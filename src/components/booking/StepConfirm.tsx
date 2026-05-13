@@ -66,7 +66,7 @@ export default function StepConfirm({ state, business, onUpdate, onBack, onConfi
 
   return (
     <div>
-      <h2 className="font-semibold text-lg mb-5">Your details</h2>
+      <h2 className="font-cal text-lg mb-5">Your details</h2>
 
       {/* Summary */}
       <div className="bg-muted/40 rounded-lg p-4 mb-5 text-sm space-y-1.5">

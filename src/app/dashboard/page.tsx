@@ -40,7 +40,7 @@ export default async function DashboardOverview() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold">Good day! 👋</h1>
+        <h1 className="font-cal text-2xl">Good day! 👋</h1>
         <p className="text-muted-foreground mt-1">Here&apos;s what&apos;s happening with {business.name}.</p>
       </div>
 

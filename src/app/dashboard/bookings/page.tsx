@@ -39,7 +39,7 @@ export default async function BookingsPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Bookings</h1>
+        <h1 className="font-cal text-2xl">Bookings</h1>
       </div>
 
       {rows.length === 0 ? (

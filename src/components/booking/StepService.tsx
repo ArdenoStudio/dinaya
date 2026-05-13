@@ -18,7 +18,7 @@ export default function StepService({ services, selected, onSelect }: Props) {
 
   return (
     <div>
-      <h2 className="font-semibold text-lg mb-4">Choose a service</h2>
+      <h2 className="font-cal text-lg mb-4">Choose a service</h2>
       <div className="space-y-2">
         {services.map((s) => (
           <button

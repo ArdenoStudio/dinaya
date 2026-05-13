@@ -12,7 +12,7 @@ export default async function SettingsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Settings</h1>
+      <h1 className="font-cal text-2xl mb-6">Settings</h1>
       <SettingsForm business={business} />
     </div>
   );

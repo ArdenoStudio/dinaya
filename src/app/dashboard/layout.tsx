@@ -25,7 +25,7 @@ export default async function DashboardLayout({
       {/* Sidebar */}
       <aside className="w-56 border-r bg-white flex flex-col">
         <div className="px-6 py-5 border-b">
-          <Link href="/dashboard" className="font-bold text-lg text-primary">
+          <Link href="/dashboard" className="font-cal text-lg text-primary">
             Dinaya.lk
           </Link>
         </div>

@@ -34,7 +34,7 @@ export default async function BookingConfirmedPage({ params, searchParams }: Pro
     <div className="min-h-screen bg-muted/20 flex items-center justify-center px-4">
       <div className="bg-white border rounded-xl p-10 max-w-md w-full text-center shadow-sm">
         <div className="text-5xl mb-4">✅</div>
-        <h1 className="text-2xl font-bold mb-2">Booking confirmed!</h1>
+        <h1 className="font-cal text-2xl mb-2">Booking confirmed!</h1>
         <p className="text-muted-foreground text-sm mb-6">
           See you at {business.name}.
         </p>

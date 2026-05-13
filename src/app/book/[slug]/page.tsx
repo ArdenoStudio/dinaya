@@ -65,7 +65,7 @@ export default async function BookingPage({ params }: Props) {
             />
           )}
           <div>
-            <h1 className="text-xl font-bold">{business.name}</h1>
+            <h1 className="font-cal text-xl">{business.name}</h1>
             {business.description && (
               <p className="text-muted-foreground text-sm mt-0.5">{business.description}</p>
             )}

@@ -24,7 +24,7 @@ export default function StepStaff({
 
   return (
     <div>
-      <h2 className="font-semibold text-lg mb-4">Choose a team member</h2>
+      <h2 className="font-cal text-lg mb-4">Choose a team member</h2>
 
       {eligible.length === 0 ? (
         <p className="text-muted-foreground text-sm text-center py-8">

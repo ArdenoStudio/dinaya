@@ -58,7 +58,7 @@ export default function BookingWizard({ business, services, staff, staffServiceM
       return (
         <div className="bg-white border rounded-xl p-8 text-center">
           <div className="text-4xl mb-4">💳</div>
-          <h2 className="text-xl font-bold mb-2">Redirecting to payment…</h2>
+          <h2 className="font-cal text-xl mb-2">Redirecting to payment…</h2>
           <p className="text-muted-foreground text-sm mb-6">You&apos;ll be taken to PayHere to complete your booking.</p>
           <form id="payhere-form" method="POST" action={confirmed.payhereUrl}>
             {Object.entries(confirmed.payhereFormData).map(([k, v]) => (
@@ -79,7 +79,7 @@ export default function BookingWizard({ business, services, staff, staffServiceM
     return (
       <div className="bg-white border rounded-xl p-8 text-center">
         <div className="text-5xl mb-4">✅</div>
-        <h2 className="text-xl font-bold mb-2">Booking confirmed!</h2>
+        <h2 className="font-cal text-xl mb-2">Booking confirmed!</h2>
         <p className="text-muted-foreground text-sm mb-2">
           We&apos;ve sent a confirmation to {state.clientEmail || state.clientPhone}.
         </p>

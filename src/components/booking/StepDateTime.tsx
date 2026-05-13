@@ -47,7 +47,7 @@ export default function StepDateTime({ businessId, service, staff, onSelect, onB
 
   return (
     <div>
-      <h2 className="font-semibold text-lg mb-4">Pick a date & time</h2>
+      <h2 className="font-cal text-lg mb-4">Pick a date & time</h2>
 
       {/* Date picker */}
       <div className="flex gap-2 overflow-x-auto pb-2 mb-4">

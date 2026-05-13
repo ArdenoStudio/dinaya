@@ -35,10 +35,10 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-muted/30 px-4">
       <div className="w-full max-w-sm bg-white border rounded-xl p-8 shadow-sm">
         <div className="mb-8">
-          <Link href="/" className="font-bold text-xl text-primary">
+          <Link href="/" className="font-cal text-xl text-primary">
             Dinaya.lk
           </Link>
-          <h1 className="text-2xl font-bold mt-6 mb-1">Welcome back</h1>
+          <h1 className="font-cal text-2xl mt-6 mb-1">Welcome back</h1>
           <p className="text-muted-foreground text-sm">Sign in to your dashboard</p>
         </div>
 

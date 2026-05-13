@@ -5,7 +5,7 @@ export default function LandingPage() {
     <main className="min-h-screen bg-white">
       {/* Nav */}
       <nav className="border-b px-6 py-4 flex items-center justify-between max-w-6xl mx-auto">
-        <span className="font-bold text-xl text-primary">Dinaya.lk</span>
+        <span className="font-cal text-xl text-primary">Dinaya.lk</span>
         <div className="flex gap-4">
           <Link href="/login" className="text-sm text-muted-foreground hover:text-foreground">
             Log in
@@ -21,7 +21,7 @@ export default function LandingPage() {
 
       {/* Hero */}
       <section className="max-w-4xl mx-auto px-6 py-24 text-center">
-        <h1 className="text-5xl font-bold tracking-tight mb-6">
+        <h1 className="font-cal text-5xl tracking-tight mb-6">
           Your business, bookable online.
           <br />
           <span className="text-primary">No WhatsApp chaos.</span>
@@ -60,7 +60,7 @@ export default function LandingPage() {
         ].map((f) => (
           <div key={f.title} className="p-6 border rounded-xl">
             <div className="text-3xl mb-3">{f.icon}</div>
-            <h3 className="font-semibold text-lg mb-2">{f.title}</h3>
+            <h3 className="font-cal text-lg mb-2">{f.title}</h3>
             <p className="text-muted-foreground text-sm">{f.desc}</p>
           </div>
         ))}

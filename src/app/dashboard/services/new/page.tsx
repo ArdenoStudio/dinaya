@@ -33,7 +33,7 @@ export default function NewServicePage() {
 
   return (
     <div className="max-w-lg">
-      <h1 className="text-2xl font-bold mb-6">New service</h1>
+      <h1 className="font-cal text-2xl mb-6">New service</h1>
       <form onSubmit={handleSubmit} className="bg-white border rounded-xl p-6 space-y-4">
         <div>
           <label className="text-sm font-medium">Service name *</label>

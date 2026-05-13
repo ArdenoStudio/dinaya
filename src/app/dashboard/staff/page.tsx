@@ -13,7 +13,7 @@ export default async function StaffPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Staff</h1>
+        <h1 className="font-cal text-2xl">Staff</h1>
         <Link href="/dashboard/staff/new"
           className="bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90">
           + Add staff

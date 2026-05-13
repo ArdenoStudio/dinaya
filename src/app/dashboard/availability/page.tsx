@@ -26,7 +26,7 @@ export default async function AvailabilityPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Availability</h1>
+      <h1 className="font-cal text-2xl mb-6">Availability</h1>
       {staffList.length === 0 ? (
         <div className="bg-white border rounded-xl p-12 text-center text-muted-foreground">
           Add staff first before setting availability.
