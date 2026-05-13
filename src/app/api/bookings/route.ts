@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { bookings, payments, businesses, services, staff } from "@/db/schema";
+import { bookings, payments, businesses, services, staff, clients } from "@/db/schema";
 import { eq, and, lt, gte } from "drizzle-orm";
 import { buildPayhereFormData, getPayhereUrl } from "@/lib/payhere";
 import { sendBookingConfirmationToClient, sendBookingNotificationToBusiness } from "@/lib/resend";
@@ -62,6 +62,36 @@ export async function POST(req: NextRequest) {
     .where(eq(staff.id, staffId))
     .limit(1);
 
+  // Upsert client record — match by phone within this business
+  let clientId: string | null = null;
+  const [existingClient] = await db
+    .select({ id: clients.id })
+    .from(clients)
+    .where(and(eq(clients.businessId, businessId), eq(clients.phone, clientPhone)))
+    .limit(1);
+
+  if (existingClient) {
+    clientId = existingClient.id;
+    // Promote stage to "active" if not already
+    await db
+      .update(clients)
+      .set({ stage: "active", name: clientName, email: clientEmail || undefined })
+      .where(eq(clients.id, existingClient.id));
+  } else {
+    const [newClient] = await db
+      .insert(clients)
+      .values({
+        businessId,
+        name: clientName,
+        phone: clientPhone,
+        email: clientEmail || null,
+        stage: "active",
+        source: "booking_page",
+      })
+      .returning({ id: clients.id });
+    clientId = newClient.id;
+  }
+
   // Create booking (pending until payment confirmed, or immediately confirmed if free)
   const requiresPayment = service.requiresPayment && business.payhereEnabled && business.payhereMerchantId;
   const initialStatus = requiresPayment ? "pending" : "confirmed";
@@ -72,6 +102,7 @@ export async function POST(req: NextRequest) {
       businessId,
       serviceId,
       staffId,
+      clientId,
       clientName,
       clientPhone,
       clientEmail: clientEmail || null,

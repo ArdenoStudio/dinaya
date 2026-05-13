@@ -6,6 +6,7 @@ import { signOut } from "@/auth";
 const navLinks = [
   { href: "/dashboard", label: "Overview" },
   { href: "/dashboard/bookings", label: "Bookings" },
+  { href: "/dashboard/clients", label: "Clients" },
   { href: "/dashboard/services", label: "Services" },
   { href: "/dashboard/staff", label: "Staff" },
   { href: "/dashboard/availability", label: "Availability" },

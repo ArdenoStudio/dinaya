@@ -17,6 +17,12 @@ import { relations } from "drizzle-orm";
 // ─── Enums ────────────────────────────────────────────────────────────────────
 
 export const planEnum = pgEnum("plan", ["free", "pro"]);
+export const clientStageEnum = pgEnum("client_stage", [
+  "lead",
+  "prospect",
+  "active",
+  "churned",
+]);
 export const roleEnum = pgEnum("role", ["owner", "staff"]);
 export const bookingStatusEnum = pgEnum("booking_status", [
   "pending",
@@ -31,6 +37,32 @@ export const paymentStatusEnum = pgEnum("payment_status", [
   "failed",
   "refunded",
 ]);
+
+// ─── Clients (CRM) ────────────────────────────────────────────────────────────
+
+export const clients = pgTable("clients", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  businessId: uuid("business_id")
+    .notNull()
+    .references(() => businesses.id, { onDelete: "cascade" }),
+  name: varchar("name", { length: 100 }).notNull(),
+  phone: varchar("phone", { length: 20 }).notNull(),
+  email: varchar("email", { length: 255 }),
+  stage: clientStageEnum("stage").default("lead").notNull(),
+  source: varchar("source", { length: 100 }),
+  tags: text("tags").array(),
+  internalNotes: text("internal_notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const clientNotes = pgTable("client_notes", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  clientId: uuid("client_id")
+    .notNull()
+    .references(() => clients.id, { onDelete: "cascade" }),
+  body: text("body").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
 
 // ─── Businesses ───────────────────────────────────────────────────────────────
 
@@ -146,6 +178,7 @@ export const bookings = pgTable("bookings", {
   staffId: uuid("staff_id")
     .notNull()
     .references(() => staff.id),
+  clientId: uuid("client_id").references(() => clients.id, { onDelete: "set null" }),
   clientName: varchar("client_name", { length: 100 }).notNull(),
   clientPhone: varchar("client_phone", { length: 20 }).notNull(),
   clientEmail: varchar("client_email", { length: 255 }),
@@ -177,6 +210,7 @@ export const businessesRelations = relations(businesses, ({ many }) => ({
   services: many(services),
   staff: many(staff),
   bookings: many(bookings),
+  clients: many(clients),
 }));
 
 export const usersRelations = relations(users, ({ one }) => ({
@@ -214,7 +248,18 @@ export const bookingsRelations = relations(bookings, ({ one }) => ({
   business: one(businesses, { fields: [bookings.businessId], references: [businesses.id] }),
   service: one(services, { fields: [bookings.serviceId], references: [services.id] }),
   staff: one(staff, { fields: [bookings.staffId], references: [staff.id] }),
+  client: one(clients, { fields: [bookings.clientId], references: [clients.id] }),
   payment: one(payments, { fields: [bookings.id], references: [payments.bookingId] }),
+}));
+
+export const clientsRelations = relations(clients, ({ one, many }) => ({
+  business: one(businesses, { fields: [clients.businessId], references: [businesses.id] }),
+  bookings: many(bookings),
+  notes: many(clientNotes),
+}));
+
+export const clientNotesRelations = relations(clientNotes, ({ one }) => ({
+  client: one(clients, { fields: [clientNotes.clientId], references: [clients.id] }),
 }));
 
 export const paymentsRelations = relations(payments, ({ one }) => ({
@@ -236,3 +281,6 @@ export type AvailabilityOverride = typeof availabilityOverrides.$inferSelect;
 export type Booking = typeof bookings.$inferSelect;
 export type NewBooking = typeof bookings.$inferInsert;
 export type Payment = typeof payments.$inferSelect;
+export type Client = typeof clients.$inferSelect;
+export type NewClient = typeof clients.$inferInsert;
+export type ClientNote = typeof clientNotes.$inferSelect;
