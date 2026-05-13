@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { db } from "@/db";
 import { clients } from "@/db/schema";
-import { eq, desc, ilike, or } from "drizzle-orm";
+import { eq, desc, ilike, or, and } from "drizzle-orm";
 
 export async function GET(req: NextRequest) {
   const session = await auth();
@@ -13,26 +13,18 @@ export async function GET(req: NextRequest) {
   const stage = searchParams.get("stage");
   const q = searchParams.get("q");
 
-  let query = db
+  const conditions = [
+    eq(clients.businessId, businessId),
+    stage ? eq(clients.stage, stage as "lead" | "prospect" | "active" | "churned") : undefined,
+    q ? or(ilike(clients.name, `%${q}%`), ilike(clients.phone, `%${q}%`), ilike(clients.email, `%${q}%`)) : undefined,
+  ].filter(Boolean) as Parameters<typeof and>;
+
+  const rows = await db
     .select()
     .from(clients)
-    .where(eq(clients.businessId, businessId))
-    .$dynamic();
+    .where(and(...conditions))
+    .orderBy(desc(clients.createdAt));
 
-  if (stage) {
-    query = query.where(eq(clients.stage, stage as "lead" | "prospect" | "active" | "churned"));
-  }
-  if (q) {
-    query = query.where(
-      or(
-        ilike(clients.name, `%${q}%`),
-        ilike(clients.phone, `%${q}%`),
-        ilike(clients.email, `%${q}%`)
-      )
-    );
-  }
-
-  const rows = await query.orderBy(desc(clients.createdAt));
   return NextResponse.json(rows);
 }
 
