@@ -7,7 +7,7 @@ export default function NotFound() {
       <div className="flex flex-col items-center gap-6 text-center">
         <div className="flex flex-col items-center gap-2">
           <p
-            className="font-extrabold text-9xl text-foreground select-none"
+            className="font-extrabold text-9xl text-primary select-none"
             style={{
               maskImage: "linear-gradient(to bottom, black 20%, transparent 80%)",
               WebkitMaskImage: "linear-gradient(to bottom, black 20%, transparent 80%)",
