@@ -208,7 +208,7 @@ export default function SolutionsPage() {
 
           <FadeDiv>
             <p className="text-lg text-muted-foreground max-w-xl mx-auto mb-8">
-              Dinaya works for salons, clinics, tuition classes, and freelancers. Same product, tailored to how your business actually runs.
+              Dinaya works for salons, clinics, tuition classes, freelancers, and more. Same product, tailored to how your business actually runs.
             </p>
           </FadeDiv>
 
@@ -227,6 +227,7 @@ export default function SolutionsPage() {
                   {ind.label}
                 </a>
               ))}
+              <span className="px-4 py-2 text-sm text-muted-foreground">& more</span>
             </div>
           </FadeDiv>
         </FadeContainer>
