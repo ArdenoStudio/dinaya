@@ -11,7 +11,9 @@ export default function SettingsForm({ business }: Props) {
     description: business.description ?? "",
     phone: business.phone ?? "",
     address: business.address ?? "",
-    dodoEnabled: business.dodoEnabled,
+    payhereEnabled: business.payhereEnabled,
+    payhereMerchantId: business.payhereMerchantId ?? "",
+    payhereMerchantSecret: business.payhereMerchantSecret ?? "",
   });
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -65,24 +67,49 @@ export default function SettingsForm({ business }: Props) {
             placeholder="123 Main St, Colombo 03" />
         </div>
 
-        <div className="border-t pt-4">
-          <p className="text-sm font-medium mb-1">Dodo Payments</p>
-          <p className="text-xs text-muted-foreground mb-3">
-            Accept online payments via Dodo Payments. Requires a{" "}
-            <a href="https://dodopayments.com" target="_blank" rel="noopener noreferrer" className="underline">
-              Dodo Payments account
-            </a>{" "}
-            and a product ID set on each service.
-          </p>
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={form.dodoEnabled}
-              onChange={(e) => setForm((f) => ({ ...f, dodoEnabled: e.target.checked }))}
-              className="rounded"
-            />
-            <span className="text-sm">Enable Dodo Payments for this business</span>
-          </label>
+        <div className="border-t pt-4 space-y-3">
+          <div>
+            <p className="text-sm font-medium mb-1">PayHere</p>
+            <p className="text-xs text-muted-foreground mb-3">
+              Accept online payments via{" "}
+              <a href="https://www.payhere.lk" target="_blank" rel="noopener noreferrer" className="underline">
+                PayHere
+              </a>
+              . Enter your Merchant ID and Secret from the PayHere dashboard.
+            </p>
+            <label className="flex items-center gap-2 cursor-pointer mb-3">
+              <input
+                type="checkbox"
+                checked={form.payhereEnabled}
+                onChange={(e) => setForm((f) => ({ ...f, payhereEnabled: e.target.checked }))}
+                className="rounded"
+              />
+              <span className="text-sm">Enable PayHere for this business</span>
+            </label>
+          </div>
+          {form.payhereEnabled && (
+            <div className="space-y-3 pl-6 border-l-2 border-primary/20">
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">Merchant ID</label>
+                <input
+                  value={form.payhereMerchantId}
+                  onChange={(e) => setForm((f) => ({ ...f, payhereMerchantId: e.target.value }))}
+                  placeholder="123456"
+                  className="mt-1 w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">Merchant Secret</label>
+                <input
+                  type="password"
+                  value={form.payhereMerchantSecret}
+                  onChange={(e) => setForm((f) => ({ ...f, payhereMerchantSecret: e.target.value }))}
+                  placeholder="••••••••••••••••"
+                  className="mt-1 w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="pt-1 border-t">

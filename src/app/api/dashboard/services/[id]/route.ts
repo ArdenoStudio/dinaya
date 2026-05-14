@@ -43,7 +43,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const allowedFields = [
     "name", "description", "durationMinutes", "priceLkr",
     "requiresPayment", "isActive", "beforeBuffer", "afterBuffer",
-    "minimumNoticeHours", "dailyCapacity", "dodoProductId",
+    "minimumNoticeHours", "dailyCapacity",
   ] as const;
 
   const update: Record<string, unknown> = {};

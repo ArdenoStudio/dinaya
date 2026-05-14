@@ -41,7 +41,7 @@ export default function LandingPage() {
       </section>
 
       {/* Features */}
-      <section className="max-w-6xl mx-auto px-6 py-16 grid md:grid-cols-3 gap-8">
+      <section className="max-w-6xl mx-auto px-6 pb-4 pt-0 grid md:grid-cols-3 gap-8">
         {[
           {
             icon: "📅",
@@ -66,6 +66,16 @@ export default function LandingPage() {
           </div>
         ))}
       </section>
+
+      {/* Footer */}
+      <footer className="border-t py-8 px-6 text-center text-sm text-muted-foreground">
+        <div className="flex justify-center gap-6 mb-3">
+          <Link href="/legal/terms" className="hover:text-foreground">Terms of Service</Link>
+          <Link href="/legal/privacy" className="hover:text-foreground">Privacy Policy</Link>
+          <Link href="/legal/refund" className="hover:text-foreground">Refund Policy</Link>
+        </div>
+        <p>© {new Date().getFullYear()} Dinaya by Ardeno Studio</p>
+      </footer>
     </main>
   );
 }

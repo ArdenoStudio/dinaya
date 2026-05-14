@@ -80,7 +80,6 @@ export const businesses = pgTable("businesses", {
   payhereEnabled: boolean("payhere_enabled").default(false).notNull(),
   payhereMerchantId: varchar("payhere_merchant_id", { length: 100 }),
   payhereMerchantSecret: text("payhere_merchant_secret"),
-  dodoEnabled: boolean("dodo_enabled").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -118,8 +117,6 @@ export const services = pgTable("services", {
   minimumNoticeHours: integer("minimum_notice_hours").notNull().default(0),
   // Max bookings per staff per day for this service (null = unlimited) — from Cal.diy bookingLimits
   dailyCapacity: integer("daily_capacity"),
-  // Dodo Payments product ID (from Dodo dashboard) — required to accept Dodo payments for this service
-  dodoProductId: varchar("dodo_product_id", { length: 100 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -232,7 +229,6 @@ export const payments = pgTable("payments", {
     .references(() => bookings.id, { onDelete: "cascade" }),
   amountLkr: integer("amount_lkr").notNull(),
   payhereOrderId: varchar("payhere_order_id", { length: 100 }).unique(),
-  dodoPaymentId: varchar("dodo_payment_id", { length: 100 }).unique(),
   status: paymentStatusEnum("status").default("pending").notNull(),
   payherePayload: jsonb("payhere_payload"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
