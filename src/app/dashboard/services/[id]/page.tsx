@@ -16,6 +16,11 @@ interface ServiceForm {
   dailyCapacity: string | number;
 }
 
+interface StaffMember {
+  id: string;
+  name: string;
+}
+
 export default function EditServicePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
@@ -24,25 +29,34 @@ export default function EditServicePage({ params }: { params: Promise<{ id: stri
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
+  const [allStaff, setAllStaff] = useState<StaffMember[]>([]);
+  const [assignedStaffIds, setAssignedStaffIds] = useState<string[]>([]);
+  const [savingStaff, setSavingStaff] = useState(false);
 
   useEffect(() => {
-    fetch(`/api/dashboard/services/${id}`)
-      .then((r) => r.json())
-      .then((d) => {
-        setForm({
-          name: d.name ?? "",
-          description: d.description ?? "",
-          durationMinutes: d.durationMinutes ?? 30,
-          priceLkr: d.priceLkr ?? 0,
-          requiresPayment: d.requiresPayment ?? false,
-          isActive: d.isActive ?? true,
-          beforeBuffer: d.beforeBuffer ?? 0,
-          afterBuffer: d.afterBuffer ?? 0,
-          minimumNoticeHours: d.minimumNoticeHours ?? 0,
-          dailyCapacity: d.dailyCapacity ?? "",
-        });
-        setLoading(false);
+    Promise.all([
+      fetch(`/api/dashboard/services/${id}`).then((r) => r.json()),
+      fetch(`/api/dashboard/staff`).then((r) => r.json()),
+      fetch(`/api/dashboard/services/${id}/staff`).then((r) => r.json()),
+    ]).then(([d, staffList, assignedList]) => {
+      setForm({
+        name: d.name ?? "",
+        description: d.description ?? "",
+        durationMinutes: d.durationMinutes ?? 30,
+        priceLkr: d.priceLkr ?? 0,
+        requiresPayment: d.requiresPayment ?? false,
+        isActive: d.isActive ?? true,
+        beforeBuffer: d.beforeBuffer ?? 0,
+        afterBuffer: d.afterBuffer ?? 0,
+        minimumNoticeHours: d.minimumNoticeHours ?? 0,
+        dailyCapacity: d.dailyCapacity ?? "",
       });
+      setAllStaff(Array.isArray(staffList) ? staffList : []);
+      setAssignedStaffIds(
+        Array.isArray(assignedList) ? assignedList.map((s: StaffMember) => s.id) : []
+      );
+      setLoading(false);
+    });
   }, [id]);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -72,6 +86,22 @@ export default function EditServicePage({ params }: { params: Promise<{ id: stri
     setDeleting(true);
     await fetch(`/api/dashboard/services/${id}`, { method: "DELETE" });
     router.push("/dashboard/services");
+  }
+
+  function toggleStaff(staffId: string) {
+    setAssignedStaffIds((prev) =>
+      prev.includes(staffId) ? prev.filter((s) => s !== staffId) : [...prev, staffId]
+    );
+  }
+
+  async function handleSaveStaff() {
+    setSavingStaff(true);
+    await fetch(`/api/dashboard/services/${id}/staff`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ staffIds: assignedStaffIds }),
+    });
+    setSavingStaff(false);
   }
 
   if (loading) return <div className="text-muted-foreground text-sm">Loading…</div>;
@@ -196,6 +226,40 @@ export default function EditServicePage({ params }: { params: Promise<{ id: stri
           </button>
         </div>
       </form>
+
+      {/* Staff assignment */}
+      <div className="bg-white border rounded-xl p-6 mt-6">
+        <h2 className="text-base font-semibold mb-1">Team members</h2>
+        <p className="text-xs text-muted-foreground mb-4">
+          Choose which staff members offer this service.
+        </p>
+        {allStaff.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No staff members yet. Add staff first.</p>
+        ) : (
+          <div className="space-y-2 mb-4">
+            {allStaff.map((member) => (
+              <label key={member.id} className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={assignedStaffIds.includes(member.id)}
+                  onChange={() => toggleStaff(member.id)}
+                  className="rounded"
+                />
+                <span className="text-sm">{member.name}</span>
+              </label>
+            ))}
+          </div>
+        )}
+        {allStaff.length > 0 && (
+          <button
+            onClick={handleSaveStaff}
+            disabled={savingStaff}
+            className="bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 disabled:opacity-50"
+          >
+            {savingStaff ? "Saving…" : "Save team"}
+          </button>
+        )}
+      </div>
     </div>
   );
 }
