@@ -3,7 +3,6 @@
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
-import { ArrowLeft, Calendar, Clock, Scissors, User, Phone, Mail, MessageCircle, CheckCircle } from "lucide-react";
 
 type Booking = {
   id: string;
@@ -105,7 +104,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
           href="/dashboard/bookings"
           className="flex items-center gap-1 text-muted-foreground hover:text-foreground text-sm transition-colors"
         >
-          <ArrowLeft className="w-3.5 h-3.5" /> Bookings
+          <i className="bi bi-arrow-left text-xs" /> Bookings
         </Link>
         <span className="text-muted-foreground">/</span>
         <h1 className="font-cal text-2xl">{booking.clientName}</h1>
@@ -120,7 +119,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
           <div className="bg-white border rounded-xl p-5 space-y-4">
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Appointment</p>
             <div className="flex items-start gap-2.5">
-              <Calendar className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+              <i className="bi bi-calendar text-sm text-muted-foreground mt-0.5 shrink-0" />
               <div>
                 <p className="text-sm font-medium">{format(new Date(booking.startsAt), "EEEE, d MMM yyyy")}</p>
                 <p className="text-xs text-muted-foreground">
@@ -129,16 +128,16 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
               </div>
             </div>
             <div className="flex items-start gap-2.5">
-              <Scissors className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+              <i className="bi bi-scissors text-sm text-muted-foreground mt-0.5 shrink-0" />
               <div>
                 <p className="text-sm font-medium">{booking.serviceName}</p>
                 <p className="text-xs text-muted-foreground flex items-center gap-1">
-                  <Clock className="w-3 h-3" /> {booking.serviceDuration} min
+                  <i className="bi bi-clock" style={{ fontSize: '0.75rem' }} /> {booking.serviceDuration} min
                 </p>
               </div>
             </div>
             <div className="flex items-start gap-2.5">
-              <User className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+              <i className="bi bi-person text-sm text-muted-foreground mt-0.5 shrink-0" />
               <p className="text-sm font-medium">{booking.staffName}</p>
             </div>
           </div>
@@ -146,12 +145,12 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
           <div className="bg-white border rounded-xl p-5 space-y-3">
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Client</p>
             <div className="flex items-center gap-2 text-sm">
-              <Phone className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+              <i className="bi bi-telephone text-xs text-muted-foreground shrink-0" />
               <span className="font-medium">{booking.clientPhone}</span>
             </div>
             {booking.clientEmail && (
               <div className="flex items-center gap-2 text-sm">
-                <Mail className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                <i className="bi bi-envelope text-xs text-muted-foreground shrink-0" />
                 <span className="font-medium">{booking.clientEmail}</span>
               </div>
             )}
@@ -170,7 +169,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
                 rel="noopener noreferrer"
                 className="flex items-center gap-1 text-xs px-3 py-1.5 rounded border font-medium text-green-700 border-green-200 hover:bg-green-50 transition-colors"
               >
-                <MessageCircle className="w-3.5 h-3.5" /> WhatsApp
+                <i className="bi bi-chat-square text-xs" /> WhatsApp
               </a>
             </div>
           </div>
@@ -221,7 +220,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
               </button>
               {savedNotes && (
                 <span className="flex items-center gap-1.5 text-green-600 text-sm">
-                  <CheckCircle className="w-4 h-4" /> Saved
+                  <i className="bi bi-check-circle text-sm" /> Saved
                 </span>
               )}
             </div>

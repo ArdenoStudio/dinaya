@@ -3,7 +3,6 @@ import { db } from "@/db";
 import { staff } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import Link from "next/link";
-import { Plus, Pencil } from "lucide-react";
 
 export default async function StaffPage() {
   const session = await auth();
@@ -19,7 +18,7 @@ export default async function StaffPage() {
           href="/dashboard/staff/new"
           className="flex items-center gap-1.5 bg-gradient-to-b from-primary/90 to-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium border-b-2 border-primary/70 shadow-sm transition-all hover:shadow-primary/30 hover:shadow-md"
         >
-          <Plus className="w-3.5 h-3.5" /> Add staff
+          <i className="bi bi-plus text-xs" /> Add staff
         </Link>
       </div>
 
@@ -48,7 +47,7 @@ export default async function StaffPage() {
                 href={`/dashboard/staff/${s.id}`}
                 className="flex items-center gap-1 text-xs px-2.5 py-1 rounded border font-medium text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
               >
-                <Pencil className="w-3 h-3" /> Edit
+                <i className="bi bi-pencil" style={{ fontSize: '0.75rem' }} /> Edit
               </Link>
             </div>
           ))}

@@ -1,4 +1,3 @@
-import { Check, Clock } from "lucide-react";
 import type { Service } from "@/db/schema";
 import { formatLkr } from "@/lib/utils";
 
@@ -40,7 +39,7 @@ export default function StepService({ services, selected, onSelect }: Props) {
                     <p className="text-muted-foreground text-xs mt-0.5 truncate">{s.description}</p>
                   )}
                   <p className="flex items-center gap-1 text-xs text-muted-foreground/70 mt-1">
-                    <Clock className="w-3 h-3 shrink-0" />
+                    <i className="bi bi-clock shrink-0" style={{ fontSize: '0.75rem' }} />
                     {s.durationMinutes} min
                   </p>
                 </div>
@@ -57,7 +56,7 @@ export default function StepService({ services, selected, onSelect }: Props) {
                         : "border-muted-foreground/30"
                     }`}
                   >
-                    {isSelected && <Check className="w-3 h-3 text-white" />}
+                    {isSelected && <i className="bi bi-check text-white" style={{ fontSize: '0.75rem' }} />}
                   </div>
                 </div>
               </div>

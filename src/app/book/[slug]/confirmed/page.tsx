@@ -5,7 +5,6 @@ import { notFound } from "next/navigation";
 import { format } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import Link from "next/link";
-import { CheckCircle, Calendar, User, Clock, Tag } from "lucide-react";
 
 const COLOMBO_TZ = "Asia/Colombo";
 
@@ -32,10 +31,10 @@ export default async function BookingConfirmedPage({ params, searchParams }: Pro
   const local = toZonedTime(booking.startsAt, COLOMBO_TZ);
 
   const details = [
-    { icon: Tag, label: "Service", value: service.name },
-    { icon: User, label: "With", value: staffMember.name },
-    { icon: Calendar, label: "Date", value: format(local, "d MMMM yyyy") },
-    { icon: Clock, label: "Time", value: format(local, "h:mm a") },
+    { icon: "bi-tag", label: "Service", value: service.name },
+    { icon: "bi-person", label: "With", value: staffMember.name },
+    { icon: "bi-calendar", label: "Date", value: format(local, "d MMMM yyyy") },
+    { icon: "bi-clock", label: "Time", value: format(local, "h:mm a") },
   ];
 
   return (
@@ -43,7 +42,7 @@ export default async function BookingConfirmedPage({ params, searchParams }: Pro
       <div className="bg-white border rounded-2xl p-10 max-w-md w-full text-center shadow-sm">
         {/* Icon */}
         <div className="mx-auto mb-5 flex items-center justify-center w-16 h-16 rounded-full bg-emerald-50 border border-emerald-100">
-          <CheckCircle className="w-8 h-8 text-emerald-500" />
+          <i className="bi bi-check-circle text-2xl text-emerald-500" />
         </div>
 
         <h1 className="font-cal text-2xl mb-2">Booking confirmed!</h1>
@@ -56,7 +55,7 @@ export default async function BookingConfirmedPage({ params, searchParams }: Pro
           {details.map((d) => (
             <div key={d.label} className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-2 text-muted-foreground">
-                <d.icon className="w-3.5 h-3.5 shrink-0" />
+                <i className={`bi ${d.icon} text-xs shrink-0`} />
                 <span>{d.label}</span>
               </div>
               <span className="font-medium text-right">{d.value}</span>

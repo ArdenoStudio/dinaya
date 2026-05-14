@@ -1,4 +1,3 @@
-import { Check, ChevronLeft } from "lucide-react";
 import type { Staff } from "@/db/schema";
 
 interface Props {
@@ -66,7 +65,7 @@ export default function StepStaff({
                       : "border-muted-foreground/30"
                   }`}
                 >
-                  {isSelected && <Check className="w-3 h-3 text-white" />}
+                  {isSelected && <i className="bi bi-check text-white" style={{ fontSize: '0.75rem' }} />}
                 </div>
               </button>
             );
@@ -78,7 +77,7 @@ export default function StepStaff({
         onClick={onBack}
         className="mt-5 flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
       >
-        <ChevronLeft className="w-4 h-4" /> Back
+        <i className="bi bi-chevron-left text-sm" /> Back
       </button>
     </div>
   );

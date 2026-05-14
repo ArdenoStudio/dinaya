@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import type { Business } from "@/db/schema";
-import { CheckCircle, CreditCard } from "lucide-react";
 
 interface Props { business: Business; }
 
@@ -97,7 +96,7 @@ export default function SettingsForm({ business }: Props) {
         {/* PayHere */}
         <div className="bg-white border rounded-xl p-6 space-y-4 mt-5">
           <div className="flex items-center gap-2">
-            <CreditCard className="w-4 h-4 text-muted-foreground" />
+            <i className="bi bi-credit-card text-sm text-muted-foreground" />
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">PayHere</p>
           </div>
           <p className="text-xs text-muted-foreground">
@@ -153,7 +152,7 @@ export default function SettingsForm({ business }: Props) {
           </button>
           {saved && (
             <span className="flex items-center gap-1.5 text-green-600 text-sm">
-              <CheckCircle className="w-4 h-4" /> Saved
+              <i className="bi bi-check-circle text-sm" /> Saved
             </span>
           )}
         </div>

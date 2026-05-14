@@ -5,23 +5,10 @@ import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
-import {
-  AlertCircle,
-  Calendar,
-  CheckCircle,
-  CheckCircle2,
-  CreditCard,
-  Eye,
-  EyeOff,
-  LayoutDashboard,
-  Loader2,
-  Lock,
-} from "lucide-react";
-
 const perks = [
-  { icon: Calendar,        text: "Clients book 24/7 without calling you" },
-  { icon: CreditCard,      text: "Accept online payments via PayHere" },
-  { icon: LayoutDashboard, text: "Manage everything from one dashboard" },
+  { icon: "bi-calendar",  text: "Clients book 24/7 without calling you" },
+  { icon: "bi-credit-card", text: "Accept online payments via PayHere" },
+  { icon: "bi-grid",      text: "Manage everything from one dashboard" },
 ];
 
 const testimonial = {
@@ -79,7 +66,7 @@ function LoginForm() {
 
         {justRegistered && (
           <div className="flex items-start gap-2 mb-5 px-3 py-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm">
-            <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0" />
+            <i className="bi bi-check-circle-fill text-sm mt-0.5 shrink-0" />
             <span>Account created. Sign in to get started.</span>
           </div>
         )}
@@ -117,14 +104,14 @@ function LoginForm() {
                 className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-gray-300 hover:text-gray-500 rounded-md transition-colors"
                 aria-label={showPassword ? "Hide password" : "Show password"} tabIndex={-1}
               >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showPassword ? <i className="bi bi-eye-slash text-sm" /> : <i className="bi bi-eye text-sm" />}
               </button>
             </div>
           </div>
 
           {error && (
             <div role="alert" className="flex items-start gap-2 px-3 py-2.5 rounded-lg bg-red-50 border border-red-100 text-red-600 text-sm">
-              <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+              <i className="bi bi-exclamation-circle text-sm mt-0.5 shrink-0" />
               <span>{error}</span>
             </div>
           )}
@@ -133,13 +120,13 @@ function LoginForm() {
             type="submit" disabled={loading}
             className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-b from-primary/90 to-primary text-primary-foreground py-3 rounded-lg text-sm font-medium border-b-2 border-primary/70 shadow-[0_0_0_2px_rgba(0,0,0,0.04),0_0_14px_0_rgba(99,102,241,0.2)] transition-all hover:shadow-primary/30 hover:shadow-md disabled:cursor-not-allowed mt-1"
           >
-            {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+            {loading && <i className="bi bi-arrow-repeat text-sm animate-spin" />}
             {loading ? "Signing in…" : "Sign in"}
           </button>
         </form>
 
         <div className="flex items-center justify-center gap-1.5 mt-4 text-xs text-gray-400">
-          <Lock className="w-3 h-3" />
+          <i className="bi bi-lock" style={{ fontSize: '0.75rem' }} />
           <span>Secure sign-in · Your data is encrypted</span>
         </div>
       </div>
@@ -196,7 +183,7 @@ export default function LoginPage() {
           <ul className="space-y-3 mb-9">
             {perks.map((p) => (
               <li key={p.text} className="flex items-start gap-3">
-                <CheckCircle className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                <i className={`bi ${p.icon} text-sm text-primary shrink-0 mt-0.5`} />
                 <span className="text-white/65 text-sm">{p.text}</span>
               </li>
             ))}

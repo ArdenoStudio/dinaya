@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { HomeIcon, CompassIcon } from "lucide-react";
 
 export default function NotFound() {
   return (
@@ -27,7 +26,7 @@ export default function NotFound() {
             href="/"
             className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
-            <HomeIcon className="size-4" />
+            <i className="bi bi-house text-sm" />
             Go Home
           </Link>
 
@@ -35,7 +34,7 @@ export default function NotFound() {
             href="/features"
             className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
           >
-            <CompassIcon className="size-4" />
+            <i className="bi bi-compass text-sm" />
             Features
           </Link>
         </div>

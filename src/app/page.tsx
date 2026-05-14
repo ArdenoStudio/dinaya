@@ -2,41 +2,35 @@ import Link from "next/link";
 import { Logo } from "@/components/Logo";
 import { FadeContainer, FadeDiv, FadeSpan } from "@/components/Fade";
 import { WordRotate } from "@/components/WordRotate";
-import {
-  Calendar, CreditCard, LayoutDashboard, ArrowUpRight,
-  Bell, Clock, Link2, Star, CheckCircle2, Zap, ArrowRight,
-  ChevronDown,
-  BookOpen, HelpCircle, FileText, Sparkles,
-} from "lucide-react";
 
 const features = [
   {
-    icon: Calendar,
+    icon: "bi-calendar-check",
     title: "Self-booking page",
     desc: "Your own link at yourname.dinaya.lk. Clients book 24/7 without calling you.",
   },
   {
-    icon: CreditCard,
+    icon: "bi-credit-card",
     title: "Online payments",
     desc: "Accept deposits or full payment via PayHere. Eliminate no-shows instantly.",
   },
   {
-    icon: LayoutDashboard,
+    icon: "bi-grid",
     title: "Simple dashboard",
     desc: "See all your bookings in one place. Cancel, reschedule, and track revenue.",
   },
   {
-    icon: Bell,
+    icon: "bi-bell",
     title: "Automated reminders",
     desc: "Clients get SMS and email reminders before their appointment — automatically.",
   },
   {
-    icon: Clock,
+    icon: "bi-clock",
     title: "Custom availability",
     desc: "Set your working hours, block dates, and add buffer time between sessions.",
   },
   {
-    icon: Link2,
+    icon: "bi-share",
     title: "Shareable link",
     desc: "One link for Instagram, WhatsApp, and Facebook. Share everywhere in seconds.",
   },
@@ -108,7 +102,7 @@ export default function LandingPage() {
             <div className="group">
               <button className="inline-flex items-center gap-1 px-3 py-2 rounded-md hover:text-gray-900 transition-colors">
                 Features
-                <ChevronDown className="size-3.5 text-gray-400 group-hover:text-gray-600 transition-transform group-hover:rotate-180" />
+                <i className="bi bi-chevron-down text-xs text-gray-400 group-hover:text-gray-600 transition-transform group-hover:rotate-180" />
               </button>
               <div className="invisible opacity-0 translate-y-1 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 transition-all absolute left-1/2 -translate-x-1/2 top-full pt-3 w-[920px] max-w-[calc(100vw-2rem)]">
                 <div className="rounded-2xl border bg-white shadow-xl shadow-gray-900/[0.06] p-5 grid grid-cols-[260px_1fr_1fr_1fr] gap-5">
@@ -127,7 +121,7 @@ export default function LandingPage() {
                       </p>
                     </div>
                     <span className="inline-flex items-center gap-1 text-sm font-medium underline underline-offset-4 decoration-primary">
-                      Try now <ArrowUpRight className="size-3.5" />
+                      Try now <i className="bi bi-arrow-up-right text-xs" />
                     </span>
                     <div className="pointer-events-none absolute -bottom-10 -right-10 size-32 rounded-full bg-primary/30 blur-3xl" />
                   </Link>
@@ -136,7 +130,7 @@ export default function LandingPage() {
                   <div className="rounded-xl ring-1 ring-emerald-100 bg-emerald-50/30 p-4">
                     <div className="flex items-center gap-2 pb-3 mb-2 border-b border-emerald-200/60">
                       <span className="flex h-7 w-7 items-center justify-center rounded-md bg-emerald-500 text-white">
-                        <Calendar className="size-3.5" />
+                        <i className="bi bi-calendar text-xs" />
                       </span>
                       <span className="text-sm font-semibold text-gray-900">Booking</span>
                     </div>
@@ -161,7 +155,7 @@ export default function LandingPage() {
                   <div className="rounded-xl ring-1 ring-sky-100 bg-sky-50/30 p-4">
                     <div className="flex items-center gap-2 pb-3 mb-2 border-b border-sky-200/60">
                       <span className="flex h-7 w-7 items-center justify-center rounded-md bg-sky-500 text-white">
-                        <CreditCard className="size-3.5" />
+                        <i className="bi bi-credit-card text-xs" />
                       </span>
                       <span className="text-sm font-semibold text-gray-900">Payments</span>
                     </div>
@@ -187,7 +181,7 @@ export default function LandingPage() {
                   <div className="rounded-xl ring-1 ring-pink-100 bg-pink-50/30 p-4">
                     <div className="flex items-center gap-2 pb-3 mb-2 border-b border-pink-200/60">
                       <span className="flex h-7 w-7 items-center justify-center rounded-md bg-pink-500 text-white">
-                        <Bell className="size-3.5" />
+                        <i className="bi bi-bell text-xs" />
                       </span>
                       <span className="text-sm font-semibold text-gray-900">Engagement</span>
                     </div>
@@ -220,15 +214,15 @@ export default function LandingPage() {
             <div className="group">
               <button className="inline-flex items-center gap-1 px-3 py-2 rounded-md hover:text-gray-900 transition-colors">
                 Resources
-                <ChevronDown className="size-3.5 text-gray-400 group-hover:text-gray-600 transition-transform group-hover:rotate-180" />
+                <i className="bi bi-chevron-down text-xs text-gray-400 group-hover:text-gray-600 transition-transform group-hover:rotate-180" />
               </button>
               <div className="invisible opacity-0 translate-y-1 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 transition-all absolute left-1/2 -translate-x-1/2 top-full pt-3 w-[680px] max-w-[calc(100vw-2rem)]">
                 <div className="rounded-2xl border bg-white shadow-xl shadow-gray-900/[0.06] p-5 grid grid-cols-2 gap-2">
                   {[
-                    { icon: BookOpen, color: "bg-emerald-500", title: "Getting started", desc: "Set up your page in 5 minutes", href: "/register" },
-                    { icon: HelpCircle, color: "bg-sky-500", title: "Help center", desc: "Answers to common questions", href: "#" },
-                    { icon: Sparkles, color: "bg-pink-500", title: "What's new", desc: "Latest features and updates", href: "#" },
-                    { icon: FileText, color: "bg-amber-500", title: "Legal", desc: "Terms, privacy, refund policy", href: "/legal/terms" },
+                    { icon: "bi-book-open", color: "bg-emerald-500", title: "Getting started", desc: "Set up your page in 5 minutes", href: "/register" },
+                    { icon: "bi-question-circle", color: "bg-sky-500", title: "Help center", desc: "Answers to common questions", href: "#" },
+                    { icon: "bi-stars", color: "bg-pink-500", title: "What's new", desc: "Latest features and updates", href: "#" },
+                    { icon: "bi-file-text", color: "bg-amber-500", title: "Legal", desc: "Terms, privacy, refund policy", href: "/legal/terms" },
                   ].map((it) => (
                     <Link
                       key={it.title}
@@ -236,7 +230,7 @@ export default function LandingPage() {
                       className="flex items-start gap-3 rounded-xl p-3 hover:bg-gray-50 transition-colors"
                     >
                       <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${it.color} text-white`}>
-                        <it.icon className="size-4" />
+                        <i className={`bi ${it.icon} text-sm`} />
                       </span>
                       <span>
                         <span className="block text-sm font-semibold text-gray-900">{it.title}</span>
@@ -286,7 +280,7 @@ export default function LandingPage() {
               </span>
               <span className="flex items-center gap-1 truncate">
                 Free for Sri Lankan businesses
-                <ArrowUpRight className="size-3.5 shrink-0 text-gray-700" />
+                <i className="bi bi-arrow-up-right text-xs shrink-0 text-gray-700" />
               </span>
             </a>
           </FadeDiv>
@@ -335,7 +329,7 @@ export default function LandingPage() {
       {/* Trust strip */}
       <section className="max-w-6xl mx-auto px-6 py-6">
         <div className="flex items-center justify-center gap-2.5 text-sm text-muted-foreground">
-          <CheckCircle2 className="size-4 text-green-500 shrink-0" />
+          <i className="bi bi-check-circle-fill text-sm text-green-500 shrink-0" />
           <span>Trusted by salons, clinics, tuition classes, and freelancers across Sri Lanka</span>
         </div>
       </section>
@@ -395,7 +389,7 @@ export default function LandingPage() {
               <div className="relative mb-5 inline-flex">
                 <div className="absolute inset-0 rounded-xl bg-primary/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 ring-1 ring-primary/15 group-hover:ring-primary/25 transition">
-                  <f.icon className="w-5 h-5 text-primary" />
+                  <i className={`bi ${f.icon} text-[1.15rem] text-primary`} />
                 </div>
               </div>
 
@@ -455,7 +449,7 @@ export default function LandingPage() {
             >
               <div className="flex gap-0.5 mb-4">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="size-3.5 fill-amber-400 text-amber-400" />
+                  <i key={i} className="bi bi-star-fill text-xs text-amber-400" />
                 ))}
               </div>
               <blockquote className="text-sm leading-relaxed text-gray-700 flex-1 mb-6">
@@ -505,7 +499,7 @@ export default function LandingPage() {
 
             <div className="relative z-10">
               <div className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/20 px-4 py-1.5 text-sm text-white/80 mb-6">
-                <Zap className="size-3.5" />
+                <i className="bi bi-lightning-charge text-xs" />
                 Free forever · No credit card needed
               </div>
               <h2 className="font-cal text-4xl md:text-5xl tracking-tight text-white mb-4">
@@ -520,7 +514,7 @@ export default function LandingPage() {
                   className="inline-flex items-center gap-2 bg-white text-indigo-700 px-7 py-3.5 rounded-xl font-semibold shadow-lg hover:bg-white/95 transition-colors"
                 >
                   Create your page
-                  <ArrowRight className="size-4" />
+                  <i className="bi bi-arrow-right text-sm" />
                 </Link>
                 <Link
                   href="/login"

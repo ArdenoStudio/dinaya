@@ -1,37 +1,30 @@
 import Link from "next/link";
 import { FadeContainer, FadeDiv, FadeSpan } from "@/components/Fade";
 import { PublicNav } from "@/components/PublicNav";
-import {
-  Calendar, CreditCard, Bell, ArrowRight, Check,
-  Link2, Clock, Users, BadgeCheck,
-  Wallet, Receipt, RotateCcw, BarChart3,
-  MessageSquare, Mail, ShieldAlert, LayoutDashboard,
-  History, RefreshCw, Sparkles,
-} from "lucide-react";
 
 const bookingFeatures = [
   {
-    icon: Link2,
+    icon: "bi-link-45deg",
     title: "Self-booking page",
     desc: "Your own page at yourname.dinaya.lk. Share it anywhere — Instagram bio, WhatsApp, Facebook — and let customers book in seconds.",
   },
   {
-    icon: Calendar,
+    icon: "bi-calendar",
     title: "Custom availability",
     desc: "Set your hours, block off personal time, and define exactly when clients can book. Changes take effect immediately.",
   },
   {
-    icon: Clock,
+    icon: "bi-clock",
     title: "Buffer time",
     desc: "Add breathing room between appointments automatically. No more back-to-back bookings that leave you rushing.",
   },
   {
-    icon: Users,
+    icon: "bi-people",
     title: "Multi-staff calendar",
     desc: "Manage your whole team from one place. Each staff member gets their own schedule and bookings roll up to you.",
   },
   {
-    icon: BadgeCheck,
+    icon: "bi-patch-check-fill",
     title: "Shareable link",
     desc: "One link for everything. Paste it in your bio, print it on a card, or text it directly — it always works.",
   },
@@ -39,32 +32,32 @@ const bookingFeatures = [
 
 const paymentFeatures = [
   {
-    icon: CreditCard,
+    icon: "bi-credit-card",
     title: "PayHere checkout",
     desc: "Sri Lanka's most trusted payment gateway built in. Customers pay with cards or bank transfer without leaving your booking page.",
   },
   {
-    icon: Wallet,
+    icon: "bi-wallet2",
     title: "Deposit collection",
     desc: "Require a deposit to confirm a booking. Reduce no-shows without turning away genuine clients.",
   },
   {
-    icon: BadgeCheck,
+    icon: "bi-patch-check-fill",
     title: "Full payment",
     desc: "Collect the full amount upfront for high-demand services. Money in your account before the appointment starts.",
   },
   {
-    icon: RotateCcw,
+    icon: "bi-arrow-counterclockwise",
     title: "Refunds & cancellations",
     desc: "Handle refunds cleanly from your dashboard. Set your cancellation policy and let Dinaya enforce it for you.",
   },
   {
-    icon: BarChart3,
+    icon: "bi-bar-chart",
     title: "Revenue tracking",
     desc: "See exactly what you've earned, what's pending, and what's been refunded — all in one view.",
   },
   {
-    icon: Receipt,
+    icon: "bi-receipt",
     title: "Invoice receipts",
     desc: "Every paid booking generates a clean receipt. Customers get it automatically; you never have to send one manually.",
   },
@@ -72,32 +65,32 @@ const paymentFeatures = [
 
 const engagementFeatures = [
   {
-    icon: MessageSquare,
+    icon: "bi-chat-square-text",
     title: "SMS reminders",
     desc: "Automated texts sent before every appointment. Customers show up because they remembered — not because you chased them.",
   },
   {
-    icon: Mail,
+    icon: "bi-envelope",
     title: "Email confirmations",
     desc: "Instant confirmation the moment a booking is made. Customers get all the details; you don't lift a finger.",
   },
   {
-    icon: ShieldAlert,
+    icon: "bi-shield-exclamation",
     title: "No-show protection",
     desc: "Deposits and reminders working together mean far fewer empty slots. And when someone does cancel, you're protected.",
   },
   {
-    icon: LayoutDashboard,
+    icon: "bi-grid",
     title: "Client dashboard",
     desc: "Your clients can view, reschedule, or cancel upcoming appointments without calling you. Everyone saves time.",
   },
   {
-    icon: History,
+    icon: "bi-clock-history",
     title: "Booking history",
     desc: "A full timeline of every appointment, payment, and cancellation. Perfect for spotting loyal customers or quiet periods.",
   },
   {
-    icon: RefreshCw,
+    icon: "bi-arrow-repeat",
     title: "Rebooking nudges",
     desc: "Friendly follow-ups that encourage clients to book again after their appointment. Repeat business on autopilot.",
   },
@@ -120,7 +113,7 @@ export default function FeaturesPage() {
         <FadeContainer className="flex flex-col items-center">
           <FadeDiv className="mb-6">
             <span className="inline-flex items-center gap-2 rounded-full border bg-white px-3 py-1 text-xs font-medium text-gray-700 shadow-sm">
-              <Sparkles className="size-3.5 text-primary" />
+              <i className="bi bi-stars text-xs text-primary" />
               Built for Sri Lankan businesses
             </span>
           </FadeDiv>
@@ -143,7 +136,7 @@ export default function FeaturesPage() {
                 className="inline-flex items-center gap-2 bg-gradient-to-b from-primary/90 to-primary text-primary-foreground px-6 py-3 rounded-lg text-sm font-medium border-b-2 border-primary/70 shadow-[0_0_0_2px_rgba(0,0,0,0.04),0_0_14px_0_rgba(99,102,241,0.25)] transition-all duration-200 hover:shadow-primary/40 hover:shadow-lg"
               >
                 Create your booking page
-                <ArrowRight className="size-4" />
+                <i className="bi bi-arrow-right text-sm" />
               </Link>
               <Link
                 href="/pricing"
@@ -173,7 +166,7 @@ export default function FeaturesPage() {
         <div className="mb-10">
           <div className="inline-flex items-center gap-2 rounded-xl ring-1 ring-emerald-100 bg-emerald-50/50 px-3.5 py-2 mb-4">
             <span className="flex h-6 w-6 items-center justify-center rounded-md bg-emerald-500 text-white">
-              <Calendar className="size-3.5" />
+              <i className="bi bi-calendar text-xs" />
             </span>
             <span className="text-sm font-semibold text-gray-900">Booking</span>
           </div>
@@ -191,7 +184,7 @@ export default function FeaturesPage() {
               <div className="relative mb-5 inline-flex">
                 <div className="absolute inset-0 rounded-xl bg-emerald-500/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-500/15 to-emerald-500/5">
-                  <f.icon className="w-5 h-5 text-emerald-600" />
+                  <i className={`bi ${f.icon} text-[1.15rem] text-emerald-600`} />
                 </div>
               </div>
               <h3 className="font-cal text-lg mb-2 tracking-tight">{f.title}</h3>
@@ -207,7 +200,7 @@ export default function FeaturesPage() {
         <div className="mb-10">
           <div className="inline-flex items-center gap-2 rounded-xl ring-1 ring-sky-100 bg-sky-50/50 px-3.5 py-2 mb-4">
             <span className="flex h-6 w-6 items-center justify-center rounded-md bg-sky-500 text-white">
-              <CreditCard className="size-3.5" />
+              <i className="bi bi-credit-card text-xs" />
             </span>
             <span className="text-sm font-semibold text-gray-900">Payments</span>
           </div>
@@ -225,7 +218,7 @@ export default function FeaturesPage() {
               <div className="relative mb-5 inline-flex">
                 <div className="absolute inset-0 rounded-xl bg-sky-500/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-sky-500/15 to-sky-500/5">
-                  <f.icon className="w-5 h-5 text-sky-600" />
+                  <i className={`bi ${f.icon} text-[1.15rem] text-sky-600`} />
                 </div>
               </div>
               <h3 className="font-cal text-lg mb-2 tracking-tight">{f.title}</h3>
@@ -241,7 +234,7 @@ export default function FeaturesPage() {
         <div className="mb-10">
           <div className="inline-flex items-center gap-2 rounded-xl ring-1 ring-pink-100 bg-pink-50/50 px-3.5 py-2 mb-4">
             <span className="flex h-6 w-6 items-center justify-center rounded-md bg-pink-500 text-white">
-              <Bell className="size-3.5" />
+              <i className="bi bi-bell text-xs" />
             </span>
             <span className="text-sm font-semibold text-gray-900">Engagement</span>
           </div>
@@ -259,7 +252,7 @@ export default function FeaturesPage() {
               <div className="relative mb-5 inline-flex">
                 <div className="absolute inset-0 rounded-xl bg-pink-500/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-pink-500/15 to-pink-500/5">
-                  <f.icon className="w-5 h-5 text-pink-600" />
+                  <i className={`bi ${f.icon} text-[1.15rem] text-pink-600`} />
                 </div>
               </div>
               <h3 className="font-cal text-lg mb-2 tracking-tight">{f.title}</h3>
@@ -350,7 +343,7 @@ export default function FeaturesPage() {
             ].map((f) => (
               <div key={f} className="flex items-center gap-2.5">
                 <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-primary/15">
-                  <Check className="size-2.5 text-primary" strokeWidth={3} />
+                  <i className="bi bi-check text-primary" style={{ fontSize: '0.625rem' }} />
                 </span>
                 <span className="text-gray-700">{f}</span>
               </div>
@@ -377,7 +370,7 @@ export default function FeaturesPage() {
                 className="inline-flex items-center gap-2 bg-white text-indigo-700 px-7 py-3.5 rounded-xl font-semibold shadow-lg hover:bg-white/95 transition-colors"
               >
                 Create your page — it&apos;s free
-                <ArrowRight className="size-4" />
+                <i className="bi bi-arrow-right text-sm" />
               </Link>
             </div>
           </div>

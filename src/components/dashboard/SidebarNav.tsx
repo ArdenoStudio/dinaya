@@ -2,38 +2,27 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  LayoutDashboard,
-  BookOpen,
-  Calendar,
-  Users,
-  Scissors,
-  UserCheck,
-  Clock,
-  Settings,
-  Webhook,
-} from "lucide-react";
 
 const mainLinks = [
-  { href: "/dashboard", label: "Overview", icon: LayoutDashboard, exact: true },
-  { href: "/dashboard/bookings", label: "Bookings", icon: BookOpen },
-  { href: "/dashboard/calendar", label: "Calendar", icon: Calendar },
-  { href: "/dashboard/clients", label: "Clients", icon: Users },
-  { href: "/dashboard/services", label: "Services", icon: Scissors },
-  { href: "/dashboard/staff", label: "Staff", icon: UserCheck },
-  { href: "/dashboard/availability", label: "Availability", icon: Clock },
+  { href: "/dashboard", label: "Overview", icon: "bi-grid", exact: true },
+  { href: "/dashboard/bookings", label: "Bookings", icon: "bi-book-open" },
+  { href: "/dashboard/calendar", label: "Calendar", icon: "bi-calendar" },
+  { href: "/dashboard/clients", label: "Clients", icon: "bi-people" },
+  { href: "/dashboard/services", label: "Services", icon: "bi-scissors" },
+  { href: "/dashboard/staff", label: "Staff", icon: "bi-person-check" },
+  { href: "/dashboard/availability", label: "Availability", icon: "bi-clock" },
 ];
 
 const systemLinks = [
-  { href: "/dashboard/settings", label: "Settings", icon: Settings },
-  { href: "/dashboard/settings/webhooks", label: "Webhooks", icon: Webhook },
+  { href: "/dashboard/settings", label: "Settings", icon: "bi-gear" },
+  { href: "/dashboard/settings/webhooks", label: "Webhooks", icon: "bi-activity" },
 ];
 
 function NavLink({
   link,
   pathname,
 }: {
-  link: { href: string; label: string; icon: React.ElementType; exact?: boolean };
+  link: { href: string; label: string; icon: string; exact?: boolean };
   pathname: string;
 }) {
   const isActive = link.exact
@@ -49,7 +38,7 @@ function NavLink({
           : "border-transparent text-muted-foreground hover:bg-muted hover:text-foreground"
       }`}
     >
-      <link.icon className="w-4 h-4 shrink-0" aria-hidden="true" />
+      <i className={`bi ${link.icon} text-sm shrink-0`} aria-hidden="true" />
       {link.label}
     </Link>
   );

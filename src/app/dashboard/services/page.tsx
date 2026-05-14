@@ -4,7 +4,6 @@ import { services } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import Link from "next/link";
 import { formatLkr } from "@/lib/utils";
-import { Plus, Clock, Pencil, CreditCard } from "lucide-react";
 
 export default async function ServicesPage() {
   const session = await auth();
@@ -24,7 +23,7 @@ export default async function ServicesPage() {
           href="/dashboard/services/new"
           className="flex items-center gap-1.5 bg-gradient-to-b from-primary/90 to-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium border-b-2 border-primary/70 shadow-sm transition-all hover:shadow-primary/30 hover:shadow-md"
         >
-          <Plus className="w-3.5 h-3.5" /> Add service
+          <i className="bi bi-plus text-xs" /> Add service
         </Link>
       </div>
 
@@ -46,11 +45,11 @@ export default async function ServicesPage() {
                 )}
                 <div className="flex items-center gap-3 mt-1.5 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1">
-                    <Clock className="w-3 h-3" />
+                    <i className="bi bi-clock" style={{ fontSize: '0.75rem' }} />
                     {s.durationMinutes} min
                   </span>
                   <span className="flex items-center gap-1">
-                    <CreditCard className="w-3 h-3" />
+                    <i className="bi bi-credit-card" style={{ fontSize: '0.75rem' }} />
                     {s.priceLkr > 0 ? formatLkr(s.priceLkr) : "Free"}
                   </span>
                   {s.requiresPayment && (
@@ -74,7 +73,7 @@ export default async function ServicesPage() {
                   href={`/dashboard/services/${s.id}`}
                   className="flex items-center gap-1 text-xs px-2.5 py-1 rounded border font-medium text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
                 >
-                  <Pencil className="w-3 h-3" /> Edit
+                  <i className="bi bi-pencil" style={{ fontSize: '0.75rem' }} /> Edit
                 </Link>
               </div>
             </div>

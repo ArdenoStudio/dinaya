@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { format, parseISO } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
-import { ChevronLeft, AlertCircle } from "lucide-react";
 import type { Business } from "@/db/schema";
 import type { BookingState } from "./BookingWizard";
 import { formatLkr } from "@/lib/utils";
@@ -156,7 +155,7 @@ export default function StepConfirm({ state, business, onUpdate, onBack, onConfi
 
       {error && (
         <div className="flex items-start gap-2 text-destructive text-sm mb-4 bg-destructive/5 border border-destructive/20 rounded-lg px-3 py-2.5">
-          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+          <i className="bi bi-exclamation-circle text-sm shrink-0 mt-0.5" />
           <span>{error}</span>
         </div>
       )}
@@ -166,7 +165,7 @@ export default function StepConfirm({ state, business, onUpdate, onBack, onConfi
           onClick={onBack}
           className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
-          <ChevronLeft className="w-4 h-4" /> Back
+          <i className="bi bi-chevron-left text-sm" /> Back
         </button>
         <button
           onClick={handleBook}

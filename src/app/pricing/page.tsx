@@ -1,11 +1,6 @@
 import Link from "next/link";
 import { FadeContainer, FadeDiv, FadeSpan } from "@/components/Fade";
 import { PublicNav } from "@/components/PublicNav";
-import {
-  Check, Sparkles, ArrowRight, Zap, Calendar, CreditCard,
-  Bell, LayoutDashboard, ShieldCheck, MessageCircle,
-  Users, Globe, EyeOff, BarChart2, Headphones,
-} from "lucide-react";
 
 const freeFeatures = [
   "Your own booking page at yourname.dinaya.lk",
@@ -60,7 +55,7 @@ export default function PricingPage() {
         <FadeContainer className="flex flex-col items-center">
           <FadeDiv className="mb-6">
             <span className="inline-flex items-center gap-2 rounded-full border bg-white px-3 py-1 text-xs font-medium text-gray-700 shadow-sm">
-              <Sparkles className="size-3.5 text-primary" />
+              <i className="bi bi-stars text-xs text-primary" />
               Free for every Sri Lankan business
             </span>
           </FadeDiv>
@@ -86,7 +81,7 @@ export default function PricingPage() {
             <div className="flex items-center gap-2 mb-2">
               <h3 className="font-cal text-2xl tracking-tight">Free</h3>
               <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 px-2 py-0.5 text-[11px] font-medium">
-                <Zap className="size-3" />
+                <i className="bi bi-lightning-charge" style={{ fontSize: '0.75rem' }} />
                 Current
               </span>
             </div>
@@ -107,14 +102,14 @@ export default function PricingPage() {
               className="inline-flex items-center justify-center gap-2 bg-gradient-to-b from-primary/90 to-primary text-primary-foreground px-5 py-3 rounded-lg text-sm font-medium border-b-2 border-primary/70 shadow-[0_0_0_2px_rgba(0,0,0,0.04),0_0_14px_0_rgba(99,102,241,0.25)] transition-all duration-200 hover:shadow-primary/40 hover:shadow-lg mb-7"
             >
               Create your booking page
-              <ArrowRight className="size-4" />
+              <i className="bi bi-arrow-right text-sm" />
             </Link>
 
             <ul className="space-y-3 text-sm">
               {freeFeatures.map((f) => (
                 <li key={f} className="flex items-start gap-2.5">
                   <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-primary/15">
-                    <Check className="size-2.5 text-primary" strokeWidth={3} />
+                    <i className="bi bi-check text-primary" style={{ fontSize: '0.625rem' }} />
                   </span>
                   <span className="text-gray-700">{f}</span>
                 </li>
@@ -150,14 +145,14 @@ export default function PricingPage() {
                 className="inline-flex items-center justify-center gap-2 bg-white/10 border border-white/20 text-white px-5 py-3 rounded-lg text-sm font-medium hover:bg-white/15 transition-colors mb-7"
               >
                 Join the waitlist
-                <ArrowRight className="size-4" />
+                <i className="bi bi-arrow-right text-sm" />
               </Link>
 
               <ul className="space-y-3 text-sm">
                 {proFeatures.map((f) => (
                   <li key={f} className="flex items-start gap-2.5">
                     <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-primary/30">
-                      <Check className="size-2.5 text-primary" strokeWidth={3} />
+                      <i className="bi bi-check text-primary" style={{ fontSize: '0.625rem' }} />
                     </span>
                     <span className="text-white/85">{f}</span>
                   </li>
@@ -170,13 +165,13 @@ export default function PricingPage() {
         {/* Value strip */}
         <div className="mt-10 grid sm:grid-cols-3 gap-px bg-gray-200/70 rounded-2xl overflow-hidden border border-gray-200/70">
           {[
-            { icon: ShieldCheck, title: "No commissions", desc: "Keep 100% of every booking — we don't take a cut." },
-            { icon: CreditCard, title: "No setup fees", desc: "Create your page and go live in 5 minutes." },
-            { icon: MessageCircle, title: "Real human support", desc: "We reply on WhatsApp in Sinhala, Tamil, or English." },
+            { icon: "bi-shield-check", title: "No commissions", desc: "Keep 100% of every booking — we don't take a cut." },
+            { icon: "bi-credit-card", title: "No setup fees", desc: "Create your page and go live in 5 minutes." },
+            { icon: "bi-chat-square-text", title: "Real human support", desc: "We reply on WhatsApp in Sinhala, Tamil, or English." },
           ].map((it) => (
             <div key={it.title} className="bg-white p-6">
               <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 ring-1 ring-primary/15 mb-3">
-                <it.icon className="size-4 text-primary" />
+                <i className={`bi ${it.icon} text-sm text-primary`} />
               </div>
               <h4 className="font-cal text-base mb-1 tracking-tight">{it.title}</h4>
               <p className="text-sm text-muted-foreground leading-relaxed">{it.desc}</p>
@@ -206,33 +201,33 @@ export default function PricingPage() {
             </thead>
             <tbody className="divide-y">
               {[
-                { f: "Self-booking page", a: "Yes", b: "Yes", icon: Calendar },
-                { f: "Online payments (PayHere)", a: "Yes", b: "Yes", icon: CreditCard },
-                { f: "SMS + email reminders", a: "Yes", b: "Yes", icon: Bell },
-                { f: "Booking dashboard", a: "Yes", b: "Yes", icon: LayoutDashboard },
-                { f: "Multi-staff calendar", a: "—", b: "Yes", icon: Users },
-                { f: "Custom domain", a: "—", b: "Yes", icon: Globe },
-                { f: "Remove Dinaya branding", a: "—", b: "Yes", icon: EyeOff },
-                { f: "Advanced reports & exports", a: "—", b: "Yes", icon: BarChart2 },
-                { f: "Priority support", a: "Email", b: "WhatsApp", icon: Headphones },
+                { f: "Self-booking page", a: "Yes", b: "Yes", icon: "bi-calendar" },
+                { f: "Online payments (PayHere)", a: "Yes", b: "Yes", icon: "bi-credit-card" },
+                { f: "SMS + email reminders", a: "Yes", b: "Yes", icon: "bi-bell" },
+                { f: "Booking dashboard", a: "Yes", b: "Yes", icon: "bi-grid" },
+                { f: "Multi-staff calendar", a: "—", b: "Yes", icon: "bi-people" },
+                { f: "Custom domain", a: "—", b: "Yes", icon: "bi-globe" },
+                { f: "Remove Dinaya branding", a: "—", b: "Yes", icon: "bi-eye-slash" },
+                { f: "Advanced reports & exports", a: "—", b: "Yes", icon: "bi-bar-chart" },
+                { f: "Priority support", a: "Email", b: "WhatsApp", icon: "bi-headset" },
               ].map((row) => (
                 <tr key={row.f} className="hover:bg-gray-50/50 transition-colors">
                   <td className="px-5 py-3.5 text-gray-800">
                     <span className="inline-flex items-center gap-2.5">
-                      {row.icon ? <row.icon className="size-3.5 text-gray-400" /> : <span className="size-3.5" />}
+                      {row.icon ? <i className={`bi ${row.icon} text-xs text-gray-400`} /> : <span className="w-3.5 h-3.5 inline-block" />}
                       {row.f}
                     </span>
                   </td>
                   <td className="px-5 py-3.5 text-center">
                     {row.a === "Yes" ? (
-                      <Check className="inline size-4 text-primary" strokeWidth={3} />
+                      <i className="bi bi-check text-sm text-primary" />
                     ) : (
                       <span className="text-gray-700">{row.a}</span>
                     )}
                   </td>
                   <td className="px-5 py-3.5 text-center">
                     {row.b === "Yes" ? (
-                      <Check className="inline size-4 text-primary" strokeWidth={3} />
+                      <i className="bi bi-check text-sm text-primary" />
                     ) : (
                       <span className="text-gray-700">{row.b}</span>
                     )}
@@ -317,7 +312,7 @@ export default function PricingPage() {
                 className="inline-flex items-center gap-2 bg-white text-indigo-700 px-7 py-3.5 rounded-xl font-semibold shadow-lg hover:bg-white/95 transition-colors"
               >
                 Create your page
-                <ArrowRight className="size-4" />
+                <i className="bi bi-arrow-right text-sm" />
               </Link>
             </div>
           </div>

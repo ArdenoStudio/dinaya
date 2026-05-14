@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle2, CreditCard, Check } from "lucide-react";
 import type { Business, Service, Staff } from "@/db/schema";
 import StepService from "./StepService";
 import StepStaff from "./StepStaff";
@@ -62,7 +61,7 @@ export default function BookingWizard({ business, services, staff, staffServiceM
       return (
         <div className="bg-white border rounded-xl p-10 text-center">
           <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-            <CreditCard className="w-7 h-7 text-primary" />
+            <i className="bi bi-credit-card text-2xl text-primary" />
           </div>
           <h2 className="font-cal text-xl mb-2">Redirecting to payment…</h2>
           <p className="text-muted-foreground text-sm mb-6">
@@ -87,7 +86,7 @@ export default function BookingWizard({ business, services, staff, staffServiceM
     return (
       <div className="bg-white border rounded-xl p-10 text-center">
         <div className="w-14 h-14 rounded-full bg-emerald-50 flex items-center justify-center mx-auto mb-4">
-          <CheckCircle2 className="w-7 h-7 text-emerald-600" />
+          <i className="bi bi-check-circle-fill text-2xl text-emerald-600" />
         </div>
         <h2 className="font-cal text-xl mb-2">Booking confirmed!</h2>
         <p className="text-muted-foreground text-sm mb-1">
@@ -127,7 +126,7 @@ export default function BookingWizard({ business, services, staff, staffServiceM
                     : "bg-muted/40 text-muted-foreground/50"
                 }`}
               >
-                {done ? <Check className="w-3 h-3" /> : i + 1}
+                {done ? <i className="bi bi-check" style={{ fontSize: '0.75rem' }} /> : i + 1}
               </span>
               <span className="hidden sm:block">{label}</span>
             </div>

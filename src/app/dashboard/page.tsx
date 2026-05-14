@@ -4,15 +4,6 @@ import { bookings, businesses } from "@/db/schema";
 import { eq, gte, count, and, sql } from "drizzle-orm";
 import { startOfWeek, endOfWeek, format } from "date-fns";
 import Link from "next/link";
-import {
-  CalendarDays,
-  BookOpen,
-  Sparkles,
-  ExternalLink,
-  ArrowRight,
-  Scissors,
-  Link2,
-} from "lucide-react";
 
 export default async function DashboardOverview() {
   const session = await auth();
@@ -58,7 +49,7 @@ export default async function DashboardOverview() {
     {
       label: "Bookings this week",
       value: bookingsThisWeek,
-      icon: CalendarDays,
+      icon: "bi-calendar3",
       iconColor: "text-primary",
       iconBg: "bg-primary/10",
       accent: "bg-primary",
@@ -66,7 +57,7 @@ export default async function DashboardOverview() {
     {
       label: "Total bookings",
       value: totalBookings,
-      icon: BookOpen,
+      icon: "bi-book-open",
       iconColor: "text-emerald-600",
       iconBg: "bg-emerald-50",
       accent: "bg-emerald-500",
@@ -74,7 +65,7 @@ export default async function DashboardOverview() {
     {
       label: "Current plan",
       value: business.plan.charAt(0).toUpperCase() + business.plan.slice(1),
-      icon: Sparkles,
+      icon: "bi-stars",
       iconColor: "text-amber-600",
       iconBg: "bg-amber-50",
       accent: "bg-amber-500",
@@ -86,19 +77,19 @@ export default async function DashboardOverview() {
       href: "/dashboard/bookings",
       label: "View all bookings",
       description: "See your full schedule",
-      icon: BookOpen,
+      icon: "bi-book-open",
     },
     {
       href: "/dashboard/services",
       label: "Manage services",
       description: "Edit your offerings",
-      icon: Scissors,
+      icon: "bi-scissors",
     },
     {
       href: "/dashboard/calendar",
       label: "Open calendar",
       description: "Browse by date",
-      icon: CalendarDays,
+      icon: "bi-calendar3",
     },
   ];
 
@@ -126,7 +117,7 @@ export default async function DashboardOverview() {
               <div
                 className={`flex items-center justify-center w-10 h-10 rounded-lg shrink-0 ${s.iconBg}`}
               >
-                <s.icon className={`w-5 h-5 ${s.iconColor}`} />
+                <i className={`bi ${s.icon} text-[1.15rem] ${s.iconColor}`} />
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">{s.label}</p>
@@ -141,7 +132,7 @@ export default async function DashboardOverview() {
       <div className="bg-primary/[0.04] border border-primary/15 rounded-xl p-5 mb-5">
         <div className="flex items-center gap-2.5 mb-3">
           <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-            <Link2 className="w-3.5 h-3.5 text-primary" />
+            <i className="bi bi-link-45deg text-xs text-primary" />
           </div>
           <p className="text-sm font-semibold">Your booking page</p>
         </div>
@@ -155,7 +146,7 @@ export default async function DashboardOverview() {
             rel="noopener noreferrer"
             className="flex items-center gap-1.5 text-sm font-medium text-primary bg-white border border-primary/20 px-4 py-2 rounded-lg hover:bg-primary/5 transition-colors whitespace-nowrap shrink-0"
           >
-            Open <ExternalLink className="w-3.5 h-3.5" />
+            Open <i className="bi bi-box-arrow-up-right text-xs" />
           </a>
         </div>
       </div>
@@ -170,14 +161,14 @@ export default async function DashboardOverview() {
           >
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-lg bg-muted/50 flex items-center justify-center shrink-0 group-hover:bg-primary/10 transition-colors">
-                <a.icon className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                <i className={`bi ${a.icon} text-sm text-muted-foreground group-hover:text-primary transition-colors`} />
               </div>
               <div>
                 <p className="font-medium text-sm leading-tight">{a.label}</p>
                 <p className="text-xs text-muted-foreground mt-0.5">{a.description}</p>
               </div>
             </div>
-            <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/50 group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0 ml-2" />
+            <i className="bi bi-arrow-right text-xs text-muted-foreground/50 group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0 ml-2" />
           </Link>
         ))}
       </div>

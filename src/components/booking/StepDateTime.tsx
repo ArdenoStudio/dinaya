@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { format, addDays, isToday } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
-import { ChevronLeft } from "lucide-react";
 import type { Service, Staff } from "@/db/schema";
 
 const COLOMBO_TZ = "Asia/Colombo";
@@ -120,7 +119,7 @@ export default function StepDateTime({ businessId, service, staff, onSelect, onB
           onClick={onBack}
           className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
-          <ChevronLeft className="w-4 h-4" /> Back
+          <i className="bi bi-chevron-left text-sm" /> Back
         </button>
         {selectedSlot && (
           <button
