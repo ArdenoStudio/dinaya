@@ -2,7 +2,7 @@ import { auth } from "@/auth";
 import { db } from "@/db";
 import { bookings, businesses } from "@/db/schema";
 import { eq, gte, count, and, sql } from "drizzle-orm";
-import { startOfWeek, endOfWeek } from "date-fns";
+import { startOfWeek, endOfWeek, format } from "date-fns";
 import Link from "next/link";
 import {
   CalendarDays,
@@ -11,6 +11,7 @@ import {
   ExternalLink,
   ArrowRight,
   Scissors,
+  Link2,
 } from "lucide-react";
 
 export default async function DashboardOverview() {
@@ -50,36 +51,60 @@ export default async function DashboardOverview() {
       label: "Bookings this week",
       value: bookingsThisWeek,
       icon: CalendarDays,
-      color: "text-primary",
-      bg: "bg-primary/10",
+      iconColor: "text-primary",
+      iconBg: "bg-primary/10",
+      accent: "bg-primary",
     },
     {
       label: "Total bookings",
       value: totalBookings,
       icon: BookOpen,
-      color: "text-emerald-600",
-      bg: "bg-emerald-50",
+      iconColor: "text-emerald-600",
+      iconBg: "bg-emerald-50",
+      accent: "bg-emerald-500",
     },
     {
-      label: "Plan",
+      label: "Current plan",
       value: business.plan.charAt(0).toUpperCase() + business.plan.slice(1),
       icon: Sparkles,
-      color: "text-amber-600",
-      bg: "bg-amber-50",
+      iconColor: "text-amber-600",
+      iconBg: "bg-amber-50",
+      accent: "bg-amber-500",
     },
   ];
 
   const quickActions = [
-    { href: "/dashboard/bookings", label: "View all bookings", icon: BookOpen },
-    { href: "/dashboard/services", label: "Manage services", icon: Scissors },
-    { href: "/dashboard/calendar", label: "Open calendar", icon: CalendarDays },
+    {
+      href: "/dashboard/bookings",
+      label: "View all bookings",
+      description: "See your full schedule",
+      icon: BookOpen,
+    },
+    {
+      href: "/dashboard/services",
+      label: "Manage services",
+      description: "Edit your offerings",
+      icon: Scissors,
+    },
+    {
+      href: "/dashboard/calendar",
+      label: "Open calendar",
+      description: "Browse by date",
+      icon: CalendarDays,
+    },
   ];
 
   return (
     <div>
+      {/* Greeting */}
       <div className="mb-8">
-        <h1 className="font-cal text-2xl">Good day, {business.name.split(" ")[0]}</h1>
-        <p className="text-muted-foreground mt-1">
+        <p className="text-xs font-medium text-muted-foreground/60 uppercase tracking-widest mb-2">
+          {format(now, "EEEE, MMMM d")}
+        </p>
+        <h1 className="font-cal text-3xl tracking-tight">
+          Good day, {business.name.split(" ")[0]}
+        </h1>
+        <p className="text-muted-foreground mt-1 text-sm">
           Here&apos;s what&apos;s happening with {business.name}.
         </p>
       </div>
@@ -87,30 +112,40 @@ export default async function DashboardOverview() {
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4 mb-8">
         {stats.map((s) => (
-          <div key={s.label} className="bg-white border rounded-xl p-5 flex items-start gap-4">
-            <div className={`mt-0.5 flex items-center justify-center w-9 h-9 rounded-lg shrink-0 ${s.bg}`}>
-              <s.icon className={`w-4.5 h-4.5 ${s.color}`} />
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">{s.label}</p>
-              <p className="text-2xl font-bold mt-0.5">{s.value}</p>
+          <div key={s.label} className="bg-white border rounded-xl overflow-hidden">
+            <div className={`h-[3px] w-full ${s.accent}`} />
+            <div className="p-5 flex items-start gap-4">
+              <div
+                className={`flex items-center justify-center w-10 h-10 rounded-lg shrink-0 ${s.iconBg}`}
+              >
+                <s.icon className={`w-5 h-5 ${s.iconColor}`} />
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">{s.label}</p>
+                <p className="text-3xl font-bold mt-0.5 tracking-tight">{s.value}</p>
+              </div>
             </div>
           </div>
         ))}
       </div>
 
       {/* Booking link */}
-      <div className="bg-primary/5 border border-primary/20 rounded-xl p-5 mb-6">
-        <p className="text-sm font-medium mb-2">Your booking page</p>
-        <div className="flex items-center gap-3">
-          <code className="text-primary text-sm bg-primary/10 px-3 py-1.5 rounded-md flex-1 truncate">
+      <div className="bg-primary/[0.04] border border-primary/15 rounded-xl p-5 mb-5">
+        <div className="flex items-center gap-2.5 mb-3">
+          <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+            <Link2 className="w-3.5 h-3.5 text-primary" />
+          </div>
+          <p className="text-sm font-semibold">Your booking page</p>
+        </div>
+        <div className="flex items-center gap-2.5">
+          <code className="text-primary text-sm bg-white px-3 py-2 rounded-lg flex-1 truncate border border-primary/15 font-mono tracking-tight">
             {business.slug}.dinaya.lk
           </code>
           <a
             href={bookingUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1 text-sm text-primary hover:underline whitespace-nowrap"
+            className="flex items-center gap-1.5 text-sm font-medium text-primary bg-white border border-primary/20 px-4 py-2 rounded-lg hover:bg-primary/5 transition-colors whitespace-nowrap shrink-0"
           >
             Open <ExternalLink className="w-3.5 h-3.5" />
           </a>
@@ -123,13 +158,18 @@ export default async function DashboardOverview() {
           <Link
             key={a.href}
             href={a.href}
-            className="flex items-center justify-between bg-white border rounded-lg px-4 py-3.5 hover:border-primary/50 hover:shadow-sm transition-all group"
+            className="flex items-center justify-between bg-white border rounded-xl px-4 py-4 hover:border-primary/40 hover:shadow-sm transition-all group"
           >
-            <div className="flex items-center gap-2.5">
-              <a.icon className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
-              <p className="font-medium text-sm">{a.label}</p>
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg bg-muted/50 flex items-center justify-center shrink-0 group-hover:bg-primary/10 transition-colors">
+                <a.icon className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+              </div>
+              <div>
+                <p className="font-medium text-sm leading-tight">{a.label}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{a.description}</p>
+              </div>
             </div>
-            <ArrowRight className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+            <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/50 group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0 ml-2" />
           </Link>
         ))}
       </div>
