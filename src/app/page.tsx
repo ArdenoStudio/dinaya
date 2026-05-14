@@ -99,12 +99,12 @@ export default function LandingPage() {
 
       {/* Nav */}
       <nav className="sticky top-0 z-50 border-b bg-white/80 backdrop-blur-sm">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between gap-6">
+        <div className="relative max-w-6xl mx-auto px-6 py-4 flex items-center justify-between gap-6">
           <Logo size="lg" />
 
           <div className="hidden md:flex items-center gap-1 text-sm font-medium text-gray-700">
             {/* Features mega menu */}
-            <div className="relative group">
+            <div className="group">
               <button className="inline-flex items-center gap-1 px-3 py-2 rounded-md hover:text-gray-900 transition-colors">
                 Features
                 <ChevronDown className="size-3.5 text-gray-400 group-hover:text-gray-600 transition-transform group-hover:rotate-180" />
@@ -212,7 +212,7 @@ export default function LandingPage() {
             </div>
 
             {/* Solutions mega menu */}
-            <div className="relative group">
+            <div className="group">
               <button className="inline-flex items-center gap-1 px-3 py-2 rounded-md hover:text-gray-900 transition-colors">
                 Solutions
                 <ChevronDown className="size-3.5 text-gray-400 group-hover:text-gray-600 transition-transform group-hover:rotate-180" />
@@ -244,7 +244,7 @@ export default function LandingPage() {
             </div>
 
             {/* Resources mega menu */}
-            <div className="relative group">
+            <div className="group">
               <button className="inline-flex items-center gap-1 px-3 py-2 rounded-md hover:text-gray-900 transition-colors">
                 Resources
                 <ChevronDown className="size-3.5 text-gray-400 group-hover:text-gray-600 transition-transform group-hover:rotate-180" />
