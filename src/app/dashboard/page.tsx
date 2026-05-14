@@ -44,7 +44,15 @@ export default async function DashboardOverview() {
     .from(bookings)
     .where(eq(bookings.businessId, businessId));
 
-  const bookingUrl = `${process.env.NEXT_PUBLIC_APP_URL?.replace("://", `://${business.slug}.`)}`;
+  const appDomain = process.env.NEXT_PUBLIC_APP_DOMAIN ?? "localhost:3000";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const isLocalhost = appDomain.startsWith("localhost");
+  const bookingUrl = isLocalhost
+    ? `${appUrl}/book/${business.slug}`
+    : `${appUrl.replace("://", `://${business.slug}.`)}`;
+  const bookingDisplayUrl = isLocalhost
+    ? `localhost:3000/book/${business.slug}`
+    : `${business.slug}.${appDomain}`;
 
   const stats = [
     {
@@ -139,7 +147,7 @@ export default async function DashboardOverview() {
         </div>
         <div className="flex items-center gap-2.5">
           <code className="text-primary text-sm bg-white px-3 py-2 rounded-lg flex-1 truncate border border-primary/15 font-mono tracking-tight">
-            {business.slug}.dinaya.lk
+            {bookingDisplayUrl}
           </code>
           <a
             href={bookingUrl}
