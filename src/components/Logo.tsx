@@ -26,7 +26,7 @@ function LogoIcon({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
 
 export function Logo({ size = "md", href = "/" }: LogoProps) {
   const inner = (
-    <span className={`flex items-center gap-2 text-primary ${TEXT_CLASSES[size]}`}>
+    <span className={`flex items-center gap-2 text-foreground ${TEXT_CLASSES[size]}`}>
       <LogoIcon size={size} />
       <span className="font-cal leading-none">Dinaya.lk</span>
     </span>
