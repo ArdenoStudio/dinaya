@@ -1,20 +1,34 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Plus, Download, Search } from "lucide-react";
+import {
+  Plus,
+  Download,
+  Search,
+  Users,
+  UserCheck,
+  UserPlus,
+  Sparkles,
+  ArrowRight,
+  Mail,
+  Phone,
+  X,
+} from "lucide-react";
+
+type Stage = "lead" | "prospect" | "active" | "churned";
 
 type Client = {
   id: string;
   name: string;
   phone: string;
   email: string | null;
-  stage: "lead" | "prospect" | "active" | "churned";
+  stage: Stage;
   source: string | null;
   createdAt: string;
 };
 
-const STAGES = [
+const STAGES: { key: "" | Stage; label: string }[] = [
   { key: "", label: "All" },
   { key: "lead", label: "Lead" },
   { key: "prospect", label: "Prospect" },
@@ -22,31 +36,48 @@ const STAGES = [
   { key: "churned", label: "Churned" },
 ];
 
-const STAGE_STYLES: Record<string, string> = {
-  lead: "bg-blue-100 text-blue-700",
-  prospect: "bg-purple-100 text-purple-700",
-  active: "bg-green-100 text-green-700",
-  churned: "bg-gray-100 text-gray-500",
+const STAGE_STYLES: Record<Stage, string> = {
+  lead: "bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-700/20",
+  prospect: "bg-violet-50 text-violet-700 ring-1 ring-inset ring-violet-700/20",
+  active: "bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-700/20",
+  churned: "bg-gray-100 text-gray-500 ring-1 ring-inset ring-gray-400/20",
 };
+
+const STAGE_DOT: Record<Stage, string> = {
+  lead: "bg-blue-500",
+  prospect: "bg-violet-500",
+  active: "bg-emerald-500",
+  churned: "bg-gray-400",
+};
+
+const AVATAR_COLORS = [
+  "bg-blue-100 text-blue-700",
+  "bg-violet-100 text-violet-700",
+  "bg-emerald-100 text-emerald-700",
+  "bg-amber-100 text-amber-700",
+  "bg-rose-100 text-rose-700",
+  "bg-cyan-100 text-cyan-700",
+];
+
+function initials(name: string) {
+  const parts = name.trim().split(/\s+/);
+  const first = parts[0]?.[0] ?? "";
+  const last = parts.length > 1 ? parts[parts.length - 1][0] : "";
+  return (first + last).toUpperCase() || "?";
+}
+
+function avatarColor(id: string) {
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
+  return AVATAR_COLORS[h % AVATAR_COLORS.length];
+}
 
 export default function ClientsPage() {
   const [clients, setClients] = useState<Client[]>([]);
-  const [stage, setStage] = useState("");
+  const [allClients, setAllClients] = useState<Client[]>([]);
+  const [stage, setStage] = useState<"" | Stage>("");
   const [q, setQ] = useState("");
   const [loading, setLoading] = useState(true);
-
-  function exportCsv() {
-    const headers = ["Name", "Phone", "Email", "Stage", "Source", "Created"];
-    const rows = clients.map((c) => [
-      c.name, c.phone, c.email ?? "", c.stage, c.source ?? "",
-      new Date(c.createdAt).toLocaleDateString(),
-    ]);
-    const csv = [headers, ...rows].map((r) => r.map((v) => `"${v}"`).join(",")).join("\n");
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
-    a.download = "clients.csv";
-    a.click();
-  }
 
   useEffect(() => {
     setLoading(true);
@@ -55,51 +86,175 @@ export default function ClientsPage() {
     if (q) params.set("q", q);
     fetch(`/api/dashboard/clients?${params}`)
       .then((r) => r.json())
-      .then((data) => { setClients(data); setLoading(false); });
+      .then((data: Client[]) => {
+        setClients(data);
+        if (!stage && !q) setAllClients(data);
+        setLoading(false);
+      });
   }, [stage, q]);
+
+  const stats = useMemo(() => {
+    const source = allClients.length ? allClients : clients;
+    const by = (s: Stage) => source.filter((c) => c.stage === s).length;
+    return {
+      total: source.length,
+      active: by("active"),
+      leads: by("lead"),
+      prospects: by("prospect"),
+    };
+  }, [allClients, clients]);
+
+  function exportCsv() {
+    const headers = ["Name", "Phone", "Email", "Stage", "Source", "Created"];
+    const rows = clients.map((c) => [
+      c.name,
+      c.phone,
+      c.email ?? "",
+      c.stage,
+      c.source ?? "",
+      new Date(c.createdAt).toLocaleDateString(),
+    ]);
+    const csv = [headers, ...rows]
+      .map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(","))
+      .join("\n");
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+    a.download = "clients.csv";
+    a.click();
+  }
+
+  function clearFilters() {
+    setQ("");
+    setStage("");
+  }
+
+  const statCards = [
+    {
+      label: "Total customers",
+      value: stats.total,
+      icon: Users,
+      iconColor: "text-primary",
+      iconBg: "bg-primary/10",
+      accent: "bg-primary",
+    },
+    {
+      label: "Active",
+      value: stats.active,
+      icon: UserCheck,
+      iconColor: "text-emerald-600",
+      iconBg: "bg-emerald-50",
+      accent: "bg-emerald-500",
+    },
+    {
+      label: "Leads",
+      value: stats.leads,
+      icon: UserPlus,
+      iconColor: "text-blue-600",
+      iconBg: "bg-blue-50",
+      accent: "bg-blue-500",
+    },
+    {
+      label: "Prospects",
+      value: stats.prospects,
+      icon: Sparkles,
+      iconColor: "text-violet-600",
+      iconBg: "bg-violet-50",
+      accent: "bg-violet-500",
+    },
+  ];
+
+  const isFiltering = !loading && (q || stage);
+  const showEmptyAll = !loading && allClients.length === 0 && !isFiltering;
+  const showEmptyFiltered = !loading && clients.length === 0 && isFiltering;
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="font-cal text-2xl">Clients</h1>
-        <div className="flex gap-2">
+      {/* Header */}
+      <div className="flex items-start justify-between mb-8 gap-4 flex-wrap">
+        <div>
+          <h1 className="font-cal text-3xl tracking-tight">Customers</h1>
+          <p className="text-muted-foreground mt-1 text-sm">
+            Manage your customer list, track leads, and grow your business.
+          </p>
+        </div>
+        <div className="flex gap-2 shrink-0">
           <button
             onClick={exportCsv}
             disabled={clients.length === 0}
-            className="flex items-center gap-1.5 border px-4 py-2 rounded-md text-sm font-medium text-muted-foreground hover:border-primary/50 hover:text-foreground disabled:opacity-40 transition-colors"
+            className="flex items-center gap-1.5 border bg-white px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:border-gray-300 hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
             <Download className="w-3.5 h-3.5" /> Export CSV
           </button>
           <Link
             href="/dashboard/clients/new"
-            className="flex items-center gap-1.5 bg-gradient-to-b from-primary/90 to-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium border-b-2 border-primary/70 shadow-sm transition-all hover:shadow-primary/30 hover:shadow-md"
+            className="flex items-center gap-1.5 bg-gradient-to-b from-primary/90 to-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium border-b-2 border-primary/70 shadow-sm transition-all hover:shadow-primary/30 hover:shadow-md"
           >
-            <Plus className="w-3.5 h-3.5" /> Add client
+            <Plus className="w-3.5 h-3.5" /> Add customer
           </Link>
         </div>
       </div>
 
+      {/* Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+        {statCards.map((s) => (
+          <div key={s.label} className="bg-white border rounded-xl overflow-hidden">
+            <div className={`h-[3px] w-full ${s.accent}`} />
+            <div className="p-4 flex items-start gap-3">
+              <div
+                className={`flex items-center justify-center w-9 h-9 rounded-lg shrink-0 ${s.iconBg}`}
+              >
+                <s.icon className={`w-4 h-4 ${s.iconColor}`} />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs text-muted-foreground truncate leading-tight">
+                  {s.label}
+                </p>
+                {loading && !allClients.length ? (
+                  <div className="h-7 w-10 bg-muted/40 rounded animate-pulse mt-1.5" />
+                ) : (
+                  <p className="text-2xl font-bold mt-0.5 tracking-tight tabular-nums">
+                    {s.value}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
       {/* Filters */}
-      <div className="flex gap-3 mb-5 flex-wrap">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+      <div className="flex flex-wrap gap-2.5 items-center mb-4">
+        <div className="relative flex-1 min-w-[220px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
           <input
             type="text"
-            placeholder="Search name, phone, email…"
+            placeholder="Search by name, phone, or email…"
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            className="border rounded-md pl-8 pr-3 py-1.5 text-sm w-64 focus:outline-none focus:ring-2 focus:ring-primary/30"
+            aria-label="Search customers"
+            className="w-full bg-white border rounded-lg pl-9 pr-8 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 placeholder:text-muted-foreground/60 transition-shadow"
           />
+          {q && (
+            <button
+              onClick={() => setQ("")}
+              aria-label="Clear search"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
-        <div className="flex gap-1">
+        <div className="flex gap-1 flex-wrap" role="tablist" aria-label="Filter by stage">
           {STAGES.map((s) => (
             <button
               key={s.key}
+              role="tab"
+              aria-selected={stage === s.key}
               onClick={() => setStage(s.key)}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                 stage === s.key
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-white border text-muted-foreground hover:border-primary/50"
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "bg-white border text-muted-foreground hover:border-gray-300 hover:text-foreground"
               }`}
             >
               {s.label}
@@ -108,59 +263,165 @@ export default function ClientsPage() {
         </div>
       </div>
 
+      {/* List */}
       {loading ? (
-        <div className="bg-white border rounded-xl p-12 text-center text-muted-foreground text-sm">
-          Loading…
+        <div className="bg-white border rounded-xl overflow-hidden">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div
+              key={i}
+              className="flex items-center gap-4 px-5 py-4 border-b last:border-0"
+            >
+              <div className="w-9 h-9 rounded-full bg-muted/40 animate-pulse shrink-0" />
+              <div className="flex-1 space-y-2">
+                <div className="h-3 w-36 bg-muted/40 rounded animate-pulse" />
+                <div className="h-2.5 w-52 bg-muted/30 rounded animate-pulse" />
+              </div>
+              <div className="hidden md:block h-5 w-14 bg-muted/30 rounded-full animate-pulse" />
+              <div className="h-5 w-16 bg-muted/30 rounded-full animate-pulse" />
+            </div>
+          ))}
         </div>
-      ) : clients.length === 0 ? (
-        <div className="bg-white border rounded-xl p-12 text-center text-muted-foreground">
-          No clients found.{" "}
-          <Link href="/dashboard/clients/new" className="text-primary hover:underline">
-            Add your first client →
+      ) : showEmptyAll ? (
+        <div className="bg-white border rounded-xl p-14 text-center">
+          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+            <Users className="w-5 h-5 text-primary" />
+          </div>
+          <h3 className="font-semibold text-base mb-1">No customers yet</h3>
+          <p className="text-sm text-muted-foreground mb-5 max-w-xs mx-auto">
+            Start by adding your first customer, or share your booking page to collect them automatically.
+          </p>
+          <Link
+            href="/dashboard/clients/new"
+            className="inline-flex items-center gap-1.5 bg-gradient-to-b from-primary/90 to-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium border-b-2 border-primary/70 shadow-sm hover:shadow-md hover:shadow-primary/30 transition-all"
+          >
+            <Plus className="w-3.5 h-3.5" /> Add your first customer
           </Link>
+        </div>
+      ) : showEmptyFiltered ? (
+        <div className="bg-white border rounded-xl p-14 text-center">
+          <div className="w-12 h-12 rounded-full bg-muted/40 flex items-center justify-center mx-auto mb-4">
+            <Search className="w-5 h-5 text-muted-foreground" />
+          </div>
+          <h3 className="font-semibold text-base mb-1">No matches found</h3>
+          <p className="text-sm text-muted-foreground mb-5">
+            Try adjusting your search or stage filter.
+          </p>
+          <button
+            onClick={clearFilters}
+            className="inline-flex items-center gap-1.5 border bg-white px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:border-gray-300 hover:text-foreground transition-colors"
+          >
+            <X className="w-3.5 h-3.5" /> Clear filters
+          </button>
         </div>
       ) : (
         <div className="bg-white border rounded-xl overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b bg-muted/30">
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Name</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Phone</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Email</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Stage</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Source</th>
-                <th className="px-4 py-3" />
-              </tr>
-            </thead>
-            <tbody>
-              {clients.map((c, i) => (
-                <tr
-                  key={c.id}
-                  className={`border-b last:border-0 hover:bg-muted/10 transition-colors ${i % 2 === 1 ? "bg-muted/10" : ""}`}
-                >
-                  <td className="px-4 py-3 font-medium">{c.name}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{c.phone}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{c.email ?? "—"}</td>
-                  <td className="px-4 py-3">
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize ${STAGE_STYLES[c.stage] ?? ""}`}>
-                      {c.stage}
+          {/* Header row (desktop) */}
+          <div className="hidden md:grid grid-cols-[1fr_190px_140px_130px_72px] gap-4 px-5 py-2.5 border-b bg-muted/20 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+            <div>Customer</div>
+            <div>Contact</div>
+            <div>Source</div>
+            <div>Stage</div>
+            <div />
+          </div>
+
+          <div className="divide-y">
+            {clients.map((c) => (
+              <Link
+                key={c.id}
+                href={`/dashboard/clients/${c.id}`}
+                className="group grid grid-cols-1 md:grid-cols-[1fr_190px_140px_130px_72px] gap-y-1 md:gap-4 items-center px-5 py-3.5 hover:bg-muted/[0.07] transition-colors"
+              >
+                {/* Name + avatar */}
+                <div className="flex items-center gap-3 min-w-0">
+                  <div
+                    className={`flex items-center justify-center w-9 h-9 rounded-full text-xs font-semibold shrink-0 ${avatarColor(c.id)}`}
+                    aria-hidden="true"
+                  >
+                    {initials(c.name)}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium text-sm truncate group-hover:text-primary transition-colors">
+                      {c.name}
+                    </p>
+                    {/* Mobile: stage badge + phone inline */}
+                    <div className="flex items-center gap-2 md:hidden mt-0.5">
+                      <span
+                        className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium capitalize ${STAGE_STYLES[c.stage]}`}
+                      >
+                        <span className={`w-1 h-1 rounded-full shrink-0 ${STAGE_DOT[c.stage]}`} />
+                        {c.stage}
+                      </span>
+                      <span className="text-xs text-muted-foreground truncate tabular-nums">
+                        {c.phone}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Contact (desktop) */}
+                <div className="hidden md:flex flex-col justify-center min-w-0 gap-0.5">
+                  <span className="text-sm text-foreground/80 flex items-center gap-1.5 truncate">
+                    <Phone className="w-3 h-3 text-muted-foreground/50 shrink-0" />
+                    <span className="truncate tabular-nums">{c.phone}</span>
+                  </span>
+                  {c.email && (
+                    <span className="text-xs text-muted-foreground flex items-center gap-1.5 truncate">
+                      <Mail className="w-3 h-3 text-muted-foreground/50 shrink-0" />
+                      <span className="truncate">{c.email}</span>
                     </span>
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground capitalize">
-                    {c.source?.replace("_", " ") ?? "—"}
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <Link
-                      href={`/dashboard/clients/${c.id}`}
-                      className="text-xs px-2.5 py-1 rounded border font-medium text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
-                    >
-                      View →
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  )}
+                </div>
+
+                {/* Source (desktop) */}
+                <div className="hidden md:block text-sm truncate">
+                  {c.source ? (
+                    <span className="text-muted-foreground capitalize">
+                      {c.source.replace(/_/g, " ")}
+                    </span>
+                  ) : (
+                    <span className="text-muted-foreground/30">—</span>
+                  )}
+                </div>
+
+                {/* Stage (desktop) */}
+                <div className="hidden md:flex items-center">
+                  <span
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium capitalize ${STAGE_STYLES[c.stage]}`}
+                  >
+                    <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${STAGE_DOT[c.stage]}`} />
+                    {c.stage}
+                  </span>
+                </div>
+
+                {/* Action */}
+                <div className="hidden md:flex justify-end">
+                  <span className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground/50 group-hover:text-primary transition-colors">
+                    View
+                    <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          {/* Footer count */}
+          <div className="px-5 py-2.5 border-t bg-muted/10 text-xs text-muted-foreground flex items-center justify-between">
+            <span>
+              Showing{" "}
+              <span className="font-semibold text-foreground tabular-nums">
+                {clients.length}
+              </span>{" "}
+              {clients.length === 1 ? "customer" : "customers"}
+            </span>
+            {(q || stage) && (
+              <button
+                onClick={clearFilters}
+                className="text-primary hover:underline font-medium flex items-center gap-1"
+              >
+                <X className="w-3 h-3" /> Clear filters
+              </button>
+            )}
+          </div>
         </div>
       )}
     </div>
