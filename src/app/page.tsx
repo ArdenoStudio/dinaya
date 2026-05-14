@@ -357,8 +357,9 @@ export default function LandingPage() {
 
       {/* Features */}
       <section className="relative max-w-6xl mx-auto px-6 py-20 border-t">
+
         <div className="pointer-events-none absolute inset-0 select-none">
-          {[0, 1 / 3, 2 / 3, 1].map((pos, i) => (
+          {[0, 1].map((pos, i) => (
             <div
               key={i}
               className="absolute inset-y-0 w-px"
