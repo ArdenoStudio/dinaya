@@ -13,6 +13,9 @@ const perks = [
   { icon: LayoutDashboard, text: "Manage everything from one dashboard" },
 ];
 
+const inputCls =
+  "mt-1.5 w-full border rounded-lg px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/50 placeholder:text-gray-400";
+
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -41,7 +44,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex">
-      {/* Left branding panel */}
+      {/* Left branding panel — desktop only */}
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-gray-900 to-gray-800 flex-col justify-between px-14 py-12">
         <Logo size="lg" className="text-white" />
         <div>
@@ -63,52 +66,57 @@ export default function LoginPage() {
       </div>
 
       {/* Right form panel */}
-      <div className="flex-1 flex items-center justify-center bg-muted/30 px-6 py-12">
+      <div className="flex-1 flex items-center justify-center bg-muted/30 px-4 py-12">
         <div className="w-full max-w-sm">
-          <div className="lg:hidden mb-8">
+          {/* Mobile logo */}
+          <div className="lg:hidden mb-6 flex justify-center">
             <Logo size="md" />
           </div>
-          <h1 className="font-cal text-2xl mb-1">Welcome back</h1>
-          <p className="text-muted-foreground text-sm mb-8">Sign in to your dashboard</p>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="text-sm font-medium" htmlFor="email">Email</label>
-              <input
-                id="email"
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 w-full border rounded-lg px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary"
-                placeholder="you@example.com"
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium" htmlFor="password">Password</label>
-              <input
-                id="password"
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="mt-1 w-full border rounded-lg px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary"
-                placeholder="••••••••"
-              />
-            </div>
+          {/* Card */}
+          <div className="bg-white rounded-2xl border shadow-sm px-7 py-8">
+            <h1 className="font-cal text-2xl mb-1">Welcome back</h1>
+            <p className="text-muted-foreground text-sm mb-6">Sign in to your dashboard</p>
 
-            {error && <p className="text-destructive text-sm">{error}</p>}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="text-sm font-medium" htmlFor="email">Email</label>
+                <input
+                  id="email"
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className={inputCls}
+                  placeholder="you@example.com"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium" htmlFor="password">Password</label>
+                <input
+                  id="password"
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className={inputCls}
+                  placeholder="••••••••"
+                />
+              </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-gradient-to-b from-primary/90 to-primary text-primary-foreground py-2.5 rounded-lg text-sm font-medium border-b-2 border-primary/70 shadow-[0_0_0_2px_rgba(0,0,0,0.04),0_0_14px_0_rgba(99,102,241,0.2)] transition-all hover:shadow-primary/30 hover:shadow-md disabled:opacity-50"
-            >
-              {loading ? "Signing in…" : "Sign in"}
-            </button>
-          </form>
+              {error && <p className="text-destructive text-sm">{error}</p>}
 
-          <p className="text-center text-sm text-muted-foreground mt-6">
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-gradient-to-b from-primary/90 to-primary text-primary-foreground py-3 rounded-lg text-sm font-medium border-b-2 border-primary/70 shadow-[0_0_0_2px_rgba(0,0,0,0.04),0_0_14px_0_rgba(99,102,241,0.2)] transition-all hover:shadow-primary/30 hover:shadow-md disabled:opacity-50 mt-1"
+              >
+                {loading ? "Signing in…" : "Sign in"}
+              </button>
+            </form>
+          </div>
+
+          <p className="text-center text-sm text-muted-foreground mt-5">
             No account?{" "}
             <Link href="/register" className="text-primary hover:underline font-medium">
               Create one free
