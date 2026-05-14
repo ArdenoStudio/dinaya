@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Logo } from "@/components/Logo";
 import {
   Calendar, CreditCard, Bell, ArrowUpRight,
-  ChevronDown, Scissors, Stethoscope, GraduationCap, Briefcase,
+  ChevronDown,
   BookOpen, HelpCircle, FileText, Sparkles,
 } from "lucide-react";
 
@@ -95,33 +95,9 @@ export function PublicNav() {
             </div>
           </div>
 
-          {/* Industries mega menu */}
-          <div className="group">
-            <button className="inline-flex items-center gap-1 px-3 py-2 rounded-md hover:text-gray-900 transition-colors">
-              Industries
-              <ChevronDown className="size-3.5 text-gray-400 group-hover:text-gray-600 transition-transform group-hover:rotate-180" />
-            </button>
-            <div className="invisible opacity-0 translate-y-1 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 transition-all absolute left-1/2 -translate-x-1/2 top-full pt-3 w-[680px] max-w-[calc(100vw-2rem)]">
-              <div className="rounded-2xl border bg-white shadow-xl shadow-gray-900/[0.06] p-5 grid grid-cols-2 gap-2">
-                {[
-                  { icon: Scissors, color: "bg-rose-500", title: "Salons & spas", desc: "Stylists, beauty, wellness studios" },
-                  { icon: Stethoscope, color: "bg-emerald-500", title: "Clinics", desc: "Dental, physio, doctors, vets" },
-                  { icon: GraduationCap, color: "bg-indigo-500", title: "Tuition classes", desc: "Tutors, music, dance, art" },
-                  { icon: Briefcase, color: "bg-amber-500", title: "Freelancers", desc: "Consultants, coaches, services" },
-                ].map((it) => (
-                  <Link key={it.title} href="/register" className="flex items-start gap-3 rounded-xl p-3 hover:bg-gray-50 transition-colors">
-                    <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${it.color} text-white`}>
-                      <it.icon className="size-4" />
-                    </span>
-                    <span>
-                      <span className="block text-sm font-semibold text-gray-900">{it.title}</span>
-                      <span className="block text-xs text-muted-foreground mt-0.5 leading-relaxed">{it.desc}</span>
-                    </span>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </div>
+          <Link href="/solutions" className="px-3 py-2 rounded-md hover:text-gray-900 transition-colors">
+            Solutions
+          </Link>
 
           {/* Resources mega menu */}
           <div className="group">
