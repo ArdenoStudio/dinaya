@@ -43,12 +43,12 @@ export function PublicNav() {
 
                 {/* Booking column */}
                 <div className="rounded-xl ring-1 ring-emerald-100 bg-emerald-50/30 p-4">
-                  <div className="flex items-center gap-2 pb-3 mb-2 border-b border-emerald-200/60">
+                  <Link href="/features#booking" className="flex items-center gap-2 pb-3 mb-2 border-b border-emerald-200/60 hover:opacity-80 transition-opacity">
                     <span className="flex h-7 w-7 items-center justify-center rounded-md bg-emerald-500 text-white">
                       <Calendar className="size-3.5" />
                     </span>
                     <span className="text-sm font-semibold text-gray-900">Booking</span>
-                  </div>
+                  </Link>
                   <ul className="space-y-2.5 text-sm">
                     {["Self-booking page", "Custom availability", "Shareable link", "Buffer time", "Multi-staff calendar"].map((t) => (
                       <li key={t}>
@@ -60,12 +60,12 @@ export function PublicNav() {
 
                 {/* Payments column */}
                 <div className="rounded-xl ring-1 ring-sky-100 bg-sky-50/30 p-4">
-                  <div className="flex items-center gap-2 pb-3 mb-2 border-b border-sky-200/60">
+                  <Link href="/features#payments" className="flex items-center gap-2 pb-3 mb-2 border-b border-sky-200/60 hover:opacity-80 transition-opacity">
                     <span className="flex h-7 w-7 items-center justify-center rounded-md bg-sky-500 text-white">
                       <CreditCard className="size-3.5" />
                     </span>
                     <span className="text-sm font-semibold text-gray-900">Payments</span>
-                  </div>
+                  </Link>
                   <ul className="space-y-2.5 text-sm">
                     {["PayHere checkout", "Deposit collection", "Full payment", "Refunds & cancellations", "Revenue tracking", "Invoice receipts"].map((t) => (
                       <li key={t}>
@@ -77,12 +77,12 @@ export function PublicNav() {
 
                 {/* Engagement column */}
                 <div className="rounded-xl ring-1 ring-pink-100 bg-pink-50/30 p-4">
-                  <div className="flex items-center gap-2 pb-3 mb-2 border-b border-pink-200/60">
+                  <Link href="/features#engagement" className="flex items-center gap-2 pb-3 mb-2 border-b border-pink-200/60 hover:opacity-80 transition-opacity">
                     <span className="flex h-7 w-7 items-center justify-center rounded-md bg-pink-500 text-white">
                       <Bell className="size-3.5" />
                     </span>
                     <span className="text-sm font-semibold text-gray-900">Engagement</span>
-                  </div>
+                  </Link>
                   <ul className="space-y-2.5 text-sm">
                     {["SMS reminders", "Email confirmations", "No-show protection", "Client dashboard", "Booking history", "Rebooking nudges"].map((t) => (
                       <li key={t}>
