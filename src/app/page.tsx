@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Logo } from "@/components/Logo";
 import { FadeContainer, FadeDiv, FadeSpan } from "@/components/Fade";
 import { Calendar, CreditCard, LayoutDashboard, ArrowUpRight } from "lucide-react";
 
@@ -25,7 +26,7 @@ export default function LandingPage() {
     <main className="min-h-screen bg-white">
       {/* Nav */}
       <nav className="border-b px-6 py-4 flex items-center justify-between max-w-6xl mx-auto">
-        <span className="font-cal text-lg tracking-tight">Dinaya</span>
+        <Logo size="lg" />
         <div className="flex gap-4">
           <Link href="/login" className="text-sm text-muted-foreground hover:text-foreground">
             Log in

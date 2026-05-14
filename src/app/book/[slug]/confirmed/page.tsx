@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { format } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import Link from "next/link";
+import { CheckCircle, Calendar, User, Clock, Tag } from "lucide-react";
 
 const COLOMBO_TZ = "Asia/Colombo";
 
@@ -30,36 +31,41 @@ export default async function BookingConfirmedPage({ params, searchParams }: Pro
 
   const local = toZonedTime(booking.startsAt, COLOMBO_TZ);
 
+  const details = [
+    { icon: Tag, label: "Service", value: service.name },
+    { icon: User, label: "With", value: staffMember.name },
+    { icon: Calendar, label: "Date", value: format(local, "d MMMM yyyy") },
+    { icon: Clock, label: "Time", value: format(local, "h:mm a") },
+  ];
+
   return (
     <div className="min-h-screen bg-muted/20 flex items-center justify-center px-4">
-      <div className="bg-white border rounded-xl p-10 max-w-md w-full text-center shadow-sm">
-        <div className="text-5xl mb-4">✅</div>
+      <div className="bg-white border rounded-2xl p-10 max-w-md w-full text-center shadow-sm">
+        {/* Icon */}
+        <div className="mx-auto mb-5 flex items-center justify-center w-16 h-16 rounded-full bg-emerald-50 border border-emerald-100">
+          <CheckCircle className="w-8 h-8 text-emerald-500" />
+        </div>
+
         <h1 className="font-cal text-2xl mb-2">Booking confirmed!</h1>
-        <p className="text-muted-foreground text-sm mb-6">
-          See you at {business.name}.
+        <p className="text-muted-foreground text-sm mb-8">
+          See you at <span className="font-medium text-foreground">{business.name}</span>.
         </p>
 
-        <div className="bg-muted/30 rounded-lg p-4 text-sm text-left space-y-2 mb-6">
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Service</span>
-            <span className="font-medium">{service.name}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">With</span>
-            <span className="font-medium">{staffMember.name}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Date</span>
-            <span className="font-medium">{format(local, "d MMMM yyyy")}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Time</span>
-            <span className="font-medium">{format(local, "h:mm a")}</span>
-          </div>
+        {/* Details card */}
+        <div className="bg-muted/30 rounded-xl p-4 text-sm text-left space-y-3 mb-6">
+          {details.map((d) => (
+            <div key={d.label} className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <d.icon className="w-3.5 h-3.5 shrink-0" />
+                <span>{d.label}</span>
+              </div>
+              <span className="font-medium text-right">{d.value}</span>
+            </div>
+          ))}
         </div>
 
         <p className="text-xs text-muted-foreground mb-6">
-          Ref: {booking.id.slice(0, 8).toUpperCase()}
+          Ref: <span className="font-mono">{booking.id.slice(0, 8).toUpperCase()}</span>
         </p>
 
         <Link

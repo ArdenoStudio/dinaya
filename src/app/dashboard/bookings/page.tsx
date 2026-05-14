@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
+import { Calendar, Plus } from "lucide-react";
 
 type Booking = {
   id: string;
@@ -79,11 +80,11 @@ export default function BookingsPage() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-cal text-2xl">Bookings</h1>
         <div className="flex gap-2">
-          <Link href="/dashboard/calendar" className="border px-4 py-2 rounded-md text-sm font-medium text-muted-foreground hover:border-primary/50 hover:text-foreground transition-colors">
-            📅 Calendar
+          <Link href="/dashboard/calendar" className="flex items-center gap-1.5 border px-4 py-2 rounded-md text-sm font-medium text-muted-foreground hover:border-primary/50 hover:text-foreground transition-colors">
+            <Calendar className="w-3.5 h-3.5" /> Calendar
           </Link>
-          <Link href="/dashboard/bookings/new" className="bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90">
-            + New booking
+          <Link href="/dashboard/bookings/new" className="flex items-center gap-1.5 bg-gradient-to-b from-primary/90 to-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium border-b-2 border-primary/70 shadow-sm transition-all hover:shadow-primary/30 hover:shadow-md">
+            <Plus className="w-3.5 h-3.5" /> New booking
           </Link>
         </div>
       </div>
