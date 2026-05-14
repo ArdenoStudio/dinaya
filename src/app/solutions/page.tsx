@@ -274,7 +274,7 @@ export default function SolutionsPage() {
                       <f.icon className={`w-5 h-5 ${ind.color.text}`} />
                     </div>
                   </div>
-                  <h3 className="font-cal text-base mb-2 tracking-tight">{f.title}</h3>
+                  <h3 className="font-semibold text-sm mb-2">{f.title}</h3>
                   <p className="text-muted-foreground text-sm leading-relaxed">{f.desc}</p>
                   <span className={`absolute bottom-0 left-7 right-7 h-px bg-gradient-to-r from-transparent ${ind.color.line} to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500`} />
                 </div>
