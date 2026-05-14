@@ -4,6 +4,7 @@ import { PublicNav } from "@/components/PublicNav";
 import {
   Check, Sparkles, ArrowRight, Zap, Calendar, CreditCard,
   Bell, LayoutDashboard, ShieldCheck, MessageCircle,
+  Users, Globe, EyeOff, BarChart2, Headphones,
 } from "lucide-react";
 
 const freeFeatures = [
@@ -209,11 +210,11 @@ export default function PricingPage() {
                 { f: "Online payments (PayHere)", a: "Yes", b: "Yes", icon: CreditCard },
                 { f: "SMS + email reminders", a: "Yes", b: "Yes", icon: Bell },
                 { f: "Booking dashboard", a: "Yes", b: "Yes", icon: LayoutDashboard },
-                { f: "Multi-staff calendar", a: "—", b: "Yes" },
-                { f: "Custom domain", a: "—", b: "Yes" },
-                { f: "Remove Dinaya branding", a: "—", b: "Yes" },
-                { f: "Advanced reports & exports", a: "—", b: "Yes" },
-                { f: "Priority support", a: "Email", b: "WhatsApp" },
+                { f: "Multi-staff calendar", a: "—", b: "Yes", icon: Users },
+                { f: "Custom domain", a: "—", b: "Yes", icon: Globe },
+                { f: "Remove Dinaya branding", a: "—", b: "Yes", icon: EyeOff },
+                { f: "Advanced reports & exports", a: "—", b: "Yes", icon: BarChart2 },
+                { f: "Priority support", a: "Email", b: "WhatsApp", icon: Headphones },
               ].map((row) => (
                 <tr key={row.f} className="hover:bg-gray-50/50 transition-colors">
                   <td className="px-5 py-3.5 text-gray-800">
