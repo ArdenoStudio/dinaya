@@ -36,7 +36,7 @@ export default function NotFound() {
             className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
           >
             <CompassIcon className="size-4" />
-            Explore
+            Features
           </Link>
         </div>
       </div>
