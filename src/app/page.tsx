@@ -552,7 +552,7 @@ export default function LandingPage() {
                 </Link>
                 <Link
                   href="/login"
-                  className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-white px-7 py-3.5 rounded-xl font-medium hover:bg-white/20 transition-colors"
+                  className="inline-flex items-center gap-2 bg-white\10 border border-white\20 text-white px-7 py-3.5 rounded-xl font-medium hover:bg-white/20 transition-colors"
                 >
                   Sign in
                 </Link>
