@@ -15,10 +15,10 @@ export function PublicNav() {
         <div className="hidden md:flex items-center gap-1 text-sm font-medium text-gray-700">
           {/* Features mega menu */}
           <div className="group">
-            <button className="inline-flex items-center gap-1 px-3 py-2 rounded-md hover:text-gray-900 transition-colors">
+            <Link href="/features" className="inline-flex items-center gap-1 px-3 py-2 rounded-md hover:text-gray-900 transition-colors">
               Features
               <ChevronDown className="size-3.5 text-gray-400 group-hover:text-gray-600 transition-transform group-hover:rotate-180" />
-            </button>
+            </Link>
             <div className="invisible opacity-0 translate-y-1 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 transition-all absolute left-1/2 -translate-x-1/2 top-full pt-3 w-[920px] max-w-[calc(100vw-2rem)]">
               <div className="rounded-2xl border bg-white shadow-xl shadow-gray-900/[0.06] p-5 grid grid-cols-[260px_1fr_1fr_1fr] gap-5">
                 {/* Promo card */}
@@ -52,7 +52,7 @@ export function PublicNav() {
                   <ul className="space-y-2.5 text-sm">
                     {["Self-booking page", "Custom availability", "Shareable link", "Buffer time", "Multi-staff calendar"].map((t) => (
                       <li key={t}>
-                        <Link href="/#features" className="text-gray-600 hover:text-gray-900 transition-colors">{t}</Link>
+                        <Link href="/features#booking" className="text-gray-600 hover:text-gray-900 transition-colors">{t}</Link>
                       </li>
                     ))}
                   </ul>
@@ -69,7 +69,7 @@ export function PublicNav() {
                   <ul className="space-y-2.5 text-sm">
                     {["PayHere checkout", "Deposit collection", "Full payment", "Refunds & cancellations", "Revenue tracking", "Invoice receipts"].map((t) => (
                       <li key={t}>
-                        <Link href="/#features" className="text-gray-600 hover:text-gray-900 transition-colors">{t}</Link>
+                        <Link href="/features#payments" className="text-gray-600 hover:text-gray-900 transition-colors">{t}</Link>
                       </li>
                     ))}
                   </ul>
@@ -86,7 +86,7 @@ export function PublicNav() {
                   <ul className="space-y-2.5 text-sm">
                     {["SMS reminders", "Email confirmations", "No-show protection", "Client dashboard", "Booking history", "Rebooking nudges"].map((t) => (
                       <li key={t}>
-                        <Link href="/#features" className="text-gray-600 hover:text-gray-900 transition-colors">{t}</Link>
+                        <Link href="/features#engagement" className="text-gray-600 hover:text-gray-900 transition-colors">{t}</Link>
                       </li>
                     ))}
                   </ul>
