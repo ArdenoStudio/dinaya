@@ -276,7 +276,7 @@ export default function LandingPage() {
             </div>
 
             <Link
-              href="#pricing"
+              href="/pricing"
               className="px-3 py-2 rounded-md hover:text-gray-900 transition-colors"
             >
               Pricing
