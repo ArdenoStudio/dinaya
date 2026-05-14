@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { format, parseISO } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
+import { ChevronLeft, AlertCircle } from "lucide-react";
 import type { Business } from "@/db/schema";
 import type { BookingState } from "./BookingWizard";
 import { formatLkr } from "@/lib/utils";
@@ -68,22 +69,22 @@ export default function StepConfirm({ state, business, onUpdate, onBack, onConfi
     <div>
       <h2 className="font-cal text-lg mb-5">Your details</h2>
 
-      {/* Summary */}
-      <div className="bg-muted/40 rounded-lg p-4 mb-5 text-sm space-y-1.5">
-        <div className="flex justify-between">
+      {/* Booking summary */}
+      <div className="bg-muted/30 rounded-xl p-4 mb-5 text-sm space-y-2 border border-muted">
+        <div className="flex justify-between items-center">
           <span className="text-muted-foreground">Service</span>
           <span className="font-medium">{state.service?.name}</span>
         </div>
-        <div className="flex justify-between">
+        <div className="flex justify-between items-center">
           <span className="text-muted-foreground">With</span>
           <span className="font-medium">{state.staff?.name}</span>
         </div>
-        <div className="flex justify-between">
-          <span className="text-muted-foreground">When</span>
-          <span className="font-medium text-right max-w-[60%]">{appointmentTime}</span>
+        <div className="flex justify-between items-start">
+          <span className="text-muted-foreground shrink-0">When</span>
+          <span className="font-medium text-right ml-4">{appointmentTime}</span>
         </div>
         {state.service && state.service.priceLkr > 0 && (
-          <div className="flex justify-between pt-1.5 border-t">
+          <div className="flex justify-between items-center pt-2 border-t border-muted">
             <span className="font-medium">Total</span>
             <span className="font-bold text-primary">{formatLkr(state.service.priceLkr)}</span>
           </div>
@@ -91,65 +92,92 @@ export default function StepConfirm({ state, business, onUpdate, onBack, onConfi
       </div>
 
       {/* Contact form */}
-      <div className="space-y-3 mb-5">
+      <div className="space-y-3.5 mb-5">
         <div>
-          <label className="text-sm font-medium">Full name *</label>
+          <label htmlFor="clientName" className="text-sm font-medium">
+            Full name <span className="text-muted-foreground font-normal">*</span>
+          </label>
           <input
+            id="clientName"
             required
+            type="text"
+            autoComplete="name"
             value={state.clientName}
             onChange={(e) => onUpdate({ clientName: e.target.value })}
-            className="mt-1 w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            className="mt-1.5 w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary/50 transition-shadow placeholder:text-muted-foreground/50"
             placeholder="Nimal Perera"
           />
         </div>
         <div>
-          <label className="text-sm font-medium">Phone number *</label>
+          <label htmlFor="clientPhone" className="text-sm font-medium">
+            Phone number <span className="text-muted-foreground font-normal">*</span>
+          </label>
           <input
+            id="clientPhone"
             required
+            type="tel"
+            autoComplete="tel"
             value={state.clientPhone}
             onChange={(e) => onUpdate({ clientPhone: e.target.value })}
-            className="mt-1 w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            className="mt-1.5 w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary/50 transition-shadow placeholder:text-muted-foreground/50"
             placeholder="+94 77 123 4567"
           />
         </div>
         <div>
-          <label className="text-sm font-medium">Email (optional)</label>
+          <label htmlFor="clientEmail" className="text-sm font-medium">
+            Email{" "}
+            <span className="text-muted-foreground font-normal text-xs">(optional)</span>
+          </label>
           <input
+            id="clientEmail"
             type="email"
+            autoComplete="email"
             value={state.clientEmail}
             onChange={(e) => onUpdate({ clientEmail: e.target.value })}
-            className="mt-1 w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            className="mt-1.5 w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary/50 transition-shadow placeholder:text-muted-foreground/50"
             placeholder="you@email.com"
           />
         </div>
         <div>
-          <label className="text-sm font-medium">Notes (optional)</label>
+          <label htmlFor="notes" className="text-sm font-medium">
+            Notes{" "}
+            <span className="text-muted-foreground font-normal text-xs">(optional)</span>
+          </label>
           <textarea
+            id="notes"
             value={state.notes}
             onChange={(e) => onUpdate({ notes: e.target.value })}
-            className="mt-1 w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+            className="mt-1.5 w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary/50 transition-shadow resize-none placeholder:text-muted-foreground/50"
             rows={2}
             placeholder="Anything we should know?"
           />
         </div>
       </div>
 
-      {error && <p className="text-destructive text-sm mb-3">{error}</p>}
+      {error && (
+        <div className="flex items-start gap-2 text-destructive text-sm mb-4 bg-destructive/5 border border-destructive/20 rounded-lg px-3 py-2.5">
+          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+          <span>{error}</span>
+        </div>
+      )}
 
       <div className="flex items-center gap-3">
-        <button onClick={onBack} className="text-sm text-muted-foreground hover:text-foreground">
-          ← Back
+        <button
+          onClick={onBack}
+          className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ChevronLeft className="w-4 h-4" /> Back
         </button>
         <button
           onClick={handleBook}
           disabled={loading || !state.clientName || !state.clientPhone}
-          className="ml-auto bg-primary text-primary-foreground px-6 py-2 rounded-md text-sm font-medium hover:bg-primary/90 disabled:opacity-50"
+          className="ml-auto bg-gradient-to-b from-primary/90 to-primary text-primary-foreground px-6 py-2.5 rounded-lg text-sm font-medium border-b-2 border-primary/70 shadow-sm hover:shadow-primary/30 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none transition-all"
         >
           {loading
             ? "Booking…"
             : state.service?.requiresPayment
-            ? "Book & Pay →"
-            : "Confirm booking →"}
+            ? "Book & Pay"
+            : "Confirm booking"}
         </button>
       </div>
     </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { CheckCircle2, CreditCard, Check } from "lucide-react";
 import type { Business, Service, Staff } from "@/db/schema";
 import StepService from "./StepService";
 import StepStaff from "./StepStaff";
@@ -17,10 +18,10 @@ interface Props {
 export type BookingState = {
   service: Service | null;
   staff: Staff | null;
-  date: string;        // "YYYY-MM-DD"
-  timeSlot: string;    // ISO UTC string
-  timeSlotEnd: string; // ISO UTC string
-  timeLabel: string;   // "9:00 AM"
+  date: string;
+  timeSlot: string;
+  timeSlotEnd: string;
+  timeLabel: string;
   clientName: string;
   clientPhone: string;
   clientEmail: string;
@@ -43,7 +44,11 @@ export default function BookingWizard({ business, services, staff, staffServiceM
     clientEmail: "",
     notes: "",
   });
-  const [confirmed, setConfirmed] = useState<{ bookingId: string; payhereFormData?: Record<string, string>; payhereUrl?: string } | null>(null);
+  const [confirmed, setConfirmed] = useState<{
+    bookingId: string;
+    payhereFormData?: Record<string, string>;
+    payhereUrl?: string;
+  } | null>(null);
 
   function update(partial: Partial<BookingState>) {
     setState((s) => ({ ...s, ...partial }));
@@ -54,22 +59,25 @@ export default function BookingWizard({ business, services, staff, staffServiceM
 
   if (confirmed) {
     if (confirmed.payhereFormData && confirmed.payhereUrl) {
-      // Auto-submit PayHere form
       return (
-        <div className="bg-white border rounded-xl p-8 text-center">
-          <div className="text-4xl mb-4">💳</div>
+        <div className="bg-white border rounded-xl p-10 text-center">
+          <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+            <CreditCard className="w-7 h-7 text-primary" />
+          </div>
           <h2 className="font-cal text-xl mb-2">Redirecting to payment…</h2>
-          <p className="text-muted-foreground text-sm mb-6">You&apos;ll be taken to PayHere to complete your booking.</p>
+          <p className="text-muted-foreground text-sm mb-6">
+            You&apos;ll be taken to PayHere to complete your booking.
+          </p>
           <form id="payhere-form" method="POST" action={confirmed.payhereUrl}>
             {Object.entries(confirmed.payhereFormData).map(([k, v]) => (
               <input key={k} type="hidden" name={k} value={v} />
             ))}
             <button
               type="submit"
-              className="bg-primary text-primary-foreground px-6 py-2 rounded-md text-sm font-medium"
+              className="bg-gradient-to-b from-primary/90 to-primary text-primary-foreground px-6 py-2.5 rounded-lg text-sm font-medium border-b-2 border-primary/70 shadow-sm"
               onClick={() => (document.getElementById("payhere-form") as HTMLFormElement)?.submit()}
             >
-              Pay now →
+              Pay now
             </button>
           </form>
         </div>
@@ -77,13 +85,15 @@ export default function BookingWizard({ business, services, staff, staffServiceM
     }
 
     return (
-      <div className="bg-white border rounded-xl p-8 text-center">
-        <div className="text-5xl mb-4">✅</div>
+      <div className="bg-white border rounded-xl p-10 text-center">
+        <div className="w-14 h-14 rounded-full bg-emerald-50 flex items-center justify-center mx-auto mb-4">
+          <CheckCircle2 className="w-7 h-7 text-emerald-600" />
+        </div>
         <h2 className="font-cal text-xl mb-2">Booking confirmed!</h2>
-        <p className="text-muted-foreground text-sm mb-2">
+        <p className="text-muted-foreground text-sm mb-1">
           We&apos;ve sent a confirmation to {state.clientEmail || state.clientPhone}.
         </p>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-muted-foreground/60 mt-2">
           Ref: {confirmed.bookingId.slice(0, 8).toUpperCase()}
         </p>
       </div>
@@ -92,22 +102,37 @@ export default function BookingWizard({ business, services, staff, staffServiceM
 
   return (
     <div className="bg-white border rounded-xl overflow-hidden">
-      {/* Progress bar */}
+      {/* Step progress */}
       <div className="flex border-b">
-        {STEPS.map((label, i) => (
-          <div
-            key={label}
-            className={`flex-1 text-center py-3 text-xs font-medium transition-colors ${
-              i === step
-                ? "bg-primary text-primary-foreground"
-                : i < step
-                ? "bg-primary/10 text-primary"
-                : "text-muted-foreground"
-            }`}
-          >
-            {label}
-          </div>
-        ))}
+        {STEPS.map((label, i) => {
+          const done = i < step;
+          const active = i === step;
+          return (
+            <div
+              key={label}
+              className={`flex-1 flex flex-col items-center justify-center py-3 gap-0.5 text-[11px] font-medium transition-colors border-r last:border-r-0 ${
+                active
+                  ? "bg-primary text-primary-foreground"
+                  : done
+                  ? "bg-primary/8 text-primary"
+                  : "text-muted-foreground/60 bg-transparent"
+              }`}
+            >
+              <span
+                className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold mb-0.5 ${
+                  active
+                    ? "bg-white/20 text-white"
+                    : done
+                    ? "bg-primary/15 text-primary"
+                    : "bg-muted/40 text-muted-foreground/50"
+                }`}
+              >
+                {done ? <Check className="w-3 h-3" /> : i + 1}
+              </span>
+              <span className="hidden sm:block">{label}</span>
+            </div>
+          );
+        })}
       </div>
 
       <div className="p-6">

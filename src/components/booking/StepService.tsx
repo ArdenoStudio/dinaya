@@ -1,3 +1,4 @@
+import { Check, Clock } from "lucide-react";
 import type { Service } from "@/db/schema";
 import { formatLkr } from "@/lib/utils";
 
@@ -10,7 +11,7 @@ interface Props {
 export default function StepService({ services, selected, onSelect }: Props) {
   if (services.length === 0) {
     return (
-      <div className="text-center py-12 text-muted-foreground">
+      <div className="text-center py-12 text-muted-foreground text-sm">
         No services available yet. Check back soon!
       </div>
     );
@@ -20,28 +21,49 @@ export default function StepService({ services, selected, onSelect }: Props) {
     <div>
       <h2 className="font-cal text-lg mb-4">Choose a service</h2>
       <div className="space-y-2">
-        {services.map((s) => (
-          <button
-            key={s.id}
-            onClick={() => onSelect(s)}
-            className={`w-full text-left border rounded-lg px-4 py-3 hover:border-primary transition-colors ${
-              selected?.id === s.id ? "border-primary bg-primary/5" : ""
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium text-sm">{s.name}</p>
-                {s.description && (
-                  <p className="text-muted-foreground text-xs mt-0.5">{s.description}</p>
-                )}
+        {services.map((s) => {
+          const isSelected = selected?.id === s.id;
+          return (
+            <button
+              key={s.id}
+              onClick={() => onSelect(s)}
+              className={`w-full text-left rounded-lg px-4 py-3.5 border transition-all ${
+                isSelected
+                  ? "border-primary ring-2 ring-primary/20 bg-primary/[0.03]"
+                  : "hover:border-primary/50 hover:bg-muted/30"
+              }`}
+            >
+              <div className="flex items-center justify-between gap-4">
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium text-sm">{s.name}</p>
+                  {s.description && (
+                    <p className="text-muted-foreground text-xs mt-0.5 truncate">{s.description}</p>
+                  )}
+                  <p className="flex items-center gap-1 text-xs text-muted-foreground/70 mt-1">
+                    <Clock className="w-3 h-3 shrink-0" />
+                    {s.durationMinutes} min
+                  </p>
+                </div>
+                <div className="flex items-center gap-3 shrink-0">
+                  <div className="text-right">
+                    <p className="text-sm font-semibold">
+                      {s.priceLkr > 0 ? formatLkr(s.priceLkr) : "Free"}
+                    </p>
+                  </div>
+                  <div
+                    className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                      isSelected
+                        ? "border-primary bg-primary"
+                        : "border-muted-foreground/30"
+                    }`}
+                  >
+                    {isSelected && <Check className="w-3 h-3 text-white" />}
+                  </div>
+                </div>
               </div>
-              <div className="text-right ml-4 flex-shrink-0">
-                <p className="text-sm font-medium">{s.priceLkr > 0 ? formatLkr(s.priceLkr) : "Free"}</p>
-                <p className="text-xs text-muted-foreground">{s.durationMinutes} min</p>
-              </div>
-            </div>
-          </button>
-        ))}
+            </button>
+          );
+        })}
       </div>
     </div>
   );

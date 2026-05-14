@@ -54,20 +54,26 @@ export default async function BookingPage({ params }: Props) {
   return (
     <div className="min-h-screen bg-muted/20">
       {/* Business header */}
-      <div className="bg-white border-b px-6 py-6">
-        <div className="max-w-2xl mx-auto flex items-center gap-4">
-          {business.logoUrl && (
+      <div className="bg-white border-b">
+        <div className="max-w-2xl mx-auto px-6 py-5 flex items-center gap-4">
+          {business.logoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={business.logoUrl}
               alt={business.name}
-              className="w-14 h-14 rounded-full object-cover border"
+              className="w-12 h-12 rounded-full object-cover border shrink-0"
             />
+          ) : (
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+              <span className="text-primary font-bold text-lg">
+                {business.name.charAt(0).toUpperCase()}
+              </span>
+            </div>
           )}
-          <div>
-            <h1 className="font-cal text-xl">{business.name}</h1>
+          <div className="min-w-0">
+            <h1 className="font-cal text-xl truncate">{business.name}</h1>
             {business.description && (
-              <p className="text-muted-foreground text-sm mt-0.5">{business.description}</p>
+              <p className="text-muted-foreground text-sm mt-0.5 truncate">{business.description}</p>
             )}
           </div>
         </div>
@@ -83,7 +89,7 @@ export default async function BookingPage({ params }: Props) {
         />
       </div>
 
-      <footer className="text-center py-8 text-xs text-muted-foreground">
+      <footer className="text-center pb-10 text-xs text-muted-foreground/60">
         Powered by{" "}
         <a href="https://dinaya.lk" className="text-primary hover:underline">
           Dinaya.lk
