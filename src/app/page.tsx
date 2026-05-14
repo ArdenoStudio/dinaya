@@ -172,7 +172,7 @@ export default function LandingPage() {
       </section>
 
       {/* Features */}
-      <section className="relative max-w-6xl mx-auto px-6 py-16 border-t">
+      <section className="relative max-w-6xl mx-auto px-6 py-20 border-t">
         <div className="pointer-events-none absolute inset-0 select-none">
           {[0, 1 / 3, 2 / 3, 1].map((pos, i) => (
             <div
@@ -199,24 +199,40 @@ export default function LandingPage() {
           ))}
         </div>
 
-        <div className="relative mb-10 text-center">
+        <div className="relative text-center mb-14">
           <span className="relative text-sm font-semibold tracking-tight text-primary">
             <span className="absolute top-0.5 -left-3 h-4 w-[3px] rounded-r-sm bg-primary" />
             Everything you need
           </span>
+          <h2 className="font-cal text-3xl md:text-4xl mt-3 tracking-tight">
+            Everything to replace WhatsApp booking
+          </h2>
+          <p className="text-muted-foreground mt-3 max-w-xl mx-auto">
+            Six tools that work together — so you stop chasing clients and start filling your calendar.
+          </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-5">
-          {features.map((f) => (
+        <div className="relative grid md:grid-cols-3 gap-px bg-gray-200/70 rounded-2xl overflow-hidden border border-gray-200/70 shadow-sm">
+          {features.map((f, i) => (
             <div
               key={f.title}
-              className="p-6 border rounded-xl bg-white hover:shadow-md hover:border-primary/20 transition-all"
+              className="group relative p-7 bg-white hover:bg-gradient-to-br hover:from-primary/[0.03] hover:to-white transition-colors"
             >
-              <div className="mb-4 flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10">
-                <f.icon className="w-5 h-5 text-primary" />
+              <span className="absolute top-5 right-5 text-[10px] font-mono font-medium text-gray-300 tracking-wider">
+                {String(i + 1).padStart(2, "0")}
+              </span>
+
+              <div className="relative mb-5 inline-flex">
+                <div className="absolute inset-0 rounded-xl bg-primary/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 ring-1 ring-primary/15 group-hover:ring-primary/25 transition">
+                  <f.icon className="w-5 h-5 text-primary" />
+                </div>
               </div>
-              <h3 className="font-cal text-lg mb-2">{f.title}</h3>
+
+              <h3 className="font-cal text-lg mb-2 tracking-tight">{f.title}</h3>
               <p className="text-muted-foreground text-sm leading-relaxed">{f.desc}</p>
+
+              <span className="absolute bottom-0 left-7 right-7 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
             </div>
           ))}
         </div>
