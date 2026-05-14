@@ -8,19 +8,27 @@ import { Logo } from "@/components/Logo";
 import {
   AlertCircle,
   Calendar,
+  CheckCircle,
   CheckCircle2,
   CreditCard,
   Eye,
   EyeOff,
   LayoutDashboard,
   Loader2,
+  Lock,
 } from "lucide-react";
 
 const perks = [
-  { icon: Calendar,       text: "Clients book 24/7 without calling you" },
-  { icon: CreditCard,     text: "Accept online payments via PayHere" },
+  { icon: Calendar,        text: "Clients book 24/7 without calling you" },
+  { icon: CreditCard,      text: "Accept online payments via PayHere" },
   { icon: LayoutDashboard, text: "Manage everything from one dashboard" },
 ];
+
+const testimonial = {
+  quote: "I used to miss bookings because of WhatsApp messages I forgot to reply to. Now everything's in Dinaya and I haven't missed one since.",
+  name: "Kavinda Jayasuriya",
+  role: "Owner, The Barber Room · Kandy",
+};
 
 const inputCls =
   "mt-1.5 w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 placeholder:text-gray-300 transition-all";
@@ -129,6 +137,11 @@ function LoginForm() {
             {loading ? "Signing in…" : "Sign in"}
           </button>
         </form>
+
+        <div className="flex items-center justify-center gap-1.5 mt-4 text-xs text-gray-400">
+          <Lock className="w-3 h-3" />
+          <span>Secure sign-in · Your data is encrypted</span>
+        </div>
       </div>
 
       <p className="text-center text-sm text-gray-400 mt-5">
@@ -147,7 +160,7 @@ export default function LoginPage() {
 
       {/* ── Left branding panel ── */}
       <div
-        className="hidden lg:flex lg:w-1/2 relative flex-col justify-between px-14 py-12 overflow-hidden"
+        className="hidden lg:flex lg:w-[52%] relative flex-col justify-between px-14 py-12 overflow-hidden"
         style={{ background: "#06090f" }}
       >
         {/* Dot grid */}
@@ -172,20 +185,37 @@ export default function LoginPage() {
         <Logo size="lg" className="text-white relative z-10" />
 
         <div className="relative z-10">
-          <p className="text-white/30 text-xs font-medium uppercase tracking-widest mb-6">
-            Why businesses choose Dinaya
+          <p className="font-cal leading-[1.15] text-white mb-3" style={{ fontSize: "2.35rem" }}>
+            Your calendar,<br />
+            <span className="text-primary">always full.</span>
           </p>
-          <ul className="space-y-5">
+          <p className="text-white/40 text-sm mb-8 leading-relaxed">
+            Thousands of appointments managed. Zero phone calls needed.
+          </p>
+
+          <ul className="space-y-3 mb-9">
             {perks.map((p) => (
-              <li key={p.text} className="flex items-start gap-4">
-                <div className="mt-0.5 flex items-center justify-center w-8 h-8 rounded-lg shrink-0"
-                  style={{ background: "rgba(109,40,217,0.2)", border: "1px solid rgba(109,40,217,0.25)" }}>
-                  <p.icon className="w-4 h-4 text-primary" />
-                </div>
-                <span className="text-white/65 text-sm leading-snug pt-1">{p.text}</span>
+              <li key={p.text} className="flex items-start gap-3">
+                <CheckCircle className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                <span className="text-white/65 text-sm">{p.text}</span>
               </li>
             ))}
           </ul>
+
+          {/* Glass testimonial */}
+          <div
+            className="rounded-2xl px-4 py-3.5"
+            style={{
+              background: "rgba(255,255,255,0.04)",
+              border: "1px solid rgba(255,255,255,0.08)",
+              backdropFilter: "blur(8px)",
+            }}
+          >
+            <p className="text-white/50 text-xs italic leading-relaxed mb-2">
+              &ldquo;{testimonial.quote}&rdquo;
+            </p>
+            <p className="text-white/25 text-xs">{testimonial.name} · {testimonial.role}</p>
+          </div>
         </div>
 
         <p className="text-xs relative z-10" style={{ color: "rgba(255,255,255,0.18)" }}>
