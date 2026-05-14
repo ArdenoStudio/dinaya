@@ -47,6 +47,9 @@ export default async function ServicesPage() {
                   {s.durationMinutes} min
                   {s.priceLkr > 0 ? ` · ${formatLkr(s.priceLkr)}` : " · Free"}
                   {s.requiresPayment ? " · Payment required" : ""}
+                  {(s.beforeBuffer > 0 || s.afterBuffer > 0) && (
+                    <> · Buffer: {s.beforeBuffer > 0 ? `${s.beforeBuffer}min before` : ""}{s.beforeBuffer > 0 && s.afterBuffer > 0 ? " / " : ""}{s.afterBuffer > 0 ? `${s.afterBuffer}min after` : ""}</>
+                  )}
                 </p>
               </div>
               <div className="flex items-center gap-3">

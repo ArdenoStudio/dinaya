@@ -19,7 +19,11 @@ export async function GET(req: NextRequest) {
   }
 
   const [service] = await db
-    .select({ durationMinutes: services.durationMinutes })
+    .select({
+      durationMinutes: services.durationMinutes,
+      beforeBuffer: services.beforeBuffer,
+      afterBuffer: services.afterBuffer,
+    })
     .from(services)
     .where(eq(services.id, serviceId))
     .limit(1);
@@ -55,6 +59,8 @@ export async function GET(req: NextRequest) {
   const slots = getAvailableSlots({
     date,
     durationMinutes: service.durationMinutes,
+    beforeBuffer: service.beforeBuffer ?? 0,
+    afterBuffer: service.afterBuffer ?? 0,
     staffAvailability,
     overrides,
     existingBookings,

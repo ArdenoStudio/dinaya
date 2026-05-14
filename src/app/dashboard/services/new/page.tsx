@@ -11,6 +11,8 @@ export default function NewServicePage() {
     durationMinutes: 30,
     priceLkr: 0,
     requiresPayment: false,
+    beforeBuffer: 0,
+    afterBuffer: 0,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -58,6 +60,36 @@ export default function NewServicePage() {
             <input type="number" min={0} value={form.priceLkr}
               onChange={(e) => setForm((f) => ({ ...f, priceLkr: parseInt(e.target.value) || 0 }))}
               className="mt-1 w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
+          </div>
+        </div>
+        <div>
+          <label className="text-sm font-medium">Buffer time</label>
+          <p className="text-xs text-muted-foreground mb-2">Block time before/after each appointment for prep or cleanup.</p>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-xs text-muted-foreground">Before (minutes)</label>
+              <select
+                value={form.beforeBuffer}
+                onChange={(e) => setForm((f) => ({ ...f, beforeBuffer: parseInt(e.target.value) }))}
+                className="mt-1 w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                {[0, 5, 10, 15, 20, 30, 45, 60].map((m) => (
+                  <option key={m} value={m}>{m === 0 ? "No buffer" : `${m} min`}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground">After (minutes)</label>
+              <select
+                value={form.afterBuffer}
+                onChange={(e) => setForm((f) => ({ ...f, afterBuffer: parseInt(e.target.value) }))}
+                className="mt-1 w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                {[0, 5, 10, 15, 20, 30, 45, 60].map((m) => (
+                  <option key={m} value={m}>{m === 0 ? "No buffer" : `${m} min`}</option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
         <label className="flex items-center gap-2 cursor-pointer">

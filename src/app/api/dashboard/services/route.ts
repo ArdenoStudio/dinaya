@@ -10,7 +10,14 @@ export async function GET() {
 
   const businessId = (session.user as { businessId: string }).businessId;
   const list = await db
-    .select({ id: services.id, name: services.name, durationMinutes: services.durationMinutes, priceLkr: services.priceLkr })
+    .select({
+      id: services.id,
+      name: services.name,
+      durationMinutes: services.durationMinutes,
+      priceLkr: services.priceLkr,
+      beforeBuffer: services.beforeBuffer,
+      afterBuffer: services.afterBuffer,
+    })
     .from(services)
     .where(eq(services.businessId, businessId));
 
@@ -22,7 +29,7 @@ export async function POST(req: NextRequest) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const businessId = (session.user as { businessId: string }).businessId;
-  const { name, description, durationMinutes, priceLkr, requiresPayment } = await req.json();
+  const { name, description, durationMinutes, priceLkr, requiresPayment, beforeBuffer, afterBuffer } = await req.json();
 
   if (!name || !durationMinutes) {
     return NextResponse.json({ error: "Name and duration are required." }, { status: 400 });
@@ -30,7 +37,16 @@ export async function POST(req: NextRequest) {
 
   const [service] = await db
     .insert(services)
-    .values({ businessId, name, description, durationMinutes, priceLkr: priceLkr ?? 0, requiresPayment: !!requiresPayment })
+    .values({
+      businessId,
+      name,
+      description,
+      durationMinutes,
+      priceLkr: priceLkr ?? 0,
+      requiresPayment: !!requiresPayment,
+      beforeBuffer: beforeBuffer ?? 0,
+      afterBuffer: afterBuffer ?? 0,
+    })
     .returning({ id: services.id });
 
   return NextResponse.json({ id: service.id }, { status: 201 });

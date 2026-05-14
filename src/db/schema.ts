@@ -110,6 +110,9 @@ export const services = pgTable("services", {
   priceLkr: integer("price_lkr").notNull().default(0),
   requiresPayment: boolean("requires_payment").default(false).notNull(),
   isActive: boolean("is_active").default(true).notNull(),
+  // Buffer time blocked before/after each appointment (minutes) — from Cal.diy
+  beforeBuffer: integer("before_buffer").notNull().default(0),
+  afterBuffer: integer("after_buffer").notNull().default(0),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

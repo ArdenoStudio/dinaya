@@ -29,12 +29,18 @@ function slotsOverlap(
 export function getAvailableSlots({
   date,
   durationMinutes,
+  beforeBuffer = 0,
+  afterBuffer = 0,
   staffAvailability,
   overrides,
   existingBookings,
 }: {
   date: string; // "YYYY-MM-DD" in Colombo time
   durationMinutes: number;
+  /** Minutes to block before the appointment starts */
+  beforeBuffer?: number;
+  /** Minutes to block after the appointment ends */
+  afterBuffer?: number;
   staffAvailability: Availability[];
   overrides: AvailabilityOverride[];
   existingBookings: Pick<Booking, "startsAt" | "endsAt" | "status">[];
@@ -76,8 +82,14 @@ export function getAvailableSlots({
     const slotEnd = addMinutes(cursor, durationMinutes);
     if (slotEnd > windowEndUtc) break;
 
+    // The total blocked window for this slot includes the buffer zones:
+    //   [cursor - beforeBuffer, slotEnd + afterBuffer]
+    // A slot is unavailable if any active booking overlaps that window.
+    const blockedStart = addMinutes(cursor, -beforeBuffer);
+    const blockedEnd = addMinutes(slotEnd, afterBuffer);
+
     const overlaps = activeBookings.some((b) =>
-      slotsOverlap(cursor, slotEnd, new Date(b.startsAt), new Date(b.endsAt))
+      slotsOverlap(blockedStart, blockedEnd, new Date(b.startsAt), new Date(b.endsAt))
     );
 
     if (!overlaps) {
