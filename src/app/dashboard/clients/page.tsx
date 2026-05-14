@@ -34,6 +34,19 @@ export default function ClientsPage() {
   const [q, setQ] = useState("");
   const [loading, setLoading] = useState(true);
 
+  function exportCsv() {
+    const headers = ["Name", "Phone", "Email", "Stage", "Source", "Created"];
+    const rows = clients.map((c) => [
+      c.name, c.phone, c.email ?? "", c.stage, c.source ?? "",
+      new Date(c.createdAt).toLocaleDateString(),
+    ]);
+    const csv = [headers, ...rows].map((r) => r.map((v) => `"${v}"`).join(",")).join("\n");
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+    a.download = "clients.csv";
+    a.click();
+  }
+
   useEffect(() => {
     setLoading(true);
     const params = new URLSearchParams();
@@ -48,12 +61,21 @@ export default function ClientsPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-cal text-2xl">Clients</h1>
-        <Link
-          href="/dashboard/clients/new"
-          className="bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90"
-        >
-          + Add client
-        </Link>
+        <div className="flex gap-2">
+          <button
+            onClick={exportCsv}
+            disabled={clients.length === 0}
+            className="border px-4 py-2 rounded-md text-sm font-medium text-muted-foreground hover:border-primary/50 hover:text-foreground disabled:opacity-40 transition-colors"
+          >
+            Export CSV
+          </button>
+          <Link
+            href="/dashboard/clients/new"
+            className="bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90"
+          >
+            + Add client
+          </Link>
+        </div>
       </div>
 
       {/* Filters */}

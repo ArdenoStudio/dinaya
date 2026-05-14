@@ -186,6 +186,8 @@ export const bookings = pgTable("bookings", {
   endsAt: timestamp("ends_at", { withTimezone: true }).notNull(),
   status: bookingStatusEnum("status").default("pending").notNull(),
   notes: text("notes"),
+  staffNotes: text("staff_notes"),
+  reminderSentAt: timestamp("reminder_sent_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

@@ -78,6 +78,14 @@ export default function BookingsPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-cal text-2xl">Bookings</h1>
+        <div className="flex gap-2">
+          <Link href="/dashboard/calendar" className="border px-4 py-2 rounded-md text-sm font-medium text-muted-foreground hover:border-primary/50 hover:text-foreground transition-colors">
+            📅 Calendar
+          </Link>
+          <Link href="/dashboard/bookings/new" className="bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90">
+            + New booking
+          </Link>
+        </div>
       </div>
 
       {/* Filter tabs */}
@@ -149,20 +157,33 @@ export default function BookingsPage() {
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      {actions.length > 0 && (
-                        <div className="flex gap-1.5 justify-end">
-                          {actions.map((a) => (
-                            <button
-                              key={a.next}
-                              disabled={isUpdating}
-                              onClick={() => updateStatus(row.id, a.next)}
-                              className={`text-xs px-2.5 py-1 rounded border font-medium transition-colors disabled:opacity-40 ${a.style}`}
-                            >
-                              {isUpdating ? "…" : a.label}
-                            </button>
-                          ))}
-                        </div>
-                      )}
+                      <div className="flex gap-1.5 justify-end items-center">
+                        <Link
+                          href={`/dashboard/bookings/${row.id}`}
+                          className="text-xs px-2.5 py-1 rounded border font-medium text-muted-foreground hover:bg-muted/50 border-gray-200 transition-colors"
+                        >
+                          View
+                        </Link>
+                        <a
+                          href={`https://wa.me/${row.clientPhone.replace(/\D/g, "")}?text=${encodeURIComponent(`Hi ${row.clientName}, this is a reminder for your appointment on ${format(new Date(row.startsAt), "d MMM 'at' h:mm a")} for ${row.serviceName}.`)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs px-2.5 py-1 rounded border font-medium text-green-700 hover:bg-green-50 border-green-200 transition-colors"
+                          title="Message on WhatsApp"
+                        >
+                          WhatsApp
+                        </a>
+                        {actions.map((a) => (
+                          <button
+                            key={a.next}
+                            disabled={isUpdating}
+                            onClick={() => updateStatus(row.id, a.next)}
+                            className={`text-xs px-2.5 py-1 rounded border font-medium transition-colors disabled:opacity-40 ${a.style}`}
+                          >
+                            {isUpdating ? "…" : a.label}
+                          </button>
+                        ))}
+                      </div>
                     </td>
                   </tr>
                 );

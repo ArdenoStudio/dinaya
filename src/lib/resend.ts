@@ -51,6 +51,31 @@ export async function sendBookingConfirmationToClient(data: BookingEmailData) {
   });
 }
 
+export async function sendBookingReminder(data: BookingEmailData) {
+  if (!data.clientEmail) return;
+
+  await getResend().emails.send({
+    from: FROM,
+    to: data.clientEmail,
+    subject: `Reminder: your appointment tomorrow — ${data.businessName}`,
+    html: `
+      <div style="font-family:sans-serif;max-width:500px;margin:0 auto">
+        <h2 style="color:#1a1a1a">See you tomorrow! 👋</h2>
+        <p>Hi ${data.clientName}, just a reminder about your appointment.</p>
+        <table style="width:100%;border-collapse:collapse;margin:16px 0">
+          <tr><td style="padding:8px 0;color:#666">Business</td><td><strong>${data.businessName}</strong></td></tr>
+          <tr><td style="padding:8px 0;color:#666">Service</td><td><strong>${data.serviceName}</strong></td></tr>
+          <tr><td style="padding:8px 0;color:#666">With</td><td><strong>${data.staffName}</strong></td></tr>
+          <tr><td style="padding:8px 0;color:#666">Date & Time</td><td><strong>${formatDateTime(data.startsAt)}</strong></td></tr>
+        </table>
+        <p style="color:#666;font-size:14px">Booking reference: ${data.bookingId.slice(0, 8).toUpperCase()}</p>
+        <hr style="border:none;border-top:1px solid #eee;margin:24px 0"/>
+        <p style="color:#999;font-size:12px">Powered by <a href="https://dinaya.lk" style="color:#6366f1">Dinaya.lk</a></p>
+      </div>
+    `,
+  });
+}
+
 export async function sendBookingNotificationToBusiness(data: BookingEmailData) {
   if (!data.clientEmail) return;
 

@@ -10,7 +10,7 @@ export async function GET() {
 
   const businessId = (session.user as { businessId: string }).businessId;
   const list = await db
-    .select({ id: services.id, name: services.name })
+    .select({ id: services.id, name: services.name, durationMinutes: services.durationMinutes, priceLkr: services.priceLkr })
     .from(services)
     .where(eq(services.businessId, businessId));
 
