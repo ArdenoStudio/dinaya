@@ -327,6 +327,27 @@ export default function SolutionsPage() {
       <section className="px-6 py-20">
         <div className="max-w-6xl mx-auto">
           <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 via-violet-600 to-indigo-800 px-8 py-16 text-center shadow-2xl shadow-indigo-500/20">
+            {/* Pattern */}
+            <div className="absolute inset-0 opacity-10">
+              <svg className="h-full w-full" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <pattern id="solutions-cta-pattern" patternUnits="userSpaceOnUse" width="64" height="64">
+                    {Array.from({ length: 17 }, (_, i) => {
+                      const offset = i * 8;
+                      return (
+                        <path
+                          key={i}
+                          d={`M${-106 + offset} 110L${22 + offset} -18`}
+                          stroke="white"
+                          strokeWidth="1"
+                        />
+                      );
+                    })}
+                  </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#solutions-cta-pattern)" />
+              </svg>
+            </div>
             <div className="pointer-events-none absolute -top-24 -right-24 size-64 rounded-full bg-white/10 blur-3xl" />
             <div className="pointer-events-none absolute -bottom-16 -left-16 size-48 rounded-full bg-primary/30 blur-3xl" />
             <div className="relative z-10">
