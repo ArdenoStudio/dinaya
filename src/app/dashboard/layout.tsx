@@ -15,7 +15,7 @@ export default async function DashboardLayout({
   return (
     <div className="min-h-screen flex">
       {/* Sidebar */}
-      <aside className="w-56 border-r bg-white flex flex-col">
+      <aside className="w-56 border-r bg-white flex flex-col" aria-label="Sidebar">
         <div className="px-6 py-5 border-b">
           <Logo href="/dashboard" size="sm" />
         </div>

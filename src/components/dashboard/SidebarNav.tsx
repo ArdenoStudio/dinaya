@@ -42,13 +42,14 @@ function NavLink({
   return (
     <Link
       href={link.href}
-      className={`flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors ${
+      aria-current={isActive ? "page" : undefined}
+      className={`flex items-center gap-2.5 px-3 py-2.5 rounded-md text-sm transition-colors border-l-2 ${
         isActive
-          ? "bg-primary/10 text-primary font-medium"
-          : "text-muted-foreground hover:bg-muted hover:text-foreground"
+          ? "border-primary bg-primary/15 text-primary font-medium"
+          : "border-transparent text-muted-foreground hover:bg-muted hover:text-foreground"
       }`}
     >
-      <link.icon className="w-4 h-4 shrink-0" />
+      <link.icon className="w-4 h-4 shrink-0" aria-hidden="true" />
       {link.label}
     </Link>
   );
@@ -57,14 +58,14 @@ function NavLink({
 export function SidebarNav() {
   const pathname = usePathname();
   return (
-    <nav className="flex-1 py-4 px-3 overflow-y-auto">
-      <div className="space-y-0.5">
+    <nav className="flex-1 py-4 px-3 overflow-y-auto" aria-label="Main navigation">
+      <div className="space-y-1">
         {mainLinks.map((link) => (
           <NavLink key={link.href} link={link} pathname={pathname} />
         ))}
       </div>
       <div className="my-3 mx-1 border-t border-border/60" />
-      <div className="space-y-0.5">
+      <div className="space-y-1">
         {systemLinks.map((link) => (
           <NavLink key={link.href} link={link} pathname={pathname} />
         ))}
