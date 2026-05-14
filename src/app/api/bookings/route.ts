@@ -5,6 +5,7 @@ import { eq, and, lt, gte } from "drizzle-orm";
 import { buildPayhereFormData, getPayhereUrl } from "@/lib/payhere";
 import { sendBookingConfirmationToClient, sendBookingNotificationToBusiness } from "@/lib/resend";
 import { generateOrderId } from "@/lib/utils";
+import { dispatchWebhooks } from "@/lib/webhooks";
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
@@ -112,6 +113,19 @@ export async function POST(req: NextRequest) {
       notes: notes || null,
     })
     .returning({ id: bookings.id });
+
+  // Fire webhook for booking creation
+  void dispatchWebhooks(businessId, "booking.created", {
+    bookingId: booking.id,
+    status: initialStatus,
+    clientName,
+    clientPhone,
+    clientEmail: clientEmail || null,
+    serviceName: service.name,
+    staffName: staffMember.name,
+    startsAt,
+    endsAt,
+  });
 
   // Send emails for free bookings immediately
   if (!requiresPayment) {

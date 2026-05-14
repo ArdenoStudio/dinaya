@@ -13,6 +13,7 @@ const navLinks = [
   { href: "/dashboard/staff", label: "Staff" },
   { href: "/dashboard/availability", label: "Availability" },
   { href: "/dashboard/settings", label: "Settings" },
+  { href: "/dashboard/settings/webhooks", label: "Webhooks" },
 ];
 
 export default async function DashboardLayout({

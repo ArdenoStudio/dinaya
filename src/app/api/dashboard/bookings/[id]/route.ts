@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { db } from "@/db";
 import { bookings, services, staff, clients } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
+import { dispatchWebhooks } from "@/lib/webhooks";
 
 const VALID_STATUSES = ["pending", "confirmed", "cancelled", "completed", "no_show"] as const;
 type BookingStatus = (typeof VALID_STATUSES)[number];
@@ -71,5 +72,22 @@ export async function PATCH(
     .returning();
 
   if (!updated) return NextResponse.json({ error: "Not found." }, { status: 404 });
+
+  // Fire webhook when status changes
+  const statusToEvent: Record<string, string> = {
+    confirmed: "booking.confirmed",
+    cancelled: "booking.cancelled",
+    completed: "booking.completed",
+    no_show: "booking.no_show",
+  };
+  if (status && statusToEvent[status]) {
+    void dispatchWebhooks(businessId, statusToEvent[status] as Parameters<typeof dispatchWebhooks>[1], {
+      bookingId: updated.id,
+      status: updated.status,
+      clientName: updated.clientName,
+      startsAt: updated.startsAt,
+    });
+  }
+
   return NextResponse.json(updated);
 }

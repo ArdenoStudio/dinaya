@@ -198,6 +198,28 @@ export const bookings = pgTable("bookings", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// ─── Webhooks ─────────────────────────────────────────────────────────────────
+
+export const webhookEventEnum = pgEnum("webhook_event", [
+  "booking.created",
+  "booking.confirmed",
+  "booking.cancelled",
+  "booking.completed",
+  "booking.no_show",
+]);
+
+export const webhooks = pgTable("webhooks", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  businessId: uuid("business_id")
+    .notNull()
+    .references(() => businesses.id, { onDelete: "cascade" }),
+  url: text("url").notNull(),
+  secret: text("secret"), // HMAC signing secret
+  events: webhookEventEnum("events").array().notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // ─── Payments ─────────────────────────────────────────────────────────────────
 
 export const payments = pgTable("payments", {
@@ -275,6 +297,10 @@ export const paymentsRelations = relations(payments, ({ one }) => ({
   booking: one(bookings, { fields: [payments.bookingId], references: [bookings.id] }),
 }));
 
+export const webhooksRelations = relations(webhooks, ({ one }) => ({
+  business: one(businesses, { fields: [webhooks.businessId], references: [businesses.id] }),
+}));
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export type Business = typeof businesses.$inferSelect;
@@ -293,3 +319,5 @@ export type Payment = typeof payments.$inferSelect;
 export type Client = typeof clients.$inferSelect;
 export type NewClient = typeof clients.$inferInsert;
 export type ClientNote = typeof clientNotes.$inferSelect;
+export type Webhook = typeof webhooks.$inferSelect;
+export type NewWebhook = typeof webhooks.$inferInsert;
