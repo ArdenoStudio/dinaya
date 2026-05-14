@@ -128,12 +128,12 @@ export default function LandingPage() {
 
                   {/* Booking column */}
                   <div className="rounded-xl ring-1 ring-emerald-100 bg-emerald-50/30 p-4">
-                    <div className="flex items-center gap-2 pb-3 mb-2 border-b border-emerald-200/60">
+                    <Link href="/features#booking" className="flex items-center gap-2 pb-3 mb-2 border-b border-emerald-200/60 hover:opacity-80 transition-opacity">
                       <span className="flex h-7 w-7 items-center justify-center rounded-md bg-emerald-500 text-white">
                         <i className="bi bi-calendar text-xs" />
                       </span>
                       <span className="text-sm font-semibold text-gray-900">Booking</span>
-                    </div>
+                    </Link>
                     <ul className="space-y-2.5 text-sm">
                       {[
                         "Self-booking page",
@@ -153,12 +153,12 @@ export default function LandingPage() {
 
                   {/* Payments column */}
                   <div className="rounded-xl ring-1 ring-sky-100 bg-sky-50/30 p-4">
-                    <div className="flex items-center gap-2 pb-3 mb-2 border-b border-sky-200/60">
+                    <Link href="/features#payments" className="flex items-center gap-2 pb-3 mb-2 border-b border-sky-200/60 hover:opacity-80 transition-opacity">
                       <span className="flex h-7 w-7 items-center justify-center rounded-md bg-sky-500 text-white">
                         <i className="bi bi-credit-card text-xs" />
                       </span>
                       <span className="text-sm font-semibold text-gray-900">Payments</span>
-                    </div>
+                    </Link>
                     <ul className="space-y-2.5 text-sm">
                       {[
                         "PayHere checkout",
@@ -179,12 +179,12 @@ export default function LandingPage() {
 
                   {/* Engagement column */}
                   <div className="rounded-xl ring-1 ring-pink-100 bg-pink-50/30 p-4">
-                    <div className="flex items-center gap-2 pb-3 mb-2 border-b border-pink-200/60">
+                    <Link href="/features#engagement" className="flex items-center gap-2 pb-3 mb-2 border-b border-pink-200/60 hover:opacity-80 transition-opacity">
                       <span className="flex h-7 w-7 items-center justify-center rounded-md bg-pink-500 text-white">
                         <i className="bi bi-bell text-xs" />
                       </span>
                       <span className="text-sm font-semibold text-gray-900">Engagement</span>
-                    </div>
+                    </Link>
                     <ul className="space-y-2.5 text-sm">
                       {[
                         "SMS reminders",
@@ -529,60 +529,70 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t py-12 px-6">
+      <footer className="bg-gray-950 text-white px-6 pt-16 pb-8">
         <div className="max-w-6xl mx-auto">
-          <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-8 mb-10">
-            <div className="md:col-span-2">
-              <Logo size="lg" />
-              <p className="mt-3 text-sm text-muted-foreground max-w-xs leading-relaxed">
-                Online booking for Sri Lankan businesses. No WhatsApp chaos, no setup fees,
-                no commissions.
+          {/* Top: brand + links */}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr] gap-12 pb-12 border-b border-white/10">
+            {/* Brand */}
+            <div>
+              <Logo size="lg" className="brightness-0 invert" />
+              <p className="mt-4 text-sm text-white/50 max-w-xs leading-relaxed">
+                Online booking for Sri Lankan businesses. No WhatsApp chaos, no setup fees, no commissions.
               </p>
+              <Link
+                href="/register"
+                className="mt-6 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90 transition-colors"
+              >
+                Get started free
+                <i className="bi bi-arrow-right text-xs" />
+              </Link>
             </div>
 
+            {/* Product */}
             <div>
-              <h4 className="text-sm font-semibold text-gray-900 mb-3">Product</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>
-                  <Link href="/register" className="hover:text-foreground transition-colors">
-                    Get started
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/login" className="hover:text-foreground transition-colors">
-                    Sign in
-                  </Link>
-                </li>
+              <h4 className="text-xs font-semibold tracking-widest uppercase text-white/30 mb-4">Product</h4>
+              <ul className="space-y-3 text-sm">
+                {[
+                  { label: "Features", href: "/features" },
+                  { label: "Pricing", href: "/pricing" },
+                  { label: "Solutions", href: "/solutions" },
+                  { label: "Get started", href: "/register" },
+                  { label: "Sign in", href: "/login" },
+                ].map(({ label, href }) => (
+                  <li key={href}>
+                    <Link href={href} className="text-white/50 hover:text-white transition-colors">
+                      {label}
+                    </Link>
+                  </li>
+                ))}
               </ul>
             </div>
 
+            {/* Legal */}
             <div>
-              <h4 className="text-sm font-semibold text-gray-900 mb-3">Legal</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>
-                  <Link href="/legal/terms" className="hover:text-foreground transition-colors">
-                    Terms of Service
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/legal/privacy" className="hover:text-foreground transition-colors">
-                    Privacy Policy
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/legal/refund" className="hover:text-foreground transition-colors">
-                    Refund Policy
-                  </Link>
-                </li>
+              <h4 className="text-xs font-semibold tracking-widest uppercase text-white/30 mb-4">Legal</h4>
+              <ul className="space-y-3 text-sm">
+                {[
+                  { label: "Terms of Service", href: "/legal/terms" },
+                  { label: "Privacy Policy", href: "/legal/privacy" },
+                  { label: "Refund Policy", href: "/legal/refund" },
+                ].map(({ label, href }) => (
+                  <li key={href}>
+                    <Link href={href} className="text-white/50 hover:text-white transition-colors">
+                      {label}
+                    </Link>
+                  </li>
+                ))}
               </ul>
             </div>
           </div>
 
-          <div className="border-t pt-6 flex flex-col sm:flex-row justify-between items-center gap-3">
-            <p className="text-sm text-muted-foreground">
+          {/* Bottom bar */}
+          <div className="pt-6 flex flex-col sm:flex-row justify-between items-center gap-3">
+            <p className="text-xs text-white/30">
               © {new Date().getFullYear()} Dinaya by Ardeno Studio
             </p>
-            <p className="text-xs text-muted-foreground">Made with ❤️ for Sri Lankan businesses</p>
+            <p className="text-xs text-white/30">Made with ❤️ for Sri Lankan businesses</p>
           </div>
         </div>
       </footer>
