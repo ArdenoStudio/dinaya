@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
 import { FadeContainer, FadeDiv, FadeSpan } from "@/components/Fade";
-import { Calendar, CreditCard, LayoutDashboard, ArrowUpRight } from "lucide-react";
+import {
+  Calendar, CreditCard, LayoutDashboard, ArrowUpRight,
+  Bell, Clock, Link2, Star, CheckCircle2, Zap, ArrowRight,
+} from "lucide-react";
 
 const features = [
   {
@@ -19,212 +22,524 @@ const features = [
     title: "Simple dashboard",
     desc: "See all your bookings in one place. Cancel, reschedule, and track revenue.",
   },
+  {
+    icon: Bell,
+    title: "Automated reminders",
+    desc: "Clients get SMS and email reminders before their appointment — automatically.",
+  },
+  {
+    icon: Clock,
+    title: "Custom availability",
+    desc: "Set your working hours, block dates, and add buffer time between sessions.",
+  },
+  {
+    icon: Link2,
+    title: "Shareable link",
+    desc: "One link for Instagram, WhatsApp, and Facebook. Share everywhere in seconds.",
+  },
 ];
+
+const steps = [
+  {
+    number: "01",
+    title: "Set up your page",
+    desc: "Add your services, prices, and availability. Takes less than 5 minutes.",
+  },
+  {
+    number: "02",
+    title: "Share your link",
+    desc: "Send your dinaya.lk/yourname link via WhatsApp, Instagram, or Facebook.",
+  },
+  {
+    number: "03",
+    title: "Get booked",
+    desc: "Clients pick a time, pay online. You get an instant notification.",
+  },
+];
+
+const testimonials = [
+  {
+    quote: "Dinaya completely replaced our WhatsApp booking system. Clients love being able to book and pay online. Our no-shows dropped overnight.",
+    name: "Amal Perera",
+    role: "Owner, Amal's Salon",
+    location: "Colombo",
+    initial: "A",
+  },
+  {
+    quote: "I never thought managing appointments could be this simple. My patients book online and pay a deposit instantly — no more phone tag.",
+    name: "Dr. Nisha Fernando",
+    role: "NF Dental Clinic",
+    location: "Kandy",
+    initial: "N",
+  },
+  {
+    quote: "My tuition class fills up without me managing WhatsApp groups. Parents just click the link and book their child's slot.",
+    name: "Priya Wickramasinghe",
+    role: "Piano Teacher",
+    location: "Nugegoda",
+    initial: "P",
+  },
+];
+
+function BookingMockup() {
+  return (
+    <div className="relative w-full max-w-[340px]">
+      {/* Glow */}
+      <div className="absolute -inset-4 rounded-3xl bg-primary/15 blur-3xl" />
+
+      <div className="relative rounded-2xl border border-gray-200/80 bg-white shadow-2xl overflow-hidden">
+        {/* Header */}
+        <div className="bg-gradient-to-br from-primary to-indigo-700 px-5 py-5">
+          <div className="text-white/60 text-xs mb-0.5">Amal&apos;s Salon · Colombo</div>
+          <div className="text-white font-cal text-xl">Book an appointment</div>
+        </div>
+
+        {/* Services */}
+        <div className="px-5 pt-4 pb-3.5 border-b border-gray-100">
+          <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2.5">
+            Select service
+          </div>
+          <div className="grid grid-cols-2 gap-1.5">
+            {[
+              { name: "Haircut", price: "Rs 800", active: true },
+              { name: "Facial", price: "Rs 1,500", active: false },
+              { name: "Manicure", price: "Rs 600", active: false },
+              { name: "Pedicure", price: "Rs 700", active: false },
+            ].map((s) => (
+              <div
+                key={s.name}
+                className={`text-xs px-3 py-2 rounded-lg border cursor-default ${
+                  s.active
+                    ? "border-primary/30 bg-primary/5 text-primary"
+                    : "border-gray-100 text-gray-500 bg-gray-50/70"
+                }`}
+              >
+                <div className="font-medium">{s.name}</div>
+                <div className={s.active ? "text-primary/60 text-[10px]" : "text-gray-400 text-[10px]"}>
+                  {s.price}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Mini calendar */}
+        <div className="px-5 pt-4 pb-3.5 border-b border-gray-100">
+          <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2.5">
+            May 2026
+          </div>
+          <div className="grid grid-cols-7 gap-0.5 text-center">
+            {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => (
+              <div key={i} className="text-[9px] text-gray-400 font-semibold pb-1">
+                {d}
+              </div>
+            ))}
+            {[null, null, null, null, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17].map(
+              (d, i) => (
+                <div
+                  key={i}
+                  className={`text-[11px] rounded-full w-6 h-6 mx-auto flex items-center justify-center ${
+                    d === 15
+                      ? "bg-primary text-white font-semibold"
+                      : d === 10 || d === 11
+                      ? "text-gray-200"
+                      : d
+                      ? "text-gray-600"
+                      : ""
+                  }`}
+                >
+                  {d}
+                </div>
+              )
+            )}
+          </div>
+        </div>
+
+        {/* Time slots */}
+        <div className="px-5 pt-4 pb-4">
+          <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2.5">
+            Available times
+          </div>
+          <div className="flex gap-2 flex-wrap mb-4">
+            {["9:00 AM", "10:30 AM", "12:00 PM", "2:00 PM"].map((t, i) => (
+              <div
+                key={t}
+                className={`text-xs px-3 py-1.5 rounded-lg border ${
+                  i === 1
+                    ? "border-primary bg-primary text-white font-medium"
+                    : "border-gray-200 text-gray-500"
+                }`}
+              >
+                {t}
+              </div>
+            ))}
+          </div>
+          <div className="w-full bg-gradient-to-b from-primary/90 to-primary text-white py-2.5 rounded-xl text-sm font-semibold text-center">
+            Confirm booking →
+          </div>
+          <p className="text-center text-[10px] text-gray-400 mt-2">
+            🔒 Secure payment via PayHere
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function LandingPage() {
   return (
     <main className="min-h-screen bg-white">
+      {/* Announcement bar */}
+      <div className="bg-gray-950 py-2.5 px-4 text-center">
+        <p className="text-xs text-white/80">
+          <span className="text-primary font-semibold">Now live:</span>{" "}
+          PayHere integration — accept deposits and full payments from clients.{" "}
+          <Link href="/register" className="text-white underline underline-offset-2 font-medium">
+            Start free →
+          </Link>
+        </p>
+      </div>
+
       {/* Nav */}
-      <nav className="border-b px-6 py-4 flex items-center justify-between max-w-6xl mx-auto">
-        <Logo size="lg" />
-        <div className="flex gap-4">
-          <Link href="/login" className="text-sm text-muted-foreground hover:text-foreground">
-            Log in
-          </Link>
-          <Link
-            href="/register"
-            className="text-sm bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90"
-          >
-            Get started free
-          </Link>
+      <nav className="sticky top-0 z-50 border-b bg-white/80 backdrop-blur-sm">
+        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+          <Logo size="lg" />
+          <div className="flex gap-4 items-center">
+            <Link
+              href="/login"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Log in
+            </Link>
+            <Link
+              href="/register"
+              className="text-sm bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors font-medium"
+            >
+              Get started free
+            </Link>
+          </div>
         </div>
       </nav>
 
       {/* Hero */}
-      <section className="max-w-4xl mx-auto px-6 py-24 text-center">
-        <FadeContainer className="flex flex-col items-center">
-          {/* Announcement badge */}
-          <FadeDiv className="mb-8">
-            <a
-              href="/register"
-              className="inline-flex items-center gap-3 rounded-full bg-white px-2.5 py-0.5 pr-3 pl-0.5 text-sm font-medium text-gray-900 ring-1 shadow-lg shadow-primary/10 ring-black/10 transition-colors hover:bg-primary/5"
-            >
-              <span className="shrink-0 rounded-full border bg-gray-50 px-2.5 py-1 text-xs text-gray-600">
-                New
-              </span>
-              <span className="flex items-center gap-1 truncate">
-                Free for Sri Lankan businesses
-                <ArrowUpRight className="size-3.5 shrink-0 text-gray-700" />
-              </span>
-            </a>
-          </FadeDiv>
+      <section className="max-w-6xl mx-auto px-6 pt-16 pb-8">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          {/* Left */}
+          <FadeContainer className="flex flex-col">
+            <FadeDiv className="mb-6">
+              <a
+                href="/register"
+                className="inline-flex items-center gap-3 rounded-full bg-white px-2.5 py-0.5 pr-3 pl-0.5 text-sm font-medium text-gray-900 ring-1 shadow-lg shadow-primary/10 ring-black/10 transition-colors hover:bg-primary/5"
+              >
+                <span className="shrink-0 rounded-full border bg-gray-50 px-2.5 py-1 text-xs text-gray-600">
+                  New
+                </span>
+                <span className="flex items-center gap-1 truncate">
+                  Free for Sri Lankan businesses
+                  <ArrowUpRight className="size-3.5 shrink-0 text-gray-700" />
+                </span>
+              </a>
+            </FadeDiv>
 
-          <h1 className="font-cal text-5xl tracking-tight mb-6">
-            <FadeSpan>Your business,</FadeSpan>{" "}
-            <FadeSpan>bookable online.</FadeSpan>
-            <br />
-            <FadeSpan className="text-primary">No WhatsApp chaos.</FadeSpan>
-          </h1>
+            <h1 className="font-cal text-5xl lg:text-6xl tracking-tight mb-5 leading-[1.1]">
+              <FadeSpan>Your business,</FadeSpan>
+              <br />
+              <FadeSpan>bookable online.</FadeSpan>
+              <br />
+              <FadeSpan className="text-primary">No WhatsApp chaos.</FadeSpan>
+            </h1>
 
-          <FadeDiv>
-            <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
-              Give your salon, clinic, or tuition class a free booking page. Clients
-              pick a time, pay online, and you get notified. Takes 5 minutes to set up.
-            </p>
-          </FadeDiv>
+            <FadeDiv>
+              <p className="text-lg text-muted-foreground mb-8 max-w-lg leading-relaxed">
+                Give your salon, clinic, or tuition class a free booking page. Clients
+                pick a time, pay online, and you get notified instantly.
+              </p>
+            </FadeDiv>
 
-          <FadeDiv>
-            <Link
-              href="/register"
-              className="inline-block bg-gradient-to-b from-primary/90 to-primary text-primary-foreground px-8 py-3.5 rounded-lg text-base font-medium border-b-2 border-primary/70 shadow-[0_0_0_2px_rgba(0,0,0,0.04),0_0_14px_0_rgba(99,102,241,0.25)] transition-all duration-200 hover:shadow-primary/40 hover:shadow-lg"
-            >
-              Create your booking page →
-            </Link>
-          </FadeDiv>
+            <FadeDiv>
+              <div className="flex flex-wrap gap-3 mb-10">
+                <Link
+                  href="/register"
+                  className="inline-flex items-center gap-2 bg-gradient-to-b from-primary/90 to-primary text-primary-foreground px-6 py-3 rounded-lg text-base font-medium border-b-2 border-primary/70 shadow-[0_0_0_2px_rgba(0,0,0,0.04),0_0_14px_0_rgba(99,102,241,0.25)] transition-all duration-200 hover:shadow-primary/40 hover:shadow-lg"
+                >
+                  Create your booking page
+                  <ArrowRight className="size-4" />
+                </Link>
+                <a
+                  href="#how-it-works"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-base font-medium border text-muted-foreground hover:text-foreground hover:bg-gray-50 transition-colors"
+                >
+                  See how it works
+                </a>
+              </div>
+            </FadeDiv>
 
-          <FadeDiv>
-            <p className="text-sm text-muted-foreground mt-4">Free forever. No credit card needed.</p>
+            {/* Stats row */}
+            <FadeDiv>
+              <div className="flex flex-wrap gap-x-8 gap-y-4 pt-4 border-t">
+                {[
+                  { value: "200+", label: "businesses" },
+                  { value: "5 min", label: "to set up" },
+                  { value: "Free", label: "forever" },
+                ].map((stat) => (
+                  <div key={stat.label}>
+                    <div className="font-cal text-2xl text-gray-900">{stat.value}</div>
+                    <div className="text-xs text-muted-foreground mt-0.5">{stat.label}</div>
+                  </div>
+                ))}
+              </div>
+            </FadeDiv>
+          </FadeContainer>
+
+          {/* Right: mockup */}
+          <FadeDiv className="flex justify-center lg:justify-end">
+            <BookingMockup />
           </FadeDiv>
-        </FadeContainer>
+        </div>
+      </section>
+
+      {/* Trust strip */}
+      <section className="max-w-6xl mx-auto px-6 py-6">
+        <div className="flex items-center justify-center gap-2.5 text-sm text-muted-foreground">
+          <CheckCircle2 className="size-4 text-green-500 shrink-0" />
+          <span>Trusted by salons, clinics, tuition classes, and freelancers across Sri Lanka</span>
+        </div>
       </section>
 
       {/* Features */}
-      <section className="relative max-w-6xl mx-auto px-6 pb-4 pt-0">
-        {/* Dashed vertical guide lines */}
+      <section className="relative max-w-6xl mx-auto px-6 py-16 border-t">
         <div className="pointer-events-none absolute inset-0 select-none">
-          {[0, 1/3, 2/3, 1].map((pos, i) => (
+          {[0, 1 / 3, 2 / 3, 1].map((pos, i) => (
             <div
               key={i}
               className="absolute inset-y-0 w-px"
               style={{
                 left: `${pos * 100}%`,
-                maskImage: "linear-gradient(transparent, white 4rem, white calc(100% - 4rem), transparent)",
+                maskImage:
+                  "linear-gradient(transparent, white 4rem, white calc(100% - 4rem), transparent)",
               }}
             >
               <svg className="h-full w-full" preserveAspectRatio="none">
-                <line x1="0" y1="0" x2="0" y2="100%" className="stroke-gray-200" strokeWidth="1.5" strokeDasharray="4 4" />
+                <line
+                  x1="0"
+                  y1="0"
+                  x2="0"
+                  y2="100%"
+                  className="stroke-gray-200"
+                  strokeWidth="1.5"
+                  strokeDasharray="4 4"
+                />
               </svg>
             </div>
           ))}
         </div>
 
-        {/* Section label */}
-        <div className="relative mb-8 text-center">
+        <div className="relative mb-10 text-center">
           <span className="relative text-sm font-semibold tracking-tight text-primary">
             <span className="absolute top-0.5 -left-3 h-4 w-[3px] rounded-r-sm bg-primary" />
             Everything you need
           </span>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-3 gap-5">
           {features.map((f) => (
-            <div key={f.title} className="p-6 border rounded-xl bg-white hover:shadow-md transition-shadow">
-              <div className="mb-3 flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10">
+            <div
+              key={f.title}
+              className="p-6 border rounded-xl bg-white hover:shadow-md hover:border-primary/20 transition-all"
+            >
+              <div className="mb-4 flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10">
                 <f.icon className="w-5 h-5 text-primary" />
               </div>
               <h3 className="font-cal text-lg mb-2">{f.title}</h3>
-              <p className="text-muted-foreground text-sm">{f.desc}</p>
+              <p className="text-muted-foreground text-sm leading-relaxed">{f.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Testimonial */}
-      <section className="max-w-6xl mx-auto px-6 py-20">
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-gray-900 to-gray-800 px-8 py-14 shadow-2xl">
-          <div className="absolute inset-0 opacity-10">
-            <svg className="h-full w-full" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <pattern id="hero-pattern" patternUnits="userSpaceOnUse" width="64" height="64">
-                  {Array.from({ length: 17 }, (_, i) => {
-                    const offset = i * 8;
-                    return (
-                      <path
-                        key={i}
-                        d={`M${-106 + offset} 110L${22 + offset} -18`}
-                        stroke="white"
-                        strokeWidth="1"
-                      />
-                    );
-                  })}
-                </pattern>
-              </defs>
-              <rect width="100%" height="100%" fill="url(#hero-pattern)" />
-            </svg>
-          </div>
-          <div className="relative z-10 max-w-2xl">
-            <blockquote className="text-xl leading-relaxed tracking-tight text-white md:text-2xl">
-              <p>
-                <span className="text-white/50 mr-1 text-3xl leading-none align-bottom">&ldquo;</span>
-                <strong className="font-semibold">Dinaya completely replaced our WhatsApp booking system.</strong>{" "}
-                <span className="text-white/70">
-                  Clients love being able to book and pay online. Our no-shows dropped overnight.
-                </span>
-                <span className="text-white/50 ml-1 text-3xl leading-none align-bottom">&rdquo;</span>
-              </p>
-            </blockquote>
-            <div className="mt-10 flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/30 ring-1 ring-white/20 text-white font-cal text-lg">
-                A
+      {/* How it works */}
+      <section id="how-it-works" className="max-w-6xl mx-auto px-6 py-16 border-t">
+        <div className="text-center mb-12">
+          <span className="relative text-sm font-semibold tracking-tight text-primary">
+            <span className="absolute top-0.5 -left-3 h-4 w-[3px] rounded-r-sm bg-primary" />
+            How it works
+          </span>
+          <h2 className="font-cal text-3xl md:text-4xl mt-3 tracking-tight">
+            Up and running in minutes
+          </h2>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-8">
+          {steps.map((step) => (
+            <div key={step.number} className="flex flex-col">
+              <div className="mb-5">
+                <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 border border-primary/15">
+                  <span className="font-cal text-2xl text-primary">{step.number}</span>
+                </div>
               </div>
-              <div>
-                <div className="text-sm font-medium text-white">Amal Perera</div>
-                <div className="text-xs text-white/60">Owner, Amal&apos;s Salon — Colombo</div>
+              <h3 className="font-cal text-xl mb-2">{step.title}</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed">{step.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <section className="max-w-6xl mx-auto px-6 py-16 border-t">
+        <div className="text-center mb-12">
+          <span className="relative text-sm font-semibold tracking-tight text-primary">
+            <span className="absolute top-0.5 -left-3 h-4 w-[3px] rounded-r-sm bg-primary" />
+            Loved by businesses
+          </span>
+          <h2 className="font-cal text-3xl md:text-4xl mt-3 tracking-tight">
+            What our users say
+          </h2>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-5">
+          {testimonials.map((t) => (
+            <div
+              key={t.name}
+              className="p-6 rounded-2xl border bg-white hover:shadow-md transition-shadow flex flex-col"
+            >
+              <div className="flex gap-0.5 mb-4">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="size-3.5 fill-amber-400 text-amber-400" />
+                ))}
+              </div>
+              <blockquote className="text-sm leading-relaxed text-gray-700 flex-1 mb-6">
+                &ldquo;{t.quote}&rdquo;
+              </blockquote>
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/15 text-primary font-cal text-base shrink-0">
+                  {t.initial}
+                </div>
+                <div>
+                  <div className="text-sm font-semibold text-gray-900">{t.name}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {t.role} · {t.location}
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
+          ))}
         </div>
       </section>
 
       {/* CTA */}
-      <section className="max-w-6xl mx-auto px-6 pb-20">
-        <div className="grid items-center gap-8 sm:grid-cols-5 rounded-2xl border bg-muted/30 px-8 py-12">
-          <div className="sm:col-span-3">
-            <h2 className="font-cal text-3xl tracking-tight text-gray-900 md:text-4xl">
-              Ready to go bookable?
-            </h2>
-            <p className="mt-3 mb-8 text-lg text-muted-foreground">
-              Set up your booking page in 5 minutes. Free forever for small businesses.
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <Link
-                href="/register"
-                className="inline-block bg-gradient-to-b from-primary/90 to-primary text-primary-foreground px-6 py-3 rounded-lg font-medium border-b-2 border-primary/70 shadow-[0_0_0_2px_rgba(0,0,0,0.04),0_0_14px_0_rgba(99,102,241,0.25)] transition-all duration-200 hover:shadow-primary/40 hover:shadow-lg"
-              >
-                Create your page
-              </Link>
-              <Link
-                href="/login"
-                className="inline-block px-6 py-3 rounded-lg font-medium border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-              >
-                Sign in
-              </Link>
+      <section className="px-6 pb-20">
+        <div className="max-w-6xl mx-auto">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 via-violet-600 to-indigo-800 px-8 py-20 text-center shadow-2xl shadow-indigo-500/20">
+            {/* Pattern */}
+            <div className="absolute inset-0 opacity-10">
+              <svg className="h-full w-full" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <pattern id="cta-pattern" patternUnits="userSpaceOnUse" width="64" height="64">
+                    {Array.from({ length: 17 }, (_, i) => {
+                      const offset = i * 8;
+                      return (
+                        <path
+                          key={i}
+                          d={`M${-106 + offset} 110L${22 + offset} -18`}
+                          stroke="white"
+                          strokeWidth="1"
+                        />
+                      );
+                    })}
+                  </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#cta-pattern)" />
+              </svg>
             </div>
-          </div>
-          <div className="sm:col-span-2 flex justify-center">
-            <div className="w-full max-w-xs rounded-xl border bg-white p-5 shadow-lg">
-              <div className="space-y-3">
-                {["9:00 AM — Haircut · Amal", "10:30 AM — Facial · Nisha", "2:00 PM — Manicure · Priya"].map((s) => (
-                  <div key={s} className="flex items-center gap-3 rounded-lg bg-muted/40 px-3 py-2.5 text-sm">
-                    <div className="h-2 w-2 rounded-full bg-primary shrink-0" />
-                    {s}
-                  </div>
-                ))}
+
+            <div className="relative z-10">
+              <div className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/20 px-4 py-1.5 text-sm text-white/80 mb-6">
+                <Zap className="size-3.5" />
+                Free forever · No credit card needed
               </div>
-              <p className="mt-3 text-center text-xs text-muted-foreground">Today&apos;s bookings</p>
+              <h2 className="font-cal text-4xl md:text-5xl tracking-tight text-white mb-4">
+                Ready to go bookable?
+              </h2>
+              <p className="text-lg text-white/70 mb-10 max-w-md mx-auto">
+                Set up your booking page in 5 minutes. Start accepting clients today.
+              </p>
+              <div className="flex flex-wrap gap-4 justify-center">
+                <Link
+                  href="/register"
+                  className="inline-flex items-center gap-2 bg-white text-indigo-700 px-7 py-3.5 rounded-xl font-semibold shadow-lg hover:bg-white/95 transition-colors"
+                >
+                  Create your page
+                  <ArrowRight className="size-4" />
+                </Link>
+                <Link
+                  href="/login"
+                  className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-white px-7 py-3.5 rounded-xl font-medium hover:bg-white/20 transition-colors"
+                >
+                  Sign in
+                </Link>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t py-8 px-6 text-center text-sm text-muted-foreground">
-        <div className="flex justify-center gap-6 mb-3">
-          <Link href="/legal/terms" className="hover:text-foreground">Terms of Service</Link>
-          <Link href="/legal/privacy" className="hover:text-foreground">Privacy Policy</Link>
-          <Link href="/legal/refund" className="hover:text-foreground">Refund Policy</Link>
+      <footer className="border-t py-12 px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-8 mb-10">
+            <div className="md:col-span-2">
+              <Logo size="lg" />
+              <p className="mt-3 text-sm text-muted-foreground max-w-xs leading-relaxed">
+                Online booking for Sri Lankan businesses. No WhatsApp chaos, no setup fees,
+                no commissions.
+              </p>
+            </div>
+
+            <div>
+              <h4 className="text-sm font-semibold text-gray-900 mb-3">Product</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li>
+                  <Link href="/register" className="hover:text-foreground transition-colors">
+                    Get started
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/login" className="hover:text-foreground transition-colors">
+                    Sign in
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="text-sm font-semibold text-gray-900 mb-3">Legal</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li>
+                  <Link href="/legal/terms" className="hover:text-foreground transition-colors">
+                    Terms of Service
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/legal/privacy" className="hover:text-foreground transition-colors">
+                    Privacy Policy
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/legal/refund" className="hover:text-foreground transition-colors">
+                    Refund Policy
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="border-t pt-6 flex flex-col sm:flex-row justify-between items-center gap-3">
+            <p className="text-sm text-muted-foreground">
+              © {new Date().getFullYear()} Dinaya by Ardeno Studio
+            </p>
+            <p className="text-xs text-muted-foreground">Made with ❤️ for Sri Lankan businesses</p>
+          </div>
         </div>
-        <p>© {new Date().getFullYear()} Dinaya by Ardeno Studio</p>
       </footer>
     </main>
   );
