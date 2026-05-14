@@ -4,6 +4,8 @@ import { FadeContainer, FadeDiv, FadeSpan } from "@/components/Fade";
 import {
   Calendar, CreditCard, LayoutDashboard, ArrowUpRight,
   Bell, Clock, Link2, Star, CheckCircle2, Zap, ArrowRight,
+  ChevronDown, Scissors, Stethoscope, GraduationCap, Briefcase,
+  BookOpen, HelpCircle, FileText, Sparkles,
 } from "lucide-react";
 
 const features = [
@@ -97,8 +99,114 @@ export default function LandingPage() {
 
       {/* Nav */}
       <nav className="sticky top-0 z-50 border-b bg-white/80 backdrop-blur-sm">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between gap-6">
           <Logo size="lg" />
+
+          <div className="hidden md:flex items-center gap-1 text-sm font-medium text-gray-700">
+            {/* Features dropdown */}
+            <div className="relative group">
+              <button className="inline-flex items-center gap-1 px-3 py-2 rounded-md hover:text-gray-900 transition-colors">
+                Features
+                <ChevronDown className="size-3.5 text-gray-400 group-hover:text-gray-600 transition-transform group-hover:rotate-180" />
+              </button>
+              <div className="invisible opacity-0 translate-y-1 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 transition-all absolute left-0 top-full pt-2 w-72">
+                <div className="rounded-xl border bg-white shadow-lg shadow-gray-900/5 p-2">
+                  {[
+                    { icon: Calendar, title: "Self-booking page", desc: "Your own 24/7 booking link" },
+                    { icon: CreditCard, title: "Online payments", desc: "Accept deposits via PayHere" },
+                    { icon: Bell, title: "Automated reminders", desc: "SMS & email, on autopilot" },
+                    { icon: LayoutDashboard, title: "Simple dashboard", desc: "Manage every booking in one place" },
+                  ].map((it) => (
+                    <Link
+                      key={it.title}
+                      href="#features"
+                      className="flex items-start gap-3 rounded-lg p-2.5 hover:bg-gray-50 transition-colors"
+                    >
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                        <it.icon className="size-4" />
+                      </span>
+                      <span>
+                        <span className="block text-sm font-semibold text-gray-900">{it.title}</span>
+                        <span className="block text-xs text-muted-foreground">{it.desc}</span>
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Solutions dropdown */}
+            <div className="relative group">
+              <button className="inline-flex items-center gap-1 px-3 py-2 rounded-md hover:text-gray-900 transition-colors">
+                Solutions
+                <ChevronDown className="size-3.5 text-gray-400 group-hover:text-gray-600 transition-transform group-hover:rotate-180" />
+              </button>
+              <div className="invisible opacity-0 translate-y-1 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 transition-all absolute left-0 top-full pt-2 w-64">
+                <div className="rounded-xl border bg-white shadow-lg shadow-gray-900/5 p-2">
+                  {[
+                    { icon: Scissors, title: "Salons & spas", desc: "Stylists, beauty, wellness" },
+                    { icon: Stethoscope, title: "Clinics", desc: "Dental, physio, doctors" },
+                    { icon: GraduationCap, title: "Tuition classes", desc: "Tutors and instructors" },
+                    { icon: Briefcase, title: "Freelancers", desc: "Consultants & coaches" },
+                  ].map((it) => (
+                    <Link
+                      key={it.title}
+                      href="/register"
+                      className="flex items-start gap-3 rounded-lg p-2.5 hover:bg-gray-50 transition-colors"
+                    >
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                        <it.icon className="size-4" />
+                      </span>
+                      <span>
+                        <span className="block text-sm font-semibold text-gray-900">{it.title}</span>
+                        <span className="block text-xs text-muted-foreground">{it.desc}</span>
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Resources dropdown */}
+            <div className="relative group">
+              <button className="inline-flex items-center gap-1 px-3 py-2 rounded-md hover:text-gray-900 transition-colors">
+                Resources
+                <ChevronDown className="size-3.5 text-gray-400 group-hover:text-gray-600 transition-transform group-hover:rotate-180" />
+              </button>
+              <div className="invisible opacity-0 translate-y-1 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 transition-all absolute left-0 top-full pt-2 w-64">
+                <div className="rounded-xl border bg-white shadow-lg shadow-gray-900/5 p-2">
+                  {[
+                    { icon: BookOpen, title: "Getting started", desc: "Set up in 5 minutes" },
+                    { icon: HelpCircle, title: "Help center", desc: "Answers to common questions" },
+                    { icon: Sparkles, title: "What's new", desc: "Latest features and updates" },
+                    { icon: FileText, title: "Legal", desc: "Terms, privacy, refunds", href: "/legal/terms" },
+                  ].map((it) => (
+                    <Link
+                      key={it.title}
+                      href={it.href ?? "#"}
+                      className="flex items-start gap-3 rounded-lg p-2.5 hover:bg-gray-50 transition-colors"
+                    >
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                        <it.icon className="size-4" />
+                      </span>
+                      <span>
+                        <span className="block text-sm font-semibold text-gray-900">{it.title}</span>
+                        <span className="block text-xs text-muted-foreground">{it.desc}</span>
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <Link
+              href="#pricing"
+              className="px-3 py-2 rounded-md hover:text-gray-900 transition-colors"
+            >
+              Pricing
+            </Link>
+          </div>
+
           <div className="flex gap-4 items-center">
             <Link
               href="/login"
