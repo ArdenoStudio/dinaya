@@ -1,20 +1,8 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { signOut } from "@/auth";
 import { Logo } from "@/components/Logo";
-
-const navLinks = [
-  { href: "/dashboard", label: "Overview" },
-  { href: "/dashboard/bookings", label: "Bookings" },
-  { href: "/dashboard/calendar", label: "Calendar" },
-  { href: "/dashboard/clients", label: "Clients" },
-  { href: "/dashboard/services", label: "Services" },
-  { href: "/dashboard/staff", label: "Staff" },
-  { href: "/dashboard/availability", label: "Availability" },
-  { href: "/dashboard/settings", label: "Settings" },
-  { href: "/dashboard/settings/webhooks", label: "Webhooks" },
-];
+import { SidebarNav } from "@/components/dashboard/SidebarNav";
 
 export default async function DashboardLayout({
   children,
@@ -31,17 +19,7 @@ export default async function DashboardLayout({
         <div className="px-6 py-5 border-b">
           <Logo href="/dashboard" size="sm" />
         </div>
-        <nav className="flex-1 py-4 px-3 space-y-1">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="block px-3 py-2 rounded-md text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
+        <SidebarNav />
         <div className="px-6 py-4 border-t">
           <p className="text-xs text-muted-foreground mb-3 truncate">{session.user?.email}</p>
           <form
