@@ -14,6 +14,7 @@ export default function NewServicePage() {
     beforeBuffer: 0,
     afterBuffer: 0,
     minimumNoticeHours: 0,
+    dailyCapacity: "" as string | number,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -105,6 +106,19 @@ export default function NewServicePage() {
               <option key={h} value={h}>{h === 0 ? "No minimum" : h < 24 ? `${h} hour${h > 1 ? "s" : ""}` : `${h / 24} day${h / 24 > 1 ? "s" : ""}`}</option>
             ))}
           </select>
+        </div>
+        <div>
+          <label className="text-sm font-medium">Daily capacity</label>
+          <p className="text-xs text-muted-foreground mb-2">Max bookings per staff per day for this service. Leave blank for unlimited.</p>
+          <input
+            type="number"
+            min={1}
+            max={100}
+            value={form.dailyCapacity}
+            onChange={(e) => setForm((f) => ({ ...f, dailyCapacity: e.target.value }))}
+            placeholder="Unlimited"
+            className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          />
         </div>
         <label className="flex items-center gap-2 cursor-pointer">
           <input type="checkbox" checked={form.requiresPayment}

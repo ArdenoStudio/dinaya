@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const businessId = (session.user as { businessId: string }).businessId;
-  const { name, description, durationMinutes, priceLkr, requiresPayment, beforeBuffer, afterBuffer, minimumNoticeHours } = await req.json();
+  const { name, description, durationMinutes, priceLkr, requiresPayment, beforeBuffer, afterBuffer, minimumNoticeHours, dailyCapacity } = await req.json();
 
   if (!name || !durationMinutes) {
     return NextResponse.json({ error: "Name and duration are required." }, { status: 400 });
@@ -48,6 +48,7 @@ export async function POST(req: NextRequest) {
       beforeBuffer: beforeBuffer ?? 0,
       afterBuffer: afterBuffer ?? 0,
       minimumNoticeHours: minimumNoticeHours ?? 0,
+      dailyCapacity: dailyCapacity ? parseInt(dailyCapacity) : null,
     })
     .returning({ id: services.id });
 

@@ -115,6 +115,8 @@ export const services = pgTable("services", {
   afterBuffer: integer("after_buffer").notNull().default(0),
   // Minimum notice required before a booking can be made (hours) — from Cal.diy
   minimumNoticeHours: integer("minimum_notice_hours").notNull().default(0),
+  // Max bookings per staff per day for this service (null = unlimited) — from Cal.diy bookingLimits
+  dailyCapacity: integer("daily_capacity"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

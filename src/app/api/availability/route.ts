@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { availability, availabilityOverrides, bookings, staff, services } from "@/db/schema";
-import { eq, and, gte, lt } from "drizzle-orm";
+import { eq, and, gte, lt, count } from "drizzle-orm";
 import { getAvailableSlots } from "@/lib/availability";
 import { parseISO, startOfDay, endOfDay } from "date-fns";
 import { fromZonedTime } from "date-fns-tz";
@@ -24,6 +24,7 @@ export async function GET(req: NextRequest) {
       beforeBuffer: services.beforeBuffer,
       afterBuffer: services.afterBuffer,
       minimumNoticeHours: services.minimumNoticeHours,
+      dailyCapacity: services.dailyCapacity,
     })
     .from(services)
     .where(eq(services.id, serviceId))
@@ -56,6 +57,27 @@ export async function GET(req: NextRequest) {
         lt(bookings.startsAt, dayEndUtc)
       )
     );
+
+  // Check daily capacity — if limit reached, no slots available
+  if (service.dailyCapacity != null) {
+    const [{ value: bookedCount }] = await db
+      .select({ value: count() })
+      .from(bookings)
+      .where(
+        and(
+          eq(bookings.staffId, staffId),
+          eq(bookings.serviceId, serviceId),
+          gte(bookings.startsAt, dayStartUtc),
+          lt(bookings.startsAt, dayEndUtc),
+          and(
+            eq(bookings.status, "confirmed"),
+          )
+        )
+      );
+    if (Number(bookedCount) >= service.dailyCapacity) {
+      return NextResponse.json({ slots: [], capacityReached: true });
+    }
+  }
 
   const slots = getAvailableSlots({
     date,
