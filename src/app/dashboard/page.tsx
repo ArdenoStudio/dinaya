@@ -46,13 +46,13 @@ export default async function DashboardOverview() {
 
   const appDomain = process.env.NEXT_PUBLIC_APP_DOMAIN ?? "localhost:3000";
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-  const isLocalhost = appDomain.startsWith("localhost");
-  const bookingUrl = isLocalhost
-    ? `${appUrl}/book/${business.slug}`
-    : `${appUrl.replace("://", `://${business.slug}.`)}`;
-  const bookingDisplayUrl = isLocalhost
-    ? `localhost:3000/book/${business.slug}`
-    : `${business.slug}.${appDomain}`;
+  const useSubdomain = appDomain === "dinaya.lk";
+  const bookingUrl = useSubdomain
+    ? `https://${business.slug}.dinaya.lk`
+    : `${appUrl}/book/${business.slug}`;
+  const bookingDisplayUrl = useSubdomain
+    ? `${business.slug}.dinaya.lk`
+    : `${appUrl.replace(/^https?:\/\//, "")}/book/${business.slug}`;
 
   const stats = [
     {
