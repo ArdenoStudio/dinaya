@@ -43,7 +43,7 @@ export default function BookingWizard({ business, services, staff, staffServiceM
     clientEmail: "",
     notes: "",
   });
-  const [confirmed, setConfirmed] = useState<{ bookingId: string; payhereFormData?: Record<string, string>; payhereUrl?: string } | null>(null);
+  const [confirmed, setConfirmed] = useState<{ bookingId: string; payhereFormData?: Record<string, string>; payhereUrl?: string; dodoPaymentUrl?: string } | null>(null);
 
   function update(partial: Partial<BookingState>) {
     setState((s) => ({ ...s, ...partial }));
@@ -53,6 +53,20 @@ export default function BookingWizard({ business, services, staff, staffServiceM
   function back() { setStep((s) => s - 1); }
 
   if (confirmed) {
+    // Dodo Payments redirect
+    if (confirmed.dodoPaymentUrl) {
+      if (typeof window !== "undefined") {
+        window.location.href = confirmed.dodoPaymentUrl;
+      }
+      return (
+        <div className="bg-white border rounded-xl p-8 text-center">
+          <div className="text-4xl mb-4">💳</div>
+          <h2 className="font-cal text-xl mb-2">Redirecting to payment…</h2>
+          <p className="text-muted-foreground text-sm">You&apos;ll be taken to Dodo Payments to complete your booking.</p>
+        </div>
+      );
+    }
+
     if (confirmed.payhereFormData && confirmed.payhereUrl) {
       // Auto-submit PayHere form
       return (

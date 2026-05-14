@@ -40,3 +40,5 @@ next-env.d.ts
 
 # drizzle generated (keep schema, ignore generated SQL)
 drizzle/
+
+.vercel

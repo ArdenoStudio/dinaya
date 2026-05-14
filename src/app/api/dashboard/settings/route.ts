@@ -9,13 +9,19 @@ export async function PATCH(req: NextRequest) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const businessId = (session.user as { businessId: string }).businessId;
-  const { name, description, phone, address } = await req.json();
+  const { name, description, phone, address, dodoEnabled } = await req.json();
 
   if (!name) return NextResponse.json({ error: "Business name is required." }, { status: 400 });
 
   await db
     .update(businesses)
-    .set({ name, description: description || null, phone: phone || null, address: address || null })
+    .set({
+      name,
+      description: description || null,
+      phone: phone || null,
+      address: address || null,
+      ...(dodoEnabled !== undefined && { dodoEnabled: Boolean(dodoEnabled) }),
+    })
     .where(eq(businesses.id, businessId));
 
   return NextResponse.json({ success: true });

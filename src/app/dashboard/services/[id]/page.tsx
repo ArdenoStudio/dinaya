@@ -14,6 +14,7 @@ interface ServiceForm {
   afterBuffer: number;
   minimumNoticeHours: number;
   dailyCapacity: string | number;
+  dodoProductId: string;
 }
 
 interface StaffMember {
@@ -50,6 +51,7 @@ export default function EditServicePage({ params }: { params: Promise<{ id: stri
         afterBuffer: d.afterBuffer ?? 0,
         minimumNoticeHours: d.minimumNoticeHours ?? 0,
         dailyCapacity: d.dailyCapacity ?? "",
+        dodoProductId: d.dodoProductId ?? "",
       });
       setAllStaff(Array.isArray(staffList) ? staffList : []);
       setAssignedStaffIds(
@@ -70,6 +72,7 @@ export default function EditServicePage({ params }: { params: Promise<{ id: stri
       body: JSON.stringify({
         ...form,
         dailyCapacity: form.dailyCapacity === "" ? null : Number(form.dailyCapacity),
+        dodoProductId: form.dodoProductId || null,
       }),
     });
     if (!res.ok) {
@@ -214,6 +217,26 @@ export default function EditServicePage({ params }: { params: Promise<{ id: stri
             <span className="text-sm">Active</span>
           </label>
         </div>
+
+        {form.requiresPayment && (
+          <div className="border rounded-lg p-4 bg-muted/30 space-y-2">
+            <label className="text-sm font-medium">Dodo Payments product ID</label>
+            <p className="text-xs text-muted-foreground">
+              Copy the product ID from your{" "}
+              <a href="https://app.dodopayments.com" target="_blank" rel="noopener noreferrer" className="underline">
+                Dodo dashboard
+              </a>
+              . Required to accept online payments for this service.
+            </p>
+            <input
+              type="text"
+              value={form.dodoProductId}
+              onChange={(e) => setForm((f) => f && ({ ...f, dodoProductId: e.target.value }))}
+              placeholder="pdt_xxxxxxxxxxxxxxxxxxxxxx"
+              className={inputCls}
+            />
+          </div>
+        )}
 
         {error && <p className="text-destructive text-sm">{error}</p>}
 

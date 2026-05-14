@@ -11,6 +11,7 @@ export default function SettingsForm({ business }: Props) {
     description: business.description ?? "",
     phone: business.phone ?? "",
     address: business.address ?? "",
+    dodoEnabled: business.dodoEnabled,
   });
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -62,6 +63,26 @@ export default function SettingsForm({ business }: Props) {
           <input value={form.address} onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
             className="mt-1 w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             placeholder="123 Main St, Colombo 03" />
+        </div>
+
+        <div className="border-t pt-4">
+          <p className="text-sm font-medium mb-1">Dodo Payments</p>
+          <p className="text-xs text-muted-foreground mb-3">
+            Accept online payments via Dodo Payments. Requires a{" "}
+            <a href="https://dodopayments.com" target="_blank" rel="noopener noreferrer" className="underline">
+              Dodo Payments account
+            </a>{" "}
+            and a product ID set on each service.
+          </p>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={form.dodoEnabled}
+              onChange={(e) => setForm((f) => ({ ...f, dodoEnabled: e.target.checked }))}
+              className="rounded"
+            />
+            <span className="text-sm">Enable Dodo Payments for this business</span>
+          </label>
         </div>
 
         <div className="pt-1 border-t">

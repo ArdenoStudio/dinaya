@@ -6,6 +6,7 @@ import { buildPayhereFormData, getPayhereUrl } from "@/lib/payhere";
 import { sendBookingConfirmationToClient, sendBookingNotificationToBusiness } from "@/lib/resend";
 import { generateOrderId } from "@/lib/utils";
 import { dispatchWebhooks } from "@/lib/webhooks";
+import { dodo } from "@/lib/dodo";
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
@@ -94,7 +95,9 @@ export async function POST(req: NextRequest) {
   }
 
   // Create booking (pending until payment confirmed, or immediately confirmed if free)
-  const requiresPayment = service.requiresPayment && business.payhereEnabled && business.payhereMerchantId;
+  const dodoEnabled = service.requiresPayment && business.dodoEnabled && service.dodoProductId;
+  const payhereEnabled = service.requiresPayment && business.payhereEnabled && business.payhereMerchantId;
+  const requiresPayment = dodoEnabled || payhereEnabled;
   const initialStatus = requiresPayment ? "pending" : "confirmed";
 
   const [booking] = await db
@@ -159,7 +162,42 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ bookingId: booking.id });
   }
 
-  // PayHere payment flow
+  // ── Dodo Payments flow ────────────────────────────────────────────────────
+  if (dodoEnabled) {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL!;
+
+    const payment = await dodo.payments.create({
+      billing: {
+        city: "Colombo",
+        country: "LK",
+        state: "Western Province",
+        street: "N/A",
+        zipcode: "00100",
+      },
+      customer: {
+        name: clientName,
+        email: clientEmail || undefined,
+      },
+      product_cart: [{ product_id: service.dodoProductId!, quantity: 1 }],
+      metadata: { bookingId: booking.id },
+      return_url: `${appUrl}/book/${business.slug}/confirmed?bookingId=${booking.id}`,
+      payment_link: true,
+    });
+
+    await db.insert(payments).values({
+      bookingId: booking.id,
+      amountLkr: service.priceLkr,
+      dodoPaymentId: payment.payment_id,
+      status: "pending",
+    });
+
+    return NextResponse.json({
+      bookingId: booking.id,
+      dodoPaymentUrl: payment.payment_link,
+    });
+  }
+
+  // ── PayHere payment flow ────────────────────────────────────────────────
   const orderId = generateOrderId();
 
   await db.insert(payments).values({
