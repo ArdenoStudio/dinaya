@@ -81,111 +81,6 @@ const testimonials = [
   },
 ];
 
-function BookingMockup() {
-  return (
-    <div className="relative w-full max-w-[340px]">
-      {/* Glow */}
-      <div className="absolute -inset-4 rounded-3xl bg-primary/15 blur-3xl" />
-
-      <div className="relative rounded-2xl border border-gray-200/80 bg-white shadow-2xl overflow-hidden">
-        {/* Header */}
-        <div className="bg-gradient-to-br from-primary to-indigo-700 px-5 py-5">
-          <div className="text-white/60 text-xs mb-0.5">Amal&apos;s Salon · Colombo</div>
-          <div className="text-white font-cal text-xl">Book an appointment</div>
-        </div>
-
-        {/* Services */}
-        <div className="px-5 pt-4 pb-3.5 border-b border-gray-100">
-          <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2.5">
-            Select service
-          </div>
-          <div className="grid grid-cols-2 gap-1.5">
-            {[
-              { name: "Haircut", price: "Rs 800", active: true },
-              { name: "Facial", price: "Rs 1,500", active: false },
-              { name: "Manicure", price: "Rs 600", active: false },
-              { name: "Pedicure", price: "Rs 700", active: false },
-            ].map((s) => (
-              <div
-                key={s.name}
-                className={`text-xs px-3 py-2 rounded-lg border cursor-default ${
-                  s.active
-                    ? "border-primary/30 bg-primary/5 text-primary"
-                    : "border-gray-100 text-gray-500 bg-gray-50/70"
-                }`}
-              >
-                <div className="font-medium">{s.name}</div>
-                <div className={s.active ? "text-primary/60 text-[10px]" : "text-gray-400 text-[10px]"}>
-                  {s.price}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Mini calendar */}
-        <div className="px-5 pt-4 pb-3.5 border-b border-gray-100">
-          <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2.5">
-            May 2026
-          </div>
-          <div className="grid grid-cols-7 gap-0.5 text-center">
-            {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => (
-              <div key={i} className="text-[9px] text-gray-400 font-semibold pb-1">
-                {d}
-              </div>
-            ))}
-            {[null, null, null, null, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17].map(
-              (d, i) => (
-                <div
-                  key={i}
-                  className={`text-[11px] rounded-full w-6 h-6 mx-auto flex items-center justify-center ${
-                    d === 15
-                      ? "bg-primary text-white font-semibold"
-                      : d === 10 || d === 11
-                      ? "text-gray-200"
-                      : d
-                      ? "text-gray-600"
-                      : ""
-                  }`}
-                >
-                  {d}
-                </div>
-              )
-            )}
-          </div>
-        </div>
-
-        {/* Time slots */}
-        <div className="px-5 pt-4 pb-4">
-          <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2.5">
-            Available times
-          </div>
-          <div className="flex gap-2 flex-wrap mb-4">
-            {["9:00 AM", "10:30 AM", "12:00 PM", "2:00 PM"].map((t, i) => (
-              <div
-                key={t}
-                className={`text-xs px-3 py-1.5 rounded-lg border ${
-                  i === 1
-                    ? "border-primary bg-primary text-white font-medium"
-                    : "border-gray-200 text-gray-500"
-                }`}
-              >
-                {t}
-              </div>
-            ))}
-          </div>
-          <div className="w-full bg-gradient-to-b from-primary/90 to-primary text-white py-2.5 rounded-xl text-sm font-semibold text-center">
-            Confirm booking →
-          </div>
-          <p className="text-center text-[10px] text-gray-400 mt-2">
-            🔒 Secure payment via PayHere
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default function LandingPage() {
   return (
     <main className="min-h-screen bg-white">
@@ -222,80 +117,50 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero */}
-      <section className="max-w-6xl mx-auto px-6 pt-16 pb-8">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          {/* Left */}
-          <FadeContainer className="flex flex-col">
-            <FadeDiv className="mb-6">
-              <a
-                href="/register"
-                className="inline-flex items-center gap-3 rounded-full bg-white px-2.5 py-0.5 pr-3 pl-0.5 text-sm font-medium text-gray-900 ring-1 shadow-lg shadow-primary/10 ring-black/10 transition-colors hover:bg-primary/5"
-              >
-                <span className="shrink-0 rounded-full border bg-gray-50 px-2.5 py-1 text-xs text-gray-600">
-                  New
-                </span>
-                <span className="flex items-center gap-1 truncate">
-                  Free for Sri Lankan businesses
-                  <ArrowUpRight className="size-3.5 shrink-0 text-gray-700" />
-                </span>
-              </a>
-            </FadeDiv>
-
-            <h1 className="font-cal text-5xl lg:text-6xl tracking-tight mb-5 leading-[1.1]">
-              <FadeSpan>Your business,</FadeSpan>
-              <br />
-              <FadeSpan>bookable online.</FadeSpan>
-              <br />
-              <FadeSpan className="text-primary">No WhatsApp chaos.</FadeSpan>
-            </h1>
-
-            <FadeDiv>
-              <p className="text-lg text-muted-foreground mb-8 max-w-lg leading-relaxed">
-                Give your salon, clinic, or tuition class a free booking page. Clients
-                pick a time, pay online, and you get notified instantly.
-              </p>
-            </FadeDiv>
-
-            <FadeDiv>
-              <div className="flex flex-wrap gap-3 mb-10">
-                <Link
-                  href="/register"
-                  className="inline-flex items-center gap-2 bg-gradient-to-b from-primary/90 to-primary text-primary-foreground px-6 py-3 rounded-lg text-base font-medium border-b-2 border-primary/70 shadow-[0_0_0_2px_rgba(0,0,0,0.04),0_0_14px_0_rgba(99,102,241,0.25)] transition-all duration-200 hover:shadow-primary/40 hover:shadow-lg"
-                >
-                  Create your booking page
-                  <ArrowRight className="size-4" />
-                </Link>
-                <a
-                  href="#how-it-works"
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-base font-medium border text-muted-foreground hover:text-foreground hover:bg-gray-50 transition-colors"
-                >
-                  See how it works
-                </a>
-              </div>
-            </FadeDiv>
-
-            {/* Stats row */}
-            <FadeDiv>
-              <div className="flex flex-wrap gap-x-8 gap-y-4 pt-4 border-t">
-                {[
-                  { value: "200+", label: "businesses" },
-                  { value: "5 min", label: "to set up" },
-                  { value: "Free", label: "forever" },
-                ].map((stat) => (
-                  <div key={stat.label}>
-                    <div className="font-cal text-2xl text-gray-900">{stat.value}</div>
-                    <div className="text-xs text-muted-foreground mt-0.5">{stat.label}</div>
-                  </div>
-                ))}
-              </div>
-            </FadeDiv>
-          </FadeContainer>
-
-          {/* Right: mockup */}
-          <FadeDiv className="flex justify-center lg:justify-end">
-            <BookingMockup />
+      <section className="max-w-4xl mx-auto px-6 py-24 text-center">
+        <FadeContainer className="flex flex-col items-center">
+          <FadeDiv className="mb-8">
+            <a
+              href="/register"
+              className="inline-flex items-center gap-3 rounded-full bg-white px-2.5 py-0.5 pr-3 pl-0.5 text-sm font-medium text-gray-900 ring-1 shadow-lg shadow-primary/10 ring-black/10 transition-colors hover:bg-primary/5"
+            >
+              <span className="shrink-0 rounded-full border bg-gray-50 px-2.5 py-1 text-xs text-gray-600">
+                New
+              </span>
+              <span className="flex items-center gap-1 truncate">
+                Free for Sri Lankan businesses
+                <ArrowUpRight className="size-3.5 shrink-0 text-gray-700" />
+              </span>
+            </a>
           </FadeDiv>
-        </div>
+
+          <h1 className="font-cal text-5xl tracking-tight mb-6">
+            <FadeSpan>Your business,</FadeSpan>{" "}
+            <FadeSpan>bookable online.</FadeSpan>
+            <br />
+            <FadeSpan className="text-primary">No WhatsApp chaos.</FadeSpan>
+          </h1>
+
+          <FadeDiv>
+            <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
+              Give your salon, clinic, or tuition class a free booking page. Clients
+              pick a time, pay online, and you get notified. Takes 5 minutes to set up.
+            </p>
+          </FadeDiv>
+
+          <FadeDiv>
+            <Link
+              href="/register"
+              className="inline-block bg-gradient-to-b from-primary/90 to-primary text-primary-foreground px-8 py-3.5 rounded-lg text-base font-medium border-b-2 border-primary/70 shadow-[0_0_0_2px_rgba(0,0,0,0.04),0_0_14px_0_rgba(99,102,241,0.25)] transition-all duration-200 hover:shadow-primary/40 hover:shadow-lg"
+            >
+              Create your booking page →
+            </Link>
+          </FadeDiv>
+
+          <FadeDiv>
+            <p className="text-sm text-muted-foreground mt-4">Free forever. No credit card needed.</p>
+          </FadeDiv>
+        </FadeContainer>
       </section>
 
       {/* Trust strip */}
