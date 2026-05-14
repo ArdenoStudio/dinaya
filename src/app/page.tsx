@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Logo } from "@/components/Logo";
 import { FadeContainer, FadeDiv, FadeSpan } from "@/components/Fade";
 import { WordRotate } from "@/components/WordRotate";
@@ -529,14 +530,14 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-950 text-white px-6 pt-16 pb-8">
+      <footer className="border-t px-6 pt-16 pb-8">
         <div className="max-w-6xl mx-auto">
           {/* Top: brand + links */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr] gap-12 pb-12 border-b border-white/10">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr] gap-12 pb-12 border-b">
             {/* Brand */}
             <div>
-              <Logo size="lg" className="brightness-0 invert" />
-              <p className="mt-4 text-sm text-white/50 max-w-xs leading-relaxed">
+              <Logo size="lg" />
+              <p className="mt-4 text-sm text-muted-foreground max-w-xs leading-relaxed">
                 Online booking for Sri Lankan businesses. No WhatsApp chaos, no setup fees, no commissions.
               </p>
               <Link
@@ -550,7 +551,7 @@ export default function LandingPage() {
 
             {/* Product */}
             <div>
-              <h4 className="text-xs font-semibold tracking-widest uppercase text-white/30 mb-4">Product</h4>
+              <h4 className="text-xs font-semibold tracking-widest uppercase text-gray-900 mb-4">Product</h4>
               <ul className="space-y-3 text-sm">
                 {[
                   { label: "Features", href: "/features" },
@@ -560,7 +561,7 @@ export default function LandingPage() {
                   { label: "Sign in", href: "/login" },
                 ].map(({ label, href }) => (
                   <li key={href}>
-                    <Link href={href} className="text-white/50 hover:text-white transition-colors">
+                    <Link href={href} className="text-muted-foreground hover:text-foreground transition-colors">
                       {label}
                     </Link>
                   </li>
@@ -570,7 +571,7 @@ export default function LandingPage() {
 
             {/* Legal */}
             <div>
-              <h4 className="text-xs font-semibold tracking-widest uppercase text-white/30 mb-4">Legal</h4>
+              <h4 className="text-xs font-semibold tracking-widest uppercase text-gray-900 mb-4">Legal</h4>
               <ul className="space-y-3 text-sm">
                 {[
                   { label: "Terms of Service", href: "/legal/terms" },
@@ -578,7 +579,7 @@ export default function LandingPage() {
                   { label: "Refund Policy", href: "/legal/refund" },
                 ].map(({ label, href }) => (
                   <li key={href}>
-                    <Link href={href} className="text-white/50 hover:text-white transition-colors">
+                    <Link href={href} className="text-muted-foreground hover:text-foreground transition-colors">
                       {label}
                     </Link>
                   </li>
@@ -589,10 +590,17 @@ export default function LandingPage() {
 
           {/* Bottom bar */}
           <div className="pt-6 flex flex-col sm:flex-row justify-between items-center gap-3">
-            <p className="text-xs text-white/30">
-              © {new Date().getFullYear()} Dinaya by Ardeno Studio
-            </p>
-            <p className="text-xs text-white/30">Made with ❤️ for Sri Lankan businesses</p>
+            <div className="flex items-center text-xs text-muted-foreground">
+              <span>© {new Date().getFullYear()} Dinaya by</span>
+              <Image
+                src="/ardeno-studio-logo.svg"
+                alt="Ardeno Studio"
+                width={80}
+                height={20}
+                className="h-20 w-auto brightness-0 opacity-25"
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">Made with ❤️ for Sri Lankan businesses</p>
           </div>
         </div>
       </footer>
