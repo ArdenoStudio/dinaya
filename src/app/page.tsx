@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
 import { FadeContainer, FadeDiv, FadeSpan } from "@/components/Fade";
+import { WordRotate } from "@/components/WordRotate";
 import {
   Calendar, CreditCard, LayoutDashboard, ArrowUpRight,
   Bell, Clock, Link2, Star, CheckCircle2, Zap, ArrowRight,
@@ -322,7 +323,19 @@ export default function LandingPage() {
             <FadeSpan>Your business,</FadeSpan>{" "}
             <FadeSpan>bookable online.</FadeSpan>
             <br />
-            <FadeSpan className="text-primary">No WhatsApp chaos.</FadeSpan>
+            <FadeSpan className="text-primary">
+              No{" "}
+              <WordRotate
+                words={[
+                  "WhatsApp chaos.",
+                  "missed bookings.",
+                  "back-and-forth.",
+                  "double bookings.",
+                  "manual reminders.",
+                ]}
+                className="text-primary"
+              />
+            </FadeSpan>
           </h1>
 
           <FadeDiv>
