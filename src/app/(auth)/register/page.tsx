@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { slugify } from "@/lib/utils";
 import { Logo } from "@/components/Logo";
-import { CheckCircle, Lock } from "lucide-react";
+import { AlertCircle, CheckCircle, Eye, EyeOff, Loader2, Lock } from "lucide-react";
 
 const perks = [
   "Your own booking page at yourname.dinaya.lk",
@@ -19,6 +19,8 @@ const inputCls =
 
 export default function RegisterPage() {
   const router = useRouter();
+  const nameRef = useRef<HTMLInputElement>(null);
+  const slugTouched = useRef(false);
   const [form, setForm] = useState({
     name: "",
     businessName: "",
@@ -26,11 +28,25 @@ export default function RegisterPage() {
     email: "",
     password: "",
   });
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    nameRef.current?.focus();
+  }, []);
+
   function handleBusinessNameChange(value: string) {
-    setForm((f) => ({ ...f, businessName: value, slug: slugify(value) }));
+    setForm((f) => ({
+      ...f,
+      businessName: value,
+      slug: slugTouched.current ? f.slug : slugify(value),
+    }));
+  }
+
+  function handleSlugChange(value: string) {
+    slugTouched.current = true;
+    setForm((f) => ({ ...f, slug: slugify(value) }));
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -93,11 +109,15 @@ export default function RegisterPage() {
             <h1 className="font-cal text-2xl mb-1">Create your booking page</h1>
             <p className="text-muted-foreground text-sm mb-6">Free forever. No credit card needed.</p>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4" noValidate>
               <div>
-                <label className="text-sm font-medium">Your name</label>
+                <label className="text-sm font-medium" htmlFor="name">Your name</label>
                 <input
+                  ref={nameRef}
+                  id="name"
+                  name="name"
                   required
+                  autoComplete="name"
                   value={form.name}
                   onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
                   className={inputCls}
@@ -106,9 +126,12 @@ export default function RegisterPage() {
               </div>
 
               <div>
-                <label className="text-sm font-medium">Business name</label>
+                <label className="text-sm font-medium" htmlFor="businessName">Business name</label>
                 <input
+                  id="businessName"
+                  name="businessName"
                   required
+                  autoComplete="organization"
                   value={form.businessName}
                   onChange={(e) => handleBusinessNameChange(e.target.value)}
                   className={inputCls}
@@ -117,15 +140,17 @@ export default function RegisterPage() {
               </div>
 
               <div>
-                <label className="text-sm font-medium">Your booking URL</label>
+                <label className="text-sm font-medium" htmlFor="slug">Your booking URL</label>
                 <div className="mt-1.5 flex items-center border rounded-lg overflow-hidden bg-white focus-within:ring-2 focus-within:ring-primary/50">
                   <span className="bg-muted text-muted-foreground text-sm px-3 py-2.5 border-r whitespace-nowrap select-none">
                     dinaya.lk/
                   </span>
                   <input
+                    id="slug"
+                    name="slug"
                     required
                     value={form.slug}
-                    onChange={(e) => setForm((f) => ({ ...f, slug: slugify(e.target.value) }))}
+                    onChange={(e) => handleSlugChange(e.target.value)}
                     className="flex-1 px-3 py-2.5 text-sm focus:outline-none placeholder:text-gray-400"
                     placeholder="nimals-salon"
                   />
@@ -133,10 +158,14 @@ export default function RegisterPage() {
               </div>
 
               <div>
-                <label className="text-sm font-medium">Email</label>
+                <label className="text-sm font-medium" htmlFor="email">Email</label>
                 <input
+                  id="email"
+                  name="email"
                   type="email"
                   required
+                  autoComplete="email"
+                  inputMode="email"
                   value={form.email}
                   onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
                   className={inputCls}
@@ -145,25 +174,48 @@ export default function RegisterPage() {
               </div>
 
               <div>
-                <label className="text-sm font-medium">Password</label>
-                <input
-                  type="password"
-                  required
-                  minLength={8}
-                  value={form.password}
-                  onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
-                  className={inputCls}
-                  placeholder="Min. 8 characters"
-                />
+                <label className="text-sm font-medium" htmlFor="password">Password</label>
+                <div className="relative mt-1.5">
+                  <input
+                    id="password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    required
+                    minLength={8}
+                    autoComplete="new-password"
+                    value={form.password}
+                    onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
+                    className="w-full border rounded-lg pl-3 pr-10 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/50 placeholder:text-gray-400"
+                    placeholder="Min. 8 characters"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((s) => !s)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-muted-foreground hover:text-foreground rounded-md"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    tabIndex={-1}
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
               </div>
 
-              {error && <p className="text-destructive text-sm">{error}</p>}
+              {error && (
+                <div
+                  role="alert"
+                  className="flex items-start gap-2 px-3 py-2.5 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm"
+                >
+                  <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+                  <span>{error}</span>
+                </div>
+              )}
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gradient-to-b from-primary/90 to-primary text-primary-foreground py-3 rounded-lg text-sm font-medium border-b-2 border-primary/70 shadow-[0_0_0_2px_rgba(0,0,0,0.04),0_0_14px_0_rgba(99,102,241,0.2)] transition-all hover:shadow-primary/30 hover:shadow-md disabled:opacity-50 mt-1"
+                className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-b from-primary/90 to-primary text-primary-foreground py-3 rounded-lg text-sm font-medium border-b-2 border-primary/70 shadow-[0_0_0_2px_rgba(0,0,0,0.04),0_0_14px_0_rgba(99,102,241,0.2)] transition-all hover:shadow-primary/30 hover:shadow-md disabled:cursor-not-allowed mt-1"
               >
+                {loading && <Loader2 className="w-4 h-4 animate-spin" />}
                 {loading ? "Creating…" : "Create free account"}
               </button>
             </form>
