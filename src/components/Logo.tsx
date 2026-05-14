@@ -3,6 +3,7 @@ import Link from "next/link";
 interface LogoProps {
   size?: "sm" | "md" | "lg";
   href?: string;
+  className?: string;
 }
 
 const ICON_SIZES = { sm: 18, md: 22, lg: 30 };
@@ -24,9 +25,9 @@ function LogoIcon({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
   );
 }
 
-export function Logo({ size = "md", href = "/" }: LogoProps) {
+export function Logo({ size = "md", href = "/", className }: LogoProps) {
   const inner = (
-    <span className={`flex items-center gap-2 text-foreground ${TEXT_CLASSES[size]}`}>
+    <span className={`flex items-center gap-2 text-foreground ${TEXT_CLASSES[size]} ${className ?? ""}`}>
       <LogoIcon size={size} />
       <span className="font-cal leading-none">Dinaya.lk</span>
     </span>

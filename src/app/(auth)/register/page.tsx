@@ -60,7 +60,7 @@ export default function RegisterPage() {
     <div className="min-h-screen flex">
       {/* Left branding panel */}
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-gray-900 to-gray-800 flex-col justify-between px-14 py-12">
-        <Logo size="lg" />
+        <Logo size="lg" className="text-white" />
         <div>
           <p className="font-cal text-3xl text-white mb-2">
             Your business,<br />
