@@ -31,6 +31,7 @@ export function getAvailableSlots({
   durationMinutes,
   beforeBuffer = 0,
   afterBuffer = 0,
+  minimumNoticeHours = 0,
   staffAvailability,
   overrides,
   existingBookings,
@@ -41,6 +42,8 @@ export function getAvailableSlots({
   beforeBuffer?: number;
   /** Minutes to block after the appointment ends */
   afterBuffer?: number;
+  /** Slots starting sooner than this many hours from now are hidden */
+  minimumNoticeHours?: number;
   staffAvailability: Availability[];
   overrides: AvailabilityOverride[];
   existingBookings: Pick<Booking, "startsAt" | "endsAt" | "status">[];
@@ -75,6 +78,11 @@ export function getAvailableSlots({
     (b) => b.status === "confirmed" || b.status === "pending"
   );
 
+  // Earliest bookable moment based on minimum notice
+  const earliestBookable = minimumNoticeHours > 0
+    ? addMinutes(new Date(), minimumNoticeHours * 60)
+    : null;
+
   const slots: TimeSlot[] = [];
   let cursor = windowStartUtc;
 
@@ -85,6 +93,12 @@ export function getAvailableSlots({
     // The total blocked window for this slot includes the buffer zones:
     //   [cursor - beforeBuffer, slotEnd + afterBuffer]
     // A slot is unavailable if any active booking overlaps that window.
+    // Skip slots that violate minimum notice
+    if (earliestBookable && cursor < earliestBookable) {
+      cursor = addMinutes(cursor, SLOT_INTERVAL_MINUTES);
+      continue;
+    }
+
     const blockedStart = addMinutes(cursor, -beforeBuffer);
     const blockedEnd = addMinutes(slotEnd, afterBuffer);
 

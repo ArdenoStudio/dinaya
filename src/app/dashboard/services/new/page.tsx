@@ -13,6 +13,7 @@ export default function NewServicePage() {
     requiresPayment: false,
     beforeBuffer: 0,
     afterBuffer: 0,
+    minimumNoticeHours: 0,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -91,6 +92,19 @@ export default function NewServicePage() {
               </select>
             </div>
           </div>
+        </div>
+        <div>
+          <label className="text-sm font-medium">Minimum notice</label>
+          <p className="text-xs text-muted-foreground mb-2">How far in advance must clients book?</p>
+          <select
+            value={form.minimumNoticeHours}
+            onChange={(e) => setForm((f) => ({ ...f, minimumNoticeHours: parseInt(e.target.value) }))}
+            className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          >
+            {[0, 1, 2, 4, 6, 12, 24, 48, 72].map((h) => (
+              <option key={h} value={h}>{h === 0 ? "No minimum" : h < 24 ? `${h} hour${h > 1 ? "s" : ""}` : `${h / 24} day${h / 24 > 1 ? "s" : ""}`}</option>
+            ))}
+          </select>
         </div>
         <label className="flex items-center gap-2 cursor-pointer">
           <input type="checkbox" checked={form.requiresPayment}

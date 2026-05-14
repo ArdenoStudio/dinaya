@@ -113,6 +113,8 @@ export const services = pgTable("services", {
   // Buffer time blocked before/after each appointment (minutes) — from Cal.diy
   beforeBuffer: integer("before_buffer").notNull().default(0),
   afterBuffer: integer("after_buffer").notNull().default(0),
+  // Minimum notice required before a booking can be made (hours) — from Cal.diy
+  minimumNoticeHours: integer("minimum_notice_hours").notNull().default(0),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
