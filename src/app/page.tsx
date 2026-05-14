@@ -212,10 +212,10 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* Solutions mega menu */}
+            {/* Industries mega menu */}
             <div className="group">
               <button className="inline-flex items-center gap-1 px-3 py-2 rounded-md hover:text-gray-900 transition-colors">
-                Solutions
+                Industries
                 <ChevronDown className="size-3.5 text-gray-400 group-hover:text-gray-600 transition-transform group-hover:rotate-180" />
               </button>
               <div className="invisible opacity-0 translate-y-1 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 transition-all absolute left-1/2 -translate-x-1/2 top-full pt-3 w-[680px] max-w-[calc(100vw-2rem)]">
