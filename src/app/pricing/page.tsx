@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { Logo } from "@/components/Logo";
 import { FadeContainer, FadeDiv, FadeSpan } from "@/components/Fade";
+import { PublicNav } from "@/components/PublicNav";
 import {
   Check, Sparkles, ArrowRight, Zap, Calendar, CreditCard,
   Bell, LayoutDashboard, ShieldCheck, MessageCircle,
@@ -52,33 +52,7 @@ const faqs = [
 export default function PricingPage() {
   return (
     <main className="min-h-screen bg-white">
-      {/* Nav */}
-      <nav className="sticky top-0 z-50 border-b bg-white/80 backdrop-blur-sm">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between gap-6">
-          <Logo size="lg" />
-
-          <div className="hidden md:flex items-center gap-1 text-sm font-medium text-gray-700">
-            <Link href="/#features" className="px-3 py-2 rounded-md hover:text-gray-900 transition-colors">Features</Link>
-            <Link href="/#how-it-works" className="px-3 py-2 rounded-md hover:text-gray-900 transition-colors">How it works</Link>
-            <Link href="/pricing" className="px-3 py-2 rounded-md text-gray-900">Pricing</Link>
-          </div>
-
-          <div className="flex gap-4 items-center">
-            <Link
-              href="/login"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Log in
-            </Link>
-            <Link
-              href="/register"
-              className="text-sm bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors font-medium"
-            >
-              Get started free
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <PublicNav />
 
       {/* Hero */}
       <section className="max-w-4xl mx-auto px-6 pt-20 pb-10 text-center">
