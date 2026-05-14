@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { slugify } from "@/lib/utils";
+import { Logo } from "@/components/Logo";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -51,9 +52,7 @@ export default function RegisterPage() {
     <div className="min-h-screen flex items-center justify-center bg-muted/30 px-4">
       <div className="w-full max-w-sm bg-white border rounded-xl p-8 shadow-sm">
         <div className="mb-8">
-          <Link href="/" className="font-cal text-xl text-primary">
-            Dinaya.lk
-          </Link>
+          <Logo size="md" />
           <h1 className="font-cal text-2xl mt-6 mb-1">Create your booking page</h1>
           <p className="text-muted-foreground text-sm">Free forever. No credit card.</p>
         </div>

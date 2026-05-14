@@ -1,11 +1,12 @@
 import Link from "next/link";
+import { Logo } from "@/components/Logo";
 
 export default function LandingPage() {
   return (
     <main className="min-h-screen bg-white">
       {/* Nav */}
       <nav className="border-b px-6 py-4 flex items-center justify-between max-w-6xl mx-auto">
-        <span className="font-cal text-xl text-primary">Dinaya.lk</span>
+        <Logo size="lg" />
         <div className="flex gap-4">
           <Link href="/login" className="text-sm text-muted-foreground hover:text-foreground">
             Log in

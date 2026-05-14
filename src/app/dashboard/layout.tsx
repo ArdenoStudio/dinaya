@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { signOut } from "@/auth";
+import { Logo } from "@/components/Logo";
 
 const navLinks = [
   { href: "/dashboard", label: "Overview" },
@@ -27,9 +28,7 @@ export default async function DashboardLayout({
       {/* Sidebar */}
       <aside className="w-56 border-r bg-white flex flex-col">
         <div className="px-6 py-5 border-b">
-          <Link href="/dashboard" className="font-cal text-lg text-primary">
-            Dinaya.lk
-          </Link>
+          <Logo href="/dashboard" size="sm" />
         </div>
         <nav className="flex-1 py-4 px-3 space-y-1">
           {navLinks.map((link) => (
