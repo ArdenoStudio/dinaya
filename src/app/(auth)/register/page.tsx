@@ -85,25 +85,30 @@ export default function RegisterPage() {
       {/* ── Left branding panel ── */}
       <div
         className="hidden lg:flex lg:w-[52%] relative flex-col justify-between px-14 py-12 overflow-hidden"
-        style={{ background: "#06090f" }}
+        style={{ background: "linear-gradient(145deg, #050d1f 0%, #070b18 55%, #09080f 100%)" }}
       >
         {/* Dot grid */}
         <div
           className="pointer-events-none absolute inset-0"
           style={{
-            backgroundImage: "radial-gradient(rgba(255,255,255,0.055) 1px, transparent 1px)",
+            backgroundImage: "radial-gradient(rgba(255,255,255,0.045) 1px, transparent 1px)",
             backgroundSize: "22px 22px",
           }}
         />
-        {/* Purple atmospheric glow — top left */}
+        {/* Cobalt Blue glow — top centre (primary brand) */}
         <div
-          className="pointer-events-none absolute -top-48 -left-48 w-[560px] h-[560px] rounded-full"
-          style={{ background: "rgba(109,40,217,0.16)", filter: "blur(100px)" }}
+          className="pointer-events-none absolute -top-32 left-1/4 w-[480px] h-[480px] rounded-full"
+          style={{ background: "rgba(26,110,232,0.18)", filter: "blur(110px)" }}
         />
-        {/* Warm amber glow — bottom right */}
+        {/* Violet glow — top left (engagement) */}
+        <div
+          className="pointer-events-none absolute -top-40 -left-32 w-96 h-96 rounded-full"
+          style={{ background: "rgba(109,40,217,0.14)", filter: "blur(90px)" }}
+        />
+        {/* Amber glow — bottom right (booking) */}
         <div
           className="pointer-events-none absolute -bottom-32 -right-24 w-72 h-72 rounded-full"
-          style={{ background: "rgba(245,158,11,0.06)", filter: "blur(80px)" }}
+          style={{ background: "rgba(245,158,11,0.09)", filter: "blur(80px)" }}
         />
 
         <Logo size="lg" className="text-white relative z-10" />
