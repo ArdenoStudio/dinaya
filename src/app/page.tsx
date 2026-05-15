@@ -543,7 +543,7 @@ export default function LandingPage() {
         </div>
         <footer className="relative z-10 max-w-6xl mx-auto rounded-[2rem] border border-white/60 bg-white/[0.08] backdrop-blur-xl shadow-[0_8px_40px_rgba(0,0,0,0.08)] px-8 sm:px-10 pt-10 pb-6">
           {/* Top: brand + links */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr] gap-10 pb-8 border-b border-gray-100">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr] gap-10 pb-8 border-b border-gray-100">
             {/* Brand */}
             <div>
               <Logo size="lg" />
@@ -569,6 +569,25 @@ export default function LandingPage() {
                   { label: "Solutions", href: "/solutions" },
                   { label: "Get started", href: "/register" },
                   { label: "Sign in", href: "/login" },
+                ].map(({ label, href }) => (
+                  <li key={href}>
+                    <Link href={href} className="text-muted-foreground hover:text-foreground transition-colors">
+                      {label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* About */}
+            <div>
+              <h4 className="text-xs font-semibold tracking-widest uppercase text-gray-400 mb-4">About</h4>
+              <ul className="space-y-3 text-sm">
+                {[
+                  { label: "About Us", href: "/about" },
+                  { label: "Our Story", href: "/about#story" },
+                  { label: "Blog", href: "/blog" },
+                  { label: "Contact", href: "/contact" },
                 ].map(({ label, href }) => (
                   <li key={href}>
                     <Link href={href} className="text-muted-foreground hover:text-foreground transition-colors">
