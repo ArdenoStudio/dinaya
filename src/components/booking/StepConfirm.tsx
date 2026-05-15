@@ -66,7 +66,7 @@ export default function StepConfirm({ state, business, onUpdate, onBack, onConfi
 
   return (
     <div>
-      <h2 className="font-cal text-lg mb-5">Your details</h2>
+      <h2 className="font-cal text-lg mb-5 text-balance">Your details</h2>
 
       {/* Booking summary */}
       <div className="bg-muted/30 rounded-xl p-4 mb-5 text-sm space-y-2 border border-muted">
@@ -85,7 +85,7 @@ export default function StepConfirm({ state, business, onUpdate, onBack, onConfi
         {state.service && state.service.priceLkr > 0 && (
           <div className="flex justify-between items-center pt-2 border-t border-muted">
             <span className="font-medium">Total</span>
-            <span className="font-bold text-primary">{formatLkr(state.service.priceLkr)}</span>
+            <span className="font-bold text-primary tabular-nums">{formatLkr(state.service.priceLkr)}</span>
           </div>
         )}
       </div>
@@ -170,7 +170,7 @@ export default function StepConfirm({ state, business, onUpdate, onBack, onConfi
         <button
           onClick={handleBook}
           disabled={loading || !state.clientName || !state.clientPhone}
-          className="ml-auto bg-gradient-to-b from-primary/90 to-primary text-primary-foreground px-6 py-2.5 rounded-lg text-sm font-medium border-b-2 border-primary/70 shadow-sm hover:shadow-primary/30 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none transition-all"
+          className="ml-auto bg-primary text-primary-foreground px-6 py-2.5 rounded-lg text-sm font-medium shadow-sm hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {loading
             ? "Booking…"

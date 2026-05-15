@@ -18,7 +18,7 @@ export default function StepService({ services, selected, onSelect }: Props) {
 
   return (
     <div>
-      <h2 className="font-cal text-lg mb-4">Choose a service</h2>
+      <h2 className="font-cal text-lg mb-4 text-balance">Choose a service</h2>
       <div className="space-y-2">
         {services.map((s) => {
           const isSelected = selected?.id === s.id;
@@ -45,12 +45,12 @@ export default function StepService({ services, selected, onSelect }: Props) {
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
                   <div className="text-right">
-                    <p className="text-sm font-semibold">
+                    <p className="text-sm font-semibold tabular-nums">
                       {s.priceLkr > 0 ? formatLkr(s.priceLkr) : "Free"}
                     </p>
                   </div>
                   <div
-                    className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                    className={`size-5 rounded-full border-2 flex items-center justify-center transition-colors ${
                       isSelected
                         ? "border-primary bg-primary"
                         : "border-muted-foreground/30"

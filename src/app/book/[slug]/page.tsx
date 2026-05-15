@@ -52,7 +52,7 @@ export default async function BookingPage({ params }: Props) {
     .where(eq(staff.businessId, business.id));
 
   return (
-    <div className="min-h-screen bg-muted/20">
+    <div className="min-h-dvh bg-muted/20">
       {/* Business header */}
       <div className="bg-white border-b">
         <div className="max-w-2xl mx-auto px-6 py-5 flex items-center gap-4">
@@ -61,19 +61,19 @@ export default async function BookingPage({ params }: Props) {
             <img
               src={business.logoUrl}
               alt={business.name}
-              className="w-12 h-12 rounded-full object-cover border shrink-0"
+              className="size-12 rounded-full object-cover border shrink-0"
             />
           ) : (
-            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+            <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
               <span className="text-primary font-bold text-lg">
                 {business.name.charAt(0).toUpperCase()}
               </span>
             </div>
           )}
           <div className="min-w-0">
-            <h1 className="font-cal text-xl truncate">{business.name}</h1>
+            <h1 className="font-cal text-xl truncate text-balance">{business.name}</h1>
             {business.description && (
-              <p className="text-muted-foreground text-sm mt-0.5 truncate">{business.description}</p>
+              <p className="text-muted-foreground text-sm mt-0.5 truncate text-pretty">{business.description}</p>
             )}
           </div>
         </div>

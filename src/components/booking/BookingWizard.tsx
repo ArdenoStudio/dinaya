@@ -60,11 +60,11 @@ export default function BookingWizard({ business, services, staff, staffServiceM
     if (confirmed.payhereFormData && confirmed.payhereUrl) {
       return (
         <div className="bg-white border rounded-xl p-10 text-center">
-          <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+          <div className="size-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
             <i className="bi bi-credit-card text-2xl text-primary" />
           </div>
-          <h2 className="font-cal text-xl mb-2">Redirecting to payment…</h2>
-          <p className="text-muted-foreground text-sm mb-6">
+          <h2 className="font-cal text-xl mb-2 text-balance">Redirecting to payment…</h2>
+          <p className="text-muted-foreground text-sm mb-6 text-pretty">
             You&apos;ll be taken to PayHere to complete your booking.
           </p>
           <form id="payhere-form" method="POST" action={confirmed.payhereUrl}>
@@ -73,7 +73,7 @@ export default function BookingWizard({ business, services, staff, staffServiceM
             ))}
             <button
               type="submit"
-              className="bg-gradient-to-b from-primary/90 to-primary text-primary-foreground px-6 py-2.5 rounded-lg text-sm font-medium border-b-2 border-primary/70 shadow-sm"
+              className="bg-primary text-primary-foreground px-6 py-2.5 rounded-lg text-sm font-medium shadow-sm hover:bg-primary/90 transition-colors"
               onClick={() => (document.getElementById("payhere-form") as HTMLFormElement)?.submit()}
             >
               Pay now
@@ -85,11 +85,11 @@ export default function BookingWizard({ business, services, staff, staffServiceM
 
     return (
       <div className="bg-white border rounded-xl p-10 text-center">
-        <div className="w-14 h-14 rounded-full bg-emerald-50 flex items-center justify-center mx-auto mb-4">
+        <div className="size-14 rounded-full bg-emerald-50 flex items-center justify-center mx-auto mb-4">
           <i className="bi bi-check-circle-fill text-2xl text-emerald-600" />
         </div>
-        <h2 className="font-cal text-xl mb-2">Booking confirmed!</h2>
-        <p className="text-muted-foreground text-sm mb-1">
+        <h2 className="font-cal text-xl mb-2 text-balance">Booking confirmed!</h2>
+        <p className="text-muted-foreground text-sm mb-1 text-pretty">
           We&apos;ve sent a confirmation to {state.clientEmail || state.clientPhone}.
         </p>
         <p className="text-xs text-muted-foreground/60 mt-2">
@@ -118,7 +118,7 @@ export default function BookingWizard({ business, services, staff, staffServiceM
               }`}
             >
               <span
-                className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold mb-0.5 ${
+                className={`size-5 rounded-full flex items-center justify-center text-[10px] font-bold mb-0.5 ${
                   active
                     ? "bg-white/20 text-white"
                     : done

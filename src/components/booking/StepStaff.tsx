@@ -24,7 +24,7 @@ export default function StepStaff({
 
   return (
     <div>
-      <h2 className="font-cal text-lg mb-4">Choose a team member</h2>
+      <h2 className="font-cal text-lg mb-4 text-balance">Choose a team member</h2>
 
       {eligible.length === 0 ? (
         <p className="text-muted-foreground text-sm text-center py-8">
@@ -44,10 +44,10 @@ export default function StepStaff({
                     : "hover:border-primary/50 hover:bg-muted/30"
                 }`}
               >
-                <div className="w-10 h-10 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center text-sm shrink-0 overflow-hidden">
+                <div className="size-10 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center text-sm shrink-0 overflow-hidden">
                   {s.avatarUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={s.avatarUrl} alt={s.name} className="w-10 h-10 rounded-full object-cover" />
+                    <img src={s.avatarUrl} alt={s.name} className="size-10 rounded-full object-cover" />
                   ) : (
                     s.name.charAt(0).toUpperCase()
                   )}
@@ -59,7 +59,7 @@ export default function StepStaff({
                   )}
                 </div>
                 <div
-                  className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
+                  className={`size-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${
                     isSelected
                       ? "border-primary bg-primary"
                       : "border-muted-foreground/30"

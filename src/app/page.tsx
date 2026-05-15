@@ -94,7 +94,7 @@ const mockSlots = ["9:00", "10:30", "11:00", "2:00", "3:30", "4:00"];
 
 export default function LandingPage() {
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-dvh bg-white">
       {/* Announcement bar — fix #10: changed from PayHere (already in features) to SMS reminders */}
       <div className="bg-gray-950 py-2.5 px-4 text-center">
         <p className="text-xs text-white/80">
@@ -127,7 +127,7 @@ export default function LandingPage() {
             </a>
           </FadeDiv>
 
-          <h1 className="font-cal text-5xl tracking-tight mb-6">
+          <h1 className="font-cal text-5xl tracking-tight mb-6 text-balance">
             <FadeSpan>Your business,</FadeSpan>{" "}
             <FadeSpan>bookable online.</FadeSpan>
             <br />
@@ -147,7 +147,7 @@ export default function LandingPage() {
           </h1>
 
           <FadeDiv>
-            <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
+            <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto text-pretty">
               Give your salon, clinic, or tuition class a free booking page. Clients
               pick a time, pay online, and you get notified. Takes 5 minutes to set up.
             </p>
@@ -156,7 +156,7 @@ export default function LandingPage() {
           <FadeDiv>
             <Link
               href="/register"
-              className="inline-block bg-gradient-to-b from-primary/90 to-primary text-primary-foreground px-8 py-3.5 rounded-lg text-base font-medium border-b-2 border-primary/70 shadow-[0_0_0_2px_rgba(0,0,0,0.04),0_0_14px_0_rgba(99,102,241,0.25)] transition-all duration-200 hover:shadow-primary/40 hover:shadow-lg"
+              className="inline-block bg-primary text-primary-foreground px-8 py-3.5 rounded-lg text-base font-medium shadow-sm hover:bg-primary/90 transition-colors"
             >
               Create your booking page →
             </Link>
@@ -175,9 +175,9 @@ export default function LandingPage() {
           <div className="rounded-2xl border border-gray-200/80 shadow-2xl shadow-gray-900/[0.08] overflow-hidden">
             <div className="flex items-center gap-3 px-4 py-3 bg-gray-50 border-b border-gray-200">
               <div className="flex gap-1.5 shrink-0">
-                <div className="w-3 h-3 rounded-full bg-red-400/80" />
-                <div className="w-3 h-3 rounded-full bg-amber-400/80" />
-                <div className="w-3 h-3 rounded-full bg-green-400/80" />
+                <div className="size-3 rounded-full bg-red-400/80" />
+                <div className="size-3 rounded-full bg-amber-400/80" />
+                <div className="size-3 rounded-full bg-green-400/80" />
               </div>
               <div className="flex-1 max-w-xs mx-auto bg-white rounded-md border border-gray-200 px-3 py-1.5 text-xs text-gray-500 font-mono text-center">
                 dilini.dinaya.lk
@@ -188,15 +188,15 @@ export default function LandingPage() {
             <div className="bg-white p-6 sm:p-8">
               {/* Business header */}
               <div className="flex items-center gap-3 mb-6 pb-5 border-b">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                <div className="size-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                   <i className="bi bi-scissors text-primary text-xl" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900">Dilini&apos;s Beauty Studio</h3>
+                  <h3 className="font-semibold text-gray-900 text-balance">Dilini&apos;s Beauty Studio</h3>
                   <p className="text-xs text-gray-500 mt-0.5">Colombo 3 · Open Mon–Sat, 9am–6pm</p>
                 </div>
                 <div className="ml-auto hidden sm:flex items-center gap-1.5 text-xs text-green-600 font-medium bg-green-50 px-2.5 py-1 rounded-full">
-                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                  <span className="size-1.5 rounded-full bg-green-500 animate-pulse" />
                   Available today
                 </div>
               </div>
@@ -204,7 +204,7 @@ export default function LandingPage() {
               <div className="grid sm:grid-cols-2 gap-6">
                 {/* Services */}
                 <div>
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Choose a service</p>
+                  <p className="text-xs font-semibold text-gray-400 uppercase mb-3">Choose a service</p>
                   <div className="space-y-2">
                     {mockServices.map((s) => (
                       <div
@@ -216,15 +216,15 @@ export default function LandingPage() {
                         }`}
                       >
                         <div className="flex items-center gap-2.5">
-                          <div className={`w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center ${s.selected ? "border-primary" : "border-gray-300"}`}>
-                            {s.selected && <div className="w-2 h-2 rounded-full bg-primary" />}
+                          <div className={`size-4 rounded-full border-2 shrink-0 flex items-center justify-center ${s.selected ? "border-primary" : "border-gray-300"}`}>
+                            {s.selected && <div className="size-2 rounded-full bg-primary" />}
                           </div>
                           <div>
                             <p className="text-sm font-medium text-gray-900">{s.name}</p>
                             <p className="text-xs text-gray-400">{s.duration}</p>
                           </div>
                         </div>
-                        <span className="text-sm font-semibold text-gray-700 shrink-0">{s.price}</span>
+                        <span className="text-sm font-semibold text-gray-700 shrink-0 tabular-nums">{s.price}</span>
                       </div>
                     ))}
                   </div>
@@ -232,16 +232,16 @@ export default function LandingPage() {
 
                 {/* Calendar + time slots */}
                 <div>
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Pick a date & time</p>
+                  <p className="text-xs font-semibold text-gray-400 uppercase mb-3">Pick a date & time</p>
 
                   <div className="bg-gray-50 rounded-xl p-3.5 mb-3">
                     <div className="flex justify-between items-center mb-3">
                       <span className="text-sm font-semibold text-gray-800">May 2025</span>
                       <div className="flex gap-1">
-                        <button className="w-6 h-6 rounded-md flex items-center justify-center hover:bg-gray-200 text-gray-500">
+                        <button className="size-6 rounded-md flex items-center justify-center hover:bg-gray-200 text-gray-500" aria-label="Previous month">
                           <i className="bi bi-chevron-left text-[10px]" />
                         </button>
-                        <button className="w-6 h-6 rounded-md flex items-center justify-center hover:bg-gray-200 text-gray-500">
+                        <button className="size-6 rounded-md flex items-center justify-center hover:bg-gray-200 text-gray-500" aria-label="Next month">
                           <i className="bi bi-chevron-right text-[10px]" />
                         </button>
                       </div>
@@ -299,7 +299,7 @@ export default function LandingPage() {
 
           {/* Floating notification — business owner side */}
           <div className="absolute -top-4 -right-4 hidden sm:flex bg-white rounded-2xl border shadow-xl shadow-gray-900/10 p-3.5 items-center gap-3 max-w-[220px]">
-            <div className="w-9 h-9 bg-green-100 rounded-full flex items-center justify-center shrink-0">
+            <div className="size-9 bg-green-100 rounded-full flex items-center justify-center shrink-0">
               <i className="bi bi-check-lg text-green-600 text-sm" />
             </div>
             <div>
@@ -311,7 +311,7 @@ export default function LandingPage() {
 
           {/* Floating payment confirmation */}
           <div className="absolute -bottom-4 -left-4 hidden sm:flex bg-white rounded-2xl border shadow-xl shadow-gray-900/10 p-3.5 items-center gap-3 max-w-[200px]">
-            <div className="w-9 h-9 bg-primary/10 rounded-full flex items-center justify-center shrink-0">
+            <div className="size-9 bg-primary/10 rounded-full flex items-center justify-center shrink-0">
               <i className="bi bi-credit-card text-primary text-sm" />
             </div>
             <div>
@@ -385,21 +385,20 @@ export default function LandingPage() {
           {features.map((f, i) => (
             <div
               key={f.title}
-              className="group relative p-7 bg-white hover:bg-gradient-to-br hover:from-primary/[0.03] hover:to-white transition-colors"
+              className="group relative p-7 bg-white hover:bg-primary/[0.03] transition-colors"
             >
               <span className="absolute top-5 right-5 text-[10px] font-mono font-medium text-gray-300 tracking-wider">
                 {String(i + 1).padStart(2, "0")}
               </span>
 
-              <div className="relative mb-5 inline-flex">
-                <div className="absolute inset-0 rounded-xl bg-primary/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 ring-1 ring-primary/15 group-hover:ring-primary/25 transition">
+              <div className="mb-5 inline-flex">
+                <div className="flex items-center justify-center size-11 rounded-xl bg-primary/10 ring-1 ring-primary/15 group-hover:ring-primary/25 transition-colors">
                   <i className={`bi ${f.icon} text-[1.15rem] text-primary`} />
                 </div>
               </div>
 
-              <h3 className="font-cal text-lg mb-2 tracking-tight">{f.title}</h3>
-              <p className="text-muted-foreground text-sm leading-relaxed">{f.desc}</p>
+              <h3 className="font-cal text-lg mb-2 tracking-tight text-balance">{f.title}</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed text-pretty">{f.desc}</p>
 
               <Link
                 href="/features"
@@ -431,12 +430,12 @@ export default function LandingPage() {
             <Fragment key={step.number}>
               <div className="flex-1 flex flex-col">
                 <div className="mb-5">
-                  <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 border border-primary/15">
+                  <div className="inline-flex items-center justify-center size-14 rounded-2xl bg-primary/10 border border-primary/15">
                     <span className="font-cal text-2xl text-primary">{step.number}</span>
                   </div>
                 </div>
-                <h3 className="font-cal text-xl mb-2">{step.title}</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">{step.desc}</p>
+                <h3 className="font-cal text-xl mb-2 text-balance">{step.title}</h3>
+                <p className="text-muted-foreground text-sm leading-relaxed text-pretty">{step.desc}</p>
               </div>
               {i < steps.length - 1 && (
                 <div className="hidden md:flex items-start pt-7 px-8 text-gray-300">
@@ -471,11 +470,11 @@ export default function LandingPage() {
                   <i key={i} className="bi bi-star-fill text-xs text-amber-400" />
                 ))}
               </div>
-              <blockquote className="text-sm leading-relaxed text-gray-700 flex-1 mb-6">
+              <blockquote className="text-sm leading-relaxed text-gray-700 flex-1 mb-6 text-pretty">
                 &ldquo;{t.quote}&rdquo;
               </blockquote>
               <div className="flex items-center gap-3">
-                <div className={`flex h-10 w-10 items-center justify-center rounded-full font-cal text-base shrink-0 ${t.color}`}>
+                <div className={`flex size-10 items-center justify-center rounded-full font-cal text-base shrink-0 ${t.color}`}>
                   {t.initial}
                 </div>
                 <div>

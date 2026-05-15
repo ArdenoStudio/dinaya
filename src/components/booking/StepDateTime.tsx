@@ -48,7 +48,7 @@ export default function StepDateTime({ businessId, service, staff, onSelect, onB
 
   return (
     <div>
-      <h2 className="font-cal text-lg mb-4">Pick a date & time</h2>
+      <h2 className="font-cal text-lg mb-4 text-balance">Pick a date & time</h2>
 
       {/* Date strip */}
       <div className="flex gap-1.5 overflow-x-auto pb-2 mb-5 scrollbar-hide">
@@ -124,7 +124,7 @@ export default function StepDateTime({ businessId, service, staff, onSelect, onB
         {selectedSlot && (
           <button
             onClick={() => onSelect(selectedDate, selectedSlot)}
-            className="ml-auto bg-gradient-to-b from-primary/90 to-primary text-primary-foreground px-5 py-2 rounded-lg text-sm font-medium border-b-2 border-primary/70 shadow-sm hover:shadow-primary/30 hover:shadow-md transition-all"
+            className="ml-auto bg-primary text-primary-foreground px-5 py-2 rounded-lg text-sm font-medium shadow-sm hover:bg-primary/90 transition-colors"
           >
             Continue
           </button>
