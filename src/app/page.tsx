@@ -4,6 +4,7 @@ import Image from "next/image";
 import { LandingNav } from "@/components/LandingNav";
 import { FadeContainer, FadeDiv, FadeSpan } from "@/components/Fade";
 import { WordRotate } from "@/components/WordRotate";
+import ProductMockup from "@/components/ProductMockup";
 
 const features = [
   {
@@ -83,14 +84,6 @@ const testimonials = [
   },
 ];
 
-const mockServices = [
-  { name: "Haircut & Style", duration: "45 min", price: "Rs. 2,500", selected: true },
-  { name: "Facial Treatment", duration: "60 min", price: "Rs. 3,800", selected: false },
-  { name: "Eyebrow Threading", duration: "20 min", price: "Rs. 800", selected: false },
-];
-
-const mockDays = [null, null, null, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25];
-const mockSlots = ["9:00", "10:30", "11:00", "2:00", "3:30", "4:00"];
 
 export default function LandingPage() {
   return (
@@ -168,159 +161,8 @@ export default function LandingPage() {
         </FadeContainer>
       </section>
 
-      {/* Product UI preview — fix #1: shows what clients actually see */}
-      <section className="max-w-5xl mx-auto px-6 pb-20">
-        <div className="relative">
-          {/* Browser chrome */}
-          <div className="rounded-2xl border border-gray-200/80 shadow-2xl shadow-gray-900/[0.08] overflow-hidden">
-            <div className="flex items-center gap-3 px-4 py-3 bg-gray-50 border-b border-gray-200">
-              <div className="flex gap-1.5 shrink-0">
-                <div className="size-3 rounded-full bg-red-400/80" />
-                <div className="size-3 rounded-full bg-amber-400/80" />
-                <div className="size-3 rounded-full bg-green-400/80" />
-              </div>
-              <div className="flex-1 max-w-xs mx-auto bg-white rounded-md border border-gray-200 px-3 py-1.5 text-xs text-gray-500 font-mono text-center">
-                dilini.dinaya.lk
-              </div>
-            </div>
+      <ProductMockup />
 
-            {/* Booking page UI */}
-            <div className="bg-white p-6 sm:p-8">
-              {/* Business header */}
-              <div className="flex items-center gap-3 mb-6 pb-5 border-b">
-                <div className="size-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                  <i className="bi bi-scissors text-primary text-xl" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900 text-balance">Dilini&apos;s Beauty Studio</h3>
-                  <p className="text-xs text-gray-500 mt-0.5">Colombo 3 · Open Mon–Sat, 9am–6pm</p>
-                </div>
-                <div className="ml-auto hidden sm:flex items-center gap-1.5 text-xs text-green-600 font-medium bg-green-50 px-2.5 py-1 rounded-full">
-                  <span className="size-1.5 rounded-full bg-green-500 animate-pulse" />
-                  Available today
-                </div>
-              </div>
-
-              <div className="grid sm:grid-cols-2 gap-6">
-                {/* Services */}
-                <div>
-                  <p className="text-xs font-semibold text-gray-400 uppercase mb-3">Choose a service</p>
-                  <div className="space-y-2">
-                    {mockServices.map((s) => (
-                      <div
-                        key={s.name}
-                        className={`flex justify-between items-center p-3.5 rounded-xl border transition-colors cursor-pointer ${
-                          s.selected
-                            ? "border-primary bg-primary/[0.04] ring-1 ring-primary/20"
-                            : "border-gray-100 hover:border-gray-200"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <div className={`size-4 rounded-full border-2 shrink-0 flex items-center justify-center ${s.selected ? "border-primary" : "border-gray-300"}`}>
-                            {s.selected && <div className="size-2 rounded-full bg-primary" />}
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-gray-900">{s.name}</p>
-                            <p className="text-xs text-gray-400">{s.duration}</p>
-                          </div>
-                        </div>
-                        <span className="text-sm font-semibold text-gray-700 shrink-0 tabular-nums">{s.price}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Calendar + time slots */}
-                <div>
-                  <p className="text-xs font-semibold text-gray-400 uppercase mb-3">Pick a date & time</p>
-
-                  <div className="bg-gray-50 rounded-xl p-3.5 mb-3">
-                    <div className="flex justify-between items-center mb-3">
-                      <span className="text-sm font-semibold text-gray-800">May 2025</span>
-                      <div className="flex gap-1">
-                        <button className="size-6 rounded-md flex items-center justify-center hover:bg-gray-200 text-gray-500" aria-label="Previous month">
-                          <i className="bi bi-chevron-left text-[10px]" />
-                        </button>
-                        <button className="size-6 rounded-md flex items-center justify-center hover:bg-gray-200 text-gray-500" aria-label="Next month">
-                          <i className="bi bi-chevron-right text-[10px]" />
-                        </button>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-7 text-center">
-                      {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => (
-                        <div key={i} className="text-[10px] font-semibold text-gray-400 pb-1.5">{d}</div>
-                      ))}
-                      {mockDays.map((d, i) => (
-                        <div
-                          key={i}
-                          className={`text-[11px] py-1 rounded-md ${
-                            d === 15
-                              ? "bg-primary text-white font-semibold"
-                              : d
-                              ? "text-gray-700 hover:bg-gray-200 cursor-pointer"
-                              : ""
-                          }`}
-                        >
-                          {d ?? ""}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-1.5">
-                    {mockSlots.map((t, i) => (
-                      <button
-                        key={t}
-                        className={`text-xs py-2 rounded-lg border font-medium transition-colors ${
-                          i === 2
-                            ? "border-primary bg-primary text-white"
-                            : "border-gray-200 text-gray-700 hover:border-primary/50"
-                        }`}
-                      >
-                        {t}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Confirm */}
-              <div className="mt-6 pt-5 border-t flex flex-col sm:flex-row items-center gap-3">
-                <button className="w-full sm:flex-1 bg-primary text-white py-3 rounded-xl font-medium text-sm hover:bg-primary/90 transition-colors">
-                  Confirm & Pay — Rs. 2,500
-                </button>
-                <div className="flex items-center gap-1.5 text-xs text-gray-400 shrink-0">
-                  <i className="bi bi-shield-check text-green-500" />
-                  Secured by PayHere
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Floating notification — business owner side */}
-          <div className="absolute -top-4 -right-4 hidden sm:flex bg-white rounded-2xl border shadow-xl shadow-gray-900/10 p-3.5 items-center gap-3 max-w-[220px]">
-            <div className="size-9 bg-green-100 rounded-full flex items-center justify-center shrink-0">
-              <i className="bi bi-check-lg text-green-600 text-sm" />
-            </div>
-            <div>
-              <p className="text-xs font-semibold text-gray-900">New booking!</p>
-              <p className="text-[11px] text-gray-500 mt-0.5">Haircut · May 15, 11:00am</p>
-              <p className="text-[11px] text-gray-500">Rs. 2,500 paid</p>
-            </div>
-          </div>
-
-          {/* Floating payment confirmation */}
-          <div className="absolute -bottom-4 -left-4 hidden sm:flex bg-white rounded-2xl border shadow-xl shadow-gray-900/10 p-3.5 items-center gap-3 max-w-[200px]">
-            <div className="size-9 bg-primary/10 rounded-full flex items-center justify-center shrink-0">
-              <i className="bi bi-credit-card text-primary text-sm" />
-            </div>
-            <div>
-              <p className="text-xs font-semibold text-gray-900">Payment received</p>
-              <p className="text-[11px] text-gray-500 mt-0.5">Deposit: Rs. 1,250</p>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Trust strip — fix #3: concrete differentiators instead of vague claim */}
       <section className="max-w-6xl mx-auto px-6 py-6 border-t">
