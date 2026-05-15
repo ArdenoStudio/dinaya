@@ -19,20 +19,21 @@ export function PublicNav() {
                 {/* Promo card */}
                 <Link
                   href="/register"
-                  className="relative overflow-hidden rounded-xl bg-gradient-to-br from-gray-950 via-gray-900 to-indigo-950 p-5 text-white flex flex-col justify-between min-h-[260px] hover:from-gray-900 transition-colors"
+                  className="promo-card relative overflow-hidden rounded-xl bg-gradient-to-br from-gray-950 via-gray-900 to-indigo-950 p-5 text-white flex flex-col justify-between min-h-[260px]"
                 >
-                  <div>
-                    <div className="text-[11px] font-mono tracking-wider text-primary/90 mb-2">DINAYA.LK</div>
-                    <p className="font-cal text-lg leading-snug tracking-tight">
-                      Don&apos;t juggle DMs,<br />just send a link.
-                    </p>
-                    <p className="text-xs text-white/60 mt-2 leading-relaxed">
-                      Free for Sri Lankan businesses. Set up in five minutes.
-                    </p>
+                  <div className="relative flex flex-col justify-between h-full min-h-[220px]">
+                    <div>
+                      <p className="font-cal text-lg leading-snug tracking-tight">
+                        Don&apos;t juggle DMs,<br />just send a link.
+                      </p>
+                      <p className="text-xs text-white/60 mt-2 leading-relaxed">
+                        Free for Sri Lankan businesses. Set up in five minutes.
+                      </p>
+                    </div>
+                    <span className="inline-flex items-center gap-1 text-sm font-medium underline underline-offset-4 decoration-primary">
+                      Try now <i className="bi bi-arrow-up-right text-xs" />
+                    </span>
                   </div>
-                  <span className="inline-flex items-center gap-1 text-sm font-medium underline underline-offset-4 decoration-primary">
-                    Try now <i className="bi bi-arrow-up-right text-xs" />
-                  </span>
                   <div className="pointer-events-none absolute -bottom-10 -right-10 size-32 rounded-full bg-primary/30 blur-3xl" />
                 </Link>
 

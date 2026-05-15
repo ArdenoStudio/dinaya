@@ -110,11 +110,10 @@ export default function LandingPage() {
                   {/* Promo card */}
                   <Link
                     href="/register"
-                    className="relative overflow-hidden rounded-xl bg-gradient-to-br from-gray-950 via-gray-900 to-indigo-950 p-5 text-white flex flex-col justify-between min-h-[260px] hover:from-gray-900 transition-colors"
+                    className="relative overflow-hidden rounded-xl bg-gradient-to-br from-gray-950 via-gray-900 to-indigo-950 p-5 text-white flex flex-col justify-between min-h-[260px]"
                   >
                     <div>
-                      <div className="text-[11px] font-mono tracking-wider text-primary/90 mb-2">DINAYA.LK</div>
-                      <p className="font-cal text-lg leading-snug tracking-tight">
+<p className="font-cal text-lg leading-snug tracking-tight">
                         Don&apos;t juggle DMs,<br />just send a link.
                       </p>
                       <p className="text-xs text-white/60 mt-2 leading-relaxed">
