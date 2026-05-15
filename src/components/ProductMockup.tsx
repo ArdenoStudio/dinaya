@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import IPhoneMockup from "@/components/ui/iphone-mockup";
 
 const mockDays = [null, null, null, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25];
 
@@ -52,6 +53,65 @@ const mockups = [
   },
 ];
 
+type Mockup = typeof mockups[0];
+
+function PhoneScreen({ m }: { m: Mockup }) {
+  const selectedService = m.services.find((s) => s.selected)!;
+
+  return (
+    <div className="w-full h-full bg-[#f9f9f9]">
+      {/* Booking content */}
+      <div className="px-6 pt-[70px]">
+        {/* Business header */}
+        <div className="flex items-center gap-4 mb-6">
+          <div className="size-[70px] rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center shrink-0 shadow-md shadow-blue-500/30">
+            <i className={`bi ${m.icon} text-white text-[28px]`} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-[22px] font-bold text-gray-900 truncate leading-tight">{m.business}</p>
+            <p className="text-[18px] text-gray-400 truncate">{m.url}</p>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="size-3 rounded-full bg-green-500 animate-pulse" />
+            <span className="text-[18px] text-green-600 font-medium">Open</span>
+          </div>
+        </div>
+
+        <p className="text-[16px] font-bold text-gray-400 uppercase tracking-widest mb-3">Service</p>
+        <div className="flex justify-between items-center p-5 rounded-2xl border border-blue-200 bg-blue-50/80 mb-6">
+          <div>
+            <p className="text-[22px] font-semibold text-blue-900 leading-tight">{selectedService.name}</p>
+            <p className="text-[18px] text-gray-500 mt-1">{selectedService.duration}</p>
+          </div>
+          <span className="text-[22px] font-bold text-blue-600 tabular-nums shrink-0">{selectedService.price}</span>
+        </div>
+
+        <p className="text-[16px] font-bold text-gray-400 uppercase tracking-widest mb-3">Date & Time</p>
+        <div className="flex items-center gap-4 p-5 rounded-2xl bg-white border border-gray-100 shadow-sm mb-4">
+          <i className="bi bi-calendar3 text-blue-500 text-2xl shrink-0" />
+          <p className="text-[22px] font-medium text-gray-800">Thursday, May 15</p>
+        </div>
+        <div className="flex items-center gap-4 p-5 rounded-2xl bg-white border border-gray-100 shadow-sm mb-6">
+          <i className="bi bi-clock text-blue-500 text-2xl shrink-0" />
+          <p className="text-[22px] font-medium text-gray-800">{m.slots[m.selectedSlot]}</p>
+          <span className="ml-auto text-[18px] text-green-600 font-medium bg-green-50 px-3 py-1 rounded-full shrink-0">
+            Available
+          </span>
+        </div>
+
+        <button className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-6 rounded-2xl text-[22px] font-semibold shadow-lg shadow-blue-500/30">
+          Confirm & Pay — {selectedService.price}
+        </button>
+        <div className="flex items-center justify-center gap-2 mt-4">
+          <i className="bi bi-shield-check text-blue-400 text-[18px]" />
+          <span className="text-[18px] text-gray-400">Secured by PayHere</span>
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
 export default function ProductMockup() {
   const [current, setCurrent] = useState(0);
   const [fading, setFading] = useState(false);
@@ -100,7 +160,8 @@ export default function ProductMockup() {
         </button>
 
         {/* Fading content wrapper */}
-        <div className={`transition-opacity duration-200 ${fading ? "opacity-0" : "opacity-100"}`}>
+        <div className={`relative transition-opacity duration-200 ${fading ? "opacity-0" : "opacity-100"}`}>
+
           {/* Browser window */}
           <div
             className="rounded-2xl overflow-hidden shadow-[0_32px_80px_-8px_rgba(37,99,235,0.14),0_16px_40px_-8px_rgba(0,0,0,0.10),0_0_0_1px_rgba(0,0,0,0.05)]"
@@ -245,7 +306,7 @@ export default function ProductMockup() {
             </div>
           </div>
 
-          {/* Floating: new booking notification */}
+          {/* Floating: new booking notification (top-right) */}
           <div className="absolute -top-5 -right-5 hidden sm:flex bg-white/90 backdrop-blur-md rounded-2xl border border-white/70 shadow-2xl shadow-gray-900/12 p-3.5 items-center gap-3 max-w-[230px]">
             <div className="size-10 bg-gradient-to-br from-amber-400 to-amber-500 rounded-full flex items-center justify-center shrink-0 shadow-md shadow-amber-500/30">
               <i className="bi bi-check-lg text-white text-sm" />
@@ -257,7 +318,7 @@ export default function ProductMockup() {
             </div>
           </div>
 
-          {/* Floating: payment notification */}
+          {/* Floating: payment notification (bottom-left) */}
           <div className="absolute -bottom-5 -left-5 hidden sm:flex bg-white/90 backdrop-blur-md rounded-2xl border border-white/70 shadow-2xl shadow-gray-900/12 p-3.5 items-center gap-3 max-w-[210px]">
             <div className="size-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shrink-0 shadow-md shadow-blue-500/30">
               <i className="bi bi-credit-card text-white text-sm" />
@@ -268,6 +329,31 @@ export default function ProductMockup() {
                 {m.payment.detail} <span className="font-semibold text-blue-600">{m.payment.amount}</span>
               </p>
             </div>
+          </div>
+
+          {/* iPhone mockup — overlapping bottom-right, clipped from bottom */}
+          <div
+            className="absolute hidden lg:block pointer-events-none overflow-hidden"
+            style={{
+              right: 20,
+              bottom: -40,
+              zIndex: 20,
+              width: 280,
+              height: 400,
+            }}
+          >
+            <IPhoneMockup
+              model="15-pro"
+              color="space-black"
+              scale={0.67}
+              screenBg="#f9f9f9"
+              shadow={false}
+              safeArea={false}
+              showHomeIndicator={false}
+              innerShadow={false}
+            >
+              <PhoneScreen m={m} />
+            </IPhoneMockup>
           </div>
         </div>
 
