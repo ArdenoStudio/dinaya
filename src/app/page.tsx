@@ -1,6 +1,7 @@
+import { Fragment } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Logo } from "@/components/Logo";
+import { LandingNav } from "@/components/LandingNav";
 import { FadeContainer, FadeDiv, FadeSpan } from "@/components/Fade";
 import { WordRotate } from "@/components/WordRotate";
 
@@ -62,6 +63,7 @@ const testimonials = [
     role: "Owner, Amal's Salon",
     location: "Colombo",
     initial: "A",
+    color: "bg-blue-100 text-blue-700",
   },
   {
     quote: "I never thought managing appointments could be this simple. My patients book online and pay a deposit instantly — no more phone tag.",
@@ -69,6 +71,7 @@ const testimonials = [
     role: "NF Dental Clinic",
     location: "Kandy",
     initial: "N",
+    color: "bg-violet-100 text-violet-700",
   },
   {
     quote: "My tuition class fills up without me managing WhatsApp groups. Parents just click the link and book their child's slot.",
@@ -76,199 +79,38 @@ const testimonials = [
     role: "Piano Teacher",
     location: "Nugegoda",
     initial: "P",
+    color: "bg-amber-100 text-amber-700",
   },
 ];
+
+const mockServices = [
+  { name: "Haircut & Style", duration: "45 min", price: "Rs. 2,500", selected: true },
+  { name: "Facial Treatment", duration: "60 min", price: "Rs. 3,800", selected: false },
+  { name: "Eyebrow Threading", duration: "20 min", price: "Rs. 800", selected: false },
+];
+
+const mockDays = [null, null, null, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25];
+const mockSlots = ["9:00", "10:30", "11:00", "2:00", "3:30", "4:00"];
 
 export default function LandingPage() {
   return (
     <main className="min-h-screen bg-white">
-      {/* Announcement bar */}
+      {/* Announcement bar — fix #10: changed from PayHere (already in features) to SMS reminders */}
       <div className="bg-gray-950 py-2.5 px-4 text-center">
         <p className="text-xs text-white/80">
-          <span className="text-primary font-semibold">Now live:</span>{" "}
-          PayHere integration — accept deposits and full payments from clients.{" "}
+          <span className="text-primary font-semibold">New:</span>{" "}
+          SMS & email reminders — your clients get notified automatically before every appointment.{" "}
           <Link href="/register" className="text-white underline underline-offset-2 font-medium">
             Start free →
           </Link>
         </p>
       </div>
 
-      {/* Nav */}
-      <nav className="sticky top-0 z-50 border-b bg-white/80 backdrop-blur-sm">
-        <div className="relative max-w-6xl mx-auto px-6 py-4 flex items-center justify-between gap-6">
-          <Logo size="lg" />
-
-          <div className="hidden md:flex items-center gap-1 text-sm font-medium text-gray-700">
-            {/* Features mega menu */}
-            <div className="group">
-              <button className="inline-flex items-center gap-1 px-3 py-2 rounded-md hover:text-gray-900 transition-colors">
-                Features
-                <i className="bi bi-chevron-down text-xs text-gray-400 group-hover:text-gray-600 transition-transform group-hover:rotate-180" />
-              </button>
-              <div className="invisible opacity-0 translate-y-1 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 transition-all absolute left-1/2 -translate-x-1/2 top-full pt-3 w-[920px] max-w-[calc(100vw-2rem)]">
-                <div className="rounded-2xl border bg-white shadow-xl shadow-gray-900/[0.06] p-5 grid grid-cols-[260px_1fr_1fr_1fr] gap-5">
-                  {/* Promo card */}
-                  <Link
-                    href="/register"
-                    className="relative overflow-hidden rounded-xl bg-gradient-to-br from-gray-950 via-gray-900 to-indigo-950 p-5 text-white flex flex-col justify-between min-h-[260px]"
-                  >
-                    <div>
-<p className="font-cal text-lg leading-snug tracking-tight">
-                        Don&apos;t juggle DMs,<br />just send a link.
-                      </p>
-                      <p className="text-xs text-white/60 mt-2 leading-relaxed">
-                        Free for Sri Lankan businesses. Set up in five minutes.
-                      </p>
-                    </div>
-                    <span className="inline-flex items-center gap-1 text-sm font-medium underline underline-offset-4 decoration-primary">
-                      Try now <i className="bi bi-arrow-up-right text-xs" />
-                    </span>
-                    <div className="pointer-events-none absolute -bottom-10 -right-10 size-32 rounded-full bg-primary/30 blur-3xl" />
-                  </Link>
-
-                  {/* Booking column */}
-                  <div className="rounded-xl ring-1 ring-amber-100 bg-amber-50/30 p-4">
-                    <Link href="/features#booking" className="flex items-center gap-2 pb-3 mb-2 border-b border-amber-200/60 hover:opacity-80 transition-opacity">
-                      <span className="flex h-7 w-7 items-center justify-center rounded-md bg-amber-500 text-white">
-                        <i className="bi bi-calendar text-xs" />
-                      </span>
-                      <span className="text-sm font-semibold text-gray-900">Booking</span>
-                    </Link>
-                    <ul className="space-y-2.5 text-sm">
-                      {[
-                        "Self-booking page",
-                        "Custom availability",
-                        "Shareable link",
-                        "Buffer time",
-                        "Multi-staff calendar",
-                      ].map((t) => (
-                        <li key={t}>
-                          <Link href="#features" className="text-gray-600 hover:text-gray-900 transition-colors">
-                            {t}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {/* Payments column */}
-                  <div className="rounded-xl ring-1 ring-blue-100 bg-blue-50/30 p-4">
-                    <Link href="/features#payments" className="flex items-center gap-2 pb-3 mb-2 border-b border-blue-200/60 hover:opacity-80 transition-opacity">
-                      <span className="flex h-7 w-7 items-center justify-center rounded-md bg-blue-600 text-white">
-                        <i className="bi bi-credit-card text-xs" />
-                      </span>
-                      <span className="text-sm font-semibold text-gray-900">Payments</span>
-                    </Link>
-                    <ul className="space-y-2.5 text-sm">
-                      {[
-                        "PayHere checkout",
-                        "Deposit collection",
-                        "Full payment",
-                        "Refunds & cancellations",
-                        "Revenue tracking",
-                        "Invoice receipts",
-                      ].map((t) => (
-                        <li key={t}>
-                          <Link href="#features" className="text-gray-600 hover:text-gray-900 transition-colors">
-                            {t}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {/* Engagement column */}
-                  <div className="rounded-xl ring-1 ring-violet-100 bg-violet-50/30 p-4">
-                    <Link href="/features#engagement" className="flex items-center gap-2 pb-3 mb-2 border-b border-violet-200/60 hover:opacity-80 transition-opacity">
-                      <span className="flex h-7 w-7 items-center justify-center rounded-md bg-violet-500 text-white">
-                        <i className="bi bi-bell text-xs" />
-                      </span>
-                      <span className="text-sm font-semibold text-gray-900">Engagement</span>
-                    </Link>
-                    <ul className="space-y-2.5 text-sm">
-                      {[
-                        "SMS reminders",
-                        "Email confirmations",
-                        "No-show protection",
-                        "Client dashboard",
-                        "Booking history",
-                        "Rebooking nudges",
-                      ].map((t) => (
-                        <li key={t}>
-                          <Link href="#features" className="text-gray-600 hover:text-gray-900 transition-colors">
-                            {t}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <Link href="/solutions" className="px-3 py-2 rounded-md hover:text-gray-900 transition-colors">
-              Solutions
-            </Link>
-
-            {/* Resources mega menu */}
-            <div className="group">
-              <button className="inline-flex items-center gap-1 px-3 py-2 rounded-md hover:text-gray-900 transition-colors">
-                Resources
-                <i className="bi bi-chevron-down text-xs text-gray-400 group-hover:text-gray-600 transition-transform group-hover:rotate-180" />
-              </button>
-              <div className="invisible opacity-0 translate-y-1 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 transition-all absolute left-1/2 -translate-x-1/2 top-full pt-3 w-[680px] max-w-[calc(100vw-2rem)]">
-                <div className="rounded-2xl border bg-white shadow-xl shadow-gray-900/[0.06] p-5 grid grid-cols-2 gap-2">
-                  {[
-                    { icon: "bi-rocket-takeoff", color: "bg-blue-600", title: "Getting started", desc: "Set up your page in 5 minutes", href: "/register" },
-                    { icon: "bi-question-circle", color: "bg-violet-500", title: "Help center", desc: "Answers to common questions", href: "#" },
-                    { icon: "bi-stars", color: "bg-violet-500", title: "What's new", desc: "Latest features and updates", href: "#" },
-                    { icon: "bi-file-text", color: "bg-amber-500", title: "Legal", desc: "Terms, privacy, refund policy", href: "/legal/terms" },
-                  ].map((it) => (
-                    <Link
-                      key={it.title}
-                      href={it.href}
-                      className="flex items-start gap-3 rounded-xl p-3 hover:bg-gray-50 transition-colors"
-                    >
-                      <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${it.color} text-white`}>
-                        <i className={`bi ${it.icon} text-sm`} />
-                      </span>
-                      <span>
-                        <span className="block text-sm font-semibold text-gray-900">{it.title}</span>
-                        <span className="block text-xs text-muted-foreground mt-0.5 leading-relaxed">{it.desc}</span>
-                      </span>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <Link
-              href="/pricing"
-              className="px-3 py-2 rounded-md hover:text-gray-900 transition-colors"
-            >
-              Pricing
-            </Link>
-          </div>
-
-          <div className="flex gap-4 items-center">
-            <Link
-              href="/login"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Log in
-            </Link>
-            <Link
-              href="/register"
-              className="text-sm bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors font-medium"
-            >
-              Get started free
-            </Link>
-          </div>
-        </div>
-      </nav>
+      {/* Nav — fix #5 (mobile menu) + fix #6 (dead resource links) via LandingNav */}
+      <LandingNav />
 
       {/* Hero */}
-      <section className="max-w-4xl mx-auto px-6 py-24 text-center">
+      <section className="max-w-4xl mx-auto px-6 pt-24 pb-12 text-center">
         <FadeContainer className="flex flex-col items-center">
           <FadeDiv className="mb-8">
             <a
@@ -326,11 +168,174 @@ export default function LandingPage() {
         </FadeContainer>
       </section>
 
-      {/* Trust strip */}
-      <section className="max-w-6xl mx-auto px-6 py-6">
-        <div className="flex items-center justify-center gap-2.5 text-sm text-muted-foreground">
-          <i className="bi bi-check-circle-fill text-sm text-green-500 shrink-0" />
-          <span>Trusted by salons, clinics, tuition classes, and freelancers across Sri Lanka</span>
+      {/* Product UI preview — fix #1: shows what clients actually see */}
+      <section className="max-w-5xl mx-auto px-6 pb-20">
+        <div className="relative">
+          {/* Browser chrome */}
+          <div className="rounded-2xl border border-gray-200/80 shadow-2xl shadow-gray-900/[0.08] overflow-hidden">
+            <div className="flex items-center gap-3 px-4 py-3 bg-gray-50 border-b border-gray-200">
+              <div className="flex gap-1.5 shrink-0">
+                <div className="w-3 h-3 rounded-full bg-red-400/80" />
+                <div className="w-3 h-3 rounded-full bg-amber-400/80" />
+                <div className="w-3 h-3 rounded-full bg-green-400/80" />
+              </div>
+              <div className="flex-1 max-w-xs mx-auto bg-white rounded-md border border-gray-200 px-3 py-1.5 text-xs text-gray-500 font-mono text-center">
+                dilini.dinaya.lk
+              </div>
+            </div>
+
+            {/* Booking page UI */}
+            <div className="bg-white p-6 sm:p-8">
+              {/* Business header */}
+              <div className="flex items-center gap-3 mb-6 pb-5 border-b">
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                  <i className="bi bi-scissors text-primary text-xl" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900">Dilini&apos;s Beauty Studio</h3>
+                  <p className="text-xs text-gray-500 mt-0.5">Colombo 3 · Open Mon–Sat, 9am–6pm</p>
+                </div>
+                <div className="ml-auto hidden sm:flex items-center gap-1.5 text-xs text-green-600 font-medium bg-green-50 px-2.5 py-1 rounded-full">
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                  Available today
+                </div>
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-6">
+                {/* Services */}
+                <div>
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Choose a service</p>
+                  <div className="space-y-2">
+                    {mockServices.map((s) => (
+                      <div
+                        key={s.name}
+                        className={`flex justify-between items-center p-3.5 rounded-xl border transition-colors cursor-pointer ${
+                          s.selected
+                            ? "border-primary bg-primary/[0.04] ring-1 ring-primary/20"
+                            : "border-gray-100 hover:border-gray-200"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <div className={`w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center ${s.selected ? "border-primary" : "border-gray-300"}`}>
+                            {s.selected && <div className="w-2 h-2 rounded-full bg-primary" />}
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">{s.name}</p>
+                            <p className="text-xs text-gray-400">{s.duration}</p>
+                          </div>
+                        </div>
+                        <span className="text-sm font-semibold text-gray-700 shrink-0">{s.price}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Calendar + time slots */}
+                <div>
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Pick a date & time</p>
+
+                  <div className="bg-gray-50 rounded-xl p-3.5 mb-3">
+                    <div className="flex justify-between items-center mb-3">
+                      <span className="text-sm font-semibold text-gray-800">May 2025</span>
+                      <div className="flex gap-1">
+                        <button className="w-6 h-6 rounded-md flex items-center justify-center hover:bg-gray-200 text-gray-500">
+                          <i className="bi bi-chevron-left text-[10px]" />
+                        </button>
+                        <button className="w-6 h-6 rounded-md flex items-center justify-center hover:bg-gray-200 text-gray-500">
+                          <i className="bi bi-chevron-right text-[10px]" />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-7 text-center">
+                      {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => (
+                        <div key={i} className="text-[10px] font-semibold text-gray-400 pb-1.5">{d}</div>
+                      ))}
+                      {mockDays.map((d, i) => (
+                        <div
+                          key={i}
+                          className={`text-[11px] py-1 rounded-md ${
+                            d === 15
+                              ? "bg-primary text-white font-semibold"
+                              : d
+                              ? "text-gray-700 hover:bg-gray-200 cursor-pointer"
+                              : ""
+                          }`}
+                        >
+                          {d ?? ""}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {mockSlots.map((t, i) => (
+                      <button
+                        key={t}
+                        className={`text-xs py-2 rounded-lg border font-medium transition-colors ${
+                          i === 2
+                            ? "border-primary bg-primary text-white"
+                            : "border-gray-200 text-gray-700 hover:border-primary/50"
+                        }`}
+                      >
+                        {t}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Confirm */}
+              <div className="mt-6 pt-5 border-t flex flex-col sm:flex-row items-center gap-3">
+                <button className="w-full sm:flex-1 bg-primary text-white py-3 rounded-xl font-medium text-sm hover:bg-primary/90 transition-colors">
+                  Confirm & Pay — Rs. 2,500
+                </button>
+                <div className="flex items-center gap-1.5 text-xs text-gray-400 shrink-0">
+                  <i className="bi bi-shield-check text-green-500" />
+                  Secured by PayHere
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Floating notification — business owner side */}
+          <div className="absolute -top-4 -right-4 hidden sm:flex bg-white rounded-2xl border shadow-xl shadow-gray-900/10 p-3.5 items-center gap-3 max-w-[220px]">
+            <div className="w-9 h-9 bg-green-100 rounded-full flex items-center justify-center shrink-0">
+              <i className="bi bi-check-lg text-green-600 text-sm" />
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-gray-900">New booking!</p>
+              <p className="text-[11px] text-gray-500 mt-0.5">Haircut · May 15, 11:00am</p>
+              <p className="text-[11px] text-gray-500">Rs. 2,500 paid</p>
+            </div>
+          </div>
+
+          {/* Floating payment confirmation */}
+          <div className="absolute -bottom-4 -left-4 hidden sm:flex bg-white rounded-2xl border shadow-xl shadow-gray-900/10 p-3.5 items-center gap-3 max-w-[200px]">
+            <div className="w-9 h-9 bg-primary/10 rounded-full flex items-center justify-center shrink-0">
+              <i className="bi bi-credit-card text-primary text-sm" />
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-gray-900">Payment received</p>
+              <p className="text-[11px] text-gray-500 mt-0.5">Deposit: Rs. 1,250</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Trust strip — fix #3: concrete differentiators instead of vague claim */}
+      <section className="max-w-6xl mx-auto px-6 py-6 border-t">
+        <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-xs text-muted-foreground">
+          {[
+            { icon: "bi-geo-alt-fill", text: "Built exclusively for Sri Lanka" },
+            { icon: "bi-currency-dollar", text: "No USD subscriptions" },
+            { icon: "bi-percent", text: "Zero commission on bookings" },
+            { icon: "bi-whatsapp", text: "Replace WhatsApp chaos for good" },
+          ].map((item) => (
+            <div key={item.text} className="flex items-center gap-1.5">
+              <i className={`bi ${item.icon} text-primary text-xs`} />
+              <span>{item.text}</span>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -409,7 +414,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* How it works */}
+      {/* How it works — fix #9: arrow connectors between steps */}
       <section id="how-it-works" className="max-w-6xl mx-auto px-6 py-16 border-t">
         <div className="text-center mb-12">
           <span className="relative text-sm font-semibold tracking-tight text-primary">
@@ -421,30 +426,37 @@ export default function LandingPage() {
           </h2>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8">
-          {steps.map((step) => (
-            <div key={step.number} className="flex flex-col">
-              <div className="mb-5">
-                <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 border border-primary/15">
-                  <span className="font-cal text-2xl text-primary">{step.number}</span>
+        <div className="flex flex-col md:flex-row gap-8 md:gap-0">
+          {steps.map((step, i) => (
+            <Fragment key={step.number}>
+              <div className="flex-1 flex flex-col">
+                <div className="mb-5">
+                  <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 border border-primary/15">
+                    <span className="font-cal text-2xl text-primary">{step.number}</span>
+                  </div>
                 </div>
+                <h3 className="font-cal text-xl mb-2">{step.title}</h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">{step.desc}</p>
               </div>
-              <h3 className="font-cal text-xl mb-2">{step.title}</h3>
-              <p className="text-muted-foreground text-sm leading-relaxed">{step.desc}</p>
-            </div>
+              {i < steps.length - 1 && (
+                <div className="hidden md:flex items-start pt-7 px-8 text-gray-300">
+                  <i className="bi bi-arrow-right text-2xl" />
+                </div>
+              )}
+            </Fragment>
           ))}
         </div>
       </section>
 
-      {/* Testimonials */}
+      {/* Testimonials — fix #2 (credibility) + fix #7 (redundant headings) */}
       <section className="max-w-6xl mx-auto px-6 py-16 border-t">
         <div className="text-center mb-12">
           <span className="relative text-sm font-semibold tracking-tight text-primary">
             <span className="absolute top-0.5 -left-3 h-4 w-[3px] rounded-r-sm bg-primary" />
-            Loved by businesses
+            Early access users
           </span>
           <h2 className="font-cal text-3xl md:text-4xl mt-3 tracking-tight">
-            What our users say
+            What businesses are saying
           </h2>
         </div>
 
@@ -463,7 +475,7 @@ export default function LandingPage() {
                 &ldquo;{t.quote}&rdquo;
               </blockquote>
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/15 text-primary font-cal text-base shrink-0">
+                <div className={`flex h-10 w-10 items-center justify-center rounded-full font-cal text-base shrink-0 ${t.color}`}>
                   {t.initial}
                 </div>
                 <div>
@@ -478,11 +490,10 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* CTA */}
+      {/* CTA — fix #4: backslash → forward slash on secondary button */}
       <section className="px-6 pb-20">
         <div className="max-w-6xl mx-auto">
           <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 px-8 py-20 text-center shadow-2xl shadow-blue-500/20">
-            {/* Pattern */}
             <div className="absolute inset-0 opacity-10">
               <svg className="h-full w-full" xmlns="http://www.w3.org/2000/svg">
                 <defs>
@@ -525,7 +536,7 @@ export default function LandingPage() {
                 </Link>
                 <Link
                   href="/login"
-                  className="inline-flex items-center gap-2 bg-white\10 border border-white\20 text-white px-7 py-3.5 rounded-xl font-medium hover:bg-white/20 transition-colors"
+                  className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-white px-7 py-3.5 rounded-xl font-medium hover:bg-white/20 transition-colors"
                 >
                   Sign in
                 </Link>
@@ -537,15 +548,15 @@ export default function LandingPage() {
 
       {/* Footer */}
       <div className="relative px-4 sm:px-6 lg:px-8 pb-6 pt-4">
-        {/* Grid + glow background behind the footer */}
         <div className="animate-grid-drift pointer-events-none absolute inset-0 bg-white bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:6rem_4rem] [mask-image:radial-gradient(ellipse_100%_80%_at_50%_100%,#000_60%,transparent_100%)] [-webkit-mask-image:radial-gradient(ellipse_100%_80%_at_50%_100%,#000_60%,transparent_100%)]">
         </div>
         <footer className="relative z-10 max-w-6xl mx-auto rounded-[2rem] border border-white/60 bg-white/[0.08] backdrop-blur-xl shadow-[0_8px_40px_rgba(0,0,0,0.08)] px-8 sm:px-10 pt-10 pb-6">
-          {/* Top: brand + links */}
           <div className="grid sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr] gap-10 pb-8 border-b border-gray-100">
             {/* Brand */}
             <div>
-              <Logo size="lg" />
+              <div className="mb-1">
+                <span className="font-cal text-xl text-gray-900">Dinaya.lk</span>
+              </div>
               <p className="mt-4 text-sm text-muted-foreground max-w-xs leading-relaxed">
                 Online booking for Sri Lankan businesses. No WhatsApp chaos, no setup fees, no commissions.
               </p>
@@ -617,16 +628,16 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* Bottom bar */}
+          {/* fix #8: footer logo h-20 → h-4 */}
           <div className="pt-5 flex flex-col sm:flex-row justify-between items-center gap-3">
-            <div className="flex items-center text-xs text-muted-foreground">
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <span>© {new Date().getFullYear()} Dinaya by</span>
               <Image
                 src="/ardeno-studio-logo.svg"
                 alt="Ardeno Studio"
                 width={80}
                 height={20}
-                className="h-20 w-auto brightness-0 opacity-25"
+                className="h-4 w-auto brightness-0 opacity-25"
               />
             </div>
             <p className="text-xs text-muted-foreground">Made with ❤️ for Sri Lankan businesses</p>
