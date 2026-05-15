@@ -540,7 +540,6 @@ export default function LandingPage() {
       <div className="relative px-4 sm:px-6 lg:px-8 pb-6 pt-4">
         {/* Grid + glow background behind the footer */}
         <div className="animate-grid-drift pointer-events-none absolute inset-0 bg-white bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:6rem_4rem] [mask-image:radial-gradient(ellipse_100%_80%_at_50%_100%,#000_60%,transparent_100%)] [-webkit-mask-image:radial-gradient(ellipse_100%_80%_at_50%_100%,#000_60%,transparent_100%)]">
-          <div className="absolute bottom-0 left-0 right-0 top-0 bg-[radial-gradient(circle_800px_at_50%_100%,#ede8ff,transparent)]" />
         </div>
         <footer className="relative z-10 max-w-6xl mx-auto rounded-[2rem] border border-white/60 bg-white/[0.08] backdrop-blur-xl shadow-[0_8px_40px_rgba(0,0,0,0.08)] px-8 sm:px-10 pt-10 pb-6">
           {/* Top: brand + links */}
