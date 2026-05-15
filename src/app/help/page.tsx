@@ -256,7 +256,7 @@ export default function HelpPage() {
                     setSearch(e.target.value);
                     setActiveCategory(null);
                   }}
-                  placeholder='Search for help, e.g. "refund" or "availability"'
+                  placeholder='Search help topics — e.g. refund, availability'
                   className="w-full rounded-xl border bg-white pl-10 pr-4 py-3.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/60 transition placeholder:text-gray-400"
                 />
                 {search && (

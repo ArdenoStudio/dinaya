@@ -5,6 +5,7 @@ import { LandingNav } from "@/components/LandingNav";
 import { FadeContainer, FadeDiv, FadeSpan } from "@/components/Fade";
 import { WordRotate } from "@/components/WordRotate";
 import ProductMockup from "@/components/ProductMockup";
+import { CTAPrimaryButton } from "@/components/cta-primary-button";
 
 const features = [
   {
@@ -147,12 +148,7 @@ export default function LandingPage() {
           </FadeDiv>
 
           <FadeDiv>
-            <Link
-              href="/register"
-              className="inline-block bg-primary text-primary-foreground px-8 py-3.5 rounded-lg text-base font-medium shadow-sm hover:bg-primary/90 transition-colors"
-            >
-              Create your booking page →
-            </Link>
+            <CTAPrimaryButton>Create your booking page</CTAPrimaryButton>
           </FadeDiv>
 
           <FadeDiv>

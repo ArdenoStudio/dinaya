@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { FadeContainer, FadeDiv, FadeSpan } from "@/components/Fade";
 import { PublicNav } from "@/components/PublicNav";
+import { CTAPrimaryButton } from "@/components/cta-primary-button";
 
 const bookingFeatures = [
   {
@@ -131,13 +132,7 @@ export default function FeaturesPage() {
 
           <FadeDiv>
             <div className="flex flex-wrap items-center justify-center gap-3">
-              <Link
-                href="/register"
-                className="inline-flex items-center gap-2 bg-gradient-to-b from-primary/90 to-primary text-primary-foreground px-6 py-3 rounded-lg text-sm font-medium border-b-2 border-primary/70 shadow-[0_0_0_2px_rgba(0,0,0,0.04),0_0_14px_0_rgba(99,102,241,0.25)] transition-all duration-200 hover:shadow-primary/40 hover:shadow-lg"
-              >
-                Create your booking page
-                <i className="bi bi-arrow-right text-sm" />
-              </Link>
+              <CTAPrimaryButton size="md">Create your booking page</CTAPrimaryButton>
               <Link
                 href="/pricing"
                 className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"

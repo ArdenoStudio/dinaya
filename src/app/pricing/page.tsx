@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { FadeContainer, FadeDiv, FadeSpan } from "@/components/Fade";
 import { PublicNav } from "@/components/PublicNav";
+import { CTAPrimaryButton } from "@/components/cta-primary-button";
 
 const freeFeatures = [
   "Your own booking page at yourname.dinaya.lk",
@@ -97,13 +98,7 @@ export default function PricingPage() {
               <p className="text-xs text-muted-foreground mt-1">Free forever. No credit card.</p>
             </div>
 
-            <Link
-              href="/register"
-              className="inline-flex items-center justify-center gap-2 bg-gradient-to-b from-primary/90 to-primary text-primary-foreground px-5 py-3 rounded-lg text-sm font-medium border-b-2 border-primary/70 shadow-[0_0_0_2px_rgba(0,0,0,0.04),0_0_14px_0_rgba(99,102,241,0.25)] transition-all duration-200 hover:shadow-primary/40 hover:shadow-lg mb-7"
-            >
-              Create your booking page
-              <i className="bi bi-arrow-right text-sm" />
-            </Link>
+            <CTAPrimaryButton size="md" className="mb-7">Create your booking page</CTAPrimaryButton>
 
             <ul className="space-y-3 text-sm">
               {freeFeatures.map((f) => (
