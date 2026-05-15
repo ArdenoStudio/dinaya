@@ -37,9 +37,9 @@ export function PublicNav() {
                 </Link>
 
                 {/* Booking column */}
-                <div className="rounded-xl ring-1 ring-emerald-100 bg-emerald-50/30 p-4">
-                  <Link href="/features#booking" className="flex items-center gap-2 pb-3 mb-2 border-b border-emerald-200/60 hover:opacity-80 transition-opacity">
-                    <span className="flex h-7 w-7 items-center justify-center rounded-md bg-emerald-500 text-white">
+                <div className="rounded-xl ring-1 ring-amber-100 bg-amber-50/30 p-4">
+                  <Link href="/features#booking" className="flex items-center gap-2 pb-3 mb-2 border-b border-amber-200/60 hover:opacity-80 transition-opacity">
+                    <span className="flex h-7 w-7 items-center justify-center rounded-md bg-amber-500 text-white">
                       <i className="bi bi-calendar text-xs" />
                     </span>
                     <span className="text-sm font-semibold text-gray-900">Booking</span>
@@ -54,9 +54,9 @@ export function PublicNav() {
                 </div>
 
                 {/* Payments column */}
-                <div className="rounded-xl ring-1 ring-sky-100 bg-sky-50/30 p-4">
-                  <Link href="/features#payments" className="flex items-center gap-2 pb-3 mb-2 border-b border-sky-200/60 hover:opacity-80 transition-opacity">
-                    <span className="flex h-7 w-7 items-center justify-center rounded-md bg-sky-500 text-white">
+                <div className="rounded-xl ring-1 ring-blue-100 bg-blue-50/30 p-4">
+                  <Link href="/features#payments" className="flex items-center gap-2 pb-3 mb-2 border-b border-blue-200/60 hover:opacity-80 transition-opacity">
+                    <span className="flex h-7 w-7 items-center justify-center rounded-md bg-blue-600 text-white">
                       <i className="bi bi-credit-card text-xs" />
                     </span>
                     <span className="text-sm font-semibold text-gray-900">Payments</span>
@@ -71,9 +71,9 @@ export function PublicNav() {
                 </div>
 
                 {/* Engagement column */}
-                <div className="rounded-xl ring-1 ring-pink-100 bg-pink-50/30 p-4">
-                  <Link href="/features#engagement" className="flex items-center gap-2 pb-3 mb-2 border-b border-pink-200/60 hover:opacity-80 transition-opacity">
-                    <span className="flex h-7 w-7 items-center justify-center rounded-md bg-pink-500 text-white">
+                <div className="rounded-xl ring-1 ring-violet-100 bg-violet-50/30 p-4">
+                  <Link href="/features#engagement" className="flex items-center gap-2 pb-3 mb-2 border-b border-violet-200/60 hover:opacity-80 transition-opacity">
+                    <span className="flex h-7 w-7 items-center justify-center rounded-md bg-violet-500 text-white">
                       <i className="bi bi-bell text-xs" />
                     </span>
                     <span className="text-sm font-semibold text-gray-900">Engagement</span>
@@ -103,9 +103,9 @@ export function PublicNav() {
             <div className="invisible opacity-0 translate-y-1 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 transition-all absolute left-1/2 -translate-x-1/2 top-full pt-3 w-[680px] max-w-[calc(100vw-2rem)]">
               <div className="rounded-2xl border bg-white shadow-xl shadow-gray-900/[0.06] p-5 grid grid-cols-2 gap-2">
                 {[
-                  { icon: "bi-book-open", color: "bg-emerald-500", title: "Getting started", desc: "Set up your page in 5 minutes", href: "/register" },
-                  { icon: "bi-question-circle", color: "bg-sky-500", title: "Help center", desc: "Answers to common questions", href: "#" },
-                  { icon: "bi-stars", color: "bg-pink-500", title: "What's new", desc: "Latest features and updates", href: "#" },
+                  { icon: "bi-book-open", color: "bg-amber-500", title: "Getting started", desc: "Set up your page in 5 minutes", href: "/register" },
+                  { icon: "bi-question-circle", color: "bg-blue-600", title: "Help center", desc: "Answers to common questions", href: "#" },
+                  { icon: "bi-stars", color: "bg-violet-500", title: "What's new", desc: "Latest features and updates", href: "#" },
                   { icon: "bi-file-text", color: "bg-amber-500", title: "Legal", desc: "Terms, privacy, refund policy", href: "/legal/terms" },
                 ].map((it) => (
                   <Link key={it.title} href={it.href} className="flex items-start gap-3 rounded-xl p-3 hover:bg-gray-50 transition-colors">

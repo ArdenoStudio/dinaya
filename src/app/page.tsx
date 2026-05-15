@@ -128,9 +128,9 @@ export default function LandingPage() {
                   </Link>
 
                   {/* Booking column */}
-                  <div className="rounded-xl ring-1 ring-emerald-100 bg-emerald-50/30 p-4">
-                    <Link href="/features#booking" className="flex items-center gap-2 pb-3 mb-2 border-b border-emerald-200/60 hover:opacity-80 transition-opacity">
-                      <span className="flex h-7 w-7 items-center justify-center rounded-md bg-emerald-500 text-white">
+                  <div className="rounded-xl ring-1 ring-amber-100 bg-amber-50/30 p-4">
+                    <Link href="/features#booking" className="flex items-center gap-2 pb-3 mb-2 border-b border-amber-200/60 hover:opacity-80 transition-opacity">
+                      <span className="flex h-7 w-7 items-center justify-center rounded-md bg-amber-500 text-white">
                         <i className="bi bi-calendar text-xs" />
                       </span>
                       <span className="text-sm font-semibold text-gray-900">Booking</span>
@@ -153,9 +153,9 @@ export default function LandingPage() {
                   </div>
 
                   {/* Payments column */}
-                  <div className="rounded-xl ring-1 ring-sky-100 bg-sky-50/30 p-4">
-                    <Link href="/features#payments" className="flex items-center gap-2 pb-3 mb-2 border-b border-sky-200/60 hover:opacity-80 transition-opacity">
-                      <span className="flex h-7 w-7 items-center justify-center rounded-md bg-sky-500 text-white">
+                  <div className="rounded-xl ring-1 ring-blue-100 bg-blue-50/30 p-4">
+                    <Link href="/features#payments" className="flex items-center gap-2 pb-3 mb-2 border-b border-blue-200/60 hover:opacity-80 transition-opacity">
+                      <span className="flex h-7 w-7 items-center justify-center rounded-md bg-blue-600 text-white">
                         <i className="bi bi-credit-card text-xs" />
                       </span>
                       <span className="text-sm font-semibold text-gray-900">Payments</span>
@@ -179,9 +179,9 @@ export default function LandingPage() {
                   </div>
 
                   {/* Engagement column */}
-                  <div className="rounded-xl ring-1 ring-pink-100 bg-pink-50/30 p-4">
-                    <Link href="/features#engagement" className="flex items-center gap-2 pb-3 mb-2 border-b border-pink-200/60 hover:opacity-80 transition-opacity">
-                      <span className="flex h-7 w-7 items-center justify-center rounded-md bg-pink-500 text-white">
+                  <div className="rounded-xl ring-1 ring-violet-100 bg-violet-50/30 p-4">
+                    <Link href="/features#engagement" className="flex items-center gap-2 pb-3 mb-2 border-b border-violet-200/60 hover:opacity-80 transition-opacity">
+                      <span className="flex h-7 w-7 items-center justify-center rounded-md bg-violet-500 text-white">
                         <i className="bi bi-bell text-xs" />
                       </span>
                       <span className="text-sm font-semibold text-gray-900">Engagement</span>
@@ -220,9 +220,9 @@ export default function LandingPage() {
               <div className="invisible opacity-0 translate-y-1 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 transition-all absolute left-1/2 -translate-x-1/2 top-full pt-3 w-[680px] max-w-[calc(100vw-2rem)]">
                 <div className="rounded-2xl border bg-white shadow-xl shadow-gray-900/[0.06] p-5 grid grid-cols-2 gap-2">
                   {[
-                    { icon: "bi-book-open", color: "bg-emerald-500", title: "Getting started", desc: "Set up your page in 5 minutes", href: "/register" },
-                    { icon: "bi-question-circle", color: "bg-sky-500", title: "Help center", desc: "Answers to common questions", href: "#" },
-                    { icon: "bi-stars", color: "bg-pink-500", title: "What's new", desc: "Latest features and updates", href: "#" },
+                    { icon: "bi-book-open", color: "bg-amber-500", title: "Getting started", desc: "Set up your page in 5 minutes", href: "/register" },
+                    { icon: "bi-question-circle", color: "bg-blue-600", title: "Help center", desc: "Answers to common questions", href: "#" },
+                    { icon: "bi-stars", color: "bg-violet-500", title: "What's new", desc: "Latest features and updates", href: "#" },
                     { icon: "bi-file-text", color: "bg-amber-500", title: "Legal", desc: "Terms, privacy, refund policy", href: "/legal/terms" },
                   ].map((it) => (
                     <Link
@@ -397,6 +397,13 @@ export default function LandingPage() {
               <h3 className="font-cal text-lg mb-2 tracking-tight">{f.title}</h3>
               <p className="text-muted-foreground text-sm leading-relaxed">{f.desc}</p>
 
+              <Link
+                href="/features"
+                className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-primary opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 hover:underline"
+              >
+                Explore <i className="bi bi-arrow-right" />
+              </Link>
+
               <span className="absolute bottom-0 left-7 right-7 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
             </div>
           ))}
@@ -475,7 +482,7 @@ export default function LandingPage() {
       {/* CTA */}
       <section className="px-6 pb-20">
         <div className="max-w-6xl mx-auto">
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 via-violet-600 to-indigo-800 px-8 py-20 text-center shadow-2xl shadow-indigo-500/20">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 px-8 py-20 text-center shadow-2xl shadow-blue-500/20">
             {/* Pattern */}
             <div className="absolute inset-0 opacity-10">
               <svg className="h-full w-full" xmlns="http://www.w3.org/2000/svg">
@@ -512,7 +519,7 @@ export default function LandingPage() {
               <div className="flex flex-wrap gap-4 justify-center">
                 <Link
                   href="/register"
-                  className="inline-flex items-center gap-2 bg-white text-indigo-700 px-7 py-3.5 rounded-xl font-semibold shadow-lg hover:bg-white/95 transition-colors"
+                  className="inline-flex items-center gap-2 bg-white text-blue-700 px-7 py-3.5 rounded-xl font-semibold shadow-lg hover:bg-white/95 transition-colors"
                 >
                   Create your page
                   <i className="bi bi-arrow-right text-sm" />
@@ -578,6 +585,7 @@ export default function LandingPage() {
               <h4 className="text-xs font-semibold tracking-widest uppercase text-gray-400 mb-4">Legal</h4>
               <ul className="space-y-3 text-sm">
                 {[
+                  { label: "Brand", href: "/brand" },
                   { label: "Terms of Service", href: "/legal/terms" },
                   { label: "Privacy Policy", href: "/legal/privacy" },
                   { label: "Refund Policy", href: "/legal/refund" },

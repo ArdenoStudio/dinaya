@@ -7,14 +7,14 @@ const industries = [
     id: "salons",
     icon: "bi-scissors",
     color: {
-      bg: "bg-rose-500",
-      light: "bg-rose-50/50",
-      ring: "ring-rose-100",
-      text: "text-rose-600",
-      iconBg: "bg-gradient-to-br from-rose-500/15 to-rose-500/5",
-      glow: "bg-rose-500/20",
-      hover: "hover:from-rose-500/[0.03]",
-      line: "via-rose-500/40",
+      bg: "bg-amber-500",
+      light: "bg-amber-50/50",
+      ring: "ring-amber-100",
+      text: "text-amber-600",
+      iconBg: "bg-gradient-to-br from-amber-500/15 to-amber-500/5",
+      glow: "bg-amber-500/20",
+      hover: "hover:from-amber-500/[0.03]",
+      line: "via-amber-500/40",
     },
     label: "Salons & spas",
     headline: "Your chair is full. Your phone isn't.",
@@ -51,14 +51,14 @@ const industries = [
     id: "clinics",
     icon: "bi-heart-pulse",
     color: {
-      bg: "bg-emerald-500",
-      light: "bg-emerald-50/50",
-      ring: "ring-emerald-100",
-      text: "text-emerald-600",
-      iconBg: "bg-gradient-to-br from-emerald-500/15 to-emerald-500/5",
-      glow: "bg-emerald-500/20",
-      hover: "hover:from-emerald-500/[0.03]",
-      line: "via-emerald-500/40",
+      bg: "bg-violet-500",
+      light: "bg-violet-50/50",
+      ring: "ring-violet-100",
+      text: "text-violet-600",
+      iconBg: "bg-gradient-to-br from-violet-500/15 to-violet-500/5",
+      glow: "bg-violet-500/20",
+      hover: "hover:from-violet-500/[0.03]",
+      line: "via-violet-500/40",
     },
     label: "Clinics",
     headline: "Patients booked. Admin handled.",
@@ -139,14 +139,14 @@ const industries = [
     id: "freelancers",
     icon: "bi-briefcase",
     color: {
-      bg: "bg-amber-500",
-      light: "bg-amber-50/50",
-      ring: "ring-amber-100",
-      text: "text-amber-600",
-      iconBg: "bg-gradient-to-br from-amber-500/15 to-amber-500/5",
-      glow: "bg-amber-500/20",
-      hover: "hover:from-amber-500/[0.03]",
-      line: "via-amber-500/40",
+      bg: "bg-sky-500",
+      light: "bg-sky-50/50",
+      ring: "ring-sky-100",
+      text: "text-sky-600",
+      iconBg: "bg-gradient-to-br from-sky-500/15 to-sky-500/5",
+      glow: "bg-sky-500/20",
+      hover: "hover:from-sky-500/[0.03]",
+      line: "via-sky-500/40",
     },
     label: "Freelancers",
     headline: "Your time is your product. Protect it.",
@@ -321,7 +321,7 @@ export default function SolutionsPage() {
       {/* CTA */}
       <section className="px-6 py-20">
         <div className="max-w-6xl mx-auto">
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 via-violet-600 to-indigo-800 px-8 py-16 text-center shadow-2xl shadow-indigo-500/20">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 px-8 py-16 text-center shadow-2xl shadow-blue-500/20">
             {/* Pattern */}
             <div className="absolute inset-0 opacity-10">
               <svg className="h-full w-full" xmlns="http://www.w3.org/2000/svg">
@@ -354,7 +354,7 @@ export default function SolutionsPage() {
               </p>
               <Link
                 href="/register"
-                className="inline-flex items-center gap-2 bg-white text-indigo-700 px-7 py-3.5 rounded-xl font-semibold shadow-lg hover:bg-white/95 transition-colors"
+                className="inline-flex items-center gap-2 bg-white text-blue-700 px-7 py-3.5 rounded-xl font-semibold shadow-lg hover:bg-white/95 transition-colors"
               >
                 Create your page — it&apos;s free
                 <i className="bi bi-arrow-right text-sm" />

@@ -80,7 +80,7 @@ export default function PricingPage() {
           <div className="relative rounded-2xl border bg-white p-8 flex flex-col shadow-sm">
             <div className="flex items-center gap-2 mb-2">
               <h3 className="font-cal text-2xl tracking-tight">Free</h3>
-              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 px-2 py-0.5 text-[11px] font-medium">
+              <span className="inline-flex items-center gap-1 rounded-full bg-violet-50 text-violet-700 ring-1 ring-violet-200 px-2 py-0.5 text-[11px] font-medium">
                 <i className="bi bi-lightning-charge" style={{ fontSize: '0.75rem' }} />
                 Current
               </span>
@@ -118,7 +118,7 @@ export default function PricingPage() {
           </div>
 
           {/* Pro plan */}
-          <div className="relative rounded-2xl border bg-gradient-to-br from-gray-950 via-gray-900 to-indigo-950 p-8 text-white flex flex-col shadow-xl shadow-indigo-900/20 overflow-hidden">
+          <div className="relative rounded-2xl border bg-gradient-to-br from-gray-950 via-gray-900 to-blue-950 p-8 text-white flex flex-col shadow-xl shadow-blue-900/20 overflow-hidden">
             <div className="pointer-events-none absolute -top-16 -right-16 size-48 rounded-full bg-primary/30 blur-3xl" />
 
             <div className="relative">
@@ -278,7 +278,7 @@ export default function PricingPage() {
       {/* CTA */}
       <section className="px-6 pb-20">
         <div className="max-w-6xl mx-auto">
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 via-violet-600 to-indigo-800 px-8 py-16 text-center shadow-2xl shadow-indigo-500/20">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 px-8 py-16 text-center shadow-2xl shadow-blue-500/20">
             {/* Pattern */}
             <div className="absolute inset-0 opacity-10">
               <svg className="h-full w-full" xmlns="http://www.w3.org/2000/svg">
@@ -309,7 +309,7 @@ export default function PricingPage() {
               </p>
               <Link
                 href="/register"
-                className="inline-flex items-center gap-2 bg-white text-indigo-700 px-7 py-3.5 rounded-xl font-semibold shadow-lg hover:bg-white/95 transition-colors"
+                className="inline-flex items-center gap-2 bg-white text-blue-700 px-7 py-3.5 rounded-xl font-semibold shadow-lg hover:bg-white/95 transition-colors"
               >
                 Create your page
                 <i className="bi bi-arrow-right text-sm" />

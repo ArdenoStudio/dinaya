@@ -164,8 +164,8 @@ export default function FeaturesPage() {
       {/* Booking features */}
       <section className="max-w-6xl mx-auto px-6 pb-20" id="booking">
         <div className="mb-10">
-          <div className="inline-flex items-center gap-2 rounded-xl ring-1 ring-emerald-100 bg-emerald-50/50 px-3.5 py-2 mb-4">
-            <span className="flex h-6 w-6 items-center justify-center rounded-md bg-emerald-500 text-white">
+          <div className="inline-flex items-center gap-2 rounded-xl ring-1 ring-amber-100 bg-amber-50/50 px-3.5 py-2 mb-4">
+            <span className="flex h-6 w-6 items-center justify-center rounded-md bg-amber-500 text-white">
               <i className="bi bi-calendar text-xs" />
             </span>
             <span className="text-sm font-semibold text-gray-900">Booking</span>
@@ -180,16 +180,16 @@ export default function FeaturesPage() {
 
         <div className="grid md:grid-cols-3 gap-px bg-gray-200/70 rounded-2xl overflow-hidden border border-gray-200/70">
           {bookingFeatures.map((f) => (
-            <div key={f.title} className="group relative p-7 bg-white hover:bg-gradient-to-br hover:from-emerald-500/[0.03] hover:to-white transition-colors">
+            <div key={f.title} className="group relative p-7 bg-white hover:bg-gradient-to-br hover:from-amber-500/[0.03] hover:to-white transition-colors">
               <div className="relative mb-5 inline-flex">
-                <div className="absolute inset-0 rounded-xl bg-emerald-500/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-500/15 to-emerald-500/5">
-                  <i className={`bi ${f.icon} text-[1.15rem] text-emerald-600`} />
+                <div className="absolute inset-0 rounded-xl bg-amber-500/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-amber-500/15 to-amber-500/5">
+                  <i className={`bi ${f.icon} text-[1.15rem] text-amber-600`} />
                 </div>
               </div>
               <h3 className="font-cal text-lg mb-2 tracking-tight">{f.title}</h3>
               <p className="text-muted-foreground text-sm leading-relaxed">{f.desc}</p>
-              <span className="absolute bottom-0 left-7 right-7 h-px bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
+              <span className="absolute bottom-0 left-7 right-7 h-px bg-gradient-to-r from-transparent via-amber-500/40 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
             </div>
           ))}
         </div>
@@ -198,8 +198,8 @@ export default function FeaturesPage() {
       {/* Payments features */}
       <section className="max-w-6xl mx-auto px-6 pb-20" id="payments">
         <div className="mb-10">
-          <div className="inline-flex items-center gap-2 rounded-xl ring-1 ring-sky-100 bg-sky-50/50 px-3.5 py-2 mb-4">
-            <span className="flex h-6 w-6 items-center justify-center rounded-md bg-sky-500 text-white">
+          <div className="inline-flex items-center gap-2 rounded-xl ring-1 ring-blue-100 bg-blue-50/50 px-3.5 py-2 mb-4">
+            <span className="flex h-6 w-6 items-center justify-center rounded-md bg-blue-600 text-white">
               <i className="bi bi-credit-card text-xs" />
             </span>
             <span className="text-sm font-semibold text-gray-900">Payments</span>
@@ -214,16 +214,16 @@ export default function FeaturesPage() {
 
         <div className="grid md:grid-cols-3 gap-px bg-gray-200/70 rounded-2xl overflow-hidden border border-gray-200/70">
           {paymentFeatures.map((f) => (
-            <div key={f.title} className="group relative p-7 bg-white hover:bg-gradient-to-br hover:from-sky-500/[0.03] hover:to-white transition-colors">
+            <div key={f.title} className="group relative p-7 bg-white hover:bg-gradient-to-br hover:from-blue-600/[0.03] hover:to-white transition-colors">
               <div className="relative mb-5 inline-flex">
-                <div className="absolute inset-0 rounded-xl bg-sky-500/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-sky-500/15 to-sky-500/5">
-                  <i className={`bi ${f.icon} text-[1.15rem] text-sky-600`} />
+                <div className="absolute inset-0 rounded-xl bg-blue-600/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-blue-600/15 to-blue-600/5">
+                  <i className={`bi ${f.icon} text-[1.15rem] text-blue-600`} />
                 </div>
               </div>
               <h3 className="font-cal text-lg mb-2 tracking-tight">{f.title}</h3>
               <p className="text-muted-foreground text-sm leading-relaxed">{f.desc}</p>
-              <span className="absolute bottom-0 left-7 right-7 h-px bg-gradient-to-r from-transparent via-sky-500/40 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
+              <span className="absolute bottom-0 left-7 right-7 h-px bg-gradient-to-r from-transparent via-blue-600/40 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
             </div>
           ))}
         </div>
@@ -232,8 +232,8 @@ export default function FeaturesPage() {
       {/* Engagement features */}
       <section className="max-w-6xl mx-auto px-6 pb-20" id="engagement">
         <div className="mb-10">
-          <div className="inline-flex items-center gap-2 rounded-xl ring-1 ring-pink-100 bg-pink-50/50 px-3.5 py-2 mb-4">
-            <span className="flex h-6 w-6 items-center justify-center rounded-md bg-pink-500 text-white">
+          <div className="inline-flex items-center gap-2 rounded-xl ring-1 ring-violet-100 bg-violet-50/50 px-3.5 py-2 mb-4">
+            <span className="flex h-6 w-6 items-center justify-center rounded-md bg-violet-500 text-white">
               <i className="bi bi-bell text-xs" />
             </span>
             <span className="text-sm font-semibold text-gray-900">Engagement</span>
@@ -248,16 +248,16 @@ export default function FeaturesPage() {
 
         <div className="grid md:grid-cols-3 gap-px bg-gray-200/70 rounded-2xl overflow-hidden border border-gray-200/70">
           {engagementFeatures.map((f) => (
-            <div key={f.title} className="group relative p-7 bg-white hover:bg-gradient-to-br hover:from-pink-500/[0.03] hover:to-white transition-colors">
+            <div key={f.title} className="group relative p-7 bg-white hover:bg-gradient-to-br hover:from-violet-500/[0.03] hover:to-white transition-colors">
               <div className="relative mb-5 inline-flex">
-                <div className="absolute inset-0 rounded-xl bg-pink-500/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-pink-500/15 to-pink-500/5">
-                  <i className={`bi ${f.icon} text-[1.15rem] text-pink-600`} />
+                <div className="absolute inset-0 rounded-xl bg-violet-500/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-violet-500/15 to-violet-500/5">
+                  <i className={`bi ${f.icon} text-[1.15rem] text-violet-600`} />
                 </div>
               </div>
               <h3 className="font-cal text-lg mb-2 tracking-tight">{f.title}</h3>
               <p className="text-muted-foreground text-sm leading-relaxed">{f.desc}</p>
-              <span className="absolute bottom-0 left-7 right-7 h-px bg-gradient-to-r from-transparent via-pink-500/40 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
+              <span className="absolute bottom-0 left-7 right-7 h-px bg-gradient-to-r from-transparent via-violet-500/40 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
             </div>
           ))}
         </div>
@@ -355,7 +355,7 @@ export default function FeaturesPage() {
       {/* CTA */}
       <section className="px-6 pb-20">
         <div className="max-w-6xl mx-auto">
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 via-violet-600 to-indigo-800 px-8 py-16 text-center shadow-2xl shadow-indigo-500/20">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 px-8 py-16 text-center shadow-2xl shadow-blue-500/20">
             <div className="pointer-events-none absolute -top-24 -right-24 size-64 rounded-full bg-white/10 blur-3xl" />
             <div className="pointer-events-none absolute -bottom-16 -left-16 size-48 rounded-full bg-primary/30 blur-3xl" />
             <div className="relative z-10">
@@ -367,7 +367,7 @@ export default function FeaturesPage() {
               </p>
               <Link
                 href="/register"
-                className="inline-flex items-center gap-2 bg-white text-indigo-700 px-7 py-3.5 rounded-xl font-semibold shadow-lg hover:bg-white/95 transition-colors"
+                className="inline-flex items-center gap-2 bg-white text-blue-700 px-7 py-3.5 rounded-xl font-semibold shadow-lg hover:bg-white/95 transition-colors"
               >
                 Create your page — it&apos;s free
                 <i className="bi bi-arrow-right text-sm" />
