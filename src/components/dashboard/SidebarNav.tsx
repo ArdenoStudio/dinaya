@@ -11,6 +11,7 @@ const mainLinks = [
   { href: "/dashboard/services", label: "Services", icon: "bi-scissors" },
   { href: "/dashboard/staff", label: "Staff", icon: "bi-person-check" },
   { href: "/dashboard/availability", label: "Availability", icon: "bi-clock" },
+  { href: "/dashboard/reviews", label: "Reviews", icon: "bi-star" },
 ];
 
 const systemLinks = [

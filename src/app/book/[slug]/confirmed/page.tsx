@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { format } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import Link from "next/link";
+import ReviewPrompt from "./ReviewPrompt";
 
 const COLOMBO_TZ = "Asia/Colombo";
 
@@ -38,41 +39,47 @@ export default async function BookingConfirmedPage({ params, searchParams }: Pro
   ];
 
   return (
-    <div className="min-h-screen bg-muted/20 flex items-center justify-center px-4">
-      <div className="bg-white border rounded-2xl p-10 max-w-md w-full text-center shadow-sm">
-        {/* Icon */}
-        <div className="mx-auto mb-5 flex items-center justify-center w-16 h-16 rounded-full bg-emerald-50 border border-emerald-100">
-          <i className="bi bi-check-circle text-2xl text-emerald-500" />
-        </div>
+    <div className="min-h-screen bg-muted/20 flex items-start justify-center px-4 py-12">
+      <div className="w-full max-w-md space-y-4">
+        {/* Confirmation card */}
+        <div className="bg-white border rounded-2xl p-10 text-center shadow-sm">
+          <div className="mx-auto mb-5 flex items-center justify-center w-16 h-16 rounded-full bg-emerald-50 border border-emerald-100">
+            <i className="bi bi-check-circle text-2xl text-emerald-500" />
+          </div>
 
-        <h1 className="font-cal text-2xl mb-2">Booking confirmed!</h1>
-        <p className="text-muted-foreground text-sm mb-8">
-          See you at <span className="font-medium text-foreground">{business.name}</span>.
-        </p>
+          <h1 className="font-cal text-2xl mb-2">Booking confirmed!</h1>
+          <p className="text-muted-foreground text-sm mb-8">
+            See you at <span className="font-medium text-foreground">{business.name}</span>.
+          </p>
 
-        {/* Details card */}
-        <div className="bg-muted/30 rounded-xl p-4 text-sm text-left space-y-3 mb-6">
-          {details.map((d) => (
-            <div key={d.label} className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <i className={`bi ${d.icon} text-xs shrink-0`} />
-                <span>{d.label}</span>
+          <div className="bg-muted/30 rounded-xl p-4 text-sm text-left space-y-3 mb-6">
+            {details.map((d) => (
+              <div key={d.label} className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <i className={`bi ${d.icon} text-xs shrink-0`} />
+                  <span>{d.label}</span>
+                </div>
+                <span className="font-medium text-right">{d.value}</span>
               </div>
-              <span className="font-medium text-right">{d.value}</span>
-            </div>
-          ))}
+            ))}
+          </div>
+
+          <p className="text-xs text-muted-foreground mb-6">
+            Ref: <span className="font-mono">{booking.id.slice(0, 8).toUpperCase()}</span>
+          </p>
+
+          <Link href={`/book/${slug}`} className="text-sm text-primary hover:underline">
+            ← Back to booking page
+          </Link>
         </div>
 
-        <p className="text-xs text-muted-foreground mb-6">
-          Ref: <span className="font-mono">{booking.id.slice(0, 8).toUpperCase()}</span>
-        </p>
-
-        <Link
-          href={`/book/${slug}`}
-          className="text-sm text-primary hover:underline"
-        >
-          ← Back to booking page
-        </Link>
+        {/* Review prompt */}
+        <ReviewPrompt
+          slug={slug}
+          bookingId={booking.id}
+          clientName={booking.clientName}
+          businessName={business.name}
+        />
       </div>
     </div>
   );

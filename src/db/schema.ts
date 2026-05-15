@@ -75,6 +75,12 @@ export const businesses = pgTable("businesses", {
   phone: varchar("phone", { length: 20 }),
   email: varchar("email", { length: 255 }),
   address: text("address"),
+  // Social / profile links shown on the booking page
+  instagramUrl: text("instagram_url"),
+  facebookUrl: text("facebook_url"),
+  websiteUrl: text("website_url"),
+  // Portfolio gallery — array of image URLs shown on the booking page
+  galleryImages: text("gallery_images").array(),
   plan: planEnum("plan").default("free").notNull(),
   planExpiresAt: timestamp("plan_expires_at"),
   payhereEnabled: boolean("payhere_enabled").default(false).notNull(),
@@ -198,6 +204,21 @@ export const bookings = pgTable("bookings", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// ─── Reviews ──────────────────────────────────────────────────────────────────
+
+export const reviews = pgTable("reviews", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  businessId: uuid("business_id")
+    .notNull()
+    .references(() => businesses.id, { onDelete: "cascade" }),
+  bookingId: uuid("booking_id").references(() => bookings.id, { onDelete: "set null" }),
+  clientName: varchar("client_name", { length: 100 }).notNull(),
+  rating: smallint("rating").notNull(), // 1–5
+  comment: text("comment"),
+  isPublished: boolean("is_published").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // ─── Webhooks ─────────────────────────────────────────────────────────────────
 
 export const webhookEventEnum = pgEnum("webhook_event", [
@@ -297,6 +318,11 @@ export const paymentsRelations = relations(payments, ({ one }) => ({
   booking: one(bookings, { fields: [payments.bookingId], references: [bookings.id] }),
 }));
 
+export const reviewsRelations = relations(reviews, ({ one }) => ({
+  business: one(businesses, { fields: [reviews.businessId], references: [businesses.id] }),
+  booking: one(bookings, { fields: [reviews.bookingId], references: [bookings.id] }),
+}));
+
 export const webhooksRelations = relations(webhooks, ({ one }) => ({
   business: one(businesses, { fields: [webhooks.businessId], references: [businesses.id] }),
 }));
@@ -321,3 +347,5 @@ export type NewClient = typeof clients.$inferInsert;
 export type ClientNote = typeof clientNotes.$inferSelect;
 export type Webhook = typeof webhooks.$inferSelect;
 export type NewWebhook = typeof webhooks.$inferInsert;
+export type Review = typeof reviews.$inferSelect;
+export type NewReview = typeof reviews.$inferInsert;
