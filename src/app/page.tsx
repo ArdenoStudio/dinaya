@@ -432,8 +432,7 @@ export default function LandingPage() {
               <ul className="space-y-3 text-sm">
                 {[
                   { label: "About Us", href: "/about" },
-                  { label: "Our Story", href: "/about#story" },
-                  { label: "Blog", href: "/blog" },
+                  { label: "Our Story", href: "/our-story" },
                   { label: "Contact", href: "/contact" },
                 ].map(({ label, href }) => (
                   <li key={href}>
