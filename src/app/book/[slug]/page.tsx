@@ -42,7 +42,19 @@ export default async function BookingPage({ params }: Props) {
   const { slug } = await params;
 
   const [business] = await db
-    .select()
+    .select({
+      id: businesses.id,
+      address: businesses.address,
+      description: businesses.description,
+      facebookUrl: businesses.facebookUrl,
+      galleryImages: businesses.galleryImages,
+      instagramUrl: businesses.instagramUrl,
+      logoUrl: businesses.logoUrl,
+      name: businesses.name,
+      phone: businesses.phone,
+      slug: businesses.slug,
+      websiteUrl: businesses.websiteUrl,
+    })
     .from(businesses)
     .where(eq(businesses.slug, slug))
     .limit(1);
@@ -50,7 +62,24 @@ export default async function BookingPage({ params }: Props) {
   if (!business) notFound();
 
   const [serviceList, staffList, reviewList, ratingData] = await Promise.all([
-    db.select().from(services).where(and(eq(services.businessId, business.id), eq(services.isActive, true))),
+    db
+      .select({
+        id: services.id,
+        businessId: services.businessId,
+        name: services.name,
+        description: services.description,
+        durationMinutes: services.durationMinutes,
+        priceLkr: services.priceLkr,
+        requiresPayment: services.requiresPayment,
+        isActive: services.isActive,
+        beforeBuffer: services.beforeBuffer,
+        afterBuffer: services.afterBuffer,
+        minimumNoticeHours: services.minimumNoticeHours,
+        dailyCapacity: services.dailyCapacity,
+        createdAt: services.createdAt,
+      })
+      .from(services)
+      .where(and(eq(services.businessId, business.id), eq(services.isActive, true))),
     db.select().from(staff).where(and(eq(staff.businessId, business.id), eq(staff.isActive, true))),
     db.select().from(reviews)
       .where(and(eq(reviews.businessId, business.id), eq(reviews.isPublished, true)))

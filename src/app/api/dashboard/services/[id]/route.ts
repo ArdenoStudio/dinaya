@@ -16,7 +16,21 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 
   const { id } = await params;
   const [service] = await db
-    .select()
+    .select({
+      id: services.id,
+      businessId: services.businessId,
+      name: services.name,
+      description: services.description,
+      durationMinutes: services.durationMinutes,
+      priceLkr: services.priceLkr,
+      requiresPayment: services.requiresPayment,
+      isActive: services.isActive,
+      beforeBuffer: services.beforeBuffer,
+      afterBuffer: services.afterBuffer,
+      minimumNoticeHours: services.minimumNoticeHours,
+      dailyCapacity: services.dailyCapacity,
+      createdAt: services.createdAt,
+    })
     .from(services)
     .where(and(eq(services.id, id), eq(services.businessId, ctx.businessId)))
     .limit(1);
@@ -57,7 +71,21 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     .update(services)
     .set(update)
     .where(eq(services.id, id))
-    .returning();
+    .returning({
+      id: services.id,
+      businessId: services.businessId,
+      name: services.name,
+      description: services.description,
+      durationMinutes: services.durationMinutes,
+      priceLkr: services.priceLkr,
+      requiresPayment: services.requiresPayment,
+      isActive: services.isActive,
+      beforeBuffer: services.beforeBuffer,
+      afterBuffer: services.afterBuffer,
+      minimumNoticeHours: services.minimumNoticeHours,
+      dailyCapacity: services.dailyCapacity,
+      createdAt: services.createdAt,
+    });
 
   return NextResponse.json(updated);
 }

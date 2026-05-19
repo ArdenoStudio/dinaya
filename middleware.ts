@@ -4,6 +4,16 @@ import { auth } from "@/auth";
 
 const APP_DOMAIN = process.env.NEXT_PUBLIC_APP_DOMAIN ?? "dinaya.lk";
 
+function appUrl(req: NextRequest, path: string): URL {
+  const proto = req.headers.get("x-forwarded-proto") ?? "https";
+  const host =
+    req.headers.get("x-forwarded-host") ??
+    req.headers.get("host") ??
+    req.nextUrl.host;
+
+  return new URL(path, `${proto}://${host}`);
+}
+
 export default auth((req) => {
   const { pathname } = req.nextUrl;
   const hostname = req.headers.get("host") ?? "";
@@ -22,14 +32,14 @@ export default auth((req) => {
     const slug = hostWithoutPort.replace(`.${rootDomain}`, "");
     // Rewrite to /book/[slug] while preserving the original URL
     return NextResponse.rewrite(
-      new URL(`/book/${slug}${pathname}`, req.url)
+      appUrl(req, `/book/${slug}${pathname}`)
     );
   }
 
   // Protect dashboard routes
   if (pathname.startsWith("/dashboard")) {
     if (!req.auth) {
-      return NextResponse.redirect(new URL("/auth/signin", req.url));
+      return NextResponse.redirect(appUrl(req, "/auth/signin"));
     }
   }
 

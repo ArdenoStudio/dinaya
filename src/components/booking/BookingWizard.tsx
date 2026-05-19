@@ -1,21 +1,43 @@
 "use client";
 
 import { useState } from "react";
-import type { Business, Service, Staff } from "@/db/schema";
+import type { Staff } from "@/db/schema";
 import StepService from "./StepService";
 import StepStaff from "./StepStaff";
 import StepDateTime from "./StepDateTime";
 import StepConfirm from "./StepConfirm";
 
 interface Props {
-  business: Business;
-  services: Service[];
+  business: BookingBusiness;
+  services: BookingService[];
   staff: Staff[];
   staffServiceMap: { staffId: string; serviceId: string }[];
 }
 
+export type BookingBusiness = {
+  id: string;
+  name: string;
+  slug: string;
+};
+
+export type BookingService = {
+  id: string;
+  afterBuffer: number;
+  beforeBuffer: number;
+  businessId: string;
+  createdAt: Date;
+  dailyCapacity: number | null;
+  description: string | null;
+  durationMinutes: number;
+  isActive: boolean;
+  minimumNoticeHours: number;
+  name: string;
+  priceLkr: number;
+  requiresPayment: boolean;
+};
+
 export type BookingState = {
-  service: Service | null;
+  service: BookingService | null;
   staff: Staff | null;
   date: string;
   timeSlot: string;

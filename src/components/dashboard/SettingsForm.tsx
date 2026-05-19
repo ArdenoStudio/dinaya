@@ -1,9 +1,24 @@
 "use client";
 
 import { useState } from "react";
-import type { Business } from "@/db/schema";
 
-interface Props { business: Business; }
+type SettingsBusiness = {
+  address: string | null;
+  description: string | null;
+  facebookUrl: string | null;
+  galleryImages: string[] | null;
+  instagramUrl: string | null;
+  name: string;
+  payhereEnabled: boolean;
+  payhereMerchantId: string | null;
+  payhereMerchantSecret: string | null;
+  phone: string | null;
+  slug: string;
+  timezone: string;
+  websiteUrl: string | null;
+};
+
+interface Props { business: SettingsBusiness; }
 
 export default function SettingsForm({ business }: Props) {
   const [form, setForm] = useState({

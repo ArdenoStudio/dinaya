@@ -3,15 +3,14 @@
 import { useState } from "react";
 import { format, parseISO } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
-import type { Business } from "@/db/schema";
-import type { BookingState } from "./BookingWizard";
+import type { BookingBusiness, BookingState } from "./BookingWizard";
 import { formatLkr } from "@/lib/utils";
 
 const COLOMBO_TZ = "Asia/Colombo";
 
 interface Props {
   state: BookingState;
-  business: Business;
+  business: BookingBusiness;
   onUpdate: (partial: Partial<BookingState>) => void;
   onBack: () => void;
   onConfirmed: (data: {

@@ -7,7 +7,12 @@ import { redirect } from "next/navigation";
 const SIGN_IN_PATH = "/auth/signin";
 
 export type BusinessContext = {
-  business: typeof businesses.$inferSelect;
+  business: {
+    id: string;
+    name: string;
+    plan: "free" | "pro";
+    slug: string;
+  };
   businessId: string;
   role: "owner" | "staff";
   user: {
@@ -28,7 +33,12 @@ export async function getBusinessContext(): Promise<BusinessContext | null> {
   }
 
   const [business] = await db
-    .select()
+    .select({
+      id: businesses.id,
+      name: businesses.name,
+      plan: businesses.plan,
+      slug: businesses.slug,
+    })
     .from(businesses)
     .where(eq(businesses.id, businessId))
     .limit(1);

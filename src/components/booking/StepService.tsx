@@ -1,10 +1,10 @@
-import type { Service } from "@/db/schema";
 import { formatLkr } from "@/lib/utils";
+import type { BookingService } from "./BookingWizard";
 
 interface Props {
-  services: Service[];
-  selected: Service | null;
-  onSelect: (service: Service) => void;
+  services: BookingService[];
+  selected: BookingService | null;
+  onSelect: (service: BookingService) => void;
 }
 
 export default function StepService({ services, selected, onSelect }: Props) {

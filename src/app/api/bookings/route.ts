@@ -48,13 +48,26 @@ export async function POST(req: NextRequest) {
   }
 
   const [business] = await db
-    .select()
+    .select({
+      id: businesses.id,
+      email: businesses.email,
+      name: businesses.name,
+      payhereEnabled: businesses.payhereEnabled,
+      payhereMerchantId: businesses.payhereMerchantId,
+      payhereMerchantSecret: businesses.payhereMerchantSecret,
+      slug: businesses.slug,
+    })
     .from(businesses)
     .where(eq(businesses.id, businessId))
     .limit(1);
 
   const [service] = await db
-    .select()
+    .select({
+      id: services.id,
+      name: services.name,
+      priceLkr: services.priceLkr,
+      requiresPayment: services.requiresPayment,
+    })
     .from(services)
     .where(eq(services.id, serviceId))
     .limit(1);
@@ -113,17 +126,18 @@ export async function POST(req: NextRequest) {
       startsAt: new Date(startsAt),
       endsAt: new Date(endsAt),
       status: initialStatus,
-      source: source ?? "public",
       notes: notes || null,
     })
     .returning({ id: bookings.id });
 
-  await logActivity({
+  void logActivity({
     action: "created",
     businessId,
     entity: "booking",
     entityId: booking.id,
     meta: { source: source ?? "public", status: initialStatus },
+  }).catch((error) => {
+    console.error("Activity log write failed:", error);
   });
 
   // Fire webhook for booking creation

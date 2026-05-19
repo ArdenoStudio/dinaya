@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { format, addDays, isToday } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
-import type { Service, Staff } from "@/db/schema";
+import type { Staff } from "@/db/schema";
+import type { BookingService } from "./BookingWizard";
 
 const COLOMBO_TZ = "Asia/Colombo";
 const DATE_COUNT = 14;
@@ -16,7 +17,7 @@ interface SlotData {
 
 interface Props {
   businessId: string;
-  service: Service;
+  service: BookingService;
   staff: Staff;
   onSelect: (date: string, slot: { startUtc: string; endUtc: string; label: string }) => void;
   onBack: () => void;

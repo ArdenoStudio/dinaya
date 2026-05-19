@@ -20,7 +20,18 @@ export default async function BookingConfirmedPage({ params, searchParams }: Pro
 
   if (!bookingId) notFound();
 
-  const [booking] = await db.select().from(bookings).where(eq(bookings.id, bookingId)).limit(1);
+  const [booking] = await db
+    .select({
+      id: bookings.id,
+      businessId: bookings.businessId,
+      serviceId: bookings.serviceId,
+      staffId: bookings.staffId,
+      clientName: bookings.clientName,
+      startsAt: bookings.startsAt,
+    })
+    .from(bookings)
+    .where(eq(bookings.id, bookingId))
+    .limit(1);
   if (!booking) notFound();
 
   const [[business], [service], [staffMember]] = await Promise.all([

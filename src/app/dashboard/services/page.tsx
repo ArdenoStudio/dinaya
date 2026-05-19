@@ -9,7 +9,18 @@ export default async function ServicesPage() {
   const { businessId } = await requireBusiness();
 
   const list = await db
-    .select()
+    .select({
+      id: services.id,
+      name: services.name,
+      description: services.description,
+      durationMinutes: services.durationMinutes,
+      priceLkr: services.priceLkr,
+      requiresPayment: services.requiresPayment,
+      isActive: services.isActive,
+      beforeBuffer: services.beforeBuffer,
+      afterBuffer: services.afterBuffer,
+      createdAt: services.createdAt,
+    })
     .from(services)
     .where(eq(services.businessId, businessId))
     .orderBy(services.createdAt);

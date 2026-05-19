@@ -9,7 +9,11 @@ export default async function DashboardOverview() {
   const { businessId } = await requireBusiness();
 
   const [business] = await db
-    .select()
+    .select({
+      name: businesses.name,
+      plan: businesses.plan,
+      slug: businesses.slug,
+    })
     .from(businesses)
     .where(eq(businesses.id, businessId))
     .limit(1);

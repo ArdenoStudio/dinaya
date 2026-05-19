@@ -31,13 +31,26 @@ export async function POST(req: NextRequest) {
   }
 
   const [booking] = await db
-    .select()
+    .select({
+      id: bookings.id,
+      businessId: bookings.businessId,
+      clientEmail: bookings.clientEmail,
+      clientName: bookings.clientName,
+      serviceId: bookings.serviceId,
+      staffId: bookings.staffId,
+      startsAt: bookings.startsAt,
+    })
     .from(bookings)
     .where(eq(bookings.id, payment.bookingId))
     .limit(1);
 
   const [business] = await db
-    .select()
+    .select({
+      email: businesses.email,
+      name: businesses.name,
+      payhereMerchantSecret: businesses.payhereMerchantSecret,
+      slug: businesses.slug,
+    })
     .from(businesses)
     .where(eq(businesses.id, booking.businessId))
     .limit(1);
@@ -72,7 +85,11 @@ export async function POST(req: NextRequest) {
       .where(eq(bookings.id, booking.id));
 
     // Send confirmation emails
-    const [service] = await db.select().from(services).where(eq(services.id, booking.serviceId)).limit(1);
+    const [service] = await db
+      .select({ name: services.name })
+      .from(services)
+      .where(eq(services.id, booking.serviceId))
+      .limit(1);
     const [staffMember] = await db.select().from(staff).where(eq(staff.id, booking.staffId)).limit(1);
 
     await Promise.allSettled([
