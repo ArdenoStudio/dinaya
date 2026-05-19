@@ -11,6 +11,7 @@ export default function NewServicePage() {
     durationMinutes: 30,
     priceLkr: 0,
     requiresPayment: false,
+    depositPercent: 0,
     beforeBuffer: 0,
     afterBuffer: 0,
     minimumNoticeHours: 0,
@@ -126,6 +127,22 @@ export default function NewServicePage() {
             className="rounded" />
           <span className="text-sm">Require online payment at booking</span>
         </label>
+        {form.requiresPayment && (
+          <div>
+            <label className="text-sm font-medium">Deposit percentage</label>
+            <p className="text-xs text-muted-foreground mb-2">
+              Use 0 for full payment, or collect a smaller deposit to reduce no-shows.
+            </p>
+            <input
+              type="number"
+              min={0}
+              max={100}
+              value={form.depositPercent}
+              onChange={(e) => setForm((f) => ({ ...f, depositPercent: Math.min(100, Math.max(0, parseInt(e.target.value) || 0)) }))}
+              className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+        )}
         {error && <p className="text-destructive text-sm">{error}</p>}
         <div className="flex gap-3 pt-2">
           <button type="button" onClick={() => router.back()} className="text-sm text-muted-foreground hover:text-foreground">Cancel</button>

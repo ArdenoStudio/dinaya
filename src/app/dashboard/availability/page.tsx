@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { staff, availability } from "@/db/schema";
+import { staff } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import AvailabilityEditor from "@/components/dashboard/AvailabilityEditor";
 import { requireBusiness } from "@/lib/auth";
@@ -10,18 +10,6 @@ export default async function AvailabilityPage() {
   const { businessId } = await requireBusiness();
 
   const staffList = await db.select().from(staff).where(eq(staff.businessId, businessId));
-
-  const availabilityRows = staffList.length
-    ? await db
-        .select()
-        .from(availability)
-        .where(
-          eq(
-            availability.staffId,
-            staffList[0].id // Loaded per-staff client-side, but seed with first
-          )
-        )
-    : [];
 
   return (
     <div>

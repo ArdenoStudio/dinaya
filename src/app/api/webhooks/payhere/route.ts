@@ -4,6 +4,8 @@ import { payments, bookings, businesses, services, staff } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { verifyPayhereWebhook } from "@/lib/payhere";
 import { sendBookingConfirmationToClient, sendBookingNotificationToBusiness } from "@/lib/resend";
+import { logActivity } from "@/lib/activity-log";
+import { decryptSecret } from "@/lib/secrets";
 
 export async function POST(req: NextRequest) {
   const form = await req.formData();
@@ -44,6 +46,10 @@ export async function POST(req: NextRequest) {
     .where(eq(bookings.id, payment.bookingId))
     .limit(1);
 
+  if (!booking) {
+    return NextResponse.json({ error: "Booking not found" }, { status: 404 });
+  }
+
   const [business] = await db
     .select({
       email: businesses.email,
@@ -55,6 +61,15 @@ export async function POST(req: NextRequest) {
     .where(eq(businesses.id, booking.businessId))
     .limit(1);
 
+  if (!business) {
+    return NextResponse.json({ error: "Business not found" }, { status: 404 });
+  }
+
+  const merchantSecret = decryptSecret(business.payhereMerchantSecret);
+  if (!merchantSecret) {
+    return NextResponse.json({ error: "Payment secret is not configured" }, { status: 400 });
+  }
+
   const valid = verifyPayhereWebhook({
     merchantId,
     orderId,
@@ -62,7 +77,7 @@ export async function POST(req: NextRequest) {
     payhereCurrency,
     statusCode,
     md5sig,
-    merchantSecret: business.payhereMerchantSecret!,
+    merchantSecret,
   });
 
   if (!valid) {
@@ -73,6 +88,10 @@ export async function POST(req: NextRequest) {
   form.forEach((v, k) => { allFields[k] = v as string; });
 
   if (statusCode === "2") {
+    if (payment.status === "success") {
+      return NextResponse.json({ received: true, duplicate: true });
+    }
+
     // Payment success
     await db
       .update(payments)
@@ -83,6 +102,14 @@ export async function POST(req: NextRequest) {
       .update(bookings)
       .set({ status: "confirmed" })
       .where(eq(bookings.id, booking.id));
+
+    await logActivity({
+      action: "payment_success",
+      businessId: booking.businessId,
+      entity: "booking",
+      entityId: booking.id,
+      meta: { orderId, amount: payhereAmount, currency: payhereCurrency },
+    });
 
     // Send confirmation emails
     const [service] = await db

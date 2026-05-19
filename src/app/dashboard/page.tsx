@@ -1,16 +1,41 @@
 import { db } from "@/db";
-import { bookings, businesses } from "@/db/schema";
-import { eq, gte, count, and, sql } from "drizzle-orm";
-import { startOfWeek, endOfWeek, format } from "date-fns";
+import { activityLog, availability, bookings, businesses, clients, payments, services, staff } from "@/db/schema";
+import { and, count, desc, eq, gte, lt, sql } from "drizzle-orm";
+import { addDays, endOfWeek, format, startOfDay, startOfWeek, subWeeks } from "date-fns";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { requireBusiness } from "@/lib/auth";
+import { formatLkr } from "@/lib/utils";
+
+async function safeRecentActivity(businessId: string) {
+  try {
+    return await db
+      .select({
+        action: activityLog.action,
+        createdAt: activityLog.createdAt,
+        entity: activityLog.entity,
+        meta: activityLog.meta,
+      })
+      .from(activityLog)
+      .where(eq(activityLog.businessId, businessId))
+      .orderBy(desc(activityLog.createdAt))
+      .limit(8);
+  } catch {
+    return [];
+  }
+}
 
 export default async function DashboardOverview() {
   const { businessId } = await requireBusiness();
 
   const [business] = await db
     .select({
+      address: businesses.address,
+      description: businesses.description,
       name: businesses.name,
+      payhereEnabled: businesses.payhereEnabled,
+      payhereMerchantId: businesses.payhereMerchantId,
+      phone: businesses.phone,
       plan: businesses.plan,
       slug: businesses.slug,
     })
@@ -18,25 +43,86 @@ export default async function DashboardOverview() {
     .where(eq(businesses.id, businessId))
     .limit(1);
 
+  if (!business) notFound();
+
   const now = new Date();
+  const todayStart = startOfDay(now);
+  const tomorrow = addDays(todayStart, 1);
   const weekStart = startOfWeek(now, { weekStartsOn: 1 });
   const weekEnd = endOfWeek(now, { weekStartsOn: 1 });
+  const previousWeekStart = subWeeks(weekStart, 1);
 
-  const [{ bookingsThisWeek }] = await db
-    .select({ bookingsThisWeek: count() })
-    .from(bookings)
-    .where(
-      and(
-        eq(bookings.businessId, businessId),
-        gte(bookings.startsAt, weekStart),
-        sql`${bookings.startsAt} <= ${weekEnd}`
-      )
-    );
-
-  const [{ totalBookings }] = await db
-    .select({ totalBookings: count() })
-    .from(bookings)
-    .where(eq(bookings.businessId, businessId));
+  const [
+    [{ todayBookings }],
+    [{ totalBookings }],
+    [{ newClientsThisWeek }],
+    [{ servicesCount }],
+    [{ staffCount }],
+    [{ availabilityCount }],
+    [{ todayRevenue }],
+    [{ weekRevenue }],
+    [{ previousWeekRevenue }],
+    todayRows,
+    nextRows,
+    recentActivity,
+  ] = await Promise.all([
+    db
+      .select({ todayBookings: count() })
+      .from(bookings)
+      .where(and(eq(bookings.businessId, businessId), gte(bookings.startsAt, todayStart), lt(bookings.startsAt, tomorrow))),
+    db.select({ totalBookings: count() }).from(bookings).where(eq(bookings.businessId, businessId)),
+    db.select({ newClientsThisWeek: count() }).from(clients).where(and(eq(clients.businessId, businessId), gte(clients.createdAt, weekStart))),
+    db.select({ servicesCount: count() }).from(services).where(eq(services.businessId, businessId)),
+    db.select({ staffCount: count() }).from(staff).where(eq(staff.businessId, businessId)),
+    db
+      .select({ availabilityCount: count() })
+      .from(availability)
+      .innerJoin(staff, eq(staff.id, availability.staffId))
+      .where(eq(staff.businessId, businessId)),
+    db
+      .select({ todayRevenue: sql<number>`coalesce(sum(${payments.amountLkr}), 0)::int` })
+      .from(payments)
+      .innerJoin(bookings, eq(bookings.id, payments.bookingId))
+      .where(and(eq(bookings.businessId, businessId), eq(payments.status, "success"), gte(payments.createdAt, todayStart), lt(payments.createdAt, tomorrow))),
+    db
+      .select({ weekRevenue: sql<number>`coalesce(sum(${payments.amountLkr}), 0)::int` })
+      .from(payments)
+      .innerJoin(bookings, eq(bookings.id, payments.bookingId))
+      .where(and(eq(bookings.businessId, businessId), eq(payments.status, "success"), gte(payments.createdAt, weekStart), lt(payments.createdAt, weekEnd))),
+    db
+      .select({ previousWeekRevenue: sql<number>`coalesce(sum(${payments.amountLkr}), 0)::int` })
+      .from(payments)
+      .innerJoin(bookings, eq(bookings.id, payments.bookingId))
+      .where(and(eq(bookings.businessId, businessId), eq(payments.status, "success"), gte(payments.createdAt, previousWeekStart), lt(payments.createdAt, weekStart))),
+    db
+      .select({
+        id: bookings.id,
+        clientName: bookings.clientName,
+        serviceName: services.name,
+        staffName: staff.name,
+        startsAt: bookings.startsAt,
+        status: bookings.status,
+      })
+      .from(bookings)
+      .innerJoin(services, eq(services.id, bookings.serviceId))
+      .innerJoin(staff, eq(staff.id, bookings.staffId))
+      .where(and(eq(bookings.businessId, businessId), gte(bookings.startsAt, todayStart), lt(bookings.startsAt, tomorrow)))
+      .orderBy(bookings.startsAt)
+      .limit(10),
+    db
+      .select({
+        id: bookings.id,
+        clientName: bookings.clientName,
+        serviceName: services.name,
+        startsAt: bookings.startsAt,
+      })
+      .from(bookings)
+      .innerJoin(services, eq(services.id, bookings.serviceId))
+      .where(and(eq(bookings.businessId, businessId), gte(bookings.startsAt, now)))
+      .orderBy(bookings.startsAt)
+      .limit(3),
+    safeRecentActivity(businessId),
+  ]);
 
   const appDomain = process.env.NEXT_PUBLIC_APP_DOMAIN ?? "localhost:3000";
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
@@ -47,133 +133,158 @@ export default async function DashboardOverview() {
   const bookingDisplayUrl = useSubdomain
     ? `${business.slug}.dinaya.lk`
     : `${appUrl.replace(/^https?:\/\//, "")}/book/${business.slug}`;
+  const whatsappShare = `https://wa.me/?text=${encodeURIComponent(`Book online with ${business.name}: ${bookingUrl}`)}`;
+  const embedSnippet = `<iframe src="${bookingUrl}" width="100%" height="720" style="border:0;border-radius:8px"></iframe>`;
+  const currentWeekRevenue = Number(weekRevenue ?? 0);
+  const previousRevenue = Number(previousWeekRevenue ?? 0);
+  const revenueDelta = previousRevenue > 0
+    ? Math.round(((currentWeekRevenue - previousRevenue) / previousRevenue) * 100)
+    : currentWeekRevenue > 0 ? 100 : 0;
+
+  const onboarding = [
+    { label: "Add business info", done: Boolean(business.description && business.phone && business.address), href: "/dashboard/settings" },
+    { label: "Create first service", done: Number(servicesCount) > 0, href: "/dashboard/services/new" },
+    { label: "Add staff", done: Number(staffCount) > 0, href: "/dashboard/staff/new" },
+    { label: "Set availability", done: Number(availabilityCount) > 0, href: "/dashboard/availability" },
+    { label: "Connect PayHere", done: Boolean(business.payhereEnabled && business.payhereMerchantId), href: "/dashboard/settings" },
+    { label: "Share booking link", done: Number(totalBookings) > 0, href: bookingUrl },
+  ];
+  const showOnboarding = onboarding.some((item) => !item.done);
 
   const stats = [
-    {
-      label: "Bookings this week",
-      value: bookingsThisWeek,
-      icon: "bi-calendar3",
-      iconColor: "text-primary",
-      iconBg: "bg-primary/10",
-      accent: "bg-primary",
-    },
-    {
-      label: "Total bookings",
-      value: totalBookings,
-      icon: "bi-book-open",
-      iconColor: "text-emerald-600",
-      iconBg: "bg-emerald-50",
-      accent: "bg-emerald-500",
-    },
-    {
-      label: "Current plan",
-      value: business.plan.charAt(0).toUpperCase() + business.plan.slice(1),
-      icon: "bi-stars",
-      iconColor: "text-amber-600",
-      iconBg: "bg-amber-50",
-      accent: "bg-amber-500",
-    },
-  ];
-
-  const quickActions = [
-    {
-      href: "/dashboard/bookings",
-      label: "View all bookings",
-      description: "See your full schedule",
-      icon: "bi-book-open",
-    },
-    {
-      href: "/dashboard/services",
-      label: "Manage services",
-      description: "Edit your offerings",
-      icon: "bi-scissors",
-    },
-    {
-      href: "/dashboard/calendar",
-      label: "Open calendar",
-      description: "Browse by date",
-      icon: "bi-calendar3",
-    },
+    { label: "Today revenue", value: formatLkr(Number(todayRevenue ?? 0)), icon: "bi-cash-stack", accent: "bg-primary" },
+    { label: "Today bookings", value: todayBookings, icon: "bi-calendar2-check", accent: "bg-amber-500" },
+    { label: "Week revenue", value: `${formatLkr(currentWeekRevenue)} (${revenueDelta >= 0 ? "+" : ""}${revenueDelta}%)`, icon: "bi-graph-up", accent: "bg-violet-600" },
+    { label: "New clients", value: newClientsThisWeek, icon: "bi-person-plus", accent: "bg-primary" },
   ];
 
   return (
-    <div>
-      {/* Greeting */}
-      <div className="mb-8">
-        <p className="text-xs font-medium text-muted-foreground/60 uppercase tracking-widest mb-2">
+    <div className="space-y-6">
+      <div>
+        <p className="mb-2 text-xs font-medium uppercase tracking-widest text-muted-foreground/60">
           {format(now, "EEEE, MMMM d")}
         </p>
-        <h1 className="font-cal text-3xl tracking-tight">
-          Good day, {business.name.split(" ")[0]}
-        </h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Here&apos;s what&apos;s happening with {business.name}.
-        </p>
+        <h1 className="font-cal text-3xl tracking-tight">Good day, {business.name.split(" ")[0]}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Today&apos;s bookings, revenue, and setup progress.</p>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-4 mb-8">
-        {stats.map((s) => (
-          <div key={s.label} className="bg-white border rounded-xl overflow-hidden">
-            <div className={`h-[3px] w-full ${s.accent}`} />
-            <div className="p-5 flex items-start gap-4">
-              <div
-                className={`flex items-center justify-center w-10 h-10 rounded-lg shrink-0 ${s.iconBg}`}
+      {Number(totalBookings) === 0 && showOnboarding ? null : (
+        <div className="grid gap-4 md:grid-cols-4">
+          {stats.map((stat) => (
+            <div key={stat.label} className="overflow-hidden rounded-xl border bg-white">
+              <div className={`h-[3px] ${stat.accent}`} />
+              <div className="flex items-start gap-3 p-5">
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <i className={`bi ${stat.icon}`} aria-hidden="true" />
+                </span>
+                <div>
+                  <p className="text-xs text-muted-foreground">{stat.label}</p>
+                  <p className="mt-1 text-2xl font-bold tracking-tight">{stat.value}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {showOnboarding && (
+        <div className="rounded-xl border bg-white p-5">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="font-semibold">Onboarding checklist</h2>
+            <span className="text-xs text-muted-foreground">
+              {onboarding.filter((item) => item.done).length}/{onboarding.length} complete
+            </span>
+          </div>
+          <div className="grid gap-2 md:grid-cols-2">
+            {onboarding.map((item) => (
+              <Link
+                key={item.label}
+                href={item.href}
+                target={item.href.startsWith("http") ? "_blank" : undefined}
+                className="flex items-center justify-between rounded-lg border px-3 py-2 text-sm hover:border-primary/40"
               >
-                <i className={`bi ${s.icon} text-[1.15rem] ${s.iconColor}`} />
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">{s.label}</p>
-                <p className="text-3xl font-bold mt-0.5 tracking-tight">{s.value}</p>
-              </div>
-            </div>
+                <span>{item.label}</span>
+                <span className={item.done ? "text-primary" : "text-muted-foreground"}>
+                  <i className={`bi ${item.done ? "bi-check-circle-fill" : "bi-circle"}`} aria-hidden="true" />
+                </span>
+              </Link>
+            ))}
           </div>
-        ))}
-      </div>
+        </div>
+      )}
 
-      {/* Booking link */}
-      <div className="bg-primary/[0.04] border border-primary/15 rounded-xl p-5 mb-5">
-        <div className="flex items-center gap-2.5 mb-3">
-          <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-            <i className="bi bi-link-45deg text-xs text-primary" />
+      <div className="grid gap-6 lg:grid-cols-[1.4fr_0.9fr]">
+        <div className="rounded-xl border bg-white p-5">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="font-semibold">Today timeline</h2>
+            <Link href="/dashboard/calendar" className="text-sm text-primary hover:underline">Calendar</Link>
           </div>
-          <p className="text-sm font-semibold">Your booking page</p>
-        </div>
-        <div className="flex items-center gap-2.5">
-          <code className="text-primary text-sm bg-white px-3 py-2 rounded-lg flex-1 truncate border border-primary/15 font-mono tracking-tight">
-            {bookingDisplayUrl}
-          </code>
-          <a
-            href={bookingUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 text-sm font-medium text-primary bg-white border border-primary/20 px-4 py-2 rounded-lg hover:bg-primary/5 transition-colors whitespace-nowrap shrink-0"
-          >
-            Open <i className="bi bi-box-arrow-up-right text-xs" />
-          </a>
-        </div>
-      </div>
-
-      {/* Quick actions */}
-      <div className="grid grid-cols-3 gap-3">
-        {quickActions.map((a) => (
-          <Link
-            key={a.href}
-            href={a.href}
-            className="flex items-center justify-between bg-white border rounded-xl px-4 py-4 hover:border-primary/40 hover:shadow-sm transition-all group"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-muted/50 flex items-center justify-center shrink-0 group-hover:bg-primary/10 transition-colors">
-                <i className={`bi ${a.icon} text-sm text-muted-foreground group-hover:text-primary transition-colors`} />
-              </div>
-              <div>
-                <p className="font-medium text-sm leading-tight">{a.label}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">{a.description}</p>
-              </div>
+          {todayRows.length === 0 ? (
+            <div className="rounded-lg bg-muted/30 p-4">
+              <p className="text-sm text-muted-foreground">No bookings today.</p>
+              {nextRows.length > 0 && (
+                <div className="mt-4 space-y-2">
+                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Next appointments</p>
+                  {nextRows.map((row) => (
+                    <Link key={row.id} href={`/dashboard/bookings/${row.id}`} className="block rounded-md border bg-white px-3 py-2 text-sm hover:border-primary/40">
+                      <span className="font-medium">{row.clientName}</span>
+                      <span className="text-muted-foreground"> - {row.serviceName} on {format(row.startsAt, "d MMM, h:mm a")}</span>
+                    </Link>
+                  ))}
+                </div>
+              )}
             </div>
-            <i className="bi bi-arrow-right text-xs text-muted-foreground/50 group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0 ml-2" />
-          </Link>
-        ))}
+          ) : (
+            <div className="space-y-3">
+              {todayRows.map((row) => (
+                <Link key={row.id} href={`/dashboard/bookings/${row.id}`} className="flex items-center gap-4 rounded-lg border px-4 py-3 hover:border-primary/40">
+                  <span className="w-20 text-sm font-semibold tabular-nums text-primary">{format(row.startsAt, "h:mm a")}</span>
+                  <span className="flex-1 text-sm">
+                    <span className="font-medium">{row.clientName}</span>
+                    <span className="text-muted-foreground"> - {row.serviceName} with {row.staffName}</span>
+                  </span>
+                  <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium capitalize text-primary">{row.status.replace("_", " ")}</span>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-6">
+          <div className="rounded-xl border border-primary/15 bg-primary/[0.04] p-5">
+            <div className="mb-3 flex items-center gap-2.5">
+              <span className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <i className="bi bi-link-45deg text-sm" aria-hidden="true" />
+              </span>
+              <p className="text-sm font-semibold">Share booking link</p>
+            </div>
+            <code className="block truncate rounded-lg border border-primary/15 bg-white px-3 py-2 font-mono text-sm text-primary">
+              {bookingDisplayUrl}
+            </code>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <a href={bookingUrl} target="_blank" rel="noopener noreferrer" className="rounded-md border bg-white px-3 py-2 text-xs font-medium text-primary hover:bg-primary/5">Open</a>
+              <a href={whatsappShare} target="_blank" rel="noopener noreferrer" className="rounded-md border bg-white px-3 py-2 text-xs font-medium text-primary hover:bg-primary/5">WhatsApp</a>
+              <Link href="/dashboard/marketing" className="rounded-md border bg-white px-3 py-2 text-xs font-medium text-primary hover:bg-primary/5">QR & embed</Link>
+            </div>
+            <textarea readOnly value={embedSnippet} className="mt-3 h-16 w-full resize-none rounded-md border bg-white p-2 text-xs text-muted-foreground" />
+          </div>
+
+          <div className="rounded-xl border bg-white p-5">
+            <h2 className="mb-4 font-semibold">Recent activity</h2>
+            {recentActivity.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No recent activity yet.</p>
+            ) : (
+              <div className="space-y-3">
+                {recentActivity.map((item, index) => (
+                  <div key={`${item.entity}-${item.createdAt.toISOString()}-${index}`} className="border-b pb-3 last:border-b-0 last:pb-0">
+                    <p className="text-sm font-medium capitalize">{item.entity} {item.action.replace("_", " ")}</p>
+                    <p className="text-xs text-muted-foreground">{format(item.createdAt, "d MMM, h:mm a")}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -3,6 +3,7 @@
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
+import { bookingReminderText, whatsappUrl } from "@/lib/whatsapp";
 
 type Booking = {
   id: string;
@@ -91,10 +92,11 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
   if (!booking) return <div className="text-sm text-muted-foreground p-8">Booking not found.</div>;
 
   const actions = ACTIONS[booking.status] ?? [];
-  const waText = encodeURIComponent(
-    `Hi ${booking.clientName}, this is a reminder for your appointment on ${format(new Date(booking.startsAt), "d MMM 'at' h:mm a")} for ${booking.serviceName}. See you soon!`
-  );
-  const waPhone = booking.clientPhone.replace(/\D/g, "");
+  const waText = bookingReminderText({
+    clientName: booking.clientName,
+    serviceName: booking.serviceName,
+    startsAt: booking.startsAt,
+  });
 
   return (
     <div>
@@ -164,7 +166,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
                 </Link>
               )}
               <a
-                href={`https://wa.me/${waPhone}?text=${waText}`}
+                href={whatsappUrl(booking.clientPhone, waText)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-1 text-xs px-3 py-1.5 rounded border font-medium text-green-700 border-green-200 hover:bg-green-50 transition-colors"

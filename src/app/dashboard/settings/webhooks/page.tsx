@@ -16,7 +16,8 @@ type WebhookEvent = typeof ALL_EVENTS[number]["value"];
 interface Webhook {
   id: string;
   url: string;
-  secret: string | null;
+  hasSecret: boolean;
+  secret?: string | null;
   events: WebhookEvent[];
   isActive: boolean;
   createdAt: string;

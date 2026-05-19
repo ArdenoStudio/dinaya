@@ -19,6 +19,17 @@ const testimonial = {
   role: "Owner, Glow Beauty Studio · Colombo",
 };
 
+const businessTypes = [
+  { value: "salon_barber", label: "Salon / barber", helper: "Seeds haircut, colouring, and grooming services." },
+  { value: "clinic", label: "Clinic", helper: "Seeds consultation and follow-up appointment types." },
+  { value: "tuition", label: "Tuition / classes", helper: "Seeds one-to-one and group class sessions." },
+  { value: "vehicle_service", label: "Vehicle service", helper: "Seeds inspection and workshop service slots." },
+  { value: "photography", label: "Photography", helper: "Seeds consultation and shoot session services." },
+  { value: "spa_wellness", label: "Spa / wellness", helper: "Seeds therapy and treatment appointments." },
+  { value: "consulting", label: "Consulting", helper: "Seeds discovery and paid consultation calls." },
+  { value: "other", label: "Other", helper: "Seeds a clean generic appointment setup." },
+];
+
 const inputCls =
   "mt-1.5 w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 placeholder:text-gray-300 transition-all";
 
@@ -42,7 +53,15 @@ export default function RegisterPage() {
   const slugTouched = useRef(false);
 
   const [step, setStep]               = useState<1 | 2>(1);
-  const [form, setForm]               = useState({ name: "", email: "", password: "", businessName: "", slug: "" });
+  const [form, setForm]               = useState({
+    name: "",
+    email: "",
+    password: "",
+    businessName: "",
+    slug: "",
+    businessType: "salon_barber",
+    language: "en",
+  });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError]             = useState("");
   const [loading, setLoading]         = useState(false);
@@ -275,6 +294,40 @@ export default function RegisterPage() {
                         Clients will book at <span className="font-medium text-gray-600">dinaya.lk/{form.slug}</span>
                       </p>
                     )}
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-gray-700" htmlFor="businessType">Business type</label>
+                    <select
+                      id="businessType"
+                      value={form.businessType}
+                      onChange={(e) => setForm((f) => ({ ...f, businessType: e.target.value }))}
+                      className={inputCls}
+                    >
+                      {businessTypes.map((type) => (
+                        <option key={type.value} value={type.value}>{type.label}</option>
+                      ))}
+                    </select>
+                    <p className="text-xs text-gray-400 mt-1.5">
+                      {businessTypes.find((type) => type.value === form.businessType)?.helper}
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-gray-700" htmlFor="language">Booking page language</label>
+                    <select
+                      id="language"
+                      value={form.language}
+                      onChange={(e) => setForm((f) => ({ ...f, language: e.target.value }))}
+                      className={inputCls}
+                    >
+                      <option value="en">English</option>
+                      <option value="si">Sinhala</option>
+                      <option value="ta">Tamil</option>
+                    </select>
+                    <p className="text-xs text-gray-400 mt-1.5">
+                      You can change this later in Settings.
+                    </p>
                   </div>
 
                   {error && (

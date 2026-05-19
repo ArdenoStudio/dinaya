@@ -297,7 +297,7 @@ export default function BrandPage() {
                 A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
               </p>
               <p className="font-cal text-xl tracking-tight text-gray-800 leading-snug">
-                "Your calendar, open for business."
+                &quot;Your calendar, open for business.&quot;
               </p>
               <div className="border-t border-gray-100 pt-4 space-y-1">
                 <p className="text-sm font-semibold text-gray-900">CalSans SemiBold</p>
@@ -317,7 +317,7 @@ export default function BrandPage() {
                 A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
               </p>
               <p className="font-sans text-base text-gray-700 leading-relaxed">
-                "Give your business a free booking page. No more WhatsApp back-and-forth."
+                &quot;Give your business a free booking page. No more WhatsApp back-and-forth.&quot;
               </p>
               <div className="border-t border-gray-100 pt-4 space-y-1">
                 <p className="text-sm font-semibold text-gray-900">Inter</p>

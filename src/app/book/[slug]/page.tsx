@@ -4,6 +4,7 @@ import { businesses, services, staff, staffServices, reviews } from "@/db/schema
 import { eq, and, avg, count } from "drizzle-orm";
 import BookingWizard from "@/components/booking/BookingWizard";
 import Link from "next/link";
+import { getBookingCopy } from "@/lib/i18n";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -45,12 +46,18 @@ export default async function BookingPage({ params }: Props) {
     .select({
       id: businesses.id,
       address: businesses.address,
+      bankTransferInstructions: businesses.bankTransferInstructions,
+      cancellationPolicy: businesses.cancellationPolicy,
       description: businesses.description,
+      depositPolicy: businesses.depositPolicy,
       facebookUrl: businesses.facebookUrl,
       galleryImages: businesses.galleryImages,
       instagramUrl: businesses.instagramUrl,
+      language: businesses.language,
+      lankaqrImageUrl: businesses.lankaqrImageUrl,
       logoUrl: businesses.logoUrl,
       name: businesses.name,
+      payhereEnabled: businesses.payhereEnabled,
       phone: businesses.phone,
       slug: businesses.slug,
       websiteUrl: businesses.websiteUrl,
@@ -71,6 +78,7 @@ export default async function BookingPage({ params }: Props) {
         durationMinutes: services.durationMinutes,
         priceLkr: services.priceLkr,
         requiresPayment: services.requiresPayment,
+        depositPercent: services.depositPercent,
         isActive: services.isActive,
         beforeBuffer: services.beforeBuffer,
         afterBuffer: services.afterBuffer,
@@ -100,6 +108,7 @@ export default async function BookingPage({ params }: Props) {
   const reviewCount = ratingData[0]?.count ?? 0;
   const gallery = business.galleryImages ?? [];
   const staffWithBio = staffList.filter((s) => s.bio || s.avatarUrl);
+  const copy = getBookingCopy(business.language);
 
   return (
     <div className="min-h-dvh bg-[#f7f7f8]">
@@ -229,9 +238,36 @@ export default async function BookingPage({ params }: Props) {
       {/* ── Booking wizard ────────────────────────────────────────── */}
       <div className="max-w-2xl mx-auto px-4 py-6">
         <div className="mb-4">
-          <h2 className="font-cal text-lg">Book an appointment</h2>
-          <p className="text-sm text-muted-foreground">Choose a service and pick a time that works for you.</p>
+          <h2 className="font-cal text-lg">{copy.bookAppointment}</h2>
+          <p className="text-sm text-muted-foreground">{copy.chooseServiceAndTime}</p>
         </div>
+        {(business.cancellationPolicy || business.depositPolicy || business.bankTransferInstructions || business.lankaqrImageUrl) && (
+          <div className="mb-4 rounded-xl border bg-white p-4">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground">{copy.trustTitle}</p>
+            <div className="space-y-3 text-sm text-muted-foreground">
+              {business.cancellationPolicy && (
+                <div>
+                  <p className="font-medium text-foreground">{copy.cancellationPolicy}</p>
+                  <p className="mt-0.5 whitespace-pre-wrap">{business.cancellationPolicy}</p>
+                </div>
+              )}
+              {business.depositPolicy && (
+                <div>
+                  <p className="font-medium text-foreground">{copy.depositPolicy}</p>
+                  <p className="mt-0.5 whitespace-pre-wrap">{business.depositPolicy}</p>
+                </div>
+              )}
+              {(business.bankTransferInstructions || business.lankaqrImageUrl) && (
+                <div>
+                  <p className="font-medium text-foreground">{copy.localPayment}</p>
+                  {business.bankTransferInstructions && (
+                    <p className="mt-0.5 whitespace-pre-wrap">{business.bankTransferInstructions}</p>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
         <BookingWizard
           business={business}
           services={serviceList}

@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { fail, ok, validationError } from "@/lib/action-result";
 import { getBusinessContext } from "@/lib/auth";
 import { logActivity } from "@/lib/activity-log";
+import { encryptSecret } from "@/lib/secrets";
 import { z } from "@/lib/validation";
 
 const settingsSchema = z.object({
@@ -13,6 +14,12 @@ const settingsSchema = z.object({
   phone: z.string().trim().max(20).optional().nullable(),
   address: z.string().trim().max(1000).optional().nullable(),
   timezone: z.string().trim().min(1).max(80).default("Asia/Colombo"),
+  language: z.enum(["en", "si", "ta"]).default("en"),
+  businessType: z.string().trim().max(80).optional().nullable(),
+  cancellationPolicy: z.string().trim().max(2000).optional().nullable(),
+  depositPolicy: z.string().trim().max(2000).optional().nullable(),
+  bankTransferInstructions: z.string().trim().max(2000).optional().nullable(),
+  lankaqrImageUrl: z.string().trim().max(1000).optional().nullable(),
   instagramUrl: z.string().trim().max(500).optional().nullable(),
   facebookUrl: z.string().trim().max(500).optional().nullable(),
   websiteUrl: z.string().trim().max(500).optional().nullable(),
@@ -39,6 +46,12 @@ export async function PATCH(req: NextRequest) {
     facebookUrl,
     galleryImages,
     instagramUrl,
+    bankTransferInstructions,
+    businessType,
+    cancellationPolicy,
+    depositPolicy,
+    language,
+    lankaqrImageUrl,
     name,
     payhereEnabled,
     payhereMerchantId,
@@ -56,23 +69,35 @@ export async function PATCH(req: NextRequest) {
       phone: phone || null,
       address: address || null,
       timezone,
+      language,
+      businessType: businessType || null,
+      cancellationPolicy: cancellationPolicy || null,
+      depositPolicy: depositPolicy || null,
+      bankTransferInstructions: bankTransferInstructions || null,
+      lankaqrImageUrl: lankaqrImageUrl || null,
       instagramUrl: instagramUrl || null,
       facebookUrl: facebookUrl || null,
       websiteUrl: websiteUrl || null,
       galleryImages: Array.isArray(galleryImages) ? galleryImages.filter(Boolean) : null,
       ...(payhereEnabled !== undefined && { payhereEnabled: Boolean(payhereEnabled) }),
       ...(payhereMerchantId !== undefined && { payhereMerchantId: payhereMerchantId || null }),
-      ...(payhereMerchantSecret !== undefined && { payhereMerchantSecret: payhereMerchantSecret || null }),
+      ...(payhereMerchantSecret !== undefined && payhereMerchantSecret !== null && {
+        payhereMerchantSecret: payhereMerchantSecret.trim()
+          ? encryptSecret(payhereMerchantSecret)
+          : null,
+      }),
     })
     .where(eq(businesses.id, context.businessId));
 
-  await logActivity({
+  void logActivity({
     action: "updated",
     actorUserId: context.user.id,
     businessId: context.businessId,
     entity: "business",
     entityId: context.businessId,
     meta: { fields: Object.keys(parsed.data) },
+  }).catch((error) => {
+    console.error("Activity log write failed:", error);
   });
 
   return NextResponse.json(ok({ id: context.businessId }));

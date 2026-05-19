@@ -8,6 +8,7 @@ interface ServiceForm {
   description: string;
   durationMinutes: number;
   priceLkr: number;
+  depositPercent: number;
   requiresPayment: boolean;
   isActive: boolean;
   beforeBuffer: number;
@@ -44,6 +45,7 @@ export default function EditServicePage({ params }: { params: Promise<{ id: stri
         description: d.description ?? "",
         durationMinutes: d.durationMinutes ?? 30,
         priceLkr: d.priceLkr ?? 0,
+        depositPercent: d.depositPercent ?? 0,
         requiresPayment: d.requiresPayment ?? false,
         isActive: d.isActive ?? true,
         beforeBuffer: d.beforeBuffer ?? 0,
@@ -74,6 +76,21 @@ export default function EditServicePage({ params }: { params: Promise<{ id: stri
     });
     if (!res.ok) {
       const d = await res.json();
+      if (res.status === 409 && form.isActive === false && window.confirm(d.error)) {
+        const forced = await fetch(`/api/dashboard/services/${id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...form,
+            dailyCapacity: form.dailyCapacity === "" ? null : Number(form.dailyCapacity),
+            forceDeactivate: true,
+          }),
+        });
+        if (forced.ok) {
+          router.push("/dashboard/services");
+          return;
+        }
+      }
       setError(d.error ?? "Error saving");
       setSaving(false);
       return;
@@ -214,6 +231,23 @@ export default function EditServicePage({ params }: { params: Promise<{ id: stri
             <span className="text-sm">Active</span>
           </label>
         </div>
+
+        {form.requiresPayment && (
+          <div>
+            <label className="text-sm font-medium">Deposit percentage</label>
+            <p className="text-xs text-muted-foreground mb-2">
+              Use 0 for full payment, or collect a smaller deposit to reduce no-shows.
+            </p>
+            <input
+              type="number"
+              min={0}
+              max={100}
+              value={form.depositPercent}
+              onChange={(e) => setForm((f) => f && ({ ...f, depositPercent: Math.min(100, Math.max(0, parseInt(e.target.value) || 0)) }))}
+              className={inputCls}
+            />
+          </div>
+        )}
 
 
         {error && <p className="text-destructive text-sm">{error}</p>}

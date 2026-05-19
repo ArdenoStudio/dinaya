@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { webhooks } from "@/db/schema";
+import { webhookDeliveries, webhooks } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import crypto from "crypto";
 
@@ -52,10 +52,27 @@ export async function dispatchWebhooks(
       if (hook.secret) {
         headers["X-Dinaya-Signature"] = `sha256=${sign(hook.secret, body)}`;
       }
+      const deliveryBase = {
+        webhookId: hook.id,
+        event,
+        entityId: typeof data.bookingId === "string" ? data.bookingId : null,
+        requestBody: payload,
+      };
+
       try {
-        await fetch(hook.url, { method: "POST", headers, body, signal: AbortSignal.timeout(10_000) });
-      } catch {
-        // Fire-and-forget — failures are silently ignored
+        const response = await fetch(hook.url, { method: "POST", headers, body, signal: AbortSignal.timeout(10_000) });
+        await db.insert(webhookDeliveries).values({
+          ...deliveryBase,
+          status: response.ok ? "success" : "failed",
+          statusCode: response.status,
+          responseBody: await response.text().catch(() => null),
+        });
+      } catch (error) {
+        await db.insert(webhookDeliveries).values({
+          ...deliveryBase,
+          status: "failed",
+          error: error instanceof Error ? error.message : "Webhook delivery failed",
+        });
       }
     })
   );

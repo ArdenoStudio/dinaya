@@ -5,28 +5,42 @@ import { format, parseISO } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import type { BookingBusiness, BookingState } from "./BookingWizard";
 import { formatLkr } from "@/lib/utils";
+import type { BookingCopy } from "@/lib/i18n";
 
 const COLOMBO_TZ = "Asia/Colombo";
 
 interface Props {
   state: BookingState;
   business: BookingBusiness;
+  copy: BookingCopy;
   onUpdate: (partial: Partial<BookingState>) => void;
   onBack: () => void;
   onConfirmed: (data: {
     bookingId: string;
+    manualPayment?: boolean;
     payhereFormData?: Record<string, string>;
     payhereUrl?: string;
+    status?: string;
   }) => void;
 }
 
-export default function StepConfirm({ state, business, onUpdate, onBack, onConfirmed }: Props) {
+export default function StepConfirm({ state, business, copy, onUpdate, onBack, onConfirmed }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const appointmentTime = state.timeSlot
     ? format(toZonedTime(parseISO(state.timeSlot), COLOMBO_TZ), "EEEE, d MMMM yyyy 'at' h:mm a")
     : "";
+  const service = state.service;
+  const depositAmount = service && service.depositPercent > 0
+    ? Math.ceil((service.priceLkr * service.depositPercent) / 100)
+    : service?.priceLkr ?? 0;
+  const hasManualPaymentFallback = Boolean(
+    service?.requiresPayment &&
+    service.priceLkr > 0 &&
+    !business.payhereEnabled &&
+    (business.bankTransferInstructions || business.lankaqrImageUrl)
+  );
 
   async function handleBook() {
     setLoading(true);
@@ -58,14 +72,16 @@ export default function StepConfirm({ state, business, onUpdate, onBack, onConfi
 
     onConfirmed({
       bookingId: data.bookingId,
+      manualPayment: data.manualPayment,
       payhereFormData: data.payhereFormData,
       payhereUrl: data.payhereUrl,
+      status: data.status,
     });
   }
 
   return (
     <div>
-      <h2 className="font-cal text-lg mb-5 text-balance">Your details</h2>
+      <h2 className="font-cal text-lg mb-5 text-balance">{copy.details}</h2>
 
       {/* Booking summary */}
       <div className="bg-muted/30 rounded-xl p-4 mb-5 text-sm space-y-2 border border-muted">
@@ -81,13 +97,30 @@ export default function StepConfirm({ state, business, onUpdate, onBack, onConfi
           <span className="text-muted-foreground shrink-0">When</span>
           <span className="font-medium text-right ml-4">{appointmentTime}</span>
         </div>
-        {state.service && state.service.priceLkr > 0 && (
+        {service && service.priceLkr > 0 && (
           <div className="flex justify-between items-center pt-2 border-t border-muted">
-            <span className="font-medium">Total</span>
-            <span className="font-bold text-primary tabular-nums">{formatLkr(state.service.priceLkr)}</span>
+            <span className="font-medium">{service.requiresPayment && service.depositPercent > 0 ? copy.depositDue : copy.fullAmount}</span>
+            <span className="font-bold text-primary tabular-nums">
+              {formatLkr(service.requiresPayment ? depositAmount : service.priceLkr)}
+            </span>
           </div>
         )}
       </div>
+
+      {hasManualPaymentFallback && (
+        <div className="mb-5 rounded-xl border border-amber-200 bg-amber-50/70 p-4 text-sm">
+          <p className="mb-2 font-medium text-amber-900">{copy.localPayment}</p>
+          {business.bankTransferInstructions && (
+            <p className="whitespace-pre-wrap text-amber-900/80">{business.bankTransferInstructions}</p>
+          )}
+          {business.lankaqrImageUrl && (
+            <div className="mt-3">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={business.lankaqrImageUrl} alt="LankaQR" className="h-36 w-36 rounded-lg border bg-white object-contain p-2" />
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Contact form */}
       <div className="space-y-3.5 mb-5">
@@ -147,7 +180,7 @@ export default function StepConfirm({ state, business, onUpdate, onBack, onConfi
             onChange={(e) => onUpdate({ notes: e.target.value })}
             className="mt-1.5 w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary/50 transition-shadow resize-none placeholder:text-muted-foreground/50"
             rows={2}
-            placeholder="Anything we should know?"
+            placeholder={hasManualPaymentFallback ? copy.paymentReference : "Anything we should know?"}
           />
         </div>
       </div>
@@ -173,9 +206,9 @@ export default function StepConfirm({ state, business, onUpdate, onBack, onConfi
         >
           {loading
             ? "Booking…"
-            : state.service?.requiresPayment
-            ? "Book & Pay"
-            : "Confirm booking"}
+            : state.service?.requiresPayment && !hasManualPaymentFallback
+            ? copy.payToConfirm
+            : copy.confirmBooking}
         </button>
       </div>
     </div>

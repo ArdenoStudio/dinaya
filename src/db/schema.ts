@@ -87,6 +87,12 @@ export const businesses = pgTable("businesses", {
   email: varchar("email", { length: 255 }),
   address: text("address"),
   timezone: text("timezone").default("Asia/Colombo").notNull(),
+  language: varchar("language", { length: 5 }).default("en").notNull(),
+  businessType: varchar("business_type", { length: 80 }),
+  cancellationPolicy: text("cancellation_policy"),
+  depositPolicy: text("deposit_policy"),
+  bankTransferInstructions: text("bank_transfer_instructions"),
+  lankaqrImageUrl: text("lankaqr_image_url"),
   // Social / profile links shown on the booking page
   instagramUrl: text("instagram_url"),
   facebookUrl: text("facebook_url"),
@@ -173,6 +179,7 @@ export const services = pgTable("services", {
   durationMinutes: integer("duration_minutes").notNull(),
   priceLkr: integer("price_lkr").notNull().default(0),
   requiresPayment: boolean("requires_payment").default(false).notNull(),
+  depositPercent: integer("deposit_percent").default(0).notNull(),
   isActive: boolean("is_active").default(true).notNull(),
   // Buffer time blocked before/after each appointment (minutes) — from Cal.diy
   beforeBuffer: integer("before_buffer").notNull().default(0),

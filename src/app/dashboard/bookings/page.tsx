@@ -3,12 +3,16 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
+import { bookingReminderText, whatsappUrl } from "@/lib/whatsapp";
 
 type Booking = {
   id: string;
   clientId: string | null;
   clientName: string;
   clientPhone: string;
+  amountLkr: number | null;
+  paymentStatus: "pending" | "success" | "failed" | "refunded" | null;
+  source: string;
   startsAt: string;
   status: "pending" | "confirmed" | "cancelled" | "completed" | "no_show";
   serviceName: string;
@@ -78,8 +82,11 @@ export default function BookingsPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-cal text-2xl">Bookings</h1>
-        <div className="flex gap-2">
-          <Link href="/dashboard/calendar" className="flex items-center gap-1.5 border px-4 py-2 rounded-md text-sm font-medium text-muted-foreground hover:border-primary/50 hover:text-foreground transition-colors">
+	        <div className="flex gap-2">
+          <a href={`/api/dashboard/bookings?tab=${tab}&export=csv`} className="flex items-center gap-1.5 border px-4 py-2 rounded-md text-sm font-medium text-muted-foreground hover:border-primary/50 hover:text-foreground transition-colors">
+            <i className="bi bi-download text-xs" /> Export CSV
+          </a>
+	          <Link href="/dashboard/calendar" className="flex items-center gap-1.5 border px-4 py-2 rounded-md text-sm font-medium text-muted-foreground hover:border-primary/50 hover:text-foreground transition-colors">
             <i className="bi bi-calendar text-xs" /> Calendar
           </Link>
           <Link href="/dashboard/bookings/new" className="flex items-center gap-1.5 bg-gradient-to-b from-primary/90 to-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium border-b-2 border-primary/70 shadow-sm transition-all hover:shadow-primary/30 hover:shadow-md">
@@ -121,9 +128,11 @@ export default function BookingsPage() {
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Client</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Service</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Staff</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Date & Time</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Status</th>
-                <th className="px-4 py-3" />
+	                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Date & Time</th>
+	                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Status</th>
+	                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Payment</th>
+	                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Source</th>
+	                <th className="px-4 py-3" />
               </tr>
             </thead>
             <tbody>
@@ -152,11 +161,16 @@ export default function BookingsPage() {
                       <p className="text-xs text-muted-foreground">{format(new Date(row.startsAt), "h:mm a")}</p>
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_STYLES[row.status] ?? ""}`}>
-                        {row.status.replace("_", " ")}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
+	                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_STYLES[row.status] ?? ""}`}>
+	                        {row.status.replace("_", " ")}
+	                      </span>
+	                    </td>
+	                    <td className="px-4 py-3">
+	                      <p className="tabular-nums">{row.amountLkr ? `LKR ${row.amountLkr.toLocaleString()}` : "-"}</p>
+	                      {row.paymentStatus && <p className="text-xs text-muted-foreground capitalize">{row.paymentStatus}</p>}
+	                    </td>
+	                    <td className="px-4 py-3 text-xs text-muted-foreground capitalize">{row.source}</td>
+	                    <td className="px-4 py-3">
                       <div className="flex gap-1.5 justify-end items-center">
                         <Link
                           href={`/dashboard/bookings/${row.id}`}
@@ -165,7 +179,14 @@ export default function BookingsPage() {
                           View
                         </Link>
                         <a
-                          href={`https://wa.me/${row.clientPhone.replace(/\D/g, "")}?text=${encodeURIComponent(`Hi ${row.clientName}, this is a reminder for your appointment on ${format(new Date(row.startsAt), "d MMM 'at' h:mm a")} for ${row.serviceName}.`)}`}
+                          href={whatsappUrl(
+                            row.clientPhone,
+                            bookingReminderText({
+                              clientName: row.clientName,
+                              serviceName: row.serviceName,
+                              startsAt: row.startsAt,
+                            })
+                          )}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-xs px-2.5 py-1 rounded border font-medium text-green-700 hover:bg-green-50 border-green-200 transition-colors"

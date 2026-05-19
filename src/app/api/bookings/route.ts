@@ -1,15 +1,48 @@
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/auth";
 import { db } from "@/db";
-import { bookings, payments, businesses, services, staff, clients } from "@/db/schema";
-import { eq, and, lt, gte } from "drizzle-orm";
+import { bookings, payments, businesses, services, staff, clients, staffServices } from "@/db/schema";
+import { eq, and, lt, gt, gte, inArray, count } from "drizzle-orm";
 import { buildPayhereFormData, getPayhereUrl } from "@/lib/payhere";
 import { sendBookingConfirmationToClient, sendBookingNotificationToBusiness } from "@/lib/resend";
 import { generateOrderId } from "@/lib/utils";
 import { dispatchWebhooks } from "@/lib/webhooks";
 import { logActivity } from "@/lib/activity-log";
+import { normalizeSriLankanPhone } from "@/lib/phone";
+import { decryptSecret } from "@/lib/secrets";
+import { PlanLimitError, requirePlanLimit, requirePro } from "@/lib/plan";
+import { z } from "@/lib/validation";
+import { startOfMonth } from "date-fns";
+
+const bookingSchema = z.object({
+  businessId: z.uuid(),
+  serviceId: z.uuid(),
+  staffId: z.uuid(),
+  startsAt: z.iso.datetime(),
+  endsAt: z.iso.datetime(),
+  clientName: z.string().trim().min(1).max(100),
+  clientPhone: z.string().trim().min(7).max(30),
+  clientEmail: z.email().optional().nullable().or(z.literal("")),
+  notes: z.string().trim().max(2000).optional().nullable(),
+  source: z.enum(["public", "manual", "api", "import"]).optional(),
+});
+
+function isOverlapConstraintError(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+  const maybe = error as { code?: string; cause?: { code?: string } };
+  return maybe.code === "23P01" || maybe.cause?.code === "23P01";
+}
 
 export async function POST(req: NextRequest) {
-  const body = await req.json();
+  const parsed = bookingSchema.safeParse(await req.json());
+
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: "Please check the booking details.", fieldErrors: parsed.error.flatten().fieldErrors },
+      { status: 400 }
+    );
+  }
+
   const {
     businessId,
     serviceId,
@@ -17,34 +50,23 @@ export async function POST(req: NextRequest) {
     startsAt,
     endsAt,
     clientName,
-    clientPhone,
     clientEmail,
     notes,
-    source,
-  } = body;
+    source: requestedSource = "public",
+  } = parsed.data;
+  const session = await auth();
+  const source = session?.user?.businessId === businessId ? requestedSource : "public";
 
-  if (!businessId || !serviceId || !staffId || !startsAt || !endsAt || !clientName || !clientPhone) {
-    return NextResponse.json({ error: "Missing required fields." }, { status: 400 });
+  const start = new Date(startsAt);
+  const end = new Date(endsAt);
+  const clientPhone = normalizeSriLankanPhone(parsed.data.clientPhone);
+
+  if (!clientPhone) {
+    return NextResponse.json({ error: "A valid phone number is required." }, { status: 400 });
   }
 
-  // Verify slot is still available (race condition guard)
-  const conflict = await db
-    .select({ id: bookings.id })
-    .from(bookings)
-    .where(
-      and(
-        eq(bookings.staffId, staffId),
-        lt(bookings.startsAt, new Date(endsAt)),
-        gte(bookings.endsAt, new Date(startsAt))
-      )
-    )
-    .limit(1);
-
-  if (conflict.length > 0) {
-    return NextResponse.json(
-      { error: "This slot was just taken. Please pick another time." },
-      { status: 409 }
-    );
+  if (end <= start) {
+    return NextResponse.json({ error: "Booking end time must be after start time." }, { status: 400 });
   }
 
   const [business] = await db
@@ -52,6 +74,8 @@ export async function POST(req: NextRequest) {
       id: businesses.id,
       email: businesses.email,
       name: businesses.name,
+      bankTransferInstructions: businesses.bankTransferInstructions,
+      lankaqrImageUrl: businesses.lankaqrImageUrl,
       payhereEnabled: businesses.payhereEnabled,
       payhereMerchantId: businesses.payhereMerchantId,
       payhereMerchantSecret: businesses.payhereMerchantSecret,
@@ -65,94 +89,167 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Business not found." }, { status: 404 });
   }
 
+  const [{ value: monthBookingCount }] = await db
+    .select({ value: count() })
+    .from(bookings)
+    .where(and(eq(bookings.businessId, businessId), gte(bookings.createdAt, startOfMonth(new Date()))));
+  try {
+    await requirePlanLimit(businessId, "bookingsPerMonth", Number(monthBookingCount));
+  } catch (error) {
+    if (error instanceof PlanLimitError) {
+      return NextResponse.json({ error: "This business has reached the free plan limit of 50 bookings this month." }, { status: 402 });
+    }
+    throw error;
+  }
+
   const [service] = await db
     .select({
       id: services.id,
-      businessId: services.businessId,
       name: services.name,
       priceLkr: services.priceLkr,
+      depositPercent: services.depositPercent,
       requiresPayment: services.requiresPayment,
+      durationMinutes: services.durationMinutes,
+      isActive: services.isActive,
     })
     .from(services)
-    .where(eq(services.id, serviceId))
+    .where(and(eq(services.id, serviceId), eq(services.businessId, businessId)))
     .limit(1);
+
+  if (!service || !service.isActive) {
+    return NextResponse.json({ error: "Service is not available." }, { status: 400 });
+  }
 
   const [staffMember] = await db
-    .select()
+    .select({
+      id: staff.id,
+      name: staff.name,
+      isActive: staff.isActive,
+    })
     .from(staff)
-    .where(eq(staff.id, staffId))
+    .where(and(eq(staff.id, staffId), eq(staff.businessId, businessId)))
     .limit(1);
 
-  if (
-    !service ||
-    !staffMember ||
-    service.businessId !== business.id ||
-    staffMember.businessId !== business.id
-  ) {
+  if (!staffMember || !staffMember.isActive) {
+    return NextResponse.json({ error: "Staff member is not available." }, { status: 400 });
+  }
+
+  const [eligible] = await db
+    .select({ staffId: staffServices.staffId })
+    .from(staffServices)
+    .where(and(eq(staffServices.staffId, staffId), eq(staffServices.serviceId, serviceId)))
+    .limit(1);
+
+  if (!eligible) {
+    return NextResponse.json({ error: "This staff member cannot perform the selected service." }, { status: 400 });
+  }
+
+  const expectedEnd = new Date(start.getTime() + service.durationMinutes * 60_000);
+  if (Math.abs(expectedEnd.getTime() - end.getTime()) > 60_000) {
+    return NextResponse.json({ error: "Booking duration does not match the selected service." }, { status: 400 });
+  }
+
+  // Fast pre-check. The database exclusion constraint is the final race guard.
+  const conflict = await db
+    .select({ id: bookings.id })
+    .from(bookings)
+    .where(
+      and(
+        eq(bookings.staffId, staffId),
+        inArray(bookings.status, ["pending", "confirmed"]),
+        lt(bookings.startsAt, end),
+        gt(bookings.endsAt, start)
+      )
+    )
+    .limit(1);
+
+  if (conflict.length > 0) {
     return NextResponse.json(
-      { error: "Service or staff does not belong to this business." },
-      { status: 400 },
+      { error: "This slot was just taken. Please pick another time." },
+      { status: 409 }
     );
   }
 
   // Upsert client record — match by phone within this business
-  let clientId: string | null = null;
-  const [existingClient] = await db
-    .select({ id: clients.id })
-    .from(clients)
-    .where(and(eq(clients.businessId, businessId), eq(clients.phone, clientPhone)))
-    .limit(1);
-
-  if (existingClient) {
-    clientId = existingClient.id;
-    // Promote stage to "active" if not already
-    await db
-      .update(clients)
-      .set({ stage: "active", name: clientName, email: clientEmail || undefined })
-      .where(eq(clients.id, existingClient.id));
-  } else {
-    const [newClient] = await db
-      .insert(clients)
-      .values({
-        businessId,
-        name: clientName,
-        phone: clientPhone,
-        email: clientEmail || null,
-        stage: "active",
-        source: "booking_page",
-      })
-      .returning({ id: clients.id });
-    clientId = newClient.id;
-  }
-
-  // Create booking (pending until payment confirmed, or immediately confirmed if free)
-  const payhereEnabled = service.requiresPayment && business.payhereEnabled && business.payhereMerchantId;
-  const requiresPayment = payhereEnabled;
-  const initialStatus = requiresPayment ? "pending" : "confirmed";
-
-  const [booking] = await db
-    .insert(bookings)
+  const [client] = await db
+    .insert(clients)
     .values({
       businessId,
-      serviceId,
-      staffId,
-      clientId,
-      clientName,
-      clientPhone,
-      clientEmail: clientEmail || null,
-      startsAt: new Date(startsAt),
-      endsAt: new Date(endsAt),
-      status: initialStatus,
-      notes: notes || null,
+      name: clientName,
+      phone: clientPhone,
+      email: clientEmail || null,
+      stage: "active",
+      source: source === "manual" ? "manual" : "booking_page",
     })
-    .returning({ id: bookings.id });
+    .onConflictDoUpdate({
+      target: [clients.businessId, clients.phone],
+      set: {
+        name: clientName,
+        email: clientEmail || null,
+        stage: "active",
+      },
+    })
+    .returning({ id: clients.id });
+
+  // Create booking (pending until payment/proof is confirmed, or immediately confirmed if free)
+  const payhereEnabled = service.requiresPayment && service.priceLkr > 0 && business.payhereEnabled && business.payhereMerchantId;
+  if (payhereEnabled) {
+    try {
+      await requirePro(businessId, "payments");
+    } catch (error) {
+      if (error instanceof PlanLimitError) throw error;
+      return NextResponse.json({ error: "PayHere payments require Dinaya Pro." }, { status: 402 });
+    }
+  }
+  const manualPaymentRequired = Boolean(
+    service.requiresPayment &&
+    service.priceLkr > 0 &&
+    !payhereEnabled &&
+    (business.bankTransferInstructions || business.lankaqrImageUrl)
+  );
+  const requiresPayherePayment = Boolean(payhereEnabled);
+  const initialStatus = requiresPayherePayment || manualPaymentRequired ? "pending" : "confirmed";
+
+  let booking: { id: string } | undefined;
+
+  try {
+    [booking] = await db
+      .insert(bookings)
+      .values({
+        businessId,
+        serviceId,
+        staffId,
+        clientId: client.id,
+        clientName,
+        clientPhone,
+        clientEmail: clientEmail || null,
+        startsAt: start,
+        endsAt: end,
+        status: initialStatus,
+        source,
+        notes: notes || null,
+      })
+      .returning({ id: bookings.id });
+  } catch (error) {
+    if (isOverlapConstraintError(error)) {
+      return NextResponse.json(
+        { error: "This slot was just taken. Please pick another time." },
+        { status: 409 }
+      );
+    }
+    throw error;
+  }
+
+  if (!booking) {
+    return NextResponse.json({ error: "Could not create booking." }, { status: 500 });
+  }
 
   void logActivity({
     action: "created",
     businessId,
     entity: "booking",
     entityId: booking.id,
-    meta: { source: source ?? "public", status: initialStatus },
+    meta: { source, status: initialStatus },
   }).catch((error) => {
     console.error("Activity log write failed:", error);
   });
@@ -166,14 +263,14 @@ export async function POST(req: NextRequest) {
     clientEmail: clientEmail || null,
     serviceName: service.name,
     staffName: staffMember.name,
-    startsAt,
-    endsAt,
+    startsAt: start.toISOString(),
+    endsAt: end.toISOString(),
   });
 
-  // Send emails for free bookings immediately
-  if (!requiresPayment) {
+  // Send emails for confirmed bookings immediately. Manual payment bookings remain pending.
+  if (!requiresPayherePayment) {
     await Promise.allSettled([
-      clientEmail
+      initialStatus === "confirmed" && clientEmail
         ? sendBookingConfirmationToClient({
             clientName,
             clientEmail,
@@ -199,35 +296,50 @@ export async function POST(req: NextRequest) {
         : Promise.resolve(),
     ]);
 
-    return NextResponse.json({ bookingId: booking.id });
+    return NextResponse.json({
+      bookingId: booking.id,
+      manualPayment: manualPaymentRequired,
+      status: initialStatus,
+    });
   }
 
   // ── PayHere payment flow ────────────────────────────────────────────────
   const orderId = generateOrderId();
+  const amountDueLkr = service.depositPercent > 0
+    ? Math.ceil((service.priceLkr * service.depositPercent) / 100)
+    : service.priceLkr;
 
   await db.insert(payments).values({
     bookingId: booking.id,
-    amountLkr: service.priceLkr,
+    amountLkr: amountDueLkr,
     payhereOrderId: orderId,
     status: "pending",
   });
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL!;
+  const merchantSecret = decryptSecret(business.payhereMerchantSecret);
+  if (!merchantSecret) {
+    return NextResponse.json(
+      { error: "PayHere is enabled but the merchant secret is missing." },
+      { status: 400 }
+    );
+  }
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? req.nextUrl.origin;
   const nameParts = clientName.split(" ");
 
   const formData = buildPayhereFormData({
     orderId,
-    amountLkr: service.priceLkr,
-    itemName: `${service.name} — ${business.name}`,
+    amountLkr: amountDueLkr,
+    itemName: `${service.depositPercent > 0 ? `${service.depositPercent}% deposit for ` : ""}${service.name} - ${business.name}`,
     firstName: nameParts[0],
     lastName: nameParts.slice(1).join(" "),
-    email: clientEmail,
+    email: clientEmail || undefined,
     phone: clientPhone,
     notifyUrl: `${appUrl}/api/webhooks/payhere`,
     returnUrl: `${appUrl}/book/${business.slug}/confirmed?bookingId=${booking.id}`,
     cancelUrl: `${appUrl}/book/${business.slug}`,
     merchantId: business.payhereMerchantId!,
-    merchantSecret: business.payhereMerchantSecret!,
+    merchantSecret,
   });
 
   return NextResponse.json({

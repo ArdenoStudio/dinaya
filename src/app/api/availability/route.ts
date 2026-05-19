@@ -1,17 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { availability, availabilityOverrides, bookings, staff, services } from "@/db/schema";
+import { availability, availabilityOverrides, bookings, businesses, staff, services } from "@/db/schema";
 import { eq, and, gte, lt, count } from "drizzle-orm";
 import { getAvailableSlots } from "@/lib/availability";
 import { parseISO, startOfDay, endOfDay } from "date-fns";
 import { fromZonedTime } from "date-fns-tz";
 
-const COLOMBO_TZ = "Asia/Colombo";
+const DEFAULT_TIMEZONE = "Asia/Colombo";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
   const staffId = searchParams.get("staffId");
   const serviceId = searchParams.get("serviceId");
+  const businessId = searchParams.get("businessId");
   const date = searchParams.get("date"); // "YYYY-MM-DD" in Colombo time
 
   if (!staffId || !serviceId || !date) {
@@ -22,6 +23,7 @@ export async function GET(req: NextRequest) {
     .select({
       durationMinutes: services.durationMinutes,
       beforeBuffer: services.beforeBuffer,
+      businessId: services.businessId,
       afterBuffer: services.afterBuffer,
       minimumNoticeHours: services.minimumNoticeHours,
       dailyCapacity: services.dailyCapacity,
@@ -31,6 +33,28 @@ export async function GET(req: NextRequest) {
     .limit(1);
 
   if (!service) return NextResponse.json({ slots: [] });
+
+  const [staffMember] = await db
+    .select({ businessId: staff.businessId, isActive: staff.isActive })
+    .from(staff)
+    .where(eq(staff.id, staffId))
+    .limit(1);
+
+  if (
+    !staffMember ||
+    !staffMember.isActive ||
+    staffMember.businessId !== service.businessId ||
+    (businessId && businessId !== service.businessId)
+  ) {
+    return NextResponse.json({ slots: [] }, { status: 404 });
+  }
+
+  const [business] = await db
+    .select({ timezone: businesses.timezone })
+    .from(businesses)
+    .where(eq(businesses.id, service.businessId))
+    .limit(1);
+  const timezone = business?.timezone ?? DEFAULT_TIMEZONE;
 
   const staffAvailability = await db
     .select()
@@ -44,8 +68,8 @@ export async function GET(req: NextRequest) {
 
   // Get existing bookings for this day (UTC window)
   const localDate = parseISO(date);
-  const dayStartUtc = fromZonedTime(startOfDay(localDate), COLOMBO_TZ);
-  const dayEndUtc = fromZonedTime(endOfDay(localDate), COLOMBO_TZ);
+  const dayStartUtc = fromZonedTime(startOfDay(localDate), timezone);
+  const dayEndUtc = fromZonedTime(endOfDay(localDate), timezone);
 
   const existingBookings = await db
     .select({ startsAt: bookings.startsAt, endsAt: bookings.endsAt, status: bookings.status })
@@ -88,6 +112,7 @@ export async function GET(req: NextRequest) {
     staffAvailability,
     overrides,
     existingBookings,
+    timezone,
   });
 
   return NextResponse.json({

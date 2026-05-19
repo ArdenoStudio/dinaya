@@ -40,6 +40,7 @@ export default function AvailabilityEditor({ staffList, dayNames }: Props) {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState("");
 
   // Overrides state
   const [overrides, setOverrides] = useState<Override[]>([]);
@@ -68,18 +69,55 @@ export default function AvailabilityEditor({ staffList, dayNames }: Props) {
   }, [selectedStaffId]);
 
   function toggleDay(day: number) {
-    if (rows.find((r) => r.dayOfWeek === day)) {
+    if (rows.some((r) => r.dayOfWeek === day)) {
       setRows((rs) => rs.filter((r) => r.dayOfWeek !== day));
     } else {
       setRows((rs) => [...rs, { dayOfWeek: day, startTime: "09:00", endTime: "17:00" }].sort((a, b) => a.dayOfWeek - b.dayOfWeek));
     }
   }
 
-  function updateRow(day: number, field: "startTime" | "endTime", value: string) {
-    setRows((rs) => rs.map((r) => r.dayOfWeek === day ? { ...r, [field]: value } : r));
+  function updateRow(index: number, field: "startTime" | "endTime", value: string) {
+    setRows((rs) => rs.map((r, i) => i === index ? { ...r, [field]: value } : r));
+  }
+
+  function addBlock(day: number) {
+    setRows((rs) => [...rs, { dayOfWeek: day, startTime: "13:00", endTime: "17:00" }].sort((a, b) =>
+      a.dayOfWeek === b.dayOfWeek ? a.startTime.localeCompare(b.startTime) : a.dayOfWeek - b.dayOfWeek
+    ));
+  }
+
+  function removeBlock(index: number) {
+    setRows((rs) => rs.filter((_, i) => i !== index));
+  }
+
+  function validateRows(): string | null {
+    for (const row of rows) {
+      if (row.startTime >= row.endTime) {
+        return `${dayNames[row.dayOfWeek]} has a block that ends before it starts.`;
+      }
+    }
+
+    for (const day of [0, 1, 2, 3, 4, 5, 6]) {
+      const dayRows = rows
+        .filter((row) => row.dayOfWeek === day)
+        .sort((a, b) => a.startTime.localeCompare(b.startTime));
+      for (let i = 1; i < dayRows.length; i++) {
+        if (dayRows[i - 1].endTime > dayRows[i].startTime) {
+          return `${dayNames[day]} has overlapping availability blocks.`;
+        }
+      }
+    }
+
+    return null;
   }
 
   async function handleSave() {
+    const validationError = validateRows();
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+    setError("");
     setSaving(true);
     await fetch("/api/dashboard/availability", {
       method: "POST",
@@ -143,28 +181,52 @@ export default function AvailabilityEditor({ staffList, dayNames }: Props) {
         ) : (
           <div className="space-y-3">
             {dayNames.map((name, day) => {
-              const row = rows.find((r) => r.dayOfWeek === day);
-              const active = !!row;
+              const dayRows = rows
+                .map((row, index) => ({ ...row, index }))
+                .filter((r) => r.dayOfWeek === day)
+                .sort((a, b) => a.startTime.localeCompare(b.startTime));
+              const active = dayRows.length > 0;
               return (
-                <div key={day} className="flex items-center gap-3">
+                <div key={day} className="items-start gap-3 rounded-lg border border-transparent py-2 sm:flex">
                   <label className="flex items-center gap-2 w-28 cursor-pointer">
                     <input type="checkbox" checked={active} onChange={() => toggleDay(day)} className="rounded" />
                     <span className={`text-sm ${active ? "font-medium" : "text-muted-foreground"}`}>{name}</span>
                   </label>
                   {active && (
-                    <>
-                      <input type="time" value={row.startTime} onChange={(e) => updateRow(day, "startTime", e.target.value)}
-                        className="border rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
-                      <span className="text-muted-foreground text-sm">to</span>
-                      <input type="time" value={row.endTime} onChange={(e) => updateRow(day, "endTime", e.target.value)}
-                        className="border rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
-                    </>
+                    <div className="mt-2 flex-1 space-y-2 sm:mt-0">
+                      {dayRows.map((row) => (
+                        <div key={row.index} className="flex items-center gap-2">
+                          <input type="time" value={row.startTime} onChange={(e) => updateRow(row.index, "startTime", e.target.value)}
+                            className="border rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
+                          <span className="text-muted-foreground text-sm">to</span>
+                          <input type="time" value={row.endTime} onChange={(e) => updateRow(row.index, "endTime", e.target.value)}
+                            className="border rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
+                          {dayRows.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => removeBlock(row.index)}
+                              className="rounded border px-2 py-1 text-xs text-muted-foreground hover:text-destructive"
+                            >
+                              Remove
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => addBlock(day)}
+                        className="text-xs font-medium text-primary hover:underline"
+                      >
+                        Add split shift
+                      </button>
+                    </div>
                   )}
                 </div>
               );
             })}
           </div>
         )}
+        {error && <p className="mt-3 rounded-md border border-destructive/20 bg-destructive/5 px-3 py-2 text-sm text-destructive">{error}</p>}
         <div className="mt-5 flex items-center gap-3">
           <button onClick={handleSave} disabled={saving}
             className="bg-primary text-primary-foreground px-5 py-2 rounded-md text-sm font-medium hover:bg-primary/90 disabled:opacity-50">

@@ -1,0 +1,90 @@
+import { NextRequest, NextResponse } from "next/server";
+import { and, eq, gte, inArray, lt } from "drizzle-orm";
+import { auth } from "@/auth";
+import { db } from "@/db";
+import { availability, availabilityOverrides, bookings, services, staff } from "@/db/schema";
+
+function parseStaffIds(req: NextRequest): string[] {
+  const params = req.nextUrl.searchParams;
+  const repeated = params.getAll("staffIds[]");
+  const comma = params.get("staffIds");
+  return [...repeated, ...(comma ? comma.split(",") : [])].map((id) => id.trim()).filter(Boolean);
+}
+
+export async function GET(req: NextRequest) {
+  const session = await auth();
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const businessId = session.user.businessId;
+
+  const fromParam = req.nextUrl.searchParams.get("from");
+  const toParam = req.nextUrl.searchParams.get("to");
+
+  if (!fromParam || !toParam) {
+    return NextResponse.json({ error: "from and to are required." }, { status: 400 });
+  }
+
+  const from = new Date(fromParam);
+  const to = new Date(toParam);
+
+  if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime()) || to <= from) {
+    return NextResponse.json({ error: "Invalid date range." }, { status: 400 });
+  }
+
+  const requestedStaffIds = parseStaffIds(req);
+  const staffRows = await db
+    .select({ id: staff.id, name: staff.name })
+    .from(staff)
+    .where(
+      requestedStaffIds.length > 0
+        ? and(eq(staff.businessId, businessId), inArray(staff.id, requestedStaffIds))
+        : eq(staff.businessId, businessId)
+    );
+
+  const staffIds = staffRows.map((row) => row.id);
+
+  if (staffIds.length === 0) {
+    return NextResponse.json({ staff: [], bookings: [], availability: [], overrides: [] });
+  }
+
+  const bookingRows = await db
+    .select({
+      id: bookings.id,
+      clientId: bookings.clientId,
+      clientName: bookings.clientName,
+      clientPhone: bookings.clientPhone,
+      endsAt: bookings.endsAt,
+      serviceId: bookings.serviceId,
+      serviceName: services.name,
+      source: bookings.source,
+      staffId: bookings.staffId,
+      startsAt: bookings.startsAt,
+      status: bookings.status,
+    })
+    .from(bookings)
+    .innerJoin(services, eq(services.id, bookings.serviceId))
+    .where(
+      and(
+        eq(bookings.businessId, businessId),
+        inArray(bookings.staffId, staffIds),
+        gte(bookings.startsAt, from),
+        lt(bookings.startsAt, to)
+      )
+    );
+
+  const availabilityRows = await db
+    .select()
+    .from(availability)
+    .where(inArray(availability.staffId, staffIds));
+
+  const overrideRows = await db
+    .select()
+    .from(availabilityOverrides)
+    .where(inArray(availabilityOverrides.staffId, staffIds));
+
+  return NextResponse.json({
+    staff: staffRows,
+    bookings: bookingRows,
+    availability: availabilityRows,
+    overrides: overrideRows,
+  });
+}

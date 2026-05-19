@@ -3,6 +3,18 @@ import { auth } from "@/auth";
 import { db } from "@/db";
 import { clients, bookings, services, staff, clientNotes } from "@/db/schema";
 import { eq, and, desc } from "drizzle-orm";
+import { normalizeSriLankanPhone } from "@/lib/phone";
+import { z } from "@/lib/validation";
+
+const clientPatchSchema = z.object({
+  name: z.string().trim().min(1).max(100).optional(),
+  phone: z.string().trim().min(7).max(30).optional(),
+  email: z.email().optional().nullable().or(z.literal("")),
+  stage: z.enum(["lead", "prospect", "active", "churned"]).optional(),
+  source: z.string().trim().max(100).optional().nullable(),
+  tags: z.array(z.string().trim().max(40)).optional().nullable(),
+  internalNotes: z.string().trim().max(5000).optional().nullable(),
+});
 
 export async function GET(
   _req: NextRequest,
@@ -53,14 +65,20 @@ export async function PATCH(
   const businessId = (session.user as { businessId: string }).businessId;
   const { id } = await params;
 
-  const body = await req.json();
-  const { name, phone, email, stage, source, tags, internalNotes } = body;
+  const parsed = clientPatchSchema.safeParse(await req.json());
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: "Please check the client details.", fieldErrors: parsed.error.flatten().fieldErrors },
+      { status: 400 }
+    );
+  }
+  const { name, phone, email, stage, source, tags, internalNotes } = parsed.data;
 
   const [updated] = await db
     .update(clients)
     .set({
       ...(name !== undefined && { name }),
-      ...(phone !== undefined && { phone }),
+	      ...(phone !== undefined && { phone: normalizeSriLankanPhone(phone) }),
       ...(email !== undefined && { email }),
       ...(stage !== undefined && { stage }),
       ...(source !== undefined && { source }),

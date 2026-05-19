@@ -5,6 +5,7 @@ import { format, addDays, isToday } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import type { Staff } from "@/db/schema";
 import type { BookingService } from "./BookingWizard";
+import type { BookingCopy } from "@/lib/i18n";
 
 const COLOMBO_TZ = "Asia/Colombo";
 const DATE_COUNT = 14;
@@ -17,13 +18,14 @@ interface SlotData {
 
 interface Props {
   businessId: string;
+  copy: BookingCopy;
   service: BookingService;
   staff: Staff;
   onSelect: (date: string, slot: { startUtc: string; endUtc: string; label: string }) => void;
   onBack: () => void;
 }
 
-export default function StepDateTime({ businessId, service, staff, onSelect, onBack }: Props) {
+export default function StepDateTime({ businessId, copy, service, staff, onSelect, onBack }: Props) {
   const today = toZonedTime(new Date(), COLOMBO_TZ);
   const [selectedDate, setSelectedDate] = useState<string>(format(today, "yyyy-MM-dd"));
   const [slots, setSlots] = useState<SlotData[]>([]);
@@ -49,7 +51,7 @@ export default function StepDateTime({ businessId, service, staff, onSelect, onB
 
   return (
     <div>
-      <h2 className="font-cal text-lg mb-4 text-balance">Pick a date & time</h2>
+      <h2 className="font-cal text-lg mb-4 text-balance">{copy.pickDateTime}</h2>
 
       {/* Date strip */}
       <div className="flex gap-1.5 overflow-x-auto pb-2 mb-5 scrollbar-hide">
@@ -68,7 +70,7 @@ export default function StepDateTime({ businessId, service, staff, onSelect, onB
               }`}
             >
               <span className={`font-medium ${isSelected ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
-                {todayDate ? "Today" : format(d, "EEE")}
+                {todayDate ? copy.today : format(d, "EEE")}
               </span>
               <span className="font-bold text-base mt-0.5 tabular-nums">{format(d, "d")}</span>
               <span className={`text-[10px] ${isSelected ? "text-primary-foreground/70" : "text-muted-foreground/70"}`}>
@@ -88,11 +90,11 @@ export default function StepDateTime({ businessId, service, staff, onSelect, onB
         </div>
       ) : !hasFetched ? (
         <p className="text-center text-muted-foreground/60 text-sm py-8">
-          Select a date to see available times.
+          {copy.selectDate}
         </p>
       ) : slots.length === 0 ? (
         <p className="text-center text-muted-foreground text-sm py-8">
-          No slots available on this date. Try another day.
+          {copy.noSlots}
         </p>
       ) : (
         <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 mb-5">
@@ -120,14 +122,14 @@ export default function StepDateTime({ businessId, service, staff, onSelect, onB
           onClick={onBack}
           className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
-          <i className="bi bi-chevron-left text-sm" /> Back
+          <i className="bi bi-chevron-left text-sm" /> {copy.back}
         </button>
         {selectedSlot && (
           <button
             onClick={() => onSelect(selectedDate, selectedSlot)}
             className="ml-auto bg-primary text-primary-foreground px-5 py-2 rounded-lg text-sm font-medium shadow-sm hover:bg-primary/90 transition-colors"
           >
-            Continue
+            {copy.continue}
           </button>
         )}
       </div>

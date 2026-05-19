@@ -6,6 +6,7 @@ import StepService from "./StepService";
 import StepStaff from "./StepStaff";
 import StepDateTime from "./StepDateTime";
 import StepConfirm from "./StepConfirm";
+import { getBookingCopy } from "@/lib/i18n";
 
 interface Props {
   business: BookingBusiness;
@@ -16,7 +17,13 @@ interface Props {
 
 export type BookingBusiness = {
   id: string;
+  bankTransferInstructions?: string | null;
+  cancellationPolicy?: string | null;
+  depositPolicy?: string | null;
+  language?: string;
+  lankaqrImageUrl?: string | null;
   name: string;
+  payhereEnabled?: boolean;
   slug: string;
 };
 
@@ -34,6 +41,7 @@ export type BookingService = {
   name: string;
   priceLkr: number;
   requiresPayment: boolean;
+  depositPercent: number;
 };
 
 export type BookingState = {
@@ -49,9 +57,9 @@ export type BookingState = {
   notes: string;
 };
 
-const STEPS = ["Service", "Staff", "Date & Time", "Your details"];
-
 export default function BookingWizard({ business, services, staff, staffServiceMap }: Props) {
+  const copy = getBookingCopy(business.language);
+  const steps = [copy.service, copy.staff, copy.dateTime, copy.details];
   const [step, setStep] = useState(0);
   const [state, setState] = useState<BookingState>({
     service: null,
@@ -67,8 +75,10 @@ export default function BookingWizard({ business, services, staff, staffServiceM
   });
   const [confirmed, setConfirmed] = useState<{
     bookingId: string;
+    manualPayment?: boolean;
     payhereFormData?: Record<string, string>;
     payhereUrl?: string;
+    status?: string;
   } | null>(null);
 
   function update(partial: Partial<BookingState>) {
@@ -85,7 +95,7 @@ export default function BookingWizard({ business, services, staff, staffServiceM
           <div className="size-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
             <i className="bi bi-credit-card text-2xl text-primary" />
           </div>
-          <h2 className="font-cal text-xl mb-2 text-balance">Redirecting to payment…</h2>
+          <h2 className="font-cal text-xl mb-2 text-balance">Redirecting to payment...</h2>
           <p className="text-muted-foreground text-sm mb-6 text-pretty">
             You&apos;ll be taken to PayHere to complete your booking.
           </p>
@@ -107,12 +117,16 @@ export default function BookingWizard({ business, services, staff, staffServiceM
 
     return (
       <div className="bg-white border rounded-xl p-10 text-center">
-        <div className="size-14 rounded-full bg-emerald-50 flex items-center justify-center mx-auto mb-4">
-          <i className="bi bi-check-circle-fill text-2xl text-emerald-600" />
+        <div className="size-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+          <i className="bi bi-check-circle-fill text-2xl text-primary" />
         </div>
-        <h2 className="font-cal text-xl mb-2 text-balance">Booking confirmed!</h2>
+        <h2 className="font-cal text-xl mb-2 text-balance">
+          {confirmed.manualPayment ? "Booking request received" : "Booking confirmed!"}
+        </h2>
         <p className="text-muted-foreground text-sm mb-1 text-pretty">
-          We&apos;ve sent a confirmation to {state.clientEmail || state.clientPhone}.
+          {confirmed.manualPayment
+            ? "Your booking is pending until the business confirms your payment proof."
+            : `We've sent a confirmation to ${state.clientEmail || state.clientPhone}.`}
         </p>
         <p className="text-xs text-muted-foreground/60 mt-2">
           Ref: {confirmed.bookingId.slice(0, 8).toUpperCase()}
@@ -125,7 +139,7 @@ export default function BookingWizard({ business, services, staff, staffServiceM
     <div className="bg-white border rounded-xl overflow-hidden">
       {/* Step progress */}
       <div className="flex border-b">
-        {STEPS.map((label, i) => {
+        {steps.map((label, i) => {
           const done = i < step;
           const active = i === step;
           return (
@@ -161,6 +175,7 @@ export default function BookingWizard({ business, services, staff, staffServiceM
           <StepService
             services={services}
             selected={state.service}
+            copy={copy}
             onSelect={(s) => { update({ service: s, staff: null, date: "", timeSlot: "" }); next(); }}
           />
         )}
@@ -170,6 +185,7 @@ export default function BookingWizard({ business, services, staff, staffServiceM
             staffServiceMap={staffServiceMap}
             serviceId={state.service!.id}
             selected={state.staff}
+            copy={copy}
             onSelect={(s) => { update({ staff: s, date: "", timeSlot: "" }); next(); }}
             onBack={back}
           />
@@ -179,6 +195,7 @@ export default function BookingWizard({ business, services, staff, staffServiceM
             businessId={business.id}
             service={state.service!}
             staff={state.staff!}
+            copy={copy}
             onSelect={(date, slot) => {
               update({
                 date,
@@ -195,6 +212,7 @@ export default function BookingWizard({ business, services, staff, staffServiceM
           <StepConfirm
             state={state}
             business={business}
+            copy={copy}
             onUpdate={update}
             onBack={back}
             onConfirmed={setConfirmed}

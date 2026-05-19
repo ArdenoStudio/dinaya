@@ -1,10 +1,12 @@
 import type { Staff } from "@/db/schema";
+import type { BookingCopy } from "@/lib/i18n";
 
 interface Props {
   allStaff: Staff[];
   staffServiceMap: { staffId: string; serviceId: string }[];
   serviceId: string;
   selected: Staff | null;
+  copy: BookingCopy;
   onSelect: (staff: Staff) => void;
   onBack: () => void;
 }
@@ -14,6 +16,7 @@ export default function StepStaff({
   staffServiceMap,
   serviceId,
   selected,
+  copy,
   onSelect,
   onBack,
 }: Props) {
@@ -24,11 +27,11 @@ export default function StepStaff({
 
   return (
     <div>
-      <h2 className="font-cal text-lg mb-4 text-balance">Choose a team member</h2>
+      <h2 className="font-cal text-lg mb-4 text-balance">{copy.chooseTeam}</h2>
 
       {eligible.length === 0 ? (
         <p className="text-muted-foreground text-sm text-center py-8">
-          No staff available for this service.
+          {copy.noStaff}
         </p>
       ) : (
         <div className="space-y-2">
@@ -77,7 +80,7 @@ export default function StepStaff({
         onClick={onBack}
         className="mt-5 flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
       >
-        <i className="bi bi-chevron-left text-sm" /> Back
+        <i className="bi bi-chevron-left text-sm" /> {copy.back}
       </button>
     </div>
   );

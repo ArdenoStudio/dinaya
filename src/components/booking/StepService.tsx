@@ -1,27 +1,32 @@
 import { formatLkr } from "@/lib/utils";
 import type { BookingService } from "./BookingWizard";
+import type { BookingCopy } from "@/lib/i18n";
 
 interface Props {
   services: BookingService[];
   selected: BookingService | null;
+  copy: BookingCopy;
   onSelect: (service: BookingService) => void;
 }
 
-export default function StepService({ services, selected, onSelect }: Props) {
+export default function StepService({ services, selected, copy, onSelect }: Props) {
   if (services.length === 0) {
     return (
       <div className="text-center py-12 text-muted-foreground text-sm">
-        No services available yet. Check back soon!
+        {copy.noServices}
       </div>
     );
   }
 
   return (
     <div>
-      <h2 className="font-cal text-lg mb-4 text-balance">Choose a service</h2>
+      <h2 className="font-cal text-lg mb-4 text-balance">{copy.chooseService}</h2>
       <div className="space-y-2">
         {services.map((s) => {
           const isSelected = selected?.id === s.id;
+          const depositAmount = s.depositPercent > 0
+            ? Math.ceil((s.priceLkr * s.depositPercent) / 100)
+            : s.priceLkr;
           return (
             <button
               key={s.id}
@@ -48,6 +53,11 @@ export default function StepService({ services, selected, onSelect }: Props) {
                     <p className="text-sm font-semibold tabular-nums">
                       {s.priceLkr > 0 ? formatLkr(s.priceLkr) : "Free"}
                     </p>
+                    {s.requiresPayment && s.priceLkr > 0 && (
+                      <p className="mt-0.5 text-[11px] font-medium text-amber-600">
+                        {s.depositPercent > 0 ? `${copy.depositDue}: ${formatLkr(depositAmount)}` : copy.payToConfirm}
+                      </p>
+                    )}
                   </div>
                   <div
                     className={`size-5 rounded-full border-2 flex items-center justify-center transition-colors ${

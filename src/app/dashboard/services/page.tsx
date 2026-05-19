@@ -15,6 +15,7 @@ export default async function ServicesPage() {
       description: services.description,
       durationMinutes: services.durationMinutes,
       priceLkr: services.priceLkr,
+      depositPercent: services.depositPercent,
       requiresPayment: services.requiresPayment,
       isActive: services.isActive,
       beforeBuffer: services.beforeBuffer,
@@ -63,7 +64,9 @@ export default async function ServicesPage() {
                     {s.priceLkr > 0 ? formatLkr(s.priceLkr) : "Free"}
                   </span>
                   {s.requiresPayment && (
-                    <span className="text-amber-600 font-medium">Payment required</span>
+                    <span className="text-amber-600 font-medium">
+                      {s.depositPercent > 0 ? `${s.depositPercent}% deposit` : "Payment required"}
+                    </span>
                   )}
                   {(s.beforeBuffer > 0 || s.afterBuffer > 0) && (
                     <span>

@@ -9,6 +9,8 @@ type Booking = {
   clientId: string | null;
   clientName: string;
   clientPhone: string;
+  endsAt: string;
+  staffId: string;
   startsAt: string;
   status: "pending" | "confirmed" | "cancelled" | "completed" | "no_show";
   serviceName: string;
@@ -40,10 +42,13 @@ export default function CalendarPage() {
 
   useEffect(() => {
     setLoading(true);
-    fetch("/api/dashboard/bookings?tab=all")
+    const from = weekStart.toISOString();
+    const to = addDays(weekStart, 7).toISOString();
+    fetch(`/api/calendar?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`)
       .then((r) => r.json())
-      .then((data) => { setBookings(data); setLoading(false); });
-  }, []);
+      .then((data) => { setBookings(data.bookings ?? []); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, [weekStart]);
 
   function bookingsForDay(day: Date) {
     return bookings.filter((b) => isSameDay(new Date(b.startsAt), day));

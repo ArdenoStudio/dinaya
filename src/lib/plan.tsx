@@ -23,6 +23,7 @@ type Entitlements = {
   };
   features: Record<PlanFeature, boolean>;
 };
+export type PlanLimit = keyof Entitlements["limits"];
 
 export const FREE_ENTITLEMENTS = {
   limits: {
@@ -95,6 +96,16 @@ export class PlanRequiredError extends Error {
   }
 }
 
+export class PlanLimitError extends Error {
+  constructor(
+    public readonly limit: PlanLimit,
+    public readonly max: number
+  ) {
+    super(`Your current plan allows up to ${max} ${limit}.`);
+    this.name = "PlanLimitError";
+  }
+}
+
 export function getEntitlements(plan: Plan): Entitlements {
   return PLAN_ENTITLEMENTS[plan];
 }
@@ -127,6 +138,19 @@ export async function requirePro(
 
   if (!canUseFeature(plan, feature)) {
     throw new PlanRequiredError(businessId, feature);
+  }
+}
+
+export async function requirePlanLimit(
+  businessId: string,
+  limit: PlanLimit,
+  currentCount: number
+): Promise<void> {
+  const plan = await getBusinessPlan(businessId);
+  const max = PLAN_ENTITLEMENTS[plan].limits[limit];
+
+  if (max !== null && currentCount >= max) {
+    throw new PlanLimitError(limit, max);
   }
 }
 

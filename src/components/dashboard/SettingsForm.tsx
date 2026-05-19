@@ -4,14 +4,20 @@ import { useState } from "react";
 
 type SettingsBusiness = {
   address: string | null;
+  bankTransferInstructions: string | null;
+  businessType: string | null;
+  cancellationPolicy: string | null;
   description: string | null;
+  depositPolicy: string | null;
   facebookUrl: string | null;
   galleryImages: string[] | null;
   instagramUrl: string | null;
+  language: string;
+  lankaqrImageUrl: string | null;
   name: string;
   payhereEnabled: boolean;
   payhereMerchantId: string | null;
-  payhereMerchantSecret: string | null;
+  hasPayhereMerchantSecret: boolean;
   phone: string | null;
   slug: string;
   timezone: string;
@@ -27,12 +33,18 @@ export default function SettingsForm({ business }: Props) {
     phone: business.phone ?? "",
     address: business.address ?? "",
     timezone: business.timezone,
+    language: business.language ?? "en",
+    businessType: business.businessType ?? "other",
+    cancellationPolicy: business.cancellationPolicy ?? "",
+    depositPolicy: business.depositPolicy ?? "",
+    bankTransferInstructions: business.bankTransferInstructions ?? "",
+    lankaqrImageUrl: business.lankaqrImageUrl ?? "",
     instagramUrl: business.instagramUrl ?? "",
     facebookUrl: business.facebookUrl ?? "",
     websiteUrl: business.websiteUrl ?? "",
     payhereEnabled: business.payhereEnabled,
     payhereMerchantId: business.payhereMerchantId ?? "",
-    payhereMerchantSecret: business.payhereMerchantSecret ?? "",
+    payhereMerchantSecret: "",
   });
 
   const [galleryImages, setGalleryImages] = useState<string[]>(
@@ -49,10 +61,16 @@ export default function SettingsForm({ business }: Props) {
     setSaving(true);
     setError("");
 
+    const payload = {
+      ...form,
+      galleryImages,
+      payhereMerchantSecret: form.payhereMerchantSecret.trim() || undefined,
+    };
+
     const res = await fetch("/api/dashboard/settings", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...form, galleryImages }),
+      body: JSON.stringify(payload),
     });
 
     if (!res.ok) {
@@ -134,11 +152,101 @@ export default function SettingsForm({ business }: Props) {
               <option value="UTC">UTC</option>
             </select>
           </div>
+          <div>
+            <label className="text-sm font-medium">Booking page language</label>
+            <select
+              value={form.language}
+              onChange={(e) => setForm((f) => ({ ...f, language: e.target.value }))}
+              className={inputCls}
+            >
+              <option value="en">English</option>
+              <option value="si">Sinhala</option>
+              <option value="ta">Tamil</option>
+            </select>
+          </div>
+          <div>
+            <label className="text-sm font-medium">Business type</label>
+            <select
+              value={form.businessType}
+              onChange={(e) => setForm((f) => ({ ...f, businessType: e.target.value }))}
+              className={inputCls}
+            >
+              <option value="salon_barber">Salon / barber</option>
+              <option value="clinic">Clinic</option>
+              <option value="tuition">Tuition / classes</option>
+              <option value="vehicle_service">Vehicle service</option>
+              <option value="photography">Photography</option>
+              <option value="spa_wellness">Spa / wellness</option>
+              <option value="consulting">Consulting</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
           <div className="pt-1">
             <p className="text-xs text-muted-foreground mb-1">Your booking URL</p>
             <code className="text-sm text-primary bg-primary/5 px-2.5 py-1 rounded-md">
               {business.slug}.dinaya.lk
             </code>
+          </div>
+        </div>
+
+        {/* Booking policies */}
+        <div className="bg-white border rounded-xl p-6 space-y-4">
+          <div className="flex items-center gap-2">
+            <i className="bi bi-shield-check text-sm text-muted-foreground" />
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Booking trust</p>
+          </div>
+          <p className="text-xs text-muted-foreground -mt-2">
+            These policies appear on the public booking page before a client confirms.
+          </p>
+          <div>
+            <label className="text-sm font-medium">Cancellation policy</label>
+            <textarea
+              value={form.cancellationPolicy}
+              onChange={(e) => setForm((f) => ({ ...f, cancellationPolicy: e.target.value }))}
+              className={`${inputCls} resize-none`}
+              rows={3}
+              placeholder="Example: Please reschedule at least 12 hours before the appointment."
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium">Deposit policy</label>
+            <textarea
+              value={form.depositPolicy}
+              onChange={(e) => setForm((f) => ({ ...f, depositPolicy: e.target.value }))}
+              className={`${inputCls} resize-none`}
+              rows={3}
+              placeholder="Example: Deposits are deducted from the final bill and may be non-refundable for no-shows."
+            />
+          </div>
+        </div>
+
+        {/* Local payment fallback */}
+        <div className="bg-white border rounded-xl p-6 space-y-4">
+          <div className="flex items-center gap-2">
+            <i className="bi bi-bank text-sm text-muted-foreground" />
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Local payment fallback</p>
+          </div>
+          <p className="text-xs text-muted-foreground -mt-2">
+            Use this when PayHere is not enabled or when a client prefers bank transfer or LankaQR proof.
+          </p>
+          <div>
+            <label className="text-sm font-medium">Bank transfer / payment proof instructions</label>
+            <textarea
+              value={form.bankTransferInstructions}
+              onChange={(e) => setForm((f) => ({ ...f, bankTransferInstructions: e.target.value }))}
+              className={`${inputCls} resize-none`}
+              rows={4}
+              placeholder="Bank, account number, account name, branch, and what reference clients should send on WhatsApp."
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium">LankaQR image URL</label>
+            <input
+              value={form.lankaqrImageUrl}
+              onChange={(e) => setForm((f) => ({ ...f, lankaqrImageUrl: e.target.value }))}
+              className={inputCls}
+              placeholder="https://example.com/lankaqr.png"
+            />
           </div>
         </div>
 
@@ -275,17 +383,39 @@ export default function SettingsForm({ business }: Props) {
                 />
               </div>
               <div>
-                <label className="text-xs font-medium text-muted-foreground">Merchant Secret</label>
-                <input
-                  type="password"
-                  value={form.payhereMerchantSecret}
-                  onChange={(e) => setForm((f) => ({ ...f, payhereMerchantSecret: e.target.value }))}
-                  placeholder="••••••••••••••••"
-                  className={inputCls}
-                />
-              </div>
+	                <label className="text-xs font-medium text-muted-foreground">Merchant Secret</label>
+	                <input
+	                  type="password"
+	                  value={form.payhereMerchantSecret}
+	                  onChange={(e) => setForm((f) => ({ ...f, payhereMerchantSecret: e.target.value }))}
+	                  placeholder={business.hasPayhereMerchantSecret ? "Saved - leave blank to keep existing" : "Paste merchant secret"}
+	                  className={inputCls}
+	                />
+	                {business.hasPayhereMerchantSecret && (
+	                  <p className="mt-1 text-xs text-muted-foreground">
+	                    A secret is saved. Enter a new value only when rotating it.
+	                  </p>
+	                )}
+	              </div>
             </div>
           )}
+        </div>
+
+        {/* Data controls */}
+        <div className="bg-white border rounded-xl p-6 space-y-3">
+          <div className="flex items-center gap-2">
+            <i className="bi bi-download text-sm text-muted-foreground" />
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Data controls</p>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Export business, client, booking, review, and payment records as JSON. Payment card details are never stored in Dinaya.
+          </p>
+          <a
+            href="/api/dashboard/export"
+            className="inline-flex rounded-lg border px-3 py-2 text-sm font-medium text-primary hover:border-primary/40 hover:bg-primary/5"
+          >
+            Export all data
+          </a>
         </div>
 
         {error && <p className="text-destructive text-sm">{error}</p>}
