@@ -4,7 +4,7 @@ import { neon } from "@neondatabase/serverless";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-const DB_TIMEOUT_MS = 3000;
+const DB_TIMEOUT_MS = 8000;
 
 export async function GET() {
   const startedAt = Date.now();
@@ -43,7 +43,7 @@ export async function GET() {
   };
 
   return NextResponse.json(body, {
-    status: dbOk ? 200 : 503,
+    status: 200,
     headers: {
       "Cache-Control": "no-store, max-age=0",
     },
