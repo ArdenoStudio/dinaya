@@ -29,7 +29,7 @@ export default auth((req) => {
   // Protect dashboard routes
   if (pathname.startsWith("/dashboard")) {
     if (!req.auth) {
-      return NextResponse.redirect(new URL("/login", req.url));
+      return NextResponse.redirect(new URL("/auth/signin", req.url));
     }
   }
 

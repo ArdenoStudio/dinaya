@@ -1,21 +1,52 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/auth";
 import { db } from "@/db";
 import { businesses } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { fail, ok, validationError } from "@/lib/action-result";
+import { getBusinessContext } from "@/lib/auth";
+import { logActivity } from "@/lib/activity-log";
+import { z } from "@/lib/validation";
+
+const settingsSchema = z.object({
+  name: z.string().trim().min(1, "Business name is required.").max(100),
+  description: z.string().trim().max(2000).optional().nullable(),
+  phone: z.string().trim().max(20).optional().nullable(),
+  address: z.string().trim().max(1000).optional().nullable(),
+  timezone: z.string().trim().min(1).max(80).default("Asia/Colombo"),
+  instagramUrl: z.string().trim().max(500).optional().nullable(),
+  facebookUrl: z.string().trim().max(500).optional().nullable(),
+  websiteUrl: z.string().trim().max(500).optional().nullable(),
+  galleryImages: z.array(z.string().trim().max(1000)).max(12).optional().default([]),
+  payhereEnabled: z.boolean().optional(),
+  payhereMerchantId: z.string().trim().max(100).optional().nullable(),
+  payhereMerchantSecret: z.string().trim().max(1000).optional().nullable(),
+});
 
 export async function PATCH(req: NextRequest) {
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const context = await getBusinessContext();
+  if (!context) {
+    return NextResponse.json(fail("Unauthorized"), { status: 401 });
+  }
 
-  const businessId = (session.user as { businessId: string }).businessId;
+  const parsed = settingsSchema.safeParse(await req.json());
+  if (!parsed.success) {
+    return NextResponse.json(validationError(parsed.error), { status: 400 });
+  }
+
   const {
-    name, description, phone, address,
-    instagramUrl, facebookUrl, websiteUrl, galleryImages,
-    payhereEnabled, payhereMerchantId, payhereMerchantSecret,
-  } = await req.json();
-
-  if (!name) return NextResponse.json({ error: "Business name is required." }, { status: 400 });
+    address,
+    description,
+    facebookUrl,
+    galleryImages,
+    instagramUrl,
+    name,
+    payhereEnabled,
+    payhereMerchantId,
+    payhereMerchantSecret,
+    phone,
+    timezone,
+    websiteUrl,
+  } = parsed.data;
 
   await db
     .update(businesses)
@@ -24,6 +55,7 @@ export async function PATCH(req: NextRequest) {
       description: description || null,
       phone: phone || null,
       address: address || null,
+      timezone,
       instagramUrl: instagramUrl || null,
       facebookUrl: facebookUrl || null,
       websiteUrl: websiteUrl || null,
@@ -32,7 +64,16 @@ export async function PATCH(req: NextRequest) {
       ...(payhereMerchantId !== undefined && { payhereMerchantId: payhereMerchantId || null }),
       ...(payhereMerchantSecret !== undefined && { payhereMerchantSecret: payhereMerchantSecret || null }),
     })
-    .where(eq(businesses.id, businessId));
+    .where(eq(businesses.id, context.businessId));
 
-  return NextResponse.json({ success: true });
+  await logActivity({
+    action: "updated",
+    actorUserId: context.user.id,
+    businessId: context.businessId,
+    entity: "business",
+    entityId: context.businessId,
+    meta: { fields: Object.keys(parsed.data) },
+  });
+
+  return NextResponse.json(ok({ id: context.businessId }));
 }

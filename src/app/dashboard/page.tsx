@@ -1,13 +1,12 @@
-import { auth } from "@/auth";
 import { db } from "@/db";
 import { bookings, businesses } from "@/db/schema";
 import { eq, gte, count, and, sql } from "drizzle-orm";
 import { startOfWeek, endOfWeek, format } from "date-fns";
 import Link from "next/link";
+import { requireBusiness } from "@/lib/auth";
 
 export default async function DashboardOverview() {
-  const session = await auth();
-  const businessId = (session!.user as { businessId: string }).businessId;
+  const { businessId } = await requireBusiness();
 
   const [business] = await db
     .select()

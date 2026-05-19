@@ -1,12 +1,11 @@
-import { auth } from "@/auth";
 import { db } from "@/db";
 import { staff } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import Link from "next/link";
+import { requireBusiness } from "@/lib/auth";
 
 export default async function StaffPage() {
-  const session = await auth();
-  const businessId = (session!.user as { businessId: string }).businessId;
+  const { businessId } = await requireBusiness();
 
   const list = await db.select().from(staff).where(eq(staff.businessId, businessId));
 

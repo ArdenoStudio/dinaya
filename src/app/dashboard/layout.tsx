@@ -1,44 +1,87 @@
-import { auth } from "@/auth";
-import { redirect } from "next/navigation";
 import { signOut } from "@/auth";
 import { Logo } from "@/components/Logo";
 import { SidebarNav } from "@/components/dashboard/SidebarNav";
+import { DashboardToastProvider } from "@/components/dashboard/ToastProvider";
+import { requireBusiness } from "@/lib/auth";
+import { Bell, ChevronsUpDown, Menu, Search, UserCircle } from "lucide-react";
 
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth();
-  if (!session) redirect("/login");
+  const { business, user } = await requireBusiness();
 
   return (
-    <div className="min-h-screen flex">
-      {/* Sidebar */}
-      <aside className="w-56 border-r bg-white flex flex-col" aria-label="Sidebar">
-        <div className="px-6 py-5 border-b">
+    <div className="min-h-screen bg-muted/20 lg:grid lg:grid-cols-[17rem_minmax(0,1fr)]">
+      <aside className="hidden border-r bg-white lg:flex lg:flex-col" aria-label="Sidebar">
+        <div className="border-b px-6 py-5">
           <Logo href="/dashboard" size="sm" />
         </div>
         <SidebarNav />
-        <div className="px-6 py-4 border-t">
-          <p className="text-xs text-muted-foreground mb-3 truncate">{session.user?.email}</p>
+        <div className="border-t px-6 py-4">
+          <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+          <p className="mt-1 text-xs capitalize text-muted-foreground/70">{business.plan} plan</p>
           <form
             action={async () => {
               "use server";
-              await signOut({ redirectTo: "/login" });
+              await signOut({ redirectTo: "/auth/signin" });
             }}
           >
-            <button className="text-xs text-muted-foreground hover:text-foreground">
+            <button className="mt-3 text-xs text-muted-foreground hover:text-foreground">
               Sign out
             </button>
           </form>
         </div>
       </aside>
 
-      {/* Main */}
-      <main className="flex-1 bg-muted/20 overflow-auto">
-        <div className="max-w-5xl mx-auto px-8 py-8">{children}</div>
-      </main>
+      <div className="min-w-0">
+        <header className="sticky top-0 z-20 border-b bg-white/95 backdrop-blur">
+          <div className="flex h-16 items-center gap-3 px-4 sm:px-6 lg:px-8">
+            <details className="group lg:hidden">
+              <summary className="flex size-9 cursor-pointer list-none items-center justify-center rounded-md border text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
+                <Menu className="size-4" aria-hidden="true" />
+                <span className="sr-only">Open navigation</span>
+              </summary>
+              <div className="absolute left-3 top-14 w-[min(20rem,calc(100vw-1.5rem))] rounded-lg border bg-white p-2 shadow-lg">
+                <SidebarNav />
+              </div>
+            </details>
+
+            <div className="hidden lg:block">
+              <button className="inline-flex items-center gap-2 rounded-md border bg-white px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted">
+                <span className="max-w-[13rem] truncate">{business.name}</span>
+                <ChevronsUpDown className="size-3.5 text-muted-foreground" aria-hidden="true" />
+              </button>
+            </div>
+
+            <div className="relative min-w-0 flex-1">
+              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+              <input
+                aria-label="Search dashboard"
+                className="h-10 w-full rounded-md border bg-white pl-9 pr-3 text-sm outline-none transition-shadow placeholder:text-muted-foreground/60 focus:ring-2 focus:ring-primary/30"
+                placeholder="Search bookings, clients, services"
+              />
+            </div>
+
+            <button className="flex size-10 items-center justify-center rounded-md border bg-white text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
+              <Bell className="size-4" aria-hidden="true" />
+              <span className="sr-only">Notifications</span>
+            </button>
+
+            <div className="hidden items-center gap-2 rounded-md border bg-white px-2.5 py-2 sm:flex">
+              <UserCircle className="size-4 text-muted-foreground" aria-hidden="true" />
+              <span className="max-w-[10rem] truncate text-sm">{user.name ?? user.email}</span>
+            </div>
+          </div>
+        </header>
+
+        <DashboardToastProvider>
+          <main className="min-h-[calc(100vh-4rem)] overflow-auto">
+            <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">{children}</div>
+          </main>
+        </DashboardToastProvider>
+      </div>
     </div>
   );
 }

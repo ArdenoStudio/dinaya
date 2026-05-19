@@ -6,6 +6,7 @@ import { buildPayhereFormData, getPayhereUrl } from "@/lib/payhere";
 import { sendBookingConfirmationToClient, sendBookingNotificationToBusiness } from "@/lib/resend";
 import { generateOrderId } from "@/lib/utils";
 import { dispatchWebhooks } from "@/lib/webhooks";
+import { logActivity } from "@/lib/activity-log";
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
@@ -19,6 +20,7 @@ export async function POST(req: NextRequest) {
     clientPhone,
     clientEmail,
     notes,
+    source,
   } = body;
 
   if (!businessId || !serviceId || !staffId || !startsAt || !endsAt || !clientName || !clientPhone) {
@@ -111,9 +113,18 @@ export async function POST(req: NextRequest) {
       startsAt: new Date(startsAt),
       endsAt: new Date(endsAt),
       status: initialStatus,
+      source: source ?? "public",
       notes: notes || null,
     })
     .returning({ id: bookings.id });
+
+  await logActivity({
+    action: "created",
+    businessId,
+    entity: "booking",
+    entityId: booking.id,
+    meta: { source: source ?? "public", status: initialStatus },
+  });
 
   // Fire webhook for booking creation
   void dispatchWebhooks(businessId, "booking.created", {

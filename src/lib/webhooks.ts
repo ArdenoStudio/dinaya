@@ -6,6 +6,7 @@ import crypto from "crypto";
 export type WebhookEvent =
   | "booking.created"
   | "booking.confirmed"
+  | "booking.rescheduled"
   | "booking.cancelled"
   | "booking.completed"
   | "booking.no_show";

@@ -11,6 +11,7 @@ export default function SettingsForm({ business }: Props) {
     description: business.description ?? "",
     phone: business.phone ?? "",
     address: business.address ?? "",
+    timezone: business.timezone,
     instagramUrl: business.instagramUrl ?? "",
     facebookUrl: business.facebookUrl ?? "",
     websiteUrl: business.websiteUrl ?? "",
@@ -104,6 +105,19 @@ export default function SettingsForm({ business }: Props) {
               className={inputCls}
               placeholder="123 Main St, Colombo 03"
             />
+          </div>
+          <div>
+            <label className="text-sm font-medium">Timezone</label>
+            <select
+              value={form.timezone}
+              onChange={(e) => setForm((f) => ({ ...f, timezone: e.target.value }))}
+              className={inputCls}
+            >
+              <option value="Asia/Colombo">Asia/Colombo</option>
+              <option value="Asia/Kolkata">Asia/Kolkata</option>
+              <option value="Asia/Dubai">Asia/Dubai</option>
+              <option value="UTC">UTC</option>
+            </select>
           </div>
           <div className="pt-1">
             <p className="text-xs text-muted-foreground mb-1">Your booking URL</p>

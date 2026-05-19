@@ -8,7 +8,7 @@ import { users } from "@/db/schema";
 export const { handlers, signIn, signOut, auth } = NextAuth({
   session: { strategy: "jwt" },
   pages: {
-    signIn: "/login",
+    signIn: "/auth/signin",
   },
   providers: [
     Credentials({
@@ -46,18 +46,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     jwt({ token, user }) {
       if (user) {
-        token.businessId = (user as { businessId: string }).businessId;
-        token.role = (user as { role: string }).role;
+        token.businessId = user.businessId;
+        token.role = user.role;
       }
       return token;
     },
     session({ session, token }) {
       if (token) {
-        session.user.id = token.sub!;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (session.user as any).businessId = token.businessId as string;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (session.user as any).role = token.role as string;
+        session.user.id = token.sub ?? "";
+        session.user.businessId =
+          typeof token.businessId === "string" ? token.businessId : "";
+        session.user.role = token.role === "owner" ? "owner" : "staff";
       }
       return session;
     },

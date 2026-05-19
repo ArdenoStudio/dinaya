@@ -1,14 +1,13 @@
-import { auth } from "@/auth";
 import { db } from "@/db";
 import { staff, availability } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import AvailabilityEditor from "@/components/dashboard/AvailabilityEditor";
+import { requireBusiness } from "@/lib/auth";
 
 const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 export default async function AvailabilityPage() {
-  const session = await auth();
-  const businessId = (session!.user as { businessId: string }).businessId;
+  const { businessId } = await requireBusiness();
 
   const staffList = await db.select().from(staff).where(eq(staff.businessId, businessId));
 

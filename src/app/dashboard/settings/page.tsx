@@ -1,14 +1,8 @@
-import { auth } from "@/auth";
-import { db } from "@/db";
-import { businesses } from "@/db/schema";
-import { eq } from "drizzle-orm";
 import SettingsForm from "@/components/dashboard/SettingsForm";
+import { requireBusiness } from "@/lib/auth";
 
 export default async function SettingsPage() {
-  const session = await auth();
-  const businessId = (session!.user as { businessId: string }).businessId;
-
-  const [business] = await db.select().from(businesses).where(eq(businesses.id, businessId)).limit(1);
+  const { business } = await requireBusiness();
 
   return (
     <div>

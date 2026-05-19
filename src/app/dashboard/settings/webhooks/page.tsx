@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 const ALL_EVENTS = [
   { value: "booking.created", label: "Booking created" },
   { value: "booking.confirmed", label: "Booking confirmed" },
+  { value: "booking.rescheduled", label: "Booking rescheduled" },
   { value: "booking.cancelled", label: "Booking cancelled" },
   { value: "booking.completed", label: "Booking completed" },
   { value: "booking.no_show", label: "No-show marked" },

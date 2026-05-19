@@ -1,13 +1,12 @@
-import { auth } from "@/auth";
 import { db } from "@/db";
 import { services } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import Link from "next/link";
 import { formatLkr } from "@/lib/utils";
+import { requireBusiness } from "@/lib/auth";
 
 export default async function ServicesPage() {
-  const session = await auth();
-  const businessId = (session!.user as { businessId: string }).businessId;
+  const { businessId } = await requireBusiness();
 
   const list = await db
     .select()

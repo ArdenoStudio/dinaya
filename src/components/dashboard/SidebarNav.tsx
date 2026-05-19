@@ -2,62 +2,109 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import {
+  BarChart3,
+  Bot,
+  BookOpen,
+  CalendarDays,
+  Clock3,
+  CreditCard,
+  LayoutDashboard,
+  Megaphone,
+  Plug,
+  Scissors,
+  Settings,
+  Star,
+  UserRoundCheck,
+  Users,
+  type LucideIcon,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
-const mainLinks = [
-  { href: "/dashboard", label: "Overview", icon: "bi-grid", exact: true },
-  { href: "/dashboard/bookings", label: "Bookings", icon: "bi-book-open" },
-  { href: "/dashboard/calendar", label: "Calendar", icon: "bi-calendar" },
-  { href: "/dashboard/clients", label: "Clients", icon: "bi-people" },
-  { href: "/dashboard/services", label: "Services", icon: "bi-scissors" },
-  { href: "/dashboard/staff", label: "Staff", icon: "bi-person-check" },
-  { href: "/dashboard/availability", label: "Availability", icon: "bi-clock" },
-  { href: "/dashboard/reviews", label: "Reviews", icon: "bi-star" },
+type NavLinkConfig = {
+  exact?: boolean;
+  href: string;
+  icon: LucideIcon;
+  label: string;
+};
+
+const navGroups: { label: string; links: NavLinkConfig[] }[] = [
+  {
+    label: "Workspace",
+    links: [
+      { href: "/dashboard", label: "Overview", icon: LayoutDashboard, exact: true },
+      { href: "/dashboard/calendar", label: "Calendar", icon: CalendarDays },
+      { href: "/dashboard/bookings", label: "Bookings", icon: BookOpen },
+      { href: "/dashboard/clients", label: "Clients", icon: Users },
+    ],
+  },
+  {
+    label: "Catalog",
+    links: [
+      { href: "/dashboard/services", label: "Services", icon: Scissors },
+      { href: "/dashboard/staff", label: "Staff", icon: UserRoundCheck },
+      { href: "/dashboard/availability", label: "Availability", icon: Clock3 },
+    ],
+  },
+  {
+    label: "Growth",
+    links: [
+      { href: "/dashboard/reviews", label: "Reviews", icon: Star },
+      { href: "/dashboard/payments", label: "Payments", icon: CreditCard },
+      { href: "/dashboard/marketing", label: "Marketing", icon: Megaphone },
+      { href: "/dashboard/reports", label: "Reports", icon: BarChart3 },
+    ],
+  },
+  {
+    label: "Configure",
+    links: [
+      { href: "/dashboard/settings/integrations", label: "Integrations", icon: Plug },
+      { href: "/dashboard/automations", label: "Automations", icon: Bot },
+      { href: "/dashboard/settings", label: "Settings", icon: Settings },
+    ],
+  },
 ];
 
-const systemLinks = [
-  { href: "/dashboard/settings", label: "Settings", icon: "bi-gear" },
-  { href: "/dashboard/settings/webhooks", label: "Webhooks", icon: "bi-activity" },
-];
-
-function NavLink({
-  link,
-  pathname,
-}: {
-  link: { href: string; label: string; icon: string; exact?: boolean };
-  pathname: string;
-}) {
+function NavLink({ link, pathname }: { link: NavLinkConfig; pathname: string }) {
+  const Icon = link.icon;
   const isActive = link.exact
     ? pathname === link.href
     : pathname === link.href || pathname.startsWith(link.href + "/");
+
   return (
     <Link
       href={link.href}
       aria-current={isActive ? "page" : undefined}
-      className={`flex items-center gap-2.5 px-3 py-2.5 rounded-md text-sm transition-colors border-l-2 ${
+      className={cn(
+        "flex items-center gap-2.5 rounded-md border-l-2 px-3 py-2 text-sm transition-colors",
         isActive
-          ? "border-primary bg-primary/15 text-primary font-medium"
+          ? "border-primary bg-primary/10 font-medium text-primary"
           : "border-transparent text-muted-foreground hover:bg-muted hover:text-foreground"
-      }`}
+      )}
     >
-      <i className={`bi ${link.icon} text-sm shrink-0`} aria-hidden="true" />
-      {link.label}
+      <Icon className="size-4 shrink-0" aria-hidden="true" />
+      <span className="truncate">{link.label}</span>
     </Link>
   );
 }
 
 export function SidebarNav() {
   const pathname = usePathname();
+
   return (
-    <nav className="flex-1 py-4 px-3 overflow-y-auto" aria-label="Main navigation">
-      <div className="space-y-1">
-        {mainLinks.map((link) => (
-          <NavLink key={link.href} link={link} pathname={pathname} />
-        ))}
-      </div>
-      <div className="my-3 mx-1 border-t border-border/60" />
-      <div className="space-y-1">
-        {systemLinks.map((link) => (
-          <NavLink key={link.href} link={link} pathname={pathname} />
+    <nav className="flex-1 overflow-y-auto px-3 py-4" aria-label="Main navigation">
+      <div className="space-y-5">
+        {navGroups.map((group) => (
+          <div key={group.label}>
+            <p className="mb-2 px-3 text-[0.68rem] font-semibold uppercase tracking-wider text-muted-foreground/70">
+              {group.label}
+            </p>
+            <div className="space-y-1">
+              {group.links.map((link) => (
+                <NavLink key={link.href} link={link} pathname={pathname} />
+              ))}
+            </div>
+          </div>
         ))}
       </div>
     </nav>

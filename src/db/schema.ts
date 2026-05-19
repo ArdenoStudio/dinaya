@@ -5,12 +5,16 @@ import {
   varchar,
   boolean,
   integer,
+  index,
   timestamp,
   jsonb,
+  numeric,
+  primaryKey,
   uuid,
   time,
   date,
   smallint,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
@@ -53,6 +57,13 @@ export const clients = pgTable("clients", {
   tags: text("tags").array(),
   internalNotes: text("internal_notes"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => {
+  return {
+    businessPhoneUnique: uniqueIndex("clients_business_id_phone_unique").on(
+      table.businessId,
+      table.phone
+    ),
+  };
 });
 
 export const clientNotes = pgTable("client_notes", {
@@ -75,6 +86,7 @@ export const businesses = pgTable("businesses", {
   phone: varchar("phone", { length: 20 }),
   email: varchar("email", { length: 255 }),
   address: text("address"),
+  timezone: text("timezone").default("Asia/Colombo").notNull(),
   // Social / profile links shown on the booking page
   instagramUrl: text("instagram_url"),
   facebookUrl: text("facebook_url"),
@@ -103,6 +115,49 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// ─── Audit / Activity Log ───────────────────────────────────────────────────
+
+export const activityLog = pgTable("activity_log", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  businessId: uuid("business_id")
+    .notNull()
+    .references(() => businesses.id, { onDelete: "cascade" }),
+  actorUserId: uuid("actor_user_id").references(() => users.id, {
+    onDelete: "set null",
+  }),
+  entity: varchar("entity", { length: 80 }).notNull(),
+  entityId: uuid("entity_id"),
+  action: varchar("action", { length: 80 }).notNull(),
+  meta: jsonb("meta"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => {
+  return {
+    businessCreatedAtIdx: index("activity_log_business_created_at_idx").on(
+      table.businessId,
+      table.createdAt
+    ),
+  };
+});
+
+// ─── Service Categories ───────────────────────────────────────────────────────
+
+export const serviceCategories = pgTable("service_categories", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  businessId: uuid("business_id")
+    .notNull()
+    .references(() => businesses.id, { onDelete: "cascade" }),
+  name: varchar("name", { length: 100 }).notNull(),
+  sortOrder: integer("sort_order").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => {
+  return {
+    businessNameUnique: uniqueIndex("service_categories_business_id_name_unique").on(
+      table.businessId,
+      table.name
+    ),
+  };
+});
+
 // ─── Services ─────────────────────────────────────────────────────────────────
 
 export const services = pgTable("services", {
@@ -110,6 +165,9 @@ export const services = pgTable("services", {
   businessId: uuid("business_id")
     .notNull()
     .references(() => businesses.id, { onDelete: "cascade" }),
+  categoryId: uuid("category_id").references(() => serviceCategories.id, {
+    onDelete: "set null",
+  }),
   name: varchar("name", { length: 100 }).notNull(),
   description: text("description"),
   durationMinutes: integer("duration_minutes").notNull(),
@@ -149,6 +207,11 @@ export const staffServices = pgTable("staff_services", {
   serviceId: uuid("service_id")
     .notNull()
     .references(() => services.id, { onDelete: "cascade" }),
+  priceOverrideLkr: integer("price_override_lkr"),
+}, (table) => {
+  return {
+    pk: primaryKey({ columns: [table.staffId, table.serviceId] }),
+  };
 });
 
 // ─── Availability (recurring weekly schedule) ─────────────────────────────────
@@ -178,6 +241,26 @@ export const availabilityOverrides = pgTable("availability_overrides", {
   reason: varchar("reason", { length: 200 }),
 });
 
+export const businessHolidays = pgTable("business_holidays", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  businessId: uuid("business_id")
+    .notNull()
+    .references(() => businesses.id, { onDelete: "cascade" }),
+  date: date("date").notNull(),
+  name: varchar("name", { length: 120 }).notNull(),
+  isClosed: boolean("is_closed").default(true).notNull(),
+  startTime: time("start_time"),
+  endTime: time("end_time"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => {
+  return {
+    businessDateUnique: uniqueIndex("business_holidays_business_id_date_unique").on(
+      table.businessId,
+      table.date
+    ),
+  };
+});
+
 // ─── Bookings ─────────────────────────────────────────────────────────────────
 
 export const bookings = pgTable("bookings", {
@@ -198,6 +281,7 @@ export const bookings = pgTable("bookings", {
   startsAt: timestamp("starts_at", { withTimezone: true }).notNull(),
   endsAt: timestamp("ends_at", { withTimezone: true }).notNull(),
   status: bookingStatusEnum("status").default("pending").notNull(),
+  source: varchar("source", { length: 40 }).default("public").notNull(),
   notes: text("notes"),
   staffNotes: text("staff_notes"),
   reminderSentAt: timestamp("reminder_sent_at"),
@@ -217,6 +301,10 @@ export const reviews = pgTable("reviews", {
   comment: text("comment"),
   isPublished: boolean("is_published").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => {
+  return {
+    bookingUnique: uniqueIndex("reviews_booking_id_unique").on(table.bookingId),
+  };
 });
 
 // ─── Webhooks ─────────────────────────────────────────────────────────────────
@@ -224,6 +312,7 @@ export const reviews = pgTable("reviews", {
 export const webhookEventEnum = pgEnum("webhook_event", [
   "booking.created",
   "booking.confirmed",
+  "booking.rescheduled",
   "booking.cancelled",
   "booking.completed",
   "booking.no_show",
@@ -255,22 +344,200 @@ export const payments = pgTable("payments", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// ─── Automations / Messaging ─────────────────────────────────────────────────
+
+export const automationRules = pgTable("automation_rules", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  businessId: uuid("business_id")
+    .notNull()
+    .references(() => businesses.id, { onDelete: "cascade" }),
+  name: varchar("name", { length: 120 }).notNull(),
+  trigger: varchar("trigger", { length: 80 }).notNull(),
+  delayMinutes: integer("delay_minutes").default(0).notNull(),
+  conditions: jsonb("conditions"),
+  actions: jsonb("actions").notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => {
+  return {
+    businessTriggerIdx: index("automation_rules_business_trigger_idx").on(
+      table.businessId,
+      table.trigger
+    ),
+  };
+});
+
+export const automationRuns = pgTable("automation_runs", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  ruleId: uuid("rule_id")
+    .notNull()
+    .references(() => automationRules.id, { onDelete: "cascade" }),
+  entityId: uuid("entity_id").notNull(),
+  triggerVersion: varchar("trigger_version", { length: 80 }).default("v1").notNull(),
+  status: varchar("status", { length: 40 }).default("pending").notNull(),
+  error: text("error"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => {
+  return {
+    ruleEntityVersionUnique: uniqueIndex("automation_runs_rule_entity_version_unique").on(
+      table.ruleId,
+      table.entityId,
+      table.triggerVersion
+    ),
+  };
+});
+
+export const messageTemplates = pgTable("message_templates", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  businessId: uuid("business_id")
+    .notNull()
+    .references(() => businesses.id, { onDelete: "cascade" }),
+  channel: varchar("channel", { length: 40 }).notNull(),
+  name: varchar("name", { length: 120 }).notNull(),
+  subject: varchar("subject", { length: 200 }),
+  body: text("body").notNull(),
+  variables: text("variables").array(),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const communications = pgTable("communications", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  businessId: uuid("business_id")
+    .notNull()
+    .references(() => businesses.id, { onDelete: "cascade" }),
+  bookingId: uuid("booking_id").references(() => bookings.id, {
+    onDelete: "set null",
+  }),
+  clientId: uuid("client_id").references(() => clients.id, {
+    onDelete: "set null",
+  }),
+  channel: varchar("channel", { length: 40 }).notNull(),
+  direction: varchar("direction", { length: 20 }).default("outbound").notNull(),
+  status: varchar("status", { length: 40 }).default("pending").notNull(),
+  subject: varchar("subject", { length: 200 }),
+  body: text("body"),
+  providerMessageId: varchar("provider_message_id", { length: 180 }),
+  error: text("error"),
+  sentAt: timestamp("sent_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => {
+  return {
+    businessCreatedAtIdx: index("communications_business_created_at_idx").on(
+      table.businessId,
+      table.createdAt
+    ),
+  };
+});
+
+// ─── Webhook Deliveries / Reporting / API Access ─────────────────────────────
+
+export const webhookDeliveries = pgTable("webhook_deliveries", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  webhookId: uuid("webhook_id")
+    .notNull()
+    .references(() => webhooks.id, { onDelete: "cascade" }),
+  event: webhookEventEnum("event").notNull(),
+  entityId: uuid("entity_id"),
+  status: varchar("status", { length: 40 }).default("pending").notNull(),
+  statusCode: integer("status_code"),
+  requestBody: jsonb("request_body"),
+  responseBody: text("response_body"),
+  error: text("error"),
+  attempts: integer("attempts").default(0).notNull(),
+  nextAttemptAt: timestamp("next_attempt_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => {
+  return {
+    webhookCreatedAtIdx: index("webhook_deliveries_webhook_created_at_idx").on(
+      table.webhookId,
+      table.createdAt
+    ),
+  };
+});
+
+export const metricsDaily = pgTable("metrics_daily", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  businessId: uuid("business_id")
+    .notNull()
+    .references(() => businesses.id, { onDelete: "cascade" }),
+  date: date("date").notNull(),
+  metric: varchar("metric", { length: 80 }).notNull(),
+  dims: jsonb("dims"),
+  value: numeric("value", { precision: 14, scale: 2 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => {
+  return {
+    businessMetricDateUnique: uniqueIndex("metrics_daily_business_metric_date_dims_unique").on(
+      table.businessId,
+      table.date,
+      table.metric,
+      table.dims
+    ),
+  };
+});
+
+export const apiKeys = pgTable("api_keys", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  businessId: uuid("business_id")
+    .notNull()
+    .references(() => businesses.id, { onDelete: "cascade" }),
+  name: varchar("name", { length: 120 }).notNull(),
+  keyHash: text("key_hash").notNull(),
+  scopes: text("scopes").array().notNull(),
+  lastUsedAt: timestamp("last_used_at"),
+  expiresAt: timestamp("expires_at"),
+  revokedAt: timestamp("revoked_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => {
+  return {
+    keyHashUnique: uniqueIndex("api_keys_key_hash_unique").on(table.keyHash),
+  };
+});
+
 // ─── Relations ────────────────────────────────────────────────────────────────
 
 export const businessesRelations = relations(businesses, ({ many }) => ({
   users: many(users),
   services: many(services),
+  serviceCategories: many(serviceCategories),
   staff: many(staff),
   bookings: many(bookings),
   clients: many(clients),
+  activityLog: many(activityLog),
+  businessHolidays: many(businessHolidays),
+  automationRules: many(automationRules),
+  messageTemplates: many(messageTemplates),
+  communications: many(communications),
+  metricsDaily: many(metricsDaily),
+  apiKeys: many(apiKeys),
 }));
 
-export const usersRelations = relations(users, ({ one }) => ({
+export const usersRelations = relations(users, ({ one, many }) => ({
   business: one(businesses, { fields: [users.businessId], references: [businesses.id] }),
+  activityLog: many(activityLog),
+}));
+
+export const activityLogRelations = relations(activityLog, ({ one }) => ({
+  business: one(businesses, { fields: [activityLog.businessId], references: [businesses.id] }),
+  actor: one(users, { fields: [activityLog.actorUserId], references: [users.id] }),
+}));
+
+export const serviceCategoriesRelations = relations(serviceCategories, ({ one, many }) => ({
+  business: one(businesses, {
+    fields: [serviceCategories.businessId],
+    references: [businesses.id],
+  }),
+  services: many(services),
 }));
 
 export const servicesRelations = relations(services, ({ one, many }) => ({
   business: one(businesses, { fields: [services.businessId], references: [businesses.id] }),
+  category: one(serviceCategories, {
+    fields: [services.categoryId],
+    references: [serviceCategories.id],
+  }),
   staffServices: many(staffServices),
   bookings: many(bookings),
 }));
@@ -296,18 +563,27 @@ export const availabilityOverridesRelations = relations(availabilityOverrides, (
   staff: one(staff, { fields: [availabilityOverrides.staffId], references: [staff.id] }),
 }));
 
-export const bookingsRelations = relations(bookings, ({ one }) => ({
+export const businessHolidaysRelations = relations(businessHolidays, ({ one }) => ({
+  business: one(businesses, {
+    fields: [businessHolidays.businessId],
+    references: [businesses.id],
+  }),
+}));
+
+export const bookingsRelations = relations(bookings, ({ one, many }) => ({
   business: one(businesses, { fields: [bookings.businessId], references: [businesses.id] }),
   service: one(services, { fields: [bookings.serviceId], references: [services.id] }),
   staff: one(staff, { fields: [bookings.staffId], references: [staff.id] }),
   client: one(clients, { fields: [bookings.clientId], references: [clients.id] }),
   payment: one(payments, { fields: [bookings.id], references: [payments.bookingId] }),
+  communications: many(communications),
 }));
 
 export const clientsRelations = relations(clients, ({ one, many }) => ({
   business: one(businesses, { fields: [clients.businessId], references: [businesses.id] }),
   bookings: many(bookings),
   notes: many(clientNotes),
+  communications: many(communications),
 }));
 
 export const clientNotesRelations = relations(clientNotes, ({ one }) => ({
@@ -323,8 +599,64 @@ export const reviewsRelations = relations(reviews, ({ one }) => ({
   booking: one(bookings, { fields: [reviews.bookingId], references: [bookings.id] }),
 }));
 
-export const webhooksRelations = relations(webhooks, ({ one }) => ({
+export const webhooksRelations = relations(webhooks, ({ one, many }) => ({
   business: one(businesses, { fields: [webhooks.businessId], references: [businesses.id] }),
+  deliveries: many(webhookDeliveries),
+}));
+
+export const automationRulesRelations = relations(automationRules, ({ one, many }) => ({
+  business: one(businesses, {
+    fields: [automationRules.businessId],
+    references: [businesses.id],
+  }),
+  runs: many(automationRuns),
+}));
+
+export const automationRunsRelations = relations(automationRuns, ({ one }) => ({
+  rule: one(automationRules, {
+    fields: [automationRuns.ruleId],
+    references: [automationRules.id],
+  }),
+}));
+
+export const messageTemplatesRelations = relations(messageTemplates, ({ one }) => ({
+  business: one(businesses, {
+    fields: [messageTemplates.businessId],
+    references: [businesses.id],
+  }),
+}));
+
+export const communicationsRelations = relations(communications, ({ one }) => ({
+  business: one(businesses, {
+    fields: [communications.businessId],
+    references: [businesses.id],
+  }),
+  booking: one(bookings, {
+    fields: [communications.bookingId],
+    references: [bookings.id],
+  }),
+  client: one(clients, {
+    fields: [communications.clientId],
+    references: [clients.id],
+  }),
+}));
+
+export const webhookDeliveriesRelations = relations(webhookDeliveries, ({ one }) => ({
+  webhook: one(webhooks, {
+    fields: [webhookDeliveries.webhookId],
+    references: [webhooks.id],
+  }),
+}));
+
+export const metricsDailyRelations = relations(metricsDaily, ({ one }) => ({
+  business: one(businesses, {
+    fields: [metricsDaily.businessId],
+    references: [businesses.id],
+  }),
+}));
+
+export const apiKeysRelations = relations(apiKeys, ({ one }) => ({
+  business: one(businesses, { fields: [apiKeys.businessId], references: [businesses.id] }),
 }));
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -335,17 +667,30 @@ export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type Service = typeof services.$inferSelect;
 export type NewService = typeof services.$inferInsert;
+export type ServiceCategory = typeof serviceCategories.$inferSelect;
+export type NewServiceCategory = typeof serviceCategories.$inferInsert;
 export type Staff = typeof staff.$inferSelect;
 export type NewStaff = typeof staff.$inferInsert;
 export type Availability = typeof availability.$inferSelect;
 export type AvailabilityOverride = typeof availabilityOverrides.$inferSelect;
+export type BusinessHoliday = typeof businessHolidays.$inferSelect;
 export type Booking = typeof bookings.$inferSelect;
 export type NewBooking = typeof bookings.$inferInsert;
 export type Payment = typeof payments.$inferSelect;
 export type Client = typeof clients.$inferSelect;
 export type NewClient = typeof clients.$inferInsert;
 export type ClientNote = typeof clientNotes.$inferSelect;
+export type ActivityLog = typeof activityLog.$inferSelect;
+export type NewActivityLog = typeof activityLog.$inferInsert;
 export type Webhook = typeof webhooks.$inferSelect;
 export type NewWebhook = typeof webhooks.$inferInsert;
+export type WebhookDelivery = typeof webhookDeliveries.$inferSelect;
 export type Review = typeof reviews.$inferSelect;
 export type NewReview = typeof reviews.$inferInsert;
+export type AutomationRule = typeof automationRules.$inferSelect;
+export type NewAutomationRule = typeof automationRules.$inferInsert;
+export type AutomationRun = typeof automationRuns.$inferSelect;
+export type MessageTemplate = typeof messageTemplates.$inferSelect;
+export type Communication = typeof communications.$inferSelect;
+export type MetricsDaily = typeof metricsDaily.$inferSelect;
+export type ApiKey = typeof apiKeys.$inferSelect;

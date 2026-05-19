@@ -78,6 +78,7 @@ export default function NewBookingPage() {
         clientPhone,
         clientEmail: clientEmail || null,
         notes: notes || null,
+        source: "manual",
       }),
     });
 
