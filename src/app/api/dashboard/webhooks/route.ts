@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { webhooks } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import crypto from "crypto";
+import { canUseFeature, getBusinessPlan } from "@/lib/plan";
 
 export async function GET() {
   const session = await auth();
@@ -18,6 +19,14 @@ export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const businessId = (session.user as { businessId: string }).businessId;
+
+  const plan = await getBusinessPlan(businessId);
+  if (!canUseFeature(plan, "webhooks")) {
+    return NextResponse.json(
+      { error: "Webhooks require the Pro plan.", feature: "webhooks" },
+      { status: 402 },
+    );
+  }
 
   const { url, events, secret: providedSecret } = await req.json();
   if (!url || !events?.length) {

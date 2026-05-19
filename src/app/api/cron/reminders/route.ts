@@ -7,12 +7,12 @@ import { addHours } from "date-fns";
 
 // Called by Vercel Cron every day at 10:00 AM Colombo time (04:30 UTC)
 export async function GET(req: NextRequest) {
-  // Verify cron secret in production
+  const expected = process.env.CRON_SECRET;
+  if (!expected) {
+    return NextResponse.json({ error: "Cron secret not configured" }, { status: 500 });
+  }
   const authHeader = req.headers.get("authorization");
-  if (
-    process.env.CRON_SECRET &&
-    authHeader !== `Bearer ${process.env.CRON_SECRET}`
-  ) {
+  if (authHeader !== `Bearer ${expected}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

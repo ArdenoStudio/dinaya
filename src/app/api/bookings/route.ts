@@ -61,9 +61,14 @@ export async function POST(req: NextRequest) {
     .where(eq(businesses.id, businessId))
     .limit(1);
 
+  if (!business) {
+    return NextResponse.json({ error: "Business not found." }, { status: 404 });
+  }
+
   const [service] = await db
     .select({
       id: services.id,
+      businessId: services.businessId,
       name: services.name,
       priceLkr: services.priceLkr,
       requiresPayment: services.requiresPayment,
@@ -77,6 +82,18 @@ export async function POST(req: NextRequest) {
     .from(staff)
     .where(eq(staff.id, staffId))
     .limit(1);
+
+  if (
+    !service ||
+    !staffMember ||
+    service.businessId !== business.id ||
+    staffMember.businessId !== business.id
+  ) {
+    return NextResponse.json(
+      { error: "Service or staff does not belong to this business." },
+      { status: 400 },
+    );
+  }
 
   // Upsert client record — match by phone within this business
   let clientId: string | null = null;

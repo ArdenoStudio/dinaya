@@ -18,8 +18,33 @@ export async function POST(req: NextRequest, { params }: Ctx) {
 
   const { bookingId, clientName, rating, comment } = await req.json();
 
-  if (!clientName || typeof rating !== "number" || rating < 1 || rating > 5) {
-    return NextResponse.json({ error: "Name and a rating between 1–5 are required." }, { status: 400 });
+  if (
+    typeof clientName !== "string" ||
+    clientName.trim().length === 0 ||
+    clientName.length > 120
+  ) {
+    return NextResponse.json(
+      { error: "Name is required and must be 120 characters or fewer." },
+      { status: 400 },
+    );
+  }
+
+  if (typeof rating !== "number" || rating < 1 || rating > 5) {
+    return NextResponse.json(
+      { error: "Rating must be a number between 1 and 5." },
+      { status: 400 },
+    );
+  }
+
+  if (comment !== undefined && comment !== null && typeof comment !== "string") {
+    return NextResponse.json({ error: "Comment must be a string." }, { status: 400 });
+  }
+
+  if (typeof comment === "string" && comment.length > 2000) {
+    return NextResponse.json(
+      { error: "Comment must be 2000 characters or fewer." },
+      { status: 400 },
+    );
   }
 
   // If a bookingId is provided, verify it belongs to this business
