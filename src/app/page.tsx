@@ -104,7 +104,7 @@ export default function LandingPage() {
       <LandingNav />
 
       {/* Hero */}
-      <section className="max-w-4xl mx-auto px-6 pt-24 pb-12 text-center">
+      <section className="max-w-4xl mx-auto px-6 pt-10 pb-12 text-center">
         <FadeContainer className="flex flex-col items-center">
           <FadeDiv className="mb-8">
             <a
@@ -122,11 +122,8 @@ export default function LandingPage() {
           </FadeDiv>
 
           <h1 className="font-cal text-5xl tracking-tight mb-6 text-balance">
-            <FadeSpan>Your business,</FadeSpan>{" "}
-            <FadeSpan>bookable online.</FadeSpan>
-            <br />
+            <FadeSpan>Stop the</FadeSpan>{" "}
             <FadeSpan className="text-primary">
-              No{" "}
               <WordRotate
                 words={[
                   "WhatsApp chaos.",
