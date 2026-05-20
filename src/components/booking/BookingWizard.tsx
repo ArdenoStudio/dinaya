@@ -266,7 +266,7 @@ export default function BookingWizard({
                 </div>
               </div>
 
-              <div className="bg-[#f2f2f7] p-[14px] md:flex md:min-h-[400px] md:flex-col md:rounded-2xl md:border md:border-gray-100 md:bg-gray-50/70 md:p-6">
+              <div className="bg-[#f2f2f7] p-[14px] md:flex md:flex-col md:rounded-2xl md:border md:border-gray-100 md:bg-gray-50/40 md:p-5">
                 <StepDateTime
                   businessId={business.id}
                   copy={copy}

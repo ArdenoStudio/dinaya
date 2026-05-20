@@ -7,15 +7,11 @@ import type { Staff } from "@/db/schema";
 import type { BookingService } from "./BookingWizard";
 import type { BookingCopy } from "@/lib/i18n";
 import MonthCalendar from "./MonthCalendar";
+import DateQuickStrip from "./DateQuickStrip";
+import TimeSlotGrid, { type SlotOption } from "./TimeSlotGrid";
 
 const COLOMBO_TZ = "Asia/Colombo";
 const MAX_BOOKING_DAYS = 60;
-
-interface SlotData {
-  startUtc: string;
-  endUtc: string;
-  label: string;
-}
 
 interface Props {
   businessId: string;
@@ -23,9 +19,9 @@ interface Props {
   service: BookingService | null;
   staff: Staff | null;
   selectedDate: string;
-  selectedSlot: SlotData | null;
+  selectedSlot: SlotOption | null;
   onDateChange: (date: string) => void;
-  onSlotSelect: (slot: SlotData) => void;
+  onSlotSelect: (slot: SlotOption) => void;
   showContinue?: boolean;
   onContinue?: () => void;
   onBack?: () => void;
@@ -46,7 +42,7 @@ export default function StepDateTime({
 }: Props) {
   const today = toZonedTime(new Date(), COLOMBO_TZ);
   const maxDate = addDays(today, MAX_BOOKING_DAYS);
-  const [slots, setSlots] = useState<SlotData[]>([]);
+  const [slots, setSlots] = useState<SlotOption[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [hasFetched, setHasFetched] = useState(false);
 
@@ -79,13 +75,13 @@ export default function StepDateTime({
     };
   }, [businessId, staff, service, selectedDate, canLoad]);
 
-  const appointmentLabel = selectedDate
-    ? format(parseISO(selectedDate + "T12:00:00"), "EEEE, d MMMM")
+  const dateHeading = selectedDate
+    ? format(parseISO(selectedDate + "T12:00:00"), "EEEE, d MMMM yyyy")
     : null;
 
   if (!service || !staff) {
     return (
-      <div className="flex min-h-[280px] items-center justify-center rounded-xl border border-dashed border-gray-200 bg-white px-6 py-12 text-center text-sm text-gray-400 md:min-h-[360px]">
+      <div className="flex min-h-[280px] items-center justify-center rounded-xl border border-dashed border-gray-200 bg-white px-6 py-12 text-center text-sm text-gray-400 md:min-h-[320px]">
         <div>
           <i className="bi bi-calendar2-plus mb-3 block text-3xl text-gray-300" />
           {copy.selectServiceHint}
@@ -94,65 +90,73 @@ export default function StepDateTime({
     );
   }
 
-  const slotsPanel = (
-    <div className="flex min-h-0 flex-1 flex-col">
-      <p className="mb-2 hidden text-[10px] font-bold uppercase tracking-widest text-gray-400 lg:block">
-        {copy.availableTimes}
-      </p>
-      {loadingSlots ? (
-        <div className="grid grid-cols-3 gap-1.5 md:grid-cols-4">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="h-10 animate-pulse rounded-xl bg-gray-100" />
-          ))}
-        </div>
-      ) : !hasFetched ? (
-        <p className="py-8 text-center text-sm text-gray-400">{copy.selectDate}</p>
-      ) : slots.length === 0 ? (
-        <p className="py-8 text-center text-sm text-gray-500">{copy.noSlots}</p>
-      ) : (
-        <div className="grid max-h-[200px] grid-cols-3 gap-1.5 overflow-y-auto pr-1 md:max-h-[220px] md:grid-cols-4 lg:max-h-[260px]">
-          {slots.map((slot) => {
-            const isSelected = selectedSlot?.startUtc === slot.startUtc;
-            return (
-              <button
-                key={slot.startUtc}
-                type="button"
-                onClick={() => onSlotSelect(slot)}
-                className={`rounded-xl py-2.5 text-xs font-semibold transition-all ${
-                  isSelected
-                    ? "bg-blue-600 text-white shadow-md shadow-blue-500/25"
-                    : "border border-gray-200 bg-white text-gray-600 hover:border-blue-300 hover:text-blue-600"
-                }`}
-              >
-                {slot.label}
-              </button>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
-
   return (
     <div className="flex h-full flex-col">
-      <p className="mb-3 text-[10px] font-bold uppercase tracking-widest text-gray-400">
+      <p className="mb-4 text-[10px] font-bold uppercase tracking-widest text-gray-400">
         {copy.pickDateTime}
       </p>
 
-      <div className="flex flex-1 flex-col gap-4 lg:grid lg:grid-cols-2 lg:items-start">
-        <MonthCalendar
-          selectedDate={selectedDate}
-          minDate={today}
-          maxDate={maxDate}
-          onSelect={onDateChange}
-        />
-        <div className="flex min-h-[180px] flex-col lg:min-h-0">{slotsPanel}</div>
+      <div className="flex flex-col gap-4 md:gap-5">
+        {/* Date selection */}
+        <section className="rounded-xl border border-gray-100 bg-white p-4 md:p-5">
+          <p className="mb-3 text-xs font-semibold text-gray-700">{copy.chooseDate}</p>
+          <DateQuickStrip
+            selectedDate={selectedDate}
+            minDate={today}
+            maxDate={maxDate}
+            copy={copy}
+            onSelect={onDateChange}
+          />
+          <div className="mt-4 hidden md:block">
+            <MonthCalendar
+              selectedDate={selectedDate}
+              minDate={today}
+              maxDate={maxDate}
+              onSelect={onDateChange}
+              size="comfortable"
+            />
+          </div>
+          <div className="mt-3 md:hidden">
+            <MonthCalendar
+              selectedDate={selectedDate}
+              minDate={today}
+              maxDate={maxDate}
+              onSelect={onDateChange}
+              size="compact"
+            />
+          </div>
+        </section>
+
+        {/* Time selection */}
+        <section className="rounded-xl border border-gray-100 bg-white p-4 md:p-5">
+          {dateHeading ? (
+            <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2 border-b border-gray-100 pb-3">
+              <h3 className="text-sm font-semibold text-gray-900">{dateHeading}</h3>
+              <span className="text-xs text-gray-400">{copy.availableTimes}</span>
+            </div>
+          ) : (
+            <p className="mb-3 text-xs text-gray-400">{copy.selectDate}</p>
+          )}
+
+          {!hasFetched && !loadingSlots ? (
+            <p className="py-6 text-center text-sm text-gray-400">{copy.selectDate}</p>
+          ) : (
+            <TimeSlotGrid
+              slots={slots}
+              selectedStartUtc={selectedSlot?.startUtc ?? null}
+              copy={copy}
+              onSelect={onSlotSelect}
+              loading={loadingSlots}
+            />
+          )}
+        </section>
       </div>
 
-      {appointmentLabel && selectedSlot && (
-        <div className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50/50 px-3 py-2 text-xs text-emerald-700 md:hidden">
-          <i className="bi bi-check-circle mr-1" />
-          {appointmentLabel} · {selectedSlot.label}
+      {dateHeading && selectedSlot && (
+        <div className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50/60 px-4 py-2.5 text-sm text-emerald-800 md:hidden">
+          <i className="bi bi-check-circle mr-1.5" />
+          <span className="font-medium">{selectedSlot.label}</span>
+          <span className="text-emerald-600"> · {dateHeading}</span>
         </div>
       )}
 

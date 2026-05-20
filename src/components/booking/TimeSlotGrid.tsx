@@ -1,0 +1,100 @@
+"use client";
+
+import { parseISO } from "date-fns";
+import { toZonedTime } from "date-fns-tz";
+import type { BookingCopy } from "@/lib/i18n";
+
+const COLOMBO_TZ = "Asia/Colombo";
+
+export type SlotOption = {
+  startUtc: string;
+  endUtc: string;
+  label: string;
+};
+
+type Period = "morning" | "afternoon" | "evening";
+
+function slotPeriod(startUtc: string): Period {
+  const hour = toZonedTime(parseISO(startUtc), COLOMBO_TZ).getHours();
+  if (hour < 12) return "morning";
+  if (hour < 17) return "afternoon";
+  return "evening";
+}
+
+const PERIOD_ORDER: Period[] = ["morning", "afternoon", "evening"];
+
+const PERIOD_LABEL: Record<Period, keyof Pick<BookingCopy, "morning" | "afternoon" | "evening">> = {
+  morning: "morning",
+  afternoon: "afternoon",
+  evening: "evening",
+};
+
+interface Props {
+  slots: SlotOption[];
+  selectedStartUtc: string | null;
+  copy: BookingCopy;
+  onSelect: (slot: SlotOption) => void;
+  loading?: boolean;
+}
+
+export default function TimeSlotGrid({
+  slots,
+  selectedStartUtc,
+  copy,
+  onSelect,
+  loading,
+}: Props) {
+  if (loading) {
+    return (
+      <div className="flex flex-wrap gap-2">
+        {Array.from({ length: 10 }).map((_, i) => (
+          <div key={i} className="h-11 w-[5.5rem] animate-pulse rounded-xl bg-gray-100" />
+        ))}
+      </div>
+    );
+  }
+
+  if (slots.length === 0) {
+    return (
+      <div className="rounded-xl border border-dashed border-gray-200 bg-gray-50/50 px-4 py-10 text-center">
+        <i className="bi bi-calendar-x mb-2 block text-2xl text-gray-300" />
+        <p className="text-sm text-gray-500">{copy.noSlots}</p>
+      </div>
+    );
+  }
+
+  const grouped = PERIOD_ORDER.map((period) => ({
+    period,
+    label: copy[PERIOD_LABEL[period]],
+    slots: slots.filter((s) => slotPeriod(s.startUtc) === period),
+  })).filter((g) => g.slots.length > 0);
+
+  return (
+    <div className="space-y-5">
+      {grouped.map(({ period, label, slots: periodSlots }) => (
+        <div key={period}>
+          <p className="mb-2.5 text-xs font-semibold text-gray-500">{label}</p>
+          <div className="flex flex-wrap gap-2">
+            {periodSlots.map((slot) => {
+              const isSelected = selectedStartUtc === slot.startUtc;
+              return (
+                <button
+                  key={slot.startUtc}
+                  type="button"
+                  onClick={() => onSelect(slot)}
+                  className={`min-w-[5.25rem] rounded-xl px-4 py-2.5 text-sm font-semibold tabular-nums transition-all ${
+                    isSelected
+                      ? "bg-blue-600 text-white shadow-md shadow-blue-500/25 ring-2 ring-blue-600/20"
+                      : "border border-gray-200 bg-white text-gray-700 hover:border-blue-400 hover:bg-blue-50/50 hover:text-blue-700"
+                  }`}
+                >
+                  {slot.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
