@@ -1,7 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { FadeContainer, FadeDiv, FadeSpan } from "@/components/Fade";
 import { PublicNav } from "@/components/PublicNav";
 import { LandingFooter } from "@/components/LandingFooter";
+
+export const metadata: Metadata = {
+  title: "Solutions — Salons, Clinics, Tutors & More | Dinaya",
+  description:
+    "Dinaya works for salons, clinics, tuition classes, freelancers, and more. One platform tailored to how your Sri Lankan business runs.",
+};
 
 const industries = [
   {

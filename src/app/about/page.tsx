@@ -1,8 +1,15 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { PublicNav } from "@/components/PublicNav";
 import { FadeContainer, FadeDiv, FadeSpan } from "@/components/Fade";
 import { LandingFooter } from "@/components/LandingFooter";
+
+export const metadata: Metadata = {
+  title: "About Us — The Booking Tool Sri Lanka Needed | Dinaya",
+  description:
+    "Dinaya was built to help Sri Lankan businesses stop losing clients to WhatsApp chaos. Free, simple, and made for how business works here.",
+};
 
 const values = [
   {

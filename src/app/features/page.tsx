@@ -1,8 +1,15 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { FadeContainer, FadeDiv, FadeSpan } from "@/components/Fade";
 import { PublicNav } from "@/components/PublicNav";
 import { CTAPrimaryButton } from "@/components/cta-primary-button";
 import { LandingFooter } from "@/components/LandingFooter";
+
+export const metadata: Metadata = {
+  title: "Features — Booking, Payments & Client Engagement | Dinaya",
+  description:
+    "Everything in one booking link. Self-booking page, PayHere payments, SMS reminders, and client engagement tools for Sri Lankan businesses.",
+};
 
 const bookingFeatures = [
   {

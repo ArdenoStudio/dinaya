@@ -1,8 +1,15 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { FadeContainer, FadeDiv, FadeSpan } from "@/components/Fade";
 import { PublicNav } from "@/components/PublicNav";
 import { CTAPrimaryButton } from "@/components/cta-primary-button";
 import { LandingFooter } from "@/components/LandingFooter";
+
+export const metadata: Metadata = {
+  title: "Pricing — Free for Every Sri Lankan Business | Dinaya",
+  description:
+    "Dinaya is free for all Sri Lankan businesses. No credit card, no hidden fees. Create your booking page and start accepting appointments today.",
+};
 
 const freeFeatures = [
   "Your own booking page at yourname.dinaya.lk",

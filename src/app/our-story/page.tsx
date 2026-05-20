@@ -1,8 +1,15 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { PublicNav } from "@/components/PublicNav";
 import { FadeContainer, FadeDiv, FadeSpan } from "@/components/Fade";
 import { LandingFooter } from "@/components/LandingFooter";
+
+export const metadata: Metadata = {
+  title: "Our Story — From WhatsApp Chaos to Dinaya | Dinaya",
+  description:
+    "How Dinaya started with 47 unread booking messages and became the booking tool Sri Lankan businesses needed.",
+};
 
 const problems = [
   {
