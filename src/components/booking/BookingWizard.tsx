@@ -210,7 +210,7 @@ export default function BookingWizard({
   return (
     <div className="overflow-hidden md:rounded-2xl md:border md:border-gray-100/80 md:bg-white md:shadow-[0_24px_64px_-12px_rgba(37,99,235,0.12),0_8px_24px_-8px_rgba(0,0,0,0.08)]">
       {/* Mobile gradient header + progress */}
-      <div className="bg-gradient-to-b from-blue-700 via-blue-600 to-blue-600 px-[18px] pt-5 pb-[18px] md:hidden">
+      <div className="bg-blue-600 px-[18px] pt-5 pb-[18px] md:hidden">
         <BusinessIdentity
           name={business.name}
           urlLabel={bookingUrlLabel}
