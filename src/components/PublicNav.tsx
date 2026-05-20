@@ -10,10 +10,14 @@ export function PublicNav() {
         <div className="hidden md:flex items-center gap-1 text-sm font-medium text-gray-700">
           {/* Features mega menu */}
           <div className="group">
-            <Link href="/features" className="inline-flex items-center gap-1 px-3 py-2 rounded-md hover:text-gray-900 transition-colors">
+            <button
+              className="inline-flex items-center gap-1 px-3 py-2 rounded-md hover:text-gray-900 transition-colors"
+              aria-expanded="false"
+              aria-haspopup="true"
+            >
               Features
               <i className="bi bi-chevron-down text-xs text-gray-400 group-hover:text-gray-600 transition-transform group-hover:rotate-180" aria-hidden="true" />
-            </Link>
+            </button>
             <div className="invisible opacity-0 translate-y-1 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 transition-all absolute left-1/2 -translate-x-1/2 top-full pt-3 w-[920px] max-w-[calc(100vw-2rem)]">
               <div className="rounded-2xl border bg-white shadow-xl shadow-gray-900/[0.06] p-5 grid grid-cols-[260px_1fr_1fr_1fr] gap-5">
                 {/* Promo card */}

@@ -8,7 +8,7 @@ export function LandingNav() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <nav className="sticky top-0 z-50 border-b bg-white/80 backdrop-blur-sm">
+    <nav className="sticky top-0 z-50 border-b bg-white/80 backdrop-blur-sm" aria-label="Main navigation">
       <div className="relative max-w-6xl mx-auto px-6 py-4 flex items-center justify-between gap-6">
         <Logo size="lg" />
 
@@ -16,9 +16,13 @@ export function LandingNav() {
         <div className="hidden md:flex items-center gap-1 text-sm font-medium text-gray-700">
           {/* Features mega menu */}
           <div className="group">
-            <button className="inline-flex items-center gap-1 px-3 py-2 rounded-md hover:text-gray-900 transition-colors">
+            <button 
+              className="inline-flex items-center gap-1 px-3 py-2 rounded-md hover:text-gray-900 transition-colors"
+              aria-expanded="false"
+              aria-haspopup="true"
+            >
               Features
-              <i className="bi bi-chevron-down text-xs text-gray-400 group-hover:text-gray-600 transition-transform group-hover:rotate-180" />
+              <i className="bi bi-chevron-down text-xs text-gray-400 group-hover:text-gray-600 transition-transform group-hover:rotate-180" aria-hidden="true" />
             </button>
             <div className="invisible opacity-0 translate-y-1 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 transition-all absolute left-1/2 -translate-x-1/2 top-full pt-3 w-[920px] max-w-[calc(100vw-2rem)]">
               <div className="rounded-2xl border bg-white shadow-xl shadow-gray-900/[0.06] p-5 grid grid-cols-[260px_1fr_1fr_1fr] gap-5">
@@ -121,7 +125,9 @@ export function LandingNav() {
           <button
             className="md:hidden p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
             onClick={() => setMobileOpen(!mobileOpen)}
-            aria-label="Toggle menu"
+            aria-expanded={mobileOpen}
+            aria-controls="mobile-menu"
+            aria-label={mobileOpen ? "Close menu" : "Open menu"}
           >
             <i className={`bi ${mobileOpen ? "bi-x-lg" : "bi-list"} text-lg`} />
           </button>
@@ -130,7 +136,7 @@ export function LandingNav() {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="md:hidden border-t bg-white">
+        <div id="mobile-menu" className="md:hidden border-t bg-white" role="navigation" aria-label="Mobile navigation">
           <div className="max-w-6xl mx-auto px-6 py-4 space-y-1">
             <Link
               href="/features"
