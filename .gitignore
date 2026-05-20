@@ -39,6 +39,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# platform admin runtime data (audit log, editable plan config)
+.dinaya/
+
 # drizzle migrations
 !drizzle/
 !drizzle/*.sql

@@ -43,6 +43,15 @@ export default auth((req) => {
     }
   }
 
+  // Protect platform admin routes (allowlist enforcement happens in the layout)
+  if (pathname.startsWith("/admin")) {
+    if (!req.auth) {
+      return NextResponse.redirect(
+        appUrl(req, `/auth/signin?callbackUrl=${encodeURIComponent(pathname)}`)
+      );
+    }
+  }
+
   return NextResponse.next();
 });
 

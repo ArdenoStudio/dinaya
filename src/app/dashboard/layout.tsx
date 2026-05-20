@@ -1,9 +1,11 @@
+import Link from "next/link";
 import { signOut } from "@/auth";
 import { Logo } from "@/components/Logo";
 import { SidebarNav } from "@/components/dashboard/SidebarNav";
 import { DashboardToastProvider } from "@/components/dashboard/ToastProvider";
 import { requireBusiness } from "@/lib/auth";
-import { Bell, ChevronsUpDown, Menu, Search, UserCircle } from "lucide-react";
+import { isPlatformAdmin } from "@/lib/platform-admin";
+import { Bell, ChevronsUpDown, Menu, Search, ShieldCheck, UserCircle } from "lucide-react";
 
 export default async function DashboardLayout({
   children,
@@ -11,6 +13,7 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }) {
   const { business, user } = await requireBusiness();
+  const showAdminLink = isPlatformAdmin(user.email);
 
   return (
     <div className="min-h-screen bg-muted/20 lg:grid lg:grid-cols-[17rem_minmax(0,1fr)]">
@@ -20,6 +23,15 @@ export default async function DashboardLayout({
         </div>
         <SidebarNav />
         <div className="border-t px-6 py-4">
+          {showAdminLink && (
+            <Link
+              href="/admin"
+              className="mb-3 flex items-center gap-2 rounded-md border border-primary/20 bg-primary/[0.04] px-3 py-2 text-xs font-medium text-primary transition-colors hover:bg-primary/10"
+            >
+              <ShieldCheck className="size-3.5" aria-hidden="true" />
+              Platform admin
+            </Link>
+          )}
           <p className="truncate text-xs text-muted-foreground">{user.email}</p>
           <p className="mt-1 text-xs capitalize text-muted-foreground/70">{business.plan} plan</p>
           <form
