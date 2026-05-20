@@ -1,13 +1,14 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import type { Staff } from "@/db/schema";
 import StepService from "./StepService";
 import StepDateTime from "./StepDateTime";
 import StepConfirm from "./StepConfirm";
 import StaffPicker from "./StaffPicker";
+import BookingDesktopSummary from "./BookingDesktopSummary";
 import { getBookingCopy } from "@/lib/i18n";
 import { getEligibleStaff, pickDefaultStaff } from "@/lib/booking-staff";
 import { formatLkr } from "@/lib/utils";
@@ -197,8 +198,17 @@ export default function BookingWizard({
     );
   }
 
+  const desktopSelectionLine = [
+    state.service?.name,
+    state.date && state.timeLabel
+      ? `${format(parseISO(state.date + "T12:00:00"), "d MMM")} · ${state.timeLabel}`
+      : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
   return (
-    <div className="overflow-hidden md:rounded-2xl md:border md:border-gray-100 md:bg-white md:shadow-sm">
+    <div className="overflow-hidden md:rounded-2xl md:border md:border-gray-100/80 md:bg-white md:shadow-[0_24px_64px_-12px_rgba(37,99,235,0.12),0_8px_24px_-8px_rgba(0,0,0,0.08)]">
       {/* Mobile gradient header + progress */}
       <div className="bg-gradient-to-b from-blue-700 via-blue-600 to-blue-600 px-[18px] pt-5 pb-[18px] md:hidden">
         <BusinessIdentity
@@ -211,30 +221,17 @@ export default function BookingWizard({
         <ProgressPills steps={progressSteps} current={step} />
       </div>
 
-      {/* Desktop in-card header */}
-      <div className="hidden border-b border-gray-100 px-6 py-5 md:block">
-        <ProgressPills steps={progressSteps} current={step} variant="desktop" />
+      {/* Desktop step bar */}
+      <div className="hidden border-b border-gray-100 bg-gray-50/50 px-8 py-6 md:block">
+        <DesktopProgressBar steps={progressSteps} current={step} />
       </div>
 
       {/* Step 0–1: Service + DateTime */}
       {step < 2 && (
         <>
-          <div className="md:p-6 md:pt-5">
-            {/* Desktop business row (above grid) */}
-            <div className="mb-6 hidden items-center gap-3 border-b border-gray-100 pb-5 md:flex">
-              <BusinessAvatar name={business.name} logoUrl={business.logoUrl} icon={businessIcon} size="lg" />
-              <div className="min-w-0 flex-1">
-                <h2 className="font-semibold text-gray-900">{business.name}</h2>
-                <p className="mt-0.5 font-mono text-xs text-gray-400">{bookingUrlLabel}</p>
-              </div>
-              <div className="flex shrink-0 items-center gap-1.5 rounded-full border border-green-100 bg-green-50 px-2.5 py-1 text-xs font-medium text-green-600">
-                <span className="size-1.5 animate-pulse rounded-full bg-green-500" />
-                {copy.availableToday}
-              </div>
-            </div>
-
-            <div className="grid gap-0 md:grid-cols-2 md:gap-6">
-              <div className="border-b border-gray-100 p-[14px] md:border-0 md:p-0">
+          <div className="md:px-8 md:py-7">
+            <div className="grid gap-0 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] md:gap-8 lg:gap-10">
+              <div className="border-b border-gray-100 p-[14px] md:flex md:flex-col md:border-0 md:p-0">
                 <StepService
                   services={services}
                   selected={state.service}
@@ -258,9 +255,18 @@ export default function BookingWizard({
                 {state.service && !state.staff && !needsStaffPicker && (
                   <p className="mt-3 text-center text-sm text-amber-600">{copy.noStaff}</p>
                 )}
+                <div className="hidden md:block">
+                  <BookingDesktopSummary
+                    copy={copy}
+                    service={state.service}
+                    staff={state.staff}
+                    date={state.date}
+                    timeLabel={state.timeLabel}
+                  />
+                </div>
               </div>
 
-              <div className="bg-[#f2f2f7] p-[14px] md:bg-transparent md:p-0">
+              <div className="bg-[#f2f2f7] p-[14px] md:flex md:min-h-[400px] md:flex-col md:rounded-2xl md:border md:border-gray-100 md:bg-gray-50/70 md:p-6">
                 <StepDateTime
                   businessId={business.id}
                   copy={copy}
@@ -282,19 +288,23 @@ export default function BookingWizard({
           </div>
 
           {/* Desktop bottom CTA */}
-          <div className="hidden border-t border-gray-100 px-6 py-5 md:flex md:items-center md:gap-3">
+          <div className="hidden border-t border-gray-100 bg-gray-50/30 px-8 py-5 md:flex md:items-center md:gap-6">
+            <div className="min-w-0 flex-1">
+              {desktopSelectionLine ? (
+                <p className="truncate text-sm font-medium text-gray-700">{desktopSelectionLine}</p>
+              ) : (
+                <p className="text-sm text-gray-400">{copy.selectServiceHint}</p>
+              )}
+              <p className="mt-0.5 text-xs text-gray-400">{copy.securedByPayHere}</p>
+            </div>
             <button
               type="button"
               onClick={goConfirm}
               disabled={!canProceedDesktop}
-              className="flex-1 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 py-3.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/25 transition-opacity hover:from-blue-700 hover:to-blue-800 disabled:cursor-not-allowed disabled:opacity-40"
+              className="shrink-0 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-3.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/25 transition-opacity hover:from-blue-700 hover:to-blue-800 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {desktopPayCta}
             </button>
-            <div className="flex shrink-0 items-center gap-1.5 text-xs text-gray-400">
-              <i className="bi bi-shield-check text-blue-400" />
-              PayHere
-            </div>
           </div>
 
           {/* Mobile: after slot on step 1, show continue via StepDateTime */}
@@ -327,49 +337,58 @@ export default function BookingWizard({
   );
 }
 
+function DesktopProgressBar({ steps, current }: { steps: string[]; current: number }) {
+  return (
+    <ol className="flex w-full items-center">
+      {steps.map((label, i) => {
+        const done = i < current;
+        const active = i === current;
+        return (
+          <li
+            key={label}
+            className={`flex items-center ${i < steps.length - 1 ? "flex-1" : ""}`}
+          >
+            <div className="flex items-center gap-3">
+              <span
+                className={`flex size-9 shrink-0 items-center justify-center rounded-full text-sm font-bold transition-colors ${
+                  active
+                    ? "bg-blue-600 text-white shadow-md shadow-blue-500/30"
+                    : done
+                    ? "bg-blue-600 text-white"
+                    : "bg-white text-gray-400 ring-1 ring-gray-200"
+                }`}
+              >
+                {done ? <i className="bi bi-check-lg text-xs" /> : i + 1}
+              </span>
+              <span
+                className={`whitespace-nowrap text-sm font-semibold ${
+                  active ? "text-gray-900" : done ? "text-blue-600" : "text-gray-400"
+                }`}
+              >
+                {label}
+              </span>
+            </div>
+            {i < steps.length - 1 && (
+              <div
+                className={`mx-4 h-0.5 min-w-[2rem] flex-1 rounded-full ${
+                  done ? "bg-blue-600" : "bg-gray-200"
+                }`}
+              />
+            )}
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
 function ProgressPills({
   steps,
   current,
-  variant = "mobile",
 }: {
   steps: string[];
   current: number;
-  variant?: "mobile" | "desktop";
 }) {
-  if (variant === "desktop") {
-    return (
-      <div className="flex items-center gap-2">
-        {steps.map((label, i) => {
-          const done = i < current;
-          const active = i === current;
-          return (
-            <div key={label} className="flex items-center gap-2">
-              <div
-                className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold ${
-                  active
-                    ? "bg-blue-600 text-white shadow-sm"
-                    : done
-                    ? "bg-blue-50 text-blue-600"
-                    : "bg-gray-100 text-gray-400"
-                }`}
-              >
-                {done ? (
-                  <i className="bi bi-check-lg text-[10px]" />
-                ) : (
-                  <span
-                    className={`inline-block size-2 rounded-full ${active ? "bg-white" : "bg-gray-300"}`}
-                  />
-                )}
-                {label}
-              </div>
-              {i < steps.length - 1 && <div className="h-px w-4 bg-gray-200" />}
-            </div>
-          );
-        })}
-      </div>
-    );
-  }
-
   return (
     <div className="flex items-center gap-[7px]">
       {steps.map((label, i) => {

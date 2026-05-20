@@ -249,7 +249,7 @@ export default function StepConfirm({ state, business, copy, onUpdate, onBack, o
 
   return (
     <div className="flex flex-col">
-      <div className="flex flex-col gap-3 bg-[#f2f2f7] px-[14px] py-3 md:grid md:grid-cols-2 md:gap-6 md:bg-transparent md:p-0">
+      <div className="flex flex-col gap-3 bg-[#f2f2f7] px-[14px] py-3 md:grid md:grid-cols-2 md:gap-8 md:bg-transparent md:px-8 md:py-7">
         <div>{summaryCards}</div>
         <div>
           {hasManualPaymentFallback && (

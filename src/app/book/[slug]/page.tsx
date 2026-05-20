@@ -128,8 +128,8 @@ export default async function BookingPage({ params }: Props) {
     <div className="min-h-dvh bg-[#f2f2f7] md:bg-[#f7f7f8]">
       {/* Desktop page header — business context above the booking card */}
       <div className="hidden border-b border-gray-100 bg-white md:block">
-        <div className="mx-auto max-w-4xl px-6 py-8">
-          <div className="flex items-start gap-4">
+        <div className="mx-auto max-w-5xl px-8 py-6">
+          <div className="flex items-center gap-5">
             {business.logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -143,7 +143,10 @@ export default async function BookingPage({ params }: Props) {
               </div>
             )}
             <div className="min-w-0 flex-1">
-              <h1 className="font-cal text-2xl text-gray-900">{business.name}</h1>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                {copy.bookAppointment}
+              </p>
+              <h1 className="mt-1 font-cal text-2xl text-gray-900">{business.name}</h1>
               {avgRating !== null && reviewCount > 0 && (
                 <div className="mt-1 flex items-center gap-1.5">
                   <StarRating rating={avgRating} />
@@ -207,11 +210,18 @@ export default async function BookingPage({ params }: Props) {
                 </div>
               )}
             </div>
+            <div className="hidden shrink-0 flex-col items-end gap-2 lg:flex">
+              <div className="flex items-center gap-1.5 rounded-full border border-green-100 bg-green-50 px-3 py-1.5 text-xs font-medium text-green-600">
+                <span className="size-1.5 animate-pulse rounded-full bg-green-500" />
+                {copy.availableToday}
+              </div>
+              <span className="font-mono text-xs text-gray-400">{bookingUrlLabel}</span>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="mx-auto max-w-4xl px-0 md:px-6 md:py-8">
+      <div className="mx-auto max-w-5xl px-0 md:px-8 md:py-8">
         {/* Gallery — above booking on all breakpoints */}
         {gallery.length > 0 && (
           <div className="px-4 pb-4 pt-4 md:px-0 md:pb-6 md:pt-0">

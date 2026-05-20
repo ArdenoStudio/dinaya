@@ -85,61 +85,72 @@ export default function StepDateTime({
 
   if (!service || !staff) {
     return (
-      <div className="rounded-xl border border-dashed border-gray-200 bg-gray-50/50 px-4 py-10 text-center text-sm text-gray-400">
-        {copy.chooseService}
+      <div className="flex min-h-[280px] items-center justify-center rounded-xl border border-dashed border-gray-200 bg-white px-6 py-12 text-center text-sm text-gray-400 md:min-h-[360px]">
+        <div>
+          <i className="bi bi-calendar2-plus mb-3 block text-3xl text-gray-300" />
+          {copy.selectServiceHint}
+        </div>
       </div>
     );
   }
 
+  const slotsPanel = (
+    <div className="flex min-h-0 flex-1 flex-col">
+      <p className="mb-2 hidden text-[10px] font-bold uppercase tracking-widest text-gray-400 lg:block">
+        {copy.availableTimes}
+      </p>
+      {loadingSlots ? (
+        <div className="grid grid-cols-3 gap-1.5 md:grid-cols-4">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="h-10 animate-pulse rounded-xl bg-gray-100" />
+          ))}
+        </div>
+      ) : !hasFetched ? (
+        <p className="py-8 text-center text-sm text-gray-400">{copy.selectDate}</p>
+      ) : slots.length === 0 ? (
+        <p className="py-8 text-center text-sm text-gray-500">{copy.noSlots}</p>
+      ) : (
+        <div className="grid max-h-[200px] grid-cols-3 gap-1.5 overflow-y-auto pr-1 md:max-h-[220px] md:grid-cols-4 lg:max-h-[260px]">
+          {slots.map((slot) => {
+            const isSelected = selectedSlot?.startUtc === slot.startUtc;
+            return (
+              <button
+                key={slot.startUtc}
+                type="button"
+                onClick={() => onSlotSelect(slot)}
+                className={`rounded-xl py-2.5 text-xs font-semibold transition-all ${
+                  isSelected
+                    ? "bg-blue-600 text-white shadow-md shadow-blue-500/25"
+                    : "border border-gray-200 bg-white text-gray-600 hover:border-blue-300 hover:text-blue-600"
+                }`}
+              >
+                {slot.label}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+
   return (
-    <div>
+    <div className="flex h-full flex-col">
       <p className="mb-3 text-[10px] font-bold uppercase tracking-widest text-gray-400">
         {copy.pickDateTime}
       </p>
 
-      <MonthCalendar
-        selectedDate={selectedDate}
-        minDate={today}
-        maxDate={maxDate}
-        onSelect={onDateChange}
-      />
-
-      <div className="mt-3">
-        {loadingSlots ? (
-          <div className="grid grid-cols-3 gap-1.5">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="h-10 animate-pulse rounded-xl bg-gray-100" />
-            ))}
-          </div>
-        ) : !hasFetched ? (
-          <p className="py-6 text-center text-sm text-gray-400">{copy.selectDate}</p>
-        ) : slots.length === 0 ? (
-          <p className="py-6 text-center text-sm text-gray-500">{copy.noSlots}</p>
-        ) : (
-          <div className="grid grid-cols-3 gap-1.5">
-            {slots.map((slot) => {
-              const isSelected = selectedSlot?.startUtc === slot.startUtc;
-              return (
-                <button
-                  key={slot.startUtc}
-                  type="button"
-                  onClick={() => onSlotSelect(slot)}
-                  className={`rounded-xl py-2.5 text-xs font-semibold transition-all ${
-                    isSelected
-                      ? "bg-blue-600 text-white shadow-md shadow-blue-500/25"
-                      : "border border-gray-200 bg-white text-gray-600 hover:border-blue-300 hover:text-blue-600"
-                  }`}
-                >
-                  {slot.label}
-                </button>
-              );
-            })}
-          </div>
-        )}
+      <div className="flex flex-1 flex-col gap-4 lg:grid lg:grid-cols-2 lg:items-start">
+        <MonthCalendar
+          selectedDate={selectedDate}
+          minDate={today}
+          maxDate={maxDate}
+          onSelect={onDateChange}
+        />
+        <div className="flex min-h-[180px] flex-col lg:min-h-0">{slotsPanel}</div>
       </div>
 
       {appointmentLabel && selectedSlot && (
-        <div className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50/50 px-3 py-2 text-xs text-emerald-700">
+        <div className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50/50 px-3 py-2 text-xs text-emerald-700 md:hidden">
           <i className="bi bi-check-circle mr-1" />
           {appointmentLabel} · {selectedSlot.label}
         </div>
