@@ -172,7 +172,7 @@ export default function ProductMockup() {
       <div className="md:hidden flex flex-col items-center">
         <div
           className={`transition-opacity duration-200 ${fading ? "opacity-0" : "opacity-100"}`}
-          style={{ height: Math.round(852 * 0.72), overflow: "hidden" }}
+          style={{ marginBottom: -Math.round(852 * (1 - 0.72)) }}
         >
           <IPhoneMockup
             model="15-pro"
