@@ -1,4 +1,3 @@
-import { Fragment } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { LandingNav } from "@/components/LandingNav";
@@ -45,16 +44,19 @@ const features = [
 const steps = [
   {
     number: "01",
+    icon: "bi-sliders",
     title: "Set up your page",
     desc: "Add your services, prices, and availability. Takes less than 5 minutes.",
   },
   {
     number: "02",
+    icon: "bi-send",
     title: "Share your link",
     desc: "Send your dinaya.lk/yourname link via WhatsApp, Instagram, or Facebook.",
   },
   {
     number: "03",
+    icon: "bi-calendar-check",
     title: "Get booked",
     desc: "Clients pick a time, pay online. You get an instant notification.",
   },
@@ -280,9 +282,9 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* How it works — fix #9: arrow connectors between steps */}
-      <section id="how-it-works" className="max-w-6xl mx-auto px-6 py-16 border-t">
-        <div className="text-center mb-12">
+      {/* How it works */}
+      <section id="how-it-works" className="max-w-5xl mx-auto px-6 py-20 border-t">
+        <div className="text-center mb-16">
           <span className="relative text-sm font-semibold tracking-tight text-primary">
             <span className="absolute top-0.5 -left-3 h-4 w-[3px] rounded-r-sm bg-primary" />
             How it works
@@ -292,19 +294,24 @@ export default function LandingPage() {
           </h2>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-8 md:gap-0">
-          {steps.map((step, i) => (
-            <Fragment key={step.number}>
-              <div className="flex-1 flex flex-col">
-                <div className="mb-5">
-                  <div className="inline-flex items-center justify-center size-14 rounded-2xl bg-primary/10 border border-primary/15">
-                    <span className="font-cal text-2xl text-primary">{step.number}</span>
-                  </div>
+        <div className="relative grid md:grid-cols-3 gap-10">
+          {/* Connecting line behind the icons */}
+          <div className="hidden md:block absolute top-7 left-[16.5%] right-[16.5%] h-px bg-gray-200" />
+
+          {steps.map((step) => (
+            <div key={step.number} className="flex flex-col items-center text-center">
+              {/* Icon badge with step number dot */}
+              <div className="relative z-10 mb-6">
+                <div className="flex size-14 items-center justify-center rounded-2xl bg-white border border-gray-200 shadow-sm ring-4 ring-white">
+                  <i className={`bi ${step.icon} text-xl text-primary`} />
                 </div>
-                <h3 className="font-cal text-xl mb-2 text-balance">{step.title}</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed text-pretty">{step.desc}</p>
+                <span className="absolute -top-2 -right-2 flex size-5 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-white">
+                  {parseInt(step.number)}
+                </span>
               </div>
-            </Fragment>
+              <h3 className="font-semibold text-gray-900 text-lg mb-2">{step.title}</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed max-w-[220px]">{step.desc}</p>
+            </div>
           ))}
         </div>
       </section>
