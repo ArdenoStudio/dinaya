@@ -107,6 +107,32 @@ export const businesses = pgTable("businesses", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// ─── Pro subscriptions (Dinaya billing its own customers) ───────────────────
+
+export const subscriptionStatusEnum = pgEnum("subscription_status", [
+  "active",
+  "past_due",
+  "cancelled",
+  "ended",
+]);
+
+export const subscriptions = pgTable("subscriptions", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  businessId: uuid("business_id")
+    .references(() => businesses.id, { onDelete: "cascade" })
+    .notNull(),
+  // PayHere identifiers
+  payhereOrderId: varchar("payhere_order_id", { length: 100 }).notNull().unique(),
+  payhereSubscriptionId: varchar("payhere_subscription_id", { length: 100 }).unique(),
+  // Plan being subscribed to (forward-compat: more tiers later)
+  plan: planEnum("plan").default("pro").notNull(),
+  status: subscriptionStatusEnum("status").default("active").notNull(),
+  amountLkr: integer("amount_lkr").notNull(),
+  currentPeriodEnd: timestamp("current_period_end"),
+  cancelledAt: timestamp("cancelled_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // ─── Users (business owners + staff) ─────────────────────────────────────────
 
 export const users = pgTable("users", {
