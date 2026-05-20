@@ -53,13 +53,13 @@ export async function POST() {
 
   // Get the owner's name + email for the PayHere checkout (required fields)
   const [owner] = await db
-    .select({ name: users.name, email: users.email, phone: users.phone })
+    .select({ name: users.name, email: users.email })
     .from(users)
     .where(eq(users.id, userId))
     .limit(1);
 
   const contactEmail = business.email ?? owner?.email ?? "";
-  const contactPhone = business.phone ?? owner?.phone ?? "";
+  const contactPhone = business.phone ?? "";
   if (!contactEmail || !contactPhone) {
     return NextResponse.json(
       { error: "Add a business email and phone in Settings before upgrading." },
