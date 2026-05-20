@@ -124,104 +124,19 @@ export default async function BookingPage({ params }: Props) {
       business.lankaqrImageUrl
   );
 
+  const hasAboutSection = Boolean(
+    business.description ||
+      business.address ||
+      business.phone ||
+      business.instagramUrl ||
+      business.facebookUrl ||
+      business.websiteUrl ||
+      (avgRating !== null && reviewCount > 0)
+  );
+
   return (
     <div className="min-h-dvh bg-[#f2f2f7] md:bg-[#f7f7f8]">
-      {/* Desktop page header — business context above the booking card */}
-      <div className="hidden border-b border-gray-100 bg-white md:block">
-        <div className="mx-auto max-w-5xl px-8 py-6">
-          <div className="flex items-center gap-5">
-            {business.logoUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={business.logoUrl}
-                alt={business.name}
-                className="size-14 shrink-0 rounded-2xl border object-cover"
-              />
-            ) : (
-              <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-2xl font-bold text-white shadow-lg shadow-blue-500/20">
-                {business.name.charAt(0).toUpperCase()}
-              </div>
-            )}
-            <div className="min-w-0 flex-1">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
-                {copy.bookAppointment}
-              </p>
-              <h1 className="mt-1 font-cal text-2xl text-gray-900">{business.name}</h1>
-              {avgRating !== null && reviewCount > 0 && (
-                <div className="mt-1 flex items-center gap-1.5">
-                  <StarRating rating={avgRating} />
-                  <span className="text-sm font-medium">{avgRating.toFixed(1)}</span>
-                  <span className="text-sm text-gray-400">
-                    ({reviewCount} review{reviewCount !== 1 ? "s" : ""})
-                  </span>
-                </div>
-              )}
-              {business.description && (
-                <p className="mt-2 max-w-2xl text-sm leading-relaxed text-gray-500">
-                  {business.description}
-                </p>
-              )}
-              <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-400">
-                {business.address && (
-                  <span className="flex items-center gap-1">
-                    <i className="bi bi-geo-alt" />
-                    {business.address}
-                  </span>
-                )}
-                {business.phone && (
-                  <a href={`tel:${business.phone}`} className="flex items-center gap-1 hover:text-gray-700">
-                    <i className="bi bi-telephone" />
-                    {business.phone}
-                  </a>
-                )}
-              </div>
-              {(business.instagramUrl || business.facebookUrl || business.websiteUrl) && (
-                <div className="mt-3 flex items-center gap-2">
-                  {business.instagramUrl && (
-                    <a
-                      href={business.instagramUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex size-8 items-center justify-center rounded-lg bg-gray-100 text-gray-500 transition-colors hover:bg-pink-50 hover:text-pink-600"
-                    >
-                      <i className="bi bi-instagram" />
-                    </a>
-                  )}
-                  {business.facebookUrl && (
-                    <a
-                      href={business.facebookUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex size-8 items-center justify-center rounded-lg bg-gray-100 text-gray-500 transition-colors hover:bg-blue-50 hover:text-blue-600"
-                    >
-                      <i className="bi bi-facebook" />
-                    </a>
-                  )}
-                  {business.websiteUrl && (
-                    <a
-                      href={business.websiteUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex size-8 items-center justify-center rounded-lg bg-gray-100 text-gray-500 transition-colors hover:bg-gray-200"
-                    >
-                      <i className="bi bi-globe" />
-                    </a>
-                  )}
-                </div>
-              )}
-            </div>
-            <div className="hidden shrink-0 flex-col items-end gap-2 lg:flex">
-              <div className="flex items-center gap-1.5 rounded-full border border-green-100 bg-green-50 px-3 py-1.5 text-xs font-medium text-green-600">
-                <span className="size-1.5 animate-pulse rounded-full bg-green-500" />
-                {copy.availableToday}
-              </div>
-              <span className="font-mono text-xs text-gray-400">{bookingUrlLabel}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="mx-auto max-w-5xl px-0 md:px-8 md:py-8">
+      <div className="mx-auto max-w-5xl px-0 md:px-8 md:py-6">
         {/* Gallery — above booking on all breakpoints */}
         {gallery.length > 0 && (
           <div className="px-4 pb-4 pt-4 md:px-0 md:pb-6 md:pt-0">
@@ -296,6 +211,71 @@ export default async function BookingPage({ params }: Props) {
           staffServiceMap={assignments}
           bookingUrlLabel={bookingUrlLabel}
         />
+
+        {hasAboutSection && (
+          <section className="mt-6 hidden rounded-2xl border border-gray-100 bg-white p-6 md:block">
+            {avgRating !== null && reviewCount > 0 && (
+              <div className="mb-4 flex items-center gap-2">
+                <StarRating rating={avgRating} size="md" />
+                <span className="font-semibold text-gray-900">{avgRating.toFixed(1)}</span>
+                <span className="text-sm text-gray-400">
+                  ({reviewCount} review{reviewCount !== 1 ? "s" : ""})
+                </span>
+              </div>
+            )}
+            {business.description && (
+              <p className="text-sm leading-relaxed text-gray-600">{business.description}</p>
+            )}
+            <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-gray-500">
+              {business.address && (
+                <span className="flex items-center gap-1.5">
+                  <i className="bi bi-geo-alt text-gray-400" />
+                  {business.address}
+                </span>
+              )}
+              {business.phone && (
+                <a href={`tel:${business.phone}`} className="flex items-center gap-1.5 hover:text-gray-800">
+                  <i className="bi bi-telephone text-gray-400" />
+                  {business.phone}
+                </a>
+              )}
+            </div>
+            {(business.instagramUrl || business.facebookUrl || business.websiteUrl) && (
+              <div className="mt-4 flex items-center gap-2 border-t border-gray-100 pt-4">
+                {business.instagramUrl && (
+                  <a
+                    href={business.instagramUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex size-9 items-center justify-center rounded-lg bg-gray-50 text-gray-500 transition-colors hover:bg-pink-50 hover:text-pink-600"
+                  >
+                    <i className="bi bi-instagram" />
+                  </a>
+                )}
+                {business.facebookUrl && (
+                  <a
+                    href={business.facebookUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex size-9 items-center justify-center rounded-lg bg-gray-50 text-gray-500 transition-colors hover:bg-blue-50 hover:text-blue-600"
+                  >
+                    <i className="bi bi-facebook" />
+                  </a>
+                )}
+                {business.websiteUrl && (
+                  <a
+                    href={business.websiteUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex size-9 items-center justify-center rounded-lg bg-gray-50 text-gray-500 transition-colors hover:bg-gray-100"
+                  >
+                    <i className="bi bi-globe" />
+                  </a>
+                )}
+              </div>
+            )}
+          </section>
+        )}
 
         {/* Team */}
         {staffWithBio.length > 0 && (

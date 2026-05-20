@@ -221,9 +221,45 @@ export default function BookingWizard({
         <ProgressPills steps={progressSteps} current={step} />
       </div>
 
-      {/* Desktop step bar */}
-      <div className="hidden border-b border-gray-100 bg-gray-50/50 px-8 py-6 md:block">
-        <DesktopProgressBar steps={progressSteps} current={step} />
+      {/* Desktop: unified business header + progress */}
+      <div className="hidden bg-gradient-to-br from-blue-700 via-blue-600 to-indigo-800 md:block">
+        <div className="px-8 pb-6 pt-7">
+          <div className="flex items-center gap-4">
+            <BusinessAvatar
+              name={business.name}
+              logoUrl={business.logoUrl}
+              icon={businessIcon}
+              size="lg"
+              onDark
+            />
+            <div className="min-w-0 flex-1">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-blue-200/90">
+                {copy.bookAppointment}
+              </p>
+              <h2 className="mt-0.5 text-xl font-semibold tracking-tight text-white">
+                {business.name}
+              </h2>
+            </div>
+            <div className="flex shrink-0 flex-col items-end gap-2">
+              <div className="flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1.5 text-xs font-medium text-white ring-1 ring-white/20">
+                <span className="size-1.5 animate-pulse rounded-full bg-emerald-400" />
+                {copy.availableToday}
+              </div>
+              <span className="flex items-center gap-1.5 font-mono text-xs text-blue-200/80">
+                <i className="bi bi-lock-fill text-[10px] text-blue-300" />
+                {bookingUrlLabel}
+              </span>
+            </div>
+          </div>
+          <div className="mt-6 border-t border-white/10 pt-5">
+            <DesktopProgressBar
+              steps={progressSteps}
+              current={step}
+              variant="dark"
+              onStepClick={(i) => i < step && setStep(i)}
+            />
+          </div>
+        </div>
       </div>
 
       {/* Step 0–1: Service + DateTime */}
@@ -337,41 +373,91 @@ export default function BookingWizard({
   );
 }
 
-function DesktopProgressBar({ steps, current }: { steps: string[]; current: number }) {
+function DesktopProgressBar({
+  steps,
+  current,
+  variant = "light",
+  onStepClick,
+}: {
+  steps: string[];
+  current: number;
+  variant?: "light" | "dark";
+  onStepClick?: (index: number) => void;
+}) {
+  const dark = variant === "dark";
+
   return (
     <ol className="flex w-full items-center">
       {steps.map((label, i) => {
         const done = i < current;
         const active = i === current;
+        const canNavigate = done && onStepClick;
+
+        const stepControl = (
+          <>
+            <span
+              className={`flex size-9 shrink-0 items-center justify-center rounded-full text-sm font-bold transition-colors ${
+                dark
+                  ? active
+                    ? "bg-white text-blue-700 shadow-lg shadow-black/10"
+                    : done
+                    ? "bg-white/25 text-white"
+                    : "bg-white/10 text-white/50 ring-1 ring-white/20"
+                  : active
+                  ? "bg-blue-600 text-white shadow-md shadow-blue-500/30"
+                  : done
+                  ? "bg-blue-600 text-white"
+                  : "bg-white text-gray-400 ring-1 ring-gray-200"
+              }`}
+            >
+              {done ? <i className="bi bi-check-lg text-xs" /> : i + 1}
+            </span>
+            <span
+              className={`whitespace-nowrap text-sm font-semibold ${
+                dark
+                  ? active
+                    ? "text-white"
+                    : done
+                    ? "text-white/90"
+                    : "text-white/45"
+                  : active
+                  ? "text-gray-900"
+                  : done
+                  ? "text-blue-600"
+                  : "text-gray-400"
+              }`}
+            >
+              {label}
+            </span>
+          </>
+        );
+
         return (
           <li
             key={label}
             className={`flex items-center ${i < steps.length - 1 ? "flex-1" : ""}`}
           >
-            <div className="flex items-center gap-3">
-              <span
-                className={`flex size-9 shrink-0 items-center justify-center rounded-full text-sm font-bold transition-colors ${
-                  active
-                    ? "bg-blue-600 text-white shadow-md shadow-blue-500/30"
-                    : done
-                    ? "bg-blue-600 text-white"
-                    : "bg-white text-gray-400 ring-1 ring-gray-200"
-                }`}
+            {canNavigate ? (
+              <button
+                type="button"
+                onClick={() => onStepClick(i)}
+                className="flex items-center gap-3 rounded-lg transition-opacity hover:opacity-90"
               >
-                {done ? <i className="bi bi-check-lg text-xs" /> : i + 1}
-              </span>
-              <span
-                className={`whitespace-nowrap text-sm font-semibold ${
-                  active ? "text-gray-900" : done ? "text-blue-600" : "text-gray-400"
-                }`}
-              >
-                {label}
-              </span>
-            </div>
+                {stepControl}
+              </button>
+            ) : (
+              <div className="flex items-center gap-3">{stepControl}</div>
+            )}
             {i < steps.length - 1 && (
               <div
                 className={`mx-4 h-0.5 min-w-[2rem] flex-1 rounded-full ${
-                  done ? "bg-blue-600" : "bg-gray-200"
+                  dark
+                    ? done
+                      ? "bg-white/50"
+                      : "bg-white/20"
+                    : done
+                    ? "bg-blue-600"
+                    : "bg-gray-200"
                 }`}
               />
             )}
@@ -455,22 +541,32 @@ function BusinessAvatar({
   logoUrl,
   icon,
   size,
+  onDark,
 }: {
   name: string;
   logoUrl?: string | null;
   icon?: string | null;
   size: "md" | "lg";
+  onDark?: boolean;
 }) {
   const dim = size === "lg" ? "size-12 rounded-xl" : "size-[42px] rounded-[13px]";
   if (logoUrl) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
-      <img src={logoUrl} alt={name} className={`${dim} shrink-0 object-cover ring-1 ring-white/25`} />
+      <img
+        src={logoUrl}
+        alt={name}
+        className={`${dim} shrink-0 object-cover ${onDark ? "ring-2 ring-white/30" : "ring-1 ring-white/25"}`}
+      />
     );
   }
   return (
     <div
-      className={`${dim} flex shrink-0 items-center justify-center bg-gradient-to-br from-blue-500 to-blue-700 shadow-lg shadow-blue-500/25`}
+      className={`${dim} flex shrink-0 items-center justify-center shadow-lg ${
+        onDark
+          ? "bg-white/20 ring-2 ring-white/30 backdrop-blur-sm"
+          : "bg-gradient-to-br from-blue-500 to-blue-700 shadow-blue-500/25"
+      }`}
     >
       {icon ? (
         <i className={`bi ${icon} text-white ${size === "lg" ? "text-xl" : "text-[18px]"}`} />
