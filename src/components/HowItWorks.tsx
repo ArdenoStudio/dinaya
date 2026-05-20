@@ -103,31 +103,6 @@ export function HowItWorks() {
 
         {/* Right — orbit diagram */}
         <div className="relative flex items-center justify-center overflow-hidden">
-          {/* Diagonal background pattern */}
-          <svg className="absolute size-full opacity-60">
-            <defs>
-              <pattern
-                id="dinaya-orbit-pattern"
-                patternUnits="userSpaceOnUse"
-                width="64"
-                height="64"
-              >
-                {Array.from({ length: 17 }, (_, i) => {
-                  const offset = i * 8;
-                  return (
-                    <path
-                      key={i}
-                      d={`M${-106 + offset} 110L${22 + offset} -18`}
-                      stroke="#e5e7eb"
-                      strokeWidth="1"
-                    />
-                  );
-                })}
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#dinaya-orbit-pattern)" />
-          </svg>
-
           <div className="pointer-events-none py-16 select-none">
             <Orbit
               durationSeconds={40}
