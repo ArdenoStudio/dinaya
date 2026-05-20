@@ -185,6 +185,21 @@ export default function LandingPage() {
             </div>
           ))}
         </div>
+
+        {/* Payment providers — localized trust signals */}
+        <div className="mt-5 pt-5 border-t border-dashed border-gray-200/80 flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
+          <span className="text-[11px] uppercase tracking-widest text-gray-400 font-semibold">
+            Accept payments via
+          </span>
+          {["PayHere", "Visa", "Mastercard", "LankaQR", "FriMi"].map((p) => (
+            <span
+              key={p}
+              className="inline-flex items-center rounded-md border border-gray-200 bg-white px-2.5 py-1 text-xs font-semibold text-gray-700 shadow-sm"
+            >
+              {p}
+            </span>
+          ))}
+        </div>
       </section>
 
       {/* Features */}
