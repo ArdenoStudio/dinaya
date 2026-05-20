@@ -3,7 +3,6 @@ import { db } from "@/db";
 import { businesses, services, staff, staffServices, reviews } from "@/db/schema";
 import { eq, and, avg, count } from "drizzle-orm";
 import BookingWizard from "@/components/booking/BookingWizard";
-import Link from "next/link";
 import { getBookingCopy } from "@/lib/i18n";
 
 interface Props {
@@ -353,12 +352,6 @@ export default async function BookingPage({ params }: Props) {
           </section>
         )}
 
-        <footer className="hidden pb-10 text-center text-xs text-gray-400 md:block">
-          {copy.poweredBy}{" "}
-          <Link href="https://dinaya.lk" className="text-blue-600 hover:underline">
-            Dinaya.lk
-          </Link>
-        </footer>
       </div>
     </div>
   );
