@@ -304,11 +304,6 @@ export default function LandingPage() {
                 <h3 className="font-cal text-xl mb-2 text-balance">{step.title}</h3>
                 <p className="text-muted-foreground text-sm leading-relaxed text-pretty">{step.desc}</p>
               </div>
-              {i < steps.length - 1 && (
-                <div className="hidden md:flex items-start pt-7 px-8 text-gray-300">
-                  <i className="bi bi-arrow-right text-2xl" />
-                </div>
-              )}
             </Fragment>
           ))}
         </div>
