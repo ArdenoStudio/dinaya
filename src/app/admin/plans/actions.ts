@@ -5,7 +5,6 @@ import { requirePlatformAdmin } from "@/lib/platform-admin";
 import {
   getPlanConfig,
   savePlanConfig,
-  type Plan,
   type PlanConfig,
   type PlanFeature,
 } from "@/lib/plan";
