@@ -57,57 +57,129 @@ type Mockup = typeof mockups[0];
 
 function PhoneScreen({ m }: { m: Mockup }) {
   const selectedService = m.services.find((s) => s.selected)!;
+  const num = parseInt(selectedService.price.replace(/[^0-9]/g, ""));
+  const depositAmount = `Rs. ${(num / 2).toLocaleString()}`;
 
   return (
-    <div className="w-full h-full bg-[#f9f9f9]">
-      {/* Booking content */}
-      <div className="px-6 pt-[70px]">
-        {/* Business header */}
-        <div className="flex items-center gap-4 mb-6">
-          <div className="size-[70px] rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center shrink-0 shadow-md shadow-blue-500/30">
-            <i className={`bi ${m.icon} text-white text-[28px]`} />
+    <div className="w-full h-full flex flex-col bg-[#f2f2f7]">
+
+      {/* ── Gradient header: status bar + business identity + progress ── */}
+      <div className="bg-gradient-to-b from-blue-700 via-blue-600 to-blue-600 px-[18px] pt-[66px] pb-[18px]">
+        {/* Business row */}
+        <div className="flex items-center gap-[12px] mb-[14px]">
+          <div className="size-[42px] rounded-[13px] bg-white/20 flex items-center justify-center ring-1 ring-white/25 shrink-0">
+            <i className={`bi ${m.icon} text-white text-[18px]`} />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[22px] font-bold text-gray-900 truncate leading-tight">{m.business}</p>
-            <p className="text-[18px] text-gray-400 truncate">{m.url}</p>
+            <p className="text-white font-semibold text-[16px] leading-tight truncate">{m.business}</p>
+            <p className="text-blue-200/80 text-[11px] truncate mt-[2px]">{m.url}</p>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <span className="size-3 rounded-full bg-green-500 animate-pulse" />
-            <span className="text-[18px] text-green-600 font-medium">Open</span>
+          <div className="flex items-center gap-[5px] bg-white/15 rounded-full px-[9px] py-[5px] shrink-0">
+            <span className="size-[7px] rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-white text-[11px] font-medium">Open</span>
           </div>
         </div>
 
-        <p className="text-[16px] font-bold text-gray-400 uppercase tracking-widest mb-3">Service</p>
-        <div className="flex justify-between items-center p-5 rounded-2xl border border-blue-200 bg-blue-50/80 mb-6">
-          <div>
-            <p className="text-[22px] font-semibold text-blue-900 leading-tight">{selectedService.name}</p>
-            <p className="text-[18px] text-gray-500 mt-1">{selectedService.duration}</p>
+        {/* Progress steps */}
+        <div className="flex items-center gap-[7px]">
+          {[
+            { label: "Service", done: true },
+            { label: "Time",    done: true },
+            { label: "Confirm", done: false },
+          ].map((step, i) => (
+            <div key={step.label} className="flex items-center gap-[7px]">
+              <div className={`flex items-center gap-[5px] rounded-full px-[9px] py-[5px] text-[11px] font-semibold ${
+                step.done
+                  ? "bg-white/20 text-white/75"
+                  : "bg-white text-blue-600 shadow-sm"
+              }`}>
+                {step.done
+                  ? <i className="bi bi-check-lg text-[9px]" />
+                  : <span className="size-[8px] rounded-full bg-blue-300 inline-block" />
+                }
+                {step.label}
+              </div>
+              {i < 2 && <div className="h-px w-[8px] bg-white/25 shrink-0" />}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Cards ── */}
+      <div className="flex-1 px-[14px] py-[12px] flex flex-col gap-[8px]">
+
+        {/* Selected service */}
+        <div className="bg-white rounded-[16px] px-[15px] py-[13px]">
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.08em] mb-[9px]">Selected Service</p>
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-[15px] font-semibold text-gray-900 leading-snug">{selectedService.name}</p>
+              <div className="flex items-center gap-[4px] mt-[3px]">
+                <i className="bi bi-clock text-gray-300 text-[10px]" />
+                <p className="text-[11px] text-gray-400">{selectedService.duration}</p>
+              </div>
+            </div>
+            <p className="text-[16px] font-bold text-blue-600 tabular-nums shrink-0">{selectedService.price}</p>
           </div>
-          <span className="text-[22px] font-bold text-blue-600 tabular-nums shrink-0">{selectedService.price}</span>
         </div>
 
-        <p className="text-[16px] font-bold text-gray-400 uppercase tracking-widest mb-3">Date & Time</p>
-        <div className="flex items-center gap-4 p-5 rounded-2xl bg-white border border-gray-100 shadow-sm mb-4">
-          <i className="bi bi-calendar3 text-blue-500 text-2xl shrink-0" />
-          <p className="text-[22px] font-medium text-gray-800">Thursday, May 15</p>
-        </div>
-        <div className="flex items-center gap-4 p-5 rounded-2xl bg-white border border-gray-100 shadow-sm mb-6">
-          <i className="bi bi-clock text-blue-500 text-2xl shrink-0" />
-          <p className="text-[22px] font-medium text-gray-800">{m.slots[m.selectedSlot]}</p>
-          <span className="ml-auto text-[18px] text-green-600 font-medium bg-green-50 px-3 py-1 rounded-full shrink-0">
-            Available
-          </span>
+        {/* Appointment */}
+        <div className="bg-white rounded-[16px] px-[15px] py-[13px]">
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.08em] mb-[9px]">Appointment</p>
+          <div className="flex items-center gap-[11px] mb-[9px]">
+            <div className="size-[34px] rounded-[10px] bg-blue-50 flex items-center justify-center shrink-0">
+              <i className="bi bi-calendar3 text-blue-500 text-[13px]" />
+            </div>
+            <div>
+              <p className="text-[13px] font-semibold text-gray-900">Thursday, May 15</p>
+              <p className="text-[11px] text-gray-400">2025</p>
+            </div>
+          </div>
+          <div className="h-px bg-gray-100 mb-[9px]" />
+          <div className="flex items-center gap-[11px]">
+            <div className="size-[34px] rounded-[10px] bg-emerald-50 flex items-center justify-center shrink-0">
+              <i className="bi bi-clock text-emerald-500 text-[13px]" />
+            </div>
+            <div className="flex-1">
+              <p className="text-[13px] font-semibold text-gray-900">{m.slots[m.selectedSlot]}</p>
+              <p className="text-[11px] text-gray-400">{selectedService.duration}</p>
+            </div>
+            <span className="text-[11px] text-emerald-600 font-semibold bg-emerald-50 px-[8px] py-[3px] rounded-full border border-emerald-100 shrink-0">
+              Available
+            </span>
+          </div>
         </div>
 
-        <button className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-6 rounded-2xl text-[22px] font-semibold shadow-lg shadow-blue-500/30">
-          Confirm & Pay — {selectedService.price}
-        </button>
-        <div className="flex items-center justify-center gap-2 mt-4">
-          <i className="bi bi-shield-check text-blue-400 text-[18px]" />
-          <span className="text-[18px] text-gray-400">Secured by PayHere</span>
+        {/* Order summary */}
+        <div className="bg-white rounded-[16px] px-[15px] py-[13px]">
+          <div className="flex justify-between items-center">
+            <p className="text-[12px] text-gray-500">{selectedService.name}</p>
+            <p className="text-[12px] text-gray-700 font-medium tabular-nums">{selectedService.price}</p>
+          </div>
+          <div className="flex justify-between items-center mt-[5px]">
+            <p className="text-[11px] text-gray-400">Due now (50% deposit)</p>
+            <p className="text-[11px] text-blue-600 font-semibold tabular-nums">{depositAmount}</p>
+          </div>
+          <div className="h-px bg-gray-100 my-[9px]" />
+          <div className="flex justify-between items-center">
+            <p className="text-[13px] font-bold text-gray-900">Total</p>
+            <p className="text-[14px] font-bold text-gray-900 tabular-nums">{selectedService.price}</p>
+          </div>
         </div>
 
       </div>
+
+      {/* ── Pinned CTA ── */}
+      <div className="px-[14px] pb-[26px] pt-[2px]">
+        <button className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-[17px] rounded-[14px] text-[16px] font-bold shadow-lg shadow-blue-500/25">
+          Confirm & Pay — {selectedService.price}
+        </button>
+        <div className="flex items-center justify-center gap-[5px] mt-[9px]">
+          <i className="bi bi-shield-check text-gray-300 text-[11px]" />
+          <span className="text-[11px] text-gray-400">Secured by PayHere · SSL encrypted</span>
+        </div>
+      </div>
+
     </div>
   );
 }
