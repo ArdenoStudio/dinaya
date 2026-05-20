@@ -4,7 +4,7 @@ import { Orbit } from "@/components/Orbit";
 function DinayaMark({ className }: { className?: string }) {
   return (
     <svg
-      viewBox="0 0 1200 1200"
+      viewBox="255 285 960 920"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
