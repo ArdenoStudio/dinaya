@@ -89,11 +89,14 @@ export default async function BookingPage({ params }: Props) {
       .from(services)
       .where(and(eq(services.businessId, business.id), eq(services.isActive, true))),
     db.select().from(staff).where(and(eq(staff.businessId, business.id), eq(staff.isActive, true))),
-    db.select().from(reviews)
+    db
+      .select()
+      .from(reviews)
       .where(and(eq(reviews.businessId, business.id), eq(reviews.isPublished, true)))
       .orderBy(reviews.createdAt)
       .limit(20),
-    db.select({ avg: avg(reviews.rating), count: count() })
+    db
+      .select({ avg: avg(reviews.rating), count: count() })
       .from(reviews)
       .where(and(eq(reviews.businessId, business.id), eq(reviews.isPublished, true))),
   ]);
@@ -110,70 +113,73 @@ export default async function BookingPage({ params }: Props) {
   const staffWithBio = staffList.filter((s) => s.bio || s.avatarUrl);
   const copy = getBookingCopy(business.language);
 
-  return (
-    <div className="min-h-dvh bg-[#f7f7f8]">
+  const appDomain = process.env.NEXT_PUBLIC_APP_DOMAIN ?? "";
+  const bookingUrlLabel =
+    appDomain === "dinaya.lk" ? `${business.slug}.dinaya.lk` : `${business.slug} · Dinaya`;
 
-      {/* ── Hero header ──────────────────────────────────────────── */}
-      <div className="bg-white border-b">
-        <div className="max-w-2xl mx-auto px-5 py-6">
+  const hasTrustBlock = Boolean(
+    business.cancellationPolicy ||
+      business.depositPolicy ||
+      business.bankTransferInstructions ||
+      business.lankaqrImageUrl
+  );
+
+  return (
+    <div className="min-h-dvh bg-[#f2f2f7] md:bg-[#f7f7f8]">
+      {/* Desktop page header — business context above the booking card */}
+      <div className="hidden border-b border-gray-100 bg-white md:block">
+        <div className="mx-auto max-w-4xl px-6 py-8">
           <div className="flex items-start gap-4">
-            {/* Logo */}
             {business.logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={business.logoUrl}
                 alt={business.name}
-                className="size-16 rounded-2xl object-cover border shrink-0"
+                className="size-14 shrink-0 rounded-2xl border object-cover"
               />
             ) : (
-              <div className="size-16 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0 border border-primary/10">
-                <span className="text-primary font-bold text-2xl">
-                  {business.name.charAt(0).toUpperCase()}
-                </span>
+              <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-2xl font-bold text-white shadow-lg shadow-blue-500/20">
+                {business.name.charAt(0).toUpperCase()}
               </div>
             )}
-
-            <div className="flex-1 min-w-0">
-              <h1 className="font-cal text-2xl leading-tight">{business.name}</h1>
-
-              {/* Rating summary */}
+            <div className="min-w-0 flex-1">
+              <h1 className="font-cal text-2xl text-gray-900">{business.name}</h1>
               {avgRating !== null && reviewCount > 0 && (
-                <div className="flex items-center gap-1.5 mt-1">
+                <div className="mt-1 flex items-center gap-1.5">
                   <StarRating rating={avgRating} />
                   <span className="text-sm font-medium">{avgRating.toFixed(1)}</span>
-                  <span className="text-sm text-muted-foreground">({reviewCount} review{reviewCount !== 1 ? "s" : ""})</span>
+                  <span className="text-sm text-gray-400">
+                    ({reviewCount} review{reviewCount !== 1 ? "s" : ""})
+                  </span>
                 </div>
               )}
-
               {business.description && (
-                <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">{business.description}</p>
+                <p className="mt-2 max-w-2xl text-sm leading-relaxed text-gray-500">
+                  {business.description}
+                </p>
               )}
-
-              {/* Info row */}
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-3">
+              <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-400">
                 {business.address && (
-                  <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <i className="bi bi-geo-alt text-[10px]" />
+                  <span className="flex items-center gap-1">
+                    <i className="bi bi-geo-alt" />
                     {business.address}
                   </span>
                 )}
                 {business.phone && (
-                  <a href={`tel:${business.phone}`} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors">
-                    <i className="bi bi-telephone text-[10px]" />
+                  <a href={`tel:${business.phone}`} className="flex items-center gap-1 hover:text-gray-700">
+                    <i className="bi bi-telephone" />
                     {business.phone}
                   </a>
                 )}
               </div>
-
-              {/* Social links */}
               {(business.instagramUrl || business.facebookUrl || business.websiteUrl) && (
-                <div className="flex items-center gap-2 mt-2.5">
+                <div className="mt-3 flex items-center gap-2">
                   {business.instagramUrl && (
                     <a
                       href={business.instagramUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center justify-center size-7 rounded-lg bg-gray-100 hover:bg-pink-50 hover:text-pink-600 text-gray-500 transition-colors text-sm"
+                      className="flex size-8 items-center justify-center rounded-lg bg-gray-100 text-gray-500 transition-colors hover:bg-pink-50 hover:text-pink-600"
                     >
                       <i className="bi bi-instagram" />
                     </a>
@@ -183,7 +189,7 @@ export default async function BookingPage({ params }: Props) {
                       href={business.facebookUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center justify-center size-7 rounded-lg bg-gray-100 hover:bg-blue-50 hover:text-blue-600 text-gray-500 transition-colors text-sm"
+                      className="flex size-8 items-center justify-center rounded-lg bg-gray-100 text-gray-500 transition-colors hover:bg-blue-50 hover:text-blue-600"
                     >
                       <i className="bi bi-facebook" />
                     </a>
@@ -193,7 +199,7 @@ export default async function BookingPage({ params }: Props) {
                       href={business.websiteUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center justify-center size-7 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-500 transition-colors text-sm"
+                      className="flex size-8 items-center justify-center rounded-lg bg-gray-100 text-gray-500 transition-colors hover:bg-gray-200"
                     >
                       <i className="bi bi-globe" />
                     </a>
@@ -205,61 +211,65 @@ export default async function BookingPage({ params }: Props) {
         </div>
       </div>
 
-      {/* ── Portfolio gallery ─────────────────────────────────────── */}
-      {gallery.length > 0 && (
-        <div className="max-w-2xl mx-auto px-5 pt-5">
-          <div className={`grid gap-2 rounded-2xl overflow-hidden ${
-            gallery.length === 1 ? "grid-cols-1" :
-            gallery.length === 2 ? "grid-cols-2" :
-            gallery.length >= 3 ? "grid-cols-3" : ""
-          }`}>
-            {gallery.slice(0, 6).map((url, i) => (
-              <div
-                key={url}
-                className={`relative bg-muted overflow-hidden ${
-                  gallery.length === 3 && i === 0 ? "col-span-2 row-span-2 aspect-square" :
-                  gallery.length >= 4 && i === 0 ? "col-span-2 aspect-video" :
-                  "aspect-square"
-                }`}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={url} alt="" className="w-full h-full object-cover" />
-                {i === 5 && gallery.length > 6 && (
-                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                    <span className="text-white font-semibold text-lg">+{gallery.length - 6}</span>
-                  </div>
-                )}
-              </div>
-            ))}
+      <div className="mx-auto max-w-4xl px-0 md:px-6 md:py-8">
+        {/* Gallery — above booking on all breakpoints */}
+        {gallery.length > 0 && (
+          <div className="px-4 pb-4 pt-4 md:px-0 md:pb-6 md:pt-0">
+            <div
+              className={`grid gap-2 overflow-hidden rounded-2xl ${
+                gallery.length === 1
+                  ? "grid-cols-1"
+                  : gallery.length === 2
+                  ? "grid-cols-2"
+                  : "grid-cols-3"
+              }`}
+            >
+              {gallery.slice(0, 6).map((url, i) => (
+                <div
+                  key={url}
+                  className={`relative overflow-hidden bg-gray-200 ${
+                    gallery.length === 3 && i === 0
+                      ? "col-span-2 row-span-2 aspect-square"
+                      : gallery.length >= 4 && i === 0
+                      ? "col-span-2 aspect-video"
+                      : "aspect-square"
+                  }`}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={url} alt="" className="h-full w-full object-cover" />
+                  {i === 5 && gallery.length > 6 && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                      <span className="text-lg font-semibold text-white">+{gallery.length - 6}</span>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* ── Booking wizard ────────────────────────────────────────── */}
-      <div className="max-w-2xl mx-auto px-4 py-6">
-        <div className="mb-4">
-          <h2 className="font-cal text-lg">{copy.bookAppointment}</h2>
-          <p className="text-sm text-muted-foreground">{copy.chooseServiceAndTime}</p>
-        </div>
-        {(business.cancellationPolicy || business.depositPolicy || business.bankTransferInstructions || business.lankaqrImageUrl) && (
-          <div className="mb-4 rounded-xl border bg-white p-4">
-            <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground">{copy.trustTitle}</p>
-            <div className="space-y-3 text-sm text-muted-foreground">
+        {/* Trust / policies — compact, before wizard on desktop */}
+        {hasTrustBlock && (
+          <div className="mx-4 mb-4 rounded-xl border border-gray-100 bg-white p-4 md:mx-0 md:mb-6">
+            <p className="mb-3 text-[10px] font-bold uppercase tracking-widest text-gray-400">
+              {copy.trustTitle}
+            </p>
+            <div className="space-y-3 text-sm text-gray-500">
               {business.cancellationPolicy && (
                 <div>
-                  <p className="font-medium text-foreground">{copy.cancellationPolicy}</p>
+                  <p className="font-medium text-gray-800">{copy.cancellationPolicy}</p>
                   <p className="mt-0.5 whitespace-pre-wrap">{business.cancellationPolicy}</p>
                 </div>
               )}
               {business.depositPolicy && (
                 <div>
-                  <p className="font-medium text-foreground">{copy.depositPolicy}</p>
+                  <p className="font-medium text-gray-800">{copy.depositPolicy}</p>
                   <p className="mt-0.5 whitespace-pre-wrap">{business.depositPolicy}</p>
                 </div>
               )}
               {(business.bankTransferInstructions || business.lankaqrImageUrl) && (
                 <div>
-                  <p className="font-medium text-foreground">{copy.localPayment}</p>
+                  <p className="font-medium text-gray-800">{copy.localPayment}</p>
                   {business.bankTransferInstructions && (
                     <p className="mt-0.5 whitespace-pre-wrap">{business.bankTransferInstructions}</p>
                   )}
@@ -268,88 +278,98 @@ export default async function BookingPage({ params }: Props) {
             </div>
           </div>
         )}
+
         <BookingWizard
           business={business}
           services={serviceList}
           staff={staffList}
           staffServiceMap={assignments}
+          bookingUrlLabel={bookingUrlLabel}
         />
-      </div>
 
-      {/* ── Team section ──────────────────────────────────────────── */}
-      {staffWithBio.length > 0 && (
-        <div className="max-w-2xl mx-auto px-5 pb-6">
-          <h2 className="font-cal text-lg mb-4">Meet the team</h2>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            {staffWithBio.map((member) => (
-              <div key={member.id} className="bg-white border rounded-xl p-4 flex flex-col items-center text-center gap-2">
-                {member.avatarUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={member.avatarUrl}
-                    alt={member.name}
-                    className="size-14 rounded-full object-cover border"
-                  />
-                ) : (
-                  <div className="size-14 rounded-full bg-primary/10 flex items-center justify-center border border-primary/10">
-                    <span className="text-primary font-bold text-xl">{member.name.charAt(0)}</span>
-                  </div>
-                )}
-                <div>
-                  <p className="font-medium text-sm">{member.name}</p>
-                  {member.bio && (
-                    <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed line-clamp-3">{member.bio}</p>
+        {/* Team */}
+        {staffWithBio.length > 0 && (
+          <section className="mt-8 px-4 md:px-0">
+            <h2 className="mb-4 font-cal text-lg text-gray-900">Meet the team</h2>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {staffWithBio.map((member) => (
+                <div
+                  key={member.id}
+                  className="flex flex-col items-center gap-2 rounded-xl border border-gray-100 bg-white p-4 text-center"
+                >
+                  {member.avatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={member.avatarUrl}
+                      alt={member.name}
+                      className="size-14 rounded-full border object-cover"
+                    />
+                  ) : (
+                    <div className="flex size-14 items-center justify-center rounded-full border border-blue-100 bg-blue-50 text-xl font-bold text-blue-600">
+                      {member.name.charAt(0)}
+                    </div>
                   )}
+                  <div>
+                    <p className="text-sm font-medium">{member.name}</p>
+                    {member.bio && (
+                      <p className="mt-0.5 line-clamp-3 text-xs leading-relaxed text-gray-500">
+                        {member.bio}
+                      </p>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+              ))}
+            </div>
+          </section>
+        )}
 
-      {/* ── Reviews ───────────────────────────────────────────────── */}
-      {reviewList.length > 0 && (
-        <div className="max-w-2xl mx-auto px-5 pb-8">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h2 className="font-cal text-lg">Reviews</h2>
+        {/* Reviews */}
+        {reviewList.length > 0 && (
+          <section className="mt-8 px-4 pb-8 md:px-0">
+            <div className="mb-4">
+              <h2 className="font-cal text-lg text-gray-900">Reviews</h2>
               {avgRating !== null && (
-                <div className="flex items-center gap-2 mt-0.5">
+                <div className="mt-1 flex items-center gap-2">
                   <StarRating rating={avgRating} size="md" />
                   <span className="font-semibold">{avgRating.toFixed(1)}</span>
-                  <span className="text-sm text-muted-foreground">from {reviewCount} review{reviewCount !== 1 ? "s" : ""}</span>
+                  <span className="text-sm text-gray-400">
+                    from {reviewCount} review{reviewCount !== 1 ? "s" : ""}
+                  </span>
                 </div>
               )}
             </div>
-          </div>
-
-          <div className="space-y-3">
-            {reviewList.map((review) => (
-              <div key={review.id} className="bg-white border rounded-xl p-4">
-                <div className="flex items-start justify-between gap-2 mb-2">
-                  <div>
-                    <p className="font-medium text-sm">{review.clientName}</p>
-                    <StarRating rating={review.rating} />
+            <div className="space-y-3">
+              {reviewList.map((review) => (
+                <div key={review.id} className="rounded-xl border border-gray-100 bg-white p-4">
+                  <div className="mb-2 flex items-start justify-between gap-2">
+                    <div>
+                      <p className="text-sm font-medium">{review.clientName}</p>
+                      <StarRating rating={review.rating} />
+                    </div>
+                    <p className="shrink-0 text-xs text-gray-400">
+                      {new Date(review.createdAt).toLocaleDateString("en-LK", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </p>
                   </div>
-                  <p className="text-xs text-muted-foreground shrink-0">
-                    {new Date(review.createdAt).toLocaleDateString("en-LK", { day: "numeric", month: "short", year: "numeric" })}
-                  </p>
+                  {review.comment && (
+                    <p className="text-sm leading-relaxed text-gray-500">{review.comment}</p>
+                  )}
                 </div>
-                {review.comment && (
-                  <p className="text-sm text-muted-foreground leading-relaxed">{review.comment}</p>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+              ))}
+            </div>
+          </section>
+        )}
 
-      <footer className="text-center pb-8 text-xs text-muted-foreground/60">
-        Powered by{" "}
-        <Link href="https://dinaya.lk" className="text-primary hover:underline">
-          Dinaya.lk
-        </Link>
-      </footer>
+        <footer className="hidden pb-10 text-center text-xs text-gray-400 md:block">
+          {copy.poweredBy}{" "}
+          <Link href="https://dinaya.lk" className="text-blue-600 hover:underline">
+            Dinaya.lk
+          </Link>
+        </footer>
+      </div>
     </div>
   );
 }

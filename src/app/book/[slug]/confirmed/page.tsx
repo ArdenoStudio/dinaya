@@ -50,29 +50,32 @@ export default async function BookingConfirmedPage({ params, searchParams }: Pro
   ];
 
   return (
-    <div className="min-h-screen bg-muted/20 flex items-start justify-center px-4 py-12">
+    <div className="flex min-h-dvh items-start justify-center bg-[#f2f2f7] px-4 py-12">
       <div className="w-full max-w-md space-y-4">
-        {/* Confirmation card */}
-        <div className="bg-white border rounded-2xl p-10 text-center shadow-sm">
-          <div className={`mx-auto mb-5 flex items-center justify-center w-16 h-16 rounded-full border ${
-            isConfirmed
-              ? "bg-emerald-50 border-emerald-100"
-              : "bg-amber-50 border-amber-100"
-          }`}>
-            <i className={`bi ${isConfirmed ? "bi-check-circle text-emerald-500" : "bi-hourglass-split text-amber-500"} text-2xl`} />
+        <div className="rounded-2xl border border-gray-100 bg-white p-10 text-center shadow-sm">
+          <div
+            className={`mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full border ${
+              isConfirmed
+                ? "border-emerald-100 bg-emerald-50"
+                : "border-amber-100 bg-amber-50"
+            }`}
+          >
+            <i
+              className={`bi ${isConfirmed ? "bi-check-circle text-emerald-500" : "bi-hourglass-split text-amber-500"} text-2xl`}
+            />
           </div>
 
-          <h1 className="font-cal text-2xl mb-2">
+          <h1 className="mb-2 font-cal text-2xl text-gray-900">
             {isConfirmed ? "Booking confirmed!" : "Booking request received"}
           </h1>
-          <p className="text-muted-foreground text-sm mb-8">
+          <p className="mb-8 text-sm text-gray-500">
             {isPending
               ? "Your slot is being held while payment or business confirmation is completed."
               : "See you at"}{" "}
             <span className="font-medium text-foreground">{booking.businessName}</span>.
           </p>
 
-          <div className="bg-muted/30 rounded-xl p-4 text-sm text-left space-y-3 mb-6">
+          <div className="mb-6 space-y-3 rounded-xl bg-gray-50 p-4 text-left text-sm">
             {details.map((d) => (
               <div key={d.label} className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-2 text-muted-foreground">
@@ -88,7 +91,7 @@ export default async function BookingConfirmedPage({ params, searchParams }: Pro
             Ref: <span className="font-mono">{booking.id.slice(0, 8).toUpperCase()}</span>
           </p>
 
-          <Link href={`/book/${slug}`} className="text-sm text-primary hover:underline">
+          <Link href={`/book/${slug}`} className="text-sm text-blue-600 hover:underline">
             ← Back to booking page
           </Link>
         </div>

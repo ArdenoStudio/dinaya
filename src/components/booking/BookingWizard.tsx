@@ -1,18 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
+import { format } from "date-fns";
+import { toZonedTime } from "date-fns-tz";
 import type { Staff } from "@/db/schema";
 import StepService from "./StepService";
-import StepStaff from "./StepStaff";
 import StepDateTime from "./StepDateTime";
 import StepConfirm from "./StepConfirm";
+import StaffPicker from "./StaffPicker";
 import { getBookingCopy } from "@/lib/i18n";
+import { getEligibleStaff, pickDefaultStaff } from "@/lib/booking-staff";
+import { formatLkr } from "@/lib/utils";
+import Link from "next/link";
+
+const COLOMBO_TZ = "Asia/Colombo";
 
 interface Props {
   business: BookingBusiness;
   services: BookingService[];
   staff: Staff[];
   staffServiceMap: { staffId: string; serviceId: string }[];
+  bookingUrlLabel: string;
+  businessIcon?: string | null;
 }
 
 export type BookingBusiness = {
@@ -25,6 +34,7 @@ export type BookingBusiness = {
   name: string;
   payhereEnabled?: boolean;
   slug: string;
+  logoUrl?: string | null;
 };
 
 export type BookingService = {
@@ -57,14 +67,25 @@ export type BookingState = {
   notes: string;
 };
 
-export default function BookingWizard({ business, services, staff, staffServiceMap }: Props) {
+type SlotData = { startUtc: string; endUtc: string; label: string };
+
+export default function BookingWizard({
+  business,
+  services,
+  staff,
+  staffServiceMap,
+  bookingUrlLabel,
+  businessIcon,
+}: Props) {
   const copy = getBookingCopy(business.language);
-  const steps = [copy.service, copy.staff, copy.dateTime, copy.details];
+  const progressSteps = [copy.service, copy.dateTime, copy.confirm];
+  const todayStr = format(toZonedTime(new Date(), COLOMBO_TZ), "yyyy-MM-dd");
+
   const [step, setStep] = useState(0);
   const [state, setState] = useState<BookingState>({
     service: null,
     staff: null,
-    date: "",
+    date: todayStr,
     timeSlot: "",
     timeSlotEnd: "",
     timeLabel: "",
@@ -73,6 +94,7 @@ export default function BookingWizard({ business, services, staff, staffServiceM
     clientEmail: "",
     notes: "",
   });
+  const [selectedSlot, setSelectedSlot] = useState<SlotData | null>(null);
   const [confirmed, setConfirmed] = useState<{
     bookingId: string;
     manualPayment?: boolean;
@@ -81,150 +103,409 @@ export default function BookingWizard({ business, services, staff, staffServiceM
     status?: string;
   } | null>(null);
 
+  const needsStaffPicker = useMemo(() => {
+    if (!state.service) return false;
+    return getEligibleStaff(staff, staffServiceMap, state.service.id).length > 1;
+  }, [state.service, staff, staffServiceMap]);
+
   function update(partial: Partial<BookingState>) {
     setState((s) => ({ ...s, ...partial }));
   }
 
-  function next() { setStep((s) => s + 1); }
-  function back() { setStep((s) => s - 1); }
+  const selectService = useCallback(
+    (service: BookingService) => {
+      const defaultStaff = pickDefaultStaff(staff, staffServiceMap, service.id);
+      update({
+        service,
+        staff: defaultStaff,
+        date: todayStr,
+        timeSlot: "",
+        timeSlotEnd: "",
+        timeLabel: "",
+      });
+      setSelectedSlot(null);
+      if (typeof window !== "undefined" && window.innerWidth < 768) {
+        setStep(1);
+      }
+    },
+    [staff, staffServiceMap, todayStr]
+  );
+
+  function selectSlot(slot: SlotData) {
+    setSelectedSlot(slot);
+    update({
+      timeSlot: slot.startUtc,
+      timeSlotEnd: slot.endUtc,
+      timeLabel: slot.label,
+    });
+  }
+
+  function goConfirm() {
+    if (!state.service || !state.staff || !selectedSlot) return;
+    setStep(2);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  const canProceedDesktop =
+    Boolean(state.service && state.staff && selectedSlot) && step < 2;
+
+  const depositPreview = state.service
+    ? state.service.depositPercent > 0
+      ? Math.ceil((state.service.priceLkr * state.service.depositPercent) / 100)
+      : state.service.priceLkr
+    : 0;
+
+  const desktopPayCta =
+    state.service?.requiresPayment && depositPreview > 0
+      ? `${copy.confirmAndPay} — ${formatLkr(depositPreview)}`
+      : copy.confirmAndPay;
 
   if (confirmed) {
     if (confirmed.payhereFormData && confirmed.payhereUrl) {
       return (
-        <div className="bg-white border rounded-xl p-10 text-center">
-          <div className="size-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-            <i className="bi bi-credit-card text-2xl text-primary" />
-          </div>
-          <h2 className="font-cal text-xl mb-2 text-balance">Redirecting to payment...</h2>
-          <p className="text-muted-foreground text-sm mb-6 text-pretty">
-            You&apos;ll be taken to PayHere to complete your booking.
-          </p>
+        <SuccessPanel
+          icon="bi-credit-card"
+          title="Redirecting to payment..."
+          body="You'll be taken to PayHere to complete your booking."
+        >
           <form id="payhere-form" method="POST" action={confirmed.payhereUrl}>
             {Object.entries(confirmed.payhereFormData).map(([k, v]) => (
               <input key={k} type="hidden" name={k} value={v} />
             ))}
             <button
               type="submit"
-              className="bg-primary text-primary-foreground px-6 py-2.5 rounded-lg text-sm font-medium shadow-sm hover:bg-primary/90 transition-colors"
-              onClick={() => (document.getElementById("payhere-form") as HTMLFormElement)?.submit()}
+              className="rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-500/25 hover:bg-blue-700"
             >
               Pay now
             </button>
           </form>
-        </div>
+        </SuccessPanel>
       );
     }
 
     return (
-      <div className="bg-white border rounded-xl p-10 text-center">
-        <div className="size-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-          <i className="bi bi-check-circle-fill text-2xl text-primary" />
-        </div>
-        <h2 className="font-cal text-xl mb-2 text-balance">
-          {confirmed.manualPayment ? "Booking request received" : "Booking confirmed!"}
-        </h2>
-        <p className="text-muted-foreground text-sm mb-1 text-pretty">
-          {confirmed.manualPayment
+      <SuccessPanel
+        icon="bi-check-circle-fill"
+        title={confirmed.manualPayment ? "Booking request received" : "Booking confirmed!"}
+        body={
+          confirmed.manualPayment
             ? "Your booking is pending until the business confirms your payment proof."
-            : `We've sent a confirmation to ${state.clientEmail || state.clientPhone}.`}
-        </p>
-        <p className="text-xs text-muted-foreground/60 mt-2">
-          Ref: {confirmed.bookingId.slice(0, 8).toUpperCase()}
-        </p>
+            : `We've sent a confirmation to ${state.clientEmail || state.clientPhone}.`
+        }
+        refId={confirmed.bookingId}
+      />
+    );
+  }
+
+  return (
+    <div className="overflow-hidden md:rounded-2xl md:border md:border-gray-100 md:bg-white md:shadow-sm">
+      {/* Mobile gradient header + progress */}
+      <div className="bg-gradient-to-b from-blue-700 via-blue-600 to-blue-600 px-[18px] pt-5 pb-[18px] md:hidden">
+        <BusinessIdentity
+          name={business.name}
+          urlLabel={bookingUrlLabel}
+          logoUrl={business.logoUrl}
+          icon={businessIcon}
+          openLabel={copy.openNow}
+        />
+        <ProgressPills steps={progressSteps} current={step} />
+      </div>
+
+      {/* Desktop in-card header */}
+      <div className="hidden border-b border-gray-100 px-6 py-5 md:block">
+        <ProgressPills steps={progressSteps} current={step} variant="desktop" />
+      </div>
+
+      {/* Step 0–1: Service + DateTime */}
+      {step < 2 && (
+        <>
+          <div className="md:p-6 md:pt-5">
+            {/* Desktop business row (above grid) */}
+            <div className="mb-6 hidden items-center gap-3 border-b border-gray-100 pb-5 md:flex">
+              <BusinessAvatar name={business.name} logoUrl={business.logoUrl} icon={businessIcon} size="lg" />
+              <div className="min-w-0 flex-1">
+                <h2 className="font-semibold text-gray-900">{business.name}</h2>
+                <p className="mt-0.5 font-mono text-xs text-gray-400">{bookingUrlLabel}</p>
+              </div>
+              <div className="flex shrink-0 items-center gap-1.5 rounded-full border border-green-100 bg-green-50 px-2.5 py-1 text-xs font-medium text-green-600">
+                <span className="size-1.5 animate-pulse rounded-full bg-green-500" />
+                {copy.availableToday}
+              </div>
+            </div>
+
+            <div className="grid gap-0 md:grid-cols-2 md:gap-6">
+              <div className="border-b border-gray-100 p-[14px] md:border-0 md:p-0">
+                <StepService
+                  services={services}
+                  selected={state.service}
+                  copy={copy}
+                  onSelect={selectService}
+                  desktop
+                />
+                {state.service && needsStaffPicker && (
+                  <StaffPicker
+                    allStaff={staff}
+                    staffServiceMap={staffServiceMap}
+                    serviceId={state.service.id}
+                    selected={state.staff}
+                    copy={copy}
+                    onSelect={(s) => {
+                      update({ staff: s, timeSlot: "", timeSlotEnd: "", timeLabel: "" });
+                      setSelectedSlot(null);
+                    }}
+                    compact
+                  />
+                )}
+                {state.service && !state.staff && !needsStaffPicker && (
+                  <p className="mt-3 text-center text-sm text-amber-600">{copy.noStaff}</p>
+                )}
+              </div>
+
+              <div className="bg-[#f2f2f7] p-[14px] md:bg-transparent md:p-0">
+                <StepDateTime
+                  businessId={business.id}
+                  copy={copy}
+                  service={state.service}
+                  staff={state.staff}
+                  selectedDate={state.date}
+                  selectedSlot={selectedSlot}
+                  onDateChange={(date) => {
+                    update({ date, timeSlot: "", timeSlotEnd: "", timeLabel: "" });
+                    setSelectedSlot(null);
+                  }}
+                  onSlotSelect={selectSlot}
+                  showContinue={step === 1}
+                  onContinue={goConfirm}
+                  onBack={() => setStep(0)}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Desktop bottom CTA */}
+          <div className="hidden border-t border-gray-100 px-6 py-5 md:flex md:items-center md:gap-3">
+            <button
+              type="button"
+              onClick={goConfirm}
+              disabled={!canProceedDesktop}
+              className="flex-1 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 py-3.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/25 transition-opacity hover:from-blue-700 hover:to-blue-800 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {desktopPayCta}
+            </button>
+            <div className="flex shrink-0 items-center gap-1.5 text-xs text-gray-400">
+              <i className="bi bi-shield-check text-blue-400" />
+              PayHere
+            </div>
+          </div>
+
+          {/* Mobile: after slot on step 1, show continue via StepDateTime */}
+        </>
+      )}
+
+      {/* Step 2: Confirm */}
+      {step === 2 && (
+        <StepConfirm
+          state={state}
+          business={business}
+          copy={copy}
+          onUpdate={update}
+          onBack={() => setStep(1)}
+          onConfirmed={setConfirmed}
+        />
+      )}
+
+      {/* Mobile footer branding (booking steps) */}
+      {step < 2 && (
+        <div className="flex items-center justify-center gap-1 pb-6 pt-2 text-[11px] text-gray-400 md:hidden">
+          <span>{copy.poweredBy}</span>
+          <Link href="https://dinaya.lk" className="inline-flex items-center gap-1 text-gray-500">
+            <DinayaMark size={10} />
+            <span className="font-cal text-[11px] leading-none">Dinaya.lk</span>
+          </Link>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ProgressPills({
+  steps,
+  current,
+  variant = "mobile",
+}: {
+  steps: string[];
+  current: number;
+  variant?: "mobile" | "desktop";
+}) {
+  if (variant === "desktop") {
+    return (
+      <div className="flex items-center gap-2">
+        {steps.map((label, i) => {
+          const done = i < current;
+          const active = i === current;
+          return (
+            <div key={label} className="flex items-center gap-2">
+              <div
+                className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold ${
+                  active
+                    ? "bg-blue-600 text-white shadow-sm"
+                    : done
+                    ? "bg-blue-50 text-blue-600"
+                    : "bg-gray-100 text-gray-400"
+                }`}
+              >
+                {done ? (
+                  <i className="bi bi-check-lg text-[10px]" />
+                ) : (
+                  <span
+                    className={`inline-block size-2 rounded-full ${active ? "bg-white" : "bg-gray-300"}`}
+                  />
+                )}
+                {label}
+              </div>
+              {i < steps.length - 1 && <div className="h-px w-4 bg-gray-200" />}
+            </div>
+          );
+        })}
       </div>
     );
   }
 
   return (
-    <div className="bg-white border rounded-xl overflow-hidden" role="region" aria-label="Booking wizard">
-      {/* Step progress */}
-      <nav aria-label="Booking progress" className="flex border-b">
-        {steps.map((label, i) => {
-          const done = i < step;
-          const active = i === step;
-          return (
+    <div className="flex items-center gap-[7px]">
+      {steps.map((label, i) => {
+        const done = i < current;
+        const active = i === current;
+        return (
+          <div key={label} className="flex items-center gap-[7px]">
             <div
-              key={label}
-              role="listitem"
-              aria-current={active ? "step" : undefined}
-              className={`flex-1 flex flex-col items-center justify-center py-3 gap-0.5 text-[11px] font-medium transition-colors border-r last:border-r-0 ${
+              className={`flex items-center gap-[5px] rounded-full px-[9px] py-[5px] text-[11px] font-semibold ${
                 active
-                  ? "bg-primary text-primary-foreground"
+                  ? "bg-white text-blue-600 shadow-sm"
                   : done
-                  ? "bg-primary/8 text-primary"
-                  : "text-muted-foreground/60 bg-transparent"
+                  ? "bg-white/20 text-white/75"
+                  : "bg-white/10 text-white/50"
               }`}
             >
-              <span
-                aria-hidden="true"
-                className={`size-5 rounded-full flex items-center justify-center text-[10px] font-bold mb-0.5 ${
-                  active
-                    ? "bg-white/20 text-white"
-                    : done
-                    ? "bg-primary/15 text-primary"
-                    : "bg-muted/40 text-muted-foreground/50"
-                }`}
-              >
-                {done ? <i className="bi bi-check" style={{ fontSize: '0.75rem' }} /> : i + 1}
-              </span>
-              <span className="hidden sm:block">{label}</span>
-              <span className="sr-only">
-                Step {i + 1} of {steps.length}: {label}{done ? " (completed)" : active ? " (current)" : ""}
-              </span>
+              {done ? (
+                <i className="bi bi-check-lg text-[9px]" />
+              ) : (
+                <span
+                  className={`inline-block size-[8px] rounded-full ${active ? "bg-blue-300" : "bg-white/30"}`}
+                />
+              )}
+              {label}
             </div>
-          );
-        })}
-      </nav>
+            {i < steps.length - 1 && <div className="h-px w-[8px] shrink-0 bg-white/25" />}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
-      <div className="p-6" role="form" aria-label={`Step ${step + 1}: ${steps[step]}`}>
-        {step === 0 && (
-          <StepService
-            services={services}
-            selected={state.service}
-            copy={copy}
-            onSelect={(s) => { update({ service: s, staff: null, date: "", timeSlot: "" }); next(); }}
-          />
-        )}
-        {step === 1 && (
-          <StepStaff
-            allStaff={staff}
-            staffServiceMap={staffServiceMap}
-            serviceId={state.service!.id}
-            selected={state.staff}
-            copy={copy}
-            onSelect={(s) => { update({ staff: s, date: "", timeSlot: "" }); next(); }}
-            onBack={back}
-          />
-        )}
-        {step === 2 && (
-          <StepDateTime
-            businessId={business.id}
-            service={state.service!}
-            staff={state.staff!}
-            copy={copy}
-            onSelect={(date, slot) => {
-              update({
-                date,
-                timeSlot: slot.startUtc,
-                timeSlotEnd: slot.endUtc,
-                timeLabel: slot.label,
-              });
-              next();
-            }}
-            onBack={back}
-          />
-        )}
-        {step === 3 && (
-          <StepConfirm
-            state={state}
-            business={business}
-            copy={copy}
-            onUpdate={update}
-            onBack={back}
-            onConfirmed={setConfirmed}
-          />
-        )}
+function BusinessIdentity({
+  name,
+  urlLabel,
+  logoUrl,
+  icon,
+  openLabel,
+}: {
+  name: string;
+  urlLabel: string;
+  logoUrl?: string | null;
+  icon?: string | null;
+  openLabel: string;
+}) {
+  return (
+    <div className="mb-[14px] flex items-center gap-[12px]">
+      <BusinessAvatar name={name} logoUrl={logoUrl} icon={icon} size="md" />
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-[16px] font-semibold leading-tight text-white">{name}</p>
+        <p className="mt-[2px] truncate text-[11px] text-blue-200/80">{urlLabel}</p>
       </div>
+      <div className="flex shrink-0 items-center gap-[5px] rounded-full bg-white/15 px-[9px] py-[5px]">
+        <span className="size-[7px] animate-pulse rounded-full bg-emerald-400" />
+        <span className="text-[11px] font-medium text-white">{openLabel}</span>
+      </div>
+    </div>
+  );
+}
+
+function BusinessAvatar({
+  name,
+  logoUrl,
+  icon,
+  size,
+}: {
+  name: string;
+  logoUrl?: string | null;
+  icon?: string | null;
+  size: "md" | "lg";
+}) {
+  const dim = size === "lg" ? "size-12 rounded-xl" : "size-[42px] rounded-[13px]";
+  if (logoUrl) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img src={logoUrl} alt={name} className={`${dim} shrink-0 object-cover ring-1 ring-white/25`} />
+    );
+  }
+  return (
+    <div
+      className={`${dim} flex shrink-0 items-center justify-center bg-gradient-to-br from-blue-500 to-blue-700 shadow-lg shadow-blue-500/25`}
+    >
+      {icon ? (
+        <i className={`bi ${icon} text-white ${size === "lg" ? "text-xl" : "text-[18px]"}`} />
+      ) : (
+        <span className={`font-bold text-white ${size === "lg" ? "text-xl" : "text-lg"}`}>
+          {name.charAt(0).toUpperCase()}
+        </span>
+      )}
+    </div>
+  );
+}
+
+function DinayaMark({ size = 13 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="318 319 875 866"
+      fill="currentColor"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <path d="M 819.949219 499.695312 L 563.980469 755.773438 C 513.210938 806.554688 513.210938 889.15625 563.980469 939.941406 C 614.75 990.777344 697.378906 990.726562 748.09375 939.941406 L 966.117188 721.851562 C 982.484375 705.480469 982.484375 678.953125 966.117188 662.582031 C 949.75 646.207031 923.230469 646.207031 906.863281 662.582031 L 688.84375 880.671875 C 670.753906 898.707031 641.375 898.761719 623.234375 880.671875 C 605.144531 862.578125 605.144531 833.132812 623.234375 815.042969 L 879.203125 558.96875 C 931.742188 506.464844 1017.1875 506.464844 1069.671875 558.96875 C 1095.097656 584.425781 1109.117188 618.265625 1109.117188 654.257812 C 1109.117188 690.226562 1095.097656 724.0625 1069.671875 749.523438 L 782.496094 1036.789062 C 740.375 1078.921875 684.367188 1102.117188 624.816406 1102.117188 C 565.261719 1102.117188 509.285156 1078.921875 467.164062 1036.789062 C 380.222656 949.820312 380.222656 808.328125 467.164062 721.359375 L 797.144531 391.253906 C 813.511719 374.878906 813.511719 348.355469 797.144531 331.980469 C 780.773438 315.609375 754.257812 315.609375 737.890625 331.980469 L 407.910156 662.089844 C 288.285156 781.722656 288.285156 976.425781 407.910156 1096.058594 C 465.828125 1154.019531 542.867188 1185.945312 624.816406 1185.945312 C 706.765625 1185.945312 783.804688 1154.019531 841.746094 1096.058594 L 1128.925781 808.792969 C 1214.121094 723.570312 1214.121094 584.917969 1128.925781 499.695312 C 1043.78125 414.558594 905.144531 414.445312 819.949219 499.695312 Z" />
+    </svg>
+  );
+}
+
+function SuccessPanel({
+  icon,
+  title,
+  body,
+  refId,
+  children,
+}: {
+  icon: string;
+  title: string;
+  body: string;
+  refId?: string;
+  children?: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-2xl bg-white p-10 text-center md:border md:border-gray-100 md:shadow-sm">
+      <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-blue-50">
+        <i className={`bi ${icon} text-2xl text-blue-600`} />
+      </div>
+      <h2 className="mb-2 font-cal text-xl">{title}</h2>
+      <p className="mb-6 text-pretty text-sm text-gray-500">{body}</p>
+      {refId && (
+        <p className="mb-4 text-xs text-gray-400">
+          Ref: {refId.slice(0, 8).toUpperCase()}
+        </p>
+      )}
+      {children}
     </div>
   );
 }

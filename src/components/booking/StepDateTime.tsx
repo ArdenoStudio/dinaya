@@ -1,14 +1,15 @@
 "use client";
 
-import { useState } from "react";
-import { format, addDays, isToday } from "date-fns";
+import { useEffect, useState } from "react";
+import { addDays, format, parseISO } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import type { Staff } from "@/db/schema";
 import type { BookingService } from "./BookingWizard";
 import type { BookingCopy } from "@/lib/i18n";
+import MonthCalendar from "./MonthCalendar";
 
 const COLOMBO_TZ = "Asia/Colombo";
-const DATE_COUNT = 14;
+const MAX_BOOKING_DAYS = 60;
 
 interface SlotData {
   startUtc: string;
@@ -19,120 +20,153 @@ interface SlotData {
 interface Props {
   businessId: string;
   copy: BookingCopy;
-  service: BookingService;
-  staff: Staff;
-  onSelect: (date: string, slot: { startUtc: string; endUtc: string; label: string }) => void;
-  onBack: () => void;
+  service: BookingService | null;
+  staff: Staff | null;
+  selectedDate: string;
+  selectedSlot: SlotData | null;
+  onDateChange: (date: string) => void;
+  onSlotSelect: (slot: SlotData) => void;
+  showContinue?: boolean;
+  onContinue?: () => void;
+  onBack?: () => void;
 }
 
-export default function StepDateTime({ businessId, copy, service, staff, onSelect, onBack }: Props) {
+export default function StepDateTime({
+  businessId,
+  copy,
+  service,
+  staff,
+  selectedDate,
+  selectedSlot,
+  onDateChange,
+  onSlotSelect,
+  showContinue,
+  onContinue,
+  onBack,
+}: Props) {
   const today = toZonedTime(new Date(), COLOMBO_TZ);
-  const [selectedDate, setSelectedDate] = useState<string>(format(today, "yyyy-MM-dd"));
+  const maxDate = addDays(today, MAX_BOOKING_DAYS);
   const [slots, setSlots] = useState<SlotData[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
-  const [selectedSlot, setSelectedSlot] = useState<SlotData | null>(null);
   const [hasFetched, setHasFetched] = useState(false);
 
-  const dates = Array.from({ length: DATE_COUNT }, (_, i) => addDays(today, i));
+  const canLoad = Boolean(service && staff);
 
-  async function loadSlots(date: string) {
-    setSelectedDate(date);
-    setSelectedSlot(null);
-    setLoadingSlots(true);
-    setHasFetched(false);
-    const res = await fetch(
-      `/api/availability?businessId=${businessId}&staffId=${staff.id}&serviceId=${service.id}&date=${date}`
+  useEffect(() => {
+    if (!canLoad || !selectedDate) {
+      setSlots([]);
+      setHasFetched(false);
+      return;
+    }
+
+    let cancelled = false;
+    async function load() {
+      setLoadingSlots(true);
+      setHasFetched(false);
+      const res = await fetch(
+        `/api/availability?businessId=${businessId}&staffId=${staff!.id}&serviceId=${service!.id}&date=${selectedDate}`
+      );
+      const data = await res.json();
+      if (!cancelled) {
+        setSlots(data.slots ?? []);
+        setLoadingSlots(false);
+        setHasFetched(true);
+      }
+    }
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [businessId, staff, service, selectedDate, canLoad]);
+
+  const appointmentLabel = selectedDate
+    ? format(parseISO(selectedDate + "T12:00:00"), "EEEE, d MMMM")
+    : null;
+
+  if (!service || !staff) {
+    return (
+      <div className="rounded-xl border border-dashed border-gray-200 bg-gray-50/50 px-4 py-10 text-center text-sm text-gray-400">
+        {copy.chooseService}
+      </div>
     );
-    const data = await res.json();
-    setSlots(data.slots ?? []);
-    setLoadingSlots(false);
-    setHasFetched(true);
   }
 
   return (
     <div>
-      <h2 className="font-cal text-lg mb-4 text-balance">{copy.pickDateTime}</h2>
+      <p className="mb-3 text-[10px] font-bold uppercase tracking-widest text-gray-400">
+        {copy.pickDateTime}
+      </p>
 
-      {/* Date strip */}
-      <div className="flex gap-1.5 overflow-x-auto pb-2 mb-5 scrollbar-hide">
-        {dates.map((d) => {
-          const dateStr = format(d, "yyyy-MM-dd");
-          const isSelected = dateStr === selectedDate;
-          const todayDate = isToday(d);
-          return (
-            <button
-              key={dateStr}
-              onClick={() => loadSlots(dateStr)}
-              className={`flex-shrink-0 flex flex-col items-center rounded-lg px-3 py-2.5 text-xs min-w-[54px] border transition-all ${
-                isSelected
-                  ? "bg-primary text-primary-foreground border-primary shadow-sm"
-                  : "hover:border-primary/50 hover:bg-muted/30"
-              }`}
-            >
-              <span className={`font-medium ${isSelected ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
-                {todayDate ? copy.today : format(d, "EEE")}
-              </span>
-              <span className="font-bold text-base mt-0.5 tabular-nums">{format(d, "d")}</span>
-              <span className={`text-[10px] ${isSelected ? "text-primary-foreground/70" : "text-muted-foreground/70"}`}>
-                {format(d, "MMM")}
-              </span>
-            </button>
-          );
-        })}
+      <MonthCalendar
+        selectedDate={selectedDate}
+        minDate={today}
+        maxDate={maxDate}
+        onSelect={onDateChange}
+      />
+
+      <div className="mt-3">
+        {loadingSlots ? (
+          <div className="grid grid-cols-3 gap-1.5">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="h-10 animate-pulse rounded-xl bg-gray-100" />
+            ))}
+          </div>
+        ) : !hasFetched ? (
+          <p className="py-6 text-center text-sm text-gray-400">{copy.selectDate}</p>
+        ) : slots.length === 0 ? (
+          <p className="py-6 text-center text-sm text-gray-500">{copy.noSlots}</p>
+        ) : (
+          <div className="grid grid-cols-3 gap-1.5">
+            {slots.map((slot) => {
+              const isSelected = selectedSlot?.startUtc === slot.startUtc;
+              return (
+                <button
+                  key={slot.startUtc}
+                  type="button"
+                  onClick={() => onSlotSelect(slot)}
+                  className={`rounded-xl py-2.5 text-xs font-semibold transition-all ${
+                    isSelected
+                      ? "bg-blue-600 text-white shadow-md shadow-blue-500/25"
+                      : "border border-gray-200 bg-white text-gray-600 hover:border-blue-300 hover:text-blue-600"
+                  }`}
+                >
+                  {slot.label}
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
-      {/* Time slots */}
-      {loadingSlots ? (
-        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 mb-5">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="h-10 bg-muted/40 rounded-lg animate-pulse" />
-          ))}
-        </div>
-      ) : !hasFetched ? (
-        <p className="text-center text-muted-foreground/60 text-sm py-8">
-          {copy.selectDate}
-        </p>
-      ) : slots.length === 0 ? (
-        <p className="text-center text-muted-foreground text-sm py-8">
-          {copy.noSlots}
-        </p>
-      ) : (
-        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 mb-5">
-          {slots.map((slot) => {
-            const isSelected = selectedSlot?.startUtc === slot.startUtc;
-            return (
-              <button
-                key={slot.startUtc}
-                onClick={() => setSelectedSlot(slot)}
-                className={`rounded-lg py-2.5 text-xs font-medium border transition-all ${
-                  isSelected
-                    ? "bg-primary text-primary-foreground border-primary shadow-sm ring-2 ring-primary/20"
-                    : "hover:border-primary/50 hover:bg-muted/30"
-                }`}
-              >
-                {slot.label}
-              </button>
-            );
-          })}
+      {appointmentLabel && selectedSlot && (
+        <div className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50/50 px-3 py-2 text-xs text-emerald-700">
+          <i className="bi bi-check-circle mr-1" />
+          {appointmentLabel} · {selectedSlot.label}
         </div>
       )}
 
-      <div className="flex items-center gap-3 mt-2">
-        <button
-          onClick={onBack}
-          className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <i className="bi bi-chevron-left text-sm" /> {copy.back}
-        </button>
-        {selectedSlot && (
-          <button
-            onClick={() => onSelect(selectedDate, selectedSlot)}
-            className="ml-auto bg-primary text-primary-foreground px-5 py-2 rounded-lg text-sm font-medium shadow-sm hover:bg-primary/90 transition-colors"
-          >
-            {copy.continue}
-          </button>
-        )}
-      </div>
+      {(onBack || showContinue) && (
+        <div className="mt-4 flex items-center gap-3 md:hidden">
+          {onBack && (
+            <button
+              type="button"
+              onClick={onBack}
+              className="flex items-center gap-1 text-sm text-gray-500 transition-colors hover:text-gray-800"
+            >
+              <i className="bi bi-chevron-left text-sm" /> {copy.back}
+            </button>
+          )}
+          {showContinue && selectedSlot && onContinue && (
+            <button
+              type="button"
+              onClick={onContinue}
+              className="ml-auto rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-blue-500/25 transition-colors hover:bg-blue-700"
+            >
+              {copy.continue}
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
