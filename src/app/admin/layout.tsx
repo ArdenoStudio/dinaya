@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { signOut } from "@/auth";
 import { Logo } from "@/components/Logo";
@@ -6,6 +7,13 @@ import { requirePlatformAdmin } from "@/lib/platform-admin";
 import { logAdminEvent } from "@/lib/admin-audit";
 import { headers } from "next/headers";
 import { Menu, Search, ShieldCheck } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Platform Admin | Dinaya",
+  description:
+    "Dinaya platform administration dashboard for managing accounts, users, and subscriptions.",
+  robots: "noindex, nofollow",
+};
 
 export default async function AdminLayout({
   children,

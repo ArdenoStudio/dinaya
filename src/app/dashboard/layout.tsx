@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { signOut } from "@/auth";
 import { Logo } from "@/components/Logo";
@@ -6,6 +7,12 @@ import { DashboardToastProvider } from "@/components/dashboard/ToastProvider";
 import { requireBusiness } from "@/lib/auth";
 import { isPlatformAdmin } from "@/lib/platform-admin";
 import { Bell, ChevronsUpDown, Menu, Search, ShieldCheck, UserCircle } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Dashboard | Dinaya",
+  description:
+    "Manage your bookings, clients, services, and settings from your Dinaya dashboard.",
+};
 
 export default async function DashboardLayout({
   children,
