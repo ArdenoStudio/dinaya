@@ -136,15 +136,17 @@ export default function BookingWizard({ business, services, staff, staffServiceM
   }
 
   return (
-    <div className="bg-white border rounded-xl overflow-hidden">
+    <div className="bg-white border rounded-xl overflow-hidden" role="region" aria-label="Booking wizard">
       {/* Step progress */}
-      <div className="flex border-b">
+      <nav aria-label="Booking progress" className="flex border-b">
         {steps.map((label, i) => {
           const done = i < step;
           const active = i === step;
           return (
             <div
               key={label}
+              role="listitem"
+              aria-current={active ? "step" : undefined}
               className={`flex-1 flex flex-col items-center justify-center py-3 gap-0.5 text-[11px] font-medium transition-colors border-r last:border-r-0 ${
                 active
                   ? "bg-primary text-primary-foreground"
@@ -154,6 +156,7 @@ export default function BookingWizard({ business, services, staff, staffServiceM
               }`}
             >
               <span
+                aria-hidden="true"
                 className={`size-5 rounded-full flex items-center justify-center text-[10px] font-bold mb-0.5 ${
                   active
                     ? "bg-white/20 text-white"
@@ -165,12 +168,15 @@ export default function BookingWizard({ business, services, staff, staffServiceM
                 {done ? <i className="bi bi-check" style={{ fontSize: '0.75rem' }} /> : i + 1}
               </span>
               <span className="hidden sm:block">{label}</span>
+              <span className="sr-only">
+                Step {i + 1} of {steps.length}: {label}{done ? " (completed)" : active ? " (current)" : ""}
+              </span>
             </div>
           );
         })}
-      </div>
+      </nav>
 
-      <div className="p-6">
+      <div className="p-6" role="form" aria-label={`Step ${step + 1}: ${steps[step]}`}>
         {step === 0 && (
           <StepService
             services={services}
