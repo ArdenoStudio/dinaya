@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { businesses } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { fail, ok, validationError } from "@/lib/action-result";
-import { getBusinessContext } from "@/lib/auth";
+import { ok, validationError } from "@/lib/action-result";
+import { requireApiBusiness } from "@/lib/api-auth";
 import { logActivity } from "@/lib/activity-log";
 import { encryptSecret } from "@/lib/secrets";
 import { z } from "@/lib/validation";
@@ -30,10 +30,11 @@ const settingsSchema = z.object({
 });
 
 export async function PATCH(req: NextRequest) {
-  const context = await getBusinessContext();
-  if (!context) {
-    return NextResponse.json(fail("Unauthorized"), { status: 401 });
+  const authResult = await requireApiBusiness({ ownerOnly: true });
+  if (!authResult.ok) {
+    return authResult.response;
   }
+  const context = authResult.context;
 
   const parsed = settingsSchema.safeParse(await req.json());
   if (!parsed.success) {

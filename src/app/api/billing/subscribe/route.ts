@@ -1,18 +1,17 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/auth";
 import { db } from "@/db";
 import { businesses, subscriptions, users } from "@/db/schema";
 import { eq, and, inArray } from "drizzle-orm";
 import { buildRecurringFormData, PAYHERE_CHECKOUT_URL } from "@/lib/payhere-subscriptions";
 import { generateOrderId } from "@/lib/utils";
+import { requireApiBusiness } from "@/lib/api-auth";
 
 const PRO_PRICE_LKR = Number(process.env.DINAYA_PRO_MONTHLY_PRICE_LKR ?? "2500");
 
 export async function POST() {
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const businessId = (session.user as { businessId: string }).businessId;
-  const userId = (session.user as { id: string }).id;
+  const authResult = await requireApiBusiness({ ownerOnly: true });
+  if (!authResult.ok) return authResult.response;
+  const { businessId, user } = authResult.context;
 
   const [business] = await db
     .select({
@@ -55,7 +54,7 @@ export async function POST() {
   const [owner] = await db
     .select({ name: users.name, email: users.email })
     .from(users)
-    .where(eq(users.id, userId))
+    .where(eq(users.id, user.id))
     .limit(1);
 
   const contactEmail = business.email ?? owner?.email ?? "";

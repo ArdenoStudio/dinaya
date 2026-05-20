@@ -1,14 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/auth";
 import { db } from "@/db";
-import { staff, staffServices } from "@/db/schema";
-import { count, eq } from "drizzle-orm";
+import { services, staff, staffServices } from "@/db/schema";
+import { and, count, eq, inArray } from "drizzle-orm";
 import { PlanLimitError, requirePlanLimit } from "@/lib/plan";
+import { requireApiBusiness } from "@/lib/api-auth";
+import { z } from "@/lib/validation";
+
+const staffCreateSchema = z.object({
+  name: z.string().trim().min(1, "Name is required.").max(100),
+  bio: z.string().trim().max(1000).optional().nullable(),
+  serviceIds: z.array(z.uuid()).optional().default([]),
+});
 
 export async function GET() {
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const businessId = (session.user as { businessId: string }).businessId;
+  const authResult = await requireApiBusiness();
+  if (!authResult.ok) return authResult.response;
+  const { businessId } = authResult.context;
 
   const rows = await db
     .select({ id: staff.id, name: staff.name, bio: staff.bio, isActive: staff.isActive })
@@ -19,13 +26,19 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const authResult = await requireApiBusiness({ ownerOnly: true });
+  if (!authResult.ok) return authResult.response;
+  const { businessId } = authResult.context;
 
-  const businessId = (session.user as { businessId: string }).businessId;
-  const { name, bio, serviceIds } = await req.json();
-
-  if (!name) return NextResponse.json({ error: "Name is required." }, { status: 400 });
+  const parsed = staffCreateSchema.safeParse(await req.json());
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: "Please check the staff details.", fieldErrors: parsed.error.flatten().fieldErrors },
+      { status: 400 }
+    );
+  }
+  const { name, bio } = parsed.data;
+  const serviceIds = Array.from(new Set(parsed.data.serviceIds));
 
   const [{ value: staffCount }] = await db
     .select({ value: count() })
@@ -40,16 +53,31 @@ export async function POST(req: NextRequest) {
     throw error;
   }
 
-  const [member] = await db
-    .insert(staff)
-    .values({ businessId, name, bio: bio || null })
-    .returning({ id: staff.id });
+  if (serviceIds.length > 0) {
+    const validServices = await db
+      .select({ id: services.id })
+      .from(services)
+      .where(and(eq(services.businessId, businessId), inArray(services.id, serviceIds)));
 
-  if (serviceIds?.length) {
-    await db.insert(staffServices).values(
-      serviceIds.map((serviceId: string) => ({ staffId: member.id, serviceId }))
-    );
+    if (validServices.length !== serviceIds.length) {
+      return NextResponse.json({ error: "One or more services are invalid." }, { status: 400 });
+    }
   }
+
+  const member = await db.transaction(async (tx) => {
+    const [created] = await tx
+      .insert(staff)
+      .values({ businessId, name, bio: bio || null })
+      .returning({ id: staff.id });
+
+    if (serviceIds.length > 0) {
+      await tx.insert(staffServices).values(
+        serviceIds.map((serviceId) => ({ staffId: created.id, serviceId }))
+      );
+    }
+
+    return created;
+  });
 
   return NextResponse.json({ id: member.id }, { status: 201 });
 }

@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/auth";
 import { db } from "@/db";
 import { webhooks } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { z } from "@/lib/validation";
 import { PlanRequiredError, requirePro } from "@/lib/plan";
+import { requireApiBusiness } from "@/lib/api-auth";
+import { isSafeWebhookUrl } from "@/lib/webhook-url";
 
 const patchSchema = z.object({
   isActive: z.boolean().optional(),
@@ -35,9 +36,9 @@ async function requireWebhooks(businessId: string) {
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const businessId = (session.user as { businessId: string }).businessId;
+  const authResult = await requireApiBusiness({ ownerOnly: true });
+  if (!authResult.ok) return authResult.response;
+  const { businessId } = authResult.context;
   const planError = await requireWebhooks(businessId);
   if (planError) return planError;
   const { id } = await params;
@@ -47,6 +48,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     return NextResponse.json({ error: "Invalid webhook update." }, { status: 400 });
   }
   const body = parsed.data;
+  if (body.url && !isSafeWebhookUrl(body.url)) {
+    return NextResponse.json({ error: "Webhook URL must be a public HTTPS endpoint." }, { status: 400 });
+  }
   const update: Record<string, unknown> = {};
   if ("isActive" in body) update.isActive = body.isActive;
   if ("url" in body) update.url = body.url;
@@ -70,9 +74,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 }
 
 export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const businessId = (session.user as { businessId: string }).businessId;
+  const authResult = await requireApiBusiness({ ownerOnly: true });
+  if (!authResult.ok) return authResult.response;
+  const { businessId } = authResult.context;
   const planError = await requireWebhooks(businessId);
   if (planError) return planError;
   const { id } = await params;

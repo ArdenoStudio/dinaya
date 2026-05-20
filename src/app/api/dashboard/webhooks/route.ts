@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/auth";
 import { db } from "@/db";
 import { webhooks } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import crypto from "crypto";
 import { z } from "@/lib/validation";
 import { PlanRequiredError, requirePro } from "@/lib/plan";
+import { requireApiBusiness } from "@/lib/api-auth";
+import { isSafeWebhookUrl } from "@/lib/webhook-url";
 
 const EVENTS = [
   "booking.created",
@@ -21,17 +22,6 @@ const webhookSchema = z.object({
   events: z.array(z.enum(EVENTS)).min(1),
   secret: z.string().trim().min(16).max(200).optional(),
 });
-
-function isSafeWebhookUrl(value: string): boolean {
-  const parsed = new URL(value);
-  const hostname = parsed.hostname.toLowerCase();
-  return (
-    ["http:", "https:"].includes(parsed.protocol) &&
-    hostname !== "localhost" &&
-    hostname !== "127.0.0.1" &&
-    !hostname.endsWith(".local")
-  );
-}
 
 async function requireWebhooks(businessId: string) {
   try {
@@ -49,9 +39,9 @@ async function requireWebhooks(businessId: string) {
 }
 
 export async function GET() {
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const businessId = (session.user as { businessId: string }).businessId;
+  const authResult = await requireApiBusiness({ ownerOnly: true });
+  if (!authResult.ok) return authResult.response;
+  const { businessId } = authResult.context;
   const planError = await requireWebhooks(businessId);
   if (planError) return planError;
 
@@ -70,9 +60,9 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const businessId = (session.user as { businessId: string }).businessId;
+  const authResult = await requireApiBusiness({ ownerOnly: true });
+  if (!authResult.ok) return authResult.response;
+  const { businessId } = authResult.context;
   const planError = await requireWebhooks(businessId);
   if (planError) return planError;
 
@@ -86,7 +76,7 @@ export async function POST(req: NextRequest) {
 
   const { url, events, secret: providedSecret } = parsed.data;
   if (!isSafeWebhookUrl(url)) {
-    return NextResponse.json({ error: "Webhook URL must be a public HTTP or HTTPS endpoint." }, { status: 400 });
+    return NextResponse.json({ error: "Webhook URL must be a public HTTPS endpoint." }, { status: 400 });
   }
 
   const secret = providedSecret || crypto.randomBytes(24).toString("hex");

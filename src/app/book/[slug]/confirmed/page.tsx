@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { bookings, businesses, services, staff } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { format } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
@@ -23,28 +23,28 @@ export default async function BookingConfirmedPage({ params, searchParams }: Pro
   const [booking] = await db
     .select({
       id: bookings.id,
-      businessId: bookings.businessId,
-      serviceId: bookings.serviceId,
-      staffId: bookings.staffId,
       clientName: bookings.clientName,
       startsAt: bookings.startsAt,
+      status: bookings.status,
+      businessName: businesses.name,
+      serviceName: services.name,
+      staffName: staff.name,
     })
     .from(bookings)
-    .where(eq(bookings.id, bookingId))
+    .innerJoin(businesses, eq(businesses.id, bookings.businessId))
+    .innerJoin(services, eq(services.id, bookings.serviceId))
+    .innerJoin(staff, eq(staff.id, bookings.staffId))
+    .where(and(eq(bookings.id, bookingId), eq(businesses.slug, slug)))
     .limit(1);
   if (!booking) notFound();
 
-  const [[business], [service], [staffMember]] = await Promise.all([
-    db.select({ name: businesses.name }).from(businesses).where(eq(businesses.id, booking.businessId)).limit(1),
-    db.select({ name: services.name }).from(services).where(eq(services.id, booking.serviceId)).limit(1),
-    db.select({ name: staff.name }).from(staff).where(eq(staff.id, booking.staffId)).limit(1),
-  ]);
-
   const local = toZonedTime(booking.startsAt, COLOMBO_TZ);
+  const isConfirmed = booking.status === "confirmed" || booking.status === "completed";
+  const isPending = booking.status === "pending";
 
   const details = [
-    { icon: "bi-tag", label: "Service", value: service.name },
-    { icon: "bi-person", label: "With", value: staffMember.name },
+    { icon: "bi-tag", label: "Service", value: booking.serviceName },
+    { icon: "bi-person", label: "With", value: booking.staffName },
     { icon: "bi-calendar", label: "Date", value: format(local, "d MMMM yyyy") },
     { icon: "bi-clock", label: "Time", value: format(local, "h:mm a") },
   ];
@@ -54,13 +54,22 @@ export default async function BookingConfirmedPage({ params, searchParams }: Pro
       <div className="w-full max-w-md space-y-4">
         {/* Confirmation card */}
         <div className="bg-white border rounded-2xl p-10 text-center shadow-sm">
-          <div className="mx-auto mb-5 flex items-center justify-center w-16 h-16 rounded-full bg-emerald-50 border border-emerald-100">
-            <i className="bi bi-check-circle text-2xl text-emerald-500" />
+          <div className={`mx-auto mb-5 flex items-center justify-center w-16 h-16 rounded-full border ${
+            isConfirmed
+              ? "bg-emerald-50 border-emerald-100"
+              : "bg-amber-50 border-amber-100"
+          }`}>
+            <i className={`bi ${isConfirmed ? "bi-check-circle text-emerald-500" : "bi-hourglass-split text-amber-500"} text-2xl`} />
           </div>
 
-          <h1 className="font-cal text-2xl mb-2">Booking confirmed!</h1>
+          <h1 className="font-cal text-2xl mb-2">
+            {isConfirmed ? "Booking confirmed!" : "Booking request received"}
+          </h1>
           <p className="text-muted-foreground text-sm mb-8">
-            See you at <span className="font-medium text-foreground">{business.name}</span>.
+            {isPending
+              ? "Your slot is being held while payment or business confirmation is completed."
+              : "See you at"}{" "}
+            <span className="font-medium text-foreground">{booking.businessName}</span>.
           </p>
 
           <div className="bg-muted/30 rounded-xl p-4 text-sm text-left space-y-3 mb-6">
@@ -85,12 +94,14 @@ export default async function BookingConfirmedPage({ params, searchParams }: Pro
         </div>
 
         {/* Review prompt */}
-        <ReviewPrompt
-          slug={slug}
-          bookingId={booking.id}
-          clientName={booking.clientName}
-          businessName={business.name}
-        />
+        {booking.status === "completed" && (
+          <ReviewPrompt
+            slug={slug}
+            bookingId={booking.id}
+            clientName={booking.clientName}
+            businessName={booking.businessName}
+          />
+        )}
       </div>
     </div>
   );

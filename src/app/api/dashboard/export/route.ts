@@ -15,15 +15,13 @@ import {
   staffServices,
   users,
 } from "@/db/schema";
-import { getBusinessContext } from "@/lib/auth";
+import { requireApiBusiness } from "@/lib/api-auth";
 import { eq, inArray } from "drizzle-orm";
 
 export async function GET() {
-  const context = await getBusinessContext();
-  if (!context) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-  const { businessId } = context;
+  const authResult = await requireApiBusiness({ ownerOnly: true });
+  if (!authResult.ok) return authResult.response;
+  const { businessId } = authResult.context;
 
   const [
     businessRows,

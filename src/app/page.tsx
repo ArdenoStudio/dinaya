@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { LandingNav } from "@/components/LandingNav";
 import { FadeContainer, FadeDiv, FadeSpan } from "@/components/Fade";
 import { WordRotate } from "@/components/WordRotate";

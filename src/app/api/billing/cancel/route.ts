@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/auth";
 import { db } from "@/db";
 import { subscriptions } from "@/db/schema";
 import { eq, and, inArray } from "drizzle-orm";
 import { cancelPayhereSubscription } from "@/lib/payhere-subscriptions";
+import { requireApiBusiness } from "@/lib/api-auth";
 
 export async function POST() {
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const businessId = (session.user as { businessId: string }).businessId;
+  const authResult = await requireApiBusiness({ ownerOnly: true });
+  if (!authResult.ok) return authResult.response;
+  const { businessId } = authResult.context;
 
   const [sub] = await db
     .select()

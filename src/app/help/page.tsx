@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useState, useMemo } from "react";
 import { PublicNav } from "@/components/PublicNav";
 import { FadeContainer, FadeDiv } from "@/components/Fade";

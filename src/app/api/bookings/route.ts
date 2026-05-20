@@ -10,7 +10,7 @@ import { dispatchWebhooks } from "@/lib/webhooks";
 import { logActivity } from "@/lib/activity-log";
 import { normalizeSriLankanPhone } from "@/lib/phone";
 import { decryptSecret } from "@/lib/secrets";
-import { PlanLimitError, requirePlanLimit, requirePro } from "@/lib/plan";
+import { PlanLimitError, PlanRequiredError, requirePlanLimit, requirePro } from "@/lib/plan";
 import { z } from "@/lib/validation";
 import { startOfMonth } from "date-fns";
 
@@ -170,6 +170,43 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // Create booking (pending until payment/proof is confirmed, or immediately confirmed if free)
+  const payhereEnabled = Boolean(
+    service.requiresPayment &&
+    service.priceLkr > 0 &&
+    business.payhereEnabled &&
+    business.payhereMerchantId
+  );
+  let merchantSecret: string | null = null;
+
+  if (payhereEnabled) {
+    try {
+      await requirePro(businessId, "payments");
+    } catch (error) {
+      if (error instanceof PlanRequiredError) {
+        return NextResponse.json({ error: "PayHere payments require Dinaya Pro." }, { status: 402 });
+      }
+      throw error;
+    }
+
+    merchantSecret = decryptSecret(business.payhereMerchantSecret);
+    if (!merchantSecret) {
+      return NextResponse.json(
+        { error: "PayHere is enabled but the merchant secret is missing." },
+        { status: 400 }
+      );
+    }
+  }
+
+  const manualPaymentRequired = Boolean(
+    service.requiresPayment &&
+    service.priceLkr > 0 &&
+    !payhereEnabled &&
+    (business.bankTransferInstructions || business.lankaqrImageUrl)
+  );
+  const requiresPayherePayment = Boolean(payhereEnabled);
+  const initialStatus = requiresPayherePayment || manualPaymentRequired ? "pending" : "confirmed";
+
   // Upsert client record — match by phone within this business
   const [client] = await db
     .insert(clients)
@@ -190,25 +227,6 @@ export async function POST(req: NextRequest) {
       },
     })
     .returning({ id: clients.id });
-
-  // Create booking (pending until payment/proof is confirmed, or immediately confirmed if free)
-  const payhereEnabled = service.requiresPayment && service.priceLkr > 0 && business.payhereEnabled && business.payhereMerchantId;
-  if (payhereEnabled) {
-    try {
-      await requirePro(businessId, "payments");
-    } catch (error) {
-      if (error instanceof PlanLimitError) throw error;
-      return NextResponse.json({ error: "PayHere payments require Dinaya Pro." }, { status: 402 });
-    }
-  }
-  const manualPaymentRequired = Boolean(
-    service.requiresPayment &&
-    service.priceLkr > 0 &&
-    !payhereEnabled &&
-    (business.bankTransferInstructions || business.lankaqrImageUrl)
-  );
-  const requiresPayherePayment = Boolean(payhereEnabled);
-  const initialStatus = requiresPayherePayment || manualPaymentRequired ? "pending" : "confirmed";
 
   let booking: { id: string } | undefined;
 
@@ -304,6 +322,14 @@ export async function POST(req: NextRequest) {
   }
 
   // ── PayHere payment flow ────────────────────────────────────────────────
+  const payhereMerchantId = business.payhereMerchantId;
+  if (!payhereMerchantId || !merchantSecret) {
+    return NextResponse.json(
+      { error: "PayHere is enabled but merchant credentials are incomplete." },
+      { status: 400 }
+    );
+  }
+
   const orderId = generateOrderId();
   const amountDueLkr = service.depositPercent > 0
     ? Math.ceil((service.priceLkr * service.depositPercent) / 100)
@@ -315,14 +341,6 @@ export async function POST(req: NextRequest) {
     payhereOrderId: orderId,
     status: "pending",
   });
-
-  const merchantSecret = decryptSecret(business.payhereMerchantSecret);
-  if (!merchantSecret) {
-    return NextResponse.json(
-      { error: "PayHere is enabled but the merchant secret is missing." },
-      { status: 400 }
-    );
-  }
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? req.nextUrl.origin;
   const nameParts = clientName.split(" ");
@@ -338,7 +356,7 @@ export async function POST(req: NextRequest) {
     notifyUrl: `${appUrl}/api/webhooks/payhere`,
     returnUrl: `${appUrl}/book/${business.slug}/confirmed?bookingId=${booking.id}`,
     cancelUrl: `${appUrl}/book/${business.slug}`,
-    merchantId: business.payhereMerchantId!,
+    merchantId: payhereMerchantId,
     merchantSecret,
   });
 

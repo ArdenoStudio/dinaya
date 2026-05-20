@@ -1,16 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/auth";
 import { db } from "@/db";
 import { staff, staffServices, services } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, inArray } from "drizzle-orm";
+import { requireApiBusiness } from "@/lib/api-auth";
+import { z } from "@/lib/validation";
+
+const assignmentSchema = z.object({
+  staffIds: z.array(z.uuid()).default([]),
+});
 
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const businessId = (session.user as { businessId: string }).businessId;
+  const authResult = await requireApiBusiness({ ownerOnly: true });
+  if (!authResult.ok) return authResult.response;
+  const { businessId } = authResult.context;
   const { id: serviceId } = await params;
 
   // Verify service belongs to business
@@ -26,7 +31,13 @@ export async function GET(
     .select({ id: staff.id, name: staff.name })
     .from(staff)
     .innerJoin(staffServices, eq(staffServices.staffId, staff.id))
-    .where(and(eq(staffServices.serviceId, serviceId), eq(staff.isActive, true)));
+    .where(
+      and(
+        eq(staffServices.serviceId, serviceId),
+        eq(staff.businessId, businessId),
+        eq(staff.isActive, true)
+      )
+    );
 
   return NextResponse.json(rows);
 }
@@ -35,9 +46,9 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const businessId = (session.user as { businessId: string }).businessId;
+  const authResult = await requireApiBusiness({ ownerOnly: true });
+  if (!authResult.ok) return authResult.response;
+  const { businessId } = authResult.context;
   const { id: serviceId } = await params;
 
   // Verify service belongs to business
@@ -49,17 +60,35 @@ export async function POST(
 
   if (!svc) return NextResponse.json({ error: "Not found." }, { status: 404 });
 
-  const body = await req.json();
-  const { staffIds } = body as { staffIds: string[] };
-
-  // Replace all assignments for this service (upsert pattern)
-  await db.delete(staffServices).where(eq(staffServices.serviceId, serviceId));
-
-  if (Array.isArray(staffIds) && staffIds.length > 0) {
-    await db.insert(staffServices).values(
-      staffIds.map((staffId) => ({ staffId, serviceId }))
+  const parsed = assignmentSchema.safeParse(await req.json());
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: "Please check the staff assignments.", fieldErrors: parsed.error.flatten().fieldErrors },
+      { status: 400 }
     );
   }
+
+  const staffIds = Array.from(new Set(parsed.data.staffIds));
+  if (staffIds.length > 0) {
+    const validStaff = await db
+      .select({ id: staff.id })
+      .from(staff)
+      .where(and(eq(staff.businessId, businessId), inArray(staff.id, staffIds)));
+
+    if (validStaff.length !== staffIds.length) {
+      return NextResponse.json({ error: "One or more staff members are invalid." }, { status: 400 });
+    }
+  }
+
+  await db.transaction(async (tx) => {
+    await tx.delete(staffServices).where(eq(staffServices.serviceId, serviceId));
+
+    if (staffIds.length > 0) {
+      await tx.insert(staffServices).values(
+        staffIds.map((staffId) => ({ staffId, serviceId }))
+      );
+    }
+  });
 
   return NextResponse.json({ success: true });
 }
