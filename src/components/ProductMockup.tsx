@@ -315,102 +315,74 @@ export default function ProductMockup() {
               </div>
 
               {/* Booking page */}
-              <div className="bg-[#f2f2f7]">
-
-                {/* Gradient header */}
-                <div className="bg-gradient-to-b from-blue-700 via-blue-600 to-blue-600 px-6 pt-5 pb-5">
-                  <div className="flex items-center gap-3 mb-3.5">
-                    <div className="size-10 rounded-[11px] bg-white/20 flex items-center justify-center ring-1 ring-white/25 shrink-0">
-                      <i className={`bi ${m.icon} text-white text-base`} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-white font-semibold text-sm leading-tight truncate">{m.business}</h3>
-                      <p className="text-blue-200/80 text-[11px] truncate mt-[1px]">{m.location}</p>
-                    </div>
-                    <div className="flex items-center gap-1.5 bg-white/15 rounded-full px-2.5 py-1.5 shrink-0">
-                      <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                      <span className="text-white text-[11px] font-medium">Open today</span>
-                    </div>
+              <div className="bg-white p-6 sm:p-8">
+                {/* Business header */}
+                <div className="flex items-center gap-3 mb-6 pb-5 border-b border-gray-100">
+                  <div className="size-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center shrink-0 shadow-lg shadow-blue-500/25">
+                    <i className={`bi ${m.icon} text-white text-xl`} />
                   </div>
-                  {/* Progress steps */}
-                  <div className="flex items-center gap-2">
-                    {[
-                      { label: "Service", done: true },
-                      { label: "Date & Time", done: true },
-                      { label: "Confirm", done: false },
-                    ].map((step, i) => (
-                      <div key={step.label} className="flex items-center gap-2">
-                        <div className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-semibold ${
-                          step.done
-                            ? "bg-white/20 text-white/75"
-                            : "bg-white text-blue-600 shadow-sm"
-                        }`}>
-                          {step.done
-                            ? <i className="bi bi-check-lg text-[8px]" />
-                            : <span className="size-[7px] rounded-full bg-blue-300 inline-block" />
-                          }
-                          {step.label}
-                        </div>
-                        {i < 2 && <div className="h-px w-2.5 bg-white/25 shrink-0" />}
-                      </div>
-                    ))}
+                  <div>
+                    <h3 className="font-semibold text-gray-900">{m.business}</h3>
+                    <p className="text-xs text-gray-400 mt-0.5">{m.location}</p>
+                  </div>
+                  <div className="ml-auto flex items-center gap-1.5 text-xs text-green-600 font-medium bg-green-50 px-2.5 py-1 rounded-full border border-green-100/80">
+                    <span className="size-1.5 rounded-full bg-green-500 animate-pulse" />
+                    Available today
                   </div>
                 </div>
 
-                {/* Content cards */}
-                <div className="p-4 grid sm:grid-cols-2 gap-3">
-
+                <div className="grid sm:grid-cols-2 gap-6">
                   {/* Services */}
-                  <div className="bg-white rounded-[14px] p-4">
-                    <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-2.5">Choose a service</p>
-                    <div className="space-y-1.5">
+                  <div>
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Choose a service</p>
+                    <div className="space-y-2">
                       {m.services.map((s) => (
                         <div
                           key={s.name}
-                          className={`flex justify-between items-center p-3 rounded-xl cursor-pointer transition-all ${
+                          className={`flex justify-between items-center p-3.5 rounded-xl cursor-pointer transition-all ${
                             s.selected
                               ? "border border-blue-500 ring-2 ring-blue-500/10 bg-blue-50/60 shadow-sm"
-                              : "border border-gray-100 bg-gray-50/50"
+                              : "border border-gray-100 hover:border-gray-200"
                           }`}
                         >
-                          <div className="flex items-center gap-2">
-                            <div className={`size-3.5 rounded-full border-2 shrink-0 flex items-center justify-center ${s.selected ? "border-blue-500 bg-blue-500" : "border-gray-300"}`}>
-                              {s.selected && <div className="size-1 rounded-full bg-white" />}
+                          <div className="flex items-center gap-2.5">
+                            <div className={`size-4 rounded-full border-2 shrink-0 flex items-center justify-center ${s.selected ? "border-blue-500 bg-blue-500" : "border-gray-300"}`}>
+                              {s.selected && <div className="size-1.5 rounded-full bg-white" />}
                             </div>
                             <div>
-                              <p className={`text-xs font-medium leading-tight ${s.selected ? "text-blue-900" : "text-gray-800"}`}>{s.name}</p>
-                              <p className="text-[10px] text-gray-400">{s.duration}</p>
+                              <p className={`text-sm font-medium ${s.selected ? "text-blue-900" : "text-gray-800"}`}>{s.name}</p>
+                              <p className="text-xs text-gray-400">{s.duration}</p>
                             </div>
                           </div>
-                          <span className={`text-xs font-bold shrink-0 tabular-nums ${s.selected ? "text-blue-600" : "text-gray-500"}`}>{s.price}</span>
+                          <span className={`text-sm font-bold shrink-0 tabular-nums ${s.selected ? "text-blue-600" : "text-gray-600"}`}>{s.price}</span>
                         </div>
                       ))}
                     </div>
                   </div>
 
                   {/* Calendar + time slots */}
-                  <div className="bg-white rounded-[14px] p-4">
-                    <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-2.5">Pick a date & time</p>
-                    <div className="rounded-xl bg-gray-50/80 p-3 mb-2.5">
-                      <div className="flex justify-between items-center mb-2.5">
-                        <span className="text-xs font-bold text-gray-800">May 2025</span>
+                  <div>
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Pick a date & time</p>
+                    <div className="rounded-xl border border-gray-100 bg-gray-50/60 p-3.5 mb-3">
+                      <div className="flex justify-between items-center mb-3">
+                        <span className="text-sm font-bold text-gray-800">May 2025</span>
                         <div className="flex gap-1">
-                          <button className="size-6 rounded-lg flex items-center justify-center hover:bg-white hover:shadow-sm text-gray-400 transition-all" aria-label="Previous month">
-                            <i className="bi bi-chevron-left text-[9px]" />
+                          <button className="size-7 rounded-lg flex items-center justify-center hover:bg-white hover:shadow-sm text-gray-400 transition-all" aria-label="Previous month">
+                            <i className="bi bi-chevron-left text-[10px]" />
                           </button>
-                          <button className="size-6 rounded-lg flex items-center justify-center hover:bg-white hover:shadow-sm text-gray-400 transition-all" aria-label="Next month">
-                            <i className="bi bi-chevron-right text-[9px]" />
+                          <button className="size-7 rounded-lg flex items-center justify-center hover:bg-white hover:shadow-sm text-gray-400 transition-all" aria-label="Next month">
+                            <i className="bi bi-chevron-right text-[10px]" />
                           </button>
                         </div>
                       </div>
                       <div className="grid grid-cols-7 text-center gap-y-0.5">
                         {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => (
-                          <div key={i} className="text-[8px] font-bold text-gray-400 pb-1.5 tracking-wider">{d}</div>
+                          <div key={i} className="text-[9px] font-bold text-gray-400 pb-2 tracking-wider">{d}</div>
                         ))}
                         {mockDays.map((d, i) => (
                           <div
                             key={i}
-                            className={`text-[10px] py-0.5 rounded-md font-medium transition-all ${
+                            className={`text-[11px] py-1 rounded-lg font-medium transition-all ${
                               d === 15
                                 ? "bg-blue-600 text-white shadow-sm shadow-blue-500/40"
                                 : d
@@ -423,14 +395,14 @@ export default function ProductMockup() {
                         ))}
                       </div>
                     </div>
-                    <div className="grid grid-cols-3 gap-1">
+                    <div className="grid grid-cols-3 gap-1.5">
                       {m.slots.map((t, i) => (
                         <button
                           key={t}
-                          className={`text-[10px] py-2 rounded-lg font-semibold transition-all ${
+                          className={`text-xs py-2.5 rounded-xl font-semibold transition-all ${
                             i === m.selectedSlot
                               ? "bg-blue-600 text-white shadow-md shadow-blue-500/25"
-                              : "border border-gray-200 text-gray-600 bg-white"
+                              : "border border-gray-200 text-gray-600 hover:border-blue-300 hover:text-blue-600 bg-white"
                           }`}
                         >
                           {t}
@@ -440,30 +412,29 @@ export default function ProductMockup() {
                   </div>
                 </div>
 
-                {/* Confirm + branding */}
-                <div className="px-4 pb-4">
-                  <div className="bg-white rounded-[14px] p-4 flex items-center gap-3">
-                    <button className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 rounded-xl font-semibold text-sm shadow-lg shadow-blue-500/25">
-                      Confirm & Pay — {m.services.find((s) => s.selected)?.price}
-                    </button>
-                    <div className="flex flex-col items-end gap-1 shrink-0">
-                      <div className="flex items-center gap-1 text-[10px] text-gray-400">
-                        <i className="bi bi-shield-check text-gray-300" />
-                        Secured by PayHere
-                      </div>
-                      <div className="flex items-center gap-1 text-[10px] text-gray-400">
-                        Powered by
-                        <span className="inline-flex items-center gap-1 text-gray-600">
-                          <svg width={10} height={10} viewBox="255 285 960 920" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" fill="currentColor">
-                            <path fillRule="evenodd" clipRule="evenodd" d="M 819.949219 499.695312 L 563.980469 755.773438 C 513.210938 806.554688 513.210938 889.15625 563.980469 939.941406 C 614.75 990.777344 697.378906 990.726562 748.09375 939.941406 L 966.117188 721.851562 C 982.484375 705.480469 982.484375 678.953125 966.117188 662.582031 C 949.75 646.207031 923.230469 646.207031 906.863281 662.582031 L 688.84375 880.671875 C 670.753906 898.707031 641.375 898.761719 623.234375 880.671875 C 605.144531 862.578125 605.144531 833.132812 623.234375 815.042969 L 879.203125 558.96875 C 931.742188 506.464844 1017.1875 506.464844 1069.671875 558.96875 C 1095.097656 584.425781 1109.117188 618.265625 1109.117188 654.257812 C 1109.117188 690.226562 1095.097656 724.0625 1069.671875 749.523438 L 782.496094 1036.789062 C 740.375 1078.921875 684.367188 1102.117188 624.816406 1102.117188 C 565.261719 1102.117188 509.285156 1078.921875 467.164062 1036.789062 C 380.222656 949.820312 380.222656 808.328125 467.164062 721.359375 L 797.144531 391.253906 C 813.511719 374.878906 813.511719 348.355469 797.144531 331.980469 C 780.773438 315.609375 754.257812 315.609375 737.890625 331.980469 L 407.910156 662.089844 C 288.285156 781.722656 288.285156 976.425781 407.910156 1096.058594 C 465.828125 1154.019531 542.867188 1185.945312 624.816406 1185.945312 C 706.765625 1185.945312 783.804688 1154.019531 841.746094 1096.058594 L 1128.925781 808.792969 C 1214.121094 723.570312 1214.121094 584.917969 1128.925781 499.695312 C 1043.78125 414.558594 905.144531 414.445312 819.949219 499.695312 Z" />
-                          </svg>
-                          <span className="font-cal leading-none text-[10px]">Dinaya.lk</span>
-                        </span>
-                      </div>
-                    </div>
+                {/* Confirm */}
+                <div className="mt-6 pt-5 border-t border-gray-100 flex items-center gap-3">
+                  <button className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3.5 rounded-xl font-semibold text-sm shadow-lg shadow-blue-500/25">
+                    Confirm & Pay — {m.services.find((s) => s.selected)?.price}
+                  </button>
+                  <div className="flex items-center gap-1.5 text-xs text-gray-400 shrink-0">
+                    <i className="bi bi-shield-check text-blue-400" />
+                    Secured by PayHere
                   </div>
                 </div>
 
+                {/* Dinaya branding footer */}
+                <div className="mt-4 flex justify-center">
+                  <div className="flex items-center gap-1.5 text-[10px] text-gray-400">
+                    Powered by
+                    <span className="inline-flex items-center gap-1 text-gray-900">
+                      <svg width={13} height={13} viewBox="318 319 875 866" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" fill="currentColor">
+                        <path d="M 819.949219 499.695312 L 563.980469 755.773438 C 513.210938 806.554688 513.210938 889.15625 563.980469 939.941406 C 614.75 990.777344 697.378906 990.726562 748.09375 939.941406 L 966.117188 721.851562 C 982.484375 705.480469 982.484375 678.953125 966.117188 662.582031 C 949.75 646.207031 923.230469 646.207031 906.863281 662.582031 L 688.84375 880.671875 C 670.753906 898.707031 641.375 898.761719 623.234375 880.671875 C 605.144531 862.578125 605.144531 833.132812 623.234375 815.042969 L 879.203125 558.96875 C 931.742188 506.464844 1017.1875 506.464844 1069.671875 558.96875 C 1095.097656 584.425781 1109.117188 618.265625 1109.117188 654.257812 C 1109.117188 690.226562 1095.097656 724.0625 1069.671875 749.523438 L 782.496094 1036.789062 C 740.375 1078.921875 684.367188 1102.117188 624.816406 1102.117188 C 565.261719 1102.117188 509.285156 1078.921875 467.164062 1036.789062 C 380.222656 949.820312 380.222656 808.328125 467.164062 721.359375 L 797.144531 391.253906 C 813.511719 374.878906 813.511719 348.355469 797.144531 331.980469 C 780.773438 315.609375 754.257812 315.609375 737.890625 331.980469 L 407.910156 662.089844 C 288.285156 781.722656 288.285156 976.425781 407.910156 1096.058594 C 465.828125 1154.019531 542.867188 1185.945312 624.816406 1185.945312 C 706.765625 1185.945312 783.804688 1154.019531 841.746094 1096.058594 L 1128.925781 808.792969 C 1214.121094 723.570312 1214.121094 584.917969 1128.925781 499.695312 C 1043.78125 414.558594 905.144531 414.445312 819.949219 499.695312 Z" />
+                      </svg>
+                      <span className="font-cal leading-none text-[11px]">Dinaya.lk</span>
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
 
