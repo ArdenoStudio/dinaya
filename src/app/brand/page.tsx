@@ -43,6 +43,18 @@ const amberScale = [
   { shade: "900", hex: "#78350F", light: false },
 ];
 
+const greenScale = [
+  { shade: "100", hex: "#DCFCE7", light: true },
+  { shade: "200", hex: "#BBF7D0", light: true },
+  { shade: "300", hex: "#86EFAC", light: true },
+  { shade: "400", hex: "#4ADE80", light: true },
+  { shade: "500", hex: "#22C55E", light: false },
+  { shade: "600", hex: "#16A34A", light: false },
+  { shade: "700", hex: "#15803D", light: false },
+  { shade: "800", hex: "#166534", light: false },
+  { shade: "900", hex: "#14532D", light: false },
+];
+
 const slateScale = [
   { shade: "100", hex: "#F1F5F9", light: true },
   { shade: "200", hex: "#E2E8F0", light: true },
@@ -250,7 +262,7 @@ export default function BrandPage() {
           <FadeDiv className="mb-10">
             <h2 className="font-cal text-3xl md:text-4xl tracking-tight mb-3">The palette</h2>
             <p className="text-muted-foreground max-w-xl">
-              Three expressive colours anchored by a neutral slate stack. Click any swatch to copy its hex value.
+              Four expressive colours anchored by a neutral slate stack. Click any swatch to copy its hex value.
             </p>
           </FadeDiv>
 
@@ -263,6 +275,9 @@ export default function BrandPage() {
             </FadeDiv>
             <FadeDiv>
               <ColorScale label="Amber — Booking" swatches={amberScale} />
+            </FadeDiv>
+            <FadeDiv>
+              <ColorScale label="Green — Availability" swatches={greenScale} />
             </FadeDiv>
             <FadeDiv>
               <ColorScale label="Slate — Neutral" swatches={slateScale} />
