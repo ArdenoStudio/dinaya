@@ -167,25 +167,37 @@ export default function ProductMockup() {
 
       {/* ── MOBILE: centred iPhone only ── */}
       <div className="md:hidden flex flex-col items-center">
-        <div className="relative flex items-center justify-center">
-          {navBtn(-1, "Previous", "absolute -left-4 top-1/2 -translate-y-1/2")}
-          {navBtn(1,  "Next",     "absolute -right-4 top-1/2 -translate-y-1/2")}
-          <div className={`transition-opacity duration-200 ${fading ? "opacity-0" : "opacity-100"}`}>
-            <IPhoneMockup
-              model="15-pro"
-              color="space-black"
-              scale={0.78}
-              screenBg="#f9f9f9"
-              shadow
-              safeArea={false}
-              showHomeIndicator={false}
-              innerShadow={false}
-            >
-              <PhoneScreen m={m} />
-            </IPhoneMockup>
-          </div>
+        <div className={`transition-opacity duration-200 ${fading ? "opacity-0" : "opacity-100"}`}>
+          <IPhoneMockup
+            model="15-pro"
+            color="space-black"
+            scale={0.65}
+            screenBg="#f9f9f9"
+            shadow
+            safeArea={false}
+            showHomeIndicator={false}
+            innerShadow={false}
+          >
+            <PhoneScreen m={m} />
+          </IPhoneMockup>
         </div>
-        {indicators}
+        {/* Nav row: prev · dots · next */}
+        <div className="flex items-center gap-4 mt-6">
+          {navBtn(-1, "Previous", "")}
+          <div className="flex gap-2">
+            {mockups.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => goTo(i)}
+                aria-label={`Go to slide ${i + 1}`}
+                className={`h-1.5 rounded-full transition-all duration-300 ${
+                  i === current ? "bg-blue-600 w-6" : "bg-gray-300 w-1.5 hover:bg-gray-400"
+                }`}
+              />
+            ))}
+          </div>
+          {navBtn(1, "Next", "")}
+        </div>
       </div>
 
       {/* ── DESKTOP: browser window + floating chips + iPhone corner ── */}
