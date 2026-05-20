@@ -93,16 +93,6 @@ const testimonials = [
 export default function LandingPage() {
   return (
     <main className="min-h-dvh bg-white">
-      {/* Announcement bar — fix #10: changed from PayHere (already in features) to SMS reminders */}
-      <div className="bg-gray-950 py-2.5 px-4 text-center">
-        <p className="text-xs text-white/80">
-          <span className="text-primary font-semibold">New:</span>{" "}
-          SMS & email reminders — your clients get notified automatically before every appointment.{" "}
-          <Link href="/register" className="text-white underline underline-offset-2 font-medium">
-            Start free →
-          </Link>
-        </p>
-      </div>
 
       {/* Nav — fix #5 (mobile menu) + fix #6 (dead resource links) via LandingNav */}
       <LandingNav />
