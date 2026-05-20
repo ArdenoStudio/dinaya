@@ -135,17 +135,28 @@ export default function LandingPage() {
                 className="text-primary"
               />
             </FadeSpan>
+            <br />
+            <FadeSpan>Get a real booking page in 5 minutes.</FadeSpan>
           </h1>
 
           <FadeDiv>
             <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto text-pretty">
               Give your salon, clinic, or tuition class a free booking page. Clients
-              pick a time, pay online, and you get notified. Takes 5 minutes to set up.
+              pick a time, pay online, and you get notified.
             </p>
           </FadeDiv>
 
           <FadeDiv>
-            <CTAPrimaryButton>Create your booking page</CTAPrimaryButton>
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <CTAPrimaryButton>Create your booking page</CTAPrimaryButton>
+              <Link
+                href="#demo"
+                className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-6 py-3 text-sm font-medium text-gray-800 shadow-sm hover:bg-gray-50 transition-colors"
+              >
+                <i className="bi bi-play-circle text-base" />
+                See a live demo
+              </Link>
+            </div>
           </FadeDiv>
 
           <FadeDiv>
@@ -154,7 +165,9 @@ export default function LandingPage() {
         </FadeContainer>
       </section>
 
-      <ProductMockup />
+      <div id="demo">
+        <ProductMockup />
+      </div>
 
 
       {/* Trust strip — fix #3: concrete differentiators instead of vague claim */}
