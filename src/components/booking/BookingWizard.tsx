@@ -209,7 +209,7 @@ export default function BookingWizard({
 
   return (
     <div className="overflow-hidden md:rounded-2xl md:border md:border-gray-100/80 md:bg-white md:shadow-[0_24px_64px_-12px_rgba(37,99,235,0.12),0_8px_24px_-8px_rgba(0,0,0,0.08)]">
-      {/* Mobile gradient header + progress */}
+      {/* Mobile header + progress */}
       <div className="bg-blue-600 px-[18px] pt-5 pb-[18px] md:hidden">
         <BusinessIdentity
           name={business.name}
@@ -222,7 +222,7 @@ export default function BookingWizard({
       </div>
 
       {/* Desktop: unified business header + progress */}
-      <div className="hidden bg-gradient-to-br from-blue-700 via-blue-600 to-indigo-800 md:block">
+      <div className="hidden bg-blue-600 md:block">
         <div className="px-8 pb-6 pt-7">
           <div className="flex items-center gap-4">
             <BusinessAvatar
