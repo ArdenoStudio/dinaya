@@ -6,6 +6,7 @@ import { FadeContainer, FadeDiv, FadeSpan } from "@/components/Fade";
 import { WordRotate } from "@/components/WordRotate";
 import ProductMockup from "@/components/ProductMockup";
 import { CTAPrimaryButton } from "@/components/cta-primary-button";
+import { FluidParticlesBackground } from "@/components/ui/fluid-particles-background";
 
 const features = [
   {
@@ -353,7 +354,7 @@ export default function LandingPage() {
       </section>
 
       {/* CTA — fix #4: backslash → forward slash on secondary button */}
-      <section className="px-6 pb-20">
+      <section className="relative z-10 px-6 pb-20">
         <div className="max-w-6xl mx-auto">
           <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 px-8 py-20 text-center shadow-2xl shadow-blue-500/20">
             <div className="absolute inset-0 opacity-10">
@@ -409,10 +410,8 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <div className="relative px-4 sm:px-6 lg:px-8 pb-6 pt-4">
-        <div className="animate-grid-drift pointer-events-none absolute inset-0 bg-white bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:6rem_4rem] [mask-image:radial-gradient(ellipse_100%_80%_at_50%_100%,#000_60%,transparent_100%)] [-webkit-mask-image:radial-gradient(ellipse_100%_80%_at_50%_100%,#000_60%,transparent_100%)]">
-        </div>
-        <footer className="relative z-10 max-w-6xl mx-auto rounded-[2rem] border border-white/60 bg-white/[0.08] backdrop-blur-xl shadow-[0_8px_40px_rgba(0,0,0,0.08)] px-8 sm:px-10 pt-10 pb-6">
+      <FluidParticlesBackground className="px-4 sm:px-6 lg:px-8 pb-6 -mt-28 pt-32 [mask-image:linear-gradient(to_bottom,transparent_0%,black_30%)] [-webkit-mask-image:linear-gradient(to_bottom,transparent_0%,black_30%)]">
+        <footer className="w-full max-w-6xl mx-auto rounded-[2rem] border border-white/60 bg-white/[0.08] backdrop-blur-xl shadow-[0_8px_40px_rgba(0,0,0,0.08)] px-8 sm:px-10 pt-10 pb-6">
           <div className="grid sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr] gap-10 pb-8 border-b border-gray-100">
             {/* Brand */}
             <div>
@@ -504,7 +503,7 @@ export default function LandingPage() {
             <p className="text-xs text-muted-foreground">Made with ❤️ for Sri Lankan businesses</p>
           </div>
         </footer>
-      </div>
+      </FluidParticlesBackground>
     </main>
   );
 }
