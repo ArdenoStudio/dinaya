@@ -7,6 +7,7 @@ import { WordRotate } from "@/components/WordRotate";
 import ProductMockup from "@/components/ProductMockup";
 import { CTAPrimaryButton } from "@/components/cta-primary-button";
 import { LandingFooter } from "@/components/LandingFooter";
+import { HowItWorks } from "@/components/HowItWorks";
 
 const features = [
   {
@@ -202,6 +203,8 @@ export default function LandingPage() {
           ))}
         </div>
       </section>
+
+      <HowItWorks />
 
       {/* Features */}
       <section className="relative max-w-6xl mx-auto px-6 py-20 border-t">
