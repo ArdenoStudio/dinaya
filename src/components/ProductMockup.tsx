@@ -166,17 +166,24 @@ export default function ProductMockup() {
       </div>
 
       {/* ── MOBILE: centred iPhone only ── */}
+      {/* 15-pro native size: 393×852. At scale 0.72 → ~283×614. The wrapper
+          collapses layout height so it matches the visual size; transformOrigin
+          top-center keeps it horizontally centred. */}
       <div className="md:hidden flex flex-col items-center">
-        <div className={`transition-opacity duration-200 ${fading ? "opacity-0" : "opacity-100"}`}>
+        <div
+          className={`transition-opacity duration-200 ${fading ? "opacity-0" : "opacity-100"}`}
+          style={{ height: Math.round(852 * 0.72), overflow: "hidden" }}
+        >
           <IPhoneMockup
             model="15-pro"
             color="space-black"
-            scale={0.65}
+            scale={0.72}
             screenBg="#f9f9f9"
             shadow
             safeArea={false}
             showHomeIndicator={false}
             innerShadow={false}
+            style={{ transformOrigin: "top center" }}
           >
             <PhoneScreen m={m} />
           </IPhoneMockup>
