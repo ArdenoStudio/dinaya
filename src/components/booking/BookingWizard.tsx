@@ -240,7 +240,6 @@ export default function BookingWizard({
                   selected={state.service}
                   copy={copy}
                   onSelect={selectService}
-                  desktop
                 />
                 {state.service && needsStaffPicker && (
                   <StaffPicker
