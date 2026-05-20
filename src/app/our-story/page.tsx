@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { PublicNav } from "@/components/PublicNav";
 import { FadeContainer, FadeDiv, FadeSpan } from "@/components/Fade";
+import { LandingFooter } from "@/components/LandingFooter";
 
 const problems = [
   {
@@ -310,19 +311,7 @@ export default function OurStoryPage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t py-10 px-6">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
-          <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Dinaya by Ardeno Studio
-          </p>
-          <div className="flex gap-5 text-sm text-muted-foreground">
-            <Link href="/legal/terms" className="hover:text-foreground transition-colors">Terms</Link>
-            <Link href="/legal/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
-            <Link href="/legal/refund" className="hover:text-foreground transition-colors">Refund</Link>
-          </div>
-        </div>
-      </footer>
+      <LandingFooter />
     </main>
   );
 }

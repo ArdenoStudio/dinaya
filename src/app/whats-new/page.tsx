@@ -5,6 +5,7 @@ import Link from "next/link";
 import { PublicNav } from "@/components/PublicNav";
 import { FadeContainer, FadeDiv } from "@/components/Fade";
 import { motion, AnimatePresence } from "motion/react";
+import { LandingFooter } from "@/components/LandingFooter";
 
 type FilterTag = "all" | "feature" | "improvement" | "fix";
 
@@ -467,6 +468,7 @@ export default function WhatsNewPage() {
           </div>
         </div>
       </div>
+      <LandingFooter />
     </div>
   );
 }
