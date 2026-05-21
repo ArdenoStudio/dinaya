@@ -13,6 +13,7 @@ import {
   users,
 } from "@/db/schema";
 import { eq, inArray } from "drizzle-orm";
+import { normalizeReferralCode } from "@/lib/referrals";
 import { withApiHandler } from "@/lib/api-handler";
 import { withRateLimit } from "@/lib/rate-limit";
 import { registerSchema, type RegisterInput } from "@/lib/schemas/register";
@@ -107,9 +108,20 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { name, businessName, slug, email, password, businessType, language } = parsed.data;
+    const { name, businessName, slug, email, password, businessType, language, referrerCode } = parsed.data;
     const selectedBusinessType = businessType ?? "other";
     const selectedLanguage = language ?? "en";
+    let referredByBusinessId: string | null = null;
+
+    if (referrerCode) {
+      const normalizedReferrer = normalizeReferralCode(referrerCode);
+      const [referrer] = await db
+        .select({ id: businesses.id })
+        .from(businesses)
+        .where(eq(businesses.referralCode, normalizedReferrer))
+        .limit(1);
+      referredByBusinessId = referrer?.id ?? null;
+    }
 
     const [existingBusiness] = await db
       .select({ id: businesses.id })
@@ -149,6 +161,8 @@ export async function POST(req: NextRequest) {
           email,
           businessType: selectedBusinessType,
           language: selectedLanguage,
+          referralCode: slug,
+          referredByBusinessId,
           cancellationPolicy: "Please contact the business as early as possible if you need to cancel or reschedule.",
           depositPolicy: "Some services may require a deposit to reduce no-shows.",
         })

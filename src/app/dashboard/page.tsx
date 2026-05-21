@@ -6,6 +6,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireBusiness } from "@/lib/auth";
 import { formatLkr } from "@/lib/utils";
+import { OnboardingWizard } from "@/components/dashboard/OnboardingWizard";
+import { buildPublicBookingUrl, buildPublicBookingUrlLabel } from "@/lib/booking-url";
 
 async function safeRecentActivity(businessId: string) {
   try {
@@ -38,6 +40,8 @@ export default async function DashboardOverview() {
       phone: businesses.phone,
       plan: businesses.plan,
       slug: businesses.slug,
+      customDomain: businesses.customDomain,
+      customDomainVerified: businesses.customDomainVerified,
     })
     .from(businesses)
     .where(eq(businesses.id, businessId))
@@ -124,15 +128,16 @@ export default async function DashboardOverview() {
     safeRecentActivity(businessId),
   ]);
 
-  const appDomain = process.env.NEXT_PUBLIC_APP_DOMAIN ?? "localhost:3000";
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-  const useSubdomain = appDomain === "dinaya.lk";
-  const bookingUrl = useSubdomain
-    ? `https://${business.slug}.dinaya.lk`
-    : `${appUrl}/book/${business.slug}`;
-  const bookingDisplayUrl = useSubdomain
-    ? `${business.slug}.dinaya.lk`
-    : `${appUrl.replace(/^https?:\/\//, "")}/book/${business.slug}`;
+  const bookingUrl = buildPublicBookingUrl({
+    slug: business.slug,
+    customDomain: business.customDomain,
+    customDomainVerified: business.customDomainVerified,
+  });
+  const bookingDisplayUrl = buildPublicBookingUrlLabel({
+    slug: business.slug,
+    customDomain: business.customDomain,
+    customDomainVerified: business.customDomainVerified,
+  });
   const whatsappShare = `https://wa.me/?text=${encodeURIComponent(`Book online with ${business.name}: ${bookingUrl}`)}`;
   const embedSnippet = `<iframe src="${bookingUrl}" width="100%" height="720" style="border:0;border-radius:8px"></iframe>`;
   const currentWeekRevenue = Number(weekRevenue ?? 0);
@@ -142,12 +147,12 @@ export default async function DashboardOverview() {
     : currentWeekRevenue > 0 ? 100 : 0;
 
   const onboarding = [
-    { label: "Add business info", done: Boolean(business.description && business.phone && business.address), href: "/dashboard/settings" },
-    { label: "Create first service", done: Number(servicesCount) > 0, href: "/dashboard/services/new" },
-    { label: "Add staff", done: Number(staffCount) > 0, href: "/dashboard/staff/new" },
-    { label: "Set availability", done: Number(availabilityCount) > 0, href: "/dashboard/availability" },
-    { label: "Connect PayHere", done: Boolean(business.payhereEnabled && business.payhereMerchantId), href: "/dashboard/settings" },
-    { label: "Share booking link", done: Number(totalBookings) > 0, href: bookingUrl },
+    { label: "Add business info", done: Boolean(business.description && business.phone && business.address), href: "/dashboard/settings", description: "Add your phone, address, and a short description clients will see." },
+    { label: "Create first service", done: Number(servicesCount) > 0, href: "/dashboard/services/new", description: "List what clients can book — price, duration, and deposit rules." },
+    { label: "Add staff", done: Number(staffCount) > 0, href: "/dashboard/staff/new", description: "Add yourself or your team so bookings can be assigned." },
+    { label: "Set availability", done: Number(availabilityCount) > 0, href: "/dashboard/availability", description: "Choose the days and hours clients can book online." },
+    { label: "Connect PayHere", done: Boolean(business.payhereEnabled && business.payhereMerchantId), href: "/dashboard/settings", description: "Accept card payments online, or use bank transfer on the Free plan." },
+    { label: "Share booking link", done: Number(totalBookings) > 0, href: bookingUrl, description: "Post your link on WhatsApp Status, Instagram bio, or send it directly to clients." },
   ];
   const showOnboarding = onboarding.some((item) => !item.done);
 
@@ -188,29 +193,7 @@ export default async function DashboardOverview() {
       )}
 
       {showOnboarding && (
-        <div className="rounded-xl border bg-white p-5">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-semibold">Onboarding checklist</h2>
-            <span className="text-xs text-muted-foreground">
-              {onboarding.filter((item) => item.done).length}/{onboarding.length} complete
-            </span>
-          </div>
-          <div className="grid gap-2 md:grid-cols-2">
-            {onboarding.map((item) => (
-              <Link
-                key={item.label}
-                href={item.href}
-                target={item.href.startsWith("http") ? "_blank" : undefined}
-                className="flex items-center justify-between rounded-lg border px-3 py-2 text-sm hover:border-primary/40"
-              >
-                <span>{item.label}</span>
-                <span className={item.done ? "text-primary" : "text-muted-foreground"}>
-                  <i className={`bi ${item.done ? "bi-check-circle-fill" : "bi-circle"}`} aria-hidden="true" />
-                </span>
-              </Link>
-            ))}
-          </div>
-        </div>
+        <OnboardingWizard steps={onboarding} bookingUrl={bookingUrl} whatsappShare={whatsappShare} />
       )}
 
       <div className="grid gap-6 lg:grid-cols-[1.4fr_0.9fr]">

@@ -7,8 +7,9 @@ import { PlanRequiredError, requirePro } from "@/lib/plan";
 import { withApiHandler } from "@/lib/api-handler";
 import { z } from "@/lib/validation";
 
-const replySchema = z.object({
-  ownerReply: z.string().trim().max(2000).nullable(),
+const patchSchema = z.object({
+  isPublished: z.boolean().optional(),
+  ownerReply: z.string().trim().max(2000).optional().nullable(),
 });
 
 interface Ctx {
@@ -22,37 +23,41 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
   const { id } = await params;
 
   return withApiHandler(async () => {
-    try {
-      await requirePro(businessId, "reviewReplies");
-    } catch (error) {
-      if (error instanceof PlanRequiredError) {
-        return NextResponse.json({ error: error.message }, { status: 402 });
-      }
-      throw error;
-    }
-
-    const body = await req.json();
-    if ("isPublished" in body) {
-      const [updated] = await db
-        .update(reviews)
-        .set({ isPublished: Boolean(body.isPublished) })
-        .where(and(eq(reviews.id, id), eq(reviews.businessId, businessId)))
-        .returning();
-      if (!updated) return NextResponse.json({ error: "Not found." }, { status: 404 });
-      return NextResponse.json(updated);
-    }
-
-    const parsed = replySchema.safeParse(body);
+    const parsed = patchSchema.safeParse(await req.json());
     if (!parsed.success) {
-      return NextResponse.json({ error: "Please check your reply." }, { status: 400 });
+      return NextResponse.json({ error: "Invalid review update." }, { status: 400 });
+    }
+
+    const updates: {
+      isPublished?: boolean;
+      ownerReply?: string | null;
+      ownerRepliedAt?: Date | null;
+      ownerReplySource?: string | null;
+    } = {};
+
+    if (parsed.data.isPublished !== undefined) {
+      updates.isPublished = Boolean(parsed.data.isPublished);
+    }
+
+    if (parsed.data.ownerReply !== undefined) {
+      try {
+        await requirePro(businessId, "reviewReplies");
+      } catch (error) {
+        if (error instanceof PlanRequiredError) {
+          return NextResponse.json({ error: error.message }, { status: 402 });
+        }
+        throw error;
+      }
+
+      const reply = parsed.data.ownerReply?.trim() || null;
+      updates.ownerReply = reply;
+      updates.ownerRepliedAt = reply ? new Date() : null;
+      updates.ownerReplySource = reply ? "manual" : null;
     }
 
     const [updated] = await db
       .update(reviews)
-      .set({
-        ownerReply: parsed.data.ownerReply,
-        ownerRepliedAt: parsed.data.ownerReply ? new Date() : null,
-      })
+      .set(updates)
       .where(and(eq(reviews.id, id), eq(reviews.businessId, businessId)))
       .returning();
 

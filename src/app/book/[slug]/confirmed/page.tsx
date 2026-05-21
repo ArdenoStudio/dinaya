@@ -1,11 +1,13 @@
 import { db } from "@/db";
-import { bookings, businesses, services, staff } from "@/db/schema";
+import { bookings, businesses, reviews, services, staff } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { format } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import Link from "next/link";
 import ReviewPrompt from "./ReviewPrompt";
+import { buildClientBookingUrl } from "@/lib/client-tokens";
+import { createReviewToken } from "@/lib/ai/review-links";
 
 const COLOMBO_TZ = "Asia/Colombo";
 
@@ -24,6 +26,7 @@ export default async function BookingConfirmedPage({ params, searchParams }: Pro
     .select({
       id: bookings.id,
       clientName: bookings.clientName,
+      clientPhone: bookings.clientPhone,
       startsAt: bookings.startsAt,
       status: bookings.status,
       businessName: businesses.name,
@@ -38,9 +41,25 @@ export default async function BookingConfirmedPage({ params, searchParams }: Pro
     .limit(1);
   if (!booking) notFound();
 
+  const [existingReview] = await db
+    .select({ id: reviews.id })
+    .from(reviews)
+    .where(eq(reviews.bookingId, booking.id))
+    .limit(1);
+
   const local = toZonedTime(booking.startsAt, COLOMBO_TZ);
   const isConfirmed = booking.status === "confirmed" || booking.status === "completed";
   const isPending = booking.status === "pending";
+  const reviewToken = createReviewToken({
+    bookingId: booking.id,
+    businessSlug: slug,
+    clientName: booking.clientName,
+  });
+
+  const manageUrl = buildClientBookingUrl({
+    bookingId: booking.id,
+    clientPhone: booking.clientPhone,
+  });
 
   const details = [
     { icon: "bi-tag", label: "Service", value: booking.serviceName },
@@ -79,32 +98,35 @@ export default async function BookingConfirmedPage({ params, searchParams }: Pro
             {details.map((d) => (
               <div key={d.label} className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-2 text-muted-foreground">
-                  <i className={`bi ${d.icon} text-xs shrink-0`} />
+                  <i className={`bi ${d.icon} shrink-0 text-xs`} />
                   <span>{d.label}</span>
                 </div>
-                <span className="font-medium text-right">{d.value}</span>
+                <span className="text-right font-medium">{d.value}</span>
               </div>
             ))}
           </div>
 
-          <p className="text-xs text-muted-foreground mb-6">
+          <p className="mb-4 text-xs text-muted-foreground">
             Ref: <span className="font-mono">{booking.id.slice(0, 8).toUpperCase()}</span>
           </p>
+
+          {(isConfirmed || isPending) && (
+            <Link
+              href={manageUrl}
+              className="mb-6 inline-flex w-full items-center justify-center rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white hover:bg-primary/90"
+            >
+              Manage your booking
+            </Link>
+          )}
 
           <Link href={`/book/${slug}`} className="text-sm text-blue-600 hover:underline">
             ← Back to booking page
           </Link>
         </div>
 
-        {/* Review prompt */}
-        {booking.status === "completed" && (
-          <ReviewPrompt
-            slug={slug}
-            bookingId={booking.id}
-            clientName={booking.clientName}
-            businessName={booking.businessName}
-          />
-        )}
+        {isConfirmed && !existingReview ? (
+          <ReviewPrompt reviewToken={reviewToken} businessName={booking.businessName} />
+        ) : null}
       </div>
     </div>
   );

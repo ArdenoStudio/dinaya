@@ -16,8 +16,8 @@ export const metadata: Metadata = {
 const freeFeatures = [
   "Your own booking page at yourname.dinaya.lk",
   "Unlimited bookings, every month",
-  "PayHere payments when you connect your merchant account",
-  "Email appointment reminders",
+  "Online payments via PayHere when you connect your merchant account",
+  "Automated email appointment reminders",
   "Custom availability & buffer time",
   "Simple dashboard for all your bookings",
   "Shareable link for Instagram, WhatsApp, Facebook",
@@ -54,7 +54,7 @@ const faqs = [
   },
   {
     q: "Are there transaction fees?",
-    a: "Dinaya doesn't charge a transaction fee on your bookings. PayHere (our payments partner) charges their standard local rates directly — typically 3.3% + LKR 30 per card transaction. We pass that through at cost.",
+    a: "Free includes email confirmations and a 24-hour email reminder. Pro adds SMS and WhatsApp reminders, plus AI-timed smart reminders. PayHere card fees (typically 3.3% + LKR 30) are charged by PayHere directly — Dinaya does not add a commission.",
   },
   {
     q: "Is Pro available?",
@@ -285,7 +285,7 @@ export default async function PricingPage() {
               {[
                 { f: "Self-booking page", a: "Yes", b: "Yes", icon: "bi-calendar", c: "Yes" },
                 { f: "Online payments (PayHere)", a: "Yes", b: "Yes", icon: "bi-credit-card", c: "Yes" },
-                { f: "SMS + email reminders", a: "Yes", b: "Yes", icon: "bi-bell", c: "Yes" },
+                { f: "SMS + email reminders", a: "Email", b: "Yes", icon: "bi-bell", c: "Yes" },
                 { f: "Booking dashboard", a: "Yes", b: "Yes", icon: "bi-grid", c: "Yes" },
                 { f: "Multi-staff calendar", a: "—", b: "Yes", icon: "bi-people", c: "Yes" },
                 { f: "Branch locations", a: "1", b: "Up to 3", icon: "bi-geo-alt", c: "Unlimited" },

@@ -7,6 +7,7 @@ import { requireApiBusiness } from "@/lib/api-auth";
 import { logActivity } from "@/lib/activity-log";
 import { encryptSecret } from "@/lib/secrets";
 import { syncBusinessPrimaryLocation } from "@/lib/locations";
+import { PlanRequiredError, requirePro } from "@/lib/plan";
 import { z } from "@/lib/validation";
 
 const settingsSchema = z.object({
@@ -28,6 +29,7 @@ const settingsSchema = z.object({
   payhereEnabled: z.boolean().optional(),
   payhereMerchantId: z.string().trim().max(100).optional().nullable(),
   payhereMerchantSecret: z.string().trim().max(1000).optional().nullable(),
+  hideDinayaBranding: z.boolean().optional(),
 });
 
 export async function PATCH(req: NextRequest) {
@@ -58,10 +60,25 @@ export async function PATCH(req: NextRequest) {
     payhereEnabled,
     payhereMerchantId,
     payhereMerchantSecret,
+    hideDinayaBranding,
     phone,
     timezone,
     websiteUrl,
   } = parsed.data;
+
+  if (hideDinayaBranding === true) {
+    try {
+      await requirePro(context.businessId, "publicBookingPageCustomization");
+    } catch (error) {
+      if (error instanceof PlanRequiredError) {
+        return NextResponse.json(
+          { error: "Remove Dinaya branding is available on Pro." },
+          { status: 402 },
+        );
+      }
+      throw error;
+    }
+  }
 
   await db
     .update(businesses)
@@ -88,6 +105,7 @@ export async function PATCH(req: NextRequest) {
           ? encryptSecret(payhereMerchantSecret)
           : null,
       }),
+      ...(hideDinayaBranding !== undefined && { hideDinayaBranding: Boolean(hideDinayaBranding) }),
     })
     .where(eq(businesses.id, context.businessId));
 

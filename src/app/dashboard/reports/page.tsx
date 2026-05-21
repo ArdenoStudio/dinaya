@@ -18,6 +18,7 @@ export default async function ReportsPage() {
     [{ averageRating }],
     revenueByService,
     bookingsByStaff,
+    bookingsBySource,
   ] = await Promise.all([
     db.select({ totalBookings: count() }).from(bookings).where(eq(bookings.businessId, businessId)),
     db.select({ completedBookings: count() }).from(bookings).where(and(eq(bookings.businessId, businessId), eq(bookings.status, "completed"))),
@@ -56,6 +57,16 @@ export default async function ReportsPage() {
       .groupBy(staff.name)
       .orderBy(desc(count(bookings.id)))
       .limit(8),
+    db
+      .select({
+        source: bookings.source,
+        value: count(bookings.id),
+      })
+      .from(bookings)
+      .where(eq(bookings.businessId, businessId))
+      .groupBy(bookings.source)
+      .orderBy(desc(count(bookings.id)))
+      .limit(12),
   ]);
 
   const total = Number(totalBookings);
@@ -113,6 +124,22 @@ export default async function ReportsPage() {
                   <div key={row.serviceName} className="flex items-center justify-between border-b pb-2 last:border-b-0">
                     <span className="text-sm">{row.serviceName}</span>
                     <span className="text-sm font-semibold">{formatLkr(Number(row.revenue))}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="rounded-xl border bg-white p-5 lg:col-span-2">
+            <h2 className="mb-4 font-semibold">Bookings by source</h2>
+            {bookingsBySource.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No bookings yet.</p>
+            ) : (
+              <div className="grid gap-3 md:grid-cols-2">
+                {bookingsBySource.map((row) => (
+                  <div key={row.source} className="rounded-lg border px-4 py-3">
+                    <p className="font-medium capitalize">{row.source.replace(/_/g, " ")}</p>
+                    <p className="text-sm text-muted-foreground">{row.value} bookings</p>
                   </div>
                 ))}
               </div>

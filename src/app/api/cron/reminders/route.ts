@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { bookings, businesses, services, staff } from "@/db/schema";
+import { bookingNotifications, bookings, businesses, locations, services, staff } from "@/db/schema";
 import { eq, and, gte, lt, isNull, inArray } from "drizzle-orm";
-import { sendBookingReminder } from "@/lib/resend";
 import { addHours } from "date-fns";
 import { canUseFeature, type Plan } from "@/lib/plan";
+import { sendBookingReminderMessage } from "@/lib/messaging/booking-messages";
+import { buildClientBookingUrl } from "@/lib/client-tokens";
+import { parseLocationAiConfig } from "@/lib/locations";
+import type { BookingLanguage } from "@/lib/i18n";
 
 export async function GET(req: NextRequest) {
   const expected = process.env.CRON_SECRET;
@@ -25,10 +28,13 @@ export async function GET(req: NextRequest) {
       id: bookings.id,
       clientName: bookings.clientName,
       clientEmail: bookings.clientEmail,
+      clientPhone: bookings.clientPhone,
       startsAt: bookings.startsAt,
       businessId: bookings.businessId,
       serviceId: bookings.serviceId,
       staffId: bookings.staffId,
+      locationId: bookings.locationId,
+      clientId: bookings.clientId,
     })
     .from(bookings)
     .where(
@@ -44,58 +50,100 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ sent: 0, checked: 0 });
   }
 
-  const businessIds = [...new Set(upcoming.map((b) => b.businessId))];
-  const serviceIds = [...new Set(upcoming.map((b) => b.serviceId))];
-  const staffIds = [...new Set(upcoming.map((b) => b.staffId))];
-
-  const [businessRows, serviceRows, staffRows] = await Promise.all([
-    db
-      .select({ id: businesses.id, name: businesses.name, slug: businesses.slug, plan: businesses.plan })
-      .from(businesses)
-      .where(inArray(businesses.id, businessIds)),
-    db.select({ id: services.id, name: services.name }).from(services).where(inArray(services.id, serviceIds)),
-    db.select({ id: staff.id, name: staff.name }).from(staff).where(inArray(staff.id, staffIds)),
-  ]);
-
-  const businessMap = new Map(businessRows.map((row) => [row.id, row]));
-  const serviceMap = new Map(serviceRows.map((row) => [row.id, row]));
-  const staffMap = new Map(staffRows.map((row) => [row.id, row]));
-
   let sent = 0;
-  const sentIds: string[] = [];
+  let skipped = 0;
 
   for (const booking of upcoming) {
-    if (!booking.clientEmail) continue;
-    const business = businessMap.get(booking.businessId);
-    const service = serviceMap.get(booking.serviceId);
-    const member = staffMap.get(booking.staffId);
+    const [business] = await db
+      .select({
+        name: businesses.name,
+        slug: businesses.slug,
+        plan: businesses.plan,
+        language: businesses.language,
+      })
+      .from(businesses)
+      .where(eq(businesses.id, booking.businessId))
+      .limit(1);
+
+    const [service] = await db
+      .select({ name: services.name })
+      .from(services)
+      .where(eq(services.id, booking.serviceId))
+      .limit(1);
+
+    const [member] = await db
+      .select({ name: staff.name })
+      .from(staff)
+      .where(eq(staff.id, booking.staffId))
+      .limit(1);
+
     if (!business || !service || !member) continue;
-    if (!canUseFeature(business.plan as Plan, "smartReminderSystem")) continue;
+
+    if (canUseFeature(business.plan as Plan, "smartReminderSystem") && booking.locationId) {
+      const [location] = await db
+        .select({ aiConfig: locations.aiConfig })
+        .from(locations)
+        .where(eq(locations.id, booking.locationId))
+        .limit(1);
+      if (parseLocationAiConfig(location?.aiConfig).smartReminderSystem) {
+        skipped++;
+        continue;
+      }
+    }
+
+    const alreadySent = await db
+      .select({ id: bookingNotifications.id })
+      .from(bookingNotifications)
+      .where(and(
+        eq(bookingNotifications.bookingId, booking.id),
+        eq(bookingNotifications.type, "reminder_24h"),
+        eq(bookingNotifications.status, "sent"),
+      ))
+      .limit(1);
+
+    if (alreadySent.length > 0) {
+      await db
+        .update(bookings)
+        .set({ reminderSentAt: new Date() })
+        .where(eq(bookings.id, booking.id));
+      skipped++;
+      continue;
+    }
 
     try {
-      await sendBookingReminder({
+      const result = await sendBookingReminderMessage({
+        businessId: booking.businessId,
+        bookingId: booking.id,
+        clientId: booking.clientId,
         clientName: booking.clientName,
         clientEmail: booking.clientEmail,
+        clientPhone: booking.clientPhone,
         businessName: business.name,
-        businessSlug: business.slug,
         serviceName: service.name,
         staffName: member.name,
         startsAt: new Date(booking.startsAt),
-        bookingId: booking.id,
+        manageUrl: buildClientBookingUrl({
+          bookingId: booking.id,
+          clientPhone: booking.clientPhone,
+        }),
+        plan: business.plan as Plan,
+        language: business.language as BookingLanguage,
       });
-      sentIds.push(booking.id);
-      sent++;
+
+      if (result.status === "sent" || result.status === "duplicate") {
+        await db
+          .update(bookings)
+          .set({ reminderSentAt: new Date() })
+          .where(eq(bookings.id, booking.id));
+        sent++;
+      } else {
+        skipped++;
+      }
     } catch (error) {
       console.error(`Reminder failed for booking ${booking.id}:`, error);
+      skipped++;
     }
   }
 
-  if (sentIds.length > 0) {
-    await db
-      .update(bookings)
-      .set({ reminderSentAt: new Date() })
-      .where(inArray(bookings.id, sentIds));
-  }
-
-  return NextResponse.json({ sent, checked: upcoming.length });
+  return NextResponse.json({ sent, skipped, checked: upcoming.length });
 }

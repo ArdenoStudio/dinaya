@@ -23,9 +23,10 @@ describe("plan entitlements", () => {
     expect(MAX_ENTITLEMENTS.limits.locations).toBeNull();
   });
 
-  it("allows pro-only operational surfaces for pro and max", () => {
-    expect(canUseFeature("free", "payments")).toBe(false);
+  it("allows payments on all plans and pro-only ops for pro and max", () => {
+    expect(canUseFeature("free", "payments")).toBe(true);
     expect(canUseFeature("free", "reports")).toBe(false);
+    expect(canUseFeature("free", "whatsappSms")).toBe(false);
     expect(canUseFeature("pro", "payments")).toBe(true);
     expect(canUseFeature("pro", "reports")).toBe(true);
     expect(canUseFeature("max", "payments")).toBe(true);
@@ -48,6 +49,18 @@ describe("plan entitlements", () => {
     expect(canUseFeature("free", "publicBookingPage")).toBe(true);
     expect(canUseFeature("pro", "publicBookingPage")).toBe(true);
     expect(canUseFeature("max", "publicBookingPage")).toBe(true);
+  });
+
+  it("reserves booking page customization for pro and max", () => {
+    expect(canUseFeature("free", "publicBookingPageCustomization")).toBe(false);
+    expect(canUseFeature("pro", "publicBookingPageCustomization")).toBe(true);
+    expect(canUseFeature("max", "publicBookingPageCustomization")).toBe(true);
+  });
+
+  it("reserves AI review replies for pro and max", () => {
+    expect(canUseFeature("free", "reviewReplies")).toBe(false);
+    expect(canUseFeature("pro", "reviewReplies")).toBe(true);
+    expect(canUseFeature("max", "reviewReplies")).toBe(true);
   });
 });
 

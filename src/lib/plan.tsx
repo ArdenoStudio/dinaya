@@ -84,7 +84,7 @@ const DEFAULT_FREE_ENTITLEMENTS: Entitlements = {
     broadcasts: false,
     clientReactivationCampaign: false,
     googleCalendarSync: false,
-    payments: false,
+    payments: true,
     publicBookingPage: true,
     publicBookingPageCustomization: false,
     reports: false,

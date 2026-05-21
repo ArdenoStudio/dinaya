@@ -112,6 +112,13 @@ export const businesses = pgTable("businesses", {
   payhereEnabled: boolean("payhere_enabled").default(false).notNull(),
   payhereMerchantId: varchar("payhere_merchant_id", { length: 100 }),
   payhereMerchantSecret: text("payhere_merchant_secret"),
+  hideDinayaBranding: boolean("hide_dinaya_branding").default(false).notNull(),
+  directoryListed: boolean("directory_listed").default(false).notNull(),
+  directoryCity: varchar("directory_city", { length: 80 }),
+  directoryDistrict: varchar("directory_district", { length: 80 }),
+  directoryCategory: varchar("directory_category", { length: 80 }),
+  referralCode: varchar("referral_code", { length: 40 }),
+  referredByBusinessId: uuid("referred_by_business_id"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -368,12 +375,37 @@ export const bookings = pgTable("bookings", {
   endsAt: timestamp("ends_at", { withTimezone: true }).notNull(),
   status: bookingStatusEnum("status").default("pending").notNull(),
   source: varchar("source", { length: 40 }).default("public").notNull(),
+  attribution: jsonb("attribution"),
   notes: text("notes"),
   staffNotes: text("staff_notes"),
   reminderSentAt: timestamp("reminder_sent_at"),
+  cancelledAt: timestamp("cancelled_at"),
+  cancellationReason: text("cancellation_reason"),
   googleCalendarEventId: varchar("google_calendar_event_id", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+export const bookingNotifications = pgTable("booking_notifications", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  bookingId: uuid("booking_id")
+    .notNull()
+    .references(() => bookings.id, { onDelete: "cascade" }),
+  type: varchar("type", { length: 40 }).notNull(),
+  channel: varchar("channel", { length: 20 }).notNull(),
+  status: varchar("status", { length: 20 }).default("pending").notNull(),
+  provider: varchar("provider", { length: 40 }),
+  providerMessageId: varchar("provider_message_id", { length: 180 }),
+  error: text("error"),
+  sentAt: timestamp("sent_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  bookingTypeChannelUnique: uniqueIndex("booking_notifications_booking_type_channel_unique").on(
+    table.bookingId,
+    table.type,
+    table.channel
+  ),
+  typeSentAtIdx: index("booking_notifications_type_sent_at_idx").on(table.type, table.sentAt),
+}));
 
 // ─── Reviews ──────────────────────────────────────────────────────────────────
 
@@ -388,6 +420,7 @@ export const reviews = pgTable("reviews", {
   comment: text("comment"),
   ownerReply: text("owner_reply"),
   ownerRepliedAt: timestamp("owner_replied_at"),
+  ownerReplySource: varchar("owner_reply_source", { length: 20 }),
   isPublished: boolean("is_published").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 }, (table) => {
@@ -430,6 +463,7 @@ export const payments = pgTable("payments", {
   payhereOrderId: varchar("payhere_order_id", { length: 100 }).unique(),
   status: paymentStatusEnum("status").default("pending").notNull(),
   payherePayload: jsonb("payhere_payload"),
+  receiptSentAt: timestamp("receipt_sent_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -801,6 +835,11 @@ export const bookingsRelations = relations(bookings, ({ one, many }) => ({
   client: one(clients, { fields: [bookings.clientId], references: [clients.id] }),
   payment: one(payments, { fields: [bookings.id], references: [payments.bookingId] }),
   communications: many(communications),
+  notifications: many(bookingNotifications),
+}));
+
+export const bookingNotificationsRelations = relations(bookingNotifications, ({ one }) => ({
+  booking: one(bookings, { fields: [bookingNotifications.bookingId], references: [bookings.id] }),
 }));
 
 export const clientsRelations = relations(clients, ({ one, many }) => ({
@@ -929,6 +968,8 @@ export type AvailabilityOverride = typeof availabilityOverrides.$inferSelect;
 export type BusinessHoliday = typeof businessHolidays.$inferSelect;
 export type Booking = typeof bookings.$inferSelect;
 export type NewBooking = typeof bookings.$inferInsert;
+export type BookingNotification = typeof bookingNotifications.$inferSelect;
+export type NewBookingNotification = typeof bookingNotifications.$inferInsert;
 export type Payment = typeof payments.$inferSelect;
 export type Client = typeof clients.$inferSelect;
 export type NewClient = typeof clients.$inferInsert;

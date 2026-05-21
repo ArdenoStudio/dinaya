@@ -3,6 +3,7 @@
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
+import { BookingReschedulePanel } from "@/components/dashboard/BookingReschedulePanel";
 import { bookingReminderText, whatsappUrl } from "@/lib/whatsapp";
 
 type Booking = {
@@ -175,6 +176,13 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
               </a>
             </div>
           </div>
+
+          <BookingReschedulePanel
+            bookingId={booking.id}
+            serviceDuration={booking.serviceDuration}
+            canReschedule={booking.status === "pending" || booking.status === "confirmed"}
+            currentStartsAt={booking.startsAt}
+          />
 
           {/* Status actions */}
           {actions.length > 0 && (

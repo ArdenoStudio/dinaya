@@ -6,6 +6,7 @@ import { format, parseISO } from "date-fns";
 import type { BookingBusiness, BookingState } from "./BookingWizard";
 import { formatLkr, isOptimizableRemoteImage } from "@/lib/utils";
 import type { BookingCopy } from "@/lib/i18n";
+import { readStoredAttribution } from "@/lib/booking-attribution";
 
 interface Props {
   state: BookingState;
@@ -80,6 +81,8 @@ export default function StepConfirm({ state, business, copy, onUpdate, onBack, o
     setLoading(true);
     setError("");
 
+    const attribution = readStoredAttribution(business.id);
+
     const res = await fetch("/api/bookings", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -94,6 +97,7 @@ export default function StepConfirm({ state, business, copy, onUpdate, onBack, o
         clientPhone: state.clientPhone,
         clientEmail: state.clientEmail,
         notes: state.notes,
+        attribution,
       }),
     });
 

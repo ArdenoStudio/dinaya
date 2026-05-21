@@ -4,9 +4,15 @@ import { payments, bookings, businesses, services, staff } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { verifyPayhereWebhook } from "@/lib/payhere";
 import { parsePayhereWebhookFields } from "@/lib/payhere-webhook";
-import { sendBookingConfirmationToClient, sendBookingNotificationToBusiness } from "@/lib/resend";
+import { sendBookingNotificationToBusiness } from "@/lib/resend";
+import { sendBookingConfirmationMessage } from "@/lib/messaging/booking-messages";
+import { buildClientBookingUrl } from "@/lib/client-tokens";
+import type { Plan } from "@/lib/plan";
+import type { BookingLanguage } from "@/lib/i18n";
 import { logActivity } from "@/lib/activity-log";
 import { decryptSecret } from "@/lib/secrets";
+import { processBookingAutomationTrigger } from "@/lib/automations/engine";
+import { sendPaymentReceiptEmail } from "@/lib/receipts";
 
 export async function POST(req: NextRequest) {
   const form = await req.formData();
@@ -35,6 +41,7 @@ export async function POST(req: NextRequest) {
       businessId: bookings.businessId,
       clientEmail: bookings.clientEmail,
       clientName: bookings.clientName,
+      clientPhone: bookings.clientPhone,
       serviceId: bookings.serviceId,
       staffId: bookings.staffId,
       startsAt: bookings.startsAt,
@@ -53,6 +60,8 @@ export async function POST(req: NextRequest) {
       name: businesses.name,
       payhereMerchantSecret: businesses.payhereMerchantSecret,
       slug: businesses.slug,
+      plan: businesses.plan,
+      language: businesses.language,
     })
     .from(businesses)
     .where(eq(businesses.id, booking.businessId))
@@ -100,6 +109,10 @@ export async function POST(req: NextRequest) {
       .set({ status: "confirmed" })
       .where(eq(bookings.id, booking.id));
 
+    void processBookingAutomationTrigger(booking.businessId, booking.id, "booking.confirmed").catch((error) => {
+      console.error("Automation trigger failed:", error);
+    });
+
     await logActivity({
       action: "payment_success",
       businessId: booking.businessId,
@@ -117,16 +130,45 @@ export async function POST(req: NextRequest) {
     const [staffMember] = await db.select().from(staff).where(eq(staff.id, booking.staffId)).limit(1);
 
     await Promise.allSettled([
+      sendBookingConfirmationMessage({
+        businessId: booking.businessId,
+        bookingId: booking.id,
+        clientName: booking.clientName,
+        clientEmail: booking.clientEmail,
+        clientPhone: booking.clientPhone,
+        businessName: business.name,
+        serviceName: service?.name ?? "Service",
+        staffName: staffMember?.name ?? "Staff",
+        startsAt: booking.startsAt,
+        manageUrl: buildClientBookingUrl({
+          bookingId: booking.id,
+          clientPhone: booking.clientPhone,
+        }),
+        plan: business.plan as Plan,
+        language: business.language as BookingLanguage,
+      }),
       booking.clientEmail
-        ? sendBookingConfirmationToClient({
+        ? sendPaymentReceiptEmail({
             clientName: booking.clientName,
             clientEmail: booking.clientEmail,
             businessName: business.name,
-            businessSlug: business.slug,
-            serviceName: service.name,
-            staffName: staffMember.name,
+            serviceName: service?.name ?? "Service",
+            staffName: staffMember?.name ?? "Staff",
             startsAt: booking.startsAt,
-            bookingId: booking.id,
+            amountLkr: payment.amountLkr,
+            orderId,
+            paymentId: payment.id,
+            manageUrl: buildClientBookingUrl({
+              bookingId: booking.id,
+              clientPhone: booking.clientPhone,
+            }),
+          }).then(async (result) => {
+            if (result.status === "sent") {
+              await db
+                .update(payments)
+                .set({ receiptSentAt: new Date() })
+                .where(eq(payments.id, payment.id));
+            }
           })
         : Promise.resolve(),
       business.email
@@ -135,8 +177,8 @@ export async function POST(req: NextRequest) {
             clientEmail: business.email,
             businessName: business.name,
             businessSlug: business.slug,
-            serviceName: service.name,
-            staffName: staffMember.name,
+            serviceName: service?.name ?? "Service",
+            staffName: staffMember?.name ?? "Staff",
             startsAt: booking.startsAt,
             bookingId: booking.id,
           })

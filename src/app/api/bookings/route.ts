@@ -4,14 +4,24 @@ import { db } from "@/db";
 import { bookings, payments, businesses, services, staff, clients, staffServices, staffLocations } from "@/db/schema";
 import { eq, and, lt, gt, gte, inArray, count } from "drizzle-orm";
 import { buildPayhereFormData, getPayhereUrl } from "@/lib/payhere";
-import { sendBookingConfirmationToClient, sendBookingNotificationToBusiness } from "@/lib/resend";
+import { sendBookingNotificationToBusiness } from "@/lib/resend";
+import { sendBookingConfirmationMessage } from "@/lib/messaging/booking-messages";
+import { buildClientBookingUrl } from "@/lib/client-tokens";
+import type { Plan } from "@/lib/plan";
+import type { BookingLanguage } from "@/lib/i18n";
 import { generateOrderId } from "@/lib/utils";
 import { dispatchWebhooks } from "@/lib/webhooks";
 import { logActivity } from "@/lib/activity-log";
+import { processBookingAutomationTrigger } from "@/lib/automations/engine";
 import { normalizeSriLankanPhone } from "@/lib/phone";
 import { decryptSecret } from "@/lib/secrets";
 import { resolveBookingLocationId } from "@/lib/locations";
-import { PlanLimitError, PlanRequiredError, requirePlanLimit, requirePro } from "@/lib/plan";
+import {
+  resolveBookingSource,
+  resolveClientSource,
+  type BookingAttribution,
+} from "@/lib/booking-attribution";
+import { PlanLimitError, requirePlanLimit } from "@/lib/plan";
 import { withRateLimit } from "@/lib/rate-limit";
 import { hasApiKeyAuth, requireApiKey } from "@/lib/api-key-auth";
 import { z } from "@/lib/validation";
@@ -29,6 +39,13 @@ const bookingSchema = z.object({
   clientEmail: z.email().optional().nullable().or(z.literal("")),
   notes: z.string().trim().max(2000).optional().nullable(),
   source: z.enum(["public", "manual", "api", "import"]).optional(),
+  attribution: z.object({
+    utmSource: z.string().trim().max(80).optional().nullable(),
+    utmMedium: z.string().trim().max(80).optional().nullable(),
+    utmCampaign: z.string().trim().max(120).optional().nullable(),
+    referralCode: z.string().trim().max(40).optional().nullable(),
+    channel: z.string().trim().max(40).optional().nullable(),
+  }).optional().nullable(),
 });
 
 function isOverlapConstraintError(error: unknown): boolean {
@@ -73,18 +90,25 @@ export async function POST(req: NextRequest) {
     clientEmail,
     notes,
     source: requestedSource = "public",
+    attribution: requestedAttribution,
   } = parsed.data;
   const session = await auth();
-  const source =
-    apiBusinessId && apiBusinessId === businessId
-      ? "api"
-      : session?.user?.businessId === businessId
-        ? requestedSource
-        : "public";
 
   if (apiKeyAuth && apiBusinessId !== businessId) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
+
+  const isOwnerBooking = session?.user?.businessId === businessId;
+  const isApiBooking = apiBusinessId !== null && apiBusinessId === businessId;
+  const attribution = isOwnerBooking || isApiBooking
+    ? null
+    : (requestedAttribution as BookingAttribution | null | undefined);
+  const source = isApiBooking
+    ? "api"
+    : isOwnerBooking
+      ? requestedSource
+      : resolveBookingSource(attribution);
+  const clientSource = resolveClientSource(source, attribution);
 
   const start = new Date(startsAt);
   const end = new Date(endsAt);
@@ -109,6 +133,8 @@ export async function POST(req: NextRequest) {
       payhereMerchantId: businesses.payhereMerchantId,
       payhereMerchantSecret: businesses.payhereMerchantSecret,
       slug: businesses.slug,
+      plan: businesses.plan,
+      language: businesses.language,
     })
     .from(businesses)
     .where(eq(businesses.id, businessId))
@@ -238,15 +264,6 @@ export async function POST(req: NextRequest) {
   let merchantSecret: string | null = null;
 
   if (payhereEnabled) {
-    try {
-      await requirePro(businessId, "payments");
-    } catch (error) {
-      if (error instanceof PlanRequiredError) {
-        return NextResponse.json({ error: "PayHere payments require Dinaya Pro." }, { status: 402 });
-      }
-      throw error;
-    }
-
     merchantSecret = decryptSecret(business.payhereMerchantSecret);
     if (!merchantSecret) {
       return NextResponse.json(
@@ -274,7 +291,7 @@ export async function POST(req: NextRequest) {
       phone: clientPhone,
       email: clientEmail || null,
       stage: "active",
-      source: source === "manual" ? "manual" : "booking_page",
+      source: clientSource,
     })
     .onConflictDoUpdate({
       target: [clients.businessId, clients.phone],
@@ -282,6 +299,7 @@ export async function POST(req: NextRequest) {
         name: clientName,
         email: clientEmail || null,
         stage: "active",
+        ...(clientSource !== "booking_page" && { source: clientSource }),
       },
     })
     .returning({ id: clients.id });
@@ -304,6 +322,7 @@ export async function POST(req: NextRequest) {
         endsAt: end,
         status: initialStatus,
         source,
+        attribution: attribution && Object.values(attribution).some(Boolean) ? attribution : null,
         notes: notes || null,
       })
       .returning({ id: bookings.id });
@@ -344,21 +363,39 @@ export async function POST(req: NextRequest) {
     endsAt: end.toISOString(),
   });
 
+  void processBookingAutomationTrigger(businessId, booking.id, "booking.created").catch((error) => {
+    console.error("Automation trigger failed:", error);
+  });
+
+  if (initialStatus === "confirmed") {
+    void processBookingAutomationTrigger(businessId, booking.id, "booking.confirmed").catch((error) => {
+      console.error("Automation trigger failed:", error);
+    });
+  }
+
   // Send emails for confirmed bookings immediately. Manual payment bookings remain pending.
   if (!requiresPayherePayment) {
+    const manageUrl = buildClientBookingUrl({
+      bookingId: booking.id,
+      clientPhone,
+    });
+
     await Promise.allSettled([
-      initialStatus === "confirmed" && clientEmail
-        ? sendBookingConfirmationToClient({
-            clientName,
-            clientEmail,
-            businessName: business.name,
-            businessSlug: business.slug,
-            serviceName: service.name,
-            staffName: staffMember.name,
-            startsAt: new Date(startsAt),
-            bookingId: booking.id,
-          })
-        : Promise.resolve(),
+      sendBookingConfirmationMessage({
+        businessId,
+        bookingId: booking.id,
+        clientId: client.id,
+        clientName,
+        clientEmail: clientEmail || null,
+        clientPhone,
+        businessName: business.name,
+        serviceName: service.name,
+        staffName: staffMember.name,
+        startsAt: new Date(startsAt),
+        manageUrl,
+        plan: business.plan as Plan,
+        language: business.language as BookingLanguage,
+      }),
       business.email
         ? sendBookingNotificationToBusiness({
             clientName,

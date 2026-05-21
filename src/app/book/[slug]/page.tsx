@@ -8,6 +8,7 @@ import BookingWizard from "@/components/booking/BookingWizard";
 import { getBookingCopy } from "@/lib/i18n";
 import { resolveEffectivePlan } from "@/lib/plan";
 import { isOptimizableRemoteImage } from "@/lib/utils";
+import { canUseFeature, type Plan } from "@/lib/plan";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -68,6 +69,7 @@ export default async function BookingPage({ params }: Props) {
       phone: businesses.phone,
       slug: businesses.slug,
       websiteUrl: businesses.websiteUrl,
+      hideDinayaBranding: businesses.hideDinayaBranding,
     })
     .from(businesses)
     .where(eq(businesses.slug, slug))
@@ -241,7 +243,13 @@ export default async function BookingPage({ params }: Props) {
         )}
 
         <BookingWizard
-          business={business}
+          business={{
+            ...business,
+            hideBranding: Boolean(
+              business.hideDinayaBranding &&
+              canUseFeature(business.plan as Plan, "publicBookingPageCustomization")
+            ),
+          }}
           services={serviceList}
           staff={staffList}
           staffServiceMap={assignments}
@@ -388,6 +396,12 @@ export default async function BookingPage({ params }: Props) {
                   {review.comment && (
                     <p className="text-sm leading-relaxed text-gray-500">{review.comment}</p>
                   )}
+                  {review.ownerReply ? (
+                    <div className="mt-3 rounded-lg border border-gray-100 bg-gray-50 p-3">
+                      <p className="text-xs font-medium text-gray-700">Response from {business.name}</p>
+                      <p className="mt-1 text-sm leading-relaxed text-gray-500">{review.ownerReply}</p>
+                    </div>
+                  ) : null}
                 </div>
               ))}
             </div>
