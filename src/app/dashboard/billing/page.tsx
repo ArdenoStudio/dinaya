@@ -143,7 +143,7 @@ export default async function BillingPage() {
             />
           </section>
 
-          <section className="rounded-xl border border-indigo-200 bg-indigo-50/50 p-6">
+          <section className="rounded-xl border border-amber-200 bg-amber-50/50 p-6">
             <h2 className="text-lg font-semibold">Upgrade to Max</h2>
             <p className="mt-1 text-sm text-neutral-700">
               Everything in Pro — plus AI Booking Autopilot, Smart reminders, Review engine,
@@ -163,7 +163,7 @@ export default async function BillingPage() {
       )}
 
       {plan === "pro" && (
-        <section className="rounded-xl border border-indigo-200 bg-indigo-50/50 p-6">
+        <section className="rounded-xl border border-amber-200 bg-amber-50/50 p-6">
           <h2 className="text-lg font-semibold">Upgrade to Max</h2>
           <p className="mt-1 text-sm text-neutral-700">
             Unlock AI Booking Autopilot, Smart reminders, Review engine, Client reactivation,

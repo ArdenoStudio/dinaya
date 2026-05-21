@@ -267,8 +267,8 @@ export default async function AdminPlansPage() {
         <div className="grid gap-6 lg:grid-cols-3 md:grid-cols-2">
           {(["free", "pro", "max"] as Plan[]).map((planKey) => {
             const entitlements = config.plans[planKey];
-            const accent = planKey === "max" ? "border-indigo-400/40 ring-1 ring-indigo-400/15" : planKey === "pro" ? "border-primary/40 ring-1 ring-primary/15" : "border-muted-foreground/20";
-            const tile = planKey === "max" ? "bg-indigo-600 text-white" : planKey === "pro" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground";
+            const accent = planKey === "max" ? "border-amber-400/40 ring-1 ring-amber-400/15" : planKey === "pro" ? "border-primary/40 ring-1 ring-primary/15" : "border-muted-foreground/20";
+            const tile = planKey === "max" ? "bg-amber-600 text-white" : planKey === "pro" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground";
             const share = planKey === "max"
               ? (total > 0 ? Math.round((Number(maxCount) / total) * 100) : 0)
               : planKey === "pro"
