@@ -1,5 +1,6 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
+import { requireHealthAuth } from "@/lib/health-auth";
 
 export const runtime = "edge";
 export const dynamic = "force-dynamic";
@@ -7,7 +8,9 @@ export const revalidate = 0;
 
 const TIMEOUT_MS = 6000;
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const authError = requireHealthAuth(req);
+  if (authError) return authError;
   const startedAt = Date.now();
 
   let ok = false;

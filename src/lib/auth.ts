@@ -38,12 +38,14 @@ export async function getBusinessContext(): Promise<BusinessContext | null> {
       name: businesses.name,
       plan: businesses.plan,
       slug: businesses.slug,
+      isSuspended: businesses.isSuspended,
+      deletedAt: businesses.deletedAt,
     })
     .from(businesses)
     .where(eq(businesses.id, businessId))
     .limit(1);
 
-  if (!business) {
+  if (!business || business.isSuspended || business.deletedAt) {
     return null;
   }
 

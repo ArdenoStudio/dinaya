@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { format, parseISO } from "date-fns";
 import type { BookingBusiness, BookingState } from "./BookingWizard";
-import { formatLkr } from "@/lib/utils";
+import { formatLkr, isOptimizableRemoteImage } from "@/lib/utils";
 import type { BookingCopy } from "@/lib/i18n";
 
 interface Props {
@@ -281,11 +282,13 @@ export default function StepConfirm({ state, business, copy, onUpdate, onBack, o
               )}
               {business.lankaqrImageUrl && (
                 <div className="mt-3">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
+                  <Image
                     src={business.lankaqrImageUrl}
                     alt="LankaQR"
+                    width={144}
+                    height={144}
                     className="h-36 w-36 rounded-lg border bg-white object-contain p-2"
+                    unoptimized={!isOptimizableRemoteImage(business.lankaqrImageUrl)}
                   />
                 </div>
               )}

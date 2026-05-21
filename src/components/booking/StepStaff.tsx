@@ -1,5 +1,7 @@
+import Image from "next/image";
 import type { Staff } from "@/db/schema";
 import type { BookingCopy } from "@/lib/i18n";
+import { isOptimizableRemoteImage } from "@/lib/utils";
 
 interface Props {
   allStaff: Staff[];
@@ -49,8 +51,14 @@ export default function StepStaff({
               >
                 <div className="size-10 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center text-sm shrink-0 overflow-hidden">
                   {s.avatarUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={s.avatarUrl} alt={s.name} className="size-10 rounded-full object-cover" />
+                    <Image
+                      src={s.avatarUrl}
+                      alt={s.name}
+                      width={40}
+                      height={40}
+                      className="size-10 rounded-full object-cover"
+                      unoptimized={!isOptimizableRemoteImage(s.avatarUrl)}
+                    />
                   ) : (
                     s.name.charAt(0).toUpperCase()
                   )}

@@ -1,12 +1,12 @@
 import { ProGate } from "@/lib/plan";
-import { requireBusiness } from "@/lib/auth";
+import { requireOwner } from "@/lib/auth";
 import { db } from "@/db";
 import { automationRules } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 import { AutomationsClient } from "@/components/dashboard/AutomationsClient";
 
 export default async function AutomationsPage() {
-  const { businessId } = await requireBusiness();
+  const { businessId } = await requireOwner();
   const rules = await db
     .select({
       id: automationRules.id,

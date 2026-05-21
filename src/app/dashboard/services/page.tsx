@@ -3,10 +3,10 @@ import { services } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import Link from "next/link";
 import { formatLkr } from "@/lib/utils";
-import { requireBusiness } from "@/lib/auth";
+import { requireOwner } from "@/lib/auth";
 
 export default async function ServicesPage() {
-  const { businessId } = await requireBusiness();
+  const { businessId } = await requireOwner();
 
   const list = await db
     .select({

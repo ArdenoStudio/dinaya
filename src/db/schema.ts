@@ -104,6 +104,8 @@ export const businesses = pgTable("businesses", {
   galleryImages: text("gallery_images").array(),
   plan: planEnum("plan").default("free").notNull(),
   planExpiresAt: timestamp("plan_expires_at"),
+  isSuspended: boolean("is_suspended").default(false).notNull(),
+  deletedAt: timestamp("deleted_at"),
   payhereEnabled: boolean("payhere_enabled").default(false).notNull(),
   payhereMerchantId: varchar("payhere_merchant_id", { length: 100 }),
   payhereMerchantSecret: text("payhere_merchant_secret"),

@@ -1,9 +1,8 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { auth } from "@/auth";
 import { db } from "@/db";
 import { businesses, subscriptions } from "@/db/schema";
 import { eq, and, inArray, desc } from "drizzle-orm";
+import { requireOwner } from "@/lib/auth";
 import {
   annualSavingsPercent,
   getPlanConfig,
@@ -56,15 +55,13 @@ function PlanPricing({
 }
 
 export default async function BillingPage() {
-  const session = await auth();
-  if (!session) redirect("/login");
+  const { businessId } = await requireOwner();
   const {
     proMonthlyPriceLkr,
     proAnnualPriceLkr,
     maxMonthlyPriceLkr,
     maxAnnualPriceLkr,
   } = getPlanConfig();
-  const businessId = (session.user as { businessId: string }).businessId;
 
   const [business] = await db
     .select({

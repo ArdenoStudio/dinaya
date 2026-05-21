@@ -3,7 +3,7 @@ import Credentials from "next-auth/providers/credentials";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { db } from "@/db";
-import { users } from "@/db/schema";
+import { businesses, users } from "@/db/schema";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   session: { strategy: "jwt" },
@@ -26,6 +26,19 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           .limit(1);
 
         if (!user) return null;
+
+        const [business] = await db
+          .select({
+            isSuspended: businesses.isSuspended,
+            deletedAt: businesses.deletedAt,
+          })
+          .from(businesses)
+          .where(eq(businesses.id, user.businessId))
+          .limit(1);
+
+        if (!business || business.isSuspended || business.deletedAt) {
+          return null;
+        }
 
         const valid = await bcrypt.compare(
           credentials.password as string,

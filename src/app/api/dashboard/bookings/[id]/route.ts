@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/auth";
+import { requireApiBusiness } from "@/lib/api-auth";
 import { db } from "@/db";
 import { bookings, services, staff, clients } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
@@ -27,9 +27,9 @@ export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const businessId = (session.user as { businessId: string }).businessId;
+  const authResult = await requireApiBusiness();
+  if (!authResult.ok) return authResult.response;
+  const { businessId } = authResult.context;
   const { id } = await params;
 
   const [row] = await db
@@ -65,9 +65,9 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const businessId = (session.user as { businessId: string }).businessId;
+  const authResult = await requireApiBusiness();
+  if (!authResult.ok) return authResult.response;
+  const { businessId, user } = authResult.context;
   const { id } = await params;
 
   const parsed = patchSchema.safeParse(await req.json());
@@ -113,7 +113,7 @@ export async function PATCH(
   if (status && status !== existing.status) {
     void logActivity({
       action: "status_changed",
-      actorUserId: session.user.id,
+      actorUserId: user.id,
       businessId,
       entity: "booking",
       entityId: updated.id,

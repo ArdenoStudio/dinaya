@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { db } from "@/db";
 import { businesses, webhooks } from "@/db/schema";
-import { requireBusiness } from "@/lib/auth";
+import { requireOwner } from "@/lib/auth";
 import { count, eq } from "drizzle-orm";
 
 export default async function IntegrationsPage() {
-  const { businessId } = await requireBusiness();
+  const { businessId } = await requireOwner();
   const [[business], [{ webhookCount }]] = await Promise.all([
     db
       .select({

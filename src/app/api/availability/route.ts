@@ -3,12 +3,20 @@ import { db } from "@/db";
 import { availability, availabilityOverrides, bookings, businesses, staff, services } from "@/db/schema";
 import { eq, and, gte, lt, count } from "drizzle-orm";
 import { getAvailableSlots } from "@/lib/availability";
+import { withRateLimit } from "@/lib/rate-limit";
 import { parseISO, startOfDay, endOfDay } from "date-fns";
 import { fromZonedTime } from "date-fns-tz";
 
 const DEFAULT_TIMEZONE = "Asia/Colombo";
 
 export async function GET(req: NextRequest) {
+  const limited = await withRateLimit(req, {
+    scope: "availability",
+    limit: 120,
+    windowSeconds: 60,
+  });
+  if (!limited.ok) return limited.response;
+
   const { searchParams } = req.nextUrl;
   const staffId = searchParams.get("staffId");
   const serviceId = searchParams.get("serviceId");
@@ -34,11 +42,18 @@ export async function GET(req: NextRequest) {
 
   if (!service) return NextResponse.json({ slots: [] });
 
-  const [staffMember] = await db
-    .select({ businessId: staff.businessId, isActive: staff.isActive })
-    .from(staff)
-    .where(eq(staff.id, staffId))
-    .limit(1);
+  const [[staffMember], [business]] = await Promise.all([
+    db
+      .select({ businessId: staff.businessId, isActive: staff.isActive })
+      .from(staff)
+      .where(eq(staff.id, staffId))
+      .limit(1),
+    db
+      .select({ timezone: businesses.timezone })
+      .from(businesses)
+      .where(eq(businesses.id, service.businessId))
+      .limit(1),
+  ]);
 
   if (
     !staffMember ||
@@ -49,58 +64,51 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ slots: [] }, { status: 404 });
   }
 
-  const [business] = await db
-    .select({ timezone: businesses.timezone })
-    .from(businesses)
-    .where(eq(businesses.id, service.businessId))
-    .limit(1);
   const timezone = business?.timezone ?? DEFAULT_TIMEZONE;
 
-  const staffAvailability = await db
-    .select()
-    .from(availability)
-    .where(eq(availability.staffId, staffId));
-
-  const overrides = await db
-    .select()
-    .from(availabilityOverrides)
-    .where(and(eq(availabilityOverrides.staffId, staffId), eq(availabilityOverrides.date, date)));
-
-  // Get existing bookings for this day (UTC window)
   const localDate = parseISO(date);
   const dayStartUtc = fromZonedTime(startOfDay(localDate), timezone);
   const dayEndUtc = fromZonedTime(endOfDay(localDate), timezone);
 
-  const existingBookings = await db
-    .select({ startsAt: bookings.startsAt, endsAt: bookings.endsAt, status: bookings.status })
-    .from(bookings)
-    .where(
-      and(
-        eq(bookings.staffId, staffId),
-        gte(bookings.startsAt, dayStartUtc),
-        lt(bookings.startsAt, dayEndUtc)
-      )
-    );
+  const dayBookingsFilter = and(
+    eq(bookings.staffId, staffId),
+    gte(bookings.startsAt, dayStartUtc),
+    lt(bookings.startsAt, dayEndUtc),
+  );
 
-  // Check daily capacity — if limit reached, no slots available
-  if (service.dailyCapacity != null) {
-    const [{ value: bookedCount }] = await db
-      .select({ value: count() })
+  const [staffAvailability, overrides, existingBookings, capacityRow] = await Promise.all([
+    db.select().from(availability).where(eq(availability.staffId, staffId)),
+    db
+      .select()
+      .from(availabilityOverrides)
+      .where(and(eq(availabilityOverrides.staffId, staffId), eq(availabilityOverrides.date, date))),
+    db
+      .select({ startsAt: bookings.startsAt, endsAt: bookings.endsAt, status: bookings.status })
       .from(bookings)
-      .where(
-        and(
-          eq(bookings.staffId, staffId),
-          eq(bookings.serviceId, serviceId),
-          gte(bookings.startsAt, dayStartUtc),
-          lt(bookings.startsAt, dayEndUtc),
-          and(
-            eq(bookings.status, "confirmed"),
+      .where(dayBookingsFilter),
+    service.dailyCapacity != null
+      ? db
+          .select({ value: count() })
+          .from(bookings)
+          .where(
+            and(
+              eq(bookings.staffId, staffId),
+              eq(bookings.serviceId, serviceId),
+              gte(bookings.startsAt, dayStartUtc),
+              lt(bookings.startsAt, dayEndUtc),
+              eq(bookings.status, "confirmed"),
+            ),
           )
-        )
-      );
-    if (Number(bookedCount) >= service.dailyCapacity) {
-      return NextResponse.json({ slots: [], capacityReached: true });
-    }
+          .then(([row]) => row)
+      : Promise.resolve(null),
+  ]);
+
+  if (
+    service.dailyCapacity != null &&
+    capacityRow &&
+    Number(capacityRow.value) >= service.dailyCapacity
+  ) {
+    return NextResponse.json({ slots: [], capacityReached: true });
   }
 
   const slots = getAvailableSlots({

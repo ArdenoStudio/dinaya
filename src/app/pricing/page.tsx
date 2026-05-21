@@ -4,6 +4,7 @@ import { FadeContainer, FadeDiv, FadeSpan } from "@/components/Fade";
 import { PublicNav } from "@/components/PublicNav";
 import { CTAPrimaryButton } from "@/components/cta-primary-button";
 import { LandingFooter } from "@/components/LandingFooter";
+import { auth } from "@/auth";
 import { annualSavingsPercent, getPlanConfig } from "@/lib/plan";
 
 export const metadata: Metadata = {
@@ -56,8 +57,8 @@ const faqs = [
     a: "Dinaya doesn't charge a transaction fee on your bookings. PayHere (our payments partner) charges their standard local rates directly — typically 3.3% + LKR 30 per card transaction. We pass that through at cost.",
   },
   {
-    q: "When does Pro launch?",
-    a: "Pro is rolling out in stages later this year. If you're on the Free plan when Pro launches, you'll get a founding-member discount. Want early access? Just reach out from your dashboard.",
+    q: "Is Pro available?",
+    a: "Yes — Pro and Max are available now. Start on Free and upgrade anytime from your dashboard billing page when you're ready for multi-staff tools, AI growth features, or unlimited branches.",
   },
   {
     q: "Can I switch plans later?",
@@ -70,6 +71,9 @@ const faqs = [
 ];
 
 export default async function PricingPage() {
+  const session = await auth();
+  const upgradeHref = session?.user ? "/dashboard/billing" : "/register";
+  const upgradeLabel = session?.user ? "Upgrade in dashboard" : "Get started";
   const config = getPlanConfig();
   const proAnnualSavings = annualSavingsPercent(config.proMonthlyPriceLkr, config.proAnnualPriceLkr);
   const maxAnnualSavings = annualSavingsPercent(config.maxMonthlyPriceLkr, config.maxAnnualPriceLkr);
@@ -146,9 +150,6 @@ export default async function PricingPage() {
             <div className="relative">
               <div className="flex items-center gap-2 mb-2">
                 <h3 className="font-cal text-2xl tracking-tight">Pro</h3>
-                <span className="inline-flex items-center gap-1 rounded-full bg-white/10 text-white/80 ring-1 ring-white/20 px-2 py-0.5 text-[11px] font-medium">
-                  Coming soon
-                </span>
               </div>
               <p className="text-sm text-white/60 mb-6">
                 For growing teams — up to 3 branches, all seven AI growth tools, and advanced operations.
@@ -165,14 +166,13 @@ export default async function PricingPage() {
                     <span className="ml-1 text-emerald-300">· save {proAnnualSavings}%</span>
                   )}
                 </p>
-                <p className="text-xs text-white/50 mt-1">Estimated launch price. Free until release.</p>
               </div>
 
               <Link
-                href="/register"
+                href={upgradeHref}
                 className="inline-flex items-center justify-center gap-2 bg-white/10 border border-white/20 text-white px-5 py-3 rounded-lg text-sm font-medium hover:bg-white/15 transition-colors mb-7"
               >
-                Join the waitlist
+                {upgradeLabel}
                 <i className="bi bi-arrow-right text-sm" />
               </Link>
 
@@ -197,9 +197,6 @@ export default async function PricingPage() {
             <div className="relative">
               <div className="flex items-center gap-2 mb-2">
                 <h3 className="font-cal text-2xl tracking-tight">Max</h3>
-                <span className="inline-flex items-center gap-1 rounded-full bg-white/10 text-white/80 ring-1 ring-white/20 px-2 py-0.5 text-[11px] font-medium">
-                  Coming soon
-                </span>
               </div>
               <p className="text-sm text-white/60 mb-6">
                 Everything in Pro — plus unlimited branches for larger teams.
@@ -216,14 +213,13 @@ export default async function PricingPage() {
                     <span className="ml-1 text-emerald-300">· save {maxAnnualSavings}%</span>
                   )}
                 </p>
-                <p className="text-xs text-white/50 mt-1">Estimated launch price. Free until release.</p>
               </div>
 
               <Link
-                href="/register"
+                href={upgradeHref}
                 className="inline-flex items-center justify-center gap-2 bg-white/10 border border-white/20 text-white px-5 py-3 rounded-lg text-sm font-medium hover:bg-white/15 transition-colors mb-7"
               >
-                Join the waitlist
+                {upgradeLabel}
                 <i className="bi bi-arrow-right text-sm" />
               </Link>
 

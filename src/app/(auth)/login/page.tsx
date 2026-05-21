@@ -24,6 +24,7 @@ function LoginForm() {
   const router       = useRouter();
   const searchParams = useSearchParams();
   const justRegistered = searchParams.get("registered") === "1";
+  const passwordReset = searchParams.get("reset") === "1";
 
   const emailRef = useRef<HTMLInputElement>(null);
   const [email,        setEmail]        = useState("");
@@ -68,6 +69,13 @@ function LoginForm() {
           <div className="flex items-start gap-2 mb-5 px-3 py-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm">
             <i className="bi bi-check-circle-fill text-sm mt-0.5 shrink-0" />
             <span>Account created. Sign in to get started.</span>
+          </div>
+        )}
+
+        {passwordReset && (
+          <div className="flex items-start gap-2 mb-5 px-3 py-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm">
+            <i className="bi bi-check-circle-fill text-sm mt-0.5 shrink-0" />
+            <span>Password updated. Sign in with your new password.</span>
           </div>
         )}
 

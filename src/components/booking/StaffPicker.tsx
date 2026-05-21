@@ -1,8 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import type { Staff } from "@/db/schema";
 import type { BookingCopy } from "@/lib/i18n";
 import { getEligibleStaff } from "@/lib/booking-staff";
+import { isOptimizableRemoteImage } from "@/lib/utils";
 
 interface Props {
   allStaff: Staff[];
@@ -50,8 +52,14 @@ export default function StaffPicker({
               }`}
             >
               {s.avatarUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={s.avatarUrl} alt="" className="size-5 rounded-full object-cover" />
+                <Image
+                  src={s.avatarUrl}
+                  alt=""
+                  width={20}
+                  height={20}
+                  className="size-5 rounded-full object-cover"
+                  unoptimized={!isOptimizableRemoteImage(s.avatarUrl)}
+                />
               ) : (
                 <span className="flex size-5 items-center justify-center rounded-full bg-blue-100 text-[10px] font-bold text-blue-600">
                   {s.name.charAt(0)}

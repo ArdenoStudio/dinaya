@@ -12,6 +12,7 @@ import { normalizeSriLankanPhone } from "@/lib/phone";
 import { decryptSecret } from "@/lib/secrets";
 import { resolveBookingLocationId } from "@/lib/locations";
 import { PlanLimitError, PlanRequiredError, requirePlanLimit, requirePro } from "@/lib/plan";
+import { withRateLimit } from "@/lib/rate-limit";
 import { z } from "@/lib/validation";
 import { startOfMonth } from "date-fns";
 
@@ -36,6 +37,13 @@ function isOverlapConstraintError(error: unknown): boolean {
 }
 
 export async function POST(req: NextRequest) {
+  const limited = await withRateLimit(req, {
+    scope: "bookings",
+    limit: 20,
+    windowSeconds: 60,
+  });
+  if (!limited.ok) return limited.response;
+
   const parsed = bookingSchema.safeParse(await req.json());
 
   if (!parsed.success) {

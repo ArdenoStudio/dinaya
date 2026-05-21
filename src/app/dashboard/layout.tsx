@@ -6,7 +6,7 @@ import { SidebarNav } from "@/components/dashboard/SidebarNav";
 import { DashboardToastProvider } from "@/components/dashboard/ToastProvider";
 import { requireBusiness } from "@/lib/auth";
 import { isPlatformAdmin } from "@/lib/platform-admin";
-import { Bell, ChevronsUpDown, Menu, Search, ShieldCheck, UserCircle } from "lucide-react";
+import { ChevronsUpDown, Menu, Search, ShieldCheck, UserCircle } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Dashboard | Dinaya",
@@ -74,19 +74,16 @@ export default async function DashboardLayout({
               </button>
             </div>
 
-            <div className="relative min-w-0 flex-1">
+            <form action="/dashboard/clients" method="get" className="relative min-w-0 flex-1">
               <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
               <input
+                name="q"
+                type="search"
                 aria-label="Search dashboard"
                 className="h-10 w-full rounded-md border bg-white pl-9 pr-3 text-sm outline-none transition-shadow placeholder:text-muted-foreground/60 focus:ring-2 focus:ring-primary/30"
                 placeholder="Search bookings, clients, services"
               />
-            </div>
-
-            <button className="flex size-10 items-center justify-center rounded-md border bg-white text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
-              <Bell className="size-4" aria-hidden="true" />
-              <span className="sr-only">Notifications</span>
-            </button>
+            </form>
 
             <div className="hidden items-center gap-2 rounded-md border bg-white px-2.5 py-2 sm:flex">
               <UserCircle className="size-4 text-muted-foreground" aria-hidden="true" />

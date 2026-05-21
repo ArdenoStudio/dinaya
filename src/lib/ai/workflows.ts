@@ -55,6 +55,28 @@ function emptyStats(): WorkflowStats {
   return { checked: 0, sent: 0, skipped: 0, failed: 0, duplicate: 0 };
 }
 
+async function mapWithConcurrency<T, R>(
+  items: T[],
+  limit: number,
+  fn: (item: T, index: number) => Promise<R>,
+): Promise<R[]> {
+  if (items.length === 0) return [];
+  const results: R[] = new Array(items.length);
+  let nextIndex = 0;
+
+  async function worker() {
+    while (nextIndex < items.length) {
+      const currentIndex = nextIndex++;
+      results[currentIndex] = await fn(items[currentIndex], currentIndex);
+    }
+  }
+
+  await Promise.all(
+    Array.from({ length: Math.min(limit, items.length) }, () => worker()),
+  );
+  return results;
+}
+
 export function canRunAiWorkflow(plan: Plan, feature: PlanFeature): boolean {
   return canUseFeature(plan, feature);
 }
@@ -248,9 +270,11 @@ async function runSmartReminders(business: BusinessRow): Promise<WorkflowStats> 
       ))
       .limit(50);
 
-    for (const row of rows) {
-      if (row.locationId && !enabledIds.has(row.locationId)) continue;
-      const result = await sendWorkflowMessage({
+    const eligibleRows = rows.filter(
+      (row) => !row.locationId || enabledIds.has(row.locationId),
+    );
+    const results = await mapWithConcurrency(eligibleRows, 5, async (row) =>
+      sendWorkflowMessage({
         business,
         locationId: row.locationId,
         bookingId: row.id,
@@ -264,9 +288,9 @@ async function runSmartReminders(business: BusinessRow): Promise<WorkflowStats> 
         serviceName: row.serviceName,
         staffName: row.staffName,
         startsAtLabel: localLabel(new Date(row.startsAt), business.timezone),
-      });
-      addResult(stats, result);
-    }
+      }),
+    );
+    for (const result of results) addResult(stats, result);
   }
   return stats;
 }
@@ -295,15 +319,17 @@ async function runReviewEngine(business: BusinessRow): Promise<WorkflowStats> {
     ))
     .limit(50);
 
-  for (const row of rows) {
-    if (row.locationId && !enabledIds.has(row.locationId)) continue;
+  const eligibleRows = rows.filter(
+    (row) => !row.locationId || enabledIds.has(row.locationId),
+  );
+  const results = await mapWithConcurrency(eligibleRows, 5, async (row) => {
     const [existingReview] = await db
       .select({ id: reviews.id })
       .from(reviews)
       .where(eq(reviews.bookingId, row.id))
       .limit(1);
-    if (existingReview) continue;
-    const result = await sendWorkflowMessage({
+    if (existingReview) return null;
+    return sendWorkflowMessage({
       business,
       locationId: row.locationId,
       bookingId: row.id,
@@ -320,7 +346,9 @@ async function runReviewEngine(business: BusinessRow): Promise<WorkflowStats> {
         clientName: row.clientName,
       }),
     });
-    addResult(stats, result);
+  });
+  for (const result of results) {
+    if (result) addResult(stats, result);
   }
   return stats;
 }
@@ -357,9 +385,9 @@ async function runReactivation(business: BusinessRow): Promise<WorkflowStats> {
     .orderBy(asc(clients.lastAiContactAt))
     .limit(30);
 
-  for (const client of rows) {
-    if (!cooldownHasElapsed(client.lastAiContactAt, 30)) continue;
-    if (await clientHasFutureBooking(client.id)) continue;
+  const results = await mapWithConcurrency(rows, 5, async (client) => {
+    if (!cooldownHasElapsed(client.lastAiContactAt, 30)) return null;
+    if (await clientHasFutureBooking(client.id)) return null;
     const [lastCompleted] = await db
       .select({ startsAt: bookings.startsAt })
       .from(bookings)
@@ -369,8 +397,8 @@ async function runReactivation(business: BusinessRow): Promise<WorkflowStats> {
       ))
       .orderBy(desc(bookings.startsAt))
       .limit(1);
-    if (!lastCompleted || lastCompleted.startsAt > subDays(new Date(), 45)) continue;
-    const result = await sendWorkflowMessage({
+    if (!lastCompleted || lastCompleted.startsAt > subDays(new Date(), 45)) return null;
+    return sendWorkflowMessage({
       business,
       clientId: client.id,
       clientName: client.name,
@@ -381,7 +409,9 @@ async function runReactivation(business: BusinessRow): Promise<WorkflowStats> {
       idempotencyKey: `reactivation:${client.id}:${format(new Date(), "yyyy-MM")}`,
       meta: { lastVisit: lastCompleted.startsAt.toISOString() },
     });
-    addResult(stats, result);
+  });
+  for (const result of results) {
+    if (result) addResult(stats, result);
   }
   return stats;
 }
@@ -405,13 +435,13 @@ async function runVipLoyalty(business: BusinessRow): Promise<WorkflowStats> {
     ))
     .limit(40);
 
-  for (const client of rows) {
-    if (!cooldownHasElapsed(client.lastAiContactAt, 30)) continue;
+  const results = await mapWithConcurrency(rows, 5, async (client) => {
+    if (!cooldownHasElapsed(client.lastAiContactAt, 30)) return null;
     const [{ value }] = await db
       .select({ value: count() })
       .from(bookings)
       .where(and(eq(bookings.clientId, client.id), eq(bookings.status, "completed")));
-    if (Number(value) < 3) continue;
+    if (Number(value) < 3) return null;
     const result = await sendWorkflowMessage({
       business,
       clientId: client.id,
@@ -426,7 +456,10 @@ async function runVipLoyalty(business: BusinessRow): Promise<WorkflowStats> {
     if (typeof result !== "string" && result.status === "sent") {
       await db.update(clients).set({ loyaltyTier: "vip" }).where(eq(clients.id, client.id));
     }
-    addResult(stats, result);
+    return result;
+  });
+  for (const result of results) {
+    if (result) addResult(stats, result);
   }
   return stats;
 }
@@ -457,14 +490,16 @@ async function runUpsells(business: BusinessRow): Promise<WorkflowStats> {
     ))
     .limit(40);
 
-  for (const row of rows) {
-    if (row.locationId && !enabledIds.has(row.locationId)) continue;
+  const eligibleRows = rows.filter(
+    (row) => !row.locationId || enabledIds.has(row.locationId),
+  );
+  const results = await mapWithConcurrency(eligibleRows, 5, async (row) => {
     const recommendation = await getUpsellRecommendation({
       businessId: business.id,
       serviceId: row.serviceId,
     });
-    if (!recommendation) continue;
-    const result = await sendWorkflowMessage({
+    if (!recommendation) return null;
+    return sendWorkflowMessage({
       business,
       locationId: row.locationId,
       bookingId: row.id,
@@ -479,7 +514,9 @@ async function runUpsells(business: BusinessRow): Promise<WorkflowStats> {
       extra: recommendation.name,
       meta: { recommendation },
     });
-    addResult(stats, result);
+  });
+  for (const result of results) {
+    if (result) addResult(stats, result);
   }
   return stats;
 }
@@ -581,7 +618,8 @@ async function runBookingAutopilot(business: BusinessRow): Promise<WorkflowStats
 async function runContentMachine(business: BusinessRow): Promise<WorkflowStats> {
   const stats = emptyStats();
   const enabled = await activeAiLocations(business.id, "aiContentMachine");
-  for (const location of enabled) {
+  const locationResults = await mapWithConcurrency(enabled, 5, async (location) => {
+    const locationStats = emptyStats();
     await generateThirtyDayContentCalendar({ businessId: business.id, locationId: location.id });
     const [{ value }] = await db
       .select({ value: count() })
@@ -603,8 +641,8 @@ async function runContentMachine(business: BusinessRow): Promise<WorkflowStats> 
         error: "Business email missing.",
         meta: { drafts: Number(value) },
       });
-      addResult(stats, "skipped");
-      continue;
+      addResult(locationStats, "skipped");
+      return locationStats;
     }
     const result = await sendWorkflowMessage({
       business,
@@ -617,9 +655,10 @@ async function runContentMachine(business: BusinessRow): Promise<WorkflowStats> 
       extra: `${Number(value)} content drafts are ready for ${location.name}.`,
       meta: { drafts: Number(value) },
     });
-    addResult(stats, result);
-  }
-  return stats;
+    addResult(locationStats, result);
+    return locationStats;
+  });
+  return locationResults.reduce(mergeStats, stats);
 }
 
 export async function runAiWorkflows(): Promise<Record<PlanFeature, WorkflowStats>> {
@@ -636,17 +675,34 @@ export async function runAiWorkflows(): Promise<Record<PlanFeature, WorkflowStat
     .from(businesses)
     .where(inArray(businesses.plan, ["pro", "max"]));
 
-  for (const business of businessRows) {
-    const plan = business.plan as Plan;
-    if (!AI_FEATURES.some((feature) => canRunAiWorkflow(plan, feature))) continue;
+  const eligibleBusinesses = businessRows.filter((business) =>
+    AI_FEATURES.some((feature) => canRunAiWorkflow(business.plan as Plan, feature)),
+  );
+
+  const businessSummaries = await mapWithConcurrency(eligibleBusinesses, 5, async (business) => {
     const typedBusiness = business as BusinessRow;
-    summary.aiBookingAutopilot = mergeStats(summary.aiBookingAutopilot, await runBookingAutopilot(typedBusiness));
-    summary.smartReminderSystem = mergeStats(summary.smartReminderSystem, await runSmartReminders(typedBusiness));
-    summary.reviewEngine = mergeStats(summary.reviewEngine, await runReviewEngine(typedBusiness));
-    summary.clientReactivationCampaign = mergeStats(summary.clientReactivationCampaign, await runReactivation(typedBusiness));
-    summary.aiUpsellAssistant = mergeStats(summary.aiUpsellAssistant, await runUpsells(typedBusiness));
-    summary.aiContentMachine = mergeStats(summary.aiContentMachine, await runContentMachine(typedBusiness));
-    summary.vipLoyaltySequence = mergeStats(summary.vipLoyaltySequence, await runVipLoyalty(typedBusiness));
+    return {
+      aiBookingAutopilot: await runBookingAutopilot(typedBusiness),
+      smartReminderSystem: await runSmartReminders(typedBusiness),
+      reviewEngine: await runReviewEngine(typedBusiness),
+      clientReactivationCampaign: await runReactivation(typedBusiness),
+      aiUpsellAssistant: await runUpsells(typedBusiness),
+      aiContentMachine: await runContentMachine(typedBusiness),
+      vipLoyaltySequence: await runVipLoyalty(typedBusiness),
+    };
+  });
+
+  for (const partial of businessSummaries) {
+    summary.aiBookingAutopilot = mergeStats(summary.aiBookingAutopilot, partial.aiBookingAutopilot);
+    summary.smartReminderSystem = mergeStats(summary.smartReminderSystem, partial.smartReminderSystem);
+    summary.reviewEngine = mergeStats(summary.reviewEngine, partial.reviewEngine);
+    summary.clientReactivationCampaign = mergeStats(
+      summary.clientReactivationCampaign,
+      partial.clientReactivationCampaign,
+    );
+    summary.aiUpsellAssistant = mergeStats(summary.aiUpsellAssistant, partial.aiUpsellAssistant);
+    summary.aiContentMachine = mergeStats(summary.aiContentMachine, partial.aiContentMachine);
+    summary.vipLoyaltySequence = mergeStats(summary.vipLoyaltySequence, partial.vipLoyaltySequence);
   }
   return summary;
 }

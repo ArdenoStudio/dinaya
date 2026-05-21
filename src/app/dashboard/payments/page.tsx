@@ -1,5 +1,5 @@
 import { ProGate } from "@/lib/plan";
-import { requireBusiness } from "@/lib/auth";
+import { requireOwner } from "@/lib/auth";
 import { db } from "@/db";
 import { bookings, payments, services } from "@/db/schema";
 import { formatLkr } from "@/lib/utils";
@@ -7,7 +7,7 @@ import { desc, eq } from "drizzle-orm";
 import Link from "next/link";
 
 export default async function PaymentsPage() {
-  const { businessId } = await requireBusiness();
+  const { businessId } = await requireOwner();
 
   const rows = await db
     .select({

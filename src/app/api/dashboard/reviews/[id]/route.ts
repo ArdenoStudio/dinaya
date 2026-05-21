@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/auth";
+import { requireApiBusiness } from "@/lib/api-auth";
 import { db } from "@/db";
 import { reviews } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
@@ -7,10 +7,9 @@ import { eq, and } from "drizzle-orm";
 interface Ctx { params: Promise<{ id: string }> }
 
 export async function PATCH(req: NextRequest, { params }: Ctx) {
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  const businessId = (session.user as { businessId: string }).businessId;
+  const authResult = await requireApiBusiness();
+  if (!authResult.ok) return authResult.response;
+  const { businessId } = authResult.context;
   const { id } = await params;
   const { isPublished } = await req.json();
 
@@ -25,10 +24,9 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
 }
 
 export async function DELETE(_req: NextRequest, { params }: Ctx) {
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  const businessId = (session.user as { businessId: string }).businessId;
+  const authResult = await requireApiBusiness();
+  if (!authResult.ok) return authResult.response;
+  const { businessId } = authResult.context;
   const { id } = await params;
 
   await db
