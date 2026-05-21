@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { bookings, businesses, locations, services, staff } from "@/db/schema";
+import { bookingNotifications, bookings, businesses, locations, services, staff } from "@/db/schema";
 import { eq, and, gte, lt, isNull } from "drizzle-orm";
-import { sendBookingReminder } from "@/lib/resend";
 import { addHours } from "date-fns";
 import { parseLocationAiConfig } from "@/lib/locations";
 import { canUseFeature, type Plan } from "@/lib/plan";
+import { sendBookingReminderMessage } from "@/lib/messaging/booking-messages";
+import { buildClientBookingUrl } from "@/lib/client-tokens";
+import type { BookingLanguage } from "@/lib/i18n";
 
-// Called by Vercel Cron every day at 10:00 AM Colombo time (04:30 UTC)
 export async function GET(req: NextRequest) {
   const expected = process.env.CRON_SECRET;
   if (!expected) {
@@ -19,20 +20,21 @@ export async function GET(req: NextRequest) {
   }
 
   const now = new Date();
-  const windowStart = addHours(now, 20); // 20h from now
-  const windowEnd = addHours(now, 28);   // 28h from now — catches anything in the next ~8h window around 24h
+  const windowStart = addHours(now, 20);
+  const windowEnd = addHours(now, 28);
 
-  // Find confirmed bookings starting in the 24h window that haven't had a reminder sent
   const upcoming = await db
     .select({
       id: bookings.id,
       clientName: bookings.clientName,
       clientEmail: bookings.clientEmail,
+      clientPhone: bookings.clientPhone,
       startsAt: bookings.startsAt,
       businessId: bookings.businessId,
       serviceId: bookings.serviceId,
       staffId: bookings.staffId,
       locationId: bookings.locationId,
+      clientId: bookings.clientId,
     })
     .from(bookings)
     .where(
@@ -45,12 +47,16 @@ export async function GET(req: NextRequest) {
     );
 
   let sent = 0;
+  let skipped = 0;
 
   for (const booking of upcoming) {
-    if (!booking.clientEmail) continue;
-
     const [business] = await db
-      .select({ name: businesses.name, slug: businesses.slug, plan: businesses.plan })
+      .select({
+        name: businesses.name,
+        slug: businesses.slug,
+        plan: businesses.plan,
+        language: businesses.language,
+      })
       .from(businesses)
       .where(eq(businesses.id, booking.businessId))
       .limit(1);
@@ -76,32 +82,64 @@ export async function GET(req: NextRequest) {
         .where(eq(locations.id, booking.locationId))
         .limit(1);
       if (parseLocationAiConfig(location?.aiConfig).smartReminderSystem) {
+        skipped++;
         continue;
       }
     }
 
-    try {
-      await sendBookingReminder({
-        clientName: booking.clientName,
-        clientEmail: booking.clientEmail,
-        businessName: business.name,
-        businessSlug: business.slug,
-        serviceName: service.name,
-        staffName: member.name,
-        startsAt: new Date(booking.startsAt),
-        bookingId: booking.id,
-      });
+    const alreadySent = await db
+      .select({ id: bookingNotifications.id })
+      .from(bookingNotifications)
+      .where(and(
+        eq(bookingNotifications.bookingId, booking.id),
+        eq(bookingNotifications.type, "reminder_24h"),
+        eq(bookingNotifications.status, "sent"),
+      ))
+      .limit(1);
 
+    if (alreadySent.length > 0) {
       await db
         .update(bookings)
         .set({ reminderSentAt: new Date() })
         .where(eq(bookings.id, booking.id));
+      skipped++;
+      continue;
+    }
 
-      sent++;
-    } catch (e) {
-      console.error(`Reminder failed for booking ${booking.id}:`, e);
+    try {
+      const result = await sendBookingReminderMessage({
+        businessId: booking.businessId,
+        bookingId: booking.id,
+        clientId: booking.clientId,
+        clientName: booking.clientName,
+        clientEmail: booking.clientEmail,
+        clientPhone: booking.clientPhone,
+        businessName: business.name,
+        serviceName: service.name,
+        staffName: member.name,
+        startsAt: new Date(booking.startsAt),
+        manageUrl: buildClientBookingUrl({
+          bookingId: booking.id,
+          clientPhone: booking.clientPhone,
+        }),
+        plan: business.plan as Plan,
+        language: business.language as BookingLanguage,
+      });
+
+      if (result.status === "sent" || result.status === "duplicate") {
+        await db
+          .update(bookings)
+          .set({ reminderSentAt: new Date() })
+          .where(eq(bookings.id, booking.id));
+        sent++;
+      } else {
+        skipped++;
+      }
+    } catch (error) {
+      console.error(`Reminder failed for booking ${booking.id}:`, error);
+      skipped++;
     }
   }
 
-  return NextResponse.json({ sent, checked: upcoming.length });
+  return NextResponse.json({ sent, skipped, checked: upcoming.length });
 }

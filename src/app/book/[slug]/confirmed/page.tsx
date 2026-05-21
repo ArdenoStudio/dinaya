@@ -6,6 +6,7 @@ import { format } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import Link from "next/link";
 import ReviewPrompt from "./ReviewPrompt";
+import { buildClientBookingUrl } from "@/lib/client-tokens";
 
 const COLOMBO_TZ = "Asia/Colombo";
 
@@ -24,6 +25,7 @@ export default async function BookingConfirmedPage({ params, searchParams }: Pro
     .select({
       id: bookings.id,
       clientName: bookings.clientName,
+      clientPhone: bookings.clientPhone,
       startsAt: bookings.startsAt,
       status: bookings.status,
       businessName: businesses.name,
@@ -41,6 +43,11 @@ export default async function BookingConfirmedPage({ params, searchParams }: Pro
   const local = toZonedTime(booking.startsAt, COLOMBO_TZ);
   const isConfirmed = booking.status === "confirmed" || booking.status === "completed";
   const isPending = booking.status === "pending";
+
+  const manageUrl = buildClientBookingUrl({
+    bookingId: booking.id,
+    clientPhone: booking.clientPhone,
+  });
 
   const details = [
     { icon: "bi-tag", label: "Service", value: booking.serviceName },
@@ -87,9 +94,18 @@ export default async function BookingConfirmedPage({ params, searchParams }: Pro
             ))}
           </div>
 
-          <p className="text-xs text-muted-foreground mb-6">
+          <p className="text-xs text-muted-foreground mb-4">
             Ref: <span className="font-mono">{booking.id.slice(0, 8).toUpperCase()}</span>
           </p>
+
+          {(isConfirmed || isPending) && (
+            <Link
+              href={manageUrl}
+              className="mb-6 inline-flex w-full items-center justify-center rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white hover:bg-primary/90"
+            >
+              Manage your booking
+            </Link>
+          )}
 
           <Link href={`/book/${slug}`} className="text-sm text-blue-600 hover:underline">
             ← Back to booking page

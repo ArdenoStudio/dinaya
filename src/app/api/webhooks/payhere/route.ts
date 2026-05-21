@@ -3,7 +3,11 @@ import { db } from "@/db";
 import { payments, bookings, businesses, services, staff } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { verifyPayhereWebhook } from "@/lib/payhere";
-import { sendBookingConfirmationToClient, sendBookingNotificationToBusiness } from "@/lib/resend";
+import { sendBookingNotificationToBusiness } from "@/lib/resend";
+import { sendBookingConfirmationMessage } from "@/lib/messaging/booking-messages";
+import { buildClientBookingUrl } from "@/lib/client-tokens";
+import type { Plan } from "@/lib/plan";
+import type { BookingLanguage } from "@/lib/i18n";
 import { logActivity } from "@/lib/activity-log";
 import { decryptSecret } from "@/lib/secrets";
 
@@ -38,6 +42,7 @@ export async function POST(req: NextRequest) {
       businessId: bookings.businessId,
       clientEmail: bookings.clientEmail,
       clientName: bookings.clientName,
+      clientPhone: bookings.clientPhone,
       serviceId: bookings.serviceId,
       staffId: bookings.staffId,
       startsAt: bookings.startsAt,
@@ -56,6 +61,8 @@ export async function POST(req: NextRequest) {
       name: businesses.name,
       payhereMerchantSecret: businesses.payhereMerchantSecret,
       slug: businesses.slug,
+      plan: businesses.plan,
+      language: businesses.language,
     })
     .from(businesses)
     .where(eq(businesses.id, booking.businessId))
@@ -120,26 +127,31 @@ export async function POST(req: NextRequest) {
     const [staffMember] = await db.select().from(staff).where(eq(staff.id, booking.staffId)).limit(1);
 
     await Promise.allSettled([
-      booking.clientEmail
-        ? sendBookingConfirmationToClient({
-            clientName: booking.clientName,
-            clientEmail: booking.clientEmail,
-            businessName: business.name,
-            businessSlug: business.slug,
-            serviceName: service.name,
-            staffName: staffMember.name,
-            startsAt: booking.startsAt,
-            bookingId: booking.id,
-          })
-        : Promise.resolve(),
+      sendBookingConfirmationMessage({
+        businessId: booking.businessId,
+        bookingId: booking.id,
+        clientName: booking.clientName,
+        clientEmail: booking.clientEmail,
+        clientPhone: booking.clientPhone,
+        businessName: business.name,
+        serviceName: service?.name ?? "Service",
+        staffName: staffMember?.name ?? "Staff",
+        startsAt: booking.startsAt,
+        manageUrl: buildClientBookingUrl({
+          bookingId: booking.id,
+          clientPhone: booking.clientPhone,
+        }),
+        plan: business.plan as Plan,
+        language: business.language as BookingLanguage,
+      }),
       business.email
         ? sendBookingNotificationToBusiness({
             clientName: booking.clientName,
             clientEmail: business.email,
             businessName: business.name,
             businessSlug: business.slug,
-            serviceName: service.name,
-            staffName: staffMember.name,
+            serviceName: service?.name ?? "Service",
+            staffName: staffMember?.name ?? "Staff",
             startsAt: booking.startsAt,
             bookingId: booking.id,
           })

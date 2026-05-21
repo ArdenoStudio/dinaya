@@ -23,9 +23,10 @@ describe("plan entitlements", () => {
     expect(MAX_ENTITLEMENTS.limits.locations).toBeNull();
   });
 
-  it("allows pro-only operational surfaces for pro and max", () => {
-    expect(canUseFeature("free", "payments")).toBe(false);
+  it("allows payments on all plans and pro-only ops for pro and max", () => {
+    expect(canUseFeature("free", "payments")).toBe(true);
     expect(canUseFeature("free", "reports")).toBe(false);
+    expect(canUseFeature("free", "whatsappSms")).toBe(false);
     expect(canUseFeature("pro", "payments")).toBe(true);
     expect(canUseFeature("pro", "reports")).toBe(true);
     expect(canUseFeature("max", "payments")).toBe(true);

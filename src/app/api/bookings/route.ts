@@ -4,14 +4,18 @@ import { db } from "@/db";
 import { bookings, payments, businesses, services, staff, clients, staffServices, staffLocations } from "@/db/schema";
 import { eq, and, lt, gt, gte, inArray, count } from "drizzle-orm";
 import { buildPayhereFormData, getPayhereUrl } from "@/lib/payhere";
-import { sendBookingConfirmationToClient, sendBookingNotificationToBusiness } from "@/lib/resend";
+import { sendBookingNotificationToBusiness } from "@/lib/resend";
+import { sendBookingConfirmationMessage } from "@/lib/messaging/booking-messages";
+import { buildClientBookingUrl } from "@/lib/client-tokens";
+import type { Plan } from "@/lib/plan";
+import type { BookingLanguage } from "@/lib/i18n";
 import { generateOrderId } from "@/lib/utils";
 import { dispatchWebhooks } from "@/lib/webhooks";
 import { logActivity } from "@/lib/activity-log";
 import { normalizeSriLankanPhone } from "@/lib/phone";
 import { decryptSecret } from "@/lib/secrets";
 import { resolveBookingLocationId } from "@/lib/locations";
-import { PlanLimitError, PlanRequiredError, requirePlanLimit, requirePro } from "@/lib/plan";
+import { PlanLimitError, requirePlanLimit } from "@/lib/plan";
 import { withRateLimit } from "@/lib/rate-limit";
 import { z } from "@/lib/validation";
 import { startOfMonth } from "date-fns";
@@ -91,6 +95,8 @@ export async function POST(req: NextRequest) {
       payhereMerchantId: businesses.payhereMerchantId,
       payhereMerchantSecret: businesses.payhereMerchantSecret,
       slug: businesses.slug,
+      plan: businesses.plan,
+      language: businesses.language,
     })
     .from(businesses)
     .where(eq(businesses.id, businessId))
@@ -220,15 +226,6 @@ export async function POST(req: NextRequest) {
   let merchantSecret: string | null = null;
 
   if (payhereEnabled) {
-    try {
-      await requirePro(businessId, "payments");
-    } catch (error) {
-      if (error instanceof PlanRequiredError) {
-        return NextResponse.json({ error: "PayHere payments require Dinaya Pro." }, { status: 402 });
-      }
-      throw error;
-    }
-
     merchantSecret = decryptSecret(business.payhereMerchantSecret);
     if (!merchantSecret) {
       return NextResponse.json(
@@ -328,19 +325,27 @@ export async function POST(req: NextRequest) {
 
   // Send emails for confirmed bookings immediately. Manual payment bookings remain pending.
   if (!requiresPayherePayment) {
+    const manageUrl = buildClientBookingUrl({
+      bookingId: booking.id,
+      clientPhone,
+    });
+
     await Promise.allSettled([
-      initialStatus === "confirmed" && clientEmail
-        ? sendBookingConfirmationToClient({
-            clientName,
-            clientEmail,
-            businessName: business.name,
-            businessSlug: business.slug,
-            serviceName: service.name,
-            staffName: staffMember.name,
-            startsAt: new Date(startsAt),
-            bookingId: booking.id,
-          })
-        : Promise.resolve(),
+      sendBookingConfirmationMessage({
+        businessId,
+        bookingId: booking.id,
+        clientId: client.id,
+        clientName,
+        clientEmail: clientEmail || null,
+        clientPhone,
+        businessName: business.name,
+        serviceName: service.name,
+        staffName: staffMember.name,
+        startsAt: new Date(startsAt),
+        manageUrl,
+        plan: business.plan as Plan,
+        language: business.language as BookingLanguage,
+      }),
       business.email
         ? sendBookingNotificationToBusiness({
             clientName,

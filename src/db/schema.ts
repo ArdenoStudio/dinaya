@@ -367,8 +367,32 @@ export const bookings = pgTable("bookings", {
   notes: text("notes"),
   staffNotes: text("staff_notes"),
   reminderSentAt: timestamp("reminder_sent_at"),
+  cancelledAt: timestamp("cancelled_at"),
+  cancellationReason: text("cancellation_reason"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+export const bookingNotifications = pgTable("booking_notifications", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  bookingId: uuid("booking_id")
+    .notNull()
+    .references(() => bookings.id, { onDelete: "cascade" }),
+  type: varchar("type", { length: 40 }).notNull(),
+  channel: varchar("channel", { length: 20 }).notNull(),
+  status: varchar("status", { length: 20 }).default("pending").notNull(),
+  provider: varchar("provider", { length: 40 }),
+  providerMessageId: varchar("provider_message_id", { length: 180 }),
+  error: text("error"),
+  sentAt: timestamp("sent_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  bookingTypeChannelUnique: uniqueIndex("booking_notifications_booking_type_channel_unique").on(
+    table.bookingId,
+    table.type,
+    table.channel
+  ),
+  typeSentAtIdx: index("booking_notifications_type_sent_at_idx").on(table.type, table.sentAt),
+}));
 
 // ─── Reviews ──────────────────────────────────────────────────────────────────
 
@@ -776,6 +800,11 @@ export const bookingsRelations = relations(bookings, ({ one, many }) => ({
   client: one(clients, { fields: [bookings.clientId], references: [clients.id] }),
   payment: one(payments, { fields: [bookings.id], references: [payments.bookingId] }),
   communications: many(communications),
+  notifications: many(bookingNotifications),
+}));
+
+export const bookingNotificationsRelations = relations(bookingNotifications, ({ one }) => ({
+  booking: one(bookings, { fields: [bookingNotifications.bookingId], references: [bookings.id] }),
 }));
 
 export const clientsRelations = relations(clients, ({ one, many }) => ({
@@ -904,6 +933,8 @@ export type AvailabilityOverride = typeof availabilityOverrides.$inferSelect;
 export type BusinessHoliday = typeof businessHolidays.$inferSelect;
 export type Booking = typeof bookings.$inferSelect;
 export type NewBooking = typeof bookings.$inferInsert;
+export type BookingNotification = typeof bookingNotifications.$inferSelect;
+export type NewBookingNotification = typeof bookingNotifications.$inferInsert;
 export type Payment = typeof payments.$inferSelect;
 export type Client = typeof clients.$inferSelect;
 export type NewClient = typeof clients.$inferInsert;
