@@ -13,13 +13,12 @@ export const setupBookingPageGuide: DocsGuide = {
       title: "Create your account",
       body: "Go to dinaya.lk/register and complete the two-step sign-up: your name and email, then your business name and type. Dinaya seeds example services based on your business type so you are not starting from zero.",
       visual: { type: "mockup", mockupId: "dashboard-onboarding" },
-      hotspots: [{ x: 58, y: 32, label: "Register", showCursor: true }],
     },
     {
       title: "Complete business info",
       body: "On your dashboard, open the setup wizard and add your business photo, description, and contact details. These appear on your public booking page immediately.",
       visual: { type: "mockup", mockupId: "dashboard-onboarding" },
-      hotspots: [{ x: 58, y: 28, label: "Business info", showCursor: true }],
+      highlightTarget: "onboarding-business-info",
     },
     {
       title: "Add your first service",
@@ -44,7 +43,7 @@ export const setupBookingPageGuide: DocsGuide = {
       body: "Your page is live at yourname.dinaya.lk. Copy the link from Marketing or the setup wizard and share it on WhatsApp, Instagram, or print it on a card.",
       visual: { type: "mockup", mockupId: "dashboard-marketing" },
       highlightNav: "Marketing",
-      hotspots: [{ x: 58, y: 42, label: "Booking link", showCursor: true }],
+      highlightTarget: "marketing-booking-link",
     },
   ],
 };

@@ -19,7 +19,7 @@ export const addServicesGuide: DocsGuide = {
       title: "Add a service",
       body: "Click Add service. Enter name, duration, price in LKR, and optional description shown to clients.",
       visual: { type: "mockup", mockupId: "dashboard-services" },
-      hotspots: [{ x: 58, y: 78, label: "+ Add service", showCursor: true }],
+      highlightTarget: "services-add-service",
     },
     {
       title: "Buffer time",

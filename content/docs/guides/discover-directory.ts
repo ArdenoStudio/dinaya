@@ -13,7 +13,7 @@ export const discoverDirectoryGuide: DocsGuide = {
       body: "In Dashboard → Marketing, turn on directory listing and choose your city and category.",
       visual: { type: "mockup", mockupId: "dashboard-marketing" },
       highlightNav: "Marketing",
-      hotspots: [{ x: 58, y: 78, label: "Directory", showCursor: true }],
+      highlightTarget: "marketing-directory",
     },
     {
       title: "Public discover page",

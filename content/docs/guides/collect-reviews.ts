@@ -18,7 +18,7 @@ export const collectReviewsGuide: DocsGuide = {
       title: "Client leaves a review",
       body: "Clients rate 1–5 stars and optionally leave a comment — no account needed.",
       visual: { type: "mockup", mockupId: "booking-review" },
-      hotspots: [{ x: 50, y: 45, label: "Star rating", showCursor: true }],
+      highlightTarget: "booking-stars",
     },
     {
       title: "View & reply",

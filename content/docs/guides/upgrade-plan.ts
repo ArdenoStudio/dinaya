@@ -24,7 +24,7 @@ export const upgradePlanGuide: DocsGuide = {
       title: "Pay with PayHere",
       body: "Complete checkout through PayHere. Your new features unlock immediately after payment confirms.",
       visual: { type: "mockup", mockupId: "dashboard-billing" },
-      hotspots: [{ x: 58, y: 52, label: "Upgrade", showCursor: true }],
+      highlightTarget: "billing-upgrade",
     },
   ],
 };

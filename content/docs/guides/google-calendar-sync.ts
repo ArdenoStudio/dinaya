@@ -19,7 +19,7 @@ export const googleCalendarSyncGuide: DocsGuide = {
       title: "Connect Google",
       body: "Click Connect and sign in with the Google account that owns your business calendar.",
       visual: { type: "mockup", mockupId: "dashboard-integrations" },
-      hotspots: [{ x: 58, y: 48, label: "Connect", showCursor: true }],
+      highlightTarget: "integrations-connect",
     },
     {
       title: "Choose calendar",

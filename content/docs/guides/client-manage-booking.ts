@@ -22,10 +22,7 @@ export const clientManageBookingGuide: DocsGuide = {
       title: "Reschedule or cancel",
       body: "Clients tap Reschedule to pick a new slot, or Cancel if your policy allows it. You are notified by email.",
       visual: { type: "mockup", mockupId: "booking-manage" },
-      hotspots: [
-        { x: 30, y: 62, label: "Reschedule", showCursor: true },
-        { x: 70, y: 62, label: "Cancel", showCursor: false },
-      ],
+      highlightTarget: "booking-reschedule",
     },
   ],
 };

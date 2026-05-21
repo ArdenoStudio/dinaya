@@ -22,13 +22,18 @@ function StepVisual({ step }: { step: GuideStep }) {
 
   if (step.visual.type === "mockup") {
     if (step.visual.mockupId.startsWith("booking-")) {
-      return <DocsPhoneFrame mockupId={step.visual.mockupId} hotspots={step.hotspots} />;
+      return (
+        <DocsPhoneFrame
+          mockupId={step.visual.mockupId}
+          highlightTarget={step.highlightTarget}
+        />
+      );
     }
     return (
       <DocsScreenshotFrame
         mockupId={step.visual.mockupId}
         highlightNav={step.highlightNav}
-        hotspots={step.hotspots}
+        highlightTarget={step.highlightTarget}
       />
     );
   }
