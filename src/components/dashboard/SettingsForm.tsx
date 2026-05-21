@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { isOptimizableRemoteImage } from "@/lib/utils";
 
 type SettingsBusiness = {
@@ -20,6 +21,8 @@ type SettingsBusiness = {
   payhereEnabled: boolean;
   payhereMerchantId: string | null;
   hasPayhereMerchantSecret: boolean;
+  hideDinayaBranding: boolean;
+  canCustomizeBookingPage: boolean;
   phone: string | null;
   slug: string;
   timezone: string;
@@ -29,6 +32,7 @@ type SettingsBusiness = {
 interface Props { business: SettingsBusiness; }
 
 export default function SettingsForm({ business }: Props) {
+  const canCustomizeBookingPage = business.canCustomizeBookingPage;
   const [form, setForm] = useState({
     name: business.name,
     description: business.description ?? "",
@@ -47,6 +51,7 @@ export default function SettingsForm({ business }: Props) {
     payhereEnabled: business.payhereEnabled,
     payhereMerchantId: business.payhereMerchantId ?? "",
     payhereMerchantSecret: "",
+    hideDinayaBranding: business.hideDinayaBranding,
   });
 
   const [galleryImages, setGalleryImages] = useState<string[]>(
@@ -355,6 +360,43 @@ export default function SettingsForm({ business }: Props) {
             <a href="https://imgur.com" target="_blank" rel="noopener noreferrer" className="underline">imgur.com</a>{" "}
             and paste the direct link here.
           </p>
+        </div>
+
+        {/* Pro branding */}
+        <div className="bg-white border rounded-xl p-6 space-y-4">
+          <div className="flex items-center gap-2">
+            <i className="bi bi-palette text-sm text-muted-foreground" />
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Booking page branding</p>
+          </div>
+          {canCustomizeBookingPage ? (
+            <>
+              <p className="text-xs text-muted-foreground">
+                Hide the &quot;Powered by Dinaya&quot; footer on your public booking page for a fully branded experience.
+              </p>
+              <label className="flex items-center gap-2.5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={form.hideDinayaBranding}
+                  onChange={(e) => setForm((f) => ({ ...f, hideDinayaBranding: e.target.checked }))}
+                  className="rounded"
+                />
+                <span className="text-sm font-medium">Remove Dinaya branding</span>
+              </label>
+            </>
+          ) : (
+            <div className="rounded-lg border border-violet-200 bg-violet-50/70 p-4 text-sm">
+              <p className="font-medium text-violet-950">Remove Dinaya branding</p>
+              <p className="mt-1 text-violet-900/75">
+                Upgrade to Pro to hide the Dinaya footer and use a custom domain on your booking page.
+              </p>
+              <Link
+                href="/dashboard/billing"
+                className="mt-3 inline-flex rounded-md bg-violet-600 px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-violet-700"
+              >
+                View plan options
+              </Link>
+            </div>
+          )}
         </div>
 
         {/* PayHere */}

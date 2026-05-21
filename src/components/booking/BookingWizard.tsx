@@ -40,6 +40,7 @@ export type BookingBusiness = {
   payhereEnabled?: boolean;
   slug: string;
   logoUrl?: string | null;
+  hideBranding?: boolean;
 };
 
 export type BookingService = {
@@ -391,7 +392,7 @@ export default function BookingWizard({
         />
       )}
 
-      <BookingBranding copy={copy} />
+      <BookingBranding copy={copy} hideBranding={business.hideBranding} />
     </div>
   );
 }

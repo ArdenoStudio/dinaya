@@ -50,6 +50,12 @@ describe("plan entitlements", () => {
     expect(canUseFeature("pro", "publicBookingPage")).toBe(true);
     expect(canUseFeature("max", "publicBookingPage")).toBe(true);
   });
+
+  it("reserves booking page customization for pro and max", () => {
+    expect(canUseFeature("free", "publicBookingPageCustomization")).toBe(false);
+    expect(canUseFeature("pro", "publicBookingPageCustomization")).toBe(true);
+    expect(canUseFeature("max", "publicBookingPageCustomization")).toBe(true);
+  });
 });
 
 describe("subscription pricing", () => {

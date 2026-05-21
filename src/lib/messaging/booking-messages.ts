@@ -3,9 +3,11 @@ import { sendMessage } from "@/lib/messaging";
 import {
   cancellationMessage,
   confirmationMessage,
+  formatBookingDateShort,
   reminderMessage,
   rescheduleMessage,
 } from "@/lib/messaging/templates";
+import { localizedSmsBody } from "@/lib/messaging/locale";
 import type { BookingLanguage } from "@/lib/i18n";
 import type { MessageChannel } from "@/lib/messaging/types";
 
@@ -41,6 +43,7 @@ function channelsForPlan(plan: Plan, kind: "confirmation" | "reminder"): Message
 }
 
 export async function sendBookingConfirmationMessage(data: BookingMessageData) {
+  const whenShort = formatBookingDateShort(data.startsAt);
   const content = confirmationMessage({
     clientName: data.clientName,
     businessName: data.businessName,
@@ -49,6 +52,13 @@ export async function sendBookingConfirmationMessage(data: BookingMessageData) {
     startsAt: data.startsAt,
     manageUrl: data.manageUrl,
     language: data.language,
+  });
+  const smsBody = localizedSmsBody(data.language, "confirmationSms", {
+    clientName: data.clientName,
+    businessName: data.businessName,
+    serviceName: data.serviceName,
+    when: whenShort,
+    manageUrl: data.manageUrl,
   });
 
   return sendMessage({
@@ -61,13 +71,14 @@ export async function sendBookingConfirmationMessage(data: BookingMessageData) {
     notificationType: "confirmation",
     idempotencyKey: `booking:${data.bookingId}:confirmation`,
     subject: content.subject,
-    body: content.body,
+    body: smsBody,
     preferredChannels: channelsForPlan(data.plan, "confirmation"),
-    meta: { html: content.html },
+    meta: { html: content.html, emailText: content.body },
   });
 }
 
 export async function sendBookingReminderMessage(data: BookingMessageData) {
+  const whenShort = formatBookingDateShort(data.startsAt);
   const content = reminderMessage({
     clientName: data.clientName,
     businessName: data.businessName,
@@ -76,6 +87,13 @@ export async function sendBookingReminderMessage(data: BookingMessageData) {
     startsAt: data.startsAt,
     manageUrl: data.manageUrl,
     language: data.language,
+  });
+  const smsBody = localizedSmsBody(data.language, "reminderSms", {
+    clientName: data.clientName,
+    businessName: data.businessName,
+    serviceName: data.serviceName,
+    when: whenShort,
+    manageUrl: data.manageUrl,
   });
 
   return sendMessage({
@@ -88,18 +106,25 @@ export async function sendBookingReminderMessage(data: BookingMessageData) {
     notificationType: "reminder_24h",
     idempotencyKey: `booking:${data.bookingId}:reminder_24h`,
     subject: content.subject,
-    body: content.body,
+    body: smsBody,
     preferredChannels: channelsForPlan(data.plan, "reminder"),
-    meta: { html: content.html },
+    meta: { html: content.html, emailText: content.body },
   });
 }
 
 export async function sendBookingCancellationMessage(data: Omit<BookingMessageData, "manageUrl" | "staffName"> & { staffName?: string }) {
+  const whenShort = formatBookingDateShort(data.startsAt);
   const content = cancellationMessage({
     clientName: data.clientName,
     businessName: data.businessName,
     serviceName: data.serviceName,
     startsAt: data.startsAt,
+  });
+  const smsBody = localizedSmsBody(data.language, "cancellationSms", {
+    clientName: data.clientName,
+    businessName: data.businessName,
+    serviceName: data.serviceName,
+    when: whenShort,
   });
 
   return sendMessage({
@@ -112,12 +137,14 @@ export async function sendBookingCancellationMessage(data: Omit<BookingMessageDa
     notificationType: "cancellation",
     idempotencyKey: `booking:${data.bookingId}:cancellation`,
     subject: content.subject,
-    body: content.body,
+    body: smsBody,
     preferredChannels: channelsForPlan(data.plan, "confirmation"),
+    meta: { emailText: content.body },
   });
 }
 
 export async function sendBookingRescheduleMessage(data: BookingMessageData) {
+  const whenShort = formatBookingDateShort(data.startsAt);
   const content = rescheduleMessage({
     clientName: data.clientName,
     businessName: data.businessName,
@@ -126,6 +153,13 @@ export async function sendBookingRescheduleMessage(data: BookingMessageData) {
     startsAt: data.startsAt,
     manageUrl: data.manageUrl,
     language: data.language,
+  });
+  const smsBody = localizedSmsBody(data.language, "rescheduleSms", {
+    clientName: data.clientName,
+    businessName: data.businessName,
+    serviceName: data.serviceName,
+    when: whenShort,
+    manageUrl: data.manageUrl,
   });
 
   return sendMessage({
@@ -137,8 +171,8 @@ export async function sendBookingRescheduleMessage(data: BookingMessageData) {
     feature: "confirmation",
     idempotencyKey: `booking:${data.bookingId}:reschedule:${data.startsAt.toISOString()}`,
     subject: content.subject,
-    body: content.body,
+    body: smsBody,
     preferredChannels: channelsForPlan(data.plan, "confirmation"),
-    meta: { html: content.html },
+    meta: { html: content.html, emailText: content.body },
   });
 }

@@ -99,6 +99,10 @@ export function PublicNav() {
             Solutions
           </Link>
 
+          <Link href="/discover" className="px-3 py-2 rounded-md hover:text-gray-900 transition-colors">
+            Discover
+          </Link>
+
           {/* Resources mega menu */}
           <div className="group">
             <button 

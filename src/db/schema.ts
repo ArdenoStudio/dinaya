@@ -109,6 +109,12 @@ export const businesses = pgTable("businesses", {
   payhereEnabled: boolean("payhere_enabled").default(false).notNull(),
   payhereMerchantId: varchar("payhere_merchant_id", { length: 100 }),
   payhereMerchantSecret: text("payhere_merchant_secret"),
+  hideDinayaBranding: boolean("hide_dinaya_branding").default(false).notNull(),
+  customDomain: varchar("custom_domain", { length: 255 }),
+  directoryListed: boolean("directory_listed").default(false).notNull(),
+  directoryCity: varchar("directory_city", { length: 80 }),
+  directoryDistrict: varchar("directory_district", { length: 80 }),
+  directoryCategory: varchar("directory_category", { length: 80 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -447,6 +453,7 @@ export const payments = pgTable("payments", {
   payhereOrderId: varchar("payhere_order_id", { length: 100 }).unique(),
   status: paymentStatusEnum("status").default("pending").notNull(),
   payherePayload: jsonb("payhere_payload"),
+  receiptSentAt: timestamp("receipt_sent_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

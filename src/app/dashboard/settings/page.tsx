@@ -2,6 +2,7 @@ import SettingsForm from "@/components/dashboard/SettingsForm";
 import { db } from "@/db";
 import { businesses } from "@/db/schema";
 import { requireOwner } from "@/lib/auth";
+import { canUseFeature, type Plan } from "@/lib/plan";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 
@@ -24,6 +25,8 @@ export default async function SettingsPage() {
       payhereEnabled: businesses.payhereEnabled,
       payhereMerchantId: businesses.payhereMerchantId,
       hasPayhereMerchantSecret: businesses.payhereMerchantSecret,
+      hideDinayaBranding: businesses.hideDinayaBranding,
+      plan: businesses.plan,
       phone: businesses.phone,
       slug: businesses.slug,
       timezone: businesses.timezone,
@@ -42,6 +45,8 @@ export default async function SettingsPage() {
         business={{
           ...business,
           hasPayhereMerchantSecret: Boolean(business?.hasPayhereMerchantSecret),
+          hideDinayaBranding: business.hideDinayaBranding,
+          canCustomizeBookingPage: canUseFeature(business.plan as Plan, "publicBookingPageCustomization"),
         }}
       />
     </div>

@@ -30,7 +30,7 @@ async function sendViaChannel(
     const result = await sendEmail({
       clientEmail: input.clientEmail,
       subject: input.subject,
-      body: input.body,
+      body: typeof input.meta?.emailText === "string" ? input.meta.emailText : input.body,
       html: typeof input.meta?.html === "string" ? input.meta.html : undefined,
     });
     return result;

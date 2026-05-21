@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import { DirectorySettings } from "@/components/dashboard/DirectorySettings";
 
 export default async function MarketingPage() {
   const { businessId } = await requireOwner();
@@ -51,6 +52,8 @@ export default async function MarketingPage() {
 
       <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
         <div className="space-y-6">
+          <DirectorySettings />
+
           <div className="rounded-xl border bg-white p-5">
             <h2 className="mb-3 font-semibold">Share tools</h2>
             <code className="block truncate rounded-md border bg-muted/30 px-3 py-2 text-sm text-primary">

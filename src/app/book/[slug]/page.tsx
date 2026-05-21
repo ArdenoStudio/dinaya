@@ -7,6 +7,7 @@ import { eq, and, avg, count } from "drizzle-orm";
 import BookingWizard from "@/components/booking/BookingWizard";
 import { getBookingCopy } from "@/lib/i18n";
 import { isOptimizableRemoteImage } from "@/lib/utils";
+import { canUseFeature, type Plan } from "@/lib/plan";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -65,6 +66,8 @@ export default async function BookingPage({ params }: Props) {
       phone: businesses.phone,
       slug: businesses.slug,
       websiteUrl: businesses.websiteUrl,
+      plan: businesses.plan,
+      hideDinayaBranding: businesses.hideDinayaBranding,
     })
     .from(businesses)
     .where(eq(businesses.slug, slug))
@@ -232,7 +235,13 @@ export default async function BookingPage({ params }: Props) {
         )}
 
         <BookingWizard
-          business={business}
+          business={{
+            ...business,
+            hideBranding: Boolean(
+              business.hideDinayaBranding &&
+              canUseFeature(business.plan as Plan, "publicBookingPageCustomization")
+            ),
+          }}
           services={serviceList}
           staff={staffList}
           staffServiceMap={assignments}

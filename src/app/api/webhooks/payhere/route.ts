@@ -11,6 +11,7 @@ import type { BookingLanguage } from "@/lib/i18n";
 import { logActivity } from "@/lib/activity-log";
 import { decryptSecret } from "@/lib/secrets";
 import { processBookingAutomationTrigger } from "@/lib/automations/engine";
+import { sendPaymentReceiptEmail } from "@/lib/receipts";
 
 export async function POST(req: NextRequest) {
   const form = await req.formData();
@@ -149,6 +150,30 @@ export async function POST(req: NextRequest) {
         plan: business.plan as Plan,
         language: business.language as BookingLanguage,
       }),
+      booking.clientEmail
+        ? sendPaymentReceiptEmail({
+            clientName: booking.clientName,
+            clientEmail: booking.clientEmail,
+            businessName: business.name,
+            serviceName: service?.name ?? "Service",
+            staffName: staffMember?.name ?? "Staff",
+            startsAt: booking.startsAt,
+            amountLkr: payment.amountLkr,
+            orderId,
+            paymentId: payment.id,
+            manageUrl: buildClientBookingUrl({
+              bookingId: booking.id,
+              clientPhone: booking.clientPhone,
+            }),
+          }).then(async (result) => {
+            if (result.status === "sent") {
+              await db
+                .update(payments)
+                .set({ receiptSentAt: new Date() })
+                .where(eq(payments.id, payment.id));
+            }
+          })
+        : Promise.resolve(),
       business.email
         ? sendBookingNotificationToBusiness({
             clientName: booking.clientName,
