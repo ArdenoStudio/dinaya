@@ -3,23 +3,20 @@ import { db } from "@/db";
 import { payments, bookings, businesses, services, staff } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { verifyPayhereWebhook } from "@/lib/payhere";
+import { parsePayhereWebhookFields } from "@/lib/payhere-webhook";
 import { sendBookingConfirmationToClient, sendBookingNotificationToBusiness } from "@/lib/resend";
 import { logActivity } from "@/lib/activity-log";
 import { decryptSecret } from "@/lib/secrets";
 
 export async function POST(req: NextRequest) {
   const form = await req.formData();
+  const fields = parsePayhereWebhookFields(form);
 
-  const merchantId = form.get("merchant_id") as string;
-  const orderId = form.get("order_id") as string;
-  const payhereAmount = form.get("payhere_amount") as string;
-  const payhereCurrency = form.get("payhere_currency") as string;
-  const statusCode = form.get("status_code") as string;
-  const md5sig = form.get("md5sig") as string;
-
-  if (!merchantId || !orderId || !payhereAmount || !payhereCurrency || !statusCode || !md5sig) {
+  if (!fields) {
     return NextResponse.json({ error: "Missing fields" }, { status: 400 });
   }
+
+  const { merchantId, orderId, payhereAmount, payhereCurrency, statusCode, md5sig } = fields;
 
   // Look up payment to get the merchant secret
   const [payment] = await db

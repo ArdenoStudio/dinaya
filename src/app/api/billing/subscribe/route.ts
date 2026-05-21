@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { businesses, subscriptions, users } from "@/db/schema";
 import { eq, and, inArray } from "drizzle-orm";
 import { buildRecurringFormData, PAYHERE_CHECKOUT_URL } from "@/lib/payhere-subscriptions";
+import { parseSubscribeRequest } from "@/lib/billing-subscribe";
 import { generateOrderId } from "@/lib/utils";
 import { requireApiBusiness } from "@/lib/api-auth";
 import {
@@ -16,12 +17,6 @@ import {
   type Plan,
   type PaidPlan,
 } from "@/lib/plan";
-
-function parseSubscribeRequest(body: { plan?: string; interval?: string }) {
-  const targetPlan: PaidPlan = body.plan === "max" ? "max" : "pro";
-  const interval: BillingInterval = body.interval === "annual" ? "annual" : "monthly";
-  return { targetPlan, interval };
-}
 
 export async function POST(req: Request) {
   const authResult = await requireApiBusiness({ ownerOnly: true });

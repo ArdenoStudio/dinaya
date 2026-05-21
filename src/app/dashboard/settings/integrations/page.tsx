@@ -2,6 +2,7 @@ import Link from "next/link";
 import { db } from "@/db";
 import { businesses, webhooks } from "@/db/schema";
 import { requireOwner } from "@/lib/auth";
+import { CustomDomainPanel } from "@/components/dashboard/CustomDomainPanel";
 import { count, eq } from "drizzle-orm";
 
 export default async function IntegrationsPage() {
@@ -11,6 +12,8 @@ export default async function IntegrationsPage() {
       .select({
         payhereEnabled: businesses.payhereEnabled,
         payhereMerchantId: businesses.payhereMerchantId,
+        customDomain: businesses.customDomain,
+        customDomainVerified: businesses.customDomainVerified,
       })
       .from(businesses)
       .where(eq(businesses.id, businessId))
@@ -43,7 +46,7 @@ export default async function IntegrationsPage() {
     {
       name: "Google Calendar",
       description: "Two-way calendar sync per staff member.",
-      status: "Phase 2 adapter",
+      status: "Planned",
       href: "/dashboard/settings/integrations",
       action: "Roadmap",
     },
@@ -57,9 +60,9 @@ export default async function IntegrationsPage() {
     {
       name: "API keys",
       description: "Scoped API access for custom integrations.",
-      status: "Phase 3",
-      href: "/dashboard/settings/integrations",
-      action: "Roadmap",
+      status: "Available",
+      href: "/dashboard/settings/api-keys",
+      action: "Manage keys",
     },
   ];
 
@@ -90,6 +93,11 @@ export default async function IntegrationsPage() {
           </div>
         ))}
       </div>
+
+      <CustomDomainPanel
+        initialDomain={business?.customDomain ?? null}
+        initialVerified={Boolean(business?.customDomainVerified)}
+      />
     </div>
   );
 }

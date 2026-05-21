@@ -104,6 +104,8 @@ export const businesses = pgTable("businesses", {
   galleryImages: text("gallery_images").array(),
   plan: planEnum("plan").default("free").notNull(),
   planExpiresAt: timestamp("plan_expires_at"),
+  customDomain: varchar("custom_domain", { length: 255 }),
+  customDomainVerified: boolean("custom_domain_verified").default(false).notNull(),
   isSuspended: boolean("is_suspended").default(false).notNull(),
   deletedAt: timestamp("deleted_at"),
   payhereEnabled: boolean("payhere_enabled").default(false).notNull(),
@@ -382,6 +384,8 @@ export const reviews = pgTable("reviews", {
   clientName: varchar("client_name", { length: 100 }).notNull(),
   rating: smallint("rating").notNull(), // 1–5
   comment: text("comment"),
+  ownerReply: text("owner_reply"),
+  ownerRepliedAt: timestamp("owner_replied_at"),
   isPublished: boolean("is_published").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 }, (table) => {
