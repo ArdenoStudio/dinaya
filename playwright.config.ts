@@ -21,7 +21,11 @@ export default defineConfig({
     url: baseURL,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
+    // Merge with process.env — a bare env object replaces the shell environment.
     env: {
+      ...Object.fromEntries(
+        Object.entries(process.env).filter((entry): entry is [string, string] => entry[1] != null),
+      ),
       E2E_DISABLE_RATE_LIMIT: "true",
     },
   },
