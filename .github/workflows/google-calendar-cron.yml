@@ -6,10 +6,28 @@ on:
   workflow_dispatch:
 
 jobs:
-  sync:
+  invoke:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - name: Trigger sync
+      - name: Call Google Calendar sync endpoint
+        env:
+          APP_URL: ${{ vars.DINAYA_APP_URL || secrets.DINAYA_APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
         run: |
-          curl -fsS -X GET "${{ secrets.APP_URL }}/api/cron/google-calendar-sync" \
-            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
+          set -euo pipefail
+
+          if [ -z "${APP_URL}" ]; then
+            echo "::error::Set DINAYA_APP_URL as a repository variable or secret."
+            exit 1
+          fi
+
+          if [ -z "${CRON_SECRET}" ]; then
+            echo "::error::Set CRON_SECRET as a repository secret."
+            exit 1
+          fi
+
+          curl --fail-with-body --show-error --silent \
+            --retry 2 --retry-delay 10 --max-time 300 \
+            --header "Authorization: Bearer ${CRON_SECRET}" \
+            "${APP_URL%/}/api/cron/google-calendar-sync"

@@ -13,9 +13,18 @@ Use this checklist before pushing production changes that touch schema, auth, pa
 - `PAYHERE_SANDBOX`
 - `RESEND_API_KEY`
 - `RESEND_FROM`
-- Optional AI workflows: `AI_PROVIDER`, `AI_API_KEY`, `AI_BASE_URL`, `AI_MODEL`
-- Optional WhatsApp/social publishing: `META_WHATSAPP_TOKEN`, `META_WHATSAPP_PHONE_NUMBER_ID`, `META_SOCIAL_ACCESS_TOKEN`, `META_SOCIAL_PAGE_ID`
-- Optional SMS gateway: `SMS_HTTP_ENDPOINT`, `SMS_HTTP_API_KEY`, `SMS_HTTP_METHOD`, `SMS_HTTP_SENDER`
+- `CRON_SECRET` (same value as the GitHub Actions secret below)
+
+Optional but recommended:
+
+- `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` — distributed rate limiting (falls back to in-memory)
+- `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` — Google Calendar OAuth on integrations
+- `CONTACT_INBOX_EMAIL` — contact form destination (defaults to hello@dinaya.lk)
+- `PLATFORM_ADMIN_EMAILS` — comma-separated allowlist for `/admin`
+- `HEALTH_CHECK_SECRET` — dedicated secret for `/api/health/*` (falls back to `CRON_SECRET`)
+- AI workflows: `AI_PROVIDER`, `AI_API_KEY`, `AI_BASE_URL`, `AI_MODEL`
+- WhatsApp/social publishing: `META_WHATSAPP_TOKEN`, `META_WHATSAPP_PHONE_NUMBER_ID`, `META_SOCIAL_ACCESS_TOKEN`, `META_SOCIAL_PAGE_ID`
+- SMS gateway: `SMS_HTTP_ENDPOINT`, `SMS_HTTP_API_KEY`, `SMS_HTTP_METHOD`, `SMS_HTTP_SENDER`
 
 ## Scheduled jobs
 
@@ -24,12 +33,17 @@ Scheduled jobs are invoked by GitHub Actions, not Vercel Cron. Keep `vercel.json
 Configure these repository settings in GitHub:
 
 - Repository variable or secret `DINAYA_APP_URL`: production app URL, for example `https://dinaya.lk`
-- Repository secret `CRON_SECRET`: the same value configured in the app hosting environment
+- Repository secret `CRON_SECRET`: the same value configured in the Vercel/hosting environment
 
-Current schedules use UTC:
+All cron workflows use `DINAYA_APP_URL` and `CRON_SECRET`. Schedules are UTC:
 
-- `.github/workflows/ai-workflows-cron.yml`: calls `/api/cron/ai-workflows` every 30 minutes
-- `.github/workflows/booking-reminders-cron.yml`: calls `/api/cron/reminders` daily at `04:30 UTC`
+| Workflow | Endpoint | Schedule |
+|----------|----------|----------|
+| `ai-workflows-cron.yml` | `/api/cron/ai-workflows` | every 30 minutes |
+| `automations-cron.yml` | `/api/cron/automations` | every 15 minutes |
+| `webhook-retries-cron.yml` | `/api/cron/webhook-retries` | every 15 minutes |
+| `google-calendar-cron.yml` | `/api/cron/google-calendar-sync` | hourly |
+| `booking-reminders-cron.yml` | `/api/cron/reminders` | daily at 04:30 |
 
 `SECRET_ENCRYPTION_KEY` must stay stable. Rotating it without re-encrypting stored secrets will make PayHere merchant secrets unreadable.
 
@@ -51,7 +65,11 @@ The high-severity audit gate must pass before deployment. Moderate findings from
 npm run db:migrate
 ```
 
-3. Confirm the latest migration appears in the Drizzle migrations table.
+3. Confirm the latest migration appears in the Drizzle migrations table. Recent additions include:
+   - `0011_booking_notifications.sql`
+   - `0012_pro_growth.sql`
+   - `0013_platform_settings.sql`
+   - `0014_phase5_growth.sql`
 4. Deploy the app.
 5. Smoke test:
    - `GET /api/health`
@@ -60,6 +78,7 @@ npm run db:migrate
    - `/dashboard/ai`
    - one public booking page at `/book/[slug]`
    - signed review page at `/reviews/[token]`
+   - client booking manage link at `/client/[token]` (if enabled)
    - a test booking conflict attempt for the same staff/time
 
 ## Production safety notes
@@ -67,4 +86,5 @@ npm run db:migrate
 - Public booking writes must rely on the database overlap constraint, not only client-side checks.
 - PayHere secrets are write-only from the dashboard and encrypted before storage.
 - Webhook secrets are shown only once on creation.
-- New Sri Lanka-local fields are backward-compatible and default to English / Asia-Colombo.
+- Plan config and platform announcements are stored in Postgres (`platform_settings`); a local `.dinaya/` mirror is used in development only.
+- New Sri Lanka-local fields are backward-compatible and default to English / Asia/Colombo.
