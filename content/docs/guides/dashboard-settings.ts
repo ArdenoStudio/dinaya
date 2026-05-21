@@ -13,7 +13,7 @@ export const dashboardSettingsGuide: DocsGuide = {
       title: "Open Settings",
       body: "Dashboard → Settings holds your business profile, notifications, and account options.",
       visual: { type: "mockup", mockupId: "dashboard-settings" },
-      hotspots: [{ x: 18, y: 88, label: "Settings", showCursor: true }],
+      highlightNav: "Settings",
     },
     {
       title: "Business profile",

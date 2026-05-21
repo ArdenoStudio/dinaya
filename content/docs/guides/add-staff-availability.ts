@@ -12,7 +12,7 @@ export const addStaffAvailabilityGuide: DocsGuide = {
       title: "Add staff members",
       body: "Go to Dashboard → Staff → Add staff. Enter name, role, and optional photo.",
       visual: { type: "mockup", mockupId: "dashboard-staff" },
-      hotspots: [{ x: 18, y: 58, label: "Staff", showCursor: true }],
+      highlightNav: "Staff",
     },
     {
       title: "Assign services",

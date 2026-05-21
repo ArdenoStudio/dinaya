@@ -13,7 +13,7 @@ export const dashboardPaymentsGuide: DocsGuide = {
       title: "Payments overview",
       body: "Dashboard → Payments shows revenue summaries, recent transactions, and settlement status.",
       visual: { type: "mockup", mockupId: "dashboard-payments" },
-      hotspots: [{ x: 18, y: 76, label: "Payments", showCursor: true }],
+      highlightNav: "Payments",
     },
     {
       title: "Per-booking detail",

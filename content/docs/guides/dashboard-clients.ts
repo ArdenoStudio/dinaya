@@ -12,7 +12,7 @@ export const dashboardClientsGuide: DocsGuide = {
       title: "Open Clients",
       body: "Dashboard → Clients lists everyone who has booked. Search by name, phone, or email.",
       visual: { type: "mockup", mockupId: "dashboard-clients" },
-      hotspots: [{ x: 18, y: 45, label: "Clients", showCursor: true }],
+      highlightNav: "Clients",
     },
     {
       title: "Client profile",

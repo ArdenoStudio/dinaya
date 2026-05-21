@@ -13,7 +13,7 @@ export const aiHubOverviewGuide: DocsGuide = {
       title: "Open AI Hub",
       body: "Pro and Max plans include AI Hub under Dashboard → AI. Each workflow runs on a schedule in the background.",
       visual: { type: "mockup", mockupId: "dashboard-ai" },
-      hotspots: [{ x: 18, y: 78, label: "AI Hub", showCursor: true }],
+      highlightNav: "AI Hub",
     },
     {
       title: "Booking autopilot",

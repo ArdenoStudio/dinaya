@@ -27,6 +27,7 @@ function StepVisual({ step }: { step: GuideStep }) {
     return (
       <DocsScreenshotFrame
         mockupId={step.visual.mockupId}
+        highlightNav={step.highlightNav}
         hotspots={step.hotspots}
       />
     );

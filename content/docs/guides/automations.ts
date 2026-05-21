@@ -13,7 +13,7 @@ export const automationsGuide: DocsGuide = {
       title: "Open Automations",
       body: "Go to Dashboard → Automations (Pro plan). Create rules that trigger on booking events.",
       visual: { type: "mockup", mockupId: "dashboard-automations" },
-      hotspots: [{ x: 18, y: 85, label: "Automations", showCursor: true }],
+      highlightNav: "Automations",
     },
     {
       title: "Choose a trigger",

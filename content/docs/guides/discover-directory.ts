@@ -12,7 +12,8 @@ export const discoverDirectoryGuide: DocsGuide = {
       title: "Enable listing",
       body: "In Dashboard → Marketing, turn on directory listing and choose your city and category.",
       visual: { type: "mockup", mockupId: "dashboard-marketing" },
-      hotspots: [{ x: 55, y: 75, label: "Directory", showCursor: true }],
+      highlightNav: "Marketing",
+      hotspots: [{ x: 58, y: 78, label: "Directory", showCursor: true }],
     },
     {
       title: "Public discover page",
