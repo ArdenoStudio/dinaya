@@ -4,12 +4,10 @@ import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { db } from "@/db";
 import { businesses, users } from "@/db/schema";
+import { authConfig } from "@/auth.config";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  session: { strategy: "jwt" },
-  pages: {
-    signIn: "/auth/signin",
-  },
+  ...authConfig,
   providers: [
     Credentials({
       credentials: {
@@ -77,7 +75,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         const valid = await bcrypt.compare(
           credentials.password as string,
-          user.passwordHash
+          user.passwordHash,
         );
         if (!valid) return null;
 
@@ -91,27 +89,4 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
     }),
   ],
-  callbacks: {
-    jwt({ token, user }) {
-      if (user) {
-        token.businessId = user.businessId;
-        token.role = user.role;
-        token.impersonatedBy = user.impersonatedBy;
-        token.readOnlyImpersonation = user.readOnlyImpersonation;
-      }
-      return token;
-    },
-    session({ session, token }) {
-      if (token) {
-        session.user.id = token.sub ?? "";
-        session.user.businessId =
-          typeof token.businessId === "string" ? token.businessId : "";
-        session.user.role = token.role === "owner" ? "owner" : "staff";
-        session.user.impersonatedBy =
-          typeof token.impersonatedBy === "string" ? token.impersonatedBy : undefined;
-        session.user.readOnlyImpersonation = Boolean(token.readOnlyImpersonation);
-      }
-      return session;
-    },
-  },
 });

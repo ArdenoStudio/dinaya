@@ -1,7 +1,10 @@
+import NextAuth from "next-auth";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { auth } from "@/auth";
+import { authConfig } from "@/auth.config";
 import { lookupCustomDomainSlug } from "@/lib/custom-domain";
+
+const { auth } = NextAuth(authConfig);
 
 const APP_DOMAIN = process.env.NEXT_PUBLIC_APP_DOMAIN ?? "dinaya.lk";
 
@@ -19,14 +22,12 @@ export default auth(async (req) => {
   const { pathname } = req.nextUrl;
   const hostname = req.headers.get("host") ?? "";
 
-  // Strip port for local dev comparison
   const hostWithoutPort = hostname.split(":")[0];
   const rootDomain = APP_DOMAIN.split(":")[0];
 
   const isRootHost =
     hostWithoutPort === rootDomain || hostWithoutPort === `www.${rootDomain}`;
 
-  // Custom domain → rewrite to booking page
   if (!isRootHost) {
     const customSlug = await lookupCustomDomainSlug(hostWithoutPort);
     if (customSlug) {
@@ -34,37 +35,30 @@ export default auth(async (req) => {
     }
   }
 
-  // Check if this is a business subdomain (e.g. salon-abc.dinaya.lk)
   const isSubdomain =
     !isRootHost && hostWithoutPort.endsWith(`.${rootDomain}`);
 
   if (isSubdomain) {
     const slug = hostWithoutPort.replace(`.${rootDomain}`, "");
-    // Rewrite to /book/[slug] while preserving the original URL
-    return NextResponse.rewrite(
-      appUrl(req, `/book/${slug}${pathname}`)
-    );
+    return NextResponse.rewrite(appUrl(req, `/book/${slug}${pathname}`));
   }
 
-  // Redirect legacy login URL to canonical sign-in
   if (pathname === "/login") {
     const signInUrl = appUrl(req, "/auth/signin");
     signInUrl.search = req.nextUrl.search;
     return NextResponse.redirect(signInUrl);
   }
 
-  // Protect dashboard routes
   if (pathname.startsWith("/dashboard")) {
     if (!req.auth) {
       return NextResponse.redirect(appUrl(req, "/auth/signin"));
     }
   }
 
-  // Protect platform admin routes (allowlist enforcement happens in the layout)
   if (pathname.startsWith("/admin")) {
     if (!req.auth) {
       return NextResponse.redirect(
-        appUrl(req, `/auth/signin?callbackUrl=${encodeURIComponent(pathname)}`)
+        appUrl(req, `/auth/signin?callbackUrl=${encodeURIComponent(pathname)}`),
       );
     }
   }
