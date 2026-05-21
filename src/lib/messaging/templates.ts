@@ -90,3 +90,26 @@ export function cancellationMessage(ctx: Pick<BookingMessageContext, "clientName
     body: `Hi ${ctx.clientName}, your ${ctx.serviceName} appointment at ${ctx.businessName} on ${when} has been cancelled.`,
   };
 }
+
+export function rescheduleMessage(ctx: BookingMessageContext): { subject: string; body: string; html: string } {
+  const when = formatBookingDateTime(ctx.startsAt);
+  const manageLine = ctx.manageUrl ? `\nManage: ${ctx.manageUrl}` : "";
+
+  return {
+    subject: `Booking rescheduled — ${ctx.businessName}`,
+    body: `Hi ${ctx.clientName}, your ${ctx.serviceName} appointment with ${ctx.businessName} has been moved to ${when}.${manageLine}`,
+    html: `
+      <div style="font-family:sans-serif;max-width:500px;margin:0 auto">
+        <h2 style="color:#1a1a1a">Your booking was rescheduled</h2>
+        <p>Hi ${ctx.clientName},</p>
+        <p>Your appointment with <strong>${ctx.businessName}</strong> has a new time.</p>
+        <table style="width:100%;border-collapse:collapse;margin:16px 0">
+          <tr><td style="padding:8px 0;color:#666">Service</td><td><strong>${ctx.serviceName}</strong></td></tr>
+          <tr><td style="padding:8px 0;color:#666">With</td><td><strong>${ctx.staffName}</strong></td></tr>
+          <tr><td style="padding:8px 0;color:#666">New date & time</td><td><strong>${when}</strong></td></tr>
+        </table>
+        ${ctx.manageUrl ? `<p><a href="${ctx.manageUrl}" style="color:#6366f1">Manage your booking</a></p>` : ""}
+      </div>
+    `,
+  };
+}

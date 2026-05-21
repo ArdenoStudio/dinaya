@@ -25,7 +25,7 @@ export default async function AutomationsPage() {
         <div>
           <h1 className="font-cal text-2xl">Automations</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Start with reminder and follow-up templates. Provider sending runs through email today; WhatsApp/SMS adapters can plug in when credentials are configured.
+            Start with reminder and follow-up templates. Rules run automatically on booking events; delayed steps are processed every 15 minutes.
           </p>
         </div>
         <AutomationsClient initialRules={rules} />

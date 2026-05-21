@@ -12,6 +12,7 @@ import type { BookingLanguage } from "@/lib/i18n";
 import { generateOrderId } from "@/lib/utils";
 import { dispatchWebhooks } from "@/lib/webhooks";
 import { logActivity } from "@/lib/activity-log";
+import { processBookingAutomationTrigger } from "@/lib/automations/engine";
 import { normalizeSriLankanPhone } from "@/lib/phone";
 import { decryptSecret } from "@/lib/secrets";
 import { resolveBookingLocationId } from "@/lib/locations";
@@ -322,6 +323,16 @@ export async function POST(req: NextRequest) {
     startsAt: start.toISOString(),
     endsAt: end.toISOString(),
   });
+
+  void processBookingAutomationTrigger(businessId, booking.id, "booking.created").catch((error) => {
+    console.error("Automation trigger failed:", error);
+  });
+
+  if (initialStatus === "confirmed") {
+    void processBookingAutomationTrigger(businessId, booking.id, "booking.confirmed").catch((error) => {
+      console.error("Automation trigger failed:", error);
+    });
+  }
 
   // Send emails for confirmed bookings immediately. Manual payment bookings remain pending.
   if (!requiresPayherePayment) {

@@ -3,8 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { format } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
-import { canClientCancelBooking, getClientBookingByToken } from "@/lib/client-booking";
-import { ClientBookingActions } from "./ClientBookingActions";
+import { canClientRescheduleBooking, getClientBookingByToken } from "@/lib/client-booking";
+import { ClientBookingManage } from "./ClientBookingManage";
 
 const COLOMBO_TZ = "Asia/Colombo";
 
@@ -23,7 +23,7 @@ export default async function ClientBookingPage({ params }: Props) {
   if (!booking) notFound();
 
   const localStart = toZonedTime(booking.startsAt, COLOMBO_TZ);
-  const cancelCheck = canClientCancelBooking({
+  const modifyCheck = canClientRescheduleBooking({
     startsAt: booking.startsAt,
     status: booking.status,
     minimumNoticeHours: booking.minimumNoticeHours,
@@ -78,10 +78,11 @@ export default async function ClientBookingPage({ params }: Props) {
           ) : null}
 
           <div className="mt-6">
-            <ClientBookingActions
+            <ClientBookingManage
               token={token}
-              canCancel={cancelCheck.allowed}
-              cancelReason={cancelCheck.reason}
+              canModify={modifyCheck.allowed}
+              modifyReason={modifyCheck.reason}
+              currentStartsAt={booking.startsAt.toISOString()}
             />
           </div>
 

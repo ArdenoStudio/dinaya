@@ -2,6 +2,7 @@ import { db } from "@/db";
 import { bookings, businesses, services, staff } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 import { verifyClientBookingToken } from "@/lib/client-tokens";
+import { canModifyClientBooking } from "@/lib/booking-reschedule";
 import { normalizeSriLankanPhone } from "@/lib/phone";
 
 export async function getClientBookingByToken(token: string) {
@@ -49,22 +50,14 @@ export function canClientCancelBooking(input: {
   startsAt: Date;
   status: string;
   minimumNoticeHours: number;
-}): { allowed: boolean; reason?: string } {
-  if (input.status === "cancelled") {
-    return { allowed: false, reason: "This booking is already cancelled." };
-  }
+}) {
+  return canModifyClientBooking({ ...input, action: "cancel" });
+}
 
-  if (input.status === "completed" || input.status === "no_show") {
-    return { allowed: false, reason: "This booking can no longer be changed." };
-  }
-
-  const hoursUntil = (input.startsAt.getTime() - Date.now()) / (1000 * 60 * 60);
-  if (hoursUntil < input.minimumNoticeHours) {
-    return {
-      allowed: false,
-      reason: `Cancellations must be made at least ${input.minimumNoticeHours} hours before the appointment.`,
-    };
-  }
-
-  return { allowed: true };
+export function canClientRescheduleBooking(input: {
+  startsAt: Date;
+  status: string;
+  minimumNoticeHours: number;
+}) {
+  return canModifyClientBooking({ ...input, action: "reschedule" });
 }

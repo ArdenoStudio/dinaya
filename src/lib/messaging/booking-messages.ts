@@ -4,6 +4,7 @@ import {
   cancellationMessage,
   confirmationMessage,
   reminderMessage,
+  rescheduleMessage,
 } from "@/lib/messaging/templates";
 import type { BookingLanguage } from "@/lib/i18n";
 import type { MessageChannel } from "@/lib/messaging/types";
@@ -113,5 +114,31 @@ export async function sendBookingCancellationMessage(data: Omit<BookingMessageDa
     subject: content.subject,
     body: content.body,
     preferredChannels: channelsForPlan(data.plan, "confirmation"),
+  });
+}
+
+export async function sendBookingRescheduleMessage(data: BookingMessageData) {
+  const content = rescheduleMessage({
+    clientName: data.clientName,
+    businessName: data.businessName,
+    serviceName: data.serviceName,
+    staffName: data.staffName,
+    startsAt: data.startsAt,
+    manageUrl: data.manageUrl,
+    language: data.language,
+  });
+
+  return sendMessage({
+    businessId: data.businessId,
+    bookingId: data.bookingId,
+    clientId: data.clientId,
+    clientEmail: data.clientEmail,
+    clientPhone: data.clientPhone,
+    feature: "confirmation",
+    idempotencyKey: `booking:${data.bookingId}:reschedule:${data.startsAt.toISOString()}`,
+    subject: content.subject,
+    body: content.body,
+    preferredChannels: channelsForPlan(data.plan, "confirmation"),
+    meta: { html: content.html },
   });
 }

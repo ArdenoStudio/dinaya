@@ -2,8 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { bookings, businesses } from "@/db/schema";
-import { canClientCancelBooking, getClientBookingByToken } from "@/lib/client-booking";
+import { getClientBookingByToken } from "@/lib/client-booking";
+import { canModifyClientBooking } from "@/lib/booking-reschedule";
 import { sendBookingCancellationMessage } from "@/lib/messaging/booking-messages";
+import { processBookingAutomationTrigger } from "@/lib/automations/engine";
 import { dispatchWebhooks } from "@/lib/webhooks";
 import { logActivity } from "@/lib/activity-log";
 import type { Plan } from "@/lib/plan";
@@ -36,10 +38,11 @@ export async function POST(
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 
-  const cancelCheck = canClientCancelBooking({
+  const cancelCheck = canModifyClientBooking({
     startsAt: booking.startsAt,
     status: booking.status,
     minimumNoticeHours: booking.minimumNoticeHours,
+    action: "cancel",
   });
 
   if (!cancelCheck.allowed) {
@@ -90,6 +93,10 @@ export async function POST(
     serviceName: booking.serviceName,
     startsAt: booking.startsAt,
     plan: (business?.plan ?? "free") as Plan,
+  });
+
+  void processBookingAutomationTrigger(booking.businessId, booking.id, "booking.cancelled").catch((error) => {
+    console.error("Automation trigger failed:", error);
   });
 
   return NextResponse.json({ ok: true });

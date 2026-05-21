@@ -5,6 +5,8 @@ import { bookings, services, staff, clients } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { dispatchWebhooks } from "@/lib/webhooks";
 import { logActivity } from "@/lib/activity-log";
+import { rescheduleBooking } from "@/lib/booking-reschedule";
+import { processBookingAutomationTrigger } from "@/lib/automations/engine";
 import { z } from "@/lib/validation";
 
 const VALID_STATUSES = ["pending", "confirmed", "cancelled", "completed", "no_show"] as const;
@@ -13,6 +15,8 @@ type BookingStatus = (typeof VALID_STATUSES)[number];
 const patchSchema = z.object({
   status: z.enum(VALID_STATUSES).optional(),
   staffNotes: z.string().max(5000).optional().nullable(),
+  startsAt: z.iso.datetime().optional(),
+  endsAt: z.iso.datetime().optional(),
 });
 
 const ALLOWED_TRANSITIONS: Record<BookingStatus, BookingStatus[]> = {
@@ -79,15 +83,48 @@ export async function PATCH(
     );
   }
 
-  const { status, staffNotes } = parsed.data;
+  const { status, staffNotes, startsAt, endsAt } = parsed.data;
 
   const [existing] = await db
-    .select({ id: bookings.id, status: bookings.status })
+    .select({
+      id: bookings.id,
+      status: bookings.status,
+      startsAt: bookings.startsAt,
+      endsAt: bookings.endsAt,
+    })
     .from(bookings)
     .where(and(eq(bookings.id, id), eq(bookings.businessId, businessId)))
     .limit(1);
 
   if (!existing) return NextResponse.json({ error: "Not found." }, { status: 404 });
+
+  if ((startsAt && !endsAt) || (!startsAt && endsAt)) {
+    return NextResponse.json({ error: "Provide both startsAt and endsAt to reschedule." }, { status: 400 });
+  }
+
+  if (startsAt && endsAt) {
+    const result = await rescheduleBooking({
+      bookingId: id,
+      businessId,
+      startsAt: new Date(startsAt),
+      endsAt: new Date(endsAt),
+      source: "dashboard",
+      actorUserId: user.id,
+    });
+
+    if (!result.ok) {
+      return NextResponse.json({ error: result.error }, { status: result.status });
+    }
+
+    if (status === undefined && staffNotes === undefined) {
+      const [current] = await db
+        .select()
+        .from(bookings)
+        .where(and(eq(bookings.id, id), eq(bookings.businessId, businessId)))
+        .limit(1);
+      return NextResponse.json(current);
+    }
+  }
 
   if (status && status !== existing.status) {
     const allowed = ALLOWED_TRANSITIONS[existing.status].includes(status);
@@ -136,6 +173,10 @@ export async function PATCH(
       status: updated.status,
       clientName: updated.clientName,
       startsAt: updated.startsAt,
+    });
+
+    void processBookingAutomationTrigger(businessId, updated.id, statusToEvent[status]).catch((error) => {
+      console.error("Automation trigger failed:", error);
     });
   }
 

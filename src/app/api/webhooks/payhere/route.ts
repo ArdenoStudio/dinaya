@@ -10,6 +10,7 @@ import type { Plan } from "@/lib/plan";
 import type { BookingLanguage } from "@/lib/i18n";
 import { logActivity } from "@/lib/activity-log";
 import { decryptSecret } from "@/lib/secrets";
+import { processBookingAutomationTrigger } from "@/lib/automations/engine";
 
 export async function POST(req: NextRequest) {
   const form = await req.formData();
@@ -109,6 +110,10 @@ export async function POST(req: NextRequest) {
       .update(bookings)
       .set({ status: "confirmed" })
       .where(eq(bookings.id, booking.id));
+
+    void processBookingAutomationTrigger(booking.businessId, booking.id, "booking.confirmed").catch((error) => {
+      console.error("Automation trigger failed:", error);
+    });
 
     await logActivity({
       action: "payment_success",
