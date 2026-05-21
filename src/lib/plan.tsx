@@ -7,15 +7,22 @@ import type { ReactNode } from "react";
 export type Plan = "free" | "pro";
 
 export type PlanFeature =
+  | "aiBookingAutopilot"
+  | "aiContentMachine"
+  | "aiUpsellAssistant"
   | "automations"
   | "broadcasts"
+  | "clientReactivationCampaign"
   | "googleCalendarSync"
   | "payments"
   | "publicBookingPage"
   | "publicBookingPageCustomization"
   | "reports"
+  | "reviewEngine"
   | "reviews"
   | "reviewReplies"
+  | "smartReminderSystem"
+  | "vipLoyaltySequence"
   | "webhooks"
   | "whatsappSms";
 
@@ -52,15 +59,22 @@ const DEFAULT_FREE_ENTITLEMENTS: Entitlements = {
     services: 5,
   },
   features: {
+    aiBookingAutopilot: false,
+    aiContentMachine: false,
+    aiUpsellAssistant: false,
     automations: false,
     broadcasts: false,
+    clientReactivationCampaign: false,
     googleCalendarSync: false,
     payments: false,
     publicBookingPage: true,
     publicBookingPageCustomization: false,
     reports: false,
+    reviewEngine: false,
     reviews: true,
     reviewReplies: false,
+    smartReminderSystem: false,
+    vipLoyaltySequence: false,
     webhooks: false,
     whatsappSms: false,
   },
@@ -73,15 +87,22 @@ const DEFAULT_PRO_ENTITLEMENTS: Entitlements = {
     services: null,
   },
   features: {
+    aiBookingAutopilot: true,
+    aiContentMachine: true,
+    aiUpsellAssistant: true,
     automations: true,
     broadcasts: true,
+    clientReactivationCampaign: true,
     googleCalendarSync: true,
     payments: true,
     publicBookingPage: true,
     publicBookingPageCustomization: true,
     reports: true,
+    reviewEngine: true,
     reviews: true,
     reviewReplies: true,
+    smartReminderSystem: true,
+    vipLoyaltySequence: true,
     webhooks: true,
     whatsappSms: true,
   },
@@ -114,13 +135,48 @@ const CONFIG_FILE = path.join(CONFIG_DIR, "plans.json");
 
 let cached: PlanConfig | null = null;
 
+function mergeEntitlements(
+  defaults: Entitlements,
+  fromDisk: Partial<Entitlements> | undefined
+): Entitlements {
+  return {
+    limits: {
+      bookingsPerMonth:
+        fromDisk?.limits?.bookingsPerMonth ?? defaults.limits.bookingsPerMonth,
+      staff: fromDisk?.limits?.staff ?? defaults.limits.staff,
+      services: fromDisk?.limits?.services ?? defaults.limits.services,
+    },
+    features: {
+      ...defaults.features,
+      ...fromDisk?.features,
+    },
+  };
+}
+
+function mergePlanConfig(fromDisk: PlanConfig): PlanConfig {
+  return {
+    proMonthlyPriceLkr:
+      fromDisk.proMonthlyPriceLkr ?? DEFAULT_PLAN_CONFIG.proMonthlyPriceLkr,
+    proLaunched: fromDisk.proLaunched ?? DEFAULT_PLAN_CONFIG.proLaunched,
+    plans: {
+      free: mergeEntitlements(
+        DEFAULT_FREE_ENTITLEMENTS,
+        fromDisk.plans?.free
+      ),
+      pro: mergeEntitlements(DEFAULT_PRO_ENTITLEMENTS, fromDisk.plans?.pro),
+    },
+    updatedAt: fromDisk.updatedAt,
+    updatedBy: fromDisk.updatedBy,
+  };
+}
+
 function loadFromDisk(): PlanConfig | null {
   try {
     const raw = readFileSync(CONFIG_FILE, "utf8");
     const parsed = JSON.parse(raw) as PlanConfig;
     // Light validation: must have both plans
     if (!parsed.plans || !parsed.plans.free || !parsed.plans.pro) return null;
-    return parsed;
+    return mergePlanConfig(parsed);
   } catch {
     return null;
   }
@@ -166,15 +222,22 @@ export const PLAN_ENTITLEMENTS: Record<Plan, Entitlements> = {
 };
 
 const FEATURE_LABELS: Record<PlanFeature, string> = {
+  aiBookingAutopilot: "AI Booking Autopilot",
+  aiContentMachine: "30-Day AI Content Machine",
+  aiUpsellAssistant: "AI upsell assistant",
   automations: "Automations",
   broadcasts: "Broadcasts",
+  clientReactivationCampaign: "Client Reactivation Campaign",
   googleCalendarSync: "Google Calendar sync",
   payments: "PayHere payments",
   publicBookingPage: "Public booking page",
   publicBookingPageCustomization: "Booking page customization",
   reports: "Reports",
+  reviewEngine: "Review engine",
   reviews: "Reviews",
   reviewReplies: "Review replies",
+  smartReminderSystem: "Smart reminder system",
+  vipLoyaltySequence: "VIP Loyalty Sequence",
   webhooks: "Webhooks and API",
   whatsappSms: "WhatsApp and SMS reminders",
 };

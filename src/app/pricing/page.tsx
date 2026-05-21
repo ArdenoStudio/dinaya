@@ -22,13 +22,23 @@ const freeFeatures = [
   "Free updates forever",
 ];
 
-const proFeatures = [
+const proOperationalFeatures = [
   "Everything in Free",
   "Multi-staff calendar & permissions",
   "Custom domain (e.g. book.yoursalon.lk)",
   "Remove Dinaya branding",
   "Advanced reports & exports",
   "Priority WhatsApp support",
+];
+
+const proAiFeatures = [
+  "AI Booking Autopilot",
+  "Smart reminder system",
+  "Review engine",
+  "Client Reactivation Campaign",
+  "AI upsell assistant",
+  "30-Day AI Content Machine",
+  "VIP Loyalty Sequence",
 ];
 
 const faqs = [
@@ -132,7 +142,7 @@ export default function PricingPage() {
                 </span>
               </div>
               <p className="text-sm text-white/60 mb-6">
-                For growing teams, multi-staff studios, and businesses that want their own brand.
+                Operations + AI growth for teams that want bookings, retention, and content on autopilot.
               </p>
 
               <div className="mb-6">
@@ -152,7 +162,21 @@ export default function PricingPage() {
               </Link>
 
               <ul className="space-y-3 text-sm">
-                {proFeatures.map((f) => (
+                {proOperationalFeatures.map((f) => (
+                  <li key={f} className="flex items-start gap-2.5">
+                    <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-primary/30">
+                      <i className="bi bi-check text-primary" style={{ fontSize: '0.625rem' }} />
+                    </span>
+                    <span className="text-white/85">{f}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <p className="mt-6 mb-3 text-xs font-semibold uppercase tracking-wider text-white/50">
+                AI growth tools
+              </p>
+              <ul className="space-y-3 text-sm">
+                {proAiFeatures.map((f) => (
                   <li key={f} className="flex items-start gap-2.5">
                     <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-primary/30">
                       <i className="bi bi-check text-primary" style={{ fontSize: '0.625rem' }} />
@@ -213,6 +237,13 @@ export default function PricingPage() {
                 { f: "Remove Dinaya branding", a: "—", b: "Yes", icon: "bi-eye-slash" },
                 { f: "Advanced reports & exports", a: "—", b: "Yes", icon: "bi-bar-chart" },
                 { f: "Priority support", a: "Email", b: "WhatsApp", icon: "bi-headset" },
+                { f: "AI Booking Autopilot", a: "—", b: "Yes", icon: "bi-robot" },
+                { f: "Smart reminder system", a: "—", b: "Yes", icon: "bi-bell-fill" },
+                { f: "Review engine", a: "—", b: "Yes", icon: "bi-star" },
+                { f: "Client Reactivation Campaign", a: "—", b: "Yes", icon: "bi-arrow-repeat" },
+                { f: "AI upsell assistant", a: "—", b: "Yes", icon: "bi-graph-up-arrow" },
+                { f: "30-Day AI Content Machine", a: "—", b: "Yes", icon: "bi-calendar3" },
+                { f: "VIP Loyalty Sequence", a: "—", b: "Yes", icon: "bi-gem" },
               ].map((row) => (
                 <tr key={row.f} className="hover:bg-gray-50/50 transition-colors">
                   <td className="px-5 py-3.5 text-gray-800">

@@ -74,8 +74,11 @@ export default async function BillingPage() {
         <section className="rounded-xl border border-blue-200 bg-blue-50/50 p-6">
           <h2 className="text-lg font-semibold">Upgrade to Pro</h2>
           <p className="mt-1 text-sm text-neutral-700">
-            Unlimited bookings, staff, services. PayHere payments, webhooks,
-            automations, reports, broadcasts, WhatsApp/SMS, and Google Calendar sync.
+            Unlimited bookings, staff, and services — plus multi-staff calendar, custom
+            domain, branding control, advanced reports, and priority WhatsApp support.
+            Also includes AI Booking Autopilot, Smart reminders, Review engine, Client
+            reactivation, AI upsell assistant, 30-Day Content Machine, and VIP Loyalty
+            Sequence.
           </p>
           <div className="mt-4 flex items-baseline gap-2">
             <span className="text-3xl font-bold tracking-tight">

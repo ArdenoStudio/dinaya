@@ -1,10 +1,20 @@
 import { describe, expect, it } from "vitest";
 import { FREE_ENTITLEMENTS, PRO_ENTITLEMENTS, canUseFeature } from "./plan";
 
+const PRO_ONLY_AI_FEATURES = [
+  "aiBookingAutopilot",
+  "smartReminderSystem",
+  "reviewEngine",
+  "clientReactivationCampaign",
+  "aiUpsellAssistant",
+  "aiContentMachine",
+  "vipLoyaltySequence",
+] as const;
+
 describe("plan entitlements", () => {
   it("keeps free plan limits intentionally constrained", () => {
     expect(FREE_ENTITLEMENTS.limits).toMatchObject({
-      bookingsPerMonth: 50,
+      bookingsPerMonth: null,
       staff: 1,
       services: 5,
     });
@@ -21,5 +31,14 @@ describe("plan entitlements", () => {
     expect(canUseFeature("free", "publicBookingPage")).toBe(true);
     expect(canUseFeature("pro", "publicBookingPage")).toBe(true);
     expect(PRO_ENTITLEMENTS.features.publicBookingPage).toBe(true);
+  });
+
+  it("keeps AI growth features pro-only", () => {
+    for (const feature of PRO_ONLY_AI_FEATURES) {
+      expect(canUseFeature("free", feature)).toBe(false);
+      expect(canUseFeature("pro", feature)).toBe(true);
+      expect(FREE_ENTITLEMENTS.features[feature]).toBe(false);
+      expect(PRO_ENTITLEMENTS.features[feature]).toBe(true);
+    }
   });
 });

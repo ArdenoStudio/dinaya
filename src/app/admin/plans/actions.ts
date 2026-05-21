@@ -11,15 +11,22 @@ import {
 import { logAdminEvent } from "@/lib/admin-audit";
 
 const FEATURE_KEYS: PlanFeature[] = [
+  "aiBookingAutopilot",
+  "aiContentMachine",
+  "aiUpsellAssistant",
   "automations",
   "broadcasts",
+  "clientReactivationCampaign",
   "googleCalendarSync",
   "payments",
   "publicBookingPage",
   "publicBookingPageCustomization",
   "reports",
+  "reviewEngine",
   "reviews",
   "reviewReplies",
+  "smartReminderSystem",
+  "vipLoyaltySequence",
   "webhooks",
   "whatsappSms",
 ];
