@@ -7,7 +7,6 @@ import { requireApiBusiness } from "@/lib/api-auth";
 import { logActivity } from "@/lib/activity-log";
 import { encryptSecret } from "@/lib/secrets";
 import { syncBusinessPrimaryLocation } from "@/lib/locations";
-import { normalizeCustomDomain } from "@/lib/custom-domains";
 import { PlanRequiredError, requirePro } from "@/lib/plan";
 import { z } from "@/lib/validation";
 
@@ -31,7 +30,6 @@ const settingsSchema = z.object({
   payhereMerchantId: z.string().trim().max(100).optional().nullable(),
   payhereMerchantSecret: z.string().trim().max(1000).optional().nullable(),
   hideDinayaBranding: z.boolean().optional(),
-  customDomain: z.string().trim().max(255).optional().nullable(),
 });
 
 export async function PATCH(req: NextRequest) {
@@ -63,37 +61,24 @@ export async function PATCH(req: NextRequest) {
     payhereMerchantId,
     payhereMerchantSecret,
     hideDinayaBranding,
-    customDomain,
     phone,
     timezone,
     websiteUrl,
   } = parsed.data;
 
-  if (hideDinayaBranding === true || (customDomain !== undefined && customDomain)) {
+  if (hideDinayaBranding === true) {
     try {
       await requirePro(context.businessId, "publicBookingPageCustomization");
     } catch (error) {
       if (error instanceof PlanRequiredError) {
         return NextResponse.json(
-          { error: "Remove Dinaya branding and custom domains are available on Pro." },
+          { error: "Remove Dinaya branding is available on Pro." },
           { status: 402 },
         );
       }
       throw error;
     }
   }
-
-  const [currentBusiness] = await db
-    .select({ customDomain: businesses.customDomain })
-    .from(businesses)
-    .where(eq(businesses.id, context.businessId))
-    .limit(1);
-
-  const normalizedCustomDomain = customDomain !== undefined
-    ? normalizeCustomDomain(customDomain ?? "")
-    : undefined;
-  const customDomainChanged = normalizedCustomDomain !== undefined
-    && normalizedCustomDomain !== (currentBusiness?.customDomain ?? null);
 
   await db
     .update(businesses)
@@ -121,11 +106,6 @@ export async function PATCH(req: NextRequest) {
           : null,
       }),
       ...(hideDinayaBranding !== undefined && { hideDinayaBranding: Boolean(hideDinayaBranding) }),
-      ...(customDomainChanged && {
-        customDomain: normalizedCustomDomain,
-        customDomainVerified: false,
-        customDomainVerificationToken: null,
-      }),
     })
     .where(eq(businesses.id, context.businessId));
 

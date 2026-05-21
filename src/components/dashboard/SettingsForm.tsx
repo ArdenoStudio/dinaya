@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useDashboardCopy } from "@/components/dashboard/DashboardLocaleProvider";
-import { buildPublicBookingUrl, expectedCustomDomainTarget } from "@/lib/booking-url";
+import { buildPublicBookingUrl } from "@/lib/booking-url";
 import { isOptimizableRemoteImage } from "@/lib/utils";
 
 type SettingsBusiness = {
@@ -43,9 +43,6 @@ export default function SettingsForm({ business }: Props) {
     customDomain: business.customDomain,
     customDomainVerified: business.customDomainVerified,
   });
-  const [domainVerified, setDomainVerified] = useState(Boolean(business.customDomainVerified));
-  const [domainMessage, setDomainMessage] = useState("");
-  const [verifyingDomain, setVerifyingDomain] = useState(false);
   const [form, setForm] = useState({
     name: business.name,
     description: business.description ?? "",
@@ -65,7 +62,6 @@ export default function SettingsForm({ business }: Props) {
     payhereMerchantId: business.payhereMerchantId ?? "",
     payhereMerchantSecret: "",
     hideDinayaBranding: business.hideDinayaBranding,
-    customDomain: business.customDomain ?? "",
   });
 
   const [galleryImages, setGalleryImages] = useState<string[]>(
@@ -102,47 +98,6 @@ export default function SettingsForm({ business }: Props) {
       setTimeout(() => setSaved(false), 2000);
     }
     setSaving(false);
-  }
-
-  async function verifyDomain() {
-    setVerifyingDomain(true);
-    setDomainMessage("");
-
-    const saveResponse = await fetch("/api/dashboard/settings", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...form,
-        galleryImages,
-        customDomain: form.customDomain.trim() || null,
-        payhereMerchantSecret: form.payhereMerchantSecret.trim() || undefined,
-      }),
-    });
-
-    if (!saveResponse.ok) {
-      const data = await saveResponse.json().catch(() => ({})) as { error?: string };
-      setDomainMessage(data.error ?? "Could not save domain.");
-      setVerifyingDomain(false);
-      return;
-    }
-
-    const verifyResponse = await fetch("/api/dashboard/settings/verify-domain", { method: "POST" });
-    const data = await verifyResponse.json().catch(() => ({})) as {
-      ok?: boolean;
-      error?: string;
-      verifiedAt?: string;
-      expectedTarget?: string;
-    };
-
-    if (verifyResponse.ok && data.ok) {
-      setDomainVerified(true);
-      setDomainMessage("Custom domain verified.");
-    } else {
-      setDomainVerified(false);
-      setDomainMessage(data.error ?? "DNS verification failed.");
-    }
-
-    setVerifyingDomain(false);
   }
 
   function addGalleryImage() {
@@ -439,37 +394,17 @@ export default function SettingsForm({ business }: Props) {
                 <span className="text-sm font-medium">Remove Dinaya branding</span>
               </label>
 
-              <div className="border-t pt-4">
-                <label className="text-sm font-medium">Custom domain</label>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Point a CNAME to <code>{expectedCustomDomainTarget(business.slug)}</code> or add a TXT record with{" "}
-                  <code>dinaya-verify={business.slug}</code>.
+              <div className="rounded-lg border bg-muted/30 p-4 text-sm">
+                <p className="font-medium">Custom domain</p>
+                <p className="mt-1 text-muted-foreground">
+                  Save and verify your domain on the Integrations page using a TXT DNS record.
                 </p>
-                <input
-                  value={form.customDomain}
-                  onChange={(e) => {
-                    setDomainVerified(false);
-                    setForm((f) => ({ ...f, customDomain: e.target.value }));
-                  }}
-                  className={inputCls}
-                  placeholder="book.yoursalon.lk"
-                />
-                <div className="mt-3 flex flex-wrap items-center gap-3">
-                  <button
-                    type="button"
-                    disabled={verifyingDomain || !form.customDomain.trim()}
-                    onClick={verifyDomain}
-                    className="rounded-lg border px-3 py-2 text-sm font-medium hover:border-primary/40 disabled:opacity-60"
-                  >
-                    {verifyingDomain ? "Checking DNS…" : "Verify domain"}
-                  </button>
-                  {domainVerified ? (
-                    <span className="text-sm text-emerald-600">Verified</span>
-                  ) : form.customDomain.trim() ? (
-                    <span className="text-sm text-amber-700">Not verified</span>
-                  ) : null}
-                </div>
-                {domainMessage ? <p className="mt-2 text-xs text-muted-foreground">{domainMessage}</p> : null}
+                <Link
+                  href="/dashboard/settings/integrations"
+                  className="mt-3 inline-flex text-sm font-medium text-primary hover:underline"
+                >
+                  Manage custom domain
+                </Link>
               </div>
             </>
           ) : (

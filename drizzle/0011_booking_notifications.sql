@@ -1,3 +1,5 @@
+ALTER TYPE "subscription_status" ADD VALUE IF NOT EXISTS 'pending';
+
 CREATE TABLE IF NOT EXISTS "booking_notifications" (
   "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
   "booking_id" uuid NOT NULL REFERENCES "bookings"("id") ON DELETE CASCADE,
