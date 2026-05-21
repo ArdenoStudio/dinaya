@@ -16,6 +16,7 @@ import {
   staff,
 } from "@/db/schema";
 import { getAvailableSlots } from "@/lib/availability";
+import { buildPublicBookingUrl } from "@/lib/booking-url";
 import { generateAiCopy } from "@/lib/ai/copy";
 import { buildReviewUrl } from "@/lib/ai/review-links";
 import { sendAiMessage, type ProviderSendResult } from "@/lib/ai/providers";
@@ -39,6 +40,8 @@ type BusinessRow = {
   email: string | null;
   plan: "free" | "pro" | "max";
   timezone: string;
+  customDomain: string | null;
+  customDomainVerifiedAt: Date | null;
 };
 
 const AI_FEATURES: PlanFeature[] = [
@@ -102,9 +105,8 @@ function addResult(stats: WorkflowStats, result: ProviderSendResult | "skipped" 
   else stats.skipped++;
 }
 
-function bookingUrl(slug: string): string {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-  return `${baseUrl.replace(/\/$/, "")}/book/${slug}`;
+function bookingUrl(business: Pick<BusinessRow, "slug" | "customDomain" | "customDomainVerifiedAt">): string {
+  return buildPublicBookingUrl(business);
 }
 
 function localLabel(date: Date, timezone: string): string {
@@ -194,7 +196,7 @@ async function sendWorkflowMessage(input: {
     serviceName: input.serviceName,
     staffName: input.staffName,
     startsAtLabel: input.startsAtLabel,
-    bookingUrl: bookingUrl(input.business.slug),
+    bookingUrl: bookingUrl(input.business),
     reviewUrl: input.reviewUrl,
     extra: input.extra,
   });
@@ -671,6 +673,8 @@ export async function runAiWorkflows(): Promise<Record<PlanFeature, WorkflowStat
       email: businesses.email,
       plan: businesses.plan,
       timezone: businesses.timezone,
+      customDomain: businesses.customDomain,
+      customDomainVerifiedAt: businesses.customDomainVerifiedAt,
     })
     .from(businesses)
     .where(inArray(businesses.plan, ["pro", "max"]));

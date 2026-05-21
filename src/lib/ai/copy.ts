@@ -84,8 +84,8 @@ const FALLBACKS: Record<PlanFeature, (input: AiCopyInput) => AiCopyResult> = {
     source: "fallback",
   }),
   reviewReplies: (input) => ({
-    subject: `Thank you from ${input.businessName}`,
-    body: `Hi ${input.clientName ?? "there"}, thank you for reviewing ${input.businessName}.`,
+    subject: `Reply from ${input.businessName}`,
+    body: `Thank you for your ${input.extra?.includes("Rating: 5") ? "wonderful" : ""} review, ${input.clientName ?? "there"}! We truly appreciate you choosing ${input.businessName} and hope to welcome you back soon.`,
     source: "fallback",
   }),
   webhooks: reminderFallback,

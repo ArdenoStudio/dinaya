@@ -12,6 +12,7 @@ export type BusinessContext = {
     name: string;
     plan: "free" | "pro" | "max";
     slug: string;
+    language: string;
   };
   businessId: string;
   role: "owner" | "staff";
@@ -38,6 +39,7 @@ export async function getBusinessContext(): Promise<BusinessContext | null> {
       name: businesses.name,
       plan: businesses.plan,
       slug: businesses.slug,
+      language: businesses.language,
       isSuspended: businesses.isSuspended,
       deletedAt: businesses.deletedAt,
     })

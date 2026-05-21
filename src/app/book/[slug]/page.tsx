@@ -387,6 +387,12 @@ export default async function BookingPage({ params }: Props) {
                   {review.comment && (
                     <p className="text-sm leading-relaxed text-gray-500">{review.comment}</p>
                   )}
+                  {review.ownerReply ? (
+                    <div className="mt-3 rounded-lg border border-gray-100 bg-gray-50 p-3">
+                      <p className="text-xs font-medium text-gray-700">Response from {business.name}</p>
+                      <p className="mt-1 text-sm leading-relaxed text-gray-500">{review.ownerReply}</p>
+                    </div>
+                  ) : null}
                 </div>
               ))}
             </div>

@@ -3,8 +3,11 @@ import Link from "next/link";
 import { signOut } from "@/auth";
 import { Logo } from "@/components/Logo";
 import { SidebarNav } from "@/components/dashboard/SidebarNav";
+import { DashboardLocaleProvider } from "@/components/dashboard/DashboardLocaleProvider";
 import { DashboardToastProvider } from "@/components/dashboard/ToastProvider";
 import { requireBusiness } from "@/lib/auth";
+import { getDashboardCopy } from "@/lib/dashboard-i18n";
+import type { DashboardLanguage } from "@/lib/dashboard-i18n";
 import { isPlatformAdmin } from "@/lib/platform-admin";
 import { ChevronsUpDown, Menu, Search, ShieldCheck, UserCircle } from "lucide-react";
 
@@ -21,8 +24,11 @@ export default async function DashboardLayout({
 }) {
   const { business, user } = await requireBusiness();
   const showAdminLink = isPlatformAdmin(user.email);
+  const language = (business.language ?? "en") as DashboardLanguage;
+  const copy = getDashboardCopy(language);
 
   return (
+    <DashboardLocaleProvider language={language}>
     <div className="min-h-screen bg-muted/20 lg:grid lg:grid-cols-[17rem_minmax(0,1fr)]">
       <aside className="hidden border-r bg-white lg:flex lg:flex-col" aria-label="Sidebar">
         <div className="border-b px-6 py-5">
@@ -36,11 +42,11 @@ export default async function DashboardLayout({
               className="mb-3 flex items-center gap-2 rounded-md border border-primary/20 bg-primary/[0.04] px-3 py-2 text-xs font-medium text-primary transition-colors hover:bg-primary/10"
             >
               <ShieldCheck className="size-3.5" aria-hidden="true" />
-              Platform admin
+              {copy.layout.platformAdmin}
             </Link>
           )}
           <p className="truncate text-xs text-muted-foreground">{user.email}</p>
-          <p className="mt-1 text-xs capitalize text-muted-foreground/70">{business.plan} plan</p>
+          <p className="mt-1 text-xs capitalize text-muted-foreground/70">{business.plan} {copy.layout.planSuffix}</p>
           <form
             action={async () => {
               "use server";
@@ -48,7 +54,7 @@ export default async function DashboardLayout({
             }}
           >
             <button className="mt-3 text-xs text-muted-foreground hover:text-foreground">
-              Sign out
+              {copy.layout.signOut}
             </button>
           </form>
         </div>
@@ -81,7 +87,7 @@ export default async function DashboardLayout({
                 type="search"
                 aria-label="Search dashboard"
                 className="h-10 w-full rounded-md border bg-white pl-9 pr-3 text-sm outline-none transition-shadow placeholder:text-muted-foreground/60 focus:ring-2 focus:ring-primary/30"
-                placeholder="Search bookings, clients, services"
+                placeholder={copy.layout.searchPlaceholder}
               />
             </form>
 
@@ -99,5 +105,6 @@ export default async function DashboardLayout({
         </DashboardToastProvider>
       </div>
     </div>
+    </DashboardLocaleProvider>
   );
 }

@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { DirectorySettings } from "@/components/dashboard/DirectorySettings";
+import { buildPublicBookingUrl } from "@/lib/booking-url";
 
 export default async function MarketingPage() {
   const { businessId } = await requireOwner();
@@ -14,6 +15,8 @@ export default async function MarketingPage() {
       name: businesses.name,
       slug: businesses.slug,
       description: businesses.description,
+      customDomain: businesses.customDomain,
+      customDomainVerifiedAt: businesses.customDomainVerifiedAt,
     })
     .from(businesses)
     .where(eq(businesses.id, businessId))
@@ -21,11 +24,11 @@ export default async function MarketingPage() {
 
   if (!business) notFound();
 
-  const appDomain = process.env.NEXT_PUBLIC_APP_DOMAIN ?? "localhost:3000";
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-  const bookingUrl = appDomain === "dinaya.lk"
-    ? `https://${business.slug}.dinaya.lk`
-    : `${appUrl}/book/${business.slug}`;
+  const bookingUrl = buildPublicBookingUrl({
+    slug: business.slug,
+    customDomain: business.customDomain,
+    customDomainVerifiedAt: business.customDomainVerifiedAt,
+  });
   const encodedUrl = encodeURIComponent(bookingUrl);
   const qrPng = `https://api.qrserver.com/v1/create-qr-code/?size=1024x1024&format=png&data=${encodedUrl}`;
   const qrSvg = `https://api.qrserver.com/v1/create-qr-code/?size=1024x1024&format=svg&data=${encodedUrl}`;

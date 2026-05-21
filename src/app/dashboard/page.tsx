@@ -7,6 +7,7 @@ import { notFound } from "next/navigation";
 import { requireBusiness } from "@/lib/auth";
 import { formatLkr } from "@/lib/utils";
 import { OnboardingWizard } from "@/components/dashboard/OnboardingWizard";
+import { buildPublicBookingUrl, buildPublicBookingUrlLabel } from "@/lib/booking-url";
 
 async function safeRecentActivity(businessId: string) {
   try {
@@ -39,6 +40,8 @@ export default async function DashboardOverview() {
       phone: businesses.phone,
       plan: businesses.plan,
       slug: businesses.slug,
+      customDomain: businesses.customDomain,
+      customDomainVerifiedAt: businesses.customDomainVerifiedAt,
     })
     .from(businesses)
     .where(eq(businesses.id, businessId))
@@ -125,15 +128,16 @@ export default async function DashboardOverview() {
     safeRecentActivity(businessId),
   ]);
 
-  const appDomain = process.env.NEXT_PUBLIC_APP_DOMAIN ?? "localhost:3000";
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-  const useSubdomain = appDomain === "dinaya.lk";
-  const bookingUrl = useSubdomain
-    ? `https://${business.slug}.dinaya.lk`
-    : `${appUrl}/book/${business.slug}`;
-  const bookingDisplayUrl = useSubdomain
-    ? `${business.slug}.dinaya.lk`
-    : `${appUrl.replace(/^https?:\/\//, "")}/book/${business.slug}`;
+  const bookingUrl = buildPublicBookingUrl({
+    slug: business.slug,
+    customDomain: business.customDomain,
+    customDomainVerifiedAt: business.customDomainVerifiedAt,
+  });
+  const bookingDisplayUrl = buildPublicBookingUrlLabel({
+    slug: business.slug,
+    customDomain: business.customDomain,
+    customDomainVerifiedAt: business.customDomainVerifiedAt,
+  });
   const whatsappShare = `https://wa.me/?text=${encodeURIComponent(`Book online with ${business.name}: ${bookingUrl}`)}`;
   const embedSnippet = `<iframe src="${bookingUrl}" width="100%" height="720" style="border:0;border-radius:8px"></iframe>`;
   const currentWeekRevenue = Number(weekRevenue ?? 0);

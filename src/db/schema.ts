@@ -111,6 +111,7 @@ export const businesses = pgTable("businesses", {
   payhereMerchantSecret: text("payhere_merchant_secret"),
   hideDinayaBranding: boolean("hide_dinaya_branding").default(false).notNull(),
   customDomain: varchar("custom_domain", { length: 255 }),
+  customDomainVerifiedAt: timestamp("custom_domain_verified_at"),
   directoryListed: boolean("directory_listed").default(false).notNull(),
   directoryCity: varchar("directory_city", { length: 80 }),
   directoryDistrict: varchar("directory_district", { length: 80 }),
@@ -412,6 +413,9 @@ export const reviews = pgTable("reviews", {
   rating: smallint("rating").notNull(), // 1–5
   comment: text("comment"),
   isPublished: boolean("is_published").default(true).notNull(),
+  ownerReply: text("owner_reply"),
+  ownerReplyAt: timestamp("owner_reply_at"),
+  ownerReplySource: varchar("owner_reply_source", { length: 20 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 }, (table) => {
   return {

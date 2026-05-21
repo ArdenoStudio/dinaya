@@ -26,6 +26,8 @@ export default async function SettingsPage() {
       payhereMerchantId: businesses.payhereMerchantId,
       hasPayhereMerchantSecret: businesses.payhereMerchantSecret,
       hideDinayaBranding: businesses.hideDinayaBranding,
+      customDomain: businesses.customDomain,
+      customDomainVerifiedAt: businesses.customDomainVerifiedAt,
       plan: businesses.plan,
       phone: businesses.phone,
       slug: businesses.slug,
@@ -46,6 +48,8 @@ export default async function SettingsPage() {
           ...business,
           hasPayhereMerchantSecret: Boolean(business?.hasPayhereMerchantSecret),
           hideDinayaBranding: business.hideDinayaBranding,
+          customDomain: business.customDomain,
+          customDomainVerifiedAt: business.customDomainVerifiedAt?.toISOString() ?? null,
           canCustomizeBookingPage: canUseFeature(business.plan as Plan, "publicBookingPageCustomization"),
         }}
       />

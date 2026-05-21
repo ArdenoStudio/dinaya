@@ -56,6 +56,12 @@ describe("plan entitlements", () => {
     expect(canUseFeature("pro", "publicBookingPageCustomization")).toBe(true);
     expect(canUseFeature("max", "publicBookingPageCustomization")).toBe(true);
   });
+
+  it("reserves AI review replies for pro and max", () => {
+    expect(canUseFeature("free", "reviewReplies")).toBe(false);
+    expect(canUseFeature("pro", "reviewReplies")).toBe(true);
+    expect(canUseFeature("max", "reviewReplies")).toBe(true);
+  });
 });
 
 describe("subscription pricing", () => {

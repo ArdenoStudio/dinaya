@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { auth } from "@/auth";
+import { resolveSlugFromCustomDomain } from "@/lib/custom-domains";
 
 const APP_DOMAIN = process.env.NEXT_PUBLIC_APP_DOMAIN ?? "dinaya.lk";
 
@@ -14,47 +15,53 @@ function appUrl(req: NextRequest, path: string): URL {
   return new URL(path, `${proto}://${host}`);
 }
 
-export default auth((req) => {
+export default auth(async (req) => {
   const { pathname } = req.nextUrl;
   const hostname = req.headers.get("host") ?? "";
 
-  // Strip port for local dev comparison
   const hostWithoutPort = hostname.split(":")[0];
   const rootDomain = APP_DOMAIN.split(":")[0];
 
-  // Check if this is a business subdomain (e.g. salon-abc.dinaya.lk)
+  const isRootHost =
+    hostWithoutPort === rootDomain ||
+    hostWithoutPort === `www.${rootDomain}`;
+
   const isSubdomain =
-    hostWithoutPort !== rootDomain &&
-    hostWithoutPort !== `www.${rootDomain}` &&
+    !isRootHost &&
     hostWithoutPort.endsWith(`.${rootDomain}`);
 
   if (isSubdomain) {
     const slug = hostWithoutPort.replace(`.${rootDomain}`, "");
-    // Rewrite to /book/[slug] while preserving the original URL
     return NextResponse.rewrite(
-      appUrl(req, `/book/${slug}${pathname}`)
+      appUrl(req, `/book/${slug}${pathname}`),
     );
   }
 
-  // Redirect legacy login URL to canonical sign-in
+  if (!isRootHost && !isSubdomain) {
+    const slug = await resolveSlugFromCustomDomain(hostWithoutPort);
+    if (slug) {
+      return NextResponse.rewrite(
+        appUrl(req, `/book/${slug}${pathname}`),
+      );
+    }
+  }
+
   if (pathname === "/login") {
     const signInUrl = appUrl(req, "/auth/signin");
     signInUrl.search = req.nextUrl.search;
     return NextResponse.redirect(signInUrl);
   }
 
-  // Protect dashboard routes
   if (pathname.startsWith("/dashboard")) {
     if (!req.auth) {
       return NextResponse.redirect(appUrl(req, "/auth/signin"));
     }
   }
 
-  // Protect platform admin routes (allowlist enforcement happens in the layout)
   if (pathname.startsWith("/admin")) {
     if (!req.auth) {
       return NextResponse.redirect(
-        appUrl(req, `/auth/signin?callbackUrl=${encodeURIComponent(pathname)}`)
+        appUrl(req, `/auth/signin?callbackUrl=${encodeURIComponent(pathname)}`),
       );
     }
   }

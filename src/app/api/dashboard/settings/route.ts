@@ -7,7 +7,8 @@ import { requireApiBusiness } from "@/lib/api-auth";
 import { logActivity } from "@/lib/activity-log";
 import { encryptSecret } from "@/lib/secrets";
 import { syncBusinessPrimaryLocation } from "@/lib/locations";
-import { canUseFeature, PlanRequiredError, requirePro } from "@/lib/plan";
+import { normalizeCustomDomain } from "@/lib/custom-domains";
+import { PlanRequiredError, requirePro } from "@/lib/plan";
 import { z } from "@/lib/validation";
 
 const settingsSchema = z.object({
@@ -82,6 +83,18 @@ export async function PATCH(req: NextRequest) {
     }
   }
 
+  const [currentBusiness] = await db
+    .select({ customDomain: businesses.customDomain })
+    .from(businesses)
+    .where(eq(businesses.id, context.businessId))
+    .limit(1);
+
+  const normalizedCustomDomain = customDomain !== undefined
+    ? normalizeCustomDomain(customDomain ?? "")
+    : undefined;
+  const customDomainChanged = normalizedCustomDomain !== undefined
+    && normalizedCustomDomain !== (currentBusiness?.customDomain ?? null);
+
   await db
     .update(businesses)
     .set({
@@ -108,8 +121,9 @@ export async function PATCH(req: NextRequest) {
           : null,
       }),
       ...(hideDinayaBranding !== undefined && { hideDinayaBranding: Boolean(hideDinayaBranding) }),
-      ...(customDomain !== undefined && {
-        customDomain: customDomain?.trim().toLowerCase() || null,
+      ...(customDomainChanged && {
+        customDomain: normalizedCustomDomain,
+        customDomainVerifiedAt: null,
       }),
     })
     .where(eq(businesses.id, context.businessId));
