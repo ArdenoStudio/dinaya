@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
+import { RESOURCE_LINKS } from "@/lib/resource-links";
 
 export function PublicNav() {
   return (
