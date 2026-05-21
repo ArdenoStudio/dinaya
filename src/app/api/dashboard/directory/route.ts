@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { businesses } from "@/db/schema";
 import { requireApiBusiness } from "@/lib/api-auth";
-import { DIRECTORY_CATEGORIES, inferDirectoryCategory } from "@/lib/directory";
+import { inferDirectoryCategory } from "@/lib/directory";
 import { logActivity } from "@/lib/activity-log";
 import { z } from "@/lib/validation";
 

@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { bookings, businesses, services, staff } from "@/db/schema";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { verifyClientBookingToken } from "@/lib/client-tokens";
 import { canModifyClientBooking } from "@/lib/booking-reschedule";
 import { normalizeSriLankanPhone } from "@/lib/phone";

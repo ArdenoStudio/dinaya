@@ -17,7 +17,7 @@ const messages: Record<BookingLanguage, Record<MessageKey, (ctx: {
     confirmationSms: ({ clientName, businessName, serviceName, when, manageUrl }) =>
       `Hi ${clientName}, your ${serviceName} at ${businessName} is confirmed for ${when}.${manageUrl ? ` Manage: ${manageUrl}` : ""}`,
     reminderSms: ({ clientName, businessName, serviceName, when, manageUrl }) =>
-      `Reminder: ${serviceName} at ${businessName} on ${when}.${manageUrl ? ` Manage: ${manageUrl}` : ""}`,
+      `Hi ${clientName}, reminder: ${serviceName} at ${businessName} on ${when}.${manageUrl ? ` Manage: ${manageUrl}` : ""}`,
     cancellationSms: ({ clientName, businessName, serviceName, when }) =>
       `Hi ${clientName}, your ${serviceName} at ${businessName} on ${when} has been cancelled.`,
     rescheduleSms: ({ clientName, businessName, serviceName, when, manageUrl }) =>

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { bookings, services, staff } from "@/db/schema";
+import { bookings } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 import { requireApiBusiness } from "@/lib/api-auth";
 import { getRescheduleSlots } from "@/lib/booking-reschedule";

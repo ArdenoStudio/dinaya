@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { DIRECTORY_CATEGORIES, DIRECTORY_CITIES } from "@/lib/directory";
 
@@ -72,7 +73,7 @@ export function DirectorySettings() {
         <div>
           <h2 className="font-semibold">Dinaya Directory</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Opt in to be discovered on <a href="/discover" className="text-primary hover:underline">dinaya.lk/discover</a>. Free, no commission.
+            Opt in to be discovered on <Link href="/discover" className="text-primary hover:underline">dinaya.lk/discover</Link>. Free, no commission.
           </p>
         </div>
         <label className="inline-flex items-center gap-2 text-sm">

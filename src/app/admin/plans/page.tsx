@@ -355,9 +355,8 @@ export default async function AdminPlansPage() {
 
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-white p-4">
           <p className="text-xs text-muted-foreground">
-            Saving writes to <code className="rounded bg-muted px-1">.dinaya/plans.json</code>. On
-            production (Vercel), the filesystem is read-only — this file works for local dev.
-            A DB-backed config is on the roadmap.
+            Saves to Postgres (<code className="rounded bg-muted px-1">platform_settings</code>) and
+            mirrors to <code className="rounded bg-muted px-1">.dinaya/plans.json</code> for local dev.
           </p>
           <div className="flex gap-2">
             <button

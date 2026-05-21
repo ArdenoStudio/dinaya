@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { bookingNotifications, bookings, businesses, locations, services, staff } from "@/db/schema";
-import { eq, and, gte, lt, isNull, inArray } from "drizzle-orm";
+import { eq, and, gte, lt, isNull } from "drizzle-orm";
 import { addHours } from "date-fns";
 import { canUseFeature, type Plan } from "@/lib/plan";
 import { sendBookingReminderMessage } from "@/lib/messaging/booking-messages";
