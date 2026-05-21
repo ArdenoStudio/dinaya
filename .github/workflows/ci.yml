@@ -36,9 +36,27 @@ jobs:
 
       - run: npx playwright install --with-deps chromium
 
+      - name: Start app for e2e
+        run: |
+          npm run dev -- -p 3001 > /tmp/next-dev.log 2>&1 &
+          echo $! > /tmp/next-dev.pid
+          npx --yes wait-on@8.0.1 -t 120000 "${PLAYWRIGHT_BASE_URL}/login"
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+          E2E_DISABLE_RATE_LIMIT: "true"
+          PLAYWRIGHT_BASE_URL: http://127.0.0.1:3001
+
       - run: npm run test:e2e
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
           PLAYWRIGHT_BASE_URL: http://127.0.0.1:3001
           E2E_DISABLE_RATE_LIMIT: "true"
+
+      - name: Stop app for e2e
+        if: always()
+        run: |
+          if [ -f /tmp/next-dev.pid ]; then
+            kill "$(cat /tmp/next-dev.pid)" 2>/dev/null || true
+          fi

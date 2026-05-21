@@ -16,12 +16,15 @@ export default defineConfig({
     trace: "on-first-retry",
     screenshot: "only-on-failure",
   },
-  webServer: {
-    command: "npm run dev -- -p 3001",
-    url: baseURL,
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
-  },
+  // CI starts the dev server in the workflow so DATABASE_URL reaches the process.
+  webServer: process.env.CI
+    ? undefined
+    : {
+        command: "npm run dev -- -p 3001",
+        url: baseURL,
+        reuseExistingServer: true,
+        timeout: 120_000,
+      },
   projects: [
     {
       name: "chromium",
