@@ -1,8 +1,12 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Check, Copy, KeyRound, Loader2 } from "lucide-react";
-import { resetUserPassword, type ResetPasswordResult } from "./actions";
+import { Check, Copy, KeyRound, Loader2, UserRoundSearch } from "lucide-react";
+import {
+  resetUserPassword,
+  startImpersonation,
+  type ResetPasswordResult,
+} from "./actions";
 
 type UserRow = {
   id: string;
@@ -17,6 +21,7 @@ export function SupportClient({ users }: { users: UserRow[] }) {
   const [result, setResult] = useState<ResetPasswordResult | null>(null);
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [impersonateMessage, setImpersonateMessage] = useState("");
 
   function handleReset(userId: string) {
     setResult(null);
@@ -24,6 +29,19 @@ export function SupportClient({ users }: { users: UserRow[] }) {
     startTransition(async () => {
       const r = await resetUserPassword(userId);
       setResult(r);
+    });
+  }
+
+  function handleImpersonate(userId: string) {
+    setImpersonateMessage("");
+    startTransition(async () => {
+      const r = await startImpersonation(userId);
+      if (!r.ok) {
+        setImpersonateMessage(r.error);
+        return;
+      }
+      window.open(r.url, "_blank", "noopener,noreferrer");
+      setImpersonateMessage("Opened read-only impersonation session in a new tab.");
     });
   }
 
@@ -36,6 +54,9 @@ export function SupportClient({ users }: { users: UserRow[] }) {
 
   return (
     <div className="space-y-4">
+      {impersonateMessage && (
+        <p className="rounded-xl border bg-muted/40 px-4 py-3 text-sm">{impersonateMessage}</p>
+      )}
       {result && (
         <div
           className={
@@ -118,44 +139,54 @@ export function SupportClient({ users }: { users: UserRow[] }) {
                     </span>
                   </td>
                   <td className="px-4 py-3 text-right">
-                    {confirmId === u.id ? (
-                      <div className="inline-flex items-center gap-2">
-                        <button
-                          type="button"
-                          disabled={pending}
-                          onClick={() => handleReset(u.id)}
-                          className="inline-flex items-center gap-1.5 rounded-md bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-rose-700 disabled:opacity-50"
-                        >
-                          {pending ? (
-                            <>
-                              <Loader2 className="size-3.5 animate-spin" aria-hidden="true" /> Resetting…
-                            </>
-                          ) : (
-                            <>
-                              <KeyRound className="size-3.5" aria-hidden="true" /> Confirm reset
-                            </>
-                          )}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setConfirmId(null)}
-                          className="rounded-md border bg-white px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    ) : (
+                    <div className="inline-flex flex-wrap items-center justify-end gap-2">
                       <button
                         type="button"
-                        onClick={() => {
-                          setResult(null);
-                          setConfirmId(u.id);
-                        }}
-                        className="inline-flex items-center gap-1.5 rounded-md border bg-white px-3 py-1.5 text-xs font-medium hover:bg-muted"
+                        disabled={pending}
+                        onClick={() => handleImpersonate(u.id)}
+                        className="inline-flex items-center gap-1.5 rounded-md border bg-white px-3 py-1.5 text-xs font-medium hover:bg-muted disabled:opacity-50"
                       >
-                        <KeyRound className="size-3.5" aria-hidden="true" /> Reset password
+                        <UserRoundSearch className="size-3.5" aria-hidden="true" /> Impersonate
                       </button>
-                    )}
+                      {confirmId === u.id ? (
+                        <>
+                          <button
+                            type="button"
+                            disabled={pending}
+                            onClick={() => handleReset(u.id)}
+                            className="inline-flex items-center gap-1.5 rounded-md bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-rose-700 disabled:opacity-50"
+                          >
+                            {pending ? (
+                              <>
+                                <Loader2 className="size-3.5 animate-spin" aria-hidden="true" /> Resetting…
+                              </>
+                            ) : (
+                              <>
+                                <KeyRound className="size-3.5" aria-hidden="true" /> Confirm reset
+                              </>
+                            )}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setConfirmId(null)}
+                            className="rounded-md border bg-white px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground"
+                          >
+                            Cancel
+                          </button>
+                        </>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setResult(null);
+                            setConfirmId(u.id);
+                          }}
+                          className="inline-flex items-center gap-1.5 rounded-md border bg-white px-3 py-1.5 text-xs font-medium hover:bg-muted"
+                        >
+                          <KeyRound className="size-3.5" aria-hidden="true" /> Reset password
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}

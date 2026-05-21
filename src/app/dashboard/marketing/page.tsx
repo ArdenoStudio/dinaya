@@ -17,7 +17,7 @@ export default async function MarketingPage() {
       slug: businesses.slug,
       description: businesses.description,
       customDomain: businesses.customDomain,
-      customDomainVerifiedAt: businesses.customDomainVerifiedAt,
+      customDomainVerified: businesses.customDomainVerified,
       referralCode: businesses.referralCode,
     })
     .from(businesses)
@@ -36,7 +36,7 @@ export default async function MarketingPage() {
   const bookingUrl = buildPublicBookingUrl({
     slug: business.slug,
     customDomain: business.customDomain,
-    customDomainVerifiedAt: business.customDomainVerifiedAt,
+    customDomainVerified: business.customDomainVerified,
   });
   const encodedUrl = encodeURIComponent(bookingUrl);
   const qrPng = `https://api.qrserver.com/v1/create-qr-code/?size=1024x1024&format=png&data=${encodedUrl}`;
@@ -73,7 +73,7 @@ export default async function MarketingPage() {
             slug={business.slug}
             referralCode={referralCode}
             customDomain={business.customDomain}
-            customDomainVerifiedAt={business.customDomainVerifiedAt?.toISOString() ?? null}
+            customDomainVerified={Boolean(business.customDomainVerified)}
             referralBookings={Number(referralBookings ?? 0)}
           />
 

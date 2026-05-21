@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { bookingNotifications, bookings, businesses, locations, services, staff } from "@/db/schema";
-import { eq, and, gte, lt, isNull } from "drizzle-orm";
+import { eq, and, gte, lt, isNull, inArray } from "drizzle-orm";
 import { addHours } from "date-fns";
-import { parseLocationAiConfig } from "@/lib/locations";
 import { canUseFeature, type Plan } from "@/lib/plan";
 import { sendBookingReminderMessage } from "@/lib/messaging/booking-messages";
 import { buildClientBookingUrl } from "@/lib/client-tokens";
+import { parseLocationAiConfig } from "@/lib/locations";
 import type { BookingLanguage } from "@/lib/i18n";
 
 export async function GET(req: NextRequest) {
@@ -42,9 +42,13 @@ export async function GET(req: NextRequest) {
         eq(bookings.status, "confirmed"),
         gte(bookings.startsAt, windowStart),
         lt(bookings.startsAt, windowEnd),
-        isNull(bookings.reminderSentAt)
-      )
+        isNull(bookings.reminderSentAt),
+      ),
     );
+
+  if (upcoming.length === 0) {
+    return NextResponse.json({ sent: 0, checked: 0 });
+  }
 
   let sent = 0;
   let skipped = 0;

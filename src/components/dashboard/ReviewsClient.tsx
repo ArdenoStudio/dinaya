@@ -12,7 +12,7 @@ type Review = {
   comment: string | null;
   isPublished: boolean;
   ownerReply: string | null;
-  ownerReplyAt: string | null;
+  ownerRepliedAt: string | null;
   createdAt: string;
 };
 

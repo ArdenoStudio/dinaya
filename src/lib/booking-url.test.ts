@@ -6,7 +6,7 @@ describe("buildPublicBookingUrl", () => {
     expect(buildPublicBookingUrl({
       slug: "salon",
       customDomain: "book.salon.lk",
-      customDomainVerifiedAt: new Date(),
+      customDomainVerified: true,
     })).toBe("https://book.salon.lk");
   });
 

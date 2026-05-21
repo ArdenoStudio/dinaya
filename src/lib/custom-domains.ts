@@ -1,4 +1,4 @@
-import { and, eq, isNotNull, isNull } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { db } from "@/db";
 import { businesses } from "@/db/schema";
 import { expectedCustomDomainTarget } from "@/lib/booking-url";
@@ -75,7 +75,7 @@ export async function resolveSlugFromCustomDomain(hostname: string): Promise<str
       .from(businesses)
       .where(and(
         eq(businesses.customDomain, domain),
-        isNotNull(businesses.customDomainVerifiedAt),
+        eq(businesses.customDomainVerified, true),
         eq(businesses.isSuspended, false),
         isNull(businesses.deletedAt),
       ))

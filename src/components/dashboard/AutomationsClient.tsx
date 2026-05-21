@@ -67,6 +67,9 @@ export function AutomationsClient({ initialRules }: { initialRules: Rule[] }) {
 
   return (
     <div className="space-y-6">
+      <p className="text-sm text-muted-foreground">
+        Active rules are processed every 30 minutes by Dinaya automations cron.
+      </p>
       <div className="grid gap-3 md:grid-cols-3">
         {templates.map((template) => (
           <button

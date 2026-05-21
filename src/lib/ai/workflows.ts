@@ -41,7 +41,7 @@ type BusinessRow = {
   plan: "free" | "pro" | "max";
   timezone: string;
   customDomain: string | null;
-  customDomainVerifiedAt: Date | null;
+  customDomainVerified: boolean | null;
 };
 
 const AI_FEATURES: PlanFeature[] = [
@@ -105,7 +105,7 @@ function addResult(stats: WorkflowStats, result: ProviderSendResult | "skipped" 
   else stats.skipped++;
 }
 
-function bookingUrl(business: Pick<BusinessRow, "slug" | "customDomain" | "customDomainVerifiedAt">): string {
+function bookingUrl(business: Pick<BusinessRow, "slug" | "customDomain" | "customDomainVerified">): string {
   return buildPublicBookingUrl(business);
 }
 
@@ -674,7 +674,7 @@ export async function runAiWorkflows(): Promise<Record<PlanFeature, WorkflowStat
       plan: businesses.plan,
       timezone: businesses.timezone,
       customDomain: businesses.customDomain,
-      customDomainVerifiedAt: businesses.customDomainVerifiedAt,
+      customDomainVerified: businesses.customDomainVerified,
     })
     .from(businesses)
     .where(inArray(businesses.plan, ["pro", "max"]));

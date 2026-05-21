@@ -66,11 +66,16 @@ export async function dispatchWebhooks(
           status: response.ok ? "success" : "failed",
           statusCode: response.status,
           responseBody: await response.text().catch(() => null),
+          attempts: 1,
+          nextAttemptAt: response.ok ? null : new Date(Date.now() + 15 * 60 * 1000),
+          error: response.ok ? null : `HTTP ${response.status}`,
         });
       } catch (error) {
         await db.insert(webhookDeliveries).values({
           ...deliveryBase,
           status: "failed",
+          attempts: 1,
+          nextAttemptAt: new Date(Date.now() + 15 * 60 * 1000),
           error: error instanceof Error ? error.message : "Webhook delivery failed",
         });
       }

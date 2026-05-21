@@ -23,6 +23,7 @@ import {
 } from "@/lib/booking-attribution";
 import { PlanLimitError, requirePlanLimit } from "@/lib/plan";
 import { withRateLimit } from "@/lib/rate-limit";
+import { hasApiKeyAuth, requireApiKey } from "@/lib/api-key-auth";
 import { z } from "@/lib/validation";
 import { startOfMonth } from "date-fns";
 
@@ -61,6 +62,14 @@ export async function POST(req: NextRequest) {
   });
   if (!limited.ok) return limited.response;
 
+  const apiKeyAuth = hasApiKeyAuth(req);
+  let apiBusinessId: string | null = null;
+  if (apiKeyAuth) {
+    const keyResult = await requireApiKey(req, "bookings:write");
+    if (!keyResult.ok) return keyResult.response;
+    apiBusinessId = keyResult.context.businessId;
+  }
+
   const parsed = bookingSchema.safeParse(await req.json());
 
   if (!parsed.success) {
@@ -84,9 +93,21 @@ export async function POST(req: NextRequest) {
     attribution: requestedAttribution,
   } = parsed.data;
   const session = await auth();
+
+  if (apiKeyAuth && apiBusinessId !== businessId) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   const isOwnerBooking = session?.user?.businessId === businessId;
-  const attribution = isOwnerBooking ? null : (requestedAttribution as BookingAttribution | null | undefined);
-  const source = isOwnerBooking ? requestedSource : resolveBookingSource(attribution);
+  const isApiBooking = apiBusinessId !== null && apiBusinessId === businessId;
+  const attribution = isOwnerBooking || isApiBooking
+    ? null
+    : (requestedAttribution as BookingAttribution | null | undefined);
+  const source = isApiBooking
+    ? "api"
+    : isOwnerBooking
+      ? requestedSource
+      : resolveBookingSource(attribution);
   const clientSource = resolveClientSource(source, attribution);
 
   const start = new Date(startsAt);

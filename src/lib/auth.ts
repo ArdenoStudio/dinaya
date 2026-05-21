@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import { db } from "@/db";
 import { businesses } from "@/db/schema";
+import { resolveEffectivePlan } from "@/lib/plan";
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 
@@ -21,6 +22,8 @@ export type BusinessContext = {
     id: string;
     name?: string | null;
   };
+  readOnlyImpersonation?: boolean;
+  impersonatedBy?: string;
 };
 
 export async function getBusinessContext(): Promise<BusinessContext | null> {
@@ -38,6 +41,7 @@ export async function getBusinessContext(): Promise<BusinessContext | null> {
       id: businesses.id,
       name: businesses.name,
       plan: businesses.plan,
+      planExpiresAt: businesses.planExpiresAt,
       slug: businesses.slug,
       language: businesses.language,
       isSuspended: businesses.isSuspended,
@@ -51,8 +55,19 @@ export async function getBusinessContext(): Promise<BusinessContext | null> {
     return null;
   }
 
+  const effectivePlan = resolveEffectivePlan({
+    storedPlan: business.plan,
+    planExpiresAt: business.planExpiresAt,
+  });
+
   return {
-    business,
+    business: {
+      id: business.id,
+      name: business.name,
+      plan: effectivePlan,
+      slug: business.slug,
+      language: business.language,
+    },
     businessId,
     role,
     user: {
@@ -60,6 +75,8 @@ export async function getBusinessContext(): Promise<BusinessContext | null> {
       id: userId,
       name: session.user.name,
     },
+    readOnlyImpersonation: session.user.readOnlyImpersonation,
+    impersonatedBy: session.user.impersonatedBy,
   };
 }
 

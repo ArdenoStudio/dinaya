@@ -1,7 +1,10 @@
+import NextAuth from "next-auth";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { auth } from "@/auth";
-import { resolveSlugFromCustomDomain } from "@/lib/custom-domains";
+import { authConfig } from "@/auth.config";
+import { lookupCustomDomainSlug } from "@/lib/custom-domain";
+
+const { auth } = NextAuth(authConfig);
 
 const APP_DOMAIN = process.env.NEXT_PUBLIC_APP_DOMAIN ?? "dinaya.lk";
 
@@ -23,27 +26,21 @@ export default auth(async (req) => {
   const rootDomain = APP_DOMAIN.split(":")[0];
 
   const isRootHost =
-    hostWithoutPort === rootDomain ||
-    hostWithoutPort === `www.${rootDomain}`;
+    hostWithoutPort === rootDomain || hostWithoutPort === `www.${rootDomain}`;
+
+  if (!isRootHost) {
+    const customSlug = await lookupCustomDomainSlug(hostWithoutPort);
+    if (customSlug) {
+      return NextResponse.rewrite(appUrl(req, `/book/${customSlug}${pathname}`));
+    }
+  }
 
   const isSubdomain =
-    !isRootHost &&
-    hostWithoutPort.endsWith(`.${rootDomain}`);
+    !isRootHost && hostWithoutPort.endsWith(`.${rootDomain}`);
 
   if (isSubdomain) {
     const slug = hostWithoutPort.replace(`.${rootDomain}`, "");
-    return NextResponse.rewrite(
-      appUrl(req, `/book/${slug}${pathname}`),
-    );
-  }
-
-  if (!isRootHost && !isSubdomain) {
-    const slug = await resolveSlugFromCustomDomain(hostWithoutPort);
-    if (slug) {
-      return NextResponse.rewrite(
-        appUrl(req, `/book/${slug}${pathname}`),
-      );
-    }
+    return NextResponse.rewrite(appUrl(req, `/book/${slug}${pathname}`));
   }
 
   if (pathname === "/login") {

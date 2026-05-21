@@ -28,6 +28,7 @@ interface Props {
   locations: Pick<Location, "id" | "name" | "address">[];
   bookingUrlLabel: string;
   businessIcon?: string | null;
+  showBranding?: boolean;
 }
 
 export type BookingBusiness = {
@@ -86,6 +87,7 @@ export default function BookingWizard({
   locations,
   bookingUrlLabel,
   businessIcon,
+  showBranding = true,
 }: Props) {
   const copy = getBookingCopy(business.language);
   const needsLocationPicker = locations.length > 1;
@@ -394,7 +396,7 @@ export default function BookingWizard({
         />
       )}
 
-      <BookingBranding copy={copy} hideBranding={business.hideBranding} />
+      {showBranding && <BookingBranding copy={copy} hideBranding={business.hideBranding} />}
     </div>
   );
 }

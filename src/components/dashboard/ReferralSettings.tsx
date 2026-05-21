@@ -7,7 +7,7 @@ interface Props {
   slug: string;
   referralCode: string;
   customDomain?: string | null;
-  customDomainVerifiedAt?: string | null;
+  customDomainVerified?: boolean | null;
   referralBookings: number;
 }
 
@@ -16,14 +16,14 @@ export function ReferralSettings({
   slug,
   referralCode,
   customDomain,
-  customDomainVerifiedAt,
+  customDomainVerified,
   referralBookings,
 }: Props) {
   const bookingReferralUrl = buildReferralBookingUrl({
     slug,
     referralCode,
     customDomain,
-    customDomainVerifiedAt,
+    customDomainVerified,
   });
   const platformReferralUrl = buildPlatformReferralUrl(referralCode);
 

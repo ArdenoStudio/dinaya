@@ -25,7 +25,7 @@ type SettingsBusiness = {
   hasPayhereMerchantSecret: boolean;
   hideDinayaBranding: boolean;
   customDomain: string | null;
-  customDomainVerifiedAt: string | null;
+  customDomainVerified: boolean;
   canCustomizeBookingPage: boolean;
   phone: string | null;
   slug: string;
@@ -41,9 +41,9 @@ export default function SettingsForm({ business }: Props) {
   const bookingUrl = buildPublicBookingUrl({
     slug: business.slug,
     customDomain: business.customDomain,
-    customDomainVerifiedAt: business.customDomainVerifiedAt,
+    customDomainVerified: business.customDomainVerified,
   });
-  const [domainVerifiedAt, setDomainVerifiedAt] = useState<string | null>(business.customDomainVerifiedAt);
+  const [domainVerified, setDomainVerified] = useState(Boolean(business.customDomainVerified));
   const [domainMessage, setDomainMessage] = useState("");
   const [verifyingDomain, setVerifyingDomain] = useState(false);
   const [form, setForm] = useState({
@@ -135,10 +135,10 @@ export default function SettingsForm({ business }: Props) {
     };
 
     if (verifyResponse.ok && data.ok) {
-      setDomainVerifiedAt(data.verifiedAt ?? new Date().toISOString());
+      setDomainVerified(true);
       setDomainMessage("Custom domain verified.");
     } else {
-      setDomainVerifiedAt(null);
+      setDomainVerified(false);
       setDomainMessage(data.error ?? "DNS verification failed.");
     }
 
@@ -448,7 +448,7 @@ export default function SettingsForm({ business }: Props) {
                 <input
                   value={form.customDomain}
                   onChange={(e) => {
-                    setDomainVerifiedAt(null);
+                    setDomainVerified(false);
                     setForm((f) => ({ ...f, customDomain: e.target.value }));
                   }}
                   className={inputCls}
@@ -463,7 +463,7 @@ export default function SettingsForm({ business }: Props) {
                   >
                     {verifyingDomain ? "Checking DNS…" : "Verify domain"}
                   </button>
-                  {domainVerifiedAt ? (
+                  {domainVerified ? (
                     <span className="text-sm text-emerald-600">Verified</span>
                   ) : form.customDomain.trim() ? (
                     <span className="text-sm text-amber-700">Not verified</span>

@@ -41,7 +41,7 @@ export default async function DashboardOverview() {
       plan: businesses.plan,
       slug: businesses.slug,
       customDomain: businesses.customDomain,
-      customDomainVerifiedAt: businesses.customDomainVerifiedAt,
+      customDomainVerified: businesses.customDomainVerified,
     })
     .from(businesses)
     .where(eq(businesses.id, businessId))
@@ -131,12 +131,12 @@ export default async function DashboardOverview() {
   const bookingUrl = buildPublicBookingUrl({
     slug: business.slug,
     customDomain: business.customDomain,
-    customDomainVerifiedAt: business.customDomainVerifiedAt,
+    customDomainVerified: business.customDomainVerified,
   });
   const bookingDisplayUrl = buildPublicBookingUrlLabel({
     slug: business.slug,
     customDomain: business.customDomain,
-    customDomainVerifiedAt: business.customDomainVerifiedAt,
+    customDomainVerified: business.customDomainVerified,
   });
   const whatsappShare = `https://wa.me/?text=${encodeURIComponent(`Book online with ${business.name}: ${bookingUrl}`)}`;
   const embedSnippet = `<iframe src="${bookingUrl}" width="100%" height="720" style="border:0;border-radius:8px"></iframe>`;

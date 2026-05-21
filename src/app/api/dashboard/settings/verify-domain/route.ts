@@ -47,7 +47,7 @@ export async function POST() {
 
   await db
     .update(businesses)
-    .set({ customDomainVerifiedAt: new Date() })
+    .set({ customDomainVerified: true })
     .where(eq(businesses.id, authResult.context.businessId));
 
   return NextResponse.json({

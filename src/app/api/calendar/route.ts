@@ -10,6 +10,7 @@ import {
   staff,
   staffLocations,
 } from "@/db/schema";
+import { requireApiBusiness } from "@/lib/api-auth";
 
 function parseStaffIds(req: NextRequest): string[] {
   const params = req.nextUrl.searchParams;
@@ -19,9 +20,20 @@ function parseStaffIds(req: NextRequest): string[] {
 }
 
 export async function GET(req: NextRequest) {
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const businessId = session.user.businessId;
+  const apiAuth = await requireApiBusiness({
+    req,
+    apiKeyScope: "bookings:read",
+  });
+  let businessId: string | undefined;
+  if (apiAuth.ok) {
+    businessId = apiAuth.context.businessId;
+  } else {
+    const session = await auth();
+    if (!session?.user?.businessId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    businessId = session.user.businessId;
+  }
 
   const fromParam = req.nextUrl.searchParams.get("from");
   const toParam = req.nextUrl.searchParams.get("to");

@@ -5,8 +5,10 @@ import { eq, and, inArray, desc } from "drizzle-orm";
 import { requireOwner } from "@/lib/auth";
 import {
   annualSavingsPercent,
-  getPlanConfig,
+  getPlanConfigAsync,
+  isPaidPlanAvailable,
   planDisplayName,
+  resolveEffectivePlan,
   type Plan,
 } from "@/lib/plan";
 import { UpgradeButton } from "./UpgradeButton";
@@ -20,10 +22,12 @@ function PlanPricing({
   monthlyLkr,
   annualLkr,
   targetPlan,
+  available,
 }: {
   monthlyLkr: number;
   annualLkr: number;
   targetPlan: "pro" | "max";
+  available: boolean;
 }) {
   const savings = annualSavingsPercent(monthlyLkr, annualLkr);
 
@@ -41,27 +45,34 @@ function PlanPricing({
           )}
         </p>
       </div>
-      <div className="mt-5 flex flex-wrap gap-3">
-        <UpgradeButton targetPlan={targetPlan} interval="monthly" />
-        <UpgradeButton
-          targetPlan={targetPlan}
-          interval="annual"
-          variant="secondary"
-          label={savings > 0 ? `Annual · save ${savings}%` : "Annual"}
-        />
-      </div>
+      {available ? (
+        <div className="mt-5 flex flex-wrap gap-3">
+          <UpgradeButton targetPlan={targetPlan} interval="monthly" />
+          <UpgradeButton
+            targetPlan={targetPlan}
+            interval="annual"
+            variant="secondary"
+            label={savings > 0 ? `Annual · save ${savings}%` : "Annual"}
+          />
+        </div>
+      ) : (
+        <p className="mt-5 text-sm text-neutral-600">
+          {targetPlan === "max" ? "Max" : "Pro"} checkout is not open yet. Contact support for early access.
+        </p>
+      )}
     </>
   );
 }
 
 export default async function BillingPage() {
   const { businessId } = await requireOwner();
+  const config = await getPlanConfigAsync();
   const {
     proMonthlyPriceLkr,
     proAnnualPriceLkr,
     maxMonthlyPriceLkr,
     maxAnnualPriceLkr,
-  } = getPlanConfig();
+  } = config;
 
   const [business] = await db
     .select({
@@ -77,12 +88,15 @@ export default async function BillingPage() {
     .from(subscriptions)
     .where(and(
       eq(subscriptions.businessId, businessId),
-      inArray(subscriptions.status, ["active", "past_due"]),
+      inArray(subscriptions.status, ["pending", "active", "past_due"]),
     ))
     .orderBy(desc(subscriptions.createdAt))
     .limit(1);
 
-  const plan = (business?.plan ?? "free") as Plan;
+  const plan = resolveEffectivePlan({
+    storedPlan: (business?.plan ?? "free") as Plan,
+    planExpiresAt: business?.planExpiresAt,
+  });
   const isPaid = plan === "pro" || plan === "max";
 
   return (
@@ -113,7 +127,9 @@ export default async function BillingPage() {
             )}
             {activeSub && (
               <div className="mt-1 text-sm text-neutral-500">
-                Billed {activeSub.billingInterval === "annual" ? "annually" : "monthly"}
+                {activeSub.status === "pending"
+                  ? "Checkout in progress"
+                  : `Billed ${activeSub.billingInterval === "annual" ? "annually" : "monthly"}`}
               </div>
             )}
           </div>
@@ -137,6 +153,7 @@ export default async function BillingPage() {
               monthlyLkr={proMonthlyPriceLkr}
               annualLkr={proAnnualPriceLkr}
               targetPlan="pro"
+              available={isPaidPlanAvailable("pro", config)}
             />
           </section>
 
@@ -149,6 +166,7 @@ export default async function BillingPage() {
               monthlyLkr={maxMonthlyPriceLkr}
               annualLkr={maxAnnualPriceLkr}
               targetPlan="max"
+              available={isPaidPlanAvailable("max", config)}
             />
             <p className="mt-3 text-xs text-neutral-500">
               Cancel anytime — you keep your plan until the period ends.
@@ -167,6 +185,7 @@ export default async function BillingPage() {
             monthlyLkr={maxMonthlyPriceLkr}
             annualLkr={maxAnnualPriceLkr}
             targetPlan="max"
+            available={isPaidPlanAvailable("max", config)}
           />
         </section>
       )}

@@ -67,13 +67,13 @@ const releases = [
     version: "v1.3",
     date: "March 2026",
     isLatest: false,
-    highlight: "DoDo payments and SMS reminders",
+    highlight: "PayHere payments and SMS reminders",
     changes: [
       {
         type: "feature" as const,
         icon: "bi-credit-card-2-front-fill",
-        title: "DoDo payment gateway",
-        desc: "Accept payments through DoDo alongside PayHere. More options for your clients means fewer drop-offs at checkout.",
+        title: "PayHere payment gateway",
+        desc: "Accept card and mobile payments through PayHere with deposit support — fewer drop-offs at checkout.",
       },
       {
         type: "feature" as const,

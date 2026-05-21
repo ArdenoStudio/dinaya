@@ -104,14 +104,15 @@ export const businesses = pgTable("businesses", {
   galleryImages: text("gallery_images").array(),
   plan: planEnum("plan").default("free").notNull(),
   planExpiresAt: timestamp("plan_expires_at"),
+  customDomain: varchar("custom_domain", { length: 255 }),
+  customDomainVerified: boolean("custom_domain_verified").default(false).notNull(),
+  customDomainVerificationToken: varchar("custom_domain_verification_token", { length: 64 }),
   isSuspended: boolean("is_suspended").default(false).notNull(),
   deletedAt: timestamp("deleted_at"),
   payhereEnabled: boolean("payhere_enabled").default(false).notNull(),
   payhereMerchantId: varchar("payhere_merchant_id", { length: 100 }),
   payhereMerchantSecret: text("payhere_merchant_secret"),
   hideDinayaBranding: boolean("hide_dinaya_branding").default(false).notNull(),
-  customDomain: varchar("custom_domain", { length: 255 }),
-  customDomainVerifiedAt: timestamp("custom_domain_verified_at"),
   directoryListed: boolean("directory_listed").default(false).notNull(),
   directoryCity: varchar("directory_city", { length: 80 }),
   directoryDistrict: varchar("directory_district", { length: 80 }),
@@ -159,6 +160,7 @@ export const staffLocations = pgTable("staff_locations", {
 // ─── Pro subscriptions (Dinaya billing its own customers) ───────────────────
 
 export const subscriptionStatusEnum = pgEnum("subscription_status", [
+  "pending",
   "active",
   "past_due",
   "cancelled",
@@ -379,6 +381,7 @@ export const bookings = pgTable("bookings", {
   reminderSentAt: timestamp("reminder_sent_at"),
   cancelledAt: timestamp("cancelled_at"),
   cancellationReason: text("cancellation_reason"),
+  googleCalendarEventId: varchar("google_calendar_event_id", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -415,10 +418,10 @@ export const reviews = pgTable("reviews", {
   clientName: varchar("client_name", { length: 100 }).notNull(),
   rating: smallint("rating").notNull(), // 1–5
   comment: text("comment"),
-  isPublished: boolean("is_published").default(true).notNull(),
   ownerReply: text("owner_reply"),
-  ownerReplyAt: timestamp("owner_reply_at"),
+  ownerRepliedAt: timestamp("owner_replied_at"),
   ownerReplySource: varchar("owner_reply_source", { length: 20 }),
+  isPublished: boolean("is_published").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 }, (table) => {
   return {
@@ -650,6 +653,24 @@ export const socialConnections = pgTable("social_connections", {
     table.businessId,
     table.provider
   ),
+}));
+
+export const platformSettings = pgTable("platform_settings", {
+  key: varchar("key", { length: 120 }).primaryKey(),
+  value: jsonb("value").notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  updatedBy: varchar("updated_by", { length: 255 }),
+});
+
+export const adminAuditEvents = pgTable("admin_audit_events", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  at: timestamp("at").defaultNow().notNull(),
+  actorEmail: varchar("actor_email", { length: 255 }).notNull(),
+  action: varchar("action", { length: 120 }).notNull(),
+  target: varchar("target", { length: 500 }),
+  meta: jsonb("meta"),
+}, (table) => ({
+  atIdx: index("admin_audit_events_at_idx").on(table.at),
 }));
 
 // ─── Webhook Deliveries / Reporting / API Access ─────────────────────────────
@@ -972,5 +993,7 @@ export type NewAiContentCalendarItem = typeof aiContentCalendar.$inferInsert;
 export type SocialConnection = typeof socialConnections.$inferSelect;
 export type MetricsDaily = typeof metricsDaily.$inferSelect;
 export type ApiKey = typeof apiKeys.$inferSelect;
+export type PlatformSetting = typeof platformSettings.$inferSelect;
+export type AdminAuditEventRow = typeof adminAuditEvents.$inferSelect;
 export type Location = typeof locations.$inferSelect;
 export type NewLocation = typeof locations.$inferInsert;

@@ -123,7 +123,8 @@ export async function PATCH(req: NextRequest) {
       ...(hideDinayaBranding !== undefined && { hideDinayaBranding: Boolean(hideDinayaBranding) }),
       ...(customDomainChanged && {
         customDomain: normalizedCustomDomain,
-        customDomainVerifiedAt: null,
+        customDomainVerified: false,
+        customDomainVerificationToken: null,
       }),
     })
     .where(eq(businesses.id, context.businessId));

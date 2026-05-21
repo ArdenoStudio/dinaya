@@ -1,7 +1,7 @@
 export type PublicBookingUrlInput = {
   slug: string;
   customDomain?: string | null;
-  customDomainVerifiedAt?: Date | string | null;
+  customDomainVerified?: boolean | null;
 };
 
 export function getAppDomain(): string {
@@ -14,7 +14,7 @@ export function getAppBaseUrl(): string {
 
 export function buildPublicBookingUrl(input: PublicBookingUrlInput): string {
   const domain = input.customDomain?.trim().toLowerCase();
-  if (domain && input.customDomainVerifiedAt) {
+  if (domain && input.customDomainVerified) {
     return `https://${domain}`;
   }
 

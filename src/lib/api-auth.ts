@@ -1,5 +1,6 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
+import { hasApiKeyAuth, requireApiKey } from "@/lib/api-key-auth";
 
 export type ApiBusinessContext = {
   businessId: string;
@@ -17,7 +18,30 @@ type ApiAuthResult =
 
 export async function requireApiBusiness({
   ownerOnly = false,
-}: { ownerOnly?: boolean } = {}): Promise<ApiAuthResult> {
+  req,
+  apiKeyScope,
+}: {
+  ownerOnly?: boolean;
+  req?: NextRequest;
+  apiKeyScope?: string;
+} = {}): Promise<ApiAuthResult> {
+  if (req && apiKeyScope && hasApiKeyAuth(req)) {
+    const keyResult = await requireApiKey(req, apiKeyScope);
+    if (!keyResult.ok) return keyResult;
+    return {
+      ok: true,
+      context: {
+        businessId: keyResult.context.businessId,
+        role: "owner",
+        user: {
+          id: `api-key:${keyResult.context.keyId}`,
+          email: null,
+          name: "API key",
+        },
+      },
+    };
+  }
+
   const session = await auth();
   const businessId = session?.user?.businessId;
   const userId = session?.user?.id;
@@ -35,6 +59,19 @@ export async function requireApiBusiness({
       ok: false,
       response: NextResponse.json({ error: "Forbidden" }, { status: 403 }),
     };
+  }
+
+  if (session.user.readOnlyImpersonation) {
+    const method = req?.method ?? "GET";
+    if (method !== "GET") {
+      return {
+        ok: false,
+        response: NextResponse.json(
+          { error: "Read-only impersonation session — mutations are blocked." },
+          { status: 403 },
+        ),
+      };
+    }
   }
 
   return {

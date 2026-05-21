@@ -3,10 +3,13 @@ import { db } from "@/db";
 import { businesses, subscriptions, users } from "@/db/schema";
 import { eq, and, inArray } from "drizzle-orm";
 import { buildRecurringFormData, PAYHERE_CHECKOUT_URL } from "@/lib/payhere-subscriptions";
+import { parseSubscribeRequest } from "@/lib/billing-subscribe";
 import { generateOrderId } from "@/lib/utils";
 import { requireApiBusiness } from "@/lib/api-auth";
 import {
+  getPlanConfigAsync,
   getSubscriptionPrice,
+  isPaidPlanAvailable,
   payhereRecurrence,
   planRank,
   subscriptionItemName,
@@ -14,12 +17,6 @@ import {
   type Plan,
   type PaidPlan,
 } from "@/lib/plan";
-
-function parseSubscribeRequest(body: { plan?: string; interval?: string }) {
-  const targetPlan: PaidPlan = body.plan === "max" ? "max" : "pro";
-  const interval: BillingInterval = body.interval === "annual" ? "annual" : "monthly";
-  return { targetPlan, interval };
-}
 
 export async function POST(req: Request) {
   const authResult = await requireApiBusiness({ ownerOnly: true });
@@ -64,7 +61,7 @@ export async function POST(req: Request) {
     .from(subscriptions)
     .where(and(
       eq(subscriptions.businessId, businessId),
-      inArray(subscriptions.status, ["active", "past_due"]),
+      inArray(subscriptions.status, ["pending", "active", "past_due"]),
     ))
     .limit(1);
 
@@ -72,6 +69,14 @@ export async function POST(req: Request) {
     return NextResponse.json(
       { error: "A subscription is already in progress for this business." },
       { status: 409 },
+    );
+  }
+
+  const config = await getPlanConfigAsync();
+  if (!isPaidPlanAvailable(targetPlan, config)) {
+    return NextResponse.json(
+      { error: `${targetPlan === "max" ? "Max" : "Pro"} is not available for purchase yet.` },
+      { status: 403 },
     );
   }
 
@@ -100,7 +105,7 @@ export async function POST(req: Request) {
     plan: targetPlan,
     billingInterval: interval,
     amountLkr,
-    status: "active",
+    status: "pending",
   });
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL!;
