@@ -36,6 +36,13 @@ export default auth((req) => {
     );
   }
 
+  // Redirect legacy login URL to canonical sign-in
+  if (pathname === "/login") {
+    const signInUrl = appUrl(req, "/auth/signin");
+    signInUrl.search = req.nextUrl.search;
+    return NextResponse.redirect(signInUrl);
+  }
+
   // Protect dashboard routes
   if (pathname.startsWith("/dashboard")) {
     if (!req.auth) {

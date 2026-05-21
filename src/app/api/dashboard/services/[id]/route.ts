@@ -1,18 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/auth";
 import { db } from "@/db";
 import { bookings, services } from "@/db/schema";
 import { eq, and, gte, inArray } from "drizzle-orm";
-
-async function getSession() {
-  const session = await auth();
-  if (!session) return null;
-  return { session, businessId: (session.user as { businessId: string }).businessId };
-}
+import { requireApiBusiness } from "@/lib/api-auth";
+import { serviceUpdateSchema } from "@/lib/schemas/services";
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const ctx = await getSession();
-  if (!ctx) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const authResult = await requireApiBusiness();
+  if (!authResult.ok) return authResult.response;
+  const { businessId } = authResult.context;
 
   const { id } = await params;
   const [service] = await db
@@ -33,7 +29,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
       createdAt: services.createdAt,
     })
     .from(services)
-    .where(and(eq(services.id, id), eq(services.businessId, ctx.businessId)))
+    .where(and(eq(services.id, id), eq(services.businessId, businessId)))
     .limit(1);
 
   if (!service) return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -41,16 +37,25 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const ctx = await getSession();
-  if (!ctx) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const authResult = await requireApiBusiness({ ownerOnly: true });
+  if (!authResult.ok) return authResult.response;
+  const { businessId } = authResult.context;
 
   const { id } = await params;
-  const body = await req.json();
+  const parsed = serviceUpdateSchema.safeParse(await req.json());
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: "Please check the service details.", fieldErrors: parsed.error.flatten().fieldErrors },
+      { status: 400 },
+    );
+  }
+
+  const body = parsed.data;
 
   const [existing] = await db
     .select({ id: services.id })
     .from(services)
-    .where(and(eq(services.id, id), eq(services.businessId, ctx.businessId)))
+    .where(and(eq(services.id, id), eq(services.businessId, businessId)))
     .limit(1);
 
   if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -61,26 +66,37 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       .from(bookings)
       .where(
         and(
-          eq(bookings.businessId, ctx.businessId),
+          eq(bookings.businessId, businessId),
           eq(bookings.serviceId, id),
           gte(bookings.startsAt, new Date()),
-          inArray(bookings.status, ["pending", "confirmed"])
-        )
+          inArray(bookings.status, ["pending", "confirmed"]),
+        ),
       )
       .limit(1);
 
     if (futureBookings.length > 0) {
       return NextResponse.json(
-        { error: "This service has future bookings. Confirm deactivation to keep existing bookings but hide it from public booking." },
-        { status: 409 }
+        {
+          error:
+            "This service has future bookings. Confirm deactivation to keep existing bookings but hide it from public booking.",
+        },
+        { status: 409 },
       );
     }
   }
 
   const allowedFields = [
-    "name", "description", "durationMinutes", "priceLkr", "depositPercent",
-    "requiresPayment", "isActive", "beforeBuffer", "afterBuffer",
-    "minimumNoticeHours", "dailyCapacity",
+    "name",
+    "description",
+    "durationMinutes",
+    "priceLkr",
+    "depositPercent",
+    "requiresPayment",
+    "isActive",
+    "beforeBuffer",
+    "afterBuffer",
+    "minimumNoticeHours",
+    "dailyCapacity",
   ] as const;
 
   const update: Record<string, unknown> = {};
@@ -118,15 +134,16 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 }
 
 export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const ctx = await getSession();
-  if (!ctx) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const authResult = await requireApiBusiness({ ownerOnly: true });
+  if (!authResult.ok) return authResult.response;
+  const { businessId } = authResult.context;
 
   const { id } = await params;
 
   const [existing] = await db
     .select({ id: services.id })
     .from(services)
-    .where(and(eq(services.id, id), eq(services.businessId, ctx.businessId)))
+    .where(and(eq(services.id, id), eq(services.businessId, businessId)))
     .limit(1);
 
   if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -136,18 +153,18 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
     .from(bookings)
     .where(
       and(
-        eq(bookings.businessId, ctx.businessId),
+        eq(bookings.businessId, businessId),
         eq(bookings.serviceId, id),
         gte(bookings.startsAt, new Date()),
-        inArray(bookings.status, ["pending", "confirmed"])
-      )
+        inArray(bookings.status, ["pending", "confirmed"]),
+      ),
     )
     .limit(1);
 
   if (futureBookings.length > 0) {
     return NextResponse.json(
       { error: "Deactivate this service instead, or cancel/reassign future bookings first." },
-      { status: 409 }
+      { status: 409 },
     );
   }
 

@@ -1,12 +1,12 @@
 import SettingsForm from "@/components/dashboard/SettingsForm";
 import { db } from "@/db";
 import { businesses } from "@/db/schema";
-import { requireBusiness } from "@/lib/auth";
+import { requireOwner } from "@/lib/auth";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 
 export default async function SettingsPage() {
-  const { businessId } = await requireBusiness();
+  const { businessId } = await requireOwner();
   const [business] = await db
     .select({
       address: businesses.address,

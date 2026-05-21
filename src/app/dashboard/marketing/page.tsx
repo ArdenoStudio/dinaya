@@ -1,13 +1,13 @@
 import { db } from "@/db";
 import { businesses } from "@/db/schema";
-import { requireBusiness } from "@/lib/auth";
+import { requireOwner } from "@/lib/auth";
 import { eq } from "drizzle-orm";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 
 export default async function MarketingPage() {
-  const { businessId } = await requireBusiness();
+  const { businessId } = await requireOwner();
   const [business] = await db
     .select({
       name: businesses.name,

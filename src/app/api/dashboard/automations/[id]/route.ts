@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { and, eq } from "drizzle-orm";
-import { auth } from "@/auth";
 import { db } from "@/db";
 import { automationRules } from "@/db/schema";
+import { requireApiBusiness } from "@/lib/api-auth";
 import { requirePro } from "@/lib/plan";
 import { z } from "@/lib/validation";
 
@@ -13,11 +13,11 @@ const patchSchema = z.object({
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const businessId = session.user.businessId;
+  const authResult = await requireApiBusiness({ ownerOnly: true });
+  if (!authResult.ok) return authResult.response;
+  const { businessId } = authResult.context;
   await requirePro(businessId, "automations");
   const { id } = await params;
 
@@ -38,11 +38,11 @@ export async function PATCH(
 
 export async function DELETE(
   _req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const businessId = session.user.businessId;
+  const authResult = await requireApiBusiness({ ownerOnly: true });
+  if (!authResult.ok) return authResult.response;
+  const { businessId } = authResult.context;
   await requirePro(businessId, "automations");
   const { id } = await params;
 

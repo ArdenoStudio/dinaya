@@ -1,4 +1,5 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
+import { getAppSecret } from "@/lib/app-secret";
 
 type ReviewTokenPayload = {
   bookingId: string;
@@ -8,7 +9,7 @@ type ReviewTokenPayload = {
 };
 
 function secret(): string {
-  return process.env.AUTH_SECRET || process.env.SECRET_ENCRYPTION_KEY || "dinaya-dev-review-secret";
+  return getAppSecret("Review token signing");
 }
 
 function encode(input: string): string {

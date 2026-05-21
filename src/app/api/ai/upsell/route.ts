@@ -5,8 +5,15 @@ import { businesses, locations } from "@/db/schema";
 import { getUpsellRecommendation } from "@/lib/ai/upsell";
 import { parseLocationAiConfig } from "@/lib/locations";
 import { canUseFeature, type Plan } from "@/lib/plan";
+import { withRateLimit } from "@/lib/rate-limit";
 
 export async function GET(req: NextRequest) {
+  const limited = await withRateLimit(req, {
+    scope: "ai-upsell",
+    limit: 60,
+    windowSeconds: 60,
+  });
+  if (!limited.ok) return limited.response;
   const businessId = req.nextUrl.searchParams.get("businessId");
   const serviceId = req.nextUrl.searchParams.get("serviceId");
   const locationId = req.nextUrl.searchParams.get("locationId");

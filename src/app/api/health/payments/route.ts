@@ -1,4 +1,5 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { requireHealthAuth } from "@/lib/health-auth";
 
 export const runtime = "edge";
 export const dynamic = "force-dynamic";
@@ -6,7 +7,9 @@ export const revalidate = 0;
 
 const TIMEOUT_MS = 6000;
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const authError = requireHealthAuth(req);
+  if (authError) return authError;
   const startedAt = Date.now();
   const sandbox = process.env.PAYHERE_SANDBOX === "true";
   const url = sandbox ? "https://sandbox.payhere.lk/" : "https://www.payhere.lk/";

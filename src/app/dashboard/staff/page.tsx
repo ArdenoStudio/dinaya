@@ -2,10 +2,10 @@ import { db } from "@/db";
 import { staff } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import Link from "next/link";
-import { requireBusiness } from "@/lib/auth";
+import { requireOwner } from "@/lib/auth";
 
 export default async function StaffPage() {
-  const { businessId } = await requireBusiness();
+  const { businessId } = await requireOwner();
 
   const list = await db.select().from(staff).where(eq(staff.businessId, businessId));
 
