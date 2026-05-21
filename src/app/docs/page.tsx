@@ -14,6 +14,25 @@ import { PlanBadge } from "@/components/docs/PlanBadge";
 export default function DocsHubPage() {
   const [search, setSearch] = useState("");
   const results = useMemo(() => searchGuides(search), [search]);
+  const totalSteps = allGuides.reduce((sum, guide) => sum + guide.steps.length, 0);
+
+  const walkthroughCues = [
+    {
+      icon: "bi-compass",
+      label: "Choose a guide",
+      text: "Start from a topic card, search result, or the docs sidebar.",
+    },
+    {
+      icon: "bi-cursor-fill",
+      label: "Follow the pointer",
+      text: "Every walkthrough highlights the exact menu item, button, or field.",
+    },
+    {
+      icon: "bi-arrow-right-circle",
+      label: "Move step by step",
+      text: "Use the large step buttons or Next to continue without getting lost.",
+    },
+  ];
 
   return (
     <div className="pb-16">
@@ -30,6 +49,27 @@ export default function DocsHubPage() {
         </p>
       </div>
 
+      <section className="mb-8 rounded-xl border bg-gray-50/70 p-3" aria-label="How documentation walkthroughs work">
+        <div className="grid gap-2 md:grid-cols-3">
+          {walkthroughCues.map((cue, index) => (
+            <div key={cue.label} className="flex gap-3 rounded-lg bg-white px-3 py-3 shadow-sm shadow-gray-900/5">
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-lg border bg-white text-primary">
+                <i className={`bi ${cue.icon} text-sm`} />
+              </span>
+              <div>
+                <p className="text-sm font-semibold text-gray-900">
+                  {index + 1}. {cue.label}
+                </p>
+                <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{cue.text}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+        <p className="mt-3 text-center text-[11px] font-medium text-muted-foreground">
+          {allGuides.length} guides with {totalSteps} guided steps
+        </p>
+      </section>
+
       <div className="relative mb-10">
         <i className="bi bi-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
         <input
@@ -37,6 +77,7 @@ export default function DocsHubPage() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search guides…"
+          aria-label="Search documentation guides"
           className="w-full rounded-xl border pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
         />
       </div>
@@ -46,22 +87,34 @@ export default function DocsHubPage() {
           <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-4">
             {results.length} result{results.length !== 1 ? "s" : ""}
           </h2>
-          <ul className="space-y-2">
-            {results.map((g) => (
-              <li key={g.slug}>
-                <Link
-                  href={`/docs/guides/${g.slug}`}
-                  className="flex items-center justify-between rounded-xl border p-4 hover:border-primary/30 hover:shadow-sm"
-                >
-                  <div>
-                    <p className="font-cal text-base">{g.title}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">{g.description}</p>
-                  </div>
-                  <i className="bi bi-chevron-right text-gray-300" />
-                </Link>
-              </li>
-            ))}
-          </ul>
+          {results.length > 0 ? (
+            <ul className="space-y-2">
+              {results.map((g) => (
+                <li key={g.slug}>
+                  <Link
+                    href={`/docs/guides/${g.slug}`}
+                    className="flex items-center justify-between gap-4 rounded-xl border p-4 hover:border-primary/30 hover:shadow-sm"
+                  >
+                    <div>
+                      <p className="font-cal text-base">{g.title}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{g.description}</p>
+                    </div>
+                    <span className="inline-flex shrink-0 items-center gap-1 rounded-lg bg-primary/10 px-2.5 py-1.5 text-xs font-medium text-primary">
+                      Open
+                      <i className="bi bi-chevron-right text-[10px]" />
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="rounded-xl border border-dashed bg-gray-50 p-6 text-center">
+              <p className="font-cal text-base">No guide found</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Try searching for payments, services, staff, calendar, or reviews.
+              </p>
+            </div>
+          )}
         </section>
       ) : (
         <>
@@ -77,13 +130,19 @@ export default function DocsHubPage() {
                   <Link
                     key={slug}
                     href={`/docs/guides/${slug}`}
-                    className="rounded-xl border bg-gradient-to-br from-blue-50/80 to-white p-4 hover:border-primary/30 hover:shadow-sm transition-all"
+                    className="group rounded-xl border bg-gradient-to-br from-blue-50/80 to-white p-4 hover:border-primary/30 hover:shadow-sm transition-all"
                   >
                     <p className="font-cal text-base tracking-tight">{g.title}</p>
                     <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{g.description}</p>
-                    <p className="text-[11px] text-primary mt-2 font-medium">
-                      {g.estimatedMinutes} min · {g.steps.length} steps
-                    </p>
+                    <div className="mt-3 flex items-center justify-between gap-3">
+                      <p className="text-[11px] text-primary font-medium">
+                        {g.estimatedMinutes} min · {g.steps.length} steps
+                      </p>
+                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary group-hover:underline">
+                        Open guide
+                        <i className="bi bi-arrow-right text-[10px]" />
+                      </span>
+                    </div>
                   </Link>
                 );
               })}
