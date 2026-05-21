@@ -30,6 +30,8 @@ export function LandingFooter() {
             <ul className="space-y-3 text-sm">
               {[
                 { label: "Features", href: "/features" },
+                { label: "Documentation", href: "/docs" },
+                { label: "Help center", href: "/help" },
                 { label: "Pricing", href: "/pricing" },
                 { label: "Solutions", href: "/solutions" },
                 { label: "Get started", href: "/register" },

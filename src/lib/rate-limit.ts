@@ -95,6 +95,10 @@ export async function withRateLimit(
   config: RateLimitConfig,
   options?: { keySuffix?: string },
 ): Promise<{ ok: true } | { ok: false; response: NextResponse }> {
+  if (process.env.E2E_DISABLE_RATE_LIMIT === "true") {
+    return { ok: true };
+  }
+
   const key = rateLimitKey(config.scope, req, options?.keySuffix);
 
   const upstash = await checkUpstashLimit(key, config);

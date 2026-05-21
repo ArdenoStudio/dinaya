@@ -2,6 +2,15 @@
 
 Use this checklist before pushing production changes that touch schema, auth, payments, booking flow, or dashboard routes.
 
+## CI e2e (pull requests)
+
+The `e2e` job in [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) needs these **repository secrets**:
+
+- `DATABASE_URL` — Neon connection string for test registrations
+- `AUTH_SECRET` — same value as production/staging Auth.js secret
+
+If either secret is missing, e2e is skipped with a workflow warning (verify still runs). Add the secrets under GitHub → Settings → Secrets and variables → Actions to enable full Playwright runs on PRs.
+
 ## Required environment variables
 
 - `DATABASE_URL`
