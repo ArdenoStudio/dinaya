@@ -96,10 +96,10 @@ export default async function PricingPage() {
         </FadeContainer>
       </section>
 
-      {/* Plans — Free + Pro keep original half-width cards; Pro centered; Max can extend past container */}
-      <section className="px-6 pb-20 overflow-x-visible">
+      {/* Plans — equal card widths with even spacing; Pro centered in the row */}
+      <section className="px-6 pb-20">
         <div className="flex justify-center">
-          <div className="flex w-full max-w-[96rem] flex-col items-center gap-5 lg:flex-row lg:items-stretch lg:justify-center">
+          <div className="inline-flex w-full max-w-[96rem] flex-col items-stretch gap-5 sm:gap-6 lg:w-auto lg:flex-row lg:items-stretch">
           {/* Free plan */}
           <div className="relative flex w-full max-w-[calc((64rem-1.25rem)/2)] shrink-0 flex-col rounded-2xl border bg-white p-8 shadow-sm">
             <div className="flex items-center gap-2 mb-2">
@@ -136,7 +136,7 @@ export default async function PricingPage() {
           </div>
 
           {/* Pro plan */}
-          <div className="relative z-10 flex w-full max-w-[calc((64rem-1.25rem)/2)] shrink-0 flex-col overflow-hidden rounded-2xl border bg-gradient-to-br from-gray-950 via-gray-900 to-blue-950 p-8 text-white shadow-xl shadow-blue-900/20 lg:-my-2">
+          <div className="relative z-10 flex w-full max-w-[calc((64rem-1.25rem)/2)] shrink-0 flex-col overflow-hidden rounded-2xl border bg-gradient-to-br from-gray-950 via-gray-900 to-blue-950 p-8 text-white shadow-xl shadow-blue-900/20">
             <div className="pointer-events-none absolute -top-16 -right-16 size-48 rounded-full bg-primary/30 blur-3xl" />
 
             <div className="relative">
@@ -187,7 +187,7 @@ export default async function PricingPage() {
           </div>
 
           {/* Max plan */}
-          <div className="relative flex w-full max-w-[calc((64rem-1.25rem)/2)] shrink-0 flex-col overflow-hidden rounded-2xl border bg-gradient-to-br from-gray-950 via-gray-900 to-amber-700 p-8 text-white shadow-xl shadow-amber-700/25 lg:translate-x-6 xl:translate-x-10">
+          <div className="relative flex w-full max-w-[calc((64rem-1.25rem)/2)] shrink-0 flex-col overflow-hidden rounded-2xl border bg-gradient-to-br from-gray-950 via-gray-900 to-amber-700 p-8 text-white shadow-xl shadow-amber-700/25">
             <div className="pointer-events-none absolute -top-16 -right-16 size-48 rounded-full bg-amber-400/35 blur-3xl" />
 
             <div className="relative">
