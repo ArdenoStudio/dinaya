@@ -106,7 +106,7 @@ export default async function AdminPlansPage() {
           )}
         </div>
         <p className="mt-1 text-sm text-muted-foreground">
-          Edit limits, features, and Pro price. Changes save to{" "}
+          Edit limits, AI access, features, and paid plan prices. Changes save to{" "}
           <code className="rounded bg-muted px-1 text-xs">.dinaya/plans.json</code>{" "}
           and apply instantly.
         </p>

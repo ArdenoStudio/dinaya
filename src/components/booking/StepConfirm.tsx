@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { format, parseISO } from "date-fns";
 import type { BookingBusiness, BookingState } from "./BookingWizard";
 import { formatLkr } from "@/lib/utils";
@@ -24,6 +24,11 @@ interface Props {
 export default function StepConfirm({ state, business, copy, onUpdate, onBack, onConfirmed }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [upsell, setUpsell] = useState<{
+    name: string;
+    priceLkr: number;
+    reason: string;
+  } | null>(null);
 
   const service = state.service;
   const depositAmount =
@@ -53,6 +58,22 @@ export default function StepConfirm({ state, business, copy, onUpdate, onBack, o
     service?.requiresPayment && !hasManualPaymentFallback && dueNow > 0
       ? `${copy.confirmAndPay} — ${formatLkr(dueNow)}`
       : copy.confirmBooking;
+
+  useEffect(() => {
+    if (!service) {
+      setUpsell(null);
+      return;
+    }
+    const params = new URLSearchParams({
+      businessId: business.id,
+      serviceId: service.id,
+    });
+    if (state.location?.id) params.set("locationId", state.location.id);
+    fetch(`/api/ai/upsell?${params}`)
+      .then((res) => res.json())
+      .then((data) => setUpsell(data.recommendation ?? null))
+      .catch(() => setUpsell(null));
+  }, [business.id, service, state.location?.id]);
 
   async function handleBook() {
     setLoading(true);
@@ -268,6 +289,15 @@ export default function StepConfirm({ state, business, copy, onUpdate, onBack, o
                   />
                 </div>
               )}
+            </div>
+          )}
+          {upsell && (
+            <div className="mb-3 rounded-xl border border-blue-100 bg-blue-50/70 p-4 text-sm md:mb-4">
+              <p className="font-medium text-blue-950">Recommended add-on</p>
+              <p className="mt-1 text-blue-900/80">
+                {upsell.reason} Ask about <span className="font-semibold">{upsell.name}</span>
+                {upsell.priceLkr > 0 ? ` (${formatLkr(upsell.priceLkr)})` : ""} during your visit.
+              </p>
             </div>
           )}
           {contactForm}

@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/reminders",
       "schedule": "30 4 * * *"
+    },
+    {
+      "path": "/api/cron/ai-workflows",
+      "schedule": "*/30 * * * *"
     }
   ]
 }

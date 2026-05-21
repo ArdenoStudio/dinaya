@@ -106,22 +106,22 @@ const DEFAULT_PRO_ENTITLEMENTS: Entitlements = {
     locations: 3,
   },
   features: {
-    aiBookingAutopilot: false,
-    aiContentMachine: false,
-    aiUpsellAssistant: false,
+    aiBookingAutopilot: true,
+    aiContentMachine: true,
+    aiUpsellAssistant: true,
     automations: true,
     broadcasts: true,
-    clientReactivationCampaign: false,
+    clientReactivationCampaign: true,
     googleCalendarSync: true,
     payments: true,
     publicBookingPage: true,
     publicBookingPageCustomization: true,
     reports: true,
-    reviewEngine: false,
+    reviewEngine: true,
     reviews: true,
     reviewReplies: true,
-    smartReminderSystem: false,
-    vipLoyaltySequence: false,
+    smartReminderSystem: true,
+    vipLoyaltySequence: true,
     webhooks: true,
     whatsappSms: true,
   },
@@ -171,6 +171,7 @@ export const DEFAULT_PLAN_CONFIG: PlanConfig = {
 };
 
 export const ENFORCED_FEATURES: readonly PlanFeature[] = [
+  ...AI_FEATURES,
   "automations",
   "payments",
   "webhooks",
@@ -303,7 +304,8 @@ export function isPaidPlan(plan: Plan): boolean {
 }
 
 export function minimumPlanForFeature(feature: PlanFeature): Plan {
-  return AI_FEATURES.includes(feature) ? "max" : "pro";
+  void feature;
+  return "pro";
 }
 
 export function getEntitlements(plan: Plan): Entitlements {

@@ -13,6 +13,9 @@ Use this checklist before pushing production changes that touch schema, auth, pa
 - `PAYHERE_SANDBOX`
 - `RESEND_API_KEY`
 - `RESEND_FROM`
+- Optional AI workflows: `AI_PROVIDER`, `AI_API_KEY`, `AI_BASE_URL`, `AI_MODEL`
+- Optional WhatsApp/social publishing: `META_WHATSAPP_TOKEN`, `META_WHATSAPP_PHONE_NUMBER_ID`, `META_SOCIAL_ACCESS_TOKEN`, `META_SOCIAL_PAGE_ID`
+- Optional SMS gateway: `SMS_HTTP_ENDPOINT`, `SMS_HTTP_API_KEY`, `SMS_HTTP_METHOD`, `SMS_HTTP_SENDER`
 
 `SECRET_ENCRYPTION_KEY` must stay stable. Rotating it without re-encrypting stored secrets will make PayHere merchant secrets unreadable.
 
@@ -40,7 +43,9 @@ npm run db:migrate
    - `GET /api/health`
    - `/auth/signin`
    - `/dashboard`
+   - `/dashboard/ai`
    - one public booking page at `/book/[slug]`
+   - signed review page at `/reviews/[token]`
    - a test booking conflict attempt for the same staff/time
 
 ## Production safety notes

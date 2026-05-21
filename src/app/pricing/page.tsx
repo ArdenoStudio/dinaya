@@ -25,6 +25,13 @@ const freeFeatures = [
 
 const proOperationalFeatures = [
   "Everything in Free",
+  "AI Booking Autopilot",
+  "Smart reminder system",
+  "Review engine",
+  "Client Reactivation Campaign",
+  "AI upsell assistant",
+  "30-Day AI Content Machine",
+  "VIP Loyalty Sequence",
   "Multi-staff calendar & permissions",
   "Custom domain (e.g. book.yoursalon.lk)",
   "Remove Dinaya branding",
@@ -33,13 +40,10 @@ const proOperationalFeatures = [
 ];
 
 const maxAiFeatures = [
-  "AI Booking Autopilot",
-  "Smart reminder system",
-  "Review engine",
-  "Client Reactivation Campaign",
-  "AI upsell assistant",
-  "30-Day AI Content Machine",
-  "VIP Loyalty Sequence",
+  "Everything in Pro",
+  "Unlimited branch locations",
+  "Per-branch AI workflow controls",
+  "Priority rollout support for multi-branch teams",
 ];
 
 const faqs = [
@@ -147,7 +151,7 @@ export default async function PricingPage() {
                 </span>
               </div>
               <p className="text-sm text-white/60 mb-6">
-                For growing teams — up to 3 branches, multi-staff, branding control, and advanced operations.
+                For growing teams — up to 3 branches, all seven AI growth tools, and advanced operations.
               </p>
 
               <div className="mb-6">
@@ -198,7 +202,7 @@ export default async function PricingPage() {
                 </span>
               </div>
               <p className="text-sm text-white/60 mb-6">
-                Everything in Pro — plus seven AI tools for bookings, retention, and content on autopilot.
+                Everything in Pro — plus unlimited branches for larger teams.
               </p>
 
               <div className="mb-6">
@@ -224,7 +228,7 @@ export default async function PricingPage() {
               </Link>
 
               <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-white/50">
-                AI growth tools
+                Multi-branch scale
               </p>
               <ul className="space-y-3 text-sm">
                 {maxAiFeatures.map((f) => (
@@ -293,13 +297,13 @@ export default async function PricingPage() {
                 { f: "Remove Dinaya branding", a: "—", b: "Yes", icon: "bi-eye-slash", c: "Yes" },
                 { f: "Advanced reports & exports", a: "—", b: "Yes", icon: "bi-bar-chart", c: "Yes" },
                 { f: "Priority support", a: "Email", b: "WhatsApp", icon: "bi-headset", c: "WhatsApp" },
-                { f: "AI Booking Autopilot", a: "—", b: "—", icon: "bi-robot", c: "Yes" },
-                { f: "Smart reminder system", a: "—", b: "—", icon: "bi-bell-fill", c: "Yes" },
-                { f: "Review engine", a: "—", b: "—", icon: "bi-star", c: "Yes" },
-                { f: "Client Reactivation Campaign", a: "—", b: "—", icon: "bi-arrow-repeat", c: "Yes" },
-                { f: "AI upsell assistant", a: "—", b: "—", icon: "bi-graph-up-arrow", c: "Yes" },
-                { f: "30-Day AI Content Machine", a: "—", b: "—", icon: "bi-calendar3", c: "Yes" },
-                { f: "VIP Loyalty Sequence", a: "—", b: "—", icon: "bi-gem", c: "Yes" },
+                { f: "AI Booking Autopilot", a: "—", b: "Yes", icon: "bi-robot", c: "Yes" },
+                { f: "Smart reminder system", a: "—", b: "Yes", icon: "bi-bell-fill", c: "Yes" },
+                { f: "Review engine", a: "—", b: "Yes", icon: "bi-star", c: "Yes" },
+                { f: "Client Reactivation Campaign", a: "—", b: "Yes", icon: "bi-arrow-repeat", c: "Yes" },
+                { f: "AI upsell assistant", a: "—", b: "Yes", icon: "bi-graph-up-arrow", c: "Yes" },
+                { f: "30-Day AI Content Machine", a: "—", b: "Yes", icon: "bi-calendar3", c: "Yes" },
+                { f: "VIP Loyalty Sequence", a: "—", b: "Yes", icon: "bi-gem", c: "Yes" },
               ].map((row) => (
                 <tr key={row.f} className="hover:bg-gray-50/50 transition-colors">
                   <td className="px-5 py-3.5 text-gray-800">

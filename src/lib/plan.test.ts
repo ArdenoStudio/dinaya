@@ -32,14 +32,14 @@ describe("plan entitlements", () => {
     expect(canUseFeature("max", "reports")).toBe(true);
   });
 
-  it("keeps AI growth features max-only", () => {
+  it("allows AI growth features on pro and max", () => {
     for (const feature of AI_FEATURES) {
-      expect(minimumPlanForFeature(feature)).toBe("max");
+      expect(minimumPlanForFeature(feature)).toBe("pro");
       expect(canUseFeature("free", feature)).toBe(false);
-      expect(canUseFeature("pro", feature)).toBe(false);
+      expect(canUseFeature("pro", feature)).toBe(true);
       expect(canUseFeature("max", feature)).toBe(true);
       expect(FREE_ENTITLEMENTS.features[feature]).toBe(false);
-      expect(PRO_ENTITLEMENTS.features[feature]).toBe(false);
+      expect(PRO_ENTITLEMENTS.features[feature]).toBe(true);
       expect(MAX_ENTITLEMENTS.features[feature]).toBe(true);
     }
   });

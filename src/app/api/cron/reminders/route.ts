@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { bookings, businesses, services, staff } from "@/db/schema";
+import { bookings, businesses, locations, services, staff } from "@/db/schema";
 import { eq, and, gte, lt, isNull } from "drizzle-orm";
 import { sendBookingReminder } from "@/lib/resend";
 import { addHours } from "date-fns";
+import { parseLocationAiConfig } from "@/lib/locations";
+import { canUseFeature, type Plan } from "@/lib/plan";
 
 // Called by Vercel Cron every day at 10:00 AM Colombo time (04:30 UTC)
 export async function GET(req: NextRequest) {
@@ -30,6 +32,7 @@ export async function GET(req: NextRequest) {
       businessId: bookings.businessId,
       serviceId: bookings.serviceId,
       staffId: bookings.staffId,
+      locationId: bookings.locationId,
     })
     .from(bookings)
     .where(
@@ -47,7 +50,7 @@ export async function GET(req: NextRequest) {
     if (!booking.clientEmail) continue;
 
     const [business] = await db
-      .select({ name: businesses.name, slug: businesses.slug })
+      .select({ name: businesses.name, slug: businesses.slug, plan: businesses.plan })
       .from(businesses)
       .where(eq(businesses.id, booking.businessId))
       .limit(1);
@@ -65,6 +68,17 @@ export async function GET(req: NextRequest) {
       .limit(1);
 
     if (!business || !service || !member) continue;
+
+    if (canUseFeature(business.plan as Plan, "smartReminderSystem") && booking.locationId) {
+      const [location] = await db
+        .select({ aiConfig: locations.aiConfig })
+        .from(locations)
+        .where(eq(locations.id, booking.locationId))
+        .limit(1);
+      if (parseLocationAiConfig(location?.aiConfig).smartReminderSystem) {
+        continue;
+      }
+    }
 
     try {
       await sendBookingReminder({

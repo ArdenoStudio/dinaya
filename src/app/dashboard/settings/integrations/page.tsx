@@ -49,10 +49,10 @@ export default async function IntegrationsPage() {
     },
     {
       name: "WhatsApp / SMS",
-      description: "Reminder and broadcast adapters for Meta, Twilio, or local SMS providers.",
-      status: "Phase 2 adapter",
+      description: "AI reminders and campaigns through Meta WhatsApp or a configured local SMS gateway.",
+      status: process.env.META_WHATSAPP_TOKEN || process.env.SMS_HTTP_ENDPOINT ? "Configured" : "Env required",
       href: "/dashboard/automations",
-      action: "Roadmap",
+      action: "Use in AI Hub",
     },
     {
       name: "API keys",

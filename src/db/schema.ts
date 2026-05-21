@@ -56,6 +56,9 @@ export const clients = pgTable("clients", {
   source: varchar("source", { length: 100 }),
   tags: text("tags").array(),
   internalNotes: text("internal_notes"),
+  communicationOptOut: boolean("communication_opt_out").default(false).notNull(),
+  lastAiContactAt: timestamp("last_ai_contact_at"),
+  loyaltyTier: varchar("loyalty_tier", { length: 40 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 }, (table) => {
   return {
@@ -496,6 +499,10 @@ export const communications = pgTable("communications", {
   subject: varchar("subject", { length: 200 }),
   body: text("body"),
   providerMessageId: varchar("provider_message_id", { length: 180 }),
+  provider: varchar("provider", { length: 80 }),
+  feature: varchar("feature", { length: 80 }),
+  idempotencyKey: varchar("idempotency_key", { length: 180 }),
+  meta: jsonb("meta"),
   error: text("error"),
   sentAt: timestamp("sent_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -505,8 +512,105 @@ export const communications = pgTable("communications", {
       table.businessId,
       table.createdAt
     ),
+    businessIdempotencyUnique: uniqueIndex("communications_business_idempotency_unique").on(
+      table.businessId,
+      table.idempotencyKey
+    ),
   };
 });
+
+// ─── AI Growth Workflows ──────────────────────────────────────────────────────
+
+export const aiWorkflowRuns = pgTable("ai_workflow_runs", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  businessId: uuid("business_id")
+    .notNull()
+    .references(() => businesses.id, { onDelete: "cascade" }),
+  locationId: uuid("location_id").references(() => locations.id, {
+    onDelete: "set null",
+  }),
+  feature: varchar("feature", { length: 80 }).notNull(),
+  workflowKey: varchar("workflow_key", { length: 160 }).notNull(),
+  entityType: varchar("entity_type", { length: 40 }),
+  entityId: uuid("entity_id"),
+  channel: varchar("channel", { length: 40 }),
+  provider: varchar("provider", { length: 80 }),
+  status: varchar("status", { length: 40 }).default("queued").notNull(),
+  subject: varchar("subject", { length: 200 }),
+  body: text("body"),
+  scheduledFor: timestamp("scheduled_for"),
+  executedAt: timestamp("executed_at"),
+  idempotencyKey: varchar("idempotency_key", { length: 180 }).notNull(),
+  error: text("error"),
+  meta: jsonb("meta"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  businessFeatureIdx: index("ai_workflow_runs_business_feature_idx").on(
+    table.businessId,
+    table.feature
+  ),
+  businessCreatedAtIdx: index("ai_workflow_runs_business_created_at_idx").on(
+    table.businessId,
+    table.createdAt
+  ),
+  businessIdempotencyUnique: uniqueIndex("ai_workflow_runs_business_idempotency_unique").on(
+    table.businessId,
+    table.idempotencyKey
+  ),
+}));
+
+export const aiContentCalendar = pgTable("ai_content_calendar", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  businessId: uuid("business_id")
+    .notNull()
+    .references(() => businesses.id, { onDelete: "cascade" }),
+  locationId: uuid("location_id")
+    .notNull()
+    .references(() => locations.id, { onDelete: "cascade" }),
+  contentDate: date("content_date").notNull(),
+  channel: varchar("channel", { length: 40 }).default("social").notNull(),
+  title: varchar("title", { length: 160 }).notNull(),
+  caption: text("caption").notNull(),
+  status: varchar("status", { length: 40 }).default("draft").notNull(),
+  approvedAt: timestamp("approved_at"),
+  publishedAt: timestamp("published_at"),
+  provider: varchar("provider", { length: 80 }),
+  providerMessageId: varchar("provider_message_id", { length: 180 }),
+  error: text("error"),
+  meta: jsonb("meta"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  businessDateIdx: index("ai_content_calendar_business_date_idx").on(
+    table.businessId,
+    table.contentDate
+  ),
+  businessLocationDateUnique: uniqueIndex("ai_content_calendar_business_location_date_unique").on(
+    table.businessId,
+    table.locationId,
+    table.contentDate
+  ),
+}));
+
+export const socialConnections = pgTable("social_connections", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  businessId: uuid("business_id")
+    .notNull()
+    .references(() => businesses.id, { onDelete: "cascade" }),
+  provider: varchar("provider", { length: 80 }).notNull(),
+  accountId: varchar("account_id", { length: 160 }),
+  accountName: varchar("account_name", { length: 160 }),
+  accessTokenEncrypted: text("access_token_encrypted"),
+  isActive: boolean("is_active").default(true).notNull(),
+  meta: jsonb("meta"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  businessProviderUnique: uniqueIndex("social_connections_business_provider_unique").on(
+    table.businessId,
+    table.provider
+  ),
+}));
 
 // ─── Webhook Deliveries / Reporting / API Access ─────────────────────────────
 
@@ -588,6 +692,9 @@ export const businessesRelations = relations(businesses, ({ many }) => ({
   automationRules: many(automationRules),
   messageTemplates: many(messageTemplates),
   communications: many(communications),
+  aiWorkflowRuns: many(aiWorkflowRuns),
+  aiContentCalendar: many(aiContentCalendar),
+  socialConnections: many(socialConnections),
   metricsDaily: many(metricsDaily),
   apiKeys: many(apiKeys),
 }));
@@ -731,6 +838,35 @@ export const communicationsRelations = relations(communications, ({ one }) => ({
   }),
 }));
 
+export const aiWorkflowRunsRelations = relations(aiWorkflowRuns, ({ one }) => ({
+  business: one(businesses, {
+    fields: [aiWorkflowRuns.businessId],
+    references: [businesses.id],
+  }),
+  location: one(locations, {
+    fields: [aiWorkflowRuns.locationId],
+    references: [locations.id],
+  }),
+}));
+
+export const aiContentCalendarRelations = relations(aiContentCalendar, ({ one }) => ({
+  business: one(businesses, {
+    fields: [aiContentCalendar.businessId],
+    references: [businesses.id],
+  }),
+  location: one(locations, {
+    fields: [aiContentCalendar.locationId],
+    references: [locations.id],
+  }),
+}));
+
+export const socialConnectionsRelations = relations(socialConnections, ({ one }) => ({
+  business: one(businesses, {
+    fields: [socialConnections.businessId],
+    references: [businesses.id],
+  }),
+}));
+
 export const webhookDeliveriesRelations = relations(webhookDeliveries, ({ one }) => ({
   webhook: one(webhooks, {
     fields: [webhookDeliveries.webhookId],
@@ -782,6 +918,11 @@ export type NewAutomationRule = typeof automationRules.$inferInsert;
 export type AutomationRun = typeof automationRuns.$inferSelect;
 export type MessageTemplate = typeof messageTemplates.$inferSelect;
 export type Communication = typeof communications.$inferSelect;
+export type AiWorkflowRun = typeof aiWorkflowRuns.$inferSelect;
+export type NewAiWorkflowRun = typeof aiWorkflowRuns.$inferInsert;
+export type AiContentCalendarItem = typeof aiContentCalendar.$inferSelect;
+export type NewAiContentCalendarItem = typeof aiContentCalendar.$inferInsert;
+export type SocialConnection = typeof socialConnections.$inferSelect;
 export type MetricsDaily = typeof metricsDaily.$inferSelect;
 export type ApiKey = typeof apiKeys.$inferSelect;
 export type Location = typeof locations.$inferSelect;

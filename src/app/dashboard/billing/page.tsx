@@ -133,8 +133,8 @@ export default async function BillingPage() {
           <section className="rounded-xl border border-blue-200 bg-blue-50/50 p-6">
             <h2 className="text-lg font-semibold">Upgrade to Pro</h2>
             <p className="mt-1 text-sm text-neutral-700">
-              Unlimited bookings, staff, and services — plus multi-staff calendar, custom
-              domain, branding control, advanced reports, and priority WhatsApp support.
+              Up to 3 branches, all seven AI growth workflows, multi-staff calendar,
+              branding control, advanced reports, and priority WhatsApp support.
             </p>
             <PlanPricing
               monthlyLkr={proMonthlyPriceLkr}
@@ -146,9 +146,7 @@ export default async function BillingPage() {
           <section className="rounded-xl border border-amber-200 bg-amber-50/50 p-6">
             <h2 className="text-lg font-semibold">Upgrade to Max</h2>
             <p className="mt-1 text-sm text-neutral-700">
-              Everything in Pro — plus AI Booking Autopilot, Smart reminders, Review engine,
-              Client reactivation, AI upsell assistant, 30-Day Content Machine, and VIP
-              Loyalty Sequence.
+              Everything in Pro, with unlimited branch locations for larger teams.
             </p>
             <PlanPricing
               monthlyLkr={maxMonthlyPriceLkr}
@@ -166,8 +164,7 @@ export default async function BillingPage() {
         <section className="rounded-xl border border-amber-200 bg-amber-50/50 p-6">
           <h2 className="text-lg font-semibold">Upgrade to Max</h2>
           <p className="mt-1 text-sm text-neutral-700">
-            Unlock AI Booking Autopilot, Smart reminders, Review engine, Client reactivation,
-            AI upsell assistant, 30-Day Content Machine, and VIP Loyalty Sequence.
+            Keep every Pro AI workflow and remove the 3-branch limit.
           </p>
           <PlanPricing
             monthlyLkr={maxMonthlyPriceLkr}
