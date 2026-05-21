@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { and, eq, gte, inArray } from "drizzle-orm";
 import { auth } from "@/auth";
 import { db } from "@/db";
-import { bookings, services, staff, staffServices } from "@/db/schema";
+import { bookings, locations, services, staff, staffLocations, staffServices } from "@/db/schema";
+import { replaceStaffLocations } from "@/lib/locations";
 import { z } from "@/lib/validation";
 
 const staffSchema = z.object({
@@ -11,6 +12,7 @@ const staffSchema = z.object({
   avatarUrl: z.url().optional().nullable().or(z.literal("")),
   isActive: z.boolean().optional(),
   serviceIds: z.array(z.uuid()).optional(),
+  locationIds: z.array(z.uuid()).optional(),
 });
 
 async function getBusinessId() {
@@ -41,15 +43,23 @@ export async function GET(
 
   if (!member) return NextResponse.json({ error: "Not found." }, { status: 404 });
 
-  const assigned = await db
-    .select({ serviceId: staffServices.serviceId })
-    .from(staffServices)
-    .innerJoin(services, eq(services.id, staffServices.serviceId))
-    .where(and(eq(staffServices.staffId, id), eq(services.businessId, businessId)));
+  const [assigned, assignedLocations] = await Promise.all([
+    db
+      .select({ serviceId: staffServices.serviceId })
+      .from(staffServices)
+      .innerJoin(services, eq(services.id, staffServices.serviceId))
+      .where(and(eq(staffServices.staffId, id), eq(services.businessId, businessId))),
+    db
+      .select({ locationId: staffLocations.locationId })
+      .from(staffLocations)
+      .innerJoin(locations, eq(locations.id, staffLocations.locationId))
+      .where(and(eq(staffLocations.staffId, id), eq(locations.businessId, businessId))),
+  ]);
 
   return NextResponse.json({
     ...member,
     serviceIds: assigned.map((row) => row.serviceId),
+    locationIds: assignedLocations.map((row) => row.locationId),
   });
 }
 
@@ -77,7 +87,7 @@ export async function PATCH(
 
   if (!existing) return NextResponse.json({ error: "Not found." }, { status: 404 });
 
-  const { serviceIds, ...fields } = parsed.data;
+  const { serviceIds, locationIds, ...fields } = parsed.data;
   const update: Partial<typeof staff.$inferInsert> = {};
 
   if (fields.name !== undefined) update.name = fields.name;
@@ -105,6 +115,21 @@ export async function PATCH(
     if (serviceIds.length > 0) {
       await db.insert(staffServices).values(serviceIds.map((serviceId) => ({ staffId: id, serviceId })));
     }
+  }
+
+  if (locationIds) {
+    const validLocations = locationIds.length
+      ? await db
+          .select({ id: locations.id })
+          .from(locations)
+          .where(and(eq(locations.businessId, businessId), inArray(locations.id, locationIds)))
+      : [];
+
+    if (validLocations.length !== locationIds.length) {
+      return NextResponse.json({ error: "One or more locations are invalid." }, { status: 400 });
+    }
+
+    await replaceStaffLocations(id, locationIds);
   }
 
   return NextResponse.json({ id });

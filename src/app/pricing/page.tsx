@@ -147,7 +147,7 @@ export default async function PricingPage() {
                 </span>
               </div>
               <p className="text-sm text-white/60 mb-6">
-                For growing teams that want multi-staff, branding control, and advanced operations.
+                For growing teams — up to 3 branches, multi-staff, branding control, and advanced operations.
               </p>
 
               <div className="mb-6">
@@ -288,6 +288,7 @@ export default async function PricingPage() {
                 { f: "SMS + email reminders", a: "Yes", b: "Yes", icon: "bi-bell", c: "Yes" },
                 { f: "Booking dashboard", a: "Yes", b: "Yes", icon: "bi-grid", c: "Yes" },
                 { f: "Multi-staff calendar", a: "—", b: "Yes", icon: "bi-people", c: "Yes" },
+                { f: "Branch locations", a: "1", b: "Up to 3", icon: "bi-geo-alt", c: "Unlimited" },
                 { f: "Custom domain", a: "—", b: "Yes", icon: "bi-globe", c: "Yes" },
                 { f: "Remove Dinaya branding", a: "—", b: "Yes", icon: "bi-eye-slash", c: "Yes" },
                 { f: "Advanced reports & exports", a: "—", b: "Yes", icon: "bi-bar-chart", c: "Yes" },

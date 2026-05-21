@@ -43,6 +43,7 @@ export type Entitlements = {
     bookingsPerMonth: number | null;
     staff: number | null;
     services: number | null;
+    locations: number | null;
   };
   features: Record<PlanFeature, boolean>;
 };
@@ -73,6 +74,7 @@ const DEFAULT_FREE_ENTITLEMENTS: Entitlements = {
     bookingsPerMonth: null,
     staff: 1,
     services: 5,
+    locations: 1,
   },
   features: {
     aiBookingAutopilot: false,
@@ -101,6 +103,7 @@ const DEFAULT_PRO_ENTITLEMENTS: Entitlements = {
     bookingsPerMonth: null,
     staff: null,
     services: null,
+    locations: 3,
   },
   features: {
     aiBookingAutopilot: false,
@@ -129,6 +132,7 @@ const DEFAULT_MAX_ENTITLEMENTS: Entitlements = {
     bookingsPerMonth: null,
     staff: null,
     services: null,
+    locations: null,
   },
   features: {
     aiBookingAutopilot: true,
@@ -189,6 +193,7 @@ function mergeEntitlements(
         fromDisk?.limits?.bookingsPerMonth ?? defaults.limits.bookingsPerMonth,
       staff: fromDisk?.limits?.staff ?? defaults.limits.staff,
       services: fromDisk?.limits?.services ?? defaults.limits.services,
+      locations: fromDisk?.limits?.locations ?? defaults.limits.locations,
     },
     features: {
       ...defaults.features,
@@ -367,12 +372,19 @@ export class PlanRequiredError extends Error {
   }
 }
 
+const LIMIT_LABELS: Record<PlanLimit, string> = {
+  bookingsPerMonth: "monthly bookings",
+  staff: "staff members",
+  services: "services",
+  locations: "locations",
+};
+
 export class PlanLimitError extends Error {
   constructor(
     public readonly limit: PlanLimit,
     public readonly max: number
   ) {
-    super(`Your current plan allows up to ${max} ${limit}.`);
+    super(`Your current plan allows up to ${max} ${LIMIT_LABELS[limit]}.`);
     this.name = "PlanLimitError";
   }
 }

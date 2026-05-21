@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { db } from "@/db";
 import { businesses, services, staff, staffServices, reviews } from "@/db/schema";
+import { listActiveLocations, getStaffLocationMap, ensureBusinessHasDefaultLocation } from "@/lib/locations";
 import { eq, and, avg, count } from "drizzle-orm";
 import BookingWizard from "@/components/booking/BookingWizard";
 import { getBookingCopy } from "@/lib/i18n";
@@ -67,7 +68,9 @@ export default async function BookingPage({ params }: Props) {
 
   if (!business) notFound();
 
-  const [serviceList, staffList, reviewList, ratingData] = await Promise.all([
+  await ensureBusinessHasDefaultLocation(business.id);
+
+  const [serviceList, staffList, reviewList, ratingData, locationList, staffLocationMap] = await Promise.all([
     db
       .select({
         id: services.id,
@@ -98,6 +101,8 @@ export default async function BookingPage({ params }: Props) {
       .select({ avg: avg(reviews.rating), count: count() })
       .from(reviews)
       .where(and(eq(reviews.businessId, business.id), eq(reviews.isPublished, true))),
+    listActiveLocations(business.id),
+    getStaffLocationMap(business.id),
   ]);
 
   const assignments = await db
@@ -208,6 +213,8 @@ export default async function BookingPage({ params }: Props) {
           services={serviceList}
           staff={staffList}
           staffServiceMap={assignments}
+          staffLocationMap={staffLocationMap}
+          locations={locationList}
           bookingUrlLabel={bookingUrlLabel}
         />
 

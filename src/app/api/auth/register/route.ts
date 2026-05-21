@@ -4,9 +4,11 @@ import { db } from "@/db";
 import {
   availability,
   businesses,
+  locations,
   messageTemplates,
   services,
   staff,
+  staffLocations,
   staffServices,
   users,
 } from "@/db/schema";
@@ -188,6 +190,25 @@ export async function POST(req: NextRequest) {
         endTime: "17:00",
       }))
     );
+
+    const [defaultLocation] = await tx
+      .insert(locations)
+      .values({
+        businessId: business.id,
+        name: businessName,
+        slug: "main",
+        timezone: "Asia/Colombo",
+        isDefault: true,
+        isActive: true,
+        sortOrder: 0,
+      })
+      .returning({ id: locations.id });
+
+    await tx.insert(staffLocations).values({
+      staffId: ownerStaff.id,
+      locationId: defaultLocation.id,
+      isPrimary: true,
+    });
 
     await tx.insert(messageTemplates).values([
       {

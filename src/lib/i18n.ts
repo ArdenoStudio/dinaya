@@ -4,6 +4,8 @@ export const bookingCopy = {
   en: {
     bookAppointment: "Book an appointment",
     chooseServiceAndTime: "Choose a service and pick a time that works for you.",
+    branch: "Branch",
+    chooseBranch: "Choose a branch",
     service: "Service",
     staff: "Staff",
     dateTime: "Date & Time",
@@ -47,6 +49,8 @@ export const bookingCopy = {
   si: {
     bookAppointment: "වේලාවක් වෙන් කරගන්න",
     chooseServiceAndTime: "සේවාවක් තෝරා ඔබට පහසු වේලාවක් වෙන් කරගන්න.",
+    branch: "ශාඛාව",
+    chooseBranch: "ශාඛාවක් තෝරන්න",
     service: "සේවාව",
     staff: "කාර්ය මණ්ඩලය",
     dateTime: "දිනය සහ වේලාව",
@@ -90,6 +94,8 @@ export const bookingCopy = {
   ta: {
     bookAppointment: "நேரத்தை முன்பதிவு செய்யுங்கள்",
     chooseServiceAndTime: "சேவையைத் தேர்ந்தெடுத்து உங்களுக்கு ஏற்ற நேரத்தை பதிவு செய்யுங்கள்.",
+    branch: "கிளை",
+    chooseBranch: "கிளையைத் தேர்ந்தெடுக்கவும்",
     service: "சேவை",
     staff: "பணியாளர்",
     dateTime: "தேதி & நேரம்",

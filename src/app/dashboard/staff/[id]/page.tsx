@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 type Service = { id: string; name: string };
+type LocationOption = { id: string; name: string };
 
 type StaffForm = {
   name: string;
@@ -12,6 +13,7 @@ type StaffForm = {
   avatarUrl: string;
   isActive: boolean;
   serviceIds: string[];
+  locationIds: string[];
 };
 
 export default function EditStaffPage({ params }: { params: Promise<{ id: string }> }) {
@@ -19,6 +21,7 @@ export default function EditStaffPage({ params }: { params: Promise<{ id: string
   const router = useRouter();
   const [form, setForm] = useState<StaffForm | null>(null);
   const [services, setServices] = useState<Service[]>([]);
+  const [locations, setLocations] = useState<LocationOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -28,7 +31,8 @@ export default function EditStaffPage({ params }: { params: Promise<{ id: string
     Promise.all([
       fetch(`/api/dashboard/staff/${id}`).then((r) => r.json()),
       fetch("/api/dashboard/services").then((r) => r.json()),
-    ]).then(([member, serviceList]) => {
+      fetch("/api/dashboard/locations").then((r) => r.json()),
+    ]).then(([member, serviceList, locationList]) => {
       if (member.error) {
         setForm(null);
       } else {
@@ -38,9 +42,11 @@ export default function EditStaffPage({ params }: { params: Promise<{ id: string
           avatarUrl: member.avatarUrl ?? "",
           isActive: Boolean(member.isActive),
           serviceIds: member.serviceIds ?? [],
+          locationIds: member.locationIds ?? [],
         });
       }
       setServices(Array.isArray(serviceList) ? serviceList : []);
+      setLocations(Array.isArray(locationList) ? locationList.map((l: LocationOption) => ({ id: l.id, name: l.name })) : []);
       setLoading(false);
     });
   }, [id]);
@@ -53,6 +59,18 @@ export default function EditStaffPage({ params }: { params: Promise<{ id: string
         serviceIds: current.serviceIds.includes(serviceId)
           ? current.serviceIds.filter((item) => item !== serviceId)
           : [...current.serviceIds, serviceId],
+      };
+    });
+  }
+
+  function toggleLocation(locationId: string) {
+    setForm((current) => {
+      if (!current) return current;
+      return {
+        ...current,
+        locationIds: current.locationIds.includes(locationId)
+          ? current.locationIds.filter((item) => item !== locationId)
+          : [...current.locationIds, locationId],
       };
     });
   }
@@ -191,7 +209,27 @@ export default function EditStaffPage({ params }: { params: Promise<{ id: string
           </div>
         </div>
 
-        {error && <p className="rounded-md border border-destructive/20 bg-destructive/5 px-3 py-2 text-sm text-destructive">{error}</p>}
+        
+        {locations.length > 1 && (
+          <div>
+            <p className="text-sm font-medium">Works at</p>
+            <div className="mt-2 space-y-2">
+              {locations.map((loc) => (
+                <label key={loc.id} className="flex cursor-pointer items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={form.locationIds.includes(loc.id)}
+                    onChange={() => toggleLocation(loc.id)}
+                    className="rounded"
+                  />
+                  {loc.name}
+                </label>
+              ))}
+            </div>
+          </div>
+        )}
+
+{error && <p className="rounded-md border border-destructive/20 bg-destructive/5 px-3 py-2 text-sm text-destructive">{error}</p>}
 
         <div className="flex items-center gap-3 pt-2">
           <button type="button" onClick={() => router.back()} className="text-sm text-muted-foreground hover:text-foreground">

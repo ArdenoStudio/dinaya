@@ -162,7 +162,7 @@ const categories = [
       },
       {
         q: "Can I have multiple staff or locations?",
-        a: "Multi-staff calendars are coming in the Pro plan. Right now, each account manages one calendar. If you have multiple staff, they can each create their own free Dinaya account.",
+        a: "Yes. Free includes 1 location, Pro supports up to 3 branches, and Max offers unlimited locations with per-branch AI tools. Staff can be assigned to specific branches, and clients pick a branch when booking online.",
       },
       {
         q: "How do I delete my account?",

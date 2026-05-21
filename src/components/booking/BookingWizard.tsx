@@ -3,8 +3,9 @@
 import { useCallback, useMemo, useState } from "react";
 import { format, parseISO } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
-import type { Staff } from "@/db/schema";
+import type { Location, Staff } from "@/db/schema";
 import StepService from "./StepService";
+import StepLocation from "./StepLocation";
 import StepDateTime from "./StepDateTime";
 import StepConfirm from "./StepConfirm";
 import StaffPicker from "./StaffPicker";
@@ -21,6 +22,8 @@ interface Props {
   services: BookingService[];
   staff: Staff[];
   staffServiceMap: { staffId: string; serviceId: string }[];
+  staffLocationMap: { staffId: string; locationId: string }[];
+  locations: Pick<Location, "id" | "name" | "address">[];
   bookingUrlLabel: string;
   businessIcon?: string | null;
 }
@@ -56,6 +59,7 @@ export type BookingService = {
 };
 
 export type BookingState = {
+  location: Pick<Location, "id" | "name" | "address"> | null;
   service: BookingService | null;
   staff: Staff | null;
   date: string;
@@ -75,15 +79,20 @@ export default function BookingWizard({
   services,
   staff,
   staffServiceMap,
+  staffLocationMap,
+  locations,
   bookingUrlLabel,
   businessIcon,
 }: Props) {
   const copy = getBookingCopy(business.language);
+  const needsLocationPicker = locations.length > 1;
   const progressSteps = [copy.service, copy.dateTime, copy.confirm];
   const todayStr = format(toZonedTime(new Date(), COLOMBO_TZ), "yyyy-MM-dd");
 
   const [step, setStep] = useState(0);
+  const defaultLocation = locations.length === 1 ? locations[0]! : null;
   const [state, setState] = useState<BookingState>({
+    location: defaultLocation,
     service: null,
     staff: null,
     date: todayStr,
@@ -106,8 +115,8 @@ export default function BookingWizard({
 
   const needsStaffPicker = useMemo(() => {
     if (!state.service) return false;
-    return getEligibleStaff(staff, staffServiceMap, state.service.id).length > 1;
-  }, [state.service, staff, staffServiceMap]);
+    return getEligibleStaff(staff, staffServiceMap, state.service.id, staffLocationMap, state.location?.id).length > 1;
+  }, [state.service, state.location?.id, staff, staffServiceMap, staffLocationMap]);
 
   function update(partial: Partial<BookingState>) {
     setState((s) => ({ ...s, ...partial }));
@@ -115,7 +124,7 @@ export default function BookingWizard({
 
   const selectService = useCallback(
     (service: BookingService) => {
-      const defaultStaff = pickDefaultStaff(staff, staffServiceMap, service.id);
+      const defaultStaff = pickDefaultStaff(staff, staffServiceMap, service.id, staffLocationMap, state.location?.id);
       update({
         service,
         staff: defaultStaff,
@@ -129,7 +138,7 @@ export default function BookingWizard({
         setStep(1);
       }
     },
-    [staff, staffServiceMap, todayStr]
+    [staff, staffServiceMap, staffLocationMap, state.location?.id, todayStr]
   );
 
   function selectSlot(slot: SlotData) {
@@ -143,12 +152,14 @@ export default function BookingWizard({
 
   function goConfirm() {
     if (!state.service || !state.staff || !selectedSlot) return;
+    if (needsLocationPicker && !state.location) return;
     setStep(2);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   const canProceedDesktop =
-    Boolean(state.service && state.staff && selectedSlot) && step < 2;
+    Boolean(state.service && state.staff && selectedSlot && (!needsLocationPicker || state.location)) &&
+    step < 2;
 
   const depositPreview = state.service
     ? state.service.depositPercent > 0
@@ -268,6 +279,24 @@ export default function BookingWizard({
           <div className="md:px-8 md:py-7">
             <div className="grid gap-0 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] md:gap-8 lg:gap-10">
               <div className="border-b border-gray-100 p-[14px] md:flex md:flex-col md:border-0 md:p-0">
+                {needsLocationPicker && (
+                  <StepLocation
+                    locations={locations}
+                    selected={state.location}
+                    copy={copy}
+                    onSelect={(location) => {
+                      update({
+                        location,
+                        service: null,
+                        staff: null,
+                        timeSlot: "",
+                        timeSlotEnd: "",
+                        timeLabel: "",
+                      });
+                      setSelectedSlot(null);
+                    }}
+                  />
+                )}
                 <StepService
                   services={services}
                   selected={state.service}
@@ -278,6 +307,8 @@ export default function BookingWizard({
                   <StaffPicker
                     allStaff={staff}
                     staffServiceMap={staffServiceMap}
+                    staffLocationMap={staffLocationMap}
+                    locationId={state.location?.id}
                     serviceId={state.service.id}
                     selected={state.staff}
                     copy={copy}

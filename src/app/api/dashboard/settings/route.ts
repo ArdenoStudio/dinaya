@@ -6,6 +6,7 @@ import { ok, validationError } from "@/lib/action-result";
 import { requireApiBusiness } from "@/lib/api-auth";
 import { logActivity } from "@/lib/activity-log";
 import { encryptSecret } from "@/lib/secrets";
+import { syncBusinessPrimaryLocation } from "@/lib/locations";
 import { z } from "@/lib/validation";
 
 const settingsSchema = z.object({
@@ -89,6 +90,13 @@ export async function PATCH(req: NextRequest) {
       }),
     })
     .where(eq(businesses.id, context.businessId));
+
+  await syncBusinessPrimaryLocation(context.businessId, {
+    name,
+    address: address || null,
+    phone: phone || null,
+    timezone,
+  });
 
   void logActivity({
     action: "updated",

@@ -47,6 +47,7 @@ function buildPlanEntitlements(formData: FormData, planKey: Plan) {
       bookingsPerMonth: parseLimit(formData.get(`${planKey}.bookingsPerMonth`)),
       staff: parseLimit(formData.get(`${planKey}.staff`)),
       services: parseLimit(formData.get(`${planKey}.services`)),
+      locations: parseLimit(formData.get(`${planKey}.locations`)),
     },
     features: Object.fromEntries(
       FEATURE_KEYS.map((f) => [f, formData.get(`${planKey}.feature.${f}`) === "on"])

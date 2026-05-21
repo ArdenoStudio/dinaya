@@ -14,7 +14,13 @@ describe("plan entitlements", () => {
       bookingsPerMonth: null,
       staff: 1,
       services: 5,
+      locations: 1,
     });
+  });
+
+  it("sets branch limits by plan tier", () => {
+    expect(PRO_ENTITLEMENTS.limits.locations).toBe(3);
+    expect(MAX_ENTITLEMENTS.limits.locations).toBeNull();
   });
 
   it("allows pro-only operational surfaces for pro and max", () => {
