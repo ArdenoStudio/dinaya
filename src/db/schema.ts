@@ -116,6 +116,8 @@ export const subscriptionStatusEnum = pgEnum("subscription_status", [
   "ended",
 ]);
 
+export const billingIntervalEnum = pgEnum("billing_interval", ["monthly", "annual"]);
+
 export const subscriptions = pgTable("subscriptions", {
   id: uuid("id").defaultRandom().primaryKey(),
   businessId: uuid("business_id")
@@ -126,6 +128,7 @@ export const subscriptions = pgTable("subscriptions", {
   payhereSubscriptionId: varchar("payhere_subscription_id", { length: 100 }).unique(),
   // Plan being subscribed to (forward-compat: more tiers later)
   plan: planEnum("plan").default("pro").notNull(),
+  billingInterval: billingIntervalEnum("billing_interval").default("monthly").notNull(),
   status: subscriptionStatusEnum("status").default("active").notNull(),
   amountLkr: integer("amount_lkr").notNull(),
   currentPeriodEnd: timestamp("current_period_end"),

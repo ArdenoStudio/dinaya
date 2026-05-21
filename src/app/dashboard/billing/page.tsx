@@ -4,14 +4,66 @@ import { auth } from "@/auth";
 import { db } from "@/db";
 import { businesses, subscriptions } from "@/db/schema";
 import { eq, and, inArray, desc } from "drizzle-orm";
-import { getPlanConfig, planDisplayName, type Plan } from "@/lib/plan";
+import {
+  annualSavingsPercent,
+  getPlanConfig,
+  planDisplayName,
+  type Plan,
+} from "@/lib/plan";
 import { UpgradeButton } from "./UpgradeButton";
 import { CancelButton } from "./CancelButton";
+
+function formatRs(amount: number) {
+  return amount.toLocaleString("en-LK");
+}
+
+function PlanPricing({
+  monthlyLkr,
+  annualLkr,
+  targetPlan,
+}: {
+  monthlyLkr: number;
+  annualLkr: number;
+  targetPlan: "pro" | "max";
+}) {
+  const savings = annualSavingsPercent(monthlyLkr, annualLkr);
+
+  return (
+    <>
+      <div className="mt-4 space-y-1">
+        <div className="flex items-baseline gap-2">
+          <span className="text-3xl font-bold tracking-tight">Rs {formatRs(monthlyLkr)}</span>
+          <span className="text-sm text-neutral-500">/ month</span>
+        </div>
+        <p className="text-sm text-neutral-600">
+          or Rs {formatRs(annualLkr)} / year
+          {savings > 0 && (
+            <span className="ml-1 font-medium text-emerald-700">· save {savings}%</span>
+          )}
+        </p>
+      </div>
+      <div className="mt-5 flex flex-wrap gap-3">
+        <UpgradeButton targetPlan={targetPlan} interval="monthly" />
+        <UpgradeButton
+          targetPlan={targetPlan}
+          interval="annual"
+          variant="secondary"
+          label={savings > 0 ? `Annual · save ${savings}%` : "Annual"}
+        />
+      </div>
+    </>
+  );
+}
 
 export default async function BillingPage() {
   const session = await auth();
   if (!session) redirect("/login");
-  const { proMonthlyPriceLkr, maxMonthlyPriceLkr } = getPlanConfig();
+  const {
+    proMonthlyPriceLkr,
+    proAnnualPriceLkr,
+    maxMonthlyPriceLkr,
+    maxAnnualPriceLkr,
+  } = getPlanConfig();
   const businessId = (session.user as { businessId: string }).businessId;
 
   const [business] = await db
@@ -62,6 +114,11 @@ export default async function BillingPage() {
                 })}
               </div>
             )}
+            {activeSub && (
+              <div className="mt-1 text-sm text-neutral-500">
+                Billed {activeSub.billingInterval === "annual" ? "annually" : "monthly"}
+              </div>
+            )}
           </div>
           {isPaid && activeSub?.status === "past_due" && (
             <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700 ring-1 ring-amber-500/30">
@@ -79,15 +136,11 @@ export default async function BillingPage() {
               Unlimited bookings, staff, and services — plus multi-staff calendar, custom
               domain, branding control, advanced reports, and priority WhatsApp support.
             </p>
-            <div className="mt-4 flex items-baseline gap-2">
-              <span className="text-3xl font-bold tracking-tight">
-                Rs {proMonthlyPriceLkr.toLocaleString("en-LK")}
-              </span>
-              <span className="text-sm text-neutral-500">/ month</span>
-            </div>
-            <div className="mt-5">
-              <UpgradeButton targetPlan="pro" />
-            </div>
+            <PlanPricing
+              monthlyLkr={proMonthlyPriceLkr}
+              annualLkr={proAnnualPriceLkr}
+              targetPlan="pro"
+            />
           </section>
 
           <section className="rounded-xl border border-indigo-200 bg-indigo-50/50 p-6">
@@ -97,17 +150,13 @@ export default async function BillingPage() {
               Client reactivation, AI upsell assistant, 30-Day Content Machine, and VIP
               Loyalty Sequence.
             </p>
-            <div className="mt-4 flex items-baseline gap-2">
-              <span className="text-3xl font-bold tracking-tight">
-                Rs {maxMonthlyPriceLkr.toLocaleString("en-LK")}
-              </span>
-              <span className="text-sm text-neutral-500">/ month</span>
-            </div>
-            <div className="mt-5">
-              <UpgradeButton targetPlan="max" />
-            </div>
+            <PlanPricing
+              monthlyLkr={maxMonthlyPriceLkr}
+              annualLkr={maxAnnualPriceLkr}
+              targetPlan="max"
+            />
             <p className="mt-3 text-xs text-neutral-500">
-              Billed monthly. Cancel anytime — you keep your plan until the period ends.
+              Cancel anytime — you keep your plan until the period ends.
             </p>
           </section>
         </>
@@ -120,15 +169,11 @@ export default async function BillingPage() {
             Unlock AI Booking Autopilot, Smart reminders, Review engine, Client reactivation,
             AI upsell assistant, 30-Day Content Machine, and VIP Loyalty Sequence.
           </p>
-          <div className="mt-4 flex items-baseline gap-2">
-            <span className="text-3xl font-bold tracking-tight">
-              Rs {maxMonthlyPriceLkr.toLocaleString("en-LK")}
-            </span>
-            <span className="text-sm text-neutral-500">/ month</span>
-          </div>
-          <div className="mt-5">
-            <UpgradeButton targetPlan="max" />
-          </div>
+          <PlanPricing
+            monthlyLkr={maxMonthlyPriceLkr}
+            annualLkr={maxAnnualPriceLkr}
+            targetPlan="max"
+          />
         </section>
       )}
 

@@ -1,13 +1,18 @@
 "use client";
 
 import { useState } from "react";
+import type { BillingInterval, PaidPlan } from "@/lib/plan";
 
 export function UpgradeButton({
   targetPlan = "pro",
+  interval = "monthly",
   label,
+  variant = "primary",
 }: {
-  targetPlan?: "pro" | "max";
+  targetPlan?: PaidPlan;
+  interval?: BillingInterval;
   label?: string;
+  variant?: "primary" | "secondary";
 }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -19,7 +24,7 @@ export function UpgradeButton({
       const res = await fetch("/api/billing/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan: targetPlan }),
+        body: JSON.stringify({ plan: targetPlan, interval }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -47,15 +52,21 @@ export function UpgradeButton({
     }
   }
 
+  const tier = targetPlan === "max" ? "Max" : "Pro";
   const defaultLabel =
-    targetPlan === "max" ? "Upgrade to Max" : "Upgrade to Pro";
+    interval === "annual" ? `${tier} — annual` : `${tier} — monthly`;
+
+  const className =
+    variant === "secondary"
+      ? "rounded-lg border border-neutral-300 bg-white px-5 py-2.5 text-sm font-medium text-neutral-800 transition-colors hover:bg-neutral-50 disabled:opacity-50"
+      : "rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50";
 
   return (
     <div>
       <button
         onClick={handleClick}
         disabled={loading}
-        className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
+        className={className}
       >
         {loading ? "Redirecting to PayHere…" : (label ?? defaultLabel)}
       </button>

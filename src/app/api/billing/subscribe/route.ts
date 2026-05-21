@@ -5,34 +5,34 @@ import { eq, and, inArray } from "drizzle-orm";
 import { buildRecurringFormData, PAYHERE_CHECKOUT_URL } from "@/lib/payhere-subscriptions";
 import { generateOrderId } from "@/lib/utils";
 import { requireApiBusiness } from "@/lib/api-auth";
-import { getPlanConfig, planRank, type Plan } from "@/lib/plan";
+import {
+  getSubscriptionPrice,
+  payhereRecurrence,
+  planRank,
+  subscriptionItemName,
+  type BillingInterval,
+  type Plan,
+  type PaidPlan,
+} from "@/lib/plan";
 
-function getPlanPrices() {
-  const config = getPlanConfig();
-  return {
-    pro: config.proMonthlyPriceLkr,
-    max: config.maxMonthlyPriceLkr,
-  } satisfies Record<"pro" | "max", number>;
+function parseSubscribeRequest(body: { plan?: string; interval?: string }) {
+  const targetPlan: PaidPlan = body.plan === "max" ? "max" : "pro";
+  const interval: BillingInterval = body.interval === "annual" ? "annual" : "monthly";
+  return { targetPlan, interval };
 }
-
-const PLAN_LABELS: Record<"pro" | "max", string> = {
-  pro: "Dinaya Pro — monthly subscription",
-  max: "Dinaya Max — monthly subscription",
-};
 
 export async function POST(req: Request) {
   const authResult = await requireApiBusiness({ ownerOnly: true });
   if (!authResult.ok) return authResult.response;
   const { businessId, user } = authResult.context;
 
-  let targetPlan: "pro" | "max" = "pro";
+  let targetPlan: PaidPlan = "pro";
+  let interval: BillingInterval = "monthly";
   try {
-    const body = (await req.json()) as { plan?: string };
-    if (body.plan === "max" || body.plan === "pro") {
-      targetPlan = body.plan;
-    }
+    const body = (await req.json()) as { plan?: string; interval?: string };
+    ({ targetPlan, interval } = parseSubscribeRequest(body));
   } catch {
-    // default to pro when no JSON body
+    // default to monthly pro when no JSON body
   }
 
   const [business] = await db
@@ -92,12 +92,13 @@ export async function POST(req: Request) {
 
   const orderId = generateOrderId();
   const nameParts = (owner?.name ?? business.name).split(" ");
-  const amountLkr = getPlanPrices()[targetPlan];
+  const amountLkr = getSubscriptionPrice(targetPlan, interval);
 
   await db.insert(subscriptions).values({
     businessId,
     payhereOrderId: orderId,
     plan: targetPlan,
+    billingInterval: interval,
     amountLkr,
     status: "active",
   });
@@ -106,7 +107,7 @@ export async function POST(req: Request) {
   const formData = buildRecurringFormData({
     orderId,
     amountLkr,
-    itemName: PLAN_LABELS[targetPlan],
+    itemName: subscriptionItemName(targetPlan, interval),
     firstName: nameParts[0],
     lastName: nameParts.slice(1).join(" "),
     email: contactEmail,
@@ -114,7 +115,7 @@ export async function POST(req: Request) {
     notifyUrl: `${appUrl}/api/webhooks/payhere-subscription`,
     returnUrl: `${appUrl}/dashboard/billing?success=1`,
     cancelUrl: `${appUrl}/dashboard/billing?cancelled=1`,
-    recurrence: "1 Month",
+    recurrence: payhereRecurrence(interval),
     duration: "Forever",
   });
 

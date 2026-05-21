@@ -4,6 +4,7 @@ import { FadeContainer, FadeDiv, FadeSpan } from "@/components/Fade";
 import { PublicNav } from "@/components/PublicNav";
 import { CTAPrimaryButton } from "@/components/cta-primary-button";
 import { LandingFooter } from "@/components/LandingFooter";
+import { annualSavingsPercent, getPlanConfig } from "@/lib/plan";
 
 export const metadata: Metadata = {
   title: "Pricing — Free for Every Sri Lankan Business | Dinaya",
@@ -64,7 +65,10 @@ const faqs = [
   },
 ];
 
-export default function PricingPage() {
+export default async function PricingPage() {
+  const config = getPlanConfig();
+  const proAnnualSavings = annualSavingsPercent(config.proMonthlyPriceLkr, config.proAnnualPriceLkr);
+  const maxAnnualSavings = annualSavingsPercent(config.maxMonthlyPriceLkr, config.maxAnnualPriceLkr);
   return (
     <main className="min-h-screen bg-white">
       <PublicNav />
@@ -147,9 +151,15 @@ export default function PricingPage() {
 
               <div className="mb-6">
                 <div className="flex items-baseline gap-1">
-                  <span className="font-cal text-5xl tracking-tight">LKR 1,490</span>
+                  <span className="font-cal text-5xl tracking-tight">LKR {config.proMonthlyPriceLkr.toLocaleString("en-LK")}</span>
                   <span className="text-sm text-white/60">/month</span>
                 </div>
+                <p className="mt-2 text-sm text-white/70">
+                  or LKR {config.proAnnualPriceLkr.toLocaleString("en-LK")}/year
+                  {proAnnualSavings > 0 && (
+                    <span className="ml-1 text-emerald-300">· save {proAnnualSavings}%</span>
+                  )}
+                </p>
                 <p className="text-xs text-white/50 mt-1">Estimated launch price. Free until release.</p>
               </div>
 
@@ -192,9 +202,15 @@ export default function PricingPage() {
 
               <div className="mb-6">
                 <div className="flex items-baseline gap-1">
-                  <span className="font-cal text-5xl tracking-tight">LKR 2,490</span>
+                  <span className="font-cal text-5xl tracking-tight">LKR {config.maxMonthlyPriceLkr.toLocaleString("en-LK")}</span>
                   <span className="text-sm text-white/60">/month</span>
                 </div>
+                <p className="mt-2 text-sm text-white/70">
+                  or LKR {config.maxAnnualPriceLkr.toLocaleString("en-LK")}/year
+                  {maxAnnualSavings > 0 && (
+                    <span className="ml-1 text-emerald-300">· save {maxAnnualSavings}%</span>
+                  )}
+                </p>
                 <p className="text-xs text-white/50 mt-1">Estimated launch price. Free until release.</p>
               </div>
 

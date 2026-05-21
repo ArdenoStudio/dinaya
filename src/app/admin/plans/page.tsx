@@ -135,7 +135,7 @@ export default async function AdminPlansPage() {
             <p className="text-xs text-muted-foreground">Active subscriptions</p>
             <p className="mt-1 text-2xl font-bold tracking-tight">{Number(activeSubCount)}</p>
             <p className="mt-1 text-xs text-muted-foreground">
-              Pro tier · billed monthly
+              Pro & Max · monthly or annual
             </p>
           </div>
         </div>
@@ -182,6 +182,20 @@ export default async function AdminPlansPage() {
                 className="mt-1 h-10 w-full rounded-md border bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
               />
             </div>
+            <div>
+              <label htmlFor="proAnnualPriceLkr" className="block text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                Annual price (LKR)
+              </label>
+              <input
+                id="proAnnualPriceLkr"
+                name="proAnnualPriceLkr"
+                type="number"
+                min={0}
+                step={10}
+                defaultValue={config.proAnnualPriceLkr}
+                className="mt-1 h-10 w-full rounded-md border bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
+              />
+            </div>
             <div className="sm:col-span-2">
               <span className="block text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 Launch status
@@ -216,6 +230,20 @@ export default async function AdminPlansPage() {
                 min={0}
                 step={10}
                 defaultValue={config.maxMonthlyPriceLkr}
+                className="mt-1 h-10 w-full rounded-md border bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
+              />
+            </div>
+            <div>
+              <label htmlFor="maxAnnualPriceLkr" className="block text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                Annual price (LKR)
+              </label>
+              <input
+                id="maxAnnualPriceLkr"
+                name="maxAnnualPriceLkr"
+                type="number"
+                min={0}
+                step={10}
+                defaultValue={config.maxAnnualPriceLkr}
                 className="mt-1 h-10 w-full rounded-md border bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
               />
             </div>

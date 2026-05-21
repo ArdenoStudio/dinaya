@@ -3,7 +3,7 @@ import { db } from "@/db";
 import { subscriptions, businesses } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { verifyRecurringWebhook } from "@/lib/payhere-subscriptions";
-import { addMonths } from "date-fns";
+import { addMonths, addYears } from "date-fns";
 
 // PayHere status codes:
 //   2  = success (initial or renewal payment captured)
@@ -59,8 +59,10 @@ export async function POST(req: NextRequest) {
   // Apply status update
   switch (statusCode) {
     case "2": {
-      // Payment captured — activate or renew Pro for one billing period
-      const periodEnd = addMonths(new Date(), 1);
+      const periodEnd =
+        sub.billingInterval === "annual"
+          ? addYears(new Date(), 1)
+          : addMonths(new Date(), 1);
       await db
         .update(subscriptions)
         .set({
@@ -81,7 +83,6 @@ export async function POST(req: NextRequest) {
         .update(subscriptions)
         .set({ status: "cancelled", cancelledAt: new Date() })
         .where(eq(subscriptions.id, sub.id));
-      // Plan stays "pro" until planExpiresAt; a separate sweep can downgrade.
       break;
     }
     case "-2": {
@@ -103,7 +104,6 @@ export async function POST(req: NextRequest) {
       break;
     }
     default:
-      // pending (0) or unknown — leave row untouched, return 200 so PayHere stops retrying
       break;
   }
 

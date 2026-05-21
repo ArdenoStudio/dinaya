@@ -62,16 +62,26 @@ export async function savePlans(formData: FormData): Promise<void> {
     0,
     Math.floor(Number(formData.get("proMonthlyPriceLkr") ?? current.proMonthlyPriceLkr))
   );
+  const proAnnualPriceLkr = Math.max(
+    0,
+    Math.floor(Number(formData.get("proAnnualPriceLkr") ?? current.proAnnualPriceLkr))
+  );
   const maxMonthlyPriceLkr = Math.max(
     0,
     Math.floor(Number(formData.get("maxMonthlyPriceLkr") ?? current.maxMonthlyPriceLkr))
+  );
+  const maxAnnualPriceLkr = Math.max(
+    0,
+    Math.floor(Number(formData.get("maxAnnualPriceLkr") ?? current.maxAnnualPriceLkr))
   );
   const proLaunched = formData.get("proLaunched") === "on";
   const maxLaunched = formData.get("maxLaunched") === "on";
 
   const next: PlanConfig = {
     proMonthlyPriceLkr,
+    proAnnualPriceLkr,
     maxMonthlyPriceLkr,
+    maxAnnualPriceLkr,
     proLaunched,
     maxLaunched,
     plans: {
@@ -90,7 +100,9 @@ export async function savePlans(formData: FormData): Promise<void> {
     action: "plans.updated",
     meta: {
       proMonthlyPriceLkr,
+      proAnnualPriceLkr,
       maxMonthlyPriceLkr,
+      maxAnnualPriceLkr,
       proLaunched,
       maxLaunched,
     },

@@ -5,6 +5,8 @@ import type { ReactNode } from "react";
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export type Plan = "free" | "pro" | "max";
+export type BillingInterval = "monthly" | "annual";
+export type PaidPlan = "pro" | "max";
 
 export type PlanFeature =
   | "aiBookingAutopilot"
@@ -48,7 +50,9 @@ export type PlanLimit = keyof Entitlements["limits"];
 
 export type PlanConfig = {
   proMonthlyPriceLkr: number;
+  proAnnualPriceLkr: number;
   maxMonthlyPriceLkr: number;
+  maxAnnualPriceLkr: number;
   proLaunched: boolean;
   maxLaunched: boolean;
   plans: Record<Plan, Entitlements>;
@@ -150,7 +154,9 @@ const DEFAULT_MAX_ENTITLEMENTS: Entitlements = {
 
 export const DEFAULT_PLAN_CONFIG: PlanConfig = {
   proMonthlyPriceLkr: Number(process.env.DINAYA_PRO_MONTHLY_PRICE_LKR ?? 1490),
+  proAnnualPriceLkr: Number(process.env.DINAYA_PRO_ANNUAL_PRICE_LKR ?? 14900),
   maxMonthlyPriceLkr: Number(process.env.DINAYA_MAX_MONTHLY_PRICE_LKR ?? 2490),
+  maxAnnualPriceLkr: Number(process.env.DINAYA_MAX_ANNUAL_PRICE_LKR ?? 24900),
   proLaunched: false,
   maxLaunched: false,
   plans: {
@@ -195,8 +201,12 @@ function mergePlanConfig(fromDisk: Partial<PlanConfig>): PlanConfig {
   return {
     proMonthlyPriceLkr:
       fromDisk.proMonthlyPriceLkr ?? DEFAULT_PLAN_CONFIG.proMonthlyPriceLkr,
+    proAnnualPriceLkr:
+      fromDisk.proAnnualPriceLkr ?? DEFAULT_PLAN_CONFIG.proAnnualPriceLkr,
     maxMonthlyPriceLkr:
       fromDisk.maxMonthlyPriceLkr ?? DEFAULT_PLAN_CONFIG.maxMonthlyPriceLkr,
+    maxAnnualPriceLkr:
+      fromDisk.maxAnnualPriceLkr ?? DEFAULT_PLAN_CONFIG.maxAnnualPriceLkr,
     proLaunched: fromDisk.proLaunched ?? DEFAULT_PLAN_CONFIG.proLaunched,
     maxLaunched: fromDisk.maxLaunched ?? DEFAULT_PLAN_CONFIG.maxLaunched,
     plans: {
@@ -247,6 +257,34 @@ export function savePlanConfig(next: PlanConfig): void {
 
 export function planRank(plan: Plan): number {
   return PLAN_RANK[plan];
+}
+
+
+export function getSubscriptionPrice(
+  plan: PaidPlan,
+  interval: BillingInterval,
+  config: PlanConfig = getPlanConfig()
+): number {
+  if (interval === "annual") {
+    return plan === "pro" ? config.proAnnualPriceLkr : config.maxAnnualPriceLkr;
+  }
+  return plan === "pro" ? config.proMonthlyPriceLkr : config.maxMonthlyPriceLkr;
+}
+
+export function payhereRecurrence(interval: BillingInterval): string {
+  return interval === "annual" ? "1 Year" : "1 Month";
+}
+
+export function subscriptionItemName(plan: PaidPlan, interval: BillingInterval): string {
+  const tier = plan === "max" ? "Max" : "Pro";
+  const cadence = interval === "annual" ? "annual" : "monthly";
+  return `Dinaya ${tier} — ${cadence} subscription`;
+}
+
+export function annualSavingsPercent(monthlyLkr: number, annualLkr: number): number {
+  const fullYear = monthlyLkr * 12;
+  if (fullYear <= 0) return 0;
+  return Math.max(0, Math.round(((fullYear - annualLkr) / fullYear) * 100));
 }
 
 export function planDisplayName(plan: Plan): string {

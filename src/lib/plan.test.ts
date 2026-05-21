@@ -44,3 +44,19 @@ describe("plan entitlements", () => {
     expect(canUseFeature("max", "publicBookingPage")).toBe(true);
   });
 });
+
+describe("subscription pricing", () => {
+  it("returns monthly and annual prices from config", async () => {
+    const { getSubscriptionPrice, DEFAULT_PLAN_CONFIG } = await import("./plan");
+    expect(getSubscriptionPrice("pro", "monthly", DEFAULT_PLAN_CONFIG)).toBe(1490);
+    expect(getSubscriptionPrice("pro", "annual", DEFAULT_PLAN_CONFIG)).toBe(14900);
+    expect(getSubscriptionPrice("max", "monthly", DEFAULT_PLAN_CONFIG)).toBe(2490);
+    expect(getSubscriptionPrice("max", "annual", DEFAULT_PLAN_CONFIG)).toBe(24900);
+  });
+
+  it("calculates annual savings percent", async () => {
+    const { annualSavingsPercent } = await import("./plan");
+    expect(annualSavingsPercent(1490, 14900)).toBe(17);
+    expect(annualSavingsPercent(2490, 24900)).toBe(17);
+  });
+});
