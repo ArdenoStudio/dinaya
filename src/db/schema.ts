@@ -107,6 +107,41 @@ export const businesses = pgTable("businesses", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+
+// ─── Locations (branches) ─────────────────────────────────────────────────────
+
+export const locations = pgTable("locations", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  businessId: uuid("business_id")
+    .notNull()
+    .references(() => businesses.id, { onDelete: "cascade" }),
+  name: varchar("name", { length: 100 }).notNull(),
+  slug: varchar("slug", { length: 50 }),
+  address: text("address"),
+  phone: varchar("phone", { length: 20 }),
+  timezone: text("timezone").default("Asia/Colombo").notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  isDefault: boolean("is_default").default(false).notNull(),
+  sortOrder: integer("sort_order").default(0).notNull(),
+  aiConfig: jsonb("ai_config").default({}).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  businessSlugUnique: uniqueIndex("locations_business_slug_unique")
+    .on(table.businessId, table.slug),
+}));
+
+export const staffLocations = pgTable("staff_locations", {
+  staffId: uuid("staff_id")
+    .notNull()
+    .references(() => staff.id, { onDelete: "cascade" }),
+  locationId: uuid("location_id")
+    .notNull()
+    .references(() => locations.id, { onDelete: "cascade" }),
+  isPrimary: boolean("is_primary").default(false).notNull(),
+}, (table) => ({
+  pk: primaryKey({ columns: [table.staffId, table.locationId] }),
+}));
+
 // ─── Pro subscriptions (Dinaya billing its own customers) ───────────────────
 
 export const subscriptionStatusEnum = pgEnum("subscription_status", [
@@ -282,6 +317,9 @@ export const businessHolidays = pgTable("business_holidays", {
   businessId: uuid("business_id")
     .notNull()
     .references(() => businesses.id, { onDelete: "cascade" }),
+  locationId: uuid("location_id").references(() => locations.id, {
+    onDelete: "cascade",
+  }),
   date: date("date").notNull(),
   name: varchar("name", { length: 120 }).notNull(),
   isClosed: boolean("is_closed").default(true).notNull(),
@@ -310,6 +348,9 @@ export const bookings = pgTable("bookings", {
   staffId: uuid("staff_id")
     .notNull()
     .references(() => staff.id),
+  locationId: uuid("location_id").references(() => locations.id, {
+    onDelete: "set null",
+  }),
   clientId: uuid("client_id").references(() => clients.id, { onDelete: "set null" }),
   clientName: varchar("client_name", { length: 100 }).notNull(),
   clientPhone: varchar("client_phone", { length: 20 }).notNull(),
@@ -539,6 +580,7 @@ export const businessesRelations = relations(businesses, ({ many }) => ({
   services: many(services),
   serviceCategories: many(serviceCategories),
   staff: many(staff),
+  locations: many(locations),
   bookings: many(bookings),
   clients: many(clients),
   activityLog: many(activityLog),
@@ -576,6 +618,18 @@ export const servicesRelations = relations(services, ({ one, many }) => ({
   }),
   staffServices: many(staffServices),
   bookings: many(bookings),
+}));
+
+
+export const locationsRelations = relations(locations, ({ one, many }) => ({
+  business: one(businesses, { fields: [locations.businessId], references: [businesses.id] }),
+  staffLocations: many(staffLocations),
+  bookings: many(bookings),
+}));
+
+export const staffLocationsRelations = relations(staffLocations, ({ one }) => ({
+  staff: one(staff, { fields: [staffLocations.staffId], references: [staff.id] }),
+  location: one(locations, { fields: [staffLocations.locationId], references: [locations.id] }),
 }));
 
 export const staffRelations = relations(staff, ({ one, many }) => ({
@@ -730,3 +784,5 @@ export type MessageTemplate = typeof messageTemplates.$inferSelect;
 export type Communication = typeof communications.$inferSelect;
 export type MetricsDaily = typeof metricsDaily.$inferSelect;
 export type ApiKey = typeof apiKeys.$inferSelect;
+export type Location = typeof locations.$inferSelect;
+export type NewLocation = typeof locations.$inferInsert;

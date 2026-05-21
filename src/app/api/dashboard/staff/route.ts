@@ -1,15 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { services, staff, staffServices } from "@/db/schema";
+import { locations, services, staff, staffLocations, staffServices } from "@/db/schema";
 import { and, count, eq, inArray } from "drizzle-orm";
 import { PlanLimitError, requirePlanLimit } from "@/lib/plan";
 import { requireApiBusiness } from "@/lib/api-auth";
+import { getStaffLocationMap } from "@/lib/locations";
 import { z } from "@/lib/validation";
 
 const staffCreateSchema = z.object({
   name: z.string().trim().min(1, "Name is required.").max(100),
   bio: z.string().trim().max(1000).optional().nullable(),
   serviceIds: z.array(z.uuid()).optional().default([]),
+  locationIds: z.array(z.uuid()).optional().default([]),
 });
 
 export async function GET() {
@@ -22,7 +24,20 @@ export async function GET() {
     .from(staff)
     .where(eq(staff.businessId, businessId));
 
-  return NextResponse.json(rows);
+  const locationMap = await getStaffLocationMap(businessId);
+  const locationIdsByStaff = new Map<string, string[]>();
+  for (const row of locationMap) {
+    const list = locationIdsByStaff.get(row.staffId) ?? [];
+    list.push(row.locationId);
+    locationIdsByStaff.set(row.staffId, list);
+  }
+
+  return NextResponse.json(
+    rows.map((row) => ({
+      ...row,
+      locationIds: locationIdsByStaff.get(row.id) ?? [],
+    }))
+  );
 }
 
 export async function POST(req: NextRequest) {
@@ -39,6 +54,7 @@ export async function POST(req: NextRequest) {
   }
   const { name, bio } = parsed.data;
   const serviceIds = Array.from(new Set(parsed.data.serviceIds));
+  const locationIds = Array.from(new Set(parsed.data.locationIds));
 
   const [{ value: staffCount }] = await db
     .select({ value: count() })
@@ -64,6 +80,17 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  if (locationIds.length > 0) {
+    const validLocations = await db
+      .select({ id: locations.id })
+      .from(locations)
+      .where(and(eq(locations.businessId, businessId), inArray(locations.id, locationIds)));
+
+    if (validLocations.length !== locationIds.length) {
+      return NextResponse.json({ error: "One or more locations are invalid." }, { status: 400 });
+    }
+  }
+
   const member = await db.transaction(async (tx) => {
     const [created] = await tx
       .insert(staff)
@@ -74,6 +101,29 @@ export async function POST(req: NextRequest) {
       await tx.insert(staffServices).values(
         serviceIds.map((serviceId) => ({ staffId: created.id, serviceId }))
       );
+    }
+
+    if (locationIds.length > 0) {
+      await tx.insert(staffLocations).values(
+        locationIds.map((locationId, index) => ({
+          staffId: created.id,
+          locationId,
+          isPrimary: index === 0,
+        }))
+      );
+    } else {
+      const [defaultLoc] = await tx
+        .select({ id: locations.id })
+        .from(locations)
+        .where(and(eq(locations.businessId, businessId), eq(locations.isDefault, true)))
+        .limit(1);
+      if (defaultLoc) {
+        await tx.insert(staffLocations).values({
+          staffId: created.id,
+          locationId: defaultLoc.id,
+          isPrimary: true,
+        });
+      }
     }
 
     return created;

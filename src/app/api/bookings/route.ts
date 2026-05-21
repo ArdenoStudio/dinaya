@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { db } from "@/db";
-import { bookings, payments, businesses, services, staff, clients, staffServices } from "@/db/schema";
+import { bookings, payments, businesses, services, staff, clients, staffServices, staffLocations } from "@/db/schema";
 import { eq, and, lt, gt, gte, inArray, count } from "drizzle-orm";
 import { buildPayhereFormData, getPayhereUrl } from "@/lib/payhere";
 import { sendBookingConfirmationToClient, sendBookingNotificationToBusiness } from "@/lib/resend";
@@ -10,6 +10,7 @@ import { dispatchWebhooks } from "@/lib/webhooks";
 import { logActivity } from "@/lib/activity-log";
 import { normalizeSriLankanPhone } from "@/lib/phone";
 import { decryptSecret } from "@/lib/secrets";
+import { resolveBookingLocationId } from "@/lib/locations";
 import { PlanLimitError, PlanRequiredError, requirePlanLimit, requirePro } from "@/lib/plan";
 import { z } from "@/lib/validation";
 import { startOfMonth } from "date-fns";
@@ -18,6 +19,7 @@ const bookingSchema = z.object({
   businessId: z.uuid(),
   serviceId: z.uuid(),
   staffId: z.uuid(),
+  locationId: z.uuid().optional().nullable(),
   startsAt: z.iso.datetime(),
   endsAt: z.iso.datetime(),
   clientName: z.string().trim().min(1).max(100),
@@ -47,6 +49,7 @@ export async function POST(req: NextRequest) {
     businessId,
     serviceId,
     staffId,
+    locationId: requestedLocationId,
     startsAt,
     endsAt,
     clientName,
@@ -144,6 +147,35 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "This staff member cannot perform the selected service." }, { status: 400 });
   }
 
+  let resolvedLocationId: string;
+  try {
+    resolvedLocationId = await resolveBookingLocationId(businessId, requestedLocationId);
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Invalid branch." },
+      { status: 400 }
+    );
+  }
+
+  const [staffAtLocation] = await db
+    .select({ staffId: staffLocations.staffId })
+    .from(staffLocations)
+    .where(and(eq(staffLocations.staffId, staffId), eq(staffLocations.locationId, resolvedLocationId)))
+    .limit(1);
+
+  const [{ value: locationAssignmentCount }] = await db
+    .select({ value: count() })
+    .from(staffLocations)
+    .innerJoin(staff, eq(staff.id, staffLocations.staffId))
+    .where(eq(staff.businessId, businessId));
+
+  if (Number(locationAssignmentCount) > 0 && !staffAtLocation) {
+    return NextResponse.json(
+      { error: "This staff member is not available at the selected branch." },
+      { status: 400 }
+    );
+  }
+
   const expectedEnd = new Date(start.getTime() + service.durationMinutes * 60_000);
   if (Math.abs(expectedEnd.getTime() - end.getTime()) > 60_000) {
     return NextResponse.json({ error: "Booking duration does not match the selected service." }, { status: 400 });
@@ -237,6 +269,7 @@ export async function POST(req: NextRequest) {
         businessId,
         serviceId,
         staffId,
+        locationId: resolvedLocationId,
         clientId: client.id,
         clientName,
         clientPhone,

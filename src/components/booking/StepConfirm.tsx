@@ -65,6 +65,7 @@ export default function StepConfirm({ state, business, copy, onUpdate, onBack, o
         businessId: business.id,
         serviceId: state.service!.id,
         staffId: state.staff!.id,
+        locationId: state.location?.id ?? null,
         startsAt: state.timeSlot,
         endsAt: state.timeSlotEnd,
         clientName: state.clientName,

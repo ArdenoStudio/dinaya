@@ -10,6 +10,7 @@ import {
   Clock3,
   CreditCard,
   LayoutDashboard,
+  MapPin,
   Megaphone,
   Plug,
   Scissors,
@@ -43,6 +44,7 @@ const navGroups: { label: string; links: NavLinkConfig[] }[] = [
     links: [
       { href: "/dashboard/services", label: "Services", icon: Scissors },
       { href: "/dashboard/staff", label: "Staff", icon: UserRoundCheck },
+      { href: "/dashboard/locations", label: "Locations", icon: MapPin },
       { href: "/dashboard/availability", label: "Availability", icon: Clock3 },
     ],
   },
@@ -52,6 +54,7 @@ const navGroups: { label: string; links: NavLinkConfig[] }[] = [
       { href: "/dashboard/reviews", label: "Reviews", icon: Star },
       { href: "/dashboard/payments", label: "Payments", icon: CreditCard },
       { href: "/dashboard/marketing", label: "Marketing", icon: Megaphone },
+      { href: "/dashboard/ai", label: "AI Hub", icon: Bot },
       { href: "/dashboard/reports", label: "Reports", icon: BarChart3 },
     ],
   },

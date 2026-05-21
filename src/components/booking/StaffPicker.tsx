@@ -7,6 +7,8 @@ import { getEligibleStaff } from "@/lib/booking-staff";
 interface Props {
   allStaff: Staff[];
   staffServiceMap: { staffId: string; serviceId: string }[];
+  staffLocationMap?: { staffId: string; locationId: string }[];
+  locationId?: string | null;
   serviceId: string;
   selected: Staff | null;
   copy: BookingCopy;
@@ -17,13 +19,15 @@ interface Props {
 export default function StaffPicker({
   allStaff,
   staffServiceMap,
+  staffLocationMap,
+  locationId,
   serviceId,
   selected,
   copy,
   onSelect,
   compact,
 }: Props) {
-  const eligible = getEligibleStaff(allStaff, staffServiceMap, serviceId);
+  const eligible = getEligibleStaff(allStaff, staffServiceMap, serviceId, staffLocationMap, locationId);
   if (eligible.length <= 1) return null;
 
   return (

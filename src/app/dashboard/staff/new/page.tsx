@@ -4,17 +4,26 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 interface Service { id: string; name: string; }
+interface LocationOption { id: string; name: string; }
 
 export default function NewStaffPage() {
   const router = useRouter();
   const [form, setForm] = useState({ name: "", bio: "" });
   const [services, setServices] = useState<Service[]>([]);
+  const [locations, setLocations] = useState<LocationOption[]>([]);
+  const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch("/api/dashboard/services").then((r) => r.json()).then((d) => setServices(d ?? []));
+    Promise.all([
+      fetch("/api/dashboard/services").then((r) => r.json()),
+      fetch("/api/dashboard/locations").then((r) => r.json()),
+    ]).then(([serviceList, locationList]) => {
+      setServices(Array.isArray(serviceList) ? serviceList : []);
+      setLocations(Array.isArray(locationList) ? locationList.map((l: LocationOption) => ({ id: l.id, name: l.name })) : []);
+    });
   }, []);
 
   function toggleService(id: string) {
@@ -31,7 +40,7 @@ export default function NewStaffPage() {
     const res = await fetch("/api/dashboard/staff", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...form, serviceIds: selectedServices }),
+      body: JSON.stringify({ ...form, serviceIds: selectedServices, locationIds: selectedLocations }),
     });
 
     const data = await res.json();
@@ -69,6 +78,23 @@ export default function NewStaffPage() {
             </div>
           </div>
         )}
+        
+        {locations.length > 1 && (
+          <div>
+            <label className="text-sm font-medium">Works at</label>
+            <div className="mt-2 space-y-1">
+              {locations.map((loc) => (
+                <label key={loc.id} className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" checked={selectedLocations.includes(loc.id)}
+                    onChange={() => setSelectedLocations((prev) => prev.includes(loc.id) ? prev.filter((id) => id !== loc.id) : [...prev, loc.id])}
+                    className="rounded" />
+                  <span className="text-sm">{loc.name}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        )}
+
         {error && <p className="text-destructive text-sm">{error}</p>}
         <div className="flex gap-3 pt-2">
           <button type="button" onClick={() => router.back()} className="text-sm text-muted-foreground hover:text-foreground">Cancel</button>

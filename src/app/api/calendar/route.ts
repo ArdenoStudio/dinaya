@@ -2,7 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { and, eq, gte, inArray, lt } from "drizzle-orm";
 import { auth } from "@/auth";
 import { db } from "@/db";
-import { availability, availabilityOverrides, bookings, services, staff } from "@/db/schema";
+import {
+  availability,
+  availabilityOverrides,
+  bookings,
+  services,
+  staff,
+  staffLocations,
+} from "@/db/schema";
 
 function parseStaffIds(req: NextRequest): string[] {
   const params = req.nextUrl.searchParams;
@@ -31,14 +38,29 @@ export async function GET(req: NextRequest) {
   }
 
   const requestedStaffIds = parseStaffIds(req);
+  const locationId = req.nextUrl.searchParams.get("locationId")?.trim() || null;
+
+  let staffFilter = eq(staff.businessId, businessId);
+  if (requestedStaffIds.length > 0) {
+    staffFilter = and(staffFilter, inArray(staff.id, requestedStaffIds))!;
+  }
+
+  if (locationId) {
+    const atLocation = await db
+      .select({ staffId: staffLocations.staffId })
+      .from(staffLocations)
+      .where(eq(staffLocations.locationId, locationId));
+    const ids = atLocation.map((row) => row.staffId);
+    if (ids.length === 0) {
+      return NextResponse.json({ staff: [], bookings: [], availability: [], overrides: [] });
+    }
+    staffFilter = and(staffFilter, inArray(staff.id, ids))!;
+  }
+
   const staffRows = await db
     .select({ id: staff.id, name: staff.name })
     .from(staff)
-    .where(
-      requestedStaffIds.length > 0
-        ? and(eq(staff.businessId, businessId), inArray(staff.id, requestedStaffIds))
-        : eq(staff.businessId, businessId)
-    );
+    .where(staffFilter);
 
   const staffIds = staffRows.map((row) => row.id);
 
