@@ -173,6 +173,7 @@ export const DEFAULT_PLAN_CONFIG: PlanConfig = {
 export const ENFORCED_FEATURES: readonly PlanFeature[] = [
   ...AI_FEATURES,
   "automations",
+  "googleCalendarSync",
   "payments",
   "webhooks",
 ] as const;
@@ -257,6 +258,29 @@ export function savePlanConfig(next: PlanConfig): void {
   }
   writeFileSync(CONFIG_FILE, JSON.stringify(next, null, 2), "utf8");
   cached = next;
+  void import("@/lib/platform-settings").then(({ setPlatformSetting }) =>
+    setPlatformSetting("plan_config", next, next.updatedBy).catch(() => undefined),
+  );
+}
+
+export async function getPlanConfigAsync(): Promise<PlanConfig> {
+  try {
+    const { getPlatformSetting } = await import("@/lib/platform-settings");
+    const fromDb = await getPlatformSetting<Partial<PlanConfig>>("plan_config");
+    if (fromDb?.plans?.free && fromDb?.plans?.pro) {
+      cached = mergePlanConfig(fromDb);
+      return cached;
+    }
+  } catch {
+    // fall through
+  }
+  return getPlanConfig();
+}
+
+export async function savePlanConfigAsync(next: PlanConfig): Promise<void> {
+  savePlanConfig(next);
+  const { setPlatformSetting } = await import("@/lib/platform-settings");
+  await setPlatformSetting("plan_config", next, next.updatedBy);
 }
 
 // ─── Public API ───────────────────────────────────────────────────────────────

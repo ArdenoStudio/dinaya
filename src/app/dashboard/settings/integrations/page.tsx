@@ -1,13 +1,15 @@
 import Link from "next/link";
+import { and, count, eq } from "drizzle-orm";
 import { db } from "@/db";
-import { businesses, webhooks } from "@/db/schema";
+import { businesses, socialConnections, webhooks } from "@/db/schema";
 import { requireOwner } from "@/lib/auth";
 import { CustomDomainPanel } from "@/components/dashboard/CustomDomainPanel";
-import { count, eq } from "drizzle-orm";
+import { GoogleCalendarDisconnect } from "@/components/dashboard/GoogleCalendarDisconnect";
+import { GOOGLE_PROVIDER, googleOAuthConfigured } from "@/lib/google-calendar";
 
 export default async function IntegrationsPage() {
   const { businessId } = await requireOwner();
-  const [[business], [{ webhookCount }]] = await Promise.all([
+  const [[business], [{ webhookCount }], [{ googleCount }]] = await Promise.all([
     db
       .select({
         payhereEnabled: businesses.payhereEnabled,
@@ -19,7 +21,24 @@ export default async function IntegrationsPage() {
       .where(eq(businesses.id, businessId))
       .limit(1),
     db.select({ webhookCount: count() }).from(webhooks).where(eq(webhooks.businessId, businessId)),
+    db
+      .select({ googleCount: count() })
+      .from(socialConnections)
+      .where(
+        and(
+          eq(socialConnections.businessId, businessId),
+          eq(socialConnections.provider, GOOGLE_PROVIDER),
+          eq(socialConnections.isActive, true),
+        ),
+      ),
   ]);
+
+  const googleConnected = Number(googleCount) > 0;
+  const googleStatus = !googleOAuthConfigured()
+    ? "Env required"
+    : googleConnected
+      ? "Connected"
+      : "Not connected";
 
   const integrations = [
     {
@@ -37,18 +56,18 @@ export default async function IntegrationsPage() {
       action: "Manage",
     },
     {
+      name: "Google Calendar",
+      description: "Push confirmed bookings to your Google Calendar.",
+      status: googleStatus,
+      href: googleConnected ? "/dashboard/settings/integrations" : "/api/dashboard/integrations/google",
+      action: googleConnected ? "Connected" : googleOAuthConfigured() ? "Connect" : "Configure env",
+    },
+    {
       name: "Resend",
       description: "Transactional email for confirmations, reminders, and automations.",
       status: process.env.RESEND_API_KEY ? "Configured" : "Env required",
       href: "/dashboard/automations",
       action: "Use in automations",
-    },
-    {
-      name: "Google Calendar",
-      description: "Two-way calendar sync per staff member.",
-      status: "Planned",
-      href: "/dashboard/settings/integrations",
-      action: "Roadmap",
     },
     {
       name: "WhatsApp / SMS",
@@ -59,7 +78,7 @@ export default async function IntegrationsPage() {
     },
     {
       name: "API keys",
-      description: "Scoped API access for custom integrations.",
+      description: "Scoped API access for custom integrations and /api/v1 routes.",
       status: "Available",
       href: "/dashboard/settings/api-keys",
       action: "Manage keys",
@@ -87,9 +106,13 @@ export default async function IntegrationsPage() {
                 {item.status}
               </span>
             </div>
-            <Link href={item.href} className="mt-4 inline-flex text-sm font-medium text-primary hover:underline">
-              {item.action}
-            </Link>
+            {item.name === "Google Calendar" && googleConnected ? (
+              <GoogleCalendarDisconnect />
+            ) : (
+              <Link href={item.href} className="mt-4 inline-flex text-sm font-medium text-primary hover:underline">
+                {item.action}
+              </Link>
+            )}
           </div>
         ))}
       </div>

@@ -61,6 +61,19 @@ export async function requireApiBusiness({
     };
   }
 
+  if (session.user.readOnlyImpersonation) {
+    const method = req?.method ?? "GET";
+    if (method !== "GET") {
+      return {
+        ok: false,
+        response: NextResponse.json(
+          { error: "Read-only impersonation session — mutations are blocked." },
+          { status: 403 },
+        ),
+      };
+    }
+  }
+
   return {
     ok: true,
     context: {

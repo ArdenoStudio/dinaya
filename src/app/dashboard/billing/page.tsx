@@ -5,7 +5,7 @@ import { eq, and, inArray, desc } from "drizzle-orm";
 import { requireOwner } from "@/lib/auth";
 import {
   annualSavingsPercent,
-  getPlanConfig,
+  getPlanConfigAsync,
   isPaidPlanAvailable,
   planDisplayName,
   resolveEffectivePlan,
@@ -66,7 +66,7 @@ function PlanPricing({
 
 export default async function BillingPage() {
   const { businessId } = await requireOwner();
-  const config = getPlanConfig();
+  const config = await getPlanConfigAsync();
   const {
     proMonthlyPriceLkr,
     proAnnualPriceLkr,

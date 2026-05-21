@@ -21,6 +21,8 @@ export type BusinessContext = {
     id: string;
     name?: string | null;
   };
+  readOnlyImpersonation?: boolean;
+  impersonatedBy?: string;
 };
 
 export async function getBusinessContext(): Promise<BusinessContext | null> {
@@ -70,6 +72,8 @@ export async function getBusinessContext(): Promise<BusinessContext | null> {
       id: userId,
       name: session.user.name,
     },
+    readOnlyImpersonation: session.user.readOnlyImpersonation,
+    impersonatedBy: session.user.impersonatedBy,
   };
 }
 

@@ -11,6 +11,8 @@ export function CustomDomainPanel({
 }) {
   const [customDomain, setCustomDomain] = useState(initialDomain ?? "");
   const [verified, setVerified] = useState(initialVerified);
+  const [verificationHost, setVerificationHost] = useState<string | null>(null);
+  const [verificationValue, setVerificationValue] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
@@ -29,7 +31,9 @@ export function CustomDomainPanel({
       return;
     }
     setVerified(Boolean(data.customDomainVerified));
-    setMessage("Domain saved. Point a CNAME to dinaya.lk, then verify.");
+    setVerificationHost(data.verificationHost ?? null);
+    setVerificationValue(data.verificationValue ?? null);
+    setMessage("Domain saved. Add the TXT record below, then verify.");
   }
 
   async function verifyDomain() {
@@ -46,7 +50,7 @@ export function CustomDomainPanel({
       return;
     }
     setVerified(true);
-    setMessage("Custom domain marked as verified.");
+    setMessage("Custom domain verified.");
   }
 
   return (
@@ -71,9 +75,20 @@ export function CustomDomainPanel({
           disabled={!customDomain || verified}
           className="rounded-lg border px-4 py-2 text-sm font-medium disabled:opacity-50"
         >
-          {verified ? "Verified" : "Mark verified"}
+          {verified ? "Verified" : "Verify DNS"}
         </button>
       </form>
+      {verificationHost && verificationValue && !verified && (
+        <div className="rounded-lg border bg-muted/30 p-3 text-xs space-y-1">
+          <p>Add this TXT record at your DNS provider:</p>
+          <p>
+            Host: <code className="font-mono">{verificationHost}</code>
+          </p>
+          <p>
+            Value: <code className="font-mono break-all">{verificationValue}</code>
+          </p>
+        </div>
+      )}
       {error && <p className="text-sm text-red-600">{error}</p>}
       {message && <p className="text-sm text-green-700">{message}</p>}
     </div>

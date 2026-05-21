@@ -5,7 +5,7 @@ import { PublicNav } from "@/components/PublicNav";
 import { CTAPrimaryButton } from "@/components/cta-primary-button";
 import { LandingFooter } from "@/components/LandingFooter";
 import { auth } from "@/auth";
-import { annualSavingsPercent, getPlanConfig } from "@/lib/plan";
+import { annualSavingsPercent, getPlanConfigAsync } from "@/lib/plan";
 
 export const metadata: Metadata = {
   title: "Pricing — Free for Every Sri Lankan Business | Dinaya",
@@ -74,7 +74,7 @@ export default async function PricingPage() {
   const session = await auth();
   const upgradeHref = session?.user ? "/dashboard/billing" : "/register";
   const upgradeLabel = session?.user ? "Upgrade in dashboard" : "Get started";
-  const config = getPlanConfig();
+  const config = await getPlanConfigAsync();
   const proAnnualSavings = annualSavingsPercent(config.proMonthlyPriceLkr, config.proAnnualPriceLkr);
   const maxAnnualSavings = annualSavingsPercent(config.maxMonthlyPriceLkr, config.maxAnnualPriceLkr);
   return (

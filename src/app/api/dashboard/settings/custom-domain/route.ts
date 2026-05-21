@@ -3,8 +3,14 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { businesses } from "@/db/schema";
 import { requireApiBusiness } from "@/lib/api-auth";
-import { PlanRequiredError, requirePro } from "@/lib/plan";
 import { withApiHandler } from "@/lib/api-handler";
+import {
+  expectedVerificationRecord,
+  generateDomainVerificationToken,
+  verificationHost,
+  verifyDomainTxtRecord,
+} from "@/lib/custom-domain-dns";
+import { PlanRequiredError, requirePro } from "@/lib/plan";
 import { z } from "@/lib/validation";
 
 const domainSchema = z.object({
@@ -44,13 +50,30 @@ export async function PATCH(req: NextRequest) {
 
     if (parsed.data.verify) {
       const [business] = await db
-        .select({ customDomain: businesses.customDomain })
+        .select({
+          customDomain: businesses.customDomain,
+          customDomainVerificationToken: businesses.customDomainVerificationToken,
+        })
         .from(businesses)
         .where(eq(businesses.id, businessId))
         .limit(1);
-      if (!business?.customDomain) {
+      if (!business?.customDomain || !business.customDomainVerificationToken) {
         return NextResponse.json({ error: "Save a custom domain before verifying." }, { status: 400 });
       }
+
+      const verified = await verifyDomainTxtRecord(
+        business.customDomain,
+        business.customDomainVerificationToken,
+      );
+      if (!verified) {
+        return NextResponse.json(
+          {
+            error: `Add TXT record on ${verificationHost(business.customDomain)} with value ${expectedVerificationRecord(business.customDomainVerificationToken)}`,
+          },
+          { status: 400 },
+        );
+      }
+
       await db
         .update(businesses)
         .set({ customDomainVerified: true })
@@ -61,15 +84,27 @@ export async function PATCH(req: NextRequest) {
     const customDomain = parsed.data.customDomain
       ? normalizeDomain(parsed.data.customDomain)
       : null;
+    const customDomainVerificationToken = customDomain
+      ? generateDomainVerificationToken()
+      : null;
 
     await db
       .update(businesses)
       .set({
         customDomain,
         customDomainVerified: false,
+        customDomainVerificationToken,
       })
       .where(eq(businesses.id, businessId));
 
-    return NextResponse.json({ success: true, customDomain, customDomainVerified: false });
+    return NextResponse.json({
+      success: true,
+      customDomain,
+      customDomainVerified: false,
+      verificationHost: customDomain ? verificationHost(customDomain) : null,
+      verificationValue: customDomainVerificationToken
+        ? expectedVerificationRecord(customDomainVerificationToken)
+        : null,
+    });
   }, "Unable to update custom domain.");
 }

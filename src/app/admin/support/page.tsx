@@ -1,8 +1,10 @@
 import { desc, eq, ilike, or } from "drizzle-orm";
 import { LifeBuoy, Search } from "lucide-react";
+import Link from "next/link";
 import { db } from "@/db";
 import { businesses, users } from "@/db/schema";
 import { requirePlatformAdmin } from "@/lib/platform-admin";
+import { RefundPaymentForm } from "./RefundPaymentForm";
 import { SupportClient } from "./SupportClient";
 
 export const dynamic = "force-dynamic";
@@ -45,7 +47,7 @@ export default async function AdminSupportPage({
           </span>
         </div>
         <p className="mt-1 text-sm text-muted-foreground">
-          Resetting a password generates a one-time temporary password to share with the user.
+          Password resets, read-only impersonation, payment refunds, and webhook replay tools.
           All actions are recorded in the security audit log.
         </p>
       </div>
@@ -68,14 +70,17 @@ export default async function AdminSupportPage({
 
       <SupportClient users={rows} />
 
-      <div className="rounded-xl border border-amber-500/20 bg-amber-50/60 p-4 text-xs text-amber-900">
-        <p className="font-semibold">Additional support tools</p>
-        <ul className="mt-1 list-disc pl-5 text-amber-900/80">
-          <li>Impersonate a user (read-only session) — planned</li>
-          <li>Suspend / unsuspend accounts — available on the account detail page</li>
-          <li>Manually refund a booking payment — planned</li>
-          <li>Replay failed PayHere or webhook deliveries — planned</li>
-        </ul>
+      <RefundPaymentForm />
+
+      <div className="rounded-xl border bg-white p-5 text-sm">
+        <p className="font-semibold">Webhook replay</p>
+        <p className="mt-1 text-muted-foreground">
+          Failed webhook deliveries can be replayed from the{" "}
+          <Link href="/admin/webhooks" className="text-primary hover:underline">
+            webhook deliveries
+          </Link>{" "}
+          page.
+        </p>
       </div>
     </div>
   );

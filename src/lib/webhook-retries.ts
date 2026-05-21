@@ -123,4 +123,25 @@ export async function retryDueWebhookDeliveries(limit = 20): Promise<number> {
   return retried;
 }
 
-export { deliverWebhook as retrySingleDelivery };
+export async function replayWebhookDeliveryById(deliveryId: string): Promise<void> {
+  const [row] = await db
+    .select({
+      delivery: webhookDeliveries,
+      hook: webhooks,
+    })
+    .from(webhookDeliveries)
+    .innerJoin(webhooks, eq(webhookDeliveries.webhookId, webhooks.id))
+    .where(eq(webhookDeliveries.id, deliveryId))
+    .limit(1);
+
+  if (!row) {
+    throw new Error("Webhook delivery not found.");
+  }
+
+  const payload = row.delivery.requestBody as WebhookPayload | null;
+  if (!payload) {
+    throw new Error("Delivery payload missing.");
+  }
+
+  await deliverWebhook(row.hook, row.delivery.event as WebhookEvent, payload, row.delivery.id);
+}

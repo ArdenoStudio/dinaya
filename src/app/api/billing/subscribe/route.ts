@@ -7,7 +7,7 @@ import { parseSubscribeRequest } from "@/lib/billing-subscribe";
 import { generateOrderId } from "@/lib/utils";
 import { requireApiBusiness } from "@/lib/api-auth";
 import {
-  getPlanConfig,
+  getPlanConfigAsync,
   getSubscriptionPrice,
   isPaidPlanAvailable,
   payhereRecurrence,
@@ -72,7 +72,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const config = getPlanConfig();
+  const config = await getPlanConfigAsync();
   if (!isPaidPlanAvailable(targetPlan, config)) {
     return NextResponse.json(
       { error: `${targetPlan === "max" ? "Max" : "Pro"} is not available for purchase yet.` },
