@@ -96,11 +96,12 @@ export default async function PricingPage() {
         </FadeContainer>
       </section>
 
-      {/* Plans */}
-      <section className="max-w-5xl mx-auto px-6 pb-20">
-        <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-5">
+      {/* Plans — Free + Pro keep original half-width cards; Pro centered; Max can extend past container */}
+      <section className="px-6 pb-20 overflow-x-visible">
+        <div className="flex justify-center">
+          <div className="flex w-full max-w-[96rem] flex-col items-center gap-5 lg:flex-row lg:items-stretch lg:justify-center">
           {/* Free plan */}
-          <div className="relative rounded-2xl border bg-white p-8 flex flex-col shadow-sm">
+          <div className="relative flex w-full max-w-[calc((64rem-1.25rem)/2)] shrink-0 flex-col rounded-2xl border bg-white p-8 shadow-sm">
             <div className="flex items-center gap-2 mb-2">
               <h3 className="font-cal text-2xl tracking-tight">Free</h3>
               <span className="inline-flex items-center gap-1 rounded-full bg-violet-50 text-violet-700 ring-1 ring-violet-200 px-2 py-0.5 text-[11px] font-medium">
@@ -135,7 +136,7 @@ export default async function PricingPage() {
           </div>
 
           {/* Pro plan */}
-          <div className="relative rounded-2xl border bg-gradient-to-br from-gray-950 via-gray-900 to-blue-950 p-8 text-white flex flex-col shadow-xl shadow-blue-900/20 overflow-hidden">
+          <div className="relative z-10 flex w-full max-w-[calc((64rem-1.25rem)/2)] shrink-0 flex-col overflow-hidden rounded-2xl border bg-gradient-to-br from-gray-950 via-gray-900 to-blue-950 p-8 text-white shadow-xl shadow-blue-900/20 lg:-my-2">
             <div className="pointer-events-none absolute -top-16 -right-16 size-48 rounded-full bg-primary/30 blur-3xl" />
 
             <div className="relative">
@@ -186,7 +187,7 @@ export default async function PricingPage() {
           </div>
 
           {/* Max plan */}
-          <div className="relative rounded-2xl border bg-gradient-to-br from-indigo-950 via-violet-950 to-purple-950 p-8 text-white flex flex-col shadow-xl shadow-indigo-900/20 overflow-hidden lg:col-span-1 md:col-span-2">
+          <div className="relative flex w-full max-w-[calc((64rem-1.25rem)/2)] shrink-0 flex-col overflow-hidden rounded-2xl border bg-gradient-to-br from-indigo-950 via-violet-950 to-purple-950 p-8 text-white shadow-xl shadow-indigo-900/20 lg:translate-x-6 xl:translate-x-10">
             <div className="pointer-events-none absolute -top-16 -right-16 size-48 rounded-full bg-indigo-500/30 blur-3xl" />
 
             <div className="relative">
@@ -237,10 +238,12 @@ export default async function PricingPage() {
               </ul>
             </div>
           </div>
+          </div>
         </div>
 
+        <div className="mx-auto mt-10 max-w-5xl">
         {/* Value strip */}
-        <div className="mt-10 grid sm:grid-cols-3 gap-px bg-gray-200/70 rounded-2xl overflow-hidden border border-gray-200/70">
+        <div className="grid sm:grid-cols-3 gap-px bg-gray-200/70 rounded-2xl overflow-hidden border border-gray-200/70">
           {[
             { icon: "bi-shield-check", title: "No commissions", desc: "Keep 100% of every booking — we don't take a cut." },
             { icon: "bi-credit-card", title: "No setup fees", desc: "Create your page and go live in 5 minutes." },
@@ -254,6 +257,7 @@ export default async function PricingPage() {
               <p className="text-sm text-muted-foreground leading-relaxed">{it.desc}</p>
             </div>
           ))}
+        </div>
         </div>
       </section>
 
