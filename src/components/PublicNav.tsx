@@ -113,13 +113,14 @@ export function PublicNav() {
               Resources
               <i className="bi bi-chevron-down text-xs text-gray-400 group-hover:text-gray-600 transition-transform group-hover:rotate-180" aria-hidden="true" />
             </button>
-            <div className="invisible opacity-0 translate-y-1 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 transition-all absolute left-1/2 -translate-x-1/2 top-full pt-3 w-[680px] max-w-[calc(100vw-2rem)]">
-              <div className="rounded-2xl border bg-white shadow-xl shadow-gray-900/[0.06] p-5 grid grid-cols-2 gap-2">
+            <div className="invisible opacity-0 translate-y-1 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 transition-all absolute left-1/2 -translate-x-1/2 top-full pt-3 w-[720px] max-w-[calc(100vw-2rem)]">
+              <div className="rounded-2xl border bg-white shadow-xl shadow-gray-900/[0.06] p-5 grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {[
+                  { icon: "bi-journal-text", color: "bg-blue-600", title: "Documentation", desc: "Step-by-step guides with UI walkthroughs", href: "/docs" },
                   { icon: "bi-book-open", color: "bg-amber-500", title: "Getting started", desc: "Set up your page in 5 minutes", href: "/register" },
-                  { icon: "bi-question-circle", color: "bg-blue-600", title: "Help center", desc: "Answers to common questions", href: "/help" },
+                  { icon: "bi-question-circle", color: "bg-sky-600", title: "Help center", desc: "Answers to common questions", href: "/help" },
                   { icon: "bi-stars", color: "bg-violet-500", title: "What's new", desc: "Latest features and updates", href: "/whats-new" },
-                  { icon: "bi-file-text", color: "bg-amber-500", title: "Legal", desc: "Terms, privacy, refund policy", href: "/legal/terms" },
+                  { icon: "bi-file-text", color: "bg-gray-600", title: "Legal", desc: "Terms, privacy, refund policy", href: "/legal/terms" },
                 ].map((it) => (
                   <Link key={it.title} href={it.href} className="flex items-start gap-3 rounded-xl p-3 hover:bg-gray-50 transition-colors">
                     <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${it.color} text-white`}>

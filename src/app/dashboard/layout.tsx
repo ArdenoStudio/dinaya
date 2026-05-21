@@ -9,7 +9,7 @@ import { requireBusiness } from "@/lib/auth";
 import { getDashboardCopy } from "@/lib/dashboard-i18n";
 import type { DashboardLanguage } from "@/lib/dashboard-i18n";
 import { isPlatformAdmin } from "@/lib/platform-admin";
-import { ChevronsUpDown, Menu, Search, ShieldCheck, UserCircle } from "lucide-react";
+import { BookOpen, ChevronsUpDown, Menu, Search, ShieldCheck, UserCircle } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Dashboard | Dinaya",
@@ -42,6 +42,15 @@ export default async function DashboardLayout({
         </div>
         <SidebarNav />
         <div className="border-t px-6 py-4">
+          <Link
+            href="/docs"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mb-3 flex items-center gap-2 rounded-md px-3 py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          >
+            <BookOpen className="size-3.5 shrink-0" aria-hidden="true" />
+            Help &amp; docs
+          </Link>
           {showAdminLink && (
             <Link
               href="/admin"
