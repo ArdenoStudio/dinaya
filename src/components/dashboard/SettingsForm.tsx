@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
+import { isOptimizableRemoteImage } from "@/lib/utils";
 
 type SettingsBusiness = {
   address: string | null;
@@ -309,8 +311,14 @@ export default function SettingsForm({ business }: Props) {
             <div className="grid grid-cols-3 gap-2">
               {galleryImages.map((url) => (
                 <div key={url} className="relative group aspect-square rounded-lg overflow-hidden border bg-muted/20">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={url} alt="" className="w-full h-full object-cover" />
+                  <Image
+                    src={url}
+                    alt=""
+                    fill
+                    sizes="120px"
+                    className="object-cover"
+                    unoptimized={!isOptimizableRemoteImage(url)}
+                  />
                   <button
                     type="button"
                     onClick={() => removeGalleryImage(url)}

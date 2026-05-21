@@ -3,6 +3,7 @@ import { businesses } from "@/db/schema";
 import { requireBusiness } from "@/lib/auth";
 import { eq } from "drizzle-orm";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 
 export default async function MarketingPage() {
@@ -65,8 +66,13 @@ export default async function MarketingPage() {
 
           <div className="rounded-xl border bg-white p-5">
             <h2 className="mb-3 font-semibold">QR poster</h2>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={qrPng} alt="Booking page QR code" className="mx-auto size-52 rounded-lg border p-3" />
+            <Image
+              src={qrPng}
+              alt="Booking page QR code"
+              width={208}
+              height={208}
+              className="mx-auto size-52 rounded-lg border p-3"
+            />
             <p className="mt-3 text-center text-xs text-muted-foreground">
               Add this to your counter, Instagram story, or printed price list.
             </p>

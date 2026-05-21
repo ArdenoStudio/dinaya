@@ -1,10 +1,12 @@
 import { notFound } from "next/navigation";
+import Image from "next/image";
 import { db } from "@/db";
 import { businesses, services, staff, staffServices, reviews } from "@/db/schema";
 import { listActiveLocations, getStaffLocationMap, ensureBusinessHasDefaultLocation } from "@/lib/locations";
 import { eq, and, avg, count } from "drizzle-orm";
 import BookingWizard from "@/components/booking/BookingWizard";
 import { getBookingCopy } from "@/lib/i18n";
+import { isOptimizableRemoteImage } from "@/lib/utils";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -48,11 +50,13 @@ export default async function BookingPage({ params }: Props) {
       address: businesses.address,
       bankTransferInstructions: businesses.bankTransferInstructions,
       cancellationPolicy: businesses.cancellationPolicy,
+      deletedAt: businesses.deletedAt,
       description: businesses.description,
       depositPolicy: businesses.depositPolicy,
       facebookUrl: businesses.facebookUrl,
       galleryImages: businesses.galleryImages,
       instagramUrl: businesses.instagramUrl,
+      isSuspended: businesses.isSuspended,
       language: businesses.language,
       lankaqrImageUrl: businesses.lankaqrImageUrl,
       logoUrl: businesses.logoUrl,
@@ -66,7 +70,20 @@ export default async function BookingPage({ params }: Props) {
     .where(eq(businesses.slug, slug))
     .limit(1);
 
-  if (!business) notFound();
+  if (!business || business.deletedAt) notFound();
+
+  if (business.isSuspended) {
+    return (
+      <main className="min-h-screen bg-gray-50 flex items-center justify-center px-6">
+        <div className="max-w-md rounded-2xl border bg-white p-8 text-center shadow-sm">
+          <h1 className="font-cal text-2xl tracking-tight">{business.name}</h1>
+          <p className="mt-3 text-sm text-muted-foreground">
+            Online booking is temporarily unavailable for this business.
+          </p>
+        </div>
+      </main>
+    );
+  }
 
   await ensureBusinessHasDefaultLocation(business.id);
 
@@ -164,8 +181,14 @@ export default async function BookingPage({ params }: Props) {
                       : "aspect-square"
                   }`}
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={url} alt="" className="h-full w-full object-cover" />
+                  <Image
+                    src={url}
+                    alt=""
+                    fill
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                    className="object-cover"
+                    unoptimized={!isOptimizableRemoteImage(url)}
+                  />
                   {i === 5 && gallery.length > 6 && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black/50">
                       <span className="text-lg font-semibold text-white">+{gallery.length - 6}</span>
@@ -294,11 +317,13 @@ export default async function BookingPage({ params }: Props) {
                   className="flex flex-col items-center gap-2 rounded-xl border border-gray-100 bg-white p-4 text-center"
                 >
                   {member.avatarUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
+                    <Image
                       src={member.avatarUrl}
                       alt={member.name}
+                      width={56}
+                      height={56}
                       className="size-14 rounded-full border object-cover"
+                      unoptimized={!isOptimizableRemoteImage(member.avatarUrl)}
                     />
                   ) : (
                     <div className="flex size-14 items-center justify-center rounded-full border border-blue-100 bg-blue-50 text-xl font-bold text-blue-600">

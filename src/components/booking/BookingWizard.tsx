@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
+import Image from "next/image";
 import { format, parseISO } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import type { Location, Staff } from "@/db/schema";
@@ -12,7 +13,7 @@ import StaffPicker from "./StaffPicker";
 import BookingDesktopSummary from "./BookingDesktopSummary";
 import { getBookingCopy } from "@/lib/i18n";
 import { getEligibleStaff, pickDefaultStaff } from "@/lib/booking-staff";
-import { formatLkr } from "@/lib/utils";
+import { formatLkr, isOptimizableRemoteImage } from "@/lib/utils";
 import BookingBranding from "./BookingBranding";
 
 const COLOMBO_TZ = "Asia/Colombo";
@@ -573,12 +574,15 @@ function BusinessAvatar({
 }) {
   const dim = size === "lg" ? "size-12 rounded-xl" : "size-[42px] rounded-[13px]";
   if (logoUrl) {
+    const pixelSize = size === "lg" ? 48 : 42;
     return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
+      <Image
         src={logoUrl}
         alt={name}
+        width={pixelSize}
+        height={pixelSize}
         className={`${dim} shrink-0 object-cover ${onDark ? "ring-2 ring-white/30" : "ring-1 ring-white/25"}`}
+        unoptimized={!isOptimizableRemoteImage(logoUrl)}
       />
     );
   }
