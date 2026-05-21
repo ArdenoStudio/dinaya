@@ -92,7 +92,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Password must be at least 8 characters." }, { status: 400 });
   }
 
-  // Slug validation
   if (!/^[a-z0-9-]+$/.test(slug)) {
     return NextResponse.json(
       { error: "Slug may only contain lowercase letters, numbers, and hyphens." },
@@ -100,7 +99,6 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Check slug uniqueness
   const [existingBusiness] = await db
     .select({ id: businesses.id })
     .from(businesses)
@@ -111,7 +109,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "That URL is already taken. Try a different one." }, { status: 409 });
   }
 
-  // Check email uniqueness
   const [existingUser] = await db
     .select({ id: users.id })
     .from(users)
@@ -126,107 +123,106 @@ export async function POST(req: NextRequest) {
   const selectedBusinessType = cleanBusinessType(businessType);
   const selectedLanguage = cleanLanguage(language);
 
-  await db.transaction(async (tx) => {
-    const [business] = await tx
-      .insert(businesses)
-      .values({
-        slug,
-        name: businessName,
-        email,
-        businessType: selectedBusinessType,
-        language: selectedLanguage,
-        cancellationPolicy: "Please contact the business as early as possible if you need to cancel or reschedule.",
-        depositPolicy: "Some services may require a deposit to reduce no-shows.",
-      })
-      .returning({ id: businesses.id });
+  // neon-http does not support db.transaction(); use sequential inserts.
+  const [business] = await db
+    .insert(businesses)
+    .values({
+      slug,
+      name: businessName,
+      email,
+      businessType: selectedBusinessType,
+      language: selectedLanguage,
+      cancellationPolicy: "Please contact the business as early as possible if you need to cancel or reschedule.",
+      depositPolicy: "Some services may require a deposit to reduce no-shows.",
+    })
+    .returning({ id: businesses.id });
 
-    await tx.insert(users).values({
+  await db.insert(users).values({
+    businessId: business.id,
+    name,
+    email,
+    passwordHash,
+    role: "owner",
+  });
+
+  const [ownerStaff] = await db
+    .insert(staff)
+    .values({
       businessId: business.id,
       name,
-      email,
-      passwordHash,
-      role: "owner",
-    });
+      bio: "Owner",
+      isActive: true,
+    })
+    .returning({ id: staff.id });
 
-    const [ownerStaff] = await tx
-      .insert(staff)
-      .values({
+  const serviceRows = await db
+    .insert(services)
+    .values(
+      PRESET_SERVICES[selectedBusinessType].map((preset) => ({
         businessId: business.id,
-        name,
-        bio: "Owner",
-        isActive: true,
-      })
-      .returning({ id: staff.id });
+        ...preset,
+        requiresPayment: false,
+        depositPercent: 0,
+        beforeBuffer: 0,
+        afterBuffer: 0,
+        minimumNoticeHours: 2,
+      }))
+    )
+    .returning({ id: services.id });
 
-    const serviceRows = await tx
-      .insert(services)
-      .values(
-        PRESET_SERVICES[selectedBusinessType].map((preset) => ({
-          businessId: business.id,
-          ...preset,
-          requiresPayment: false,
-          depositPercent: 0,
-          beforeBuffer: 0,
-          afterBuffer: 0,
-          minimumNoticeHours: 2,
-        }))
-      )
-      .returning({ id: services.id });
-
-    if (serviceRows.length > 0) {
-      await tx.insert(staffServices).values(
-        serviceRows.map((service) => ({
-          staffId: ownerStaff.id,
-          serviceId: service.id,
-        }))
-      );
-    }
-
-    await tx.insert(availability).values(
-      [1, 2, 3, 4, 5].map((dayOfWeek) => ({
+  if (serviceRows.length > 0) {
+    await db.insert(staffServices).values(
+      serviceRows.map((service) => ({
         staffId: ownerStaff.id,
-        dayOfWeek,
-        startTime: "09:00",
-        endTime: "17:00",
+        serviceId: service.id,
       }))
     );
+  }
 
-    const [defaultLocation] = await tx
-      .insert(locations)
-      .values({
-        businessId: business.id,
-        name: businessName,
-        slug: "main",
-        timezone: "Asia/Colombo",
-        isDefault: true,
-        isActive: true,
-        sortOrder: 0,
-      })
-      .returning({ id: locations.id });
-
-    await tx.insert(staffLocations).values({
+  await db.insert(availability).values(
+    [1, 2, 3, 4, 5].map((dayOfWeek) => ({
       staffId: ownerStaff.id,
-      locationId: defaultLocation.id,
-      isPrimary: true,
-    });
+      dayOfWeek,
+      startTime: "09:00",
+      endTime: "17:00",
+    }))
+  );
 
-    await tx.insert(messageTemplates).values([
-      {
-        businessId: business.id,
-        channel: "whatsapp",
-        name: "Booking confirmation",
-        body: "Hi {{clientName}}, your {{serviceName}} booking at {{businessName}} is confirmed for {{appointmentTime}}.",
-        variables: ["clientName", "serviceName", "businessName", "appointmentTime"],
-      },
-      {
-        businessId: business.id,
-        channel: "whatsapp",
-        name: "Appointment reminder",
-        body: "Hi {{clientName}}, reminder: your {{serviceName}} booking at {{businessName}} is on {{appointmentTime}}.",
-        variables: ["clientName", "serviceName", "businessName", "appointmentTime"],
-      },
-    ]);
+  const [defaultLocation] = await db
+    .insert(locations)
+    .values({
+      businessId: business.id,
+      name: businessName,
+      slug: "main",
+      timezone: "Asia/Colombo",
+      isDefault: true,
+      isActive: true,
+      sortOrder: 0,
+    })
+    .returning({ id: locations.id });
+
+  await db.insert(staffLocations).values({
+    staffId: ownerStaff.id,
+    locationId: defaultLocation.id,
+    isPrimary: true,
   });
+
+  await db.insert(messageTemplates).values([
+    {
+      businessId: business.id,
+      channel: "whatsapp",
+      name: "Booking confirmation",
+      body: "Hi {{clientName}}, your {{serviceName}} booking at {{businessName}} is confirmed for {{appointmentTime}}.",
+      variables: ["clientName", "serviceName", "businessName", "appointmentTime"],
+    },
+    {
+      businessId: business.id,
+      channel: "whatsapp",
+      name: "Appointment reminder",
+      body: "Hi {{clientName}}, reminder: your {{serviceName}} booking at {{businessName}} is on {{appointmentTime}}.",
+      variables: ["clientName", "serviceName", "businessName", "appointmentTime"],
+    },
+  ]);
 
   return NextResponse.json({ success: true }, { status: 201 });
 }

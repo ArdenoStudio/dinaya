@@ -80,15 +80,13 @@ export async function POST(
     }
   }
 
-  await db.transaction(async (tx) => {
-    await tx.delete(staffServices).where(eq(staffServices.serviceId, serviceId));
+  await db.delete(staffServices).where(eq(staffServices.serviceId, serviceId));
 
-    if (staffIds.length > 0) {
-      await tx.insert(staffServices).values(
-        staffIds.map((staffId) => ({ staffId, serviceId }))
-      );
-    }
-  });
+  if (staffIds.length > 0) {
+    await db.insert(staffServices).values(
+      staffIds.map((staffId) => ({ staffId, serviceId }))
+    );
+  }
 
   return NextResponse.json({ success: true });
 }

@@ -91,43 +91,39 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  const member = await db.transaction(async (tx) => {
-    const [created] = await tx
-      .insert(staff)
-      .values({ businessId, name, bio: bio || null })
-      .returning({ id: staff.id });
+  const [created] = await db
+    .insert(staff)
+    .values({ businessId, name, bio: bio || null })
+    .returning({ id: staff.id });
 
-    if (serviceIds.length > 0) {
-      await tx.insert(staffServices).values(
-        serviceIds.map((serviceId) => ({ staffId: created.id, serviceId }))
-      );
+  if (serviceIds.length > 0) {
+    await db.insert(staffServices).values(
+      serviceIds.map((serviceId) => ({ staffId: created.id, serviceId }))
+    );
+  }
+
+  if (locationIds.length > 0) {
+    await db.insert(staffLocations).values(
+      locationIds.map((locationId, index) => ({
+        staffId: created.id,
+        locationId,
+        isPrimary: index === 0,
+      }))
+    );
+  } else {
+    const [defaultLoc] = await db
+      .select({ id: locations.id })
+      .from(locations)
+      .where(and(eq(locations.businessId, businessId), eq(locations.isDefault, true)))
+      .limit(1);
+    if (defaultLoc) {
+      await db.insert(staffLocations).values({
+        staffId: created.id,
+        locationId: defaultLoc.id,
+        isPrimary: true,
+      });
     }
+  }
 
-    if (locationIds.length > 0) {
-      await tx.insert(staffLocations).values(
-        locationIds.map((locationId, index) => ({
-          staffId: created.id,
-          locationId,
-          isPrimary: index === 0,
-        }))
-      );
-    } else {
-      const [defaultLoc] = await tx
-        .select({ id: locations.id })
-        .from(locations)
-        .where(and(eq(locations.businessId, businessId), eq(locations.isDefault, true)))
-        .limit(1);
-      if (defaultLoc) {
-        await tx.insert(staffLocations).values({
-          staffId: created.id,
-          locationId: defaultLoc.id,
-          isPrimary: true,
-        });
-      }
-    }
-
-    return created;
-  });
-
-  return NextResponse.json({ id: member.id }, { status: 201 });
+  return NextResponse.json({ id: created.id }, { status: 201 });
 }
