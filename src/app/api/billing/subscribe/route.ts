@@ -5,15 +5,15 @@ import { eq, and, inArray } from "drizzle-orm";
 import { buildRecurringFormData, PAYHERE_CHECKOUT_URL } from "@/lib/payhere-subscriptions";
 import { generateOrderId } from "@/lib/utils";
 import { requireApiBusiness } from "@/lib/api-auth";
-import { planRank, type Plan } from "@/lib/plan";
+import { getPlanConfig, planRank, type Plan } from "@/lib/plan";
 
-const PRO_PRICE_LKR = Number(process.env.DINAYA_PRO_MONTHLY_PRICE_LKR ?? "2500");
-const MAX_PRICE_LKR = Number(process.env.DINAYA_MAX_MONTHLY_PRICE_LKR ?? "3990");
-
-const PLAN_PRICES: Record<"pro" | "max", number> = {
-  pro: PRO_PRICE_LKR,
-  max: MAX_PRICE_LKR,
-};
+function getPlanPrices() {
+  const config = getPlanConfig();
+  return {
+    pro: config.proMonthlyPriceLkr,
+    max: config.maxMonthlyPriceLkr,
+  } satisfies Record<"pro" | "max", number>;
+}
 
 const PLAN_LABELS: Record<"pro" | "max", string> = {
   pro: "Dinaya Pro — monthly subscription",
@@ -92,7 +92,7 @@ export async function POST(req: Request) {
 
   const orderId = generateOrderId();
   const nameParts = (owner?.name ?? business.name).split(" ");
-  const amountLkr = PLAN_PRICES[targetPlan];
+  const amountLkr = getPlanPrices()[targetPlan];
 
   await db.insert(subscriptions).values({
     businessId,

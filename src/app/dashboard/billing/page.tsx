@@ -4,16 +4,14 @@ import { auth } from "@/auth";
 import { db } from "@/db";
 import { businesses, subscriptions } from "@/db/schema";
 import { eq, and, inArray, desc } from "drizzle-orm";
-import { planDisplayName, type Plan } from "@/lib/plan";
+import { getPlanConfig, planDisplayName, type Plan } from "@/lib/plan";
 import { UpgradeButton } from "./UpgradeButton";
 import { CancelButton } from "./CancelButton";
-
-const PRO_PRICE_LKR = Number(process.env.DINAYA_PRO_MONTHLY_PRICE_LKR ?? "2500");
-const MAX_PRICE_LKR = Number(process.env.DINAYA_MAX_MONTHLY_PRICE_LKR ?? "3990");
 
 export default async function BillingPage() {
   const session = await auth();
   if (!session) redirect("/login");
+  const { proMonthlyPriceLkr, maxMonthlyPriceLkr } = getPlanConfig();
   const businessId = (session.user as { businessId: string }).businessId;
 
   const [business] = await db
@@ -83,7 +81,7 @@ export default async function BillingPage() {
             </p>
             <div className="mt-4 flex items-baseline gap-2">
               <span className="text-3xl font-bold tracking-tight">
-                Rs {PRO_PRICE_LKR.toLocaleString("en-LK")}
+                Rs {proMonthlyPriceLkr.toLocaleString("en-LK")}
               </span>
               <span className="text-sm text-neutral-500">/ month</span>
             </div>
@@ -101,7 +99,7 @@ export default async function BillingPage() {
             </p>
             <div className="mt-4 flex items-baseline gap-2">
               <span className="text-3xl font-bold tracking-tight">
-                Rs {MAX_PRICE_LKR.toLocaleString("en-LK")}
+                Rs {maxMonthlyPriceLkr.toLocaleString("en-LK")}
               </span>
               <span className="text-sm text-neutral-500">/ month</span>
             </div>
@@ -124,7 +122,7 @@ export default async function BillingPage() {
           </p>
           <div className="mt-4 flex items-baseline gap-2">
             <span className="text-3xl font-bold tracking-tight">
-              Rs {MAX_PRICE_LKR.toLocaleString("en-LK")}
+              Rs {maxMonthlyPriceLkr.toLocaleString("en-LK")}
             </span>
             <span className="text-sm text-neutral-500">/ month</span>
           </div>
