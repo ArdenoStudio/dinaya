@@ -26,6 +26,7 @@ export const dashboardCopy = {
       reports: "Reports",
       integrations: "Integrations",
       automations: "Automations",
+      billing: "Plan & billing",
       settings: "Settings",
     },
     layout: {
@@ -84,6 +85,7 @@ export const dashboardCopy = {
       reports: "වාර්තා",
       integrations: "ඒකාබද්ධ කිරීම්",
       automations: "ස්වයංක්‍රිය ක්‍රියා",
+      billing: "සැලසුම සහ ගෙවීම",
       settings: "සැකසීම්",
     },
     layout: {
@@ -142,6 +144,7 @@ export const dashboardCopy = {
       reports: "அறிக்கைகள்",
       integrations: "Integrations",
       automations: "Automations",
+      billing: "திட்டம் & பில்லிங்",
       settings: "அமைப்புகள்",
     },
     layout: {

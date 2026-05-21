@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { hasApiKeyAuth, requireApiKey } from "@/lib/api-key-auth";
+import {
+  businessInactiveMessage,
+  getBusinessActiveStatus,
+} from "@/lib/business-active";
 
 export type ApiBusinessContext = {
   businessId: string;
@@ -16,6 +20,12 @@ type ApiAuthResult =
   | { ok: true; context: ApiBusinessContext }
   | { ok: false; response: NextResponse };
 
+async function rejectInactiveBusiness(businessId: string): Promise<NextResponse | null> {
+  const status = await getBusinessActiveStatus(businessId);
+  if (status === "active") return null;
+  return NextResponse.json({ error: businessInactiveMessage(status) }, { status: 403 });
+}
+
 export async function requireApiBusiness({
   ownerOnly = false,
   req,
@@ -28,6 +38,12 @@ export async function requireApiBusiness({
   if (req && apiKeyScope && hasApiKeyAuth(req)) {
     const keyResult = await requireApiKey(req, apiKeyScope);
     if (!keyResult.ok) return keyResult;
+
+    const inactiveResponse = await rejectInactiveBusiness(keyResult.context.businessId);
+    if (inactiveResponse) {
+      return { ok: false, response: inactiveResponse };
+    }
+
     return {
       ok: true,
       context: {
@@ -72,6 +88,11 @@ export async function requireApiBusiness({
         ),
       };
     }
+  }
+
+  const inactiveResponse = await rejectInactiveBusiness(businessId);
+  if (inactiveResponse) {
+    return { ok: false, response: inactiveResponse };
   }
 
   return {

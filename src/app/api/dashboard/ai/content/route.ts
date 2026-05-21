@@ -5,6 +5,7 @@ import { locations } from "@/db/schema";
 import { requireApiBusiness } from "@/lib/api-auth";
 import { generateThirtyDayContentCalendar, listContentCalendar } from "@/lib/ai/content";
 import { PlanRequiredError, requirePro } from "@/lib/plan";
+import { withDashboardRateLimit } from "@/lib/rate-limit";
 import { z } from "@/lib/validation";
 
 const contentRequestSchema = z.object({
@@ -62,6 +63,10 @@ export async function POST(req: NextRequest) {
   const authResult = await requireApiBusiness({ ownerOnly: true });
   if (!authResult.ok) return authResult.response;
   const { businessId } = authResult.context;
+
+  const rateLimit = await withDashboardRateLimit(req, businessId);
+  if (!rateLimit.ok) return rateLimit.response;
+
   const accessError = await requireAiContentAccess(businessId);
   if (accessError) return accessError;
 

@@ -108,6 +108,19 @@ export async function withRateLimit(
   return { ok: false, response: tooManyRequests(result.retryAfter) };
 }
 
+export const DASHBOARD_MUTATION_LIMIT: RateLimitConfig = {
+  scope: "dashboard-mutation",
+  limit: 120,
+  windowSeconds: 60,
+};
+
+export async function withDashboardRateLimit(
+  req: NextRequest,
+  businessId: string,
+): Promise<{ ok: true } | { ok: false; response: NextResponse }> {
+  return withRateLimit(req, DASHBOARD_MUTATION_LIMIT, { keySuffix: businessId });
+}
+
 /** @deprecated Use withRateLimit */
 export function checkRateLimit(
   req: NextRequest,

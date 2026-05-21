@@ -18,9 +18,10 @@ import {
   Star,
   UserRoundCheck,
   Users,
+  Wallet,
   type LucideIcon,
 } from "lucide-react";
-import { useDashboardCopy } from "@/components/dashboard/DashboardLocaleProvider";
+import { useDashboardCopy, useDashboardRole } from "@/components/dashboard/DashboardLocaleProvider";
 import type { DashboardCopy } from "@/lib/dashboard-i18n";
 import { cn } from "@/lib/utils";
 
@@ -29,6 +30,7 @@ type NavLinkConfig = {
   href: string;
   icon: LucideIcon;
   labelKey: keyof DashboardCopy["nav"];
+  ownerOnly?: boolean;
 };
 
 const navGroups: { labelKey: keyof DashboardCopy["navGroups"]; links: NavLinkConfig[] }[] = [
@@ -44,28 +46,29 @@ const navGroups: { labelKey: keyof DashboardCopy["navGroups"]; links: NavLinkCon
   {
     labelKey: "catalog",
     links: [
-      { href: "/dashboard/services", labelKey: "services", icon: Scissors },
-      { href: "/dashboard/staff", labelKey: "staff", icon: UserRoundCheck },
-      { href: "/dashboard/locations", labelKey: "locations", icon: MapPin },
+      { href: "/dashboard/services", labelKey: "services", icon: Scissors, ownerOnly: true },
+      { href: "/dashboard/staff", labelKey: "staff", icon: UserRoundCheck, ownerOnly: true },
+      { href: "/dashboard/locations", labelKey: "locations", icon: MapPin, ownerOnly: true },
       { href: "/dashboard/availability", labelKey: "availability", icon: Clock3 },
     ],
   },
   {
     labelKey: "growth",
     links: [
-      { href: "/dashboard/reviews", labelKey: "reviews", icon: Star },
-      { href: "/dashboard/payments", labelKey: "payments", icon: CreditCard },
-      { href: "/dashboard/marketing", labelKey: "marketing", icon: Megaphone },
-      { href: "/dashboard/ai", labelKey: "aiHub", icon: Bot },
+      { href: "/dashboard/reviews", labelKey: "reviews", icon: Star, ownerOnly: true },
+      { href: "/dashboard/payments", labelKey: "payments", icon: CreditCard, ownerOnly: true },
+      { href: "/dashboard/marketing", labelKey: "marketing", icon: Megaphone, ownerOnly: true },
+      { href: "/dashboard/ai", labelKey: "aiHub", icon: Bot, ownerOnly: true },
       { href: "/dashboard/reports", labelKey: "reports", icon: BarChart3 },
     ],
   },
   {
     labelKey: "configure",
     links: [
-      { href: "/dashboard/settings/integrations", labelKey: "integrations", icon: Plug },
-      { href: "/dashboard/automations", labelKey: "automations", icon: Bot },
-      { href: "/dashboard/settings", labelKey: "settings", icon: Settings },
+      { href: "/dashboard/settings/integrations", labelKey: "integrations", icon: Plug, ownerOnly: true },
+      { href: "/dashboard/automations", labelKey: "automations", icon: Bot, ownerOnly: true },
+      { href: "/dashboard/billing", labelKey: "billing", icon: Wallet, ownerOnly: true },
+      { href: "/dashboard/settings", labelKey: "settings", icon: Settings, ownerOnly: true },
     ],
   },
 ];
@@ -104,27 +107,34 @@ function NavLink({
 export function SidebarNav() {
   const pathname = usePathname();
   const copy = useDashboardCopy();
+  const role = useDashboardRole();
+  const isOwner = role === "owner";
 
   return (
     <nav className="flex-1 overflow-y-auto px-3 py-4" aria-label="Main navigation">
       <div className="space-y-5">
-        {navGroups.map((group) => (
-          <div key={group.labelKey}>
-            <p className="mb-2 px-3 text-[0.68rem] font-semibold uppercase tracking-wider text-muted-foreground/70">
-              {copy.navGroups[group.labelKey]}
-            </p>
-            <div className="space-y-1">
-              {group.links.map((link) => (
-                <NavLink
-                  key={link.href}
-                  link={link}
-                  pathname={pathname}
-                  label={copy.nav[link.labelKey]}
-                />
-              ))}
+        {navGroups.map((group) => {
+          const links = group.links.filter((link) => isOwner || !link.ownerOnly);
+          if (links.length === 0) return null;
+
+          return (
+            <div key={group.labelKey}>
+              <p className="mb-2 px-3 text-[0.68rem] font-semibold uppercase tracking-wider text-muted-foreground/70">
+                {copy.navGroups[group.labelKey]}
+              </p>
+              <div className="space-y-1">
+                {links.map((link) => (
+                  <NavLink
+                    key={link.href}
+                    link={link}
+                    pathname={pathname}
+                    label={copy.nav[link.labelKey]}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </nav>
   );

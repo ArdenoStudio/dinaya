@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { businesses, staff, users } from "@/db/schema";
 import { requireApiBusiness } from "@/lib/api-auth";
 import { withApiHandler } from "@/lib/api-handler";
+import { withDashboardRateLimit } from "@/lib/rate-limit";
 import { PlanLimitError, requirePlanLimit } from "@/lib/plan";
 import { sendStaffInviteEmail } from "@/lib/resend";
 import { buildStaffInviteUrl, createStaffInviteToken } from "@/lib/staff-invite";
@@ -18,6 +19,9 @@ export async function POST(req: NextRequest) {
   const authResult = await requireApiBusiness({ ownerOnly: true });
   if (!authResult.ok) return authResult.response;
   const { businessId, user } = authResult.context;
+
+  const rateLimit = await withDashboardRateLimit(req, businessId);
+  if (!rateLimit.ok) return rateLimit.response;
 
   return withApiHandler(async () => {
     const parsed = inviteSchema.safeParse(await req.json());

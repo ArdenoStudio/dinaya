@@ -30,7 +30,7 @@ export default function HelpPage() {
                   Email support
                 </a>
                 <a
-                  href="https://wa.me/94XXXXXXXXX"
+                  href="https://wa.me/94770000000"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center justify-center gap-2 rounded-xl bg-white/10 border border-white/20 text-white px-5 py-3 text-sm font-medium"

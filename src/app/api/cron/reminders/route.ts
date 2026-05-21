@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { bookingNotifications, bookings, businesses, locations, services, staff } from "@/db/schema";
-import { eq, and, gte, lt, isNull } from "drizzle-orm";
+import { eq, and, gte, lt, isNull, inArray } from "drizzle-orm";
 import { addHours } from "date-fns";
 import { canUseFeature, type Plan } from "@/lib/plan";
 import { sendBookingReminderMessage } from "@/lib/messaging/booking-messages";
@@ -50,58 +50,80 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ sent: 0, checked: 0 });
   }
 
-  let sent = 0;
-  let skipped = 0;
+  const bookingIds = upcoming.map((booking) => booking.id);
+  const businessIds = [...new Set(upcoming.map((booking) => booking.businessId))];
+  const serviceIds = [...new Set(upcoming.map((booking) => booking.serviceId))];
+  const staffIds = [...new Set(upcoming.map((booking) => booking.staffId))];
+  const locationIds = [
+    ...new Set(
+      upcoming
+        .map((booking) => booking.locationId)
+        .filter((id): id is string => Boolean(id)),
+    ),
+  ];
 
-  for (const booking of upcoming) {
-    const [business] = await db
+  const [businessRows, serviceRows, staffRows, locationRows, alreadySentRows] = await Promise.all([
+    db
       .select({
+        id: businesses.id,
         name: businesses.name,
         slug: businesses.slug,
         plan: businesses.plan,
         language: businesses.language,
       })
       .from(businesses)
-      .where(eq(businesses.id, booking.businessId))
-      .limit(1);
-
-    const [service] = await db
-      .select({ name: services.name })
+      .where(inArray(businesses.id, businessIds)),
+    db
+      .select({ id: services.id, name: services.name })
       .from(services)
-      .where(eq(services.id, booking.serviceId))
-      .limit(1);
-
-    const [member] = await db
-      .select({ name: staff.name })
+      .where(inArray(services.id, serviceIds)),
+    db
+      .select({ id: staff.id, name: staff.name })
       .from(staff)
-      .where(eq(staff.id, booking.staffId))
-      .limit(1);
+      .where(inArray(staff.id, staffIds)),
+    locationIds.length > 0
+      ? db
+          .select({ id: locations.id, aiConfig: locations.aiConfig })
+          .from(locations)
+          .where(inArray(locations.id, locationIds))
+      : Promise.resolve([]),
+    db
+      .select({ bookingId: bookingNotifications.bookingId })
+      .from(bookingNotifications)
+      .where(
+        and(
+          inArray(bookingNotifications.bookingId, bookingIds),
+          eq(bookingNotifications.type, "reminder_24h"),
+          eq(bookingNotifications.status, "sent"),
+        ),
+      ),
+  ]);
+
+  const businessById = new Map(businessRows.map((row) => [row.id, row]));
+  const serviceById = new Map(serviceRows.map((row) => [row.id, row]));
+  const staffById = new Map(staffRows.map((row) => [row.id, row]));
+  const locationById = new Map(locationRows.map((row) => [row.id, row]));
+  const alreadySentBookingIds = new Set(alreadySentRows.map((row) => row.bookingId));
+
+  let sent = 0;
+  let skipped = 0;
+
+  for (const booking of upcoming) {
+    const business = businessById.get(booking.businessId);
+    const service = serviceById.get(booking.serviceId);
+    const member = staffById.get(booking.staffId);
 
     if (!business || !service || !member) continue;
 
     if (canUseFeature(business.plan as Plan, "smartReminderSystem") && booking.locationId) {
-      const [location] = await db
-        .select({ aiConfig: locations.aiConfig })
-        .from(locations)
-        .where(eq(locations.id, booking.locationId))
-        .limit(1);
+      const location = locationById.get(booking.locationId);
       if (parseLocationAiConfig(location?.aiConfig).smartReminderSystem) {
         skipped++;
         continue;
       }
     }
 
-    const alreadySent = await db
-      .select({ id: bookingNotifications.id })
-      .from(bookingNotifications)
-      .where(and(
-        eq(bookingNotifications.bookingId, booking.id),
-        eq(bookingNotifications.type, "reminder_24h"),
-        eq(bookingNotifications.status, "sent"),
-      ))
-      .limit(1);
-
-    if (alreadySent.length > 0) {
+    if (alreadySentBookingIds.has(booking.id)) {
       await db
         .update(bookings)
         .set({ reminderSentAt: new Date() })

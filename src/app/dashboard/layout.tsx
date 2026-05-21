@@ -9,7 +9,7 @@ import { requireBusiness } from "@/lib/auth";
 import { getDashboardCopy } from "@/lib/dashboard-i18n";
 import type { DashboardLanguage } from "@/lib/dashboard-i18n";
 import { isPlatformAdmin } from "@/lib/platform-admin";
-import { BookOpen, ChevronsUpDown, Menu, Search, ShieldCheck, UserCircle } from "lucide-react";
+import { BookOpen, Menu, Search, ShieldCheck, UserCircle } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Dashboard | Dinaya",
@@ -22,13 +22,13 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { business, user, readOnlyImpersonation, impersonatedBy } = await requireBusiness();
+  const { business, user, role, readOnlyImpersonation, impersonatedBy } = await requireBusiness();
   const showAdminLink = isPlatformAdmin(user.email);
   const language = (business.language ?? "en") as DashboardLanguage;
   const copy = getDashboardCopy(language);
 
   return (
-    <DashboardLocaleProvider language={language}>
+    <DashboardLocaleProvider language={language} role={role}>
     <div className="min-h-screen bg-muted/20 lg:grid lg:grid-cols-[17rem_minmax(0,1fr)]">
       {readOnlyImpersonation && (
         <div className="col-span-full border-b border-amber-500/30 bg-amber-50 px-4 py-2 text-center text-sm text-amber-900">
@@ -89,10 +89,9 @@ export default async function DashboardLayout({
             </details>
 
             <div className="hidden lg:block">
-              <button className="inline-flex items-center gap-2 rounded-md border bg-white px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted">
-                <span className="max-w-[13rem] truncate">{business.name}</span>
-                <ChevronsUpDown className="size-3.5 text-muted-foreground" aria-hidden="true" />
-              </button>
+              <p className="max-w-[13rem] truncate rounded-md border bg-white px-3 py-2 text-sm font-medium text-foreground">
+                {business.name}
+              </p>
             </div>
 
             <form action="/dashboard/search" method="get" className="relative min-w-0 flex-1">

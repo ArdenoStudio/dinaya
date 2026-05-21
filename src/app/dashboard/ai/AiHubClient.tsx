@@ -4,6 +4,11 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { AI_FEATURES, AI_FEATURE_META, type AiFeatureKey } from "@/lib/plan-features";
 
+function parseLocationAiConfig(raw: unknown): Record<string, boolean> {
+  if (!raw || typeof raw !== "object") return {};
+  return raw as Record<string, boolean>;
+}
+
 type LocationRow = {
   id: string;
   name: string;
@@ -37,7 +42,6 @@ export default function AiHubClient() {
   const [content, setContent] = useState<ContentItem[]>([]);
   const [runs, setRuns] = useState<WorkflowRun[]>([]);
   const [loading, setLoading] = useState(true);
-  const [locked, setLocked] = useState(false);
   const [error, setError] = useState("");
   const [savingId, setSavingId] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
@@ -53,18 +57,12 @@ export default function AiHubClient() {
       }
 
       const rows: LocationRow[] = Array.isArray(locData) ? locData : [];
-      const withAi = await Promise.all(
-        rows.map(async (loc) => {
-          const aiRes = await fetch(`/api/dashboard/locations/${loc.id}/ai`);
-          if (aiRes.status === 402) {
-            setLocked(true);
-            return { ...loc, aiConfig: {} };
-          }
-          const aiData = await aiRes.json();
-          return { ...loc, aiConfig: aiData.aiConfig ?? {} };
-        })
+      setLocations(
+        rows.map((loc) => ({
+          ...loc,
+          aiConfig: parseLocationAiConfig(loc.aiConfig),
+        })),
       );
-      setLocations(withAi);
       const [contentRes, runsRes] = await Promise.all([
         fetch("/api/dashboard/ai/content"),
         fetch("/api/dashboard/ai/runs"),
@@ -134,27 +132,6 @@ export default function AiHubClient() {
 
   if (loading) {
     return <p className="text-sm text-muted-foreground">Loading AI hub…</p>;
-  }
-
-  if (locked) {
-    return (
-      <div className="rounded-xl border border-violet-200 bg-violet-50/70 p-8 text-center">
-        <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-violet-600 text-white">
-          <i className="bi bi-stars text-lg" aria-hidden="true" />
-        </div>
-        <h1 className="font-cal text-2xl text-violet-950">AI Growth Hub</h1>
-        <p className="mx-auto mt-2 max-w-md text-sm text-violet-900/75">
-          Per-branch AI tools — booking autopilot, smart reminders, review engine, and more — are
-          available on Dinaya Pro and Max.
-        </p>
-        <Link
-          href="/dashboard/billing"
-          className="mt-6 inline-flex rounded-md bg-violet-600 px-4 py-2 text-sm font-medium text-white hover:bg-violet-700"
-        >
-          Upgrade to Pro
-        </Link>
-      </div>
-    );
   }
 
   return (

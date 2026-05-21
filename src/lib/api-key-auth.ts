@@ -3,6 +3,10 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { apiKeys } from "@/db/schema";
 import { hashApiKey, isApiKeyFormat } from "@/lib/api-keys";
+import {
+  businessInactiveMessage,
+  getBusinessActiveStatus,
+} from "@/lib/business-active";
 
 export type ApiKeyContext = {
   businessId: string;
@@ -69,6 +73,17 @@ export async function requireApiKey(
     return {
       ok: false,
       response: NextResponse.json({ error: "Forbidden" }, { status: 403 }),
+    };
+  }
+
+  const businessStatus = await getBusinessActiveStatus(row.businessId);
+  if (businessStatus !== "active") {
+    return {
+      ok: false,
+      response: NextResponse.json(
+        { error: businessInactiveMessage(businessStatus) },
+        { status: 403 },
+      ),
     };
   }
 
