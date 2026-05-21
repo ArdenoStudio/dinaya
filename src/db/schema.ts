@@ -20,7 +20,7 @@ import { relations } from "drizzle-orm";
 
 // ─── Enums ────────────────────────────────────────────────────────────────────
 
-export const planEnum = pgEnum("plan", ["free", "pro"]);
+export const planEnum = pgEnum("plan", ["free", "pro", "max"]);
 export const clientStageEnum = pgEnum("client_stage", [
   "lead",
   "prospect",

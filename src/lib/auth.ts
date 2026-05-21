@@ -10,7 +10,7 @@ export type BusinessContext = {
   business: {
     id: string;
     name: string;
-    plan: "free" | "pro";
+    plan: "free" | "pro" | "max";
     slug: string;
   };
   businessId: string;

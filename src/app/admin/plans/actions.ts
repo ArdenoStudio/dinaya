@@ -5,6 +5,7 @@ import { requirePlatformAdmin } from "@/lib/platform-admin";
 import {
   getPlanConfig,
   savePlanConfig,
+  type Plan,
   type PlanConfig,
   type PlanFeature,
 } from "@/lib/plan";
@@ -31,12 +32,27 @@ const FEATURE_KEYS: PlanFeature[] = [
   "whatsappSms",
 ];
 
+const PAID_PLANS: Plan[] = ["pro", "max"];
+
 function parseLimit(value: FormDataEntryValue | null): number | null {
   const raw = String(value ?? "").trim();
   if (!raw || raw.toLowerCase() === "unlimited" || raw === "-") return null;
   const n = Number(raw);
   if (!Number.isFinite(n) || n < 0) return null;
   return Math.floor(n);
+}
+
+function buildPlanEntitlements(formData: FormData, planKey: Plan) {
+  return {
+    limits: {
+      bookingsPerMonth: parseLimit(formData.get(`${planKey}.bookingsPerMonth`)),
+      staff: parseLimit(formData.get(`${planKey}.staff`)),
+      services: parseLimit(formData.get(`${planKey}.services`)),
+    },
+    features: Object.fromEntries(
+      FEATURE_KEYS.map((f) => [f, formData.get(`${planKey}.feature.${f}`) === "on"])
+    ) as Record<PlanFeature, boolean>,
+  };
 }
 
 export async function savePlans(formData: FormData): Promise<void> {
@@ -47,32 +63,22 @@ export async function savePlans(formData: FormData): Promise<void> {
     0,
     Math.floor(Number(formData.get("proMonthlyPriceLkr") ?? current.proMonthlyPriceLkr))
   );
+  const maxMonthlyPriceLkr = Math.max(
+    0,
+    Math.floor(Number(formData.get("maxMonthlyPriceLkr") ?? current.maxMonthlyPriceLkr))
+  );
   const proLaunched = formData.get("proLaunched") === "on";
+  const maxLaunched = formData.get("maxLaunched") === "on";
 
   const next: PlanConfig = {
     proMonthlyPriceLkr,
+    maxMonthlyPriceLkr,
     proLaunched,
+    maxLaunched,
     plans: {
-      free: {
-        limits: {
-          bookingsPerMonth: parseLimit(formData.get("free.bookingsPerMonth")),
-          staff: parseLimit(formData.get("free.staff")),
-          services: parseLimit(formData.get("free.services")),
-        },
-        features: Object.fromEntries(
-          FEATURE_KEYS.map((f) => [f, formData.get(`free.feature.${f}`) === "on"])
-        ) as Record<PlanFeature, boolean>,
-      },
-      pro: {
-        limits: {
-          bookingsPerMonth: parseLimit(formData.get("pro.bookingsPerMonth")),
-          staff: parseLimit(formData.get("pro.staff")),
-          services: parseLimit(formData.get("pro.services")),
-        },
-        features: Object.fromEntries(
-          FEATURE_KEYS.map((f) => [f, formData.get(`pro.feature.${f}`) === "on"])
-        ) as Record<PlanFeature, boolean>,
-      },
+      free: buildPlanEntitlements(formData, "free"),
+      pro: buildPlanEntitlements(formData, "pro"),
+      max: buildPlanEntitlements(formData, "max"),
     },
     updatedAt: new Date().toISOString(),
     updatedBy: admin.email,
@@ -85,7 +91,9 @@ export async function savePlans(formData: FormData): Promise<void> {
     action: "plans.updated",
     meta: {
       proMonthlyPriceLkr,
+      maxMonthlyPriceLkr,
       proLaunched,
+      maxLaunched,
     },
   });
 
@@ -108,4 +116,3 @@ export async function resetPlansToDefaults(): Promise<void> {
   });
   revalidatePath("/admin/plans");
 }
-

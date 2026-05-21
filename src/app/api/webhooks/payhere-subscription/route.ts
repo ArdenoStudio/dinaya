@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
 
       await db
         .update(businesses)
-        .set({ plan: "pro", planExpiresAt: periodEnd })
+        .set({ plan: sub.plan, planExpiresAt: periodEnd })
         .where(eq(businesses.id, sub.businessId));
       break;
     }

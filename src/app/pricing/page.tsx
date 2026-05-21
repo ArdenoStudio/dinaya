@@ -31,7 +31,7 @@ const proOperationalFeatures = [
   "Priority WhatsApp support",
 ];
 
-const proAiFeatures = [
+const maxAiFeatures = [
   "AI Booking Autopilot",
   "Smart reminder system",
   "Review engine",
@@ -94,7 +94,7 @@ export default function PricingPage() {
 
       {/* Plans */}
       <section className="max-w-5xl mx-auto px-6 pb-20">
-        <div className="grid md:grid-cols-2 gap-5">
+        <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-5">
           {/* Free plan */}
           <div className="relative rounded-2xl border bg-white p-8 flex flex-col shadow-sm">
             <div className="flex items-center gap-2 mb-2">
@@ -142,7 +142,7 @@ export default function PricingPage() {
                 </span>
               </div>
               <p className="text-sm text-white/60 mb-6">
-                Operations + AI growth for teams that want bookings, retention, and content on autopilot.
+                For growing teams that want multi-staff, branding control, and advanced operations.
               </p>
 
               <div className="mb-6">
@@ -172,14 +172,48 @@ export default function PricingPage() {
                 ))}
               </ul>
 
-              <p className="mt-6 mb-3 text-xs font-semibold uppercase tracking-wider text-white/50">
+            </div>
+          </div>
+
+          {/* Max plan */}
+          <div className="relative rounded-2xl border bg-gradient-to-br from-indigo-950 via-violet-950 to-purple-950 p-8 text-white flex flex-col shadow-xl shadow-indigo-900/20 overflow-hidden lg:col-span-1 md:col-span-2">
+            <div className="pointer-events-none absolute -top-16 -right-16 size-48 rounded-full bg-indigo-500/30 blur-3xl" />
+
+            <div className="relative">
+              <div className="flex items-center gap-2 mb-2">
+                <h3 className="font-cal text-2xl tracking-tight">Max</h3>
+                <span className="inline-flex items-center gap-1 rounded-full bg-white/10 text-white/80 ring-1 ring-white/20 px-2 py-0.5 text-[11px] font-medium">
+                  Coming soon
+                </span>
+              </div>
+              <p className="text-sm text-white/60 mb-6">
+                Everything in Pro — plus seven AI tools for bookings, retention, and content on autopilot.
+              </p>
+
+              <div className="mb-6">
+                <div className="flex items-baseline gap-1">
+                  <span className="font-cal text-5xl tracking-tight">LKR 2,490</span>
+                  <span className="text-sm text-white/60">/month</span>
+                </div>
+                <p className="text-xs text-white/50 mt-1">Estimated launch price. Free until release.</p>
+              </div>
+
+              <Link
+                href="/register"
+                className="inline-flex items-center justify-center gap-2 bg-white/10 border border-white/20 text-white px-5 py-3 rounded-lg text-sm font-medium hover:bg-white/15 transition-colors mb-7"
+              >
+                Join the waitlist
+                <i className="bi bi-arrow-right text-sm" />
+              </Link>
+
+              <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-white/50">
                 AI growth tools
               </p>
               <ul className="space-y-3 text-sm">
-                {proAiFeatures.map((f) => (
+                {maxAiFeatures.map((f) => (
                   <li key={f} className="flex items-start gap-2.5">
-                    <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-primary/30">
-                      <i className="bi bi-check text-primary" style={{ fontSize: '0.625rem' }} />
+                    <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-indigo-400/30">
+                      <i className="bi bi-check text-indigo-300" style={{ fontSize: '0.625rem' }} />
                     </span>
                     <span className="text-white/85">{f}</span>
                   </li>
@@ -208,7 +242,7 @@ export default function PricingPage() {
       </section>
 
       {/* Compare table */}
-      <section className="max-w-5xl mx-auto px-6 pb-20">
+      <section className="max-w-6xl mx-auto px-6 pb-20">
         <div className="text-center mb-10">
           <span className="relative text-sm font-semibold tracking-tight text-primary">
             <span className="absolute top-0.5 -left-3 h-4 w-[3px] rounded-r-sm bg-primary" />
@@ -224,26 +258,27 @@ export default function PricingPage() {
                 <th className="text-left font-medium text-gray-600 px-5 py-3 w-1/2">Feature</th>
                 <th className="text-center font-medium text-gray-600 px-5 py-3">Free</th>
                 <th className="text-center font-medium text-gray-600 px-5 py-3">Pro</th>
+                <th className="text-center font-medium text-gray-600 px-5 py-3">Max</th>
               </tr>
             </thead>
             <tbody className="divide-y">
               {[
-                { f: "Self-booking page", a: "Yes", b: "Yes", icon: "bi-calendar" },
-                { f: "Online payments (PayHere)", a: "Yes", b: "Yes", icon: "bi-credit-card" },
-                { f: "SMS + email reminders", a: "Yes", b: "Yes", icon: "bi-bell" },
-                { f: "Booking dashboard", a: "Yes", b: "Yes", icon: "bi-grid" },
-                { f: "Multi-staff calendar", a: "—", b: "Yes", icon: "bi-people" },
-                { f: "Custom domain", a: "—", b: "Yes", icon: "bi-globe" },
-                { f: "Remove Dinaya branding", a: "—", b: "Yes", icon: "bi-eye-slash" },
-                { f: "Advanced reports & exports", a: "—", b: "Yes", icon: "bi-bar-chart" },
-                { f: "Priority support", a: "Email", b: "WhatsApp", icon: "bi-headset" },
-                { f: "AI Booking Autopilot", a: "—", b: "Yes", icon: "bi-robot" },
-                { f: "Smart reminder system", a: "—", b: "Yes", icon: "bi-bell-fill" },
-                { f: "Review engine", a: "—", b: "Yes", icon: "bi-star" },
-                { f: "Client Reactivation Campaign", a: "—", b: "Yes", icon: "bi-arrow-repeat" },
-                { f: "AI upsell assistant", a: "—", b: "Yes", icon: "bi-graph-up-arrow" },
-                { f: "30-Day AI Content Machine", a: "—", b: "Yes", icon: "bi-calendar3" },
-                { f: "VIP Loyalty Sequence", a: "—", b: "Yes", icon: "bi-gem" },
+                { f: "Self-booking page", a: "Yes", b: "Yes", icon: "bi-calendar", c: "Yes" },
+                { f: "Online payments (PayHere)", a: "Yes", b: "Yes", icon: "bi-credit-card", c: "Yes" },
+                { f: "SMS + email reminders", a: "Yes", b: "Yes", icon: "bi-bell", c: "Yes" },
+                { f: "Booking dashboard", a: "Yes", b: "Yes", icon: "bi-grid", c: "Yes" },
+                { f: "Multi-staff calendar", a: "—", b: "Yes", icon: "bi-people", c: "Yes" },
+                { f: "Custom domain", a: "—", b: "Yes", icon: "bi-globe", c: "Yes" },
+                { f: "Remove Dinaya branding", a: "—", b: "Yes", icon: "bi-eye-slash", c: "Yes" },
+                { f: "Advanced reports & exports", a: "—", b: "Yes", icon: "bi-bar-chart", c: "Yes" },
+                { f: "Priority support", a: "Email", b: "WhatsApp", icon: "bi-headset", c: "WhatsApp" },
+                { f: "AI Booking Autopilot", a: "—", b: "—", icon: "bi-robot", c: "Yes" },
+                { f: "Smart reminder system", a: "—", b: "—", icon: "bi-bell-fill", c: "Yes" },
+                { f: "Review engine", a: "—", b: "—", icon: "bi-star", c: "Yes" },
+                { f: "Client Reactivation Campaign", a: "—", b: "—", icon: "bi-arrow-repeat", c: "Yes" },
+                { f: "AI upsell assistant", a: "—", b: "—", icon: "bi-graph-up-arrow", c: "Yes" },
+                { f: "30-Day AI Content Machine", a: "—", b: "—", icon: "bi-calendar3", c: "Yes" },
+                { f: "VIP Loyalty Sequence", a: "—", b: "—", icon: "bi-gem", c: "Yes" },
               ].map((row) => (
                 <tr key={row.f} className="hover:bg-gray-50/50 transition-colors">
                   <td className="px-5 py-3.5 text-gray-800">
@@ -264,6 +299,13 @@ export default function PricingPage() {
                       <i className="bi bi-check text-sm text-primary" />
                     ) : (
                       <span className="text-gray-700">{row.b}</span>
+                    )}
+                  </td>
+                  <td className="px-5 py-3.5 text-center">
+                    {row.c === "Yes" ? (
+                      <i className="bi bi-check text-sm text-primary" />
+                    ) : (
+                      <span className="text-gray-700">{row.c}</span>
                     )}
                   </td>
                 </tr>

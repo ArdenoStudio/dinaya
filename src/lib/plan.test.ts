@@ -1,15 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { FREE_ENTITLEMENTS, PRO_ENTITLEMENTS, canUseFeature } from "./plan";
-
-const PRO_ONLY_AI_FEATURES = [
-  "aiBookingAutopilot",
-  "smartReminderSystem",
-  "reviewEngine",
-  "clientReactivationCampaign",
-  "aiUpsellAssistant",
-  "aiContentMachine",
-  "vipLoyaltySequence",
-] as const;
+import {
+  AI_FEATURES,
+  FREE_ENTITLEMENTS,
+  MAX_ENTITLEMENTS,
+  PRO_ENTITLEMENTS,
+  canUseFeature,
+  minimumPlanForFeature,
+} from "./plan";
 
 describe("plan entitlements", () => {
   it("keeps free plan limits intentionally constrained", () => {
@@ -20,25 +17,30 @@ describe("plan entitlements", () => {
     });
   });
 
-  it("allows pro-only surfaces only for pro businesses", () => {
+  it("allows pro-only operational surfaces for pro and max", () => {
     expect(canUseFeature("free", "payments")).toBe(false);
     expect(canUseFeature("free", "reports")).toBe(false);
     expect(canUseFeature("pro", "payments")).toBe(true);
     expect(canUseFeature("pro", "reports")).toBe(true);
+    expect(canUseFeature("max", "payments")).toBe(true);
+    expect(canUseFeature("max", "reports")).toBe(true);
   });
 
-  it("keeps public booking page available on both plans", () => {
+  it("keeps AI growth features max-only", () => {
+    for (const feature of AI_FEATURES) {
+      expect(minimumPlanForFeature(feature)).toBe("max");
+      expect(canUseFeature("free", feature)).toBe(false);
+      expect(canUseFeature("pro", feature)).toBe(false);
+      expect(canUseFeature("max", feature)).toBe(true);
+      expect(FREE_ENTITLEMENTS.features[feature]).toBe(false);
+      expect(PRO_ENTITLEMENTS.features[feature]).toBe(false);
+      expect(MAX_ENTITLEMENTS.features[feature]).toBe(true);
+    }
+  });
+
+  it("keeps public booking page available on all plans", () => {
     expect(canUseFeature("free", "publicBookingPage")).toBe(true);
     expect(canUseFeature("pro", "publicBookingPage")).toBe(true);
-    expect(PRO_ENTITLEMENTS.features.publicBookingPage).toBe(true);
-  });
-
-  it("keeps AI growth features pro-only", () => {
-    for (const feature of PRO_ONLY_AI_FEATURES) {
-      expect(canUseFeature("free", feature)).toBe(false);
-      expect(canUseFeature("pro", feature)).toBe(true);
-      expect(FREE_ENTITLEMENTS.features[feature]).toBe(false);
-      expect(PRO_ENTITLEMENTS.features[feature]).toBe(true);
-    }
+    expect(canUseFeature("max", "publicBookingPage")).toBe(true);
   });
 });
