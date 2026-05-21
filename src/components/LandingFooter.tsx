@@ -62,12 +62,29 @@ export function LandingFooter() {
             </ul>
           </div>
 
+          {/* Resources */}
+          <div>
+            <h4 className="text-xs font-semibold tracking-widest uppercase text-gray-400 mb-4">Resources</h4>
+            <ul className="space-y-3 text-sm">
+              {[
+                { label: "Getting started", href: "/register" },
+                { label: "Help center", href: "/help" },
+                { label: "What's new", href: "/whats-new" },
+              ].map(({ label, href }) => (
+                <li key={href}>
+                  <Link href={href} className="text-muted-foreground hover:text-foreground transition-colors">
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
           {/* Legal */}
           <div>
             <h4 className="text-xs font-semibold tracking-widest uppercase text-gray-400 mb-4">Legal</h4>
             <ul className="space-y-3 text-sm">
               {[
-                { label: "Brand", href: "/brand" },
                 { label: "Terms of Service", href: "/legal/terms" },
                 { label: "Privacy Policy", href: "/legal/privacy" },
                 { label: "Refund Policy", href: "/legal/refund" },
