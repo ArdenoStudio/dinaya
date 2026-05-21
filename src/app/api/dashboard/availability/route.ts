@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/auth";
+import { requireApiBusiness } from "@/lib/api-auth";
 import { db } from "@/db";
 import { availability, staff } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
@@ -28,13 +28,12 @@ function validateAvailabilityRows(rows: AvailabilityInput[]): string | null {
 }
 
 export async function GET(req: NextRequest) {
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const authResult = await requireApiBusiness();
+  if (!authResult.ok) return authResult.response;
+  const { businessId } = authResult.context;
 
   const staffId = req.nextUrl.searchParams.get("staffId");
   if (!staffId) return NextResponse.json({ error: "staffId required" }, { status: 400 });
-
-  const businessId = (session.user as { businessId: string }).businessId;
 
   // Verify staff belongs to this business
   const [member] = await db
@@ -50,10 +49,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  const businessId = (session.user as { businessId: string }).businessId;
+  const authResult = await requireApiBusiness();
+  if (!authResult.ok) return authResult.response;
+  const { businessId } = authResult.context;
   const { staffId, rows } = await req.json() as { staffId?: string; rows?: AvailabilityInput[] };
 
   if (!staffId) return NextResponse.json({ error: "staffId required" }, { status: 400 });

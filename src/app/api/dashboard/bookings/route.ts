@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/auth";
+import { requireApiBusiness } from "@/lib/api-auth";
 import { db } from "@/db";
 import { bookings, payments, services, staff } from "@/db/schema";
 import { eq, and, desc, lt, gte, ne, ilike, or } from "drizzle-orm";
@@ -28,9 +28,9 @@ function csvEscape(value: unknown): string {
 }
 
 export async function GET(req: NextRequest) {
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const businessId = (session.user as { businessId: string }).businessId;
+  const authResult = await requireApiBusiness();
+  if (!authResult.ok) return authResult.response;
+  const { businessId } = authResult.context;
 
   const params = new URL(req.url).searchParams;
   const tab = params.get("tab") ?? "upcoming";
