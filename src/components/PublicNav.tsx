@@ -111,12 +111,7 @@ export function PublicNav() {
             </button>
             <div className="invisible opacity-0 translate-y-1 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 transition-all absolute left-1/2 -translate-x-1/2 top-full pt-3 w-[680px] max-w-[calc(100vw-2rem)]">
               <div className="rounded-2xl border bg-white shadow-xl shadow-gray-900/[0.06] p-5 grid grid-cols-2 gap-2">
-                {[
-                  { icon: "bi-book-open", color: "bg-amber-500", title: "Getting started", desc: "Set up your page in 5 minutes", href: "/register" },
-                  { icon: "bi-question-circle", color: "bg-blue-600", title: "Help center", desc: "Answers to common questions", href: "/help" },
-                  { icon: "bi-stars", color: "bg-violet-500", title: "What's new", desc: "Latest features and updates", href: "/whats-new" },
-                  { icon: "bi-file-text", color: "bg-amber-500", title: "Legal", desc: "Terms, privacy, refund policy", href: "/legal/terms" },
-                ].map((it) => (
+                {RESOURCE_LINKS.map((it) => (
                   <Link key={it.title} href={it.href} className="flex items-start gap-3 rounded-xl p-3 hover:bg-gray-50 transition-colors">
                     <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${it.color} text-white`}>
                       <i className={`bi ${it.icon} text-sm`} />
