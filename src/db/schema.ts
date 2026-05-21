@@ -150,6 +150,7 @@ export const staffLocations = pgTable("staff_locations", {
 // ─── Pro subscriptions (Dinaya billing its own customers) ───────────────────
 
 export const subscriptionStatusEnum = pgEnum("subscription_status", [
+  "pending",
   "active",
   "past_due",
   "cancelled",

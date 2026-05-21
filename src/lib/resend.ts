@@ -122,3 +122,26 @@ export async function sendPasswordResetEmail(input: {
     `,
   });
 }
+
+export async function sendContactFormEmail(input: {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+}) {
+  const to = process.env.CONTACT_INBOX_EMAIL ?? "hello@dinaya.lk";
+  await getResend().emails.send({
+    from: FROM,
+    to,
+    replyTo: input.email,
+    subject: `[Contact] ${input.subject}`,
+    html: `
+      <div style="font-family:sans-serif;max-width:560px;margin:0 auto">
+        <h2 style="color:#1a1a1a">New contact form message</h2>
+        <p><strong>From:</strong> ${input.name} &lt;${input.email}&gt;</p>
+        <p><strong>Subject:</strong> ${input.subject}</p>
+        <div style="margin-top:16px;padding:16px;background:#f9fafb;border-radius:8px;white-space:pre-wrap">${input.message}</div>
+      </div>
+    `,
+  });
+}

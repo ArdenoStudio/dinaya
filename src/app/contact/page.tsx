@@ -65,9 +65,20 @@ export default function ContactPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setStatus("sending");
-    // Simulate async — wire up a real API route or service here
-    await new Promise((r) => setTimeout(r, 900));
-    setStatus("sent");
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) {
+        setStatus("error");
+        return;
+      }
+      setStatus("sent");
+    } catch {
+      setStatus("error");
+    }
   }
 
   return (

@@ -161,8 +161,8 @@ export const DEFAULT_PLAN_CONFIG: PlanConfig = {
   proAnnualPriceLkr: Number(process.env.DINAYA_PRO_ANNUAL_PRICE_LKR ?? 14300),
   maxMonthlyPriceLkr: Number(process.env.DINAYA_MAX_MONTHLY_PRICE_LKR ?? 2490),
   maxAnnualPriceLkr: Number(process.env.DINAYA_MAX_ANNUAL_PRICE_LKR ?? 23900),
-  proLaunched: false,
-  maxLaunched: false,
+  proLaunched: true,
+  maxLaunched: true,
   plans: {
     free: DEFAULT_FREE_ENTITLEMENTS,
     pro: DEFAULT_PRO_ENTITLEMENTS,
@@ -303,6 +303,24 @@ export function isPaidPlan(plan: Plan): boolean {
   return plan === "pro" || plan === "max";
 }
 
+export function isPaidPlanAvailable(plan: PaidPlan, config: PlanConfig = getPlanConfig()): boolean {
+  return plan === "pro" ? config.proLaunched : config.maxLaunched;
+}
+
+/** Effective plan after expiry — stored plan downgrades to free when planExpiresAt is past. */
+export function resolveEffectivePlan(input: {
+  storedPlan: Plan;
+  planExpiresAt: Date | null | undefined;
+  now?: Date;
+}): Plan {
+  const now = input.now ?? new Date();
+  const stored = input.storedPlan ?? "free";
+
+  if (stored === "free") return "free";
+  if (input.planExpiresAt && input.planExpiresAt < now) return "free";
+  return stored;
+}
+
 export function minimumPlanForFeature(feature: PlanFeature): Plan {
   void feature;
   return "pro";
@@ -399,12 +417,18 @@ export async function getBusinessPlan(businessId: string): Promise<Plan> {
   ]);
 
   const [business] = await db
-    .select({ plan: businesses.plan })
+    .select({
+      plan: businesses.plan,
+      planExpiresAt: businesses.planExpiresAt,
+    })
     .from(businesses)
     .where(eq(businesses.id, businessId))
     .limit(1);
 
-  return (business?.plan as Plan | undefined) ?? "free";
+  return resolveEffectivePlan({
+    storedPlan: (business?.plan as Plan | undefined) ?? "free",
+    planExpiresAt: business?.planExpiresAt,
+  });
 }
 
 export async function requirePro(

@@ -6,7 +6,9 @@ import { buildRecurringFormData, PAYHERE_CHECKOUT_URL } from "@/lib/payhere-subs
 import { generateOrderId } from "@/lib/utils";
 import { requireApiBusiness } from "@/lib/api-auth";
 import {
+  getPlanConfig,
   getSubscriptionPrice,
+  isPaidPlanAvailable,
   payhereRecurrence,
   planRank,
   subscriptionItemName,
@@ -64,7 +66,7 @@ export async function POST(req: Request) {
     .from(subscriptions)
     .where(and(
       eq(subscriptions.businessId, businessId),
-      inArray(subscriptions.status, ["active", "past_due"]),
+      inArray(subscriptions.status, ["pending", "active", "past_due"]),
     ))
     .limit(1);
 
@@ -72,6 +74,14 @@ export async function POST(req: Request) {
     return NextResponse.json(
       { error: "A subscription is already in progress for this business." },
       { status: 409 },
+    );
+  }
+
+  const config = getPlanConfig();
+  if (!isPaidPlanAvailable(targetPlan, config)) {
+    return NextResponse.json(
+      { error: `${targetPlan === "max" ? "Max" : "Pro"} is not available for purchase yet.` },
+      { status: 403 },
     );
   }
 
@@ -100,7 +110,7 @@ export async function POST(req: Request) {
     plan: targetPlan,
     billingInterval: interval,
     amountLkr,
-    status: "active",
+    status: "pending",
   });
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL!;

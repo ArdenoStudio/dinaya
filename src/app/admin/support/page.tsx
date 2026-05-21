@@ -69,12 +69,12 @@ export default async function AdminSupportPage({
       <SupportClient users={rows} />
 
       <div className="rounded-xl border border-amber-500/20 bg-amber-50/60 p-4 text-xs text-amber-900">
-        <p className="font-semibold">Other support actions — coming soon</p>
+        <p className="font-semibold">Additional support tools</p>
         <ul className="mt-1 list-disc pl-5 text-amber-900/80">
-          <li>Impersonate a user (read-only session)</li>
-          <li>Suspend / unsuspend an account</li>
-          <li>Manually refund a booking payment</li>
-          <li>Replay failed PayHere or webhook deliveries</li>
+          <li>Impersonate a user (read-only session) — planned</li>
+          <li>Suspend / unsuspend accounts — available on the account detail page</li>
+          <li>Manually refund a booking payment — planned</li>
+          <li>Replay failed PayHere or webhook deliveries — planned</li>
         </ul>
       </div>
     </div>

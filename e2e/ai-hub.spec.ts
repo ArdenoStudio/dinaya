@@ -11,8 +11,8 @@ test.describe("AI Hub — Free plan", () => {
     await registerAndLogin(page, request, account);
     await page.goto("/dashboard/ai");
     await expect(page.getByRole("heading", { name: /AI Growth Hub/i })).toBeVisible();
-    await expect(page.getByText(/available on Dinaya Max/i)).toBeVisible();
-    await expect(page.getByRole("link", { name: /Upgrade to Max/i })).toBeVisible();
+    await expect(page.getByText(/available on Dinaya Pro/i)).toBeVisible();
+    await expect(page.getByRole("link", { name: /Upgrade to Pro/i })).toBeVisible();
   });
 
   test("does not show per-branch AI toggles on Free", async ({ page, request }) => {

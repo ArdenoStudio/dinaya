@@ -66,3 +66,24 @@ describe("subscription pricing", () => {
     expect(annualSavingsPercent(2490, 23900)).toBe(20);
   });
 });
+
+describe("resolveEffectivePlan", () => {
+  it("downgrades expired paid plans to free", async () => {
+    const { resolveEffectivePlan } = await import("./plan");
+    const now = new Date("2026-06-01T00:00:00.000Z");
+    expect(
+      resolveEffectivePlan({
+        storedPlan: "pro",
+        planExpiresAt: new Date("2026-05-01T00:00:00.000Z"),
+        now,
+      }),
+    ).toBe("free");
+    expect(
+      resolveEffectivePlan({
+        storedPlan: "max",
+        planExpiresAt: new Date("2026-07-01T00:00:00.000Z"),
+        now,
+      }),
+    ).toBe("max");
+  });
+});
