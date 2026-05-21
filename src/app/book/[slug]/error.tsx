@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect } from "react";
 
 export default function BookingError({
@@ -34,12 +35,12 @@ export default function BookingError({
           >
             Try again
           </button>
-          <a
+          <Link
             href="/"
             className="rounded-md border px-4 py-2 text-sm font-medium text-muted-foreground hover:border-primary/50"
           >
             Go to Homepage
-          </a>
+          </Link>
         </div>
         {error.digest && (
           <p className="mt-4 text-xs text-muted-foreground">

@@ -2,12 +2,9 @@
 
 import { useState } from "react";
 import { format, parseISO } from "date-fns";
-import { toZonedTime } from "date-fns-tz";
 import type { BookingBusiness, BookingState } from "./BookingWizard";
 import { formatLkr } from "@/lib/utils";
 import type { BookingCopy } from "@/lib/i18n";
-
-const COLOMBO_TZ = "Asia/Colombo";
 
 interface Props {
   state: BookingState;

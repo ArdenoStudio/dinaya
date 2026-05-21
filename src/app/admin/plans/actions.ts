@@ -32,7 +32,6 @@ const FEATURE_KEYS: PlanFeature[] = [
   "whatsappSms",
 ];
 
-const PAID_PLANS: Plan[] = ["pro", "max"];
 
 function parseLimit(value: FormDataEntryValue | null): number | null {
   const raw = String(value ?? "").trim();
