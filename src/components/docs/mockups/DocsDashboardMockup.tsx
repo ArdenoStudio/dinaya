@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { DocsTargetHighlight } from "../DocsTargetHighlight";
 import { DocsCursor } from "../DocsCursor";
 import {
   DASHBOARD_NAV_GROUPS,
@@ -11,6 +12,7 @@ import {
 type Props = {
   variant: string;
   highlightNav?: string;
+  highlightTarget?: string;
 };
 
 function NavHotspot({ label }: { label: string }) {
@@ -24,9 +26,12 @@ function NavHotspot({ label }: { label: string }) {
   );
 }
 
-export function DocsDashboardMockup({ variant, highlightNav }: Props) {
+export function DocsDashboardMockup({ variant, highlightNav, highlightTarget }: Props) {
   const activeNav = resolveActiveNav(variant);
   const highlight = highlightNav as DashboardNavLabel | undefined;
+  const target = (id: string) => highlightTarget === id;
+  const showBookingActions =
+    target("bookings-reschedule") || target("bookings-cancel") || target("bookings-refund");
 
   const title =
     activeNav === "Overview" && variant.includes("onboarding")
@@ -34,12 +39,12 @@ export function DocsDashboardMockup({ variant, highlightNav }: Props) {
       : activeNav;
 
   return (
-    <div className="flex h-full min-h-[280px] text-[10px]">
+    <div className="flex text-[10px]">
       <aside className="relative flex w-[31%] shrink-0 flex-col border-r bg-gray-50/90">
         <div className="border-b px-2.5 py-2">
           <p className="font-cal text-[11px] font-semibold text-gray-900">Dinaya</p>
         </div>
-        <nav className="flex-1 overflow-y-auto px-1.5 py-2">
+        <nav className="flex-1 overflow-visible px-1.5 py-2">
           {DASHBOARD_NAV_GROUPS.map((group) => (
             <div key={group.label} className="mb-2.5">
               <p className="mb-1 px-1.5 text-[8px] font-semibold uppercase tracking-wider text-gray-400">
@@ -78,23 +83,36 @@ export function DocsDashboardMockup({ variant, highlightNav }: Props) {
         {variant.includes("onboarding") && (
           <div className="mt-2 space-y-1.5">
             {["Business info", "Add a service", "Add staff", "Set availability", "Connect PayHere", "Share link"].map(
-              (s, i) => (
-                <div
-                  key={s}
-                  className={cn(
-                    "flex items-center justify-between rounded-md border px-2 py-1.5",
-                    i < 2 ? "border-emerald-200 bg-emerald-50/70" : "border-gray-100 bg-white",
-                  )}
-                >
-                  <span>{s}</span>
-                  <i
+              (s, i) => {
+                const row = (
+                  <div
                     className={cn(
-                      "bi text-[10px]",
-                      i < 2 ? "bi-check-circle-fill text-emerald-600" : "bi-circle text-gray-300",
+                      "flex items-center justify-between rounded-md border px-2 py-1.5",
+                      i < 2 ? "border-emerald-200 bg-emerald-50/70" : "border-gray-100 bg-white",
                     )}
-                  />
-                </div>
-              ),
+                  >
+                    <span>{s}</span>
+                    <i
+                      className={cn(
+                        "bi text-[10px]",
+                        i < 2 ? "bi-check-circle-fill text-emerald-600" : "bi-circle text-gray-300",
+                      )}
+                    />
+                  </div>
+                );
+                if (s === "Business info") {
+                  return (
+                    <DocsTargetHighlight
+                      key={s}
+                      active={target("onboarding-business-info")}
+                      label="Business info"
+                    >
+                      {row}
+                    </DocsTargetHighlight>
+                  );
+                }
+                return <div key={s}>{row}</div>;
+              },
             )}
           </div>
         )}
@@ -140,46 +158,75 @@ export function DocsDashboardMockup({ variant, highlightNav }: Props) {
 
         {variant.includes("availability") && (
           <div className="mt-2 space-y-1.5">
-            <div className="rounded-lg border bg-white p-2">
-              <p className="font-medium text-gray-800">Weekly hours</p>
-              <p className="text-[9px] text-gray-500">Mon–Sat · 9:00 – 18:00</p>
-            </div>
-            <div className="rounded-lg border border-amber-200 bg-amber-50/60 p-2">
-              <p className="font-medium text-amber-900">Blocked dates</p>
-              <p className="text-[9px] text-amber-800/90">May 25 – May 27 (Holiday)</p>
-            </div>
+            <DocsTargetHighlight active={target("availability-weekly-hours")} label="Weekly hours">
+              <div className="rounded-lg border bg-white p-2">
+                <p className="font-medium text-gray-800">Weekly hours</p>
+                <p className="text-[9px] text-gray-500">Mon–Sat · 9:00 – 18:00</p>
+              </div>
+            </DocsTargetHighlight>
+            <DocsTargetHighlight active={target("availability-blocked-dates")} label="Blocked dates">
+              <div className="rounded-lg border border-amber-200 bg-amber-50/60 p-2">
+                <p className="font-medium text-amber-900">Blocked dates</p>
+                <p className="text-[9px] text-amber-800/90">May 25 – May 27 (Holiday)</p>
+              </div>
+            </DocsTargetHighlight>
           </div>
         )}
 
         {variant.includes("bookings") && (
           <div className="mt-2 space-y-1">
             <div className="flex justify-end">
-              <span className="rounded-md bg-primary px-2 py-0.5 text-[9px] font-medium text-white">
-                + New booking
-              </span>
+              <DocsTargetHighlight active={target("bookings-new-booking")} label="New booking" variant="inline">
+                <span className="rounded-md bg-primary px-2 py-0.5 text-[9px] font-medium text-white">
+                  + New booking
+                </span>
+              </DocsTargetHighlight>
             </div>
-            {["Haircut · May 21, 11:00", "Facial · May 22, 14:00"].map((b) => (
-              <div
+            {["Haircut · May 21, 11:00", "Facial · May 22, 14:00"].map((b, i) => (
+              <DocsTargetHighlight
                 key={b}
-                className="flex items-center justify-between rounded-lg border bg-white px-2 py-1.5"
+                active={target("bookings-row") && i === 0}
+                label="Booking row"
               >
-                <span>{b}</span>
-                <span className="text-[9px] font-medium text-emerald-600">Confirmed</span>
-              </div>
+                <div className="flex items-center justify-between rounded-lg border bg-white px-2 py-1.5">
+                  <span>{b}</span>
+                  <span className="text-[9px] font-medium text-emerald-600">Confirmed</span>
+                </div>
+              </DocsTargetHighlight>
             ))}
+            {showBookingActions ? (
+              <div className="mt-1.5 rounded-lg border bg-white p-2 space-y-1">
+                <p className="text-[9px] font-medium text-gray-700">Haircut · May 21, 11:00</p>
+                <div className="flex flex-wrap gap-1">
+                  <DocsTargetHighlight active={target("bookings-reschedule")} label="Reschedule" variant="inline">
+                    <span className="rounded border px-1.5 py-0.5 text-[9px]">Reschedule</span>
+                  </DocsTargetHighlight>
+                  <DocsTargetHighlight active={target("bookings-cancel")} label="Cancel" variant="inline">
+                    <span className="rounded border border-red-200 px-1.5 py-0.5 text-[9px] text-red-600">
+                      Cancel
+                    </span>
+                  </DocsTargetHighlight>
+                  <DocsTargetHighlight active={target("bookings-refund")} label="Refund" variant="inline">
+                    <span className="rounded border px-1.5 py-0.5 text-[9px]">Refund</span>
+                  </DocsTargetHighlight>
+                </div>
+              </div>
+            ) : null}
           </div>
         )}
 
         {variant.includes("services") && (
           <div className="mt-2 space-y-1">
-            {["Haircut — Rs. 2,500", "Facial — Rs. 3,800"].map((s) => (
-              <div key={s} className="rounded-lg border bg-white px-2 py-1.5">
-                {s}
-              </div>
+            {["Haircut — Rs. 2,500", "Facial — Rs. 3,800"].map((s, i) => (
+              <DocsTargetHighlight key={s} active={target("services-row") && i === 0} label="Deposit option">
+                <div className="rounded-lg border bg-white px-2 py-1.5">{s}</div>
+              </DocsTargetHighlight>
             ))}
-            <button type="button" className="w-full rounded-lg bg-primary py-1 text-[9px] font-medium text-white">
-              + Add service
-            </button>
+            <DocsTargetHighlight active={target("services-add-service")} label="+ Add service">
+              <button type="button" className="w-full rounded-lg bg-primary py-1 text-[9px] font-medium text-white">
+                + Add service
+              </button>
+            </DocsTargetHighlight>
           </div>
         )}
 
@@ -243,18 +290,33 @@ export function DocsDashboardMockup({ variant, highlightNav }: Props) {
 
         {variant.includes("marketing") && (
           <div className="mt-2 space-y-1.5">
-            <div className="rounded-lg border bg-white p-2">
-              <p className="text-[9px] text-gray-500">Your booking link</p>
-              <p className="font-medium text-primary">yourname.dinaya.lk</p>
+            <DocsTargetHighlight active={target("marketing-booking-link")} label="Booking link">
+              <div className="rounded-lg border bg-white p-2">
+                <p className="text-[9px] text-gray-500">Your booking link</p>
+                <p className="font-medium text-primary">yourname.dinaya.lk</p>
+              </div>
+            </DocsTargetHighlight>
+            <div className="flex flex-wrap gap-2 pb-1">
+              <DocsTargetHighlight active={target("marketing-copy-link")} variant="inline">
+                <span className="rounded border bg-white px-1.5 py-0.5">Copy link</span>
+              </DocsTargetHighlight>
+              <DocsTargetHighlight active={target("marketing-qr-code")} label="QR code" variant="inline">
+                <span className="rounded border bg-white px-1.5 py-0.5">QR code</span>
+              </DocsTargetHighlight>
+              <DocsTargetHighlight active={target("marketing-whatsapp")} label="WhatsApp share" variant="inline">
+                <span className="rounded border bg-white px-1.5 py-0.5">WhatsApp</span>
+              </DocsTargetHighlight>
             </div>
-            <div className="flex flex-wrap gap-1">
-              <span className="rounded border bg-white px-1.5 py-0.5">Copy link</span>
-              <span className="rounded border bg-white px-1.5 py-0.5">QR code</span>
-              <span className="rounded border bg-white px-1.5 py-0.5">WhatsApp</span>
-            </div>
-            <div className="rounded-lg border border-dashed bg-gray-50 p-2 text-[9px] text-gray-500">
-              Directory listing · Embed widget
-            </div>
+            <DocsTargetHighlight active={target("marketing-directory")} label="Directory">
+              <div className="rounded-lg border border-dashed bg-gray-50 p-2 text-[9px] text-gray-500">
+                Directory listing
+              </div>
+            </DocsTargetHighlight>
+            <DocsTargetHighlight active={target("marketing-embed")} label="Embed code">
+              <div className="rounded-lg border border-dashed bg-gray-50 p-2 text-[9px] text-gray-500">
+                Embed widget · Book now button
+              </div>
+            </DocsTargetHighlight>
           </div>
         )}
 
@@ -289,18 +351,22 @@ export function DocsDashboardMockup({ variant, highlightNav }: Props) {
         {variant.includes("billing") && (
           <div className="mt-2 rounded-lg border bg-white p-2">
             <p className="font-medium">Plan: Free</p>
-            <button type="button" className="mt-2 w-full rounded-lg bg-primary py-1 text-[9px] font-medium text-white">
-              Upgrade to Pro
-            </button>
+            <DocsTargetHighlight active={target("billing-upgrade")} label="Upgrade">
+              <button type="button" className="mt-2 w-full rounded-lg bg-primary py-1 text-[9px] font-medium text-white">
+                Upgrade to Pro
+              </button>
+            </DocsTargetHighlight>
           </div>
         )}
 
         {variant.includes("integrations") && (
           <div className="mt-2 space-y-1">
-            <div className="flex items-center justify-between rounded-lg border bg-white px-2 py-1.5">
-              <span>Google Calendar</span>
-              <span className="text-[9px] font-medium text-primary">Connect</span>
-            </div>
+            <DocsTargetHighlight active={target("integrations-connect")} label="Connect">
+              <div className="flex items-center justify-between rounded-lg border bg-white px-2 py-1.5">
+                <span>Google Calendar</span>
+                <span className="text-[9px] font-medium text-primary">Connect</span>
+              </div>
+            </DocsTargetHighlight>
             <div className="rounded-lg border bg-white px-2 py-1.5 text-gray-500">API keys · Webhooks</div>
           </div>
         )}

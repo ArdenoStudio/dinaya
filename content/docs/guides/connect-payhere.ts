@@ -25,13 +25,13 @@ export const connectPayhereGuide: DocsGuide = {
       body: "Go to Services → edit a service. Choose no payment, fixed deposit, percentage deposit, or full payment upfront.",
       visual: { type: "mockup", mockupId: "dashboard-services" },
       highlightNav: "Services",
-      hotspots: [{ x: 58, y: 72, label: "Deposit option", showCursor: true }],
+      highlightTarget: "services-row",
     },
     {
       title: "Test a booking",
       body: "Open your booking page in a private browser window and complete a test booking with PayHere sandbox before going live.",
       visual: { type: "mockup", mockupId: "booking-confirm" },
-      hotspots: [{ x: 50, y: 78, label: "Confirm & Pay", showCursor: true }],
+      highlightTarget: "booking-confirm-pay",
     },
     {
       title: "Track payments",

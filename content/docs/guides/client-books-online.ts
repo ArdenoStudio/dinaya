@@ -18,19 +18,19 @@ export const clientBooksOnlineGuide: DocsGuide = {
       title: "Choose a service",
       body: "They pick a service, see duration and price, and continue. If you have multiple locations or staff, they choose those first.",
       visual: { type: "mockup", mockupId: "booking-service" },
-      hotspots: [{ x: 50, y: 42, label: "Select service", showCursor: true }],
+      highlightTarget: "booking-service-card",
     },
     {
       title: "Pick date & time",
       body: "Available slots reflect your real-time calendar. When a slot is chosen, it is reserved immediately — no double bookings.",
       visual: { type: "mockup", mockupId: "booking-time" },
-      hotspots: [{ x: 50, y: 48, label: "Time slot", showCursor: true }],
+      highlightTarget: "booking-time-slot",
     },
     {
       title: "Enter details & pay",
       body: "Clients enter name, phone, and email. If payments are enabled, they pay a deposit or full amount via PayHere.",
       visual: { type: "mockup", mockupId: "booking-confirm" },
-      hotspots: [{ x: 50, y: 72, label: "Confirm & Pay", showCursor: true }],
+      highlightTarget: "booking-confirm-pay",
     },
     {
       title: "Confirmation & reminders",

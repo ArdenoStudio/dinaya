@@ -19,13 +19,13 @@ export const manageAvailabilityGuide: DocsGuide = {
       title: "Set weekly hours",
       body: "Choose which days you work and set open/close times for each day. Changes apply immediately — clients only see open slots.",
       visual: { type: "mockup", mockupId: "dashboard-availability" },
-      hotspots: [{ x: 58, y: 48, label: "Weekly hours", showCursor: true }],
+      highlightTarget: "availability-weekly-hours",
     },
     {
       title: "Block holidays",
       body: "Add blocked date ranges for holidays or personal time off. Blocked dates are hidden from your booking page entirely.",
       visual: { type: "mockup", mockupId: "dashboard-availability" },
-      hotspots: [{ x: 58, y: 62, label: "Blocked dates", showCursor: true }],
+      highlightTarget: "availability-blocked-dates",
     },
     {
       title: "Per-staff schedules",
