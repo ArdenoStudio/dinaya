@@ -16,6 +16,11 @@ import { processBookingAutomationTrigger } from "@/lib/automations/engine";
 import { normalizeSriLankanPhone } from "@/lib/phone";
 import { decryptSecret } from "@/lib/secrets";
 import { resolveBookingLocationId } from "@/lib/locations";
+import {
+  resolveBookingSource,
+  resolveClientSource,
+  type BookingAttribution,
+} from "@/lib/booking-attribution";
 import { PlanLimitError, requirePlanLimit } from "@/lib/plan";
 import { withRateLimit } from "@/lib/rate-limit";
 import { z } from "@/lib/validation";
@@ -33,6 +38,13 @@ const bookingSchema = z.object({
   clientEmail: z.email().optional().nullable().or(z.literal("")),
   notes: z.string().trim().max(2000).optional().nullable(),
   source: z.enum(["public", "manual", "api", "import"]).optional(),
+  attribution: z.object({
+    utmSource: z.string().trim().max(80).optional().nullable(),
+    utmMedium: z.string().trim().max(80).optional().nullable(),
+    utmCampaign: z.string().trim().max(120).optional().nullable(),
+    referralCode: z.string().trim().max(40).optional().nullable(),
+    channel: z.string().trim().max(40).optional().nullable(),
+  }).optional().nullable(),
 });
 
 function isOverlapConstraintError(error: unknown): boolean {
@@ -69,9 +81,13 @@ export async function POST(req: NextRequest) {
     clientEmail,
     notes,
     source: requestedSource = "public",
+    attribution: requestedAttribution,
   } = parsed.data;
   const session = await auth();
-  const source = session?.user?.businessId === businessId ? requestedSource : "public";
+  const isOwnerBooking = session?.user?.businessId === businessId;
+  const attribution = isOwnerBooking ? null : (requestedAttribution as BookingAttribution | null | undefined);
+  const source = isOwnerBooking ? requestedSource : resolveBookingSource(attribution);
+  const clientSource = resolveClientSource(source, attribution);
 
   const start = new Date(startsAt);
   const end = new Date(endsAt);
@@ -254,7 +270,7 @@ export async function POST(req: NextRequest) {
       phone: clientPhone,
       email: clientEmail || null,
       stage: "active",
-      source: source === "manual" ? "manual" : "booking_page",
+      source: clientSource,
     })
     .onConflictDoUpdate({
       target: [clients.businessId, clients.phone],
@@ -262,6 +278,7 @@ export async function POST(req: NextRequest) {
         name: clientName,
         email: clientEmail || null,
         stage: "active",
+        ...(clientSource !== "booking_page" && { source: clientSource }),
       },
     })
     .returning({ id: clients.id });
@@ -284,6 +301,7 @@ export async function POST(req: NextRequest) {
         endsAt: end,
         status: initialStatus,
         source,
+        attribution: attribution && Object.values(attribution).some(Boolean) ? attribution : null,
         notes: notes || null,
       })
       .returning({ id: bookings.id });

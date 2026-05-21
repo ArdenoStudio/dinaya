@@ -116,6 +116,8 @@ export const businesses = pgTable("businesses", {
   directoryCity: varchar("directory_city", { length: 80 }),
   directoryDistrict: varchar("directory_district", { length: 80 }),
   directoryCategory: varchar("directory_category", { length: 80 }),
+  referralCode: varchar("referral_code", { length: 40 }),
+  referredByBusinessId: uuid("referred_by_business_id"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -371,6 +373,7 @@ export const bookings = pgTable("bookings", {
   endsAt: timestamp("ends_at", { withTimezone: true }).notNull(),
   status: bookingStatusEnum("status").default("pending").notNull(),
   source: varchar("source", { length: 40 }).default("public").notNull(),
+  attribution: jsonb("attribution"),
   notes: text("notes"),
   staffNotes: text("staff_notes"),
   reminderSentAt: timestamp("reminder_sent_at"),

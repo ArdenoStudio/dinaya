@@ -15,6 +15,7 @@ import { getBookingCopy } from "@/lib/i18n";
 import { getEligibleStaff, pickDefaultStaff } from "@/lib/booking-staff";
 import { formatLkr, isOptimizableRemoteImage } from "@/lib/utils";
 import BookingBranding from "./BookingBranding";
+import { BookingAttributionCapture } from "./BookingAttributionCapture";
 
 const COLOMBO_TZ = "Asia/Colombo";
 
@@ -222,6 +223,7 @@ export default function BookingWizard({
 
   return (
     <div className="overflow-hidden md:rounded-2xl md:border md:border-gray-100/80 md:bg-white md:shadow-[0_24px_64px_-12px_rgba(37,99,235,0.12),0_8px_24px_-8px_rgba(0,0,0,0.08)]">
+      <BookingAttributionCapture businessId={business.id} />
       {/* Mobile header + progress */}
       <div className="bg-blue-600 px-[18px] pt-5 pb-[18px] md:hidden">
         <BusinessIdentity

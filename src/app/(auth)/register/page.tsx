@@ -48,6 +48,7 @@ const strengthText  = ["", "text-red-500", "text-amber-500", "text-emerald-600"]
 
 export default function RegisterPage() {
   const router = useRouter();
+  const [referrerCode, setReferrerCode] = useState("");
   const step1Ref   = useRef<HTMLInputElement>(null);
   const step2Ref   = useRef<HTMLInputElement>(null);
   const slugTouched = useRef(false);
@@ -67,6 +68,10 @@ export default function RegisterPage() {
   const [loading, setLoading]         = useState(false);
 
   useEffect(() => { step1Ref.current?.focus(); }, []);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setReferrerCode(params.get("ref")?.trim().toLowerCase() ?? "");
+  }, []);
   useEffect(() => { if (step === 2) step2Ref.current?.focus(); }, [step]);
 
   function handleBusinessNameChange(value: string) {
@@ -89,7 +94,10 @@ export default function RegisterPage() {
     const res = await fetch("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
+      body: JSON.stringify({
+        ...form,
+        referrerCode: referrerCode || undefined,
+      }),
     });
     const data = await res.json();
     if (!res.ok) { setError(data.error ?? "Something went wrong."); setLoading(false); return; }

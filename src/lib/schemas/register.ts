@@ -24,6 +24,7 @@ export const registerSchema = z.object({
     ])
     .optional(),
   language: z.enum(["en", "si", "ta"]).optional(),
+  referrerCode: z.string().trim().max(40).optional(),
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>;
