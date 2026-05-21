@@ -21,6 +21,9 @@ export default defineConfig({
     url: baseURL,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
+    env: {
+      E2E_DISABLE_RATE_LIMIT: "true",
+    },
   },
   projects: [
     {
