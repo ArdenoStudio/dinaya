@@ -17,6 +17,8 @@ Use this checklist before pushing production changes that touch schema, auth, pa
 - Optional WhatsApp/social publishing: `META_WHATSAPP_TOKEN`, `META_WHATSAPP_PHONE_NUMBER_ID`, `META_SOCIAL_ACCESS_TOKEN`, `META_SOCIAL_PAGE_ID`
 - Optional SMS gateway: `SMS_HTTP_ENDPOINT`, `SMS_HTTP_API_KEY`, `SMS_HTTP_METHOD`, `SMS_HTTP_SENDER`
 
+Vercel Hobby projects only support daily cron schedules. Keep `/api/cron/ai-workflows` on a daily cadence unless the project is upgraded or an external scheduler is used.
+
 `SECRET_ENCRYPTION_KEY` must stay stable. Rotating it without re-encrypting stored secrets will make PayHere merchant secrets unreadable.
 
 ## Local verification

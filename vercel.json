@@ -6,7 +6,7 @@
     },
     {
       "path": "/api/cron/ai-workflows",
-      "schedule": "*/30 * * * *"
+      "schedule": "0 5 * * *"
     }
   ]
 }
