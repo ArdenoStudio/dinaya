@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 type Stage = "lead" | "prospect" | "active" | "churned";
 
@@ -60,11 +61,17 @@ function avatarColor(id: string) {
 }
 
 export default function ClientsPage() {
+  const searchParams = useSearchParams();
+  const initialQuery = searchParams.get("q") ?? "";
   const [clients, setClients] = useState<Client[]>([]);
   const [allClients, setAllClients] = useState<Client[]>([]);
   const [stage, setStage] = useState<"" | Stage>("");
-  const [q, setQ] = useState("");
+  const [q, setQ] = useState(initialQuery);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setQ(searchParams.get("q") ?? "");
+  }, [searchParams]);
 
   useEffect(() => {
     setLoading(true);
