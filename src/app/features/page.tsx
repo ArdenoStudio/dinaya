@@ -307,12 +307,12 @@ export default function FeaturesPage() {
       {/* Max AI growth */}
       <section className="max-w-6xl mx-auto px-6 pb-20" id="max-ai">
         <div className="mb-10">
-          <div className="inline-flex items-center gap-2 rounded-xl ring-1 ring-indigo-100 bg-indigo-50/50 px-3.5 py-2 mb-4">
-            <span className="flex h-6 w-6 items-center justify-center rounded-md bg-indigo-600 text-white">
+          <div className="inline-flex items-center gap-2 rounded-xl ring-1 ring-amber-100 bg-amber-50/50 px-3.5 py-2 mb-4">
+            <span className="flex h-6 w-6 items-center justify-center rounded-md bg-amber-600 text-white">
               <i className="bi bi-stars text-xs" />
             </span>
             <span className="text-sm font-semibold text-gray-900">Max AI growth</span>
-            <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-medium text-indigo-700">
+            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-800">
               Available on Max
             </span>
           </div>
@@ -326,16 +326,16 @@ export default function FeaturesPage() {
 
         <div className="grid md:grid-cols-3 gap-px bg-gray-200/70 rounded-2xl overflow-hidden border border-gray-200/70">
           {proAiFeatures.map((f) => (
-            <div key={f.title} className="group relative p-7 bg-white hover:bg-gradient-to-br hover:from-indigo-600/[0.03] hover:to-white transition-colors">
+            <div key={f.title} className="group relative p-7 bg-white hover:bg-gradient-to-br hover:from-amber-500/[0.03] hover:to-white transition-colors">
               <div className="relative mb-5 inline-flex">
-                <div className="absolute inset-0 rounded-xl bg-indigo-600/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-600/15 to-indigo-600/5">
-                  <i className={`bi ${f.icon} text-[1.15rem] text-indigo-600`} />
+                <div className="absolute inset-0 rounded-xl bg-amber-500/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-amber-500/15 to-amber-500/5">
+                  <i className={`bi ${f.icon} text-[1.15rem] text-amber-600`} />
                 </div>
               </div>
               <h3 className="font-cal text-lg mb-2 tracking-tight">{f.title}</h3>
               <p className="text-muted-foreground text-sm leading-relaxed">{f.desc}</p>
-              <span className="absolute bottom-0 left-7 right-7 h-px bg-gradient-to-r from-transparent via-indigo-600/40 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
+              <span className="absolute bottom-0 left-7 right-7 h-px bg-gradient-to-r from-transparent via-amber-500/40 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
             </div>
           ))}
         </div>

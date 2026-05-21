@@ -187,8 +187,8 @@ export default async function PricingPage() {
           </div>
 
           {/* Max plan */}
-          <div className="relative flex w-full max-w-[calc((64rem-1.25rem)/2)] shrink-0 flex-col overflow-hidden rounded-2xl border bg-gradient-to-br from-indigo-950 via-violet-950 to-purple-950 p-8 text-white shadow-xl shadow-indigo-900/20 lg:translate-x-6 xl:translate-x-10">
-            <div className="pointer-events-none absolute -top-16 -right-16 size-48 rounded-full bg-indigo-500/30 blur-3xl" />
+          <div className="relative flex w-full max-w-[calc((64rem-1.25rem)/2)] shrink-0 flex-col overflow-hidden rounded-2xl border bg-gradient-to-br from-amber-950 via-yellow-900 to-orange-950 p-8 text-white shadow-xl shadow-amber-900/20 lg:translate-x-6 xl:translate-x-10">
+            <div className="pointer-events-none absolute -top-16 -right-16 size-48 rounded-full bg-amber-500/30 blur-3xl" />
 
             <div className="relative">
               <div className="flex items-center gap-2 mb-2">
@@ -229,8 +229,8 @@ export default async function PricingPage() {
               <ul className="space-y-3 text-sm">
                 {maxAiFeatures.map((f) => (
                   <li key={f} className="flex items-start gap-2.5">
-                    <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-indigo-400/30">
-                      <i className="bi bi-check text-indigo-300" style={{ fontSize: '0.625rem' }} />
+                    <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-amber-400/30">
+                      <i className="bi bi-check text-amber-300" style={{ fontSize: '0.625rem' }} />
                     </span>
                     <span className="text-white/85">{f}</span>
                   </li>
