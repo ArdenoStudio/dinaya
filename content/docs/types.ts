@@ -21,10 +21,32 @@ export type GuideVisual =
   | { type: "screenshot"; src: string; alt?: string }
   | { type: "custom"; componentId: string };
 
+/** Sidebar nav label — matches DASHBOARD_NAV_GROUPS in dashboard-nav-layout.ts */
+export type DashboardNavHighlight =
+  | "Overview"
+  | "Calendar"
+  | "Bookings"
+  | "Clients"
+  | "Services"
+  | "Staff"
+  | "Locations"
+  | "Availability"
+  | "Reviews"
+  | "Payments"
+  | "Marketing"
+  | "AI Hub"
+  | "Reports"
+  | "Integrations"
+  | "Automations"
+  | "Settings";
+
 export type GuideStep = {
   title: string;
   body: string;
   visual?: GuideVisual;
+  /** Highlights a sidebar item with an attached cursor (dashboard mockups only). */
+  highlightNav?: DashboardNavHighlight;
+  /** Percent-based overlays for main panel or phone mockups (use x ≥ 38 on dashboard). */
   hotspots?: DocsHotspot[];
 };
 

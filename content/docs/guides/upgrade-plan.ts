@@ -18,13 +18,13 @@ export const upgradePlanGuide: DocsGuide = {
       title: "Open Billing",
       body: "In your dashboard, go to Settings → Billing. Choose monthly or annual billing for Pro or Max.",
       visual: { type: "mockup", mockupId: "dashboard-billing" },
-      hotspots: [{ x: 18, y: 88, label: "Settings", showCursor: true }],
+      highlightNav: "Settings",
     },
     {
       title: "Pay with PayHere",
       body: "Complete checkout through PayHere. Your new features unlock immediately after payment confirms.",
       visual: { type: "mockup", mockupId: "dashboard-billing" },
-      hotspots: [{ x: 55, y: 50, label: "Upgrade", showCursor: true }],
+      hotspots: [{ x: 58, y: 52, label: "Upgrade", showCursor: true }],
     },
   ],
 };

@@ -13,7 +13,7 @@ export const apiKeysWebhooksGuide: DocsGuide = {
       title: "API keys",
       body: "Create API keys under Settings → API keys. Use them to call the public API at /api/v1/bookings and /api/v1/availability.",
       visual: { type: "mockup", mockupId: "dashboard-integrations" },
-      hotspots: [{ x: 18, y: 88, label: "Settings", showCursor: true }],
+      highlightNav: "Integrations",
     },
     {
       title: "Authentication",

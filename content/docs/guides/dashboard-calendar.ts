@@ -12,7 +12,7 @@ export const dashboardCalendarGuide: DocsGuide = {
       title: "Open Calendar",
       body: "Dashboard → Calendar shows all appointments by day and staff. Click any slot to view or edit the booking.",
       visual: { type: "mockup", mockupId: "dashboard-calendar" },
-      hotspots: [{ x: 18, y: 32, label: "Calendar", showCursor: true }],
+      highlightNav: "Calendar",
     },
     {
       title: "Switch views",

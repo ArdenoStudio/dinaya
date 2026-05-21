@@ -12,7 +12,7 @@ export const collectReviewsGuide: DocsGuide = {
       title: "Enable review requests",
       body: "After an appointment, clients receive a review link by email. Manage settings under Dashboard → Reviews.",
       visual: { type: "mockup", mockupId: "dashboard-reviews" },
-      hotspots: [{ x: 18, y: 70, label: "Reviews", showCursor: true }],
+      highlightNav: "Reviews",
     },
     {
       title: "Client leaves a review",

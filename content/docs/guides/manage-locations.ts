@@ -13,7 +13,7 @@ export const manageLocationsGuide: DocsGuide = {
       title: "Open Locations",
       body: "Free includes 1 location. Pro supports 3; Max is unlimited. Go to Dashboard → Locations.",
       visual: { type: "mockup", mockupId: "dashboard-locations" },
-      hotspots: [{ x: 18, y: 62, label: "Locations", showCursor: true }],
+      highlightNav: "Locations",
     },
     {
       title: "Add a branch",

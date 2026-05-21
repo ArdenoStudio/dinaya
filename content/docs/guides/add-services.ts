@@ -13,13 +13,13 @@ export const addServicesGuide: DocsGuide = {
       title: "Open Services",
       body: "Go to Dashboard → Services to see your catalog. Free plans include up to 5 services.",
       visual: { type: "mockup", mockupId: "dashboard-services" },
-      hotspots: [{ x: 18, y: 52, label: "Services", showCursor: true }],
+      highlightNav: "Services",
     },
     {
       title: "Add a service",
       body: "Click Add service. Enter name, duration, price in LKR, and optional description shown to clients.",
       visual: { type: "mockup", mockupId: "dashboard-services" },
-      hotspots: [{ x: 55, y: 72, label: "+ Add service", showCursor: true }],
+      hotspots: [{ x: 58, y: 78, label: "+ Add service", showCursor: true }],
     },
     {
       title: "Buffer time",
