@@ -1,6 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3001";
+/** Use 127.0.0.1 to avoid IPv6 (::1) connection refused when the dev server binds IPv4 only. */
+const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? "http://127.0.0.1:3001";
 
 export default defineConfig({
   testDir: "./e2e",
@@ -14,6 +15,12 @@ export default defineConfig({
     baseURL,
     trace: "on-first-retry",
     screenshot: "only-on-failure",
+  },
+  webServer: {
+    command: "npm run dev -- -p 3001",
+    url: baseURL,
+    reuseExistingServer: !process.env.CI,
+    timeout: 120_000,
   },
   projects: [
     {

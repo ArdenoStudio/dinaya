@@ -12,7 +12,7 @@ import { chromium } from "@playwright/test";
 import fs from "node:fs";
 import path from "node:path";
 
-const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3001";
+const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? "http://127.0.0.1:3001";
 const outDir = path.join(process.cwd(), "public/docs/screenshots");
 
 type CaptureTarget = {
