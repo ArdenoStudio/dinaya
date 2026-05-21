@@ -5,13 +5,35 @@ import { eq, and, inArray } from "drizzle-orm";
 import { buildRecurringFormData, PAYHERE_CHECKOUT_URL } from "@/lib/payhere-subscriptions";
 import { generateOrderId } from "@/lib/utils";
 import { requireApiBusiness } from "@/lib/api-auth";
+import {
+  getSubscriptionPrice,
+  payhereRecurrence,
+  planRank,
+  subscriptionItemName,
+  type BillingInterval,
+  type Plan,
+  type PaidPlan,
+} from "@/lib/plan";
 
-const PRO_PRICE_LKR = Number(process.env.DINAYA_PRO_MONTHLY_PRICE_LKR ?? "2500");
+function parseSubscribeRequest(body: { plan?: string; interval?: string }) {
+  const targetPlan: PaidPlan = body.plan === "max" ? "max" : "pro";
+  const interval: BillingInterval = body.interval === "annual" ? "annual" : "monthly";
+  return { targetPlan, interval };
+}
 
-export async function POST() {
+export async function POST(req: Request) {
   const authResult = await requireApiBusiness({ ownerOnly: true });
   if (!authResult.ok) return authResult.response;
   const { businessId, user } = authResult.context;
+
+  let targetPlan: PaidPlan = "pro";
+  let interval: BillingInterval = "monthly";
+  try {
+    const body = (await req.json()) as { plan?: string; interval?: string };
+    ({ targetPlan, interval } = parseSubscribeRequest(body));
+  } catch {
+    // default to monthly pro when no JSON body
+  }
 
   const [business] = await db
     .select({
@@ -29,11 +51,14 @@ export async function POST() {
     return NextResponse.json({ error: "Business not found." }, { status: 404 });
   }
 
-  if (business.plan === "pro") {
-    return NextResponse.json({ error: "Already on the Pro plan." }, { status: 409 });
+  const currentPlan = (business.plan ?? "free") as Plan;
+  if (planRank(currentPlan) >= planRank(targetPlan)) {
+    return NextResponse.json(
+      { error: `Already on ${targetPlan === "max" ? "Max" : "Pro"} or a higher plan.` },
+      { status: 409 }
+    );
   }
 
-  // Block double-subscribing if there's already an active subscription pending PayHere confirmation
   const [existingActive] = await db
     .select({ id: subscriptions.id })
     .from(subscriptions)
@@ -50,7 +75,6 @@ export async function POST() {
     );
   }
 
-  // Get the owner's name + email for the PayHere checkout (required fields)
   const [owner] = await db
     .select({ name: users.name, email: users.email })
     .from(users)
@@ -68,20 +92,22 @@ export async function POST() {
 
   const orderId = generateOrderId();
   const nameParts = (owner?.name ?? business.name).split(" ");
+  const amountLkr = getSubscriptionPrice(targetPlan, interval);
 
-  // Record the pending subscription before redirecting so the webhook can find it
   await db.insert(subscriptions).values({
     businessId,
     payhereOrderId: orderId,
-    amountLkr: PRO_PRICE_LKR,
+    plan: targetPlan,
+    billingInterval: interval,
+    amountLkr,
     status: "active",
   });
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL!;
   const formData = buildRecurringFormData({
     orderId,
-    amountLkr: PRO_PRICE_LKR,
-    itemName: "Dinaya Pro — monthly subscription",
+    amountLkr,
+    itemName: subscriptionItemName(targetPlan, interval),
     firstName: nameParts[0],
     lastName: nameParts.slice(1).join(" "),
     email: contactEmail,
@@ -89,7 +115,7 @@ export async function POST() {
     notifyUrl: `${appUrl}/api/webhooks/payhere-subscription`,
     returnUrl: `${appUrl}/dashboard/billing?success=1`,
     cancelUrl: `${appUrl}/dashboard/billing?cancelled=1`,
-    recurrence: "1 Month",
+    recurrence: payhereRecurrence(interval),
     duration: "Forever",
   });
 

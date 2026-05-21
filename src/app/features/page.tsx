@@ -105,6 +105,44 @@ const engagementFeatures = [
   },
 ];
 
+const proAiFeatures = [
+  {
+    icon: "bi-robot",
+    title: "AI Booking Autopilot",
+    desc: "Let AI handle reschedules, confirmations, and follow-ups so your calendar stays full without manual chasing.",
+  },
+  {
+    icon: "bi-bell-fill",
+    title: "Smart reminder system",
+    desc: "AI-timed reminders across SMS, email, and WhatsApp — optimized for each client so fewer appointments slip through.",
+  },
+  {
+    icon: "bi-star",
+    title: "Review engine",
+    desc: "Automatically request reviews after appointments, draft replies, and grow your reputation while you focus on clients.",
+  },
+  {
+    icon: "bi-arrow-repeat",
+    title: "Client Reactivation Campaign",
+    desc: "Win back lapsed clients with personalized outreach that brings quiet customers back to your booking page.",
+  },
+  {
+    icon: "bi-graph-up-arrow",
+    title: "AI upsell assistant",
+    desc: "Suggest add-ons and upgrades at the right moment — during booking or after checkout — to grow revenue per visit.",
+  },
+  {
+    icon: "bi-calendar3",
+    title: "30-Day AI Content Machine",
+    desc: "A month of social posts, captions, and promos generated for your business — ready to share on Instagram and WhatsApp.",
+  },
+  {
+    icon: "bi-gem",
+    title: "VIP Loyalty Sequence",
+    desc: "Reward your best clients with automated loyalty messages, perks, and rebooking nudges that keep them coming back.",
+  },
+];
+
 const highlights = [
   { stat: "5 min", label: "Average setup time" },
   { stat: "LKR 0", label: "Monthly cost on Free plan" },
@@ -263,6 +301,53 @@ export default function FeaturesPage() {
               <span className="absolute bottom-0 left-7 right-7 h-px bg-gradient-to-r from-transparent via-violet-500/40 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* Max AI growth */}
+      <section className="max-w-6xl mx-auto px-6 pb-20" id="max-ai">
+        <div className="mb-10">
+          <div className="inline-flex items-center gap-2 rounded-xl ring-1 ring-indigo-100 bg-indigo-50/50 px-3.5 py-2 mb-4">
+            <span className="flex h-6 w-6 items-center justify-center rounded-md bg-indigo-600 text-white">
+              <i className="bi bi-stars text-xs" />
+            </span>
+            <span className="text-sm font-semibold text-gray-900">Max AI growth</span>
+            <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-medium text-indigo-700">
+              Available on Max
+            </span>
+          </div>
+          <h2 className="font-cal text-3xl md:text-4xl tracking-tight mb-3">
+            Growth on autopilot.
+          </h2>
+          <p className="text-muted-foreground max-w-xl">
+            Seven AI-powered Max tools that fill your calendar, win back clients, and keep your social presence active — without adding hours to your week.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-px bg-gray-200/70 rounded-2xl overflow-hidden border border-gray-200/70">
+          {proAiFeatures.map((f) => (
+            <div key={f.title} className="group relative p-7 bg-white hover:bg-gradient-to-br hover:from-indigo-600/[0.03] hover:to-white transition-colors">
+              <div className="relative mb-5 inline-flex">
+                <div className="absolute inset-0 rounded-xl bg-indigo-600/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-600/15 to-indigo-600/5">
+                  <i className={`bi ${f.icon} text-[1.15rem] text-indigo-600`} />
+                </div>
+              </div>
+              <h3 className="font-cal text-lg mb-2 tracking-tight">{f.title}</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed">{f.desc}</p>
+              <span className="absolute bottom-0 left-7 right-7 h-px bg-gradient-to-r from-transparent via-indigo-600/40 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-8 text-center">
+          <Link
+            href="/pricing"
+            className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
+          >
+            See Pro pricing
+            <i className="bi bi-arrow-right text-sm" />
+          </Link>
         </div>
       </section>
 

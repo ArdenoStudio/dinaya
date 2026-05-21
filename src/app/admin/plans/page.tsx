@@ -16,15 +16,22 @@ import { resetPlansToDefaults, savePlans } from "./actions";
 export const dynamic = "force-dynamic";
 
 const FEATURE_LABELS: Record<PlanFeature, string> = {
+  aiBookingAutopilot: "AI Booking Autopilot",
+  aiContentMachine: "30-Day AI Content Machine",
+  aiUpsellAssistant: "AI upsell assistant",
   automations: "Automations",
   broadcasts: "Broadcasts",
+  clientReactivationCampaign: "Client Reactivation Campaign",
   googleCalendarSync: "Google Calendar sync",
   payments: "PayHere payments",
   publicBookingPage: "Public booking page",
   publicBookingPageCustomization: "Booking page customization",
   reports: "Reports",
+  reviewEngine: "Review engine",
   reviews: "Reviews",
   reviewReplies: "Review replies",
+  smartReminderSystem: "Smart reminder system",
+  vipLoyaltySequence: "VIP Loyalty Sequence",
   webhooks: "Webhooks and API",
   whatsappSms: "WhatsApp and SMS reminders",
 };
@@ -34,10 +41,17 @@ const FEATURE_ORDER: PlanFeature[] = [
   "publicBookingPageCustomization",
   "reviews",
   "reviewReplies",
+  "reviewEngine",
   "payments",
   "whatsappSms",
+  "smartReminderSystem",
   "automations",
+  "aiBookingAutopilot",
   "broadcasts",
+  "clientReactivationCampaign",
+  "aiUpsellAssistant",
+  "aiContentMachine",
+  "vipLoyaltySequence",
   "googleCalendarSync",
   "reports",
   "webhooks",
@@ -58,11 +72,13 @@ export default async function AdminPlansPage() {
   const [
     [{ freeCount }],
     [{ proCount }],
+    [{ maxCount }],
     [{ activeSubCount }],
     [{ activeMrr }],
   ] = await Promise.all([
     db.select({ freeCount: count() }).from(businesses).where(eq(businesses.plan, "free")),
     db.select({ proCount: count() }).from(businesses).where(eq(businesses.plan, "pro")),
+    db.select({ maxCount: count() }).from(businesses).where(eq(businesses.plan, "max")),
     db.select({ activeSubCount: count() }).from(subscriptions).where(eq(subscriptions.status, "active")),
     db
       .select({ activeMrr: sql<number>`coalesce(sum(${subscriptions.amountLkr}), 0)::int` })
@@ -70,7 +86,7 @@ export default async function AdminPlansPage() {
       .where(eq(subscriptions.status, "active")),
   ]);
 
-  const total = Number(freeCount) + Number(proCount);
+  const total = Number(freeCount) + Number(proCount) + Number(maxCount);
   const freeShare = total > 0 ? Math.round((Number(freeCount) / total) * 100) : 0;
   const proShare = total > 0 ? Math.round((Number(proCount) / total) * 100) : 0;
 
@@ -119,7 +135,7 @@ export default async function AdminPlansPage() {
             <p className="text-xs text-muted-foreground">Active subscriptions</p>
             <p className="mt-1 text-2xl font-bold tracking-tight">{Number(activeSubCount)}</p>
             <p className="mt-1 text-xs text-muted-foreground">
-              Pro tier · billed monthly
+              Pro & Max · monthly or annual
             </p>
           </div>
         </div>
@@ -166,6 +182,20 @@ export default async function AdminPlansPage() {
                 className="mt-1 h-10 w-full rounded-md border bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
               />
             </div>
+            <div>
+              <label htmlFor="proAnnualPriceLkr" className="block text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                Annual price (LKR)
+              </label>
+              <input
+                id="proAnnualPriceLkr"
+                name="proAnnualPriceLkr"
+                type="number"
+                min={0}
+                step={10}
+                defaultValue={config.proAnnualPriceLkr}
+                className="mt-1 h-10 w-full rounded-md border bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
+              />
+            </div>
             <div className="sm:col-span-2">
               <span className="block text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 Launch status
@@ -186,19 +216,75 @@ export default async function AdminPlansPage() {
           </div>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          {(["free", "pro"] as Plan[]).map((planKey) => {
+        <div className="rounded-xl border bg-white p-5">
+          <h2 className="mb-4 font-semibold">Max plan billing</h2>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div>
+              <label htmlFor="maxMonthlyPriceLkr" className="block text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                Monthly price (LKR)
+              </label>
+              <input
+                id="maxMonthlyPriceLkr"
+                name="maxMonthlyPriceLkr"
+                type="number"
+                min={0}
+                step={10}
+                defaultValue={config.maxMonthlyPriceLkr}
+                className="mt-1 h-10 w-full rounded-md border bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
+              />
+            </div>
+            <div>
+              <label htmlFor="maxAnnualPriceLkr" className="block text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                Annual price (LKR)
+              </label>
+              <input
+                id="maxAnnualPriceLkr"
+                name="maxAnnualPriceLkr"
+                type="number"
+                min={0}
+                step={10}
+                defaultValue={config.maxAnnualPriceLkr}
+                className="mt-1 h-10 w-full rounded-md border bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <span className="block text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                Launch status
+              </span>
+              <label className="mt-1 flex h-10 items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  name="maxLaunched"
+                  defaultChecked={config.maxLaunched}
+                  className="size-4 rounded border-muted-foreground/30 text-primary focus:ring-primary"
+                />
+                Max is live (billed at the price above)
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-3 md:grid-cols-2">
+          {(["free", "pro", "max"] as Plan[]).map((planKey) => {
             const entitlements = config.plans[planKey];
-            const accent = planKey === "pro" ? "border-primary/40 ring-1 ring-primary/15" : "border-muted-foreground/20";
-            const tile = planKey === "pro" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground";
-            const share = planKey === "pro" ? proShare : freeShare;
-            const countNum = planKey === "pro" ? Number(proCount) : Number(freeCount);
+            const accent = planKey === "max" ? "border-indigo-400/40 ring-1 ring-indigo-400/15" : planKey === "pro" ? "border-primary/40 ring-1 ring-primary/15" : "border-muted-foreground/20";
+            const tile = planKey === "max" ? "bg-indigo-600 text-white" : planKey === "pro" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground";
+            const share = planKey === "max"
+              ? (total > 0 ? Math.round((Number(maxCount) / total) * 100) : 0)
+              : planKey === "pro"
+                ? proShare
+                : freeShare;
+            const countNum = planKey === "max"
+              ? Number(maxCount)
+              : planKey === "pro"
+                ? Number(proCount)
+                : Number(freeCount);
             return (
               <fieldset key={planKey} className={`overflow-hidden rounded-2xl border bg-white ${accent}`}>
                 <div className="border-b px-6 py-5">
                   <div className="flex items-center justify-between">
                     <legend className={`inline-block rounded-full px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider ${tile}`}>
-                      {planKey === "pro" ? "Pro" : "Free"}
+                      {planKey === "max" ? "Max" : planKey === "pro" ? "Pro" : "Free"}
                     </legend>
                     <span className="text-xs text-muted-foreground">
                       {countNum} accounts · {share}% of base

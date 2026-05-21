@@ -4,14 +4,66 @@ import { auth } from "@/auth";
 import { db } from "@/db";
 import { businesses, subscriptions } from "@/db/schema";
 import { eq, and, inArray, desc } from "drizzle-orm";
+import {
+  annualSavingsPercent,
+  getPlanConfig,
+  planDisplayName,
+  type Plan,
+} from "@/lib/plan";
 import { UpgradeButton } from "./UpgradeButton";
 import { CancelButton } from "./CancelButton";
 
-const PRO_PRICE_LKR = Number(process.env.DINAYA_PRO_MONTHLY_PRICE_LKR ?? "2500");
+function formatRs(amount: number) {
+  return amount.toLocaleString("en-LK");
+}
+
+function PlanPricing({
+  monthlyLkr,
+  annualLkr,
+  targetPlan,
+}: {
+  monthlyLkr: number;
+  annualLkr: number;
+  targetPlan: "pro" | "max";
+}) {
+  const savings = annualSavingsPercent(monthlyLkr, annualLkr);
+
+  return (
+    <>
+      <div className="mt-4 space-y-1">
+        <div className="flex items-baseline gap-2">
+          <span className="text-3xl font-bold tracking-tight">Rs {formatRs(monthlyLkr)}</span>
+          <span className="text-sm text-neutral-500">/ month</span>
+        </div>
+        <p className="text-sm text-neutral-600">
+          or Rs {formatRs(annualLkr)} / year
+          {savings > 0 && (
+            <span className="ml-1 font-medium text-emerald-700">· save {savings}%</span>
+          )}
+        </p>
+      </div>
+      <div className="mt-5 flex flex-wrap gap-3">
+        <UpgradeButton targetPlan={targetPlan} interval="monthly" />
+        <UpgradeButton
+          targetPlan={targetPlan}
+          interval="annual"
+          variant="secondary"
+          label={savings > 0 ? `Annual · save ${savings}%` : "Annual"}
+        />
+      </div>
+    </>
+  );
+}
 
 export default async function BillingPage() {
   const session = await auth();
   if (!session) redirect("/login");
+  const {
+    proMonthlyPriceLkr,
+    proAnnualPriceLkr,
+    maxMonthlyPriceLkr,
+    maxAnnualPriceLkr,
+  } = getPlanConfig();
   const businessId = (session.user as { businessId: string }).businessId;
 
   const [business] = await db
@@ -33,7 +85,8 @@ export default async function BillingPage() {
     .orderBy(desc(subscriptions.createdAt))
     .limit(1);
 
-  const isPro = business?.plan === "pro";
+  const plan = (business?.plan ?? "free") as Plan;
+  const isPaid = plan === "pro" || plan === "max";
 
   return (
     <div className="max-w-3xl space-y-8 p-6">
@@ -49,11 +102,11 @@ export default async function BillingPage() {
           <div>
             <div className="text-xs uppercase tracking-wider text-neutral-500">Current plan</div>
             <div className="mt-1 text-xl font-semibold">
-              {isPro ? "Pro" : "Free"}
+              {planDisplayName(plan)}
             </div>
             {business?.planExpiresAt && (
               <div className="mt-1 text-sm text-neutral-500">
-                {isPro ? "Renews" : "Expires"} on{" "}
+                {isPaid ? "Renews" : "Expires"} on{" "}
                 {business.planExpiresAt.toLocaleDateString(undefined, {
                   year: "numeric",
                   month: "long",
@@ -61,8 +114,13 @@ export default async function BillingPage() {
                 })}
               </div>
             )}
+            {activeSub && (
+              <div className="mt-1 text-sm text-neutral-500">
+                Billed {activeSub.billingInterval === "annual" ? "annually" : "monthly"}
+              </div>
+            )}
           </div>
-          {isPro && activeSub?.status === "past_due" && (
+          {isPaid && activeSub?.status === "past_due" && (
             <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700 ring-1 ring-amber-500/30">
               Payment past due
             </span>
@@ -70,33 +128,60 @@ export default async function BillingPage() {
         </div>
       </section>
 
-      {!isPro && (
-        <section className="rounded-xl border border-blue-200 bg-blue-50/50 p-6">
-          <h2 className="text-lg font-semibold">Upgrade to Pro</h2>
+      {plan === "free" && (
+        <>
+          <section className="rounded-xl border border-blue-200 bg-blue-50/50 p-6">
+            <h2 className="text-lg font-semibold">Upgrade to Pro</h2>
+            <p className="mt-1 text-sm text-neutral-700">
+              Unlimited bookings, staff, and services — plus multi-staff calendar, custom
+              domain, branding control, advanced reports, and priority WhatsApp support.
+            </p>
+            <PlanPricing
+              monthlyLkr={proMonthlyPriceLkr}
+              annualLkr={proAnnualPriceLkr}
+              targetPlan="pro"
+            />
+          </section>
+
+          <section className="rounded-xl border border-indigo-200 bg-indigo-50/50 p-6">
+            <h2 className="text-lg font-semibold">Upgrade to Max</h2>
+            <p className="mt-1 text-sm text-neutral-700">
+              Everything in Pro — plus AI Booking Autopilot, Smart reminders, Review engine,
+              Client reactivation, AI upsell assistant, 30-Day Content Machine, and VIP
+              Loyalty Sequence.
+            </p>
+            <PlanPricing
+              monthlyLkr={maxMonthlyPriceLkr}
+              annualLkr={maxAnnualPriceLkr}
+              targetPlan="max"
+            />
+            <p className="mt-3 text-xs text-neutral-500">
+              Cancel anytime — you keep your plan until the period ends.
+            </p>
+          </section>
+        </>
+      )}
+
+      {plan === "pro" && (
+        <section className="rounded-xl border border-indigo-200 bg-indigo-50/50 p-6">
+          <h2 className="text-lg font-semibold">Upgrade to Max</h2>
           <p className="mt-1 text-sm text-neutral-700">
-            Unlimited bookings, staff, services. PayHere payments, webhooks,
-            automations, reports, broadcasts, WhatsApp/SMS, and Google Calendar sync.
+            Unlock AI Booking Autopilot, Smart reminders, Review engine, Client reactivation,
+            AI upsell assistant, 30-Day Content Machine, and VIP Loyalty Sequence.
           </p>
-          <div className="mt-4 flex items-baseline gap-2">
-            <span className="text-3xl font-bold tracking-tight">
-              Rs {PRO_PRICE_LKR.toLocaleString("en-LK")}
-            </span>
-            <span className="text-sm text-neutral-500">/ month</span>
-          </div>
-          <div className="mt-5">
-            <UpgradeButton />
-          </div>
-          <p className="mt-3 text-xs text-neutral-500">
-            Billed monthly. Cancel anytime — you keep Pro until the period ends.
-          </p>
+          <PlanPricing
+            monthlyLkr={maxMonthlyPriceLkr}
+            annualLkr={maxAnnualPriceLkr}
+            targetPlan="max"
+          />
         </section>
       )}
 
-      {isPro && activeSub && (
+      {isPaid && activeSub && (
         <section className="rounded-xl border border-neutral-200 bg-white p-6">
           <h2 className="text-lg font-semibold">Manage subscription</h2>
           <p className="mt-1 text-sm text-neutral-600">
-            Cancel anytime. You&apos;ll keep Pro features until the current period ends.
+            Cancel anytime. You&apos;ll keep {planDisplayName(plan)} features until the current period ends.
           </p>
           <div className="mt-4">
             <CancelButton />
