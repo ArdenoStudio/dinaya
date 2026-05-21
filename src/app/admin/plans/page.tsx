@@ -5,7 +5,7 @@ import { db } from "@/db";
 import { businesses, subscriptions } from "@/db/schema";
 import {
   ENFORCED_FEATURES,
-  getPlanConfig,
+  getPlanConfigAsync,
   type Plan,
   type PlanFeature,
 } from "@/lib/plan";
@@ -67,7 +67,7 @@ function limitInputValue(v: number | null): string {
 
 export default async function AdminPlansPage() {
   await requirePlatformAdmin();
-  const config = getPlanConfig();
+  const config = await getPlanConfigAsync();
 
   const [
     [{ freeCount }],

@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   Tags,
   Users,
+  Webhook,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -46,6 +47,7 @@ const navGroups: { label: string; links: NavLinkConfig[] }[] = [
       { href: "/admin/activity", label: "Activity log", icon: ScrollText },
       { href: "/admin/health", label: "System health", icon: Gauge },
       { href: "/admin/support", label: "Support", icon: LifeBuoy },
+      { href: "/admin/webhooks", label: "Webhooks", icon: Webhook },
     ],
   },
   {

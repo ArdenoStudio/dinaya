@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { auth } from "@/auth";
+import { lookupCustomDomainSlug } from "@/lib/custom-domain";
 
 const APP_DOMAIN = process.env.NEXT_PUBLIC_APP_DOMAIN ?? "dinaya.lk";
 
@@ -14,7 +15,7 @@ function appUrl(req: NextRequest, path: string): URL {
   return new URL(path, `${proto}://${host}`);
 }
 
-export default auth((req) => {
+export default auth(async (req) => {
   const { pathname } = req.nextUrl;
   const hostname = req.headers.get("host") ?? "";
 
@@ -22,11 +23,20 @@ export default auth((req) => {
   const hostWithoutPort = hostname.split(":")[0];
   const rootDomain = APP_DOMAIN.split(":")[0];
 
+  const isRootHost =
+    hostWithoutPort === rootDomain || hostWithoutPort === `www.${rootDomain}`;
+
+  // Custom domain → rewrite to booking page
+  if (!isRootHost) {
+    const customSlug = await lookupCustomDomainSlug(hostWithoutPort);
+    if (customSlug) {
+      return NextResponse.rewrite(appUrl(req, `/book/${customSlug}${pathname}`));
+    }
+  }
+
   // Check if this is a business subdomain (e.g. salon-abc.dinaya.lk)
   const isSubdomain =
-    hostWithoutPort !== rootDomain &&
-    hostWithoutPort !== `www.${rootDomain}` &&
-    hostWithoutPort.endsWith(`.${rootDomain}`);
+    !isRootHost && hostWithoutPort.endsWith(`.${rootDomain}`);
 
   if (isSubdomain) {
     const slug = hostWithoutPort.replace(`.${rootDomain}`, "");

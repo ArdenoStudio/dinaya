@@ -5,7 +5,7 @@ import { PublicNav } from "@/components/PublicNav";
 import { CTAPrimaryButton } from "@/components/cta-primary-button";
 import { LandingFooter } from "@/components/LandingFooter";
 import { auth } from "@/auth";
-import { annualSavingsPercent, getPlanConfig } from "@/lib/plan";
+import { annualSavingsPercent, getPlanConfigAsync } from "@/lib/plan";
 
 export const metadata: Metadata = {
   title: "Pricing — Free for Every Sri Lankan Business | Dinaya",
@@ -16,8 +16,8 @@ export const metadata: Metadata = {
 const freeFeatures = [
   "Your own booking page at yourname.dinaya.lk",
   "Unlimited bookings, every month",
-  "Online payments via PayHere",
-  "Automated SMS & email reminders",
+  "PayHere payments when you connect your merchant account",
+  "Email appointment reminders",
   "Custom availability & buffer time",
   "Simple dashboard for all your bookings",
   "Shareable link for Instagram, WhatsApp, Facebook",
@@ -50,7 +50,7 @@ const maxAiFeatures = [
 const faqs = [
   {
     q: "Is Dinaya really free?",
-    a: "Yes. Every Sri Lankan business can use the Free plan with no time limit, no card required, and no commission on your bookings. We make money from optional add-ons and a future Pro plan — never from your customers.",
+    a: "Yes. Every Sri Lankan business can use the Free plan with no time limit and no card required. PayHere and WhatsApp/SMS reminders unlock on Pro when you're ready to upgrade.",
   },
   {
     q: "Are there transaction fees?",
@@ -74,7 +74,7 @@ export default async function PricingPage() {
   const session = await auth();
   const upgradeHref = session?.user ? "/dashboard/billing" : "/register";
   const upgradeLabel = session?.user ? "Upgrade in dashboard" : "Get started";
-  const config = getPlanConfig();
+  const config = await getPlanConfigAsync();
   const proAnnualSavings = annualSavingsPercent(config.proMonthlyPriceLkr, config.proAnnualPriceLkr);
   const maxAnnualSavings = annualSavingsPercent(config.maxMonthlyPriceLkr, config.maxAnnualPriceLkr);
   return (

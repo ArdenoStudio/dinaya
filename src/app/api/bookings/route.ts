@@ -13,6 +13,7 @@ import { decryptSecret } from "@/lib/secrets";
 import { resolveBookingLocationId } from "@/lib/locations";
 import { PlanLimitError, PlanRequiredError, requirePlanLimit, requirePro } from "@/lib/plan";
 import { withRateLimit } from "@/lib/rate-limit";
+import { hasApiKeyAuth, requireApiKey } from "@/lib/api-key-auth";
 import { z } from "@/lib/validation";
 import { startOfMonth } from "date-fns";
 
@@ -44,6 +45,14 @@ export async function POST(req: NextRequest) {
   });
   if (!limited.ok) return limited.response;
 
+  const apiKeyAuth = hasApiKeyAuth(req);
+  let apiBusinessId: string | null = null;
+  if (apiKeyAuth) {
+    const keyResult = await requireApiKey(req, "bookings:write");
+    if (!keyResult.ok) return keyResult.response;
+    apiBusinessId = keyResult.context.businessId;
+  }
+
   const parsed = bookingSchema.safeParse(await req.json());
 
   if (!parsed.success) {
@@ -66,7 +75,16 @@ export async function POST(req: NextRequest) {
     source: requestedSource = "public",
   } = parsed.data;
   const session = await auth();
-  const source = session?.user?.businessId === businessId ? requestedSource : "public";
+  const source =
+    apiBusinessId && apiBusinessId === businessId
+      ? "api"
+      : session?.user?.businessId === businessId
+        ? requestedSource
+        : "public";
+
+  if (apiKeyAuth && apiBusinessId !== businessId) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
 
   const start = new Date(startsAt);
   const end = new Date(endsAt);

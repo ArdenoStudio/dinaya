@@ -15,8 +15,43 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
+        impersonationToken: { label: "Impersonation token", type: "text" },
       },
       async authorize(credentials) {
+        const impersonationToken = credentials?.impersonationToken as string | undefined;
+        if (impersonationToken) {
+          const { verifyImpersonationToken } = await import("@/lib/impersonation");
+          const payload = verifyImpersonationToken(impersonationToken);
+          if (!payload) return null;
+
+          const [user] = await db
+            .select()
+            .from(users)
+            .where(eq(users.id, payload.userId))
+            .limit(1);
+          if (!user) return null;
+
+          const [business] = await db
+            .select({
+              isSuspended: businesses.isSuspended,
+              deletedAt: businesses.deletedAt,
+            })
+            .from(businesses)
+            .where(eq(businesses.id, user.businessId))
+            .limit(1);
+          if (!business || business.isSuspended || business.deletedAt) return null;
+
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            businessId: user.businessId,
+            role: user.role,
+            impersonatedBy: payload.adminEmail,
+            readOnlyImpersonation: true,
+          };
+        }
+
         if (!credentials?.email || !credentials?.password) return null;
 
         const [user] = await db
@@ -61,6 +96,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (user) {
         token.businessId = user.businessId;
         token.role = user.role;
+        token.impersonatedBy = user.impersonatedBy;
+        token.readOnlyImpersonation = user.readOnlyImpersonation;
       }
       return token;
     },
@@ -70,6 +107,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.businessId =
           typeof token.businessId === "string" ? token.businessId : "";
         session.user.role = token.role === "owner" ? "owner" : "staff";
+        session.user.impersonatedBy =
+          typeof token.impersonatedBy === "string" ? token.impersonatedBy : undefined;
+        session.user.readOnlyImpersonation = Boolean(token.readOnlyImpersonation);
       }
       return session;
     },

@@ -6,6 +6,7 @@ import { listActiveLocations, getStaffLocationMap, ensureBusinessHasDefaultLocat
 import { eq, and, avg, count } from "drizzle-orm";
 import BookingWizard from "@/components/booking/BookingWizard";
 import { getBookingCopy } from "@/lib/i18n";
+import { resolveEffectivePlan } from "@/lib/plan";
 import { isOptimizableRemoteImage } from "@/lib/utils";
 
 interface Props {
@@ -61,6 +62,8 @@ export default async function BookingPage({ params }: Props) {
       lankaqrImageUrl: businesses.lankaqrImageUrl,
       logoUrl: businesses.logoUrl,
       name: businesses.name,
+      plan: businesses.plan,
+      planExpiresAt: businesses.planExpiresAt,
       payhereEnabled: businesses.payhereEnabled,
       phone: businesses.phone,
       slug: businesses.slug,
@@ -86,6 +89,12 @@ export default async function BookingPage({ params }: Props) {
   }
 
   await ensureBusinessHasDefaultLocation(business.id);
+
+  const effectivePlan = resolveEffectivePlan({
+    storedPlan: business.plan,
+    planExpiresAt: business.planExpiresAt,
+  });
+  const showBranding = effectivePlan === "free";
 
   const [serviceList, staffList, reviewList, ratingData, locationList, staffLocationMap] = await Promise.all([
     db
@@ -239,6 +248,7 @@ export default async function BookingPage({ params }: Props) {
           staffLocationMap={staffLocationMap}
           locations={locationList}
           bookingUrlLabel={bookingUrlLabel}
+          showBranding={showBranding}
         />
 
         {hasAboutSection && (

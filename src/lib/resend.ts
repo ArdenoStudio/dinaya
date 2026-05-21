@@ -122,3 +122,51 @@ export async function sendPasswordResetEmail(input: {
     `,
   });
 }
+
+export async function sendContactFormEmail(input: {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+}) {
+  const to = process.env.CONTACT_INBOX_EMAIL ?? "hello@dinaya.lk";
+  await getResend().emails.send({
+    from: FROM,
+    to,
+    replyTo: input.email,
+    subject: `[Contact] ${input.subject}`,
+    html: `
+      <div style="font-family:sans-serif;max-width:560px;margin:0 auto">
+        <h2 style="color:#1a1a1a">New contact form message</h2>
+        <p><strong>From:</strong> ${input.name} &lt;${input.email}&gt;</p>
+        <p><strong>Subject:</strong> ${input.subject}</p>
+        <div style="margin-top:16px;padding:16px;background:#f9fafb;border-radius:8px;white-space:pre-wrap">${input.message}</div>
+      </div>
+    `,
+  });
+}
+
+export async function sendStaffInviteEmail(input: {
+  email: string;
+  name: string;
+  businessName: string;
+  invitedBy: string;
+  inviteUrl: string;
+}) {
+  await getResend().emails.send({
+    from: FROM,
+    to: input.email,
+    subject: `You're invited to join ${input.businessName} on Dinaya`,
+    html: `
+      <div style="font-family:sans-serif;max-width:500px;margin:0 auto">
+        <h2 style="color:#1a1a1a">Join ${input.businessName} on Dinaya</h2>
+        <p>Hi ${input.name},</p>
+        <p>${input.invitedBy} invited you to help manage bookings for <strong>${input.businessName}</strong>.</p>
+        <p style="margin:24px 0">
+          <a href="${input.inviteUrl}" style="display:inline-block;background:#6366f1;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:600">Accept invite</a>
+        </p>
+        <p style="color:#666;font-size:14px">This link expires in 7 days.</p>
+      </div>
+    `,
+  });
+}

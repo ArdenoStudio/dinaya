@@ -19,11 +19,17 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { business, user } = await requireBusiness();
+  const { business, user, readOnlyImpersonation, impersonatedBy } = await requireBusiness();
   const showAdminLink = isPlatformAdmin(user.email);
 
   return (
     <div className="min-h-screen bg-muted/20 lg:grid lg:grid-cols-[17rem_minmax(0,1fr)]">
+      {readOnlyImpersonation && (
+        <div className="col-span-full border-b border-amber-500/30 bg-amber-50 px-4 py-2 text-center text-sm text-amber-900">
+          Read-only impersonation session
+          {impersonatedBy ? ` (admin: ${impersonatedBy})` : ""}. Mutations are blocked.
+        </div>
+      )}
       <aside className="hidden border-r bg-white lg:flex lg:flex-col" aria-label="Sidebar">
         <div className="border-b px-6 py-5">
           <Logo href="/dashboard" size="sm" />
@@ -74,7 +80,7 @@ export default async function DashboardLayout({
               </button>
             </div>
 
-            <form action="/dashboard/clients" method="get" className="relative min-w-0 flex-1">
+            <form action="/dashboard/search" method="get" className="relative min-w-0 flex-1">
               <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
               <input
                 name="q"

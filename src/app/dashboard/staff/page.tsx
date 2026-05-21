@@ -3,6 +3,7 @@ import { staff } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import Link from "next/link";
 import { requireOwner } from "@/lib/auth";
+import { StaffInviteForm } from "@/components/dashboard/StaffInviteForm";
 
 export default async function StaffPage() {
   const { businessId } = await requireOwner();
@@ -20,6 +21,8 @@ export default async function StaffPage() {
           <i className="bi bi-plus text-xs" /> Add staff
         </Link>
       </div>
+
+      <StaffInviteForm />
 
       {list.length === 0 ? (
         <div className="bg-white border rounded-xl p-12 text-center text-muted-foreground">

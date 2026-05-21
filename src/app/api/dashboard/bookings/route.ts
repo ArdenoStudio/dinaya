@@ -28,7 +28,10 @@ function csvEscape(value: unknown): string {
 }
 
 export async function GET(req: NextRequest) {
-  const authResult = await requireApiBusiness();
+  const authResult = await requireApiBusiness({
+    req,
+    apiKeyScope: "bookings:read",
+  });
   if (!authResult.ok) return authResult.response;
   const { businessId } = authResult.context;
 
