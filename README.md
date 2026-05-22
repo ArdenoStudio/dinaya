@@ -1,49 +1,100 @@
-# Dinaya
+<p align="center">
+  <a href="https://dinaya.lk">
+    <img src="public/dinaya-logo.svg" alt="Dinaya logo" width="96" height="96" />
+  </a>
+</p>
 
-Dinaya is a Sri Lanka–focused booking platform for local businesses. It provides public booking pages, PayHere payments, automated reminders, CRM, and AI growth workflows.
+<h1 align="center">Dinaya</h1>
 
-Production: [https://dinaya.lk](https://dinaya.lk)
+<p align="center">
+  <strong>Sri Lanka–focused booking platform for local businesses.</strong><br />
+  Public booking pages, PayHere payments, automated reminders, CRM, and AI growth workflows.
+</p>
+
+<p align="center">
+  <a href="https://github.com/ardenostudio/dinaya/actions/workflows/ci.yml">
+    <img src="https://github.com/ardenostudio/dinaya/actions/workflows/ci.yml/badge.svg" alt="CI status" />
+  </a>
+  <a href="https://dinaya.lk">
+    <img src="https://img.shields.io/badge/website-dinaya.lk-0ea5e9?style=flat-square" alt="Production website" />
+  </a>
+  <img src="https://img.shields.io/badge/Next.js-16.2-black?style=flat-square&logo=next.js&logoColor=white" alt="Next.js 16" />
+  <img src="https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black" alt="React 19" />
+  <img src="https://img.shields.io/badge/TypeScript-5.8-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Node.js-22-339933?style=flat-square&logo=node.js&logoColor=white" alt="Node.js 22" />
+</p>
+
+<p align="center">
+  <a href="https://dinaya.lk"><strong>dinaya.lk</strong></a>
+  ·
+  <a href="docs/deployment-checklist.md">Deployment checklist</a>
+  ·
+  <a href="https://github.com/ardenostudio/dinaya/actions">GitHub Actions</a>
+</p>
+
+---
+
+## Features
+
+| Area | What you get |
+|------|----------------|
+| **Booking** | Branded public pages at `/book/[slug]` and `{slug}.dinaya.lk` subdomains |
+| **Payments** | PayHere checkout and subscription billing for Pro / Max plans |
+| **Operations** | Business dashboard — calendar, clients, locations, staff, automations |
+| **Growth** | Reviews, referrals, directory discovery, AI workflow hub |
+| **Integrations** | Google Calendar sync, webhooks, API keys, WhatsApp / SMS messaging |
+| **Platform** | Internal admin for plans, support, health, and webhooks |
 
 ## Stack
 
-- Next.js 16 (App Router), React 19, TypeScript
-- Neon Postgres + Drizzle ORM
-- NextAuth (credentials)
-- PayHere, Resend, optional OpenAI
+- **Framework** — Next.js 16 (App Router), React 19, TypeScript
+- **Data** — Neon Postgres, Drizzle ORM
+- **Auth** — NextAuth (credentials)
+- **Payments & comms** — PayHere, Resend; optional OpenAI for AI workflows
 
 ## Local setup
 
-1. Install dependencies:
+### Prerequisites
+
+- Node.js **22** (matches CI)
+- A [Neon](https://neon.tech) database
+
+### 1. Install dependencies
 
 ```bash
 npm install
 ```
 
-2. Copy environment variables:
+### 2. Environment variables
 
 ```bash
 cp .env.example .env.local
 ```
 
-Required for local development:
+Minimum for local development:
 
-- `DATABASE_URL`
-- `AUTH_SECRET`
-- `NEXT_PUBLIC_APP_URL=http://localhost:3000`
+| Variable | Example / notes |
+|----------|-----------------|
+| `DATABASE_URL` | Neon connection string |
+| `AUTH_SECRET` | `openssl rand -base64 32` |
+| `NEXT_PUBLIC_APP_URL` | `http://localhost:3000` |
 
-3. Run migrations:
+See [`.env.example`](.env.example) for PayHere, cron, Google Calendar, Redis, and optional integrations.
+
+### 3. Database migrations
 
 ```bash
 npm run db:migrate
 ```
 
-4. Start the dev server:
+### 4. Start the dev server
 
 ```bash
 npm run dev
 ```
 
-Sign in at `/auth/signin`. Register a business at `/register`.
+- Sign in: [`/auth/signin`](http://localhost:3000/auth/signin)
+- Register a business: [`/register`](http://localhost:3000/register)
 
 ## Scripts
 
@@ -51,30 +102,63 @@ Sign in at `/auth/signin`. Register a business at `/register`.
 |---------|-------------|
 | `npm run dev` | Start development server |
 | `npm run build` | Production build |
-| `npm test` | Run unit tests (Vitest) |
-| `npm run test:e2e` | Run Playwright e2e tests |
+| `npm test` | Unit tests (Vitest) |
+| `npm run test:e2e` | Playwright end-to-end tests |
 | `npm run lint` | ESLint |
-| `npm run verify` | Lint + test + build |
+| `npm run verify` | Lint + test + build (same as CI `verify` job) |
 | `npm run db:migrate` | Apply Drizzle migrations |
 | `npm run db:studio` | Open Drizzle Studio |
+| `npm run docs:screenshots` | Regenerate docs UI screenshots |
 
 ## Architecture
 
 ```text
-Public booking (/book/[slug]) → API routes → Neon Postgres
-Business dashboard (/dashboard) → authenticated CRUD APIs
-Platform admin (/admin) → internal operations
-Cron (/api/cron/*) → AI workflows + reminders
+Public booking (/book/[slug])     → API routes → Neon Postgres
+Business dashboard (/dashboard)   → authenticated CRUD APIs
+Platform admin (/admin)           → internal operations
+Cron (/api/cron/*)                → reminders, automations, AI workflows
 ```
 
 Subdomain routing rewrites `{slug}.dinaya.lk` to `/book/[slug]` via middleware.
 
+## CI & scheduled jobs
+
+| Workflow | Trigger | Purpose |
+|----------|---------|---------|
+| [**CI**](.github/workflows/ci.yml) | Push to `master` / `main`, all PRs | `npm run verify`; Playwright e2e on PRs when secrets are set |
+| [Automations cron](.github/workflows/automations-cron.yml) | Every 15 min | Run tenant automations |
+| [Booking reminders](.github/workflows/booking-reminders-cron.yml) | Scheduled | Send booking reminders |
+| [Google Calendar](.github/workflows/google-calendar-cron.yml) | Scheduled | Sync calendars |
+| [AI workflows](.github/workflows/ai-workflows-cron.yml) | Scheduled | Process AI hub jobs |
+| [Webhook retries](.github/workflows/webhook-retries-cron.yml) | Scheduled | Retry failed outbound webhooks |
+
+PR e2e requires repository secrets `DATABASE_URL` and `AUTH_SECRET` — see [docs/deployment-checklist.md](docs/deployment-checklist.md#ci-e2e-pull-requests).
+
 ## Deployment
 
-See [docs/deployment-checklist.md](docs/deployment-checklist.md) for environment variables, cron setup, and smoke tests.
+Production checklist, environment variables, cron secrets, and smoke tests:
 
-## Security notes
+**[docs/deployment-checklist.md](docs/deployment-checklist.md)**
+
+## Security
 
 - Set `AUTH_SECRET` and `SECRET_ENCRYPTION_KEY` in production.
 - Protect health endpoints with `HEALTH_CHECK_SECRET` or `CRON_SECRET`.
 - Cron routes require `Authorization: Bearer $CRON_SECRET`.
+
+## Project structure
+
+```text
+src/app/          Next.js routes (booking, dashboard, admin, API, docs)
+src/components/   UI for booking flow, dashboard, and docs
+src/lib/          Domain logic, integrations, schemas
+drizzle/          SQL migrations
+.github/workflows CI and production cron invokers
+public/           Static assets (including dinaya-logo.svg)
+```
+
+---
+
+<p align="center">
+  Built by <a href="https://github.com/ardenostudio">Ardeno Studio</a>
+</p>
