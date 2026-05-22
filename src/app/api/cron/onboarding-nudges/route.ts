@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { and, count, eq, gte, isNull, lt } from "drizzle-orm";
+import { and, count, eq, isNull, lt } from "drizzle-orm";
 import { subDays } from "date-fns";
 import { db } from "@/db";
 import { bookings, businesses, platformEvents, users } from "@/db/schema";
