@@ -16,9 +16,8 @@ export function getEligibleStaff(
     const atLocation = new Set(
       staffLocationMap.filter((m) => m.locationId === locationId).map((m) => m.staffId)
     );
-    if (atLocation.size > 0) {
-      result = result.filter((s) => atLocation.has(s.id));
-    }
+    // Always filter — empty set means no staff at this branch, not "show everyone"
+    result = result.filter((s) => atLocation.has(s.id));
   }
 
   return result;

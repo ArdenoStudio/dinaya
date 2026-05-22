@@ -97,7 +97,7 @@ export default function LandingPage() {
       <LandingNav />
 
       {/* Hero */}
-      <section className="max-w-4xl mx-auto px-6 pt-10 pb-12 text-center">
+      <section className="max-w-4xl mx-auto px-6 pt-28 pb-12 text-center">
         <FadeContainer className="flex flex-col items-center">
           <FadeDiv className="mb-8">
             <a

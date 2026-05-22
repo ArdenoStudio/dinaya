@@ -115,15 +115,29 @@ export async function PATCH(
   }
 
   if (locationIds) {
-    const validLocations = locationIds.length
-      ? await db
-          .select({ id: locations.id })
-          .from(locations)
-          .where(and(eq(locations.businessId, businessId), inArray(locations.id, locationIds)))
-      : [];
+    if (locationIds.length === 0) {
+      return NextResponse.json(
+        { error: "At least one active location must be assigned to this staff member." },
+        { status: 400 }
+      );
+    }
+
+    const validLocations = await db
+      .select({ id: locations.id })
+      .from(locations)
+      .where(
+        and(
+          eq(locations.businessId, businessId),
+          eq(locations.isActive, true),
+          inArray(locations.id, locationIds)
+        )
+      );
 
     if (validLocations.length !== locationIds.length) {
-      return NextResponse.json({ error: "One or more locations are invalid." }, { status: 400 });
+      return NextResponse.json(
+        { error: "One or more locations are invalid or inactive." },
+        { status: 400 }
+      );
     }
 
     await replaceStaffLocations(id, locationIds);

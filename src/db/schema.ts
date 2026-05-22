@@ -16,7 +16,7 @@ import {
   smallint,
   uniqueIndex,
 } from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 
 // ─── Enums ────────────────────────────────────────────────────────────────────
 
@@ -150,8 +150,10 @@ export const locations = pgTable("locations", {
   aiConfig: jsonb("ai_config").default({}).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 }, (table) => ({
+  // Partial index: allows multiple rows with NULL slug (no slug assigned yet)
   businessSlugUnique: uniqueIndex("locations_business_slug_unique")
-    .on(table.businessId, table.slug),
+    .on(table.businessId, table.slug)
+    .where(sql`"slug" IS NOT NULL`),
 }));
 
 export const staffLocations = pgTable("staff_locations", {
@@ -353,8 +355,11 @@ export const businessHolidays = pgTable("business_holidays", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 }, (table) => {
   return {
-    businessDateUnique: uniqueIndex("business_holidays_business_id_date_unique").on(
+    // Unique per (business, branch, date). NULL location_id = business-wide holiday;
+    // the COALESCE sentinel in migration 0009 ensures those are still unique per date.
+    businessLocationDateUnique: uniqueIndex("business_holidays_business_id_location_id_date_unique").on(
       table.businessId,
+      table.locationId,
       table.date
     ),
   };
