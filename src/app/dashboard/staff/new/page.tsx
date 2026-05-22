@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import { track } from "@vercel/analytics";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
@@ -44,7 +46,12 @@ export default function NewStaffPage() {
     });
 
     const data = await res.json();
-    if (!res.ok) { setError(data.error ?? "Error"); setLoading(false); return; }
+    if (!res.ok) {
+      setError(data.error ?? "Error");
+      if (res.status === 402) track("plan_limit_reached", { limit: "staff", surface: "new_staff" });
+      setLoading(false);
+      return;
+    }
     router.push("/dashboard/staff");
   }
 
@@ -95,7 +102,20 @@ export default function NewStaffPage() {
           </div>
         )}
 
-        {error && <p className="text-destructive text-sm">{error}</p>}
+        {error && (
+          <div className="rounded-lg border border-violet-200 bg-violet-50 p-3 text-sm">
+            <p className="text-destructive">{error}</p>
+            {/upgrade/i.test(error) ? (
+              <Link
+                href="/dashboard/billing"
+                onClick={() => track("plan_upgrade_prompt_clicked", { limit: "staff", surface: "new_staff" })}
+                className="mt-2 inline-flex rounded-md bg-violet-600 px-3 py-2 text-xs font-medium text-white hover:bg-violet-700"
+              >
+                Compare Pro plans
+              </Link>
+            ) : null}
+          </div>
+        )}
         <div className="flex gap-3 pt-2">
           <button type="button" onClick={() => router.back()} className="text-sm text-muted-foreground hover:text-foreground">Cancel</button>
           <button type="submit" disabled={loading}

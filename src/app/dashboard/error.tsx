@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { captureClientException } from "@/lib/client-monitoring";
 
 export default function DashboardError({
   error,
@@ -12,6 +13,7 @@ export default function DashboardError({
   useEffect(() => {
     // Log the error to an error reporting service
     console.error("Dashboard error:", error);
+    captureClientException(error, "dashboard-error");
   }, [error]);
 
   return (

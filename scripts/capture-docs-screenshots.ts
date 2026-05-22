@@ -33,6 +33,9 @@ const targets: CaptureTarget[] = [
   { name: "dashboard-reviews", path: "/dashboard/reviews" },
   { name: "dashboard-payments", path: "/dashboard/payments" },
   { name: "dashboard-marketing", path: "/dashboard/marketing" },
+  { name: "dashboard-reports", path: "/dashboard/reports" },
+  { name: "dashboard-ai", path: "/dashboard/ai" },
+  { name: "dashboard-automations", path: "/dashboard/automations" },
   { name: "dashboard-settings", path: "/dashboard/settings" },
   { name: "dashboard-integrations", path: "/dashboard/settings/integrations" },
 ];

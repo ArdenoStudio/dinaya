@@ -13,12 +13,15 @@ import { logActivity } from "@/lib/activity-log";
 import { decryptSecret } from "@/lib/secrets";
 import { processBookingAutomationTrigger } from "@/lib/automations/engine";
 import { sendPaymentReceiptEmail } from "@/lib/receipts";
+import { captureMessage } from "@/lib/monitoring";
+import { trackPlatformEvent } from "@/lib/platform-events";
 
 export async function POST(req: NextRequest) {
   const form = await req.formData();
   const fields = parsePayhereWebhookFields(form);
 
   if (!fields) {
+    await captureMessage("PayHere webhook missing fields", { component: "payhere-webhook" });
     return NextResponse.json({ error: "Missing fields" }, { status: 400 });
   }
 
@@ -32,6 +35,10 @@ export async function POST(req: NextRequest) {
     .limit(1);
 
   if (!payment) {
+    await captureMessage("PayHere webhook order not found", {
+      component: "payhere-webhook",
+      extra: { orderId },
+    });
     return NextResponse.json({ error: "Order not found" }, { status: 404 });
   }
 
@@ -87,6 +94,11 @@ export async function POST(req: NextRequest) {
   });
 
   if (!valid) {
+    await captureMessage("PayHere webhook invalid signature", {
+      businessId: booking.businessId,
+      component: "payhere-webhook",
+      extra: { orderId, statusCode },
+    });
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
@@ -119,6 +131,16 @@ export async function POST(req: NextRequest) {
       entity: "booking",
       entityId: booking.id,
       meta: { orderId, amount: payhereAmount, currency: payhereCurrency },
+    });
+    void trackPlatformEvent({
+      businessId: booking.businessId,
+      event: "booking.payment_success",
+      props: {
+        amount: payhereAmount,
+        bookingId: booking.id,
+        currency: payhereCurrency,
+        orderId,
+      },
     });
 
     // Send confirmation emails
@@ -189,6 +211,15 @@ export async function POST(req: NextRequest) {
       .update(payments)
       .set({ status: "failed", payherePayload: allFields })
       .where(eq(payments.id, payment.id));
+    void trackPlatformEvent({
+      businessId: booking.businessId,
+      event: "booking.payment_failed",
+      props: {
+        bookingId: booking.id,
+        orderId,
+        statusCode,
+      },
+    });
   }
 
   return NextResponse.json({ received: true });

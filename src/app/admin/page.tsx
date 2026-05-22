@@ -6,6 +6,7 @@ import { db } from "@/db";
 import { activityLog, bookings, businesses, payments, subscriptions, users } from "@/db/schema";
 import { formatLkr } from "@/lib/utils";
 import { requirePlatformAdmin } from "@/lib/platform-admin";
+import type { Plan } from "@/lib/plan";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +24,7 @@ export default async function AdminOverviewPage() {
   const now = new Date();
   const last30 = subDays(now, 30);
   const last60 = subDays(now, 60);
+  const last7 = subDays(now, 7);
 
   const [
     [{ totalAccounts }],
@@ -34,6 +36,8 @@ export default async function AdminOverviewPage() {
     [{ cancelledSubs30 }],
     [{ mrrLkr }],
     [{ totalUsers }],
+    [{ weeklyActiveBookings }],
+    [{ activatedAccounts30 }],
     [{ bookings30 }],
     [{ bookings60to30 }],
     [{ gmv30 }],
@@ -83,6 +87,29 @@ export default async function AdminOverviewPage() {
     ),
     safe(db.select({ totalUsers: count() }).from(users), [{ totalUsers: 0 }] as { totalUsers: number }[]),
     safe(
+      db.select({ weeklyActiveBookings: count() }).from(bookings).where(gte(bookings.createdAt, last7)),
+      [{ weeklyActiveBookings: 0 }] as { weeklyActiveBookings: number }[]
+    ),
+    safe(
+      db
+        .select({
+          activatedAccounts30: sql<number>`count(*)::int`,
+        })
+        .from(businesses)
+        .where(
+          and(
+            gte(businesses.createdAt, last30),
+            sql`exists (
+              select 1
+              from ${bookings} activation_bookings
+              where activation_bookings.business_id = ${businesses.id}
+                and activation_bookings.created_at <= ${businesses.createdAt} + interval '14 days'
+            )`,
+          ),
+        ),
+      [{ activatedAccounts30: 0 }] as { activatedAccounts30: number }[]
+    ),
+    safe(
       db.select({ bookings30: count() }).from(bookings).where(gte(bookings.createdAt, last30)),
       [{ bookings30: 0 }] as { bookings30: number }[]
     ),
@@ -114,7 +141,7 @@ export default async function AdminOverviewPage() {
         .groupBy(businesses.id)
         .orderBy(desc(count(bookings.id)))
         .limit(6),
-      [] as { id: string; name: string; slug: string; plan: "free" | "pro"; bookingCount: number }[]
+      [] as { id: string; name: string; slug: string; plan: Plan; bookingCount: number }[]
     ),
     safe(
       db
@@ -128,7 +155,7 @@ export default async function AdminOverviewPage() {
         .from(businesses)
         .orderBy(desc(businesses.createdAt))
         .limit(5),
-      [] as { id: string; name: string; slug: string; plan: "free" | "pro"; createdAt: Date }[]
+      [] as { id: string; name: string; slug: string; plan: Plan; createdAt: Date }[]
     ),
     safe(
       db
@@ -182,6 +209,8 @@ export default async function AdminOverviewPage() {
           (Number(cancelledSubs30) / (Number(activeSubs) + Number(cancelledSubs30))) * 100
         )
       : 0;
+  const activationRate30 =
+    signupsCurr > 0 ? Math.round((Number(activatedAccounts30 ?? 0) / signupsCurr) * 100) : 0;
 
   const kpis = [
     {
@@ -285,6 +314,18 @@ export default async function AdminOverviewPage() {
             </span>{" "}
             <span className="text-muted-foreground">vs prior 30d</span>
           </p>
+        </div>
+        <div className="rounded-xl border bg-white p-5">
+          <p className="text-xs text-muted-foreground">14-day activation</p>
+          <p className="mt-1 text-2xl font-bold tracking-tight">{activationRate30}%</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {Number(activatedAccounts30 ?? 0)} of {signupsCurr} recent signups received a booking
+          </p>
+        </div>
+        <div className="rounded-xl border bg-white p-5">
+          <p className="text-xs text-muted-foreground">Weekly active bookings</p>
+          <p className="mt-1 text-2xl font-bold tracking-tight">{Number(weeklyActiveBookings ?? 0).toLocaleString()}</p>
+          <p className="mt-1 text-xs text-muted-foreground">Bookings created in the last 7 days</p>
         </div>
         <div className="rounded-xl border bg-white p-5">
           <p className="text-xs text-muted-foreground">Pro adoption</p>

@@ -1,4 +1,8 @@
+"use client";
+
 import Link from "next/link";
+import { track } from "@vercel/analytics";
+import { useState } from "react";
 
 type OnboardingStep = {
   label: string;
@@ -14,6 +18,7 @@ interface Props {
 }
 
 export function OnboardingWizard({ steps, bookingUrl, whatsappShare }: Props) {
+  const [copied, setCopied] = useState(false);
   const completed = steps.filter((step) => step.done).length;
   const nextStep = steps.find((step) => !step.done) ?? steps[steps.length - 1];
   const progress = Math.round((completed / steps.length) * 100);
@@ -51,15 +56,30 @@ export function OnboardingWizard({ steps, bookingUrl, whatsappShare }: Props) {
             <i className="bi bi-arrow-right text-xs" />
           </Link>
           {nextStep.label === "Share booking link" ? (
-            <a
-              href={whatsappShare}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium hover:border-primary/40"
-            >
-              <i className="bi bi-whatsapp text-emerald-600" />
-              Share on WhatsApp
-            </a>
+            <>
+              <button
+                type="button"
+                onClick={async () => {
+                  await navigator.clipboard.writeText(bookingUrl);
+                  setCopied(true);
+                  track("booking_link_copied", { surface: "onboarding" });
+                }}
+                className="inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium hover:border-primary/40"
+              >
+                <i className="bi bi-copy text-primary" />
+                {copied ? "Copied" : "Copy link"}
+              </button>
+              <a
+                href={whatsappShare}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => track("booking_link_shared", { channel: "whatsapp", surface: "onboarding" })}
+                className="inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium hover:border-primary/40"
+              >
+                <i className="bi bi-whatsapp text-emerald-600" />
+                Share on WhatsApp
+              </a>
+            </>
           ) : null}
         </div>
       </div>

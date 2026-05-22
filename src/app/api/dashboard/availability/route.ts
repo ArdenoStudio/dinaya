@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { availability, staff } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { withDashboardRateLimit } from "@/lib/rate-limit";
+import { trackPlatformEvent } from "@/lib/platform-events";
 import { z } from "@/lib/validation";
 
 const availabilityRowSchema = z.object({
@@ -103,6 +104,12 @@ export async function POST(req: NextRequest) {
       }))
     );
   }
+
+  void trackPlatformEvent({
+    businessId,
+    event: "activation.step_completed",
+    props: { rows: rows.length, staffId, step: "availability_set" },
+  });
 
   return NextResponse.json({ success: true });
 }

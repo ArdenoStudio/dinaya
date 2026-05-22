@@ -170,3 +170,39 @@ export async function sendStaffInviteEmail(input: {
     `,
   });
 }
+
+export async function sendOnboardingNudgeEmail(input: {
+  bookingUrl: string;
+  businessName: string;
+  email: string;
+  milestoneDay: 3 | 7;
+  name: string;
+  nextStepUrl: string;
+}) {
+  const subject =
+    input.milestoneDay === 3
+      ? `Get your first booking for ${input.businessName}`
+      : `Still need help launching ${input.businessName}?`;
+
+  await getResend().emails.send({
+    from: FROM,
+    to: input.email,
+    subject,
+    html: `
+      <div style="font-family:sans-serif;max-width:540px;margin:0 auto">
+        <h2 style="color:#1a1a1a">Your Dinaya booking page is ready</h2>
+        <p>Hi ${input.name},</p>
+        <p><strong>${input.businessName}</strong> already has starter services, staff, availability, and a booking page. The fastest next step is to share your link with clients.</p>
+        <p style="margin:20px 0;padding:12px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:8px">
+          <a href="${input.bookingUrl}" style="color:#4f46e5;text-decoration:none">${input.bookingUrl}</a>
+        </p>
+        <p style="margin:24px 0">
+          <a href="${input.nextStepUrl}" style="display:inline-block;background:#6366f1;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:600">Finish setup</a>
+        </p>
+        <p style="color:#666;font-size:14px">Tip: add this link to WhatsApp Status, Instagram bio, Facebook, and your Google Business Profile.</p>
+        <hr style="border:none;border-top:1px solid #eee;margin:24px 0"/>
+        <p style="color:#999;font-size:12px">Powered by <a href="https://dinaya.lk" style="color:#6366f1">Dinaya.lk</a></p>
+      </div>
+    `,
+  });
+}

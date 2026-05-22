@@ -4,6 +4,8 @@ import { subscriptions, businesses } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { verifyRecurringWebhook } from "@/lib/payhere-subscriptions";
 import { addMonths, addYears } from "date-fns";
+import { captureMessage } from "@/lib/monitoring";
+import { trackPlatformEvent } from "@/lib/platform-events";
 
 // PayHere status codes:
 //   2  = success (initial or renewal payment captured)
@@ -25,11 +27,17 @@ export async function POST(req: NextRequest) {
     : null;
 
   if (!merchantId || !orderId || !payhereAmount || !payhereCurrency || !statusCode || !md5sig) {
+    await captureMessage("PayHere subscription webhook missing fields", {
+      component: "payhere-subscription-webhook",
+    });
     return NextResponse.json({ error: "Missing fields" }, { status: 400 });
   }
 
   const merchantSecret = process.env.DINAYA_PAYHERE_MERCHANT_SECRET;
   if (!merchantSecret) {
+    await captureMessage("PayHere subscription merchant secret missing", {
+      component: "payhere-subscription-webhook",
+    });
     return NextResponse.json({ error: "Server misconfigured" }, { status: 500 });
   }
 
@@ -43,6 +51,10 @@ export async function POST(req: NextRequest) {
     merchantSecret,
   });
   if (!valid) {
+    await captureMessage("PayHere subscription webhook invalid signature", {
+      component: "payhere-subscription-webhook",
+      extra: { orderId, statusCode },
+    });
     return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }
 
@@ -53,6 +65,10 @@ export async function POST(req: NextRequest) {
     .limit(1);
 
   if (!sub) {
+    await captureMessage("PayHere subscription webhook order not found", {
+      component: "payhere-subscription-webhook",
+      extra: { orderId },
+    });
     return NextResponse.json({ error: "Subscription not found" }, { status: 404 });
   }
 
@@ -76,6 +92,17 @@ export async function POST(req: NextRequest) {
         .update(businesses)
         .set({ plan: sub.plan, planExpiresAt: periodEnd })
         .where(eq(businesses.id, sub.businessId));
+      void trackPlatformEvent({
+        businessId: sub.businessId,
+        event: "subscription.activated",
+        props: {
+          amount: payhereAmount,
+          currency: payhereCurrency,
+          interval: sub.billingInterval,
+          orderId,
+          plan: sub.plan,
+        },
+      });
       break;
     }
     case "-1": {
@@ -87,6 +114,11 @@ export async function POST(req: NextRequest) {
       if (sub.status === "pending") {
         break;
       }
+      void trackPlatformEvent({
+        businessId: sub.businessId,
+        event: "subscription.cancelled",
+        props: { orderId, plan: sub.plan },
+      });
       break;
     }
     case "-2": {
@@ -94,6 +126,11 @@ export async function POST(req: NextRequest) {
         .update(subscriptions)
         .set({ status: "past_due" })
         .where(eq(subscriptions.id, sub.id));
+      void trackPlatformEvent({
+        businessId: sub.businessId,
+        event: "subscription.past_due",
+        props: { orderId, plan: sub.plan },
+      });
       break;
     }
     case "-3": {
@@ -105,6 +142,11 @@ export async function POST(req: NextRequest) {
         .update(businesses)
         .set({ plan: "free", planExpiresAt: null })
         .where(eq(businesses.id, sub.businessId));
+      void trackPlatformEvent({
+        businessId: sub.businessId,
+        event: "subscription.ended",
+        props: { orderId, plan: sub.plan, statusCode },
+      });
       break;
     }
     default:

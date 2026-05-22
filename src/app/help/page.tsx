@@ -30,13 +30,11 @@ export default function HelpPage() {
                   Email support
                 </a>
                 <a
-                  href="https://wa.me/94770000000"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href="mailto:support@dinaya.lk?subject=Dinaya%20WhatsApp%20support%20request"
                   className="inline-flex items-center justify-center gap-2 rounded-xl bg-white/10 border border-white/20 text-white px-5 py-3 text-sm font-medium"
                 >
-                  <i className="bi bi-whatsapp text-sm" />
-                  WhatsApp us
+                  <i className="bi bi-chat-dots text-sm" />
+                  Request WhatsApp support
                 </a>
               </div>
             </div>

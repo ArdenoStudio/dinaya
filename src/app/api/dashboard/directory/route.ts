@@ -5,6 +5,7 @@ import { businesses } from "@/db/schema";
 import { requireApiBusiness } from "@/lib/api-auth";
 import { inferDirectoryCategory } from "@/lib/directory";
 import { logActivity } from "@/lib/activity-log";
+import { trackPlatformEvent } from "@/lib/platform-events";
 import { z } from "@/lib/validation";
 
 const directorySchema = z.object({
@@ -76,6 +77,16 @@ export async function PATCH(req: NextRequest) {
     meta: { section: "directory", listed: parsed.data.directoryListed },
   }).catch((error) => {
     console.error("Activity log write failed:", error);
+  });
+  void trackPlatformEvent({
+    businessId: authResult.context.businessId,
+    event: "directory.listing_changed",
+    props: {
+      category: parsed.data.directoryCategory ?? null,
+      city: parsed.data.directoryCity ?? null,
+      listed: parsed.data.directoryListed,
+    },
+    userId: authResult.context.user.id,
   });
 
   return NextResponse.json({ ok: true });

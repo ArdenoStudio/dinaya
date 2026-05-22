@@ -20,6 +20,8 @@ jobs:
 
       - run: npm run verify
 
+      - run: npm run audit:high
+
   e2e:
     runs-on: ubuntu-latest
     needs: verify
@@ -32,27 +34,21 @@ jobs:
           node-version: "22"
           cache: npm
 
-      - name: Check e2e secrets
-        id: e2e_secrets
+      - name: Require e2e secrets
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
         run: |
           if [ -z "$DATABASE_URL" ] || [ -z "$AUTH_SECRET" ]; then
-            echo "configured=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::DATABASE_URL and AUTH_SECRET repository secrets are required for e2e. Skipping Playwright job."
-          else
-            echo "configured=true" >> "$GITHUB_OUTPUT"
+            echo "::error::DATABASE_URL and AUTH_SECRET repository secrets are required for e2e."
+            exit 1
           fi
 
       - run: npm ci
-        if: steps.e2e_secrets.outputs.configured == 'true'
 
       - run: npx playwright install --with-deps chromium
-        if: steps.e2e_secrets.outputs.configured == 'true'
 
       - name: Start app for e2e
-        if: steps.e2e_secrets.outputs.configured == 'true'
         run: |
           npm run dev -- -p 3001 > /tmp/next-dev.log 2>&1 &
           echo $! > /tmp/next-dev.pid
@@ -64,7 +60,6 @@ jobs:
           PLAYWRIGHT_BASE_URL: http://127.0.0.1:3001
 
       - run: npm run test:e2e
-        if: steps.e2e_secrets.outputs.configured == 'true'
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
@@ -72,7 +67,7 @@ jobs:
           E2E_DISABLE_RATE_LIMIT: "true"
 
       - name: Stop app for e2e
-        if: always() && steps.e2e_secrets.outputs.configured == 'true'
+        if: always()
         run: |
           if [ -f /tmp/next-dev.pid ]; then
             kill "$(cat /tmp/next-dev.pid)" 2>/dev/null || true

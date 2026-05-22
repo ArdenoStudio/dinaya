@@ -14,6 +14,11 @@ interface Props {
   params: Promise<{ city: string }>;
 }
 
+function withDirectoryAttribution(url: string): string {
+  const separator = url.includes("?") ? "&" : "?";
+  return `${url}${separator}channel=directory&utm_source=dinaya&utm_medium=directory`;
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { city } = await params;
   const resolved = slugToCity(city);
@@ -64,11 +69,12 @@ export default async function DiscoverCityPage({ params }: Props) {
             const bookingUrl = appDomain === "dinaya.lk"
               ? `https://${business.slug}.dinaya.lk`
               : `${appUrl}/book/${business.slug}`;
+            const attributedBookingUrl = withDirectoryAttribution(bookingUrl);
 
             return (
               <Link
                 key={business.slug}
-                href={bookingUrl}
+                href={attributedBookingUrl}
                 className="rounded-2xl border bg-white p-5 shadow-sm transition hover:border-primary/30"
               >
                 <h2 className="font-cal text-xl tracking-tight">{business.name}</h2>

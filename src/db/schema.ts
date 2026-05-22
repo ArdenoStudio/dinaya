@@ -236,6 +236,28 @@ export const activityLog = pgTable("activity_log", {
   };
 });
 
+export const platformEvents = pgTable("platform_events", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  event: varchar("event", { length: 120 }).notNull(),
+  businessId: uuid("business_id").references(() => businesses.id, { onDelete: "set null" }),
+  userId: uuid("user_id").references(() => users.id, { onDelete: "set null" }),
+  sessionId: varchar("session_id", { length: 120 }),
+  props: jsonb("props").default({}).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => {
+  return {
+    eventCreatedAtIdx: index("platform_events_event_created_at_idx").on(
+      table.event,
+      table.createdAt,
+    ),
+    businessCreatedAtIdx: index("platform_events_business_created_at_idx").on(
+      table.businessId,
+      table.createdAt,
+    ),
+    createdAtIdx: index("platform_events_created_at_idx").on(table.createdAt),
+  };
+});
+
 // ─── Service Categories ───────────────────────────────────────────────────────
 
 export const serviceCategories = pgTable("service_categories", {

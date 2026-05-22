@@ -3,9 +3,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  BarChart3,
   Building2,
   CreditCard,
   Gauge,
+  Gift,
   LayoutDashboard,
   LifeBuoy,
   ScrollText,
@@ -30,6 +32,7 @@ const navGroups: { label: string; links: NavLinkConfig[] }[] = [
     label: "Platform",
     links: [
       { href: "/admin", label: "Overview", icon: LayoutDashboard, exact: true },
+      { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
       { href: "/admin/accounts", label: "Accounts", icon: Building2 },
       { href: "/admin/users", label: "Users", icon: Users },
     ],
@@ -38,6 +41,7 @@ const navGroups: { label: string; links: NavLinkConfig[] }[] = [
     label: "Revenue",
     links: [
       { href: "/admin/subscriptions", label: "Subscriptions", icon: CreditCard },
+      { href: "/admin/referrals", label: "Referrals", icon: Gift },
       { href: "/admin/plans", label: "Plans", icon: Tags },
     ],
   },

@@ -17,6 +17,7 @@ import {
   type Plan,
   type PaidPlan,
 } from "@/lib/plan";
+import { trackPlatformEvent } from "@/lib/platform-events";
 
 export async function POST(req: Request) {
   const authResult = await requireApiBusiness({ ownerOnly: true });
@@ -66,6 +67,12 @@ export async function POST(req: Request) {
     .limit(1);
 
   if (existingActive) {
+    void trackPlatformEvent({
+      businessId,
+      event: "billing.checkout_failed",
+      props: { reason: "existing_subscription", targetPlan },
+      userId: user.id,
+    });
     return NextResponse.json(
       { error: "A subscription is already in progress for this business." },
       { status: 409 },
@@ -74,6 +81,12 @@ export async function POST(req: Request) {
 
   const config = await getPlanConfigAsync();
   if (!isPaidPlanAvailable(targetPlan, config)) {
+    void trackPlatformEvent({
+      businessId,
+      event: "billing.checkout_failed",
+      props: { reason: "plan_unavailable", targetPlan },
+      userId: user.id,
+    });
     return NextResponse.json(
       { error: `${targetPlan === "max" ? "Max" : "Pro"} is not available for purchase yet.` },
       { status: 403 },
@@ -89,6 +102,12 @@ export async function POST(req: Request) {
   const contactEmail = business.email ?? owner?.email ?? "";
   const contactPhone = business.phone ?? "";
   if (!contactEmail || !contactPhone) {
+    void trackPlatformEvent({
+      businessId,
+      event: "billing.checkout_failed",
+      props: { reason: "missing_contact", targetPlan },
+      userId: user.id,
+    });
     return NextResponse.json(
       { error: "Add a business email and phone in Settings before upgrading." },
       { status: 400 },
@@ -106,6 +125,17 @@ export async function POST(req: Request) {
     billingInterval: interval,
     amountLkr,
     status: "pending",
+  });
+  void trackPlatformEvent({
+    businessId,
+    event: "billing.checkout_created",
+    props: {
+      amountLkr,
+      interval,
+      orderId,
+      plan: targetPlan,
+    },
+    userId: user.id,
   });
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL!;

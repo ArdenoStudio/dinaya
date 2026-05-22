@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { captureException } from "@/lib/monitoring";
 
 export function jsonError(message: string, status = 500): NextResponse {
   return NextResponse.json({ error: message }, { status });
@@ -11,7 +12,7 @@ export async function withApiHandler<T>(
   try {
     return await handler();
   } catch (error) {
-    console.error("[api]", error);
+    await captureException(error, { component: "api-handler" });
     return jsonError(fallbackMessage, 500);
   }
 }

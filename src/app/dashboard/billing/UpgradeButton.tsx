@@ -1,5 +1,6 @@
 "use client";
 
+import { track } from "@vercel/analytics";
 import { useState } from "react";
 import type { BillingInterval, PaidPlan } from "@/lib/plan";
 
@@ -20,6 +21,7 @@ export function UpgradeButton({
   async function handleClick() {
     setLoading(true);
     setError("");
+    track("billing.checkout_started", { interval, plan: targetPlan });
     try {
       const res = await fetch("/api/billing/subscribe", {
         method: "POST",
@@ -28,10 +30,12 @@ export function UpgradeButton({
       });
       const data = await res.json();
       if (!res.ok) {
+        track("billing.checkout_failed", { interval, plan: targetPlan, status: res.status });
         setError(data.error ?? "Could not start the upgrade.");
         setLoading(false);
         return;
       }
+      track("billing.checkout_redirect", { interval, plan: targetPlan });
 
       const form = document.createElement("form");
       form.method = "POST";
@@ -47,6 +51,7 @@ export function UpgradeButton({
       document.body.appendChild(form);
       form.submit();
     } catch {
+      track("billing.checkout_failed", { interval, plan: targetPlan, status: "network" });
       setError("Network error. Please try again.");
       setLoading(false);
     }

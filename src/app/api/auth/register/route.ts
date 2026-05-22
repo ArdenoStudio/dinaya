@@ -17,6 +17,7 @@ import { normalizeReferralCode } from "@/lib/referrals";
 import { withApiHandler } from "@/lib/api-handler";
 import { withRateLimit } from "@/lib/rate-limit";
 import { registerSchema, type RegisterInput } from "@/lib/schemas/register";
+import { trackPlatformEvent } from "@/lib/platform-events";
 
 type BusinessType = NonNullable<RegisterInput["businessType"]>;
 
@@ -267,6 +268,18 @@ export async function POST(req: NextRequest) {
           variables: ["clientName", "serviceName", "businessName", "appointmentTime"],
         },
       ]);
+
+      void trackPlatformEvent({
+        businessId: business.id,
+        event: "account.created",
+        props: {
+          businessType: selectedBusinessType,
+          language: selectedLanguage,
+          referred: Boolean(referredByBusinessId),
+          referrerCode: referrerCode ?? null,
+        },
+        userId: user.id,
+      });
 
       return NextResponse.json({ success: true }, { status: 201 });
     } catch (error) {

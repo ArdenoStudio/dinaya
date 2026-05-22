@@ -8,6 +8,7 @@ import { logActivity } from "@/lib/activity-log";
 import { encryptSecret } from "@/lib/secrets";
 import { syncBusinessPrimaryLocation } from "@/lib/locations";
 import { PlanRequiredError, requirePro } from "@/lib/plan";
+import { trackPlatformEvent } from "@/lib/platform-events";
 import { isPublicHttpsUrl, normalizePublicHttpsUrl } from "@/lib/public-url";
 import { z } from "@/lib/validation";
 
@@ -82,6 +83,12 @@ export async function PATCH(req: NextRequest) {
       await requirePro(context.businessId, "publicBookingPageCustomization");
     } catch (error) {
       if (error instanceof PlanRequiredError) {
+        void trackPlatformEvent({
+          businessId: context.businessId,
+          event: "plan.limit_blocked",
+          props: { feature: "publicBookingPageCustomization", requiredPlan: error.requiredPlan },
+          userId: context.user.id,
+        });
         return NextResponse.json(
           { error: "Remove Dinaya branding is available on Pro." },
           { status: 402 },
@@ -137,6 +144,22 @@ export async function PATCH(req: NextRequest) {
   }).catch((error) => {
     console.error("Activity log write failed:", error);
   });
+  if (description && phone && address) {
+    void trackPlatformEvent({
+      businessId: context.businessId,
+      event: "activation.step_completed",
+      props: { step: "business_info_added" },
+      userId: context.user.id,
+    });
+  }
+  if (payhereEnabled && payhereMerchantId) {
+    void trackPlatformEvent({
+      businessId: context.businessId,
+      event: "activation.step_completed",
+      props: { step: "payhere_connected" },
+      userId: context.user.id,
+    });
+  }
 
   return NextResponse.json(ok({ id: context.businessId }));
 }

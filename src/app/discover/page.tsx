@@ -34,6 +34,11 @@ async function listDirectoryBusinesses(city?: string) {
     .orderBy(businesses.name);
 }
 
+function withDirectoryAttribution(url: string): string {
+  const separator = url.includes("?") ? "&" : "?";
+  return `${url}${separator}channel=directory&utm_source=dinaya&utm_medium=directory`;
+}
+
 export default async function DiscoverPage() {
   const listings = await listDirectoryBusinesses();
   const appDomain = process.env.NEXT_PUBLIC_APP_DOMAIN ?? "localhost:3000";
@@ -83,11 +88,12 @@ export default async function DiscoverPage() {
               const bookingUrl = appDomain === "dinaya.lk"
                 ? `https://${business.slug}.dinaya.lk`
                 : `${appUrl}/book/${business.slug}`;
+              const attributedBookingUrl = withDirectoryAttribution(bookingUrl);
 
               return (
                 <Link
                   key={business.slug}
-                  href={bookingUrl}
+                  href={attributedBookingUrl}
                   className="rounded-2xl border bg-white p-5 shadow-sm transition hover:border-primary/30 hover:shadow-md"
                 >
                   <div className="mb-3 flex items-start justify-between gap-3">

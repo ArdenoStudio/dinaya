@@ -8,6 +8,7 @@ interface Props {
   referralCode: string;
   customDomain?: string | null;
   customDomainVerified?: boolean | null;
+  directoryBookings: number;
   referralBookings: number;
 }
 
@@ -17,6 +18,7 @@ export function ReferralSettings({
   referralCode,
   customDomain,
   customDomainVerified,
+  directoryBookings,
   referralBookings,
 }: Props) {
   const bookingReferralUrl = buildReferralBookingUrl({
@@ -61,6 +63,13 @@ export function ReferralSettings({
         <p className="mt-1">
           Append <code>?utm_source=instagram</code>, <code>?utm_source=whatsapp</code>, or{" "}
           <code>?channel=directory</code> to your booking link.
+        </p>
+        <p className="mt-2">
+          Dinaya Directory links are tagged automatically. {directoryBookings} booking
+          {directoryBookings === 1 ? "" : "s"} came from the directory.
+        </p>
+        <p className="mt-2 font-medium text-gray-800">
+          Incentive: referred businesses that upgrade to Pro can be reviewed for a one-month Pro credit.
         </p>
       </div>
     </div>

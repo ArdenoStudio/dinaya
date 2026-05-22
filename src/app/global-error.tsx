@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect } from "react";
+import { captureClientException } from "@/lib/client-monitoring";
 
 export default function GlobalError({
   error,
@@ -12,6 +13,7 @@ export default function GlobalError({
 }) {
   useEffect(() => {
     console.error("Global error:", error);
+    captureClientException(error, "global-error");
   }, [error]);
 
   return (

@@ -26,10 +26,16 @@ export default async function MarketingPage() {
 
   if (!business) notFound();
 
-  const [{ referralBookings }] = await db
-    .select({ referralBookings: count() })
-    .from(bookings)
-    .where(and(eq(bookings.businessId, businessId), eq(bookings.source, "referral")));
+  const [[{ referralBookings }], [{ directoryBookings }]] = await Promise.all([
+    db
+      .select({ referralBookings: count() })
+      .from(bookings)
+      .where(and(eq(bookings.businessId, businessId), eq(bookings.source, "referral"))),
+    db
+      .select({ directoryBookings: count() })
+      .from(bookings)
+      .where(and(eq(bookings.businessId, businessId), eq(bookings.source, "directory"))),
+  ]);
 
   const referralCode = business.referralCode ?? business.slug;
 
@@ -74,6 +80,7 @@ export default async function MarketingPage() {
             referralCode={referralCode}
             customDomain={business.customDomain}
             customDomainVerified={Boolean(business.customDomainVerified)}
+            directoryBookings={Number(directoryBookings ?? 0)}
             referralBookings={Number(referralBookings ?? 0)}
           />
 

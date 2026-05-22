@@ -5,6 +5,7 @@ import { and, count, eq, inArray } from "drizzle-orm";
 import { PlanLimitError, requirePlanLimit } from "@/lib/plan";
 import { requireApiBusiness } from "@/lib/api-auth";
 import { getStaffLocationMap } from "@/lib/locations";
+import { trackPlatformEvent } from "@/lib/platform-events";
 import { z } from "@/lib/validation";
 
 const staffCreateSchema = z.object({
@@ -64,6 +65,11 @@ export async function POST(req: NextRequest) {
     await requirePlanLimit(businessId, "staff", Number(staffCount));
   } catch (error) {
     if (error instanceof PlanLimitError) {
+      void trackPlatformEvent({
+        businessId,
+        event: "plan.limit_blocked",
+        props: { limit: "staff", max: error.max },
+      });
       return NextResponse.json({ error: "Free businesses can add 1 staff member. Upgrade to Pro for more staff." }, { status: 402 });
     }
     throw error;
@@ -124,6 +130,12 @@ export async function POST(req: NextRequest) {
       });
     }
   }
+
+  void trackPlatformEvent({
+    businessId,
+    event: "activation.step_completed",
+    props: { step: "staff_added", staffId: created.id },
+  });
 
   return NextResponse.json({ id: created.id }, { status: 201 });
 }

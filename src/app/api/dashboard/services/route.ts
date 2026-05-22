@@ -4,6 +4,7 @@ import { services } from "@/db/schema";
 import { count, eq } from "drizzle-orm";
 import { requireApiBusiness } from "@/lib/api-auth";
 import { PlanLimitError, requirePlanLimit } from "@/lib/plan";
+import { trackPlatformEvent } from "@/lib/platform-events";
 import { serviceCreateSchema } from "@/lib/schemas/services";
 
 export async function GET() {
@@ -50,6 +51,11 @@ export async function POST(req: NextRequest) {
     await requirePlanLimit(businessId, "services", Number(serviceCount));
   } catch (error) {
     if (error instanceof PlanLimitError) {
+      void trackPlatformEvent({
+        businessId,
+        event: "plan.limit_blocked",
+        props: { limit: "services", max: error.max },
+      });
       return NextResponse.json(
         { error: "Free businesses can publish up to 5 services. Upgrade to Pro for unlimited services." },
         { status: 402 },
@@ -75,6 +81,12 @@ export async function POST(req: NextRequest) {
       dailyCapacity: data.dailyCapacity ?? null,
     })
     .returning({ id: services.id });
+
+  void trackPlatformEvent({
+    businessId,
+    event: "activation.step_completed",
+    props: { serviceId: service.id, step: "service_created" },
+  });
 
   return NextResponse.json({ id: service.id }, { status: 201 });
 }

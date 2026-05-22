@@ -1,7 +1,7 @@
 import { db } from "@/db";
 import { activityLog, availability, bookings, businesses, clients, payments, services, staff } from "@/db/schema";
 import { and, count, desc, eq, gte, lt, sql } from "drizzle-orm";
-import { addDays, endOfWeek, format, startOfDay, startOfWeek, subWeeks } from "date-fns";
+import { addDays, endOfWeek, format, startOfDay, startOfMonth, startOfWeek, subWeeks } from "date-fns";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireBusiness } from "@/lib/auth";
@@ -59,6 +59,7 @@ export default async function DashboardOverview() {
   const [
     [{ todayBookings }],
     [{ totalBookings }],
+    [{ monthBookings }],
     [{ newClientsThisWeek }],
     [{ servicesCount }],
     [{ staffCount }],
@@ -75,6 +76,10 @@ export default async function DashboardOverview() {
       .from(bookings)
       .where(and(eq(bookings.businessId, businessId), gte(bookings.startsAt, todayStart), lt(bookings.startsAt, tomorrow))),
     db.select({ totalBookings: count() }).from(bookings).where(eq(bookings.businessId, businessId)),
+    db
+      .select({ monthBookings: count() })
+      .from(bookings)
+      .where(and(eq(bookings.businessId, businessId), gte(bookings.createdAt, startOfMonth(now)))),
     db.select({ newClientsThisWeek: count() }).from(clients).where(and(eq(clients.businessId, businessId), gte(clients.createdAt, weekStart))),
     db.select({ servicesCount: count() }).from(services).where(eq(services.businessId, businessId)),
     db.select({ staffCount: count() }).from(staff).where(eq(staff.businessId, businessId)),
@@ -155,6 +160,7 @@ export default async function DashboardOverview() {
     { label: "Share booking link", done: Number(totalBookings) > 0, href: bookingUrl, description: "Post your link on WhatsApp Status, Instagram bio, or send it directly to clients." },
   ];
   const showOnboarding = onboarding.some((item) => !item.done);
+  const showHighVolumeUpgrade = business.plan === "free" && Number(monthBookings ?? 0) >= 50;
 
   const stats = [
     { label: "Today revenue", value: formatLkr(Number(todayRevenue ?? 0)), icon: "bi-cash-stack", accent: "bg-primary" },
@@ -172,6 +178,25 @@ export default async function DashboardOverview() {
         <h1 className="font-cal text-3xl tracking-tight">Good day, {business.name.split(" ")[0]}</h1>
         <p className="mt-1 text-sm text-muted-foreground">Today&apos;s bookings, revenue, and setup progress.</p>
       </div>
+
+      {showHighVolumeUpgrade ? (
+        <div className="rounded-xl border border-violet-200 bg-violet-50/70 p-5">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <p className="text-sm font-semibold text-violet-950">You are booking at Pro scale</p>
+              <p className="mt-1 text-sm text-violet-900/75">
+                {Number(monthBookings).toLocaleString()} bookings this month. Upgrade to unlock advanced reports, automations, and AI growth workflows.
+              </p>
+            </div>
+            <Link
+              href="/dashboard/billing"
+              className="rounded-md bg-violet-600 px-4 py-2 text-sm font-medium text-white hover:bg-violet-700"
+            >
+              View Pro plans
+            </Link>
+          </div>
+        </div>
+      ) : null}
 
       {Number(totalBookings) === 0 && showOnboarding ? null : (
         <div className="grid gap-4 md:grid-cols-4">

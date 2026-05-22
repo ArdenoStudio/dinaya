@@ -16,12 +16,12 @@ const channels = [
     href: "mailto:hello@dinaya.lk",
   },
   {
-    icon: "bi-whatsapp",
+    icon: "bi-chat-dots-fill",
     color: "bg-amber-500",
-    label: "WhatsApp",
-    value: "+94 77 000 0000",
-    desc: "Quickest way to reach us. Mon–Fri, 9 AM–6 PM.",
-    href: "https://wa.me/94770000000",
+    label: "Priority support",
+    value: "support@dinaya.lk",
+    desc: "Send setup questions and we will reply during Sri Lanka business hours.",
+    href: "mailto:support@dinaya.lk",
   },
   {
     icon: "bi-geo-alt-fill",

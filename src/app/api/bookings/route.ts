@@ -22,6 +22,7 @@ import {
   type BookingAttribution,
 } from "@/lib/booking-attribution";
 import { PlanLimitError, requirePlanLimit } from "@/lib/plan";
+import { trackPlatformEvent } from "@/lib/platform-events";
 import { withRateLimit } from "@/lib/rate-limit";
 import { hasApiKeyAuth, requireApiKey } from "@/lib/api-key-auth";
 import { z } from "@/lib/validation";
@@ -152,6 +153,11 @@ export async function POST(req: NextRequest) {
     await requirePlanLimit(businessId, "bookingsPerMonth", Number(monthBookingCount));
   } catch (error) {
     if (error instanceof PlanLimitError) {
+      void trackPlatformEvent({
+        businessId,
+        event: "plan.limit_blocked",
+        props: { limit: "bookingsPerMonth", max: error.max },
+      });
       return NextResponse.json({ error: "This business has reached the free plan limit of 50 bookings this month." }, { status: 402 });
     }
     throw error;
@@ -349,6 +355,23 @@ export async function POST(req: NextRequest) {
   }).catch((error) => {
     console.error("Activity log write failed:", error);
   });
+  void trackPlatformEvent({
+    businessId,
+    event: "booking.created",
+    props: {
+      bookingId: booking.id,
+      source,
+      status: initialStatus,
+      attribution: attribution ? JSON.stringify(attribution) : null,
+    },
+  });
+  if (Number(monthBookingCount) === 0) {
+    void trackPlatformEvent({
+      businessId,
+      event: "activation.first_booking",
+      props: { bookingId: booking.id, source },
+    });
+  }
 
   // Fire webhook for booking creation
   void dispatchWebhooks(businessId, "booking.created", {
@@ -436,6 +459,15 @@ export async function POST(req: NextRequest) {
     amountLkr: amountDueLkr,
     payhereOrderId: orderId,
     status: "pending",
+  });
+  void trackPlatformEvent({
+    businessId,
+    event: "booking.payment_pending",
+    props: {
+      amountLkr: amountDueLkr,
+      bookingId: booking.id,
+      orderId,
+    },
   });
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? req.nextUrl.origin;
