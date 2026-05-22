@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { addDays, format, parseISO } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
+import { Icon } from "@/components/ui/Icon";
 import type { Staff } from "@/db/schema";
 import type { BookingService } from "./BookingWizard";
 import type { BookingCopy } from "@/lib/i18n";
@@ -83,7 +84,7 @@ export default function StepDateTime({
     return (
       <div className="flex min-h-[280px] items-center justify-center rounded-xl border border-dashed border-gray-200 bg-white px-6 py-12 text-center text-sm text-gray-400 md:min-h-[320px]">
         <div>
-          <i className="bi bi-calendar2-plus mb-3 block text-3xl text-gray-300" />
+          <Icon name="calendar2-plus" className="mb-3 block text-3xl text-gray-300" />
           {copy.selectServiceHint}
         </div>
       </div>
@@ -154,7 +155,7 @@ export default function StepDateTime({
 
       {dateHeading && selectedSlot && (
         <div className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50/60 px-4 py-2.5 text-sm text-emerald-800 md:hidden">
-          <i className="bi bi-check-circle mr-1.5" />
+          <Icon name="check-circle" className="mr-1.5" />
           <span className="font-medium">{selectedSlot.label}</span>
           <span className="text-emerald-600"> · {dateHeading}</span>
         </div>
@@ -168,7 +169,7 @@ export default function StepDateTime({
               onClick={onBack}
               className="flex items-center gap-1 text-sm text-gray-500 transition-colors hover:text-gray-800"
             >
-              <i className="bi bi-chevron-left text-sm" /> {copy.back}
+              <Icon name="chevron-left" className="text-sm" /> {copy.back}
             </button>
           )}
           {showContinue && selectedSlot && onContinue && (

@@ -1,6 +1,7 @@
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import path from "node:path";
 import type { ReactNode } from "react";
+import { Icon } from "@/components/ui/Icon";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -503,7 +504,7 @@ export async function ProGate({
     <div className="rounded-lg border border-violet-200 bg-violet-50/70 p-5 text-sm">
       <div className="mb-2 flex items-center gap-2 font-medium text-violet-950">
         <span className="inline-flex size-8 items-center justify-center rounded-md bg-violet-600 text-white">
-          <i className="bi bi-stars text-sm" aria-hidden="true" />
+          <Icon name="stars" className="text-sm" aria-hidden="true" />
         </span>
         Upgrade to {planDisplayName(requiredPlan)}
       </div>

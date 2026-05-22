@@ -8,6 +8,7 @@ import { requireBusiness } from "@/lib/auth";
 import { formatLkr } from "@/lib/utils";
 import { OnboardingWizard } from "@/components/dashboard/OnboardingWizard";
 import { buildPublicBookingUrl, buildPublicBookingUrlLabel } from "@/lib/booking-url";
+import { Icon } from "@/components/ui/Icon";
 
 async function safeRecentActivity(businessId: string) {
   try {
@@ -157,10 +158,10 @@ export default async function DashboardOverview() {
   const showOnboarding = onboarding.some((item) => !item.done);
 
   const stats = [
-    { label: "Today revenue", value: formatLkr(Number(todayRevenue ?? 0)), icon: "bi-cash-stack", accent: "bg-primary" },
-    { label: "Today bookings", value: todayBookings, icon: "bi-calendar2-check", accent: "bg-amber-500" },
-    { label: "Week revenue", value: `${formatLkr(currentWeekRevenue)} (${revenueDelta >= 0 ? "+" : ""}${revenueDelta}%)`, icon: "bi-graph-up", accent: "bg-violet-600" },
-    { label: "New clients", value: newClientsThisWeek, icon: "bi-person-plus", accent: "bg-primary" },
+    { label: "Today revenue", value: formatLkr(Number(todayRevenue ?? 0)), icon: "cash-stack", accent: "bg-primary" },
+    { label: "Today bookings", value: todayBookings, icon: "calendar2-check", accent: "bg-amber-500" },
+    { label: "Week revenue", value: `${formatLkr(currentWeekRevenue)} (${revenueDelta >= 0 ? "+" : ""}${revenueDelta}%)`, icon: "graph-up", accent: "bg-violet-600" },
+    { label: "New clients", value: newClientsThisWeek, icon: "person-plus", accent: "bg-primary" },
   ];
 
   return (
@@ -180,7 +181,7 @@ export default async function DashboardOverview() {
               <div className={`h-[3px] ${stat.accent}`} />
               <div className="flex items-start gap-3 p-5">
                 <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                  <i className={`bi ${stat.icon}`} aria-hidden="true" />
+                  <Icon name={stat.icon} aria-hidden="true" />
                 </span>
                 <div>
                   <p className="text-xs text-muted-foreground">{stat.label}</p>
@@ -237,7 +238,7 @@ export default async function DashboardOverview() {
           <div className="rounded-xl border border-primary/15 bg-primary/[0.04] p-5">
             <div className="mb-3 flex items-center gap-2.5">
               <span className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <i className="bi bi-link-45deg text-sm" aria-hidden="true" />
+                <Icon name="link-45deg" className="text-sm" aria-hidden="true" />
               </span>
               <p className="text-sm font-semibold">Share booking link</p>
             </div>

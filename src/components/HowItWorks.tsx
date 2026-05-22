@@ -1,4 +1,5 @@
 import { Orbit } from "@/components/Orbit";
+import { Icon } from "@/components/ui/Icon";
 
 /** Dinaya logo mark — the spiral/link icon used across the brand */
 function DinayaMark({ className }: { className?: string }) {
@@ -36,7 +37,7 @@ function OrbitNode({
   return (
     <div className="relative flex items-center justify-center">
       {/* Icon + white circle */}
-      <i className={`bi ${icon} z-10 text-[18px] text-gray-800`} />
+      <Icon name={icon} className="z-10 text-[18px] text-gray-800" />
       <div className="absolute size-10 rounded-full bg-white/60 ring-1 shadow-lg ring-black/5" />
 
       {/* Status badge */}
@@ -45,7 +46,7 @@ function OrbitNode({
           <div
             className={`flex items-center justify-center rounded-l-full ${badgeBg} p-1 ring-1 ring-gray-200`}
           >
-            <i className={`bi ${badgeIcon} text-[9px] text-white`} />
+            <Icon name={badgeIcon} className="text-[9px] text-white" />
           </div>
           <div className="rounded-r-full bg-white/70 py-0.5 pr-1.5 pl-1 text-[11px] whitespace-nowrap ring-1 ring-gray-200 text-gray-700 font-medium">
             {badgeLabel}
@@ -85,15 +86,15 @@ export function HowItWorks() {
           {/* Step legend */}
           <ol className="mt-8 space-y-3">
             {[
-              { icon: "bi-phone",        label: "Client books on your page",        color: "bg-blue-600" },
-              { icon: "bi-credit-card",  label: "Payment collected automatically",  color: "bg-green-500" },
-              { icon: "bi-bell",         label: "You get an instant notification",  color: "bg-blue-600" },
-              { icon: "bi-check-circle", label: "Appointment confirmed",            color: "bg-emerald-500" },
-              { icon: "bi-star",         label: "Review request sent after visit",  color: "bg-amber-500" },
+              { icon: "phone",        label: "Client books on your page",        color: "bg-blue-600" },
+              { icon: "credit-card",  label: "Payment collected automatically",  color: "bg-green-500" },
+              { icon: "bell",         label: "You get an instant notification",  color: "bg-blue-600" },
+              { icon: "check-circle", label: "Appointment confirmed",            color: "bg-emerald-500" },
+              { icon: "star",         label: "Review request sent after visit",  color: "bg-amber-500" },
             ].map(({ icon, label, color }, i) => (
               <li key={i} className="flex items-center gap-3 text-sm text-gray-600">
                 <span className={`flex size-6 shrink-0 items-center justify-center rounded-full ${color}`}>
-                  <i className={`bi ${icon} text-[10px] text-white`} />
+                  <Icon name={icon} className="text-[10px] text-white" />
                 </span>
                 {label}
               </li>

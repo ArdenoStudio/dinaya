@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { bookingReminderText, whatsappUrl } from "@/lib/whatsapp";
+import { Icon } from "@/components/ui/Icon";
 
 type Booking = {
   id: string;
@@ -84,13 +85,13 @@ export default function BookingsPage() {
         <h1 className="font-cal text-2xl">Bookings</h1>
 	        <div className="flex gap-2">
           <a href={`/api/dashboard/bookings?tab=${tab}&export=csv`} className="flex items-center gap-1.5 border px-4 py-2 rounded-md text-sm font-medium text-muted-foreground hover:border-primary/50 hover:text-foreground transition-colors">
-            <i className="bi bi-download text-xs" /> Export CSV
+            <Icon name="download" className="text-xs" /> Export CSV
           </a>
 	          <Link href="/dashboard/calendar" className="flex items-center gap-1.5 border px-4 py-2 rounded-md text-sm font-medium text-muted-foreground hover:border-primary/50 hover:text-foreground transition-colors">
-            <i className="bi bi-calendar text-xs" /> Calendar
+            <Icon name="calendar" className="text-xs" /> Calendar
           </Link>
           <Link href="/dashboard/bookings/new" className="flex items-center gap-1.5 bg-gradient-to-b from-primary/90 to-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium border-b-2 border-primary/70 shadow-sm transition-all hover:shadow-primary/30 hover:shadow-md">
-            <i className="bi bi-plus text-xs" /> New booking
+            <Icon name="plus" className="text-xs" /> New booking
           </Link>
         </div>
       </div>

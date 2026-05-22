@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
+import { Icon } from "@/components/ui/Icon";
 
 const inputCls =
   "mt-1.5 w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 placeholder:text-gray-300 transition-all";
@@ -67,7 +68,7 @@ function ForgotPasswordForm() {
         {success ? (
           <div className="space-y-4">
             <div className="flex items-start gap-2 px-3 py-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm">
-              <i className="bi bi-check-circle-fill text-sm mt-0.5 shrink-0" />
+              <Icon name="check-circle-fill" className="text-sm mt-0.5 shrink-0" />
               <span>{success}</span>
             </div>
             <Link
@@ -103,7 +104,7 @@ function ForgotPasswordForm() {
                 role="alert"
                 className="flex items-start gap-2 px-3 py-2.5 rounded-lg bg-red-50 border border-red-100 text-red-600 text-sm"
               >
-                <i className="bi bi-exclamation-circle text-sm mt-0.5 shrink-0" />
+                <Icon name="exclamation-circle" className="text-sm mt-0.5 shrink-0" />
                 <span>{error}</span>
               </div>
             )}
@@ -113,7 +114,7 @@ function ForgotPasswordForm() {
               disabled={loading}
               className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-b from-primary/90 to-primary text-primary-foreground py-3 rounded-lg text-sm font-medium border-b-2 border-primary/70 shadow-[0_0_0_2px_rgba(0,0,0,0.04),0_0_14px_0_rgba(99,102,241,0.2)] transition-all hover:shadow-primary/30 hover:shadow-md disabled:cursor-not-allowed"
             >
-              {loading && <i className="bi bi-arrow-repeat text-sm animate-spin" />}
+              {loading && <Icon name="arrow-repeat" className="text-sm animate-spin" />}
               {loading ? "Sending…" : "Send reset link"}
             </button>
           </form>

@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { DocsTargetHighlight } from "../DocsTargetHighlight";
+import { Icon } from "@/components/ui/Icon";
 
 type Props = {
   variant: string;
@@ -22,7 +23,7 @@ export function DocsBookingMockup({ variant, highlightTarget }: Props) {
       <div className="bg-gradient-to-b from-blue-700 to-blue-600 px-3 pb-3 pt-10">
         <div className="flex items-center gap-2">
           <div className="flex size-8 items-center justify-center rounded-lg bg-white/20">
-            <i className="bi bi-scissors text-white text-sm" />
+            <Icon name="scissors" className="text-white text-sm" />
           </div>
           <div>
             <p className="font-semibold text-white">Dilini&apos;s Studio</p>
@@ -120,7 +121,7 @@ export function DocsBookingMockup({ variant, highlightTarget }: Props) {
             <DocsTargetHighlight active={target("booking-stars")} label="Star rating" placement="below">
               <div className="my-2 flex gap-1 text-amber-400">
                 {[1, 2, 3, 4, 5].map((n) => (
-                  <i key={n} className="bi bi-star-fill" />
+                  <Icon key={n} name="star-fill" />
                 ))}
               </div>
             </DocsTargetHighlight>

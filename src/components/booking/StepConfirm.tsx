@@ -7,6 +7,7 @@ import type { BookingBusiness, BookingState } from "./BookingWizard";
 import { formatLkr, isOptimizableRemoteImage } from "@/lib/utils";
 import type { BookingCopy } from "@/lib/i18n";
 import { readStoredAttribution } from "@/lib/booking-attribution";
+import { Icon } from "@/components/ui/Icon";
 
 interface Props {
   state: BookingState;
@@ -130,7 +131,7 @@ export default function StepConfirm({ state, business, copy, onUpdate, onBack, o
               {service?.name}
             </p>
             <div className="mt-1 flex items-center gap-1 text-[11px] text-gray-400 md:text-xs">
-              <i className="bi bi-clock text-[10px] text-gray-300" />
+              <Icon name="clock" className="text-[10px] text-gray-300" />
               {service?.durationMinutes} min
               {state.staff && (
                 <>
@@ -152,7 +153,7 @@ export default function StepConfirm({ state, business, copy, onUpdate, onBack, o
         </p>
         <div className="mb-2 flex items-center gap-[11px]">
           <div className="flex size-[34px] shrink-0 items-center justify-center rounded-[10px] bg-blue-50">
-            <i className="bi bi-calendar3 text-[13px] text-blue-500" />
+            <Icon name="calendar3" className="text-[13px] text-blue-500" />
           </div>
           <div>
             <p className="text-[13px] font-semibold text-gray-900 md:text-sm">{dateLabel}</p>
@@ -162,7 +163,7 @@ export default function StepConfirm({ state, business, copy, onUpdate, onBack, o
         <div className="mb-2 h-px bg-gray-100" />
         <div className="flex items-center gap-[11px]">
           <div className="flex size-[34px] shrink-0 items-center justify-center rounded-[10px] bg-emerald-50">
-            <i className="bi bi-clock text-[13px] text-emerald-500" />
+            <Icon name="clock" className="text-[13px] text-emerald-500" />
           </div>
           <div className="flex-1">
             <p className="text-[13px] font-semibold text-gray-900 md:text-sm">{state.timeLabel}</p>
@@ -313,7 +314,7 @@ export default function StepConfirm({ state, business, copy, onUpdate, onBack, o
 
       {error && (
         <div className="mx-[14px] mb-2 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-700 md:mx-0">
-          <i className="bi bi-exclamation-circle mt-0.5 shrink-0 text-sm" />
+          <Icon name="exclamation-circle" className="mt-0.5 shrink-0 text-sm" />
           <span>{error}</span>
         </div>
       )}
@@ -326,7 +327,7 @@ export default function StepConfirm({ state, business, copy, onUpdate, onBack, o
             onClick={onBack}
             className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-800 md:mr-4"
           >
-            <i className="bi bi-chevron-left text-sm" /> {copy.back}
+            <Icon name="chevron-left" className="text-sm" /> {copy.back}
           </button>
         </div>
         <button
@@ -338,7 +339,7 @@ export default function StepConfirm({ state, business, copy, onUpdate, onBack, o
           {loading ? "Booking…" : payLabel}
         </button>
         <div className="mt-2 flex items-center justify-center gap-1 md:mt-3">
-          <i className="bi bi-shield-check text-[11px] text-gray-300" />
+          <Icon name="shield-check" className="text-[11px] text-gray-300" />
           <span className="text-[11px] text-gray-400">{copy.securedByPayHere}</span>
         </div>
       </div>

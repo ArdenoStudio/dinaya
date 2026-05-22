@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Icon } from "@/components/ui/Icon";
 
 type OnboardingStep = {
   label: string;
@@ -48,7 +49,7 @@ export function OnboardingWizard({ steps, bookingUrl, whatsappShare }: Props) {
             className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary/90"
           >
             Continue setup
-            <i className="bi bi-arrow-right text-xs" />
+            <Icon name="arrow-right" className="text-xs" />
           </Link>
           {nextStep.label === "Share booking link" ? (
             <a
@@ -57,7 +58,7 @@ export function OnboardingWizard({ steps, bookingUrl, whatsappShare }: Props) {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium hover:border-primary/40"
             >
-              <i className="bi bi-whatsapp text-emerald-600" />
+              <Icon name="whatsapp" className="text-emerald-600" />
               Share on WhatsApp
             </a>
           ) : null}
@@ -75,7 +76,7 @@ export function OnboardingWizard({ steps, bookingUrl, whatsappShare }: Props) {
             }`}
           >
             <span>{step.label}</span>
-            <i className={`bi ${step.done ? "bi-check-circle-fill text-emerald-600" : "bi-circle text-muted-foreground"}`} />
+            <Icon name={step.done ? "check-circle-fill" : "circle"} className={step.done ? "text-emerald-600" : "text-muted-foreground"} />
           </Link>
         ))}
       </div>

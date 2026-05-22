@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { docsCategories } from "@content/docs/categories";
+import { Icon } from "@/components/ui/Icon";
 import {
   allGuides,
   featuredGuideSlugs,
@@ -18,17 +19,17 @@ export default function DocsHubPage() {
 
   const walkthroughCues = [
     {
-      icon: "bi-compass",
+      icon: "compass",
       label: "Choose a guide",
       text: "Start from a topic card, search result, or the docs sidebar.",
     },
     {
-      icon: "bi-cursor-fill",
+      icon: "cursor-fill",
       label: "Follow the pointer",
       text: "Every walkthrough highlights the exact menu item, button, or field.",
     },
     {
-      icon: "bi-arrow-right-circle",
+      icon: "arrow-right-circle",
       label: "Move step by step",
       text: "Use the large step buttons or Next to continue without getting lost.",
     },
@@ -38,7 +39,7 @@ export default function DocsHubPage() {
     <div className="pb-16">
       <div className="mb-10">
         <span className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50/50 px-3 py-1 text-xs font-medium text-blue-700 mb-4">
-          <i className="bi bi-book text-xs" />
+          <Icon name="book" className="text-xs" />
           Documentation
         </span>
         <h1 className="font-cal text-3xl md:text-4xl tracking-tight mb-2">
@@ -54,7 +55,7 @@ export default function DocsHubPage() {
           {walkthroughCues.map((cue, index) => (
             <div key={cue.label} className="flex gap-3 rounded-lg bg-white px-3 py-3 shadow-sm shadow-gray-900/5">
               <span className="flex size-8 shrink-0 items-center justify-center rounded-lg border bg-white text-primary">
-                <i className={`bi ${cue.icon} text-sm`} />
+                <Icon name={cue.icon} className="text-sm" />
               </span>
               <div>
                 <p className="text-sm font-semibold text-gray-900">
@@ -71,7 +72,7 @@ export default function DocsHubPage() {
       </section>
 
       <div className="relative mb-10">
-        <i className="bi bi-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
+        <Icon name="search" className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
         <input
           type="search"
           value={search}
@@ -101,7 +102,7 @@ export default function DocsHubPage() {
                     </div>
                     <span className="inline-flex shrink-0 items-center gap-1 rounded-lg bg-primary/10 px-2.5 py-1.5 text-xs font-medium text-primary">
                       Open
-                      <i className="bi bi-chevron-right text-[10px]" />
+                      <Icon name="chevron-right" className="text-[10px]" />
                     </span>
                   </Link>
                 </li>
@@ -140,7 +141,7 @@ export default function DocsHubPage() {
                       </p>
                       <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary group-hover:underline">
                         Open guide
-                        <i className="bi bi-arrow-right text-[10px]" />
+                        <Icon name="arrow-right" className="text-[10px]" />
                       </span>
                     </div>
                   </Link>
@@ -161,7 +162,7 @@ export default function DocsHubPage() {
                   className="rounded-xl border p-4 hover:border-primary/30 hover:shadow-sm transition-all"
                 >
                   <div className="flex items-center gap-2 mb-1">
-                    <i className={`bi ${cat.icon} text-primary`} />
+                    <Icon name={cat.icon} className="text-primary" />
                     <p className="font-cal text-base">{cat.label}</p>
                   </div>
                   <p className="text-xs text-muted-foreground">{cat.description}</p>
@@ -193,7 +194,7 @@ export default function DocsHubPage() {
                         <span className="text-[11px] text-muted-foreground shrink-0">
                           {g.steps.length} steps
                         </span>
-                        <i className="bi bi-chevron-right text-gray-300 shrink-0" />
+                        <Icon name="chevron-right" className="text-gray-300 shrink-0" />
                       </Link>
                     </li>
                   ))}

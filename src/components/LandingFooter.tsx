@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { FluidParticlesBackground } from "@/components/ui/fluid-particles-background";
+import { Icon } from "@/components/ui/Icon";
 
 export function LandingFooter() {
   return (
@@ -20,7 +21,7 @@ export function LandingFooter() {
               className="mt-6 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90 transition-colors"
             >
               Get started free
-              <i className="bi bi-arrow-right text-xs" />
+              <Icon name="arrow-right" className="text-xs" />
             </Link>
           </div>
 

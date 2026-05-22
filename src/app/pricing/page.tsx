@@ -6,6 +6,7 @@ import { CTAPrimaryButton } from "@/components/cta-primary-button";
 import { LandingFooter } from "@/components/LandingFooter";
 import { auth } from "@/auth";
 import { annualSavingsPercent, getPlanConfigAsync } from "@/lib/plan";
+import { Icon } from "@/components/ui/Icon";
 
 export const metadata: Metadata = {
   title: "Pricing — Free for Every Sri Lankan Business | Dinaya",
@@ -86,7 +87,7 @@ export default async function PricingPage() {
         <FadeContainer className="flex flex-col items-center">
           <FadeDiv className="mb-6">
             <span className="inline-flex items-center gap-2 rounded-full border bg-white px-3 py-1 text-xs font-medium text-gray-700 shadow-sm">
-              <i className="bi bi-stars text-xs text-primary" />
+              <Icon name="stars" className="text-xs text-primary" />
               Free for every Sri Lankan business
             </span>
           </FadeDiv>
@@ -113,7 +114,7 @@ export default async function PricingPage() {
             <div className="flex items-center gap-2 mb-2">
               <h3 className="font-cal text-2xl tracking-tight">Free</h3>
               <span className="inline-flex items-center gap-1 rounded-full bg-violet-50 text-violet-700 ring-1 ring-violet-200 px-2 py-0.5 text-[11px] font-medium">
-                <i className="bi bi-lightning-charge" style={{ fontSize: '0.75rem' }} />
+                <Icon name="lightning-charge" />
                 Current
               </span>
             </div>
@@ -135,7 +136,7 @@ export default async function PricingPage() {
               {freeFeatures.map((f) => (
                 <li key={f} className="flex items-start gap-2.5">
                   <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-primary/15">
-                    <i className="bi bi-check text-primary" style={{ fontSize: '0.625rem' }} />
+                    <Icon name="check" className="text-primary" style={{ fontSize: '0.625rem' }} />
                   </span>
                   <span className="text-gray-700">{f}</span>
                 </li>
@@ -173,14 +174,14 @@ export default async function PricingPage() {
                 className="inline-flex items-center justify-center gap-2 bg-primary text-white px-5 py-3 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors mb-7"
               >
                 {upgradeLabel}
-                <i className="bi bi-arrow-right text-sm" />
+                <Icon name="arrow-right" className="text-sm" />
               </Link>
 
               <ul className="space-y-3 text-sm">
                 {proOperationalFeatures.map((f) => (
                   <li key={f} className="flex items-start gap-2.5">
                     <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-primary/15">
-                      <i className="bi bi-check text-primary" style={{ fontSize: '0.625rem' }} />
+                      <Icon name="check" className="text-primary" style={{ fontSize: '0.625rem' }} />
                     </span>
                     <span className="text-gray-700">{f}</span>
                   </li>
@@ -220,7 +221,7 @@ export default async function PricingPage() {
                 className="inline-flex items-center justify-center gap-2 bg-gray-900 text-white px-5 py-3 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors mb-7"
               >
                 {upgradeLabel}
-                <i className="bi bi-arrow-right text-sm" />
+                <Icon name="arrow-right" className="text-sm" />
               </Link>
 
               <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
@@ -230,7 +231,7 @@ export default async function PricingPage() {
                 {maxAiFeatures.map((f) => (
                   <li key={f} className="flex items-start gap-2.5">
                     <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-amber-400/25">
-                      <i className="bi bi-check text-amber-600" style={{ fontSize: '0.625rem' }} />
+                      <Icon name="check" className="text-amber-600" style={{ fontSize: '0.625rem' }} />
                     </span>
                     <span className="text-gray-700">{f}</span>
                   </li>
@@ -245,13 +246,13 @@ export default async function PricingPage() {
         {/* Value strip */}
         <div className="grid sm:grid-cols-3 gap-px bg-gray-200/70 rounded-2xl overflow-hidden border border-gray-200/70">
           {[
-            { icon: "bi-shield-check", title: "No commissions", desc: "Keep 100% of every booking — we don't take a cut." },
-            { icon: "bi-credit-card", title: "No setup fees", desc: "Create your page and go live in 5 minutes." },
-            { icon: "bi-chat-square-text", title: "Real human support", desc: "We reply on WhatsApp in Sinhala, Tamil, or English." },
+            { icon: "shield-check", title: "No commissions", desc: "Keep 100% of every booking — we don't take a cut." },
+            { icon: "credit-card", title: "No setup fees", desc: "Create your page and go live in 5 minutes." },
+            { icon: "chat-square-text", title: "Real human support", desc: "We reply on WhatsApp in Sinhala, Tamil, or English." },
           ].map((it) => (
             <div key={it.title} className="bg-white p-6">
               <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 ring-1 ring-primary/15 mb-3">
-                <i className={`bi ${it.icon} text-sm text-primary`} />
+                <Icon name={it.icon} className="text-sm text-primary" />
               </div>
               <h4 className="font-cal text-base mb-1 tracking-tight">{it.title}</h4>
               <p className="text-sm text-muted-foreground leading-relaxed">{it.desc}</p>
@@ -283,48 +284,48 @@ export default async function PricingPage() {
             </thead>
             <tbody className="divide-y">
               {[
-                { f: "Self-booking page", a: "Yes", b: "Yes", icon: "bi-calendar", c: "Yes" },
-                { f: "Online payments (PayHere)", a: "Yes", b: "Yes", icon: "bi-credit-card", c: "Yes" },
-                { f: "SMS + email reminders", a: "Email", b: "Yes", icon: "bi-bell", c: "Yes" },
-                { f: "Booking dashboard", a: "Yes", b: "Yes", icon: "bi-grid", c: "Yes" },
-                { f: "Multi-staff calendar", a: "—", b: "Yes", icon: "bi-people", c: "Yes" },
-                { f: "Branch locations", a: "1", b: "Up to 3", icon: "bi-geo-alt", c: "Unlimited" },
-                { f: "Custom domain", a: "—", b: "Yes", icon: "bi-globe", c: "Yes" },
-                { f: "Remove Dinaya branding", a: "—", b: "Yes", icon: "bi-eye-slash", c: "Yes" },
-                { f: "Advanced reports & exports", a: "—", b: "Yes", icon: "bi-bar-chart", c: "Yes" },
-                { f: "Priority support", a: "Email", b: "WhatsApp", icon: "bi-headset", c: "WhatsApp" },
-                { f: "AI Booking Autopilot", a: "—", b: "Yes", icon: "bi-robot", c: "Yes" },
-                { f: "Smart reminder system", a: "—", b: "Yes", icon: "bi-bell-fill", c: "Yes" },
-                { f: "Review engine", a: "—", b: "Yes", icon: "bi-star", c: "Yes" },
-                { f: "Client Reactivation Campaign", a: "—", b: "Yes", icon: "bi-arrow-repeat", c: "Yes" },
-                { f: "AI upsell assistant", a: "—", b: "Yes", icon: "bi-graph-up-arrow", c: "Yes" },
-                { f: "30-Day AI Content Machine", a: "—", b: "Yes", icon: "bi-calendar3", c: "Yes" },
-                { f: "VIP Loyalty Sequence", a: "—", b: "Yes", icon: "bi-gem", c: "Yes" },
+                { f: "Self-booking page", a: "Yes", b: "Yes", icon: "calendar", c: "Yes" },
+                { f: "Online payments (PayHere)", a: "Yes", b: "Yes", icon: "credit-card", c: "Yes" },
+                { f: "SMS + email reminders", a: "Email", b: "Yes", icon: "bell", c: "Yes" },
+                { f: "Booking dashboard", a: "Yes", b: "Yes", icon: "grid", c: "Yes" },
+                { f: "Multi-staff calendar", a: "—", b: "Yes", icon: "people", c: "Yes" },
+                { f: "Branch locations", a: "1", b: "Up to 3", icon: "geo-alt", c: "Unlimited" },
+                { f: "Custom domain", a: "—", b: "Yes", icon: "globe", c: "Yes" },
+                { f: "Remove Dinaya branding", a: "—", b: "Yes", icon: "eye-slash", c: "Yes" },
+                { f: "Advanced reports & exports", a: "—", b: "Yes", icon: "bar-chart", c: "Yes" },
+                { f: "Priority support", a: "Email", b: "WhatsApp", icon: "headset", c: "WhatsApp" },
+                { f: "AI Booking Autopilot", a: "—", b: "Yes", icon: "robot", c: "Yes" },
+                { f: "Smart reminder system", a: "—", b: "Yes", icon: "bell-fill", c: "Yes" },
+                { f: "Review engine", a: "—", b: "Yes", icon: "star", c: "Yes" },
+                { f: "Client Reactivation Campaign", a: "—", b: "Yes", icon: "arrow-repeat", c: "Yes" },
+                { f: "AI upsell assistant", a: "—", b: "Yes", icon: "graph-up-arrow", c: "Yes" },
+                { f: "30-Day AI Content Machine", a: "—", b: "Yes", icon: "calendar3", c: "Yes" },
+                { f: "VIP Loyalty Sequence", a: "—", b: "Yes", icon: "gem", c: "Yes" },
               ].map((row) => (
                 <tr key={row.f} className="hover:bg-gray-50/50 transition-colors">
                   <td className="px-5 py-3.5 text-gray-800">
                     <span className="inline-flex items-center gap-2.5">
-                      {row.icon ? <i className={`bi ${row.icon} text-xs text-gray-400`} /> : <span className="w-3.5 h-3.5 inline-block" />}
+                      {row.icon ? <Icon name={row.icon} className="text-xs text-gray-400" /> : <span className="w-3.5 h-3.5 inline-block" />}
                       {row.f}
                     </span>
                   </td>
                   <td className="px-5 py-3.5 text-center">
                     {row.a === "Yes" ? (
-                      <i className="bi bi-check text-sm text-primary" />
+                      <Icon name="check" className="text-sm text-primary" />
                     ) : (
                       <span className="text-gray-700">{row.a}</span>
                     )}
                   </td>
                   <td className="px-5 py-3.5 text-center">
                     {row.b === "Yes" ? (
-                      <i className="bi bi-check text-sm text-primary" />
+                      <Icon name="check" className="text-sm text-primary" />
                     ) : (
                       <span className="text-gray-700">{row.b}</span>
                     )}
                   </td>
                   <td className="px-5 py-3.5 text-center">
                     {row.c === "Yes" ? (
-                      <i className="bi bi-check text-sm text-primary" />
+                      <Icon name="check" className="text-sm text-primary" />
                     ) : (
                       <span className="text-gray-700">{row.c}</span>
                     )}
@@ -409,7 +410,7 @@ export default async function PricingPage() {
                 className="inline-flex items-center gap-2 bg-white text-blue-700 px-7 py-3.5 rounded-xl font-semibold shadow-lg hover:bg-white/95 transition-colors"
               >
                 Create your page
-                <i className="bi bi-arrow-right text-sm" />
+                <Icon name="arrow-right" className="text-sm" />
               </Link>
             </div>
           </div>

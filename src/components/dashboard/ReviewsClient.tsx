@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { useDashboardCopy } from "@/components/dashboard/DashboardLocaleProvider";
+import { Icon } from "@/components/ui/Icon";
 
 type Review = {
   id: string;
@@ -20,7 +21,7 @@ function Stars({ rating }: { rating: number }) {
   return (
     <span className="inline-flex gap-0.5">
       {[1, 2, 3, 4, 5].map((n) => (
-        <i key={n} className={`bi ${n <= rating ? "bi-star-fill text-amber-400" : "bi-star text-gray-300"} text-xs`} />
+        <Icon key={n} name={n <= rating ? "star-fill" : "star"} className={`${n <= rating ? "text-amber-400" : "text-gray-300"} text-xs`} />
       ))}
     </span>
   );
@@ -126,7 +127,7 @@ export function ReviewsClient({ canUseAiReplies }: { canUseAiReplies: boolean })
         <p className="text-sm text-muted-foreground">{copy.loading}</p>
       ) : reviewList.length === 0 ? (
         <div className="rounded-xl border bg-white p-12 text-center">
-          <i className="bi bi-star mb-3 block text-3xl text-muted-foreground/40" />
+          <Icon name="star" className="mb-3 block text-3xl text-muted-foreground/40" />
           <p className="text-sm font-medium">{copy.emptyTitle}</p>
           <p className="mt-1 text-xs text-muted-foreground">{copy.emptyBody}</p>
         </div>
@@ -159,7 +160,7 @@ export function ReviewsClient({ canUseAiReplies }: { canUseAiReplies: boolean })
                     onClick={() => deleteReview(review.id)}
                     className="text-sm text-muted-foreground transition-colors hover:text-destructive"
                   >
-                    <i className="bi bi-trash" />
+                    <Icon name="trash" />
                   </button>
                 </div>
               </div>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { Icon } from "@/components/ui/Icon";
 import { guidesBySlug, allGuides } from "@content/docs/guides";
 import { getCategoryLabel } from "@content/docs/categories";
 import { UiWalkthrough } from "@/components/docs/UiWalkthrough";
@@ -39,9 +40,9 @@ export default async function GuidePage({ params }: Props) {
         <Link href="/docs" className="hover:text-foreground">
           Docs
         </Link>
-        <i className="bi bi-chevron-right text-[10px]" />
+        <Icon name="chevron-right" className="text-[10px]" />
         <span>{categoryLabel}</span>
-        <i className="bi bi-chevron-right text-[10px]" />
+        <Icon name="chevron-right" className="text-[10px]" />
         <span className="text-foreground">{guide.title}</span>
       </nav>
 
@@ -96,7 +97,7 @@ export default async function GuidePage({ params }: Props) {
           href="mailto:support@dinaya.lk"
           className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
         >
-          <i className="bi bi-envelope" />
+          <Icon name="envelope" />
           Tell us at support@dinaya.lk
         </a>
       </section>

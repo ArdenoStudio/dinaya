@@ -5,7 +5,11 @@ import { ProductMockupSkeleton } from "@/components/ProductMockupSkeleton";
 import { WordRotate } from "@/components/WordRotate";
 import { CTAPrimaryButton } from "@/components/cta-primary-button";
 import { LandingFooter } from "@/components/LandingFooter";
-import { HowItWorks } from "@/components/HowItWorks";
+import { Icon } from "@/components/ui/Icon";
+
+const HowItWorks = dynamic(() =>
+  import("@/components/HowItWorks").then((m) => ({ default: m.HowItWorks }))
+);
 
 const ProductMockup = dynamic(() => import("@/components/ProductMockup"), {
   loading: () => <ProductMockupSkeleton />,
@@ -13,32 +17,32 @@ const ProductMockup = dynamic(() => import("@/components/ProductMockup"), {
 
 const features = [
   {
-    icon: "bi-calendar-check",
+    icon: "calendar-check",
     title: "Self-booking page",
     desc: "Your own link at yourname.dinaya.lk. Clients book 24/7 without calling you.",
   },
   {
-    icon: "bi-credit-card",
+    icon: "credit-card",
     title: "Online payments",
     desc: "Accept deposits or full payment via PayHere. Eliminate no-shows instantly.",
   },
   {
-    icon: "bi-grid",
+    icon: "grid",
     title: "Simple dashboard",
     desc: "See all your bookings in one place. Cancel, reschedule, and track revenue.",
   },
   {
-    icon: "bi-bell",
+    icon: "bell",
     title: "Automated reminders",
     desc: "Clients get SMS and email reminders before their appointment — automatically.",
   },
   {
-    icon: "bi-clock",
+    icon: "clock",
     title: "Custom availability",
     desc: "Set your working hours, block dates, and add buffer time between sessions.",
   },
   {
-    icon: "bi-share",
+    icon: "share",
     title: "Shareable link",
     desc: "One link for Instagram, WhatsApp, and Facebook. Share everywhere in seconds.",
   },
@@ -47,19 +51,19 @@ const features = [
 const steps = [
   {
     number: "01",
-    icon: "bi-sliders",
+    icon: "sliders",
     title: "Set up your page",
     desc: "Add your services, prices, and availability. Takes less than 5 minutes.",
   },
   {
     number: "02",
-    icon: "bi-send",
+    icon: "send",
     title: "Share your link",
     desc: "Send your dinaya.lk/yourname link via WhatsApp, Instagram, or Facebook.",
   },
   {
     number: "03",
-    icon: "bi-calendar-check",
+    icon: "calendar-check",
     title: "Get booked",
     desc: "Clients pick a time, pay online. You get an instant notification.",
   },
@@ -113,7 +117,7 @@ export default function LandingPage() {
               </span>
               <span className="flex items-center gap-1 truncate">
                 Free for Sri Lankan businesses
-                <i className="bi bi-arrow-up-right text-xs shrink-0 text-gray-700" />
+                <Icon name="arrow-up-right" className="text-xs shrink-0 text-gray-700" />
               </span>
             </a>
           </div>
@@ -147,7 +151,7 @@ export default function LandingPage() {
               href="#demo"
               className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-6 py-3 text-sm font-medium text-gray-800 shadow-sm hover:bg-gray-50 transition-colors"
             >
-              <i className="bi bi-play-circle text-base" />
+              <Icon name="play-circle" className="text-base" />
               See a live demo
             </Link>
           </div>
@@ -165,13 +169,13 @@ export default function LandingPage() {
       <section className="max-w-6xl mx-auto px-6 py-6 border-t">
         <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-xs text-muted-foreground">
           {[
-            { icon: "bi-geo-alt-fill", text: "Built exclusively for Sri Lanka" },
-            { icon: "bi-currency-dollar", text: "No USD subscriptions" },
-            { icon: "bi-percent", text: "Zero commission on bookings" },
-            { icon: "bi-whatsapp", text: "Replace WhatsApp chaos for good" },
+            { icon: "geo-alt-fill", text: "Built exclusively for Sri Lanka" },
+            { icon: "currency-dollar", text: "No USD subscriptions" },
+            { icon: "percent", text: "Zero commission on bookings" },
+            { icon: "whatsapp", text: "Replace WhatsApp chaos for good" },
           ].map((item) => (
             <div key={item.text} className="flex items-center gap-1.5">
-              <i className={`bi ${item.icon} text-primary text-xs`} />
+              <Icon name={item.icon} className="text-primary text-xs" />
               <span>{item.text}</span>
             </div>
           ))}
@@ -249,7 +253,7 @@ export default function LandingPage() {
 
               <div className="mb-5 inline-flex">
                 <div className="flex items-center justify-center size-11 rounded-xl bg-primary/10 ring-1 ring-primary/15 group-hover:ring-primary/25 transition-colors">
-                  <i className={`bi ${f.icon} text-[1.15rem] text-primary`} />
+                  <Icon name={f.icon} className="text-[1.15rem] text-primary" />
                 </div>
               </div>
 
@@ -260,7 +264,7 @@ export default function LandingPage() {
                 href="/features"
                 className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-primary opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 hover:underline"
               >
-                Explore <i className="bi bi-arrow-right" />
+                Explore <Icon name="arrow-right" />
               </Link>
 
               <span className="absolute bottom-0 left-7 right-7 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
@@ -290,7 +294,7 @@ export default function LandingPage() {
               {/* Icon badge with step number dot */}
               <div className="relative z-10 mb-6">
                 <div className="flex size-14 items-center justify-center rounded-2xl bg-white border border-gray-200 shadow-sm ring-4 ring-white">
-                  <i className={`bi ${step.icon} text-xl text-primary`} />
+                  <Icon name={step.icon} className="text-xl text-primary" />
                 </div>
                 <span className="absolute -top-2 -right-2 flex size-5 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-white">
                   {parseInt(step.number)}
@@ -323,7 +327,7 @@ export default function LandingPage() {
             >
               <div className="flex gap-0.5 mb-4">
                 {[...Array(5)].map((_, i) => (
-                  <i key={i} className="bi bi-star-fill text-xs text-amber-400" />
+                  <Icon key={i} name="star-fill" className="text-xs text-amber-400" />
                 ))}
               </div>
               <blockquote className="text-sm leading-relaxed text-gray-700 flex-1 mb-6 text-pretty">
@@ -372,7 +376,7 @@ export default function LandingPage() {
 
             <div className="relative z-10">
               <div className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/20 px-4 py-1.5 text-sm text-white/80 mb-6">
-                <i className="bi bi-lightning-charge text-xs" />
+                <Icon name="lightning-charge" className="text-xs" />
                 Free forever · No credit card needed
               </div>
               <h2 className="font-cal text-4xl md:text-5xl tracking-tight text-white mb-4">
@@ -387,7 +391,7 @@ export default function LandingPage() {
                   className="inline-flex items-center gap-2 bg-white text-blue-700 px-7 py-3.5 rounded-xl font-semibold shadow-lg hover:bg-white/95 transition-colors"
                 >
                   Create your page
-                  <i className="bi bi-arrow-right text-sm" />
+                  <Icon name="arrow-right" className="text-sm" />
                 </Link>
                 <Link
                   href="/login"

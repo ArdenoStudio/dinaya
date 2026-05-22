@@ -1,24 +1,36 @@
 "use client";
 
 import { useEffect } from "react";
-import Lenis from "lenis";
 import "lenis/dist/lenis.css";
 
 export function SmoothScroll() {
   useEffect(() => {
     history.scrollRestoration = "manual";
 
-    const lenis = new Lenis();
+    let lenis: import("lenis").default | null = null;
+    let rafId: number;
 
-    function raf(time: number) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
+    const init = async () => {
+      const { default: Lenis } = await import("lenis");
+      lenis = new Lenis();
 
-    requestAnimationFrame(raf);
+      const raf = (time: number) => {
+        lenis!.raf(time);
+        rafId = requestAnimationFrame(raf);
+      };
+
+      rafId = requestAnimationFrame(raf);
+    };
+
+    const events = ["touchstart", "wheel", "keydown", "pointerdown"] as const;
+    events.forEach((e) =>
+      window.addEventListener(e, init, { passive: true, once: true })
+    );
 
     return () => {
-      lenis.destroy();
+      events.forEach((e) => window.removeEventListener(e, init));
+      lenis?.destroy();
+      cancelAnimationFrame(rafId);
     };
   }, []);
 

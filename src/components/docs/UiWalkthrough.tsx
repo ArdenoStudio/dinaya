@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import type { GuideStep } from "@content/docs/types";
 import { DocsPhoneFrame } from "./DocsPhoneFrame";
 import { DocsScreenshotFrame } from "./DocsScreenshotFrame";
+import { Icon } from "@/components/ui/Icon";
 
 type Props = {
   steps: GuideStep[];
@@ -195,7 +196,7 @@ export function UiWalkthrough({ steps }: Props) {
           </p>
           <div className="mt-4 rounded-lg border border-blue-100 bg-blue-50/60 p-3">
             <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-widest text-blue-700">
-              <i className="bi bi-cursor-fill text-xs" />
+              <Icon name="cursor-fill" className="text-xs" />
               Where to click
             </p>
             <p className="mt-1 text-sm leading-relaxed text-blue-950">{actionHint}</p>
@@ -207,7 +208,7 @@ export function UiWalkthrough({ steps }: Props) {
               onClick={() => goTo(activeStep - 1)}
               className="inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-sm font-medium disabled:opacity-40 hover:bg-gray-50"
             >
-              <i className="bi bi-arrow-left text-xs" />
+              <Icon name="arrow-left" className="text-xs" />
               Previous
             </button>
             {activeStep < steps.length - 1 ? (
@@ -217,7 +218,7 @@ export function UiWalkthrough({ steps }: Props) {
                 className="inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary/90"
               >
                 Next
-                <i className="bi bi-arrow-right text-xs" />
+                <Icon name="arrow-right" className="text-xs" />
               </button>
             ) : (
               <a

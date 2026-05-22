@@ -4,6 +4,7 @@ import { FadeContainer, FadeDiv, FadeSpan } from "@/components/Fade";
 import { PublicNav } from "@/components/PublicNav";
 import { CTAPrimaryButton } from "@/components/cta-primary-button";
 import { LandingFooter } from "@/components/LandingFooter";
+import { Icon } from "@/components/ui/Icon";
 
 export const metadata: Metadata = {
   title: "Features — Booking, Payments & Client Engagement | Dinaya",
@@ -13,27 +14,27 @@ export const metadata: Metadata = {
 
 const bookingFeatures = [
   {
-    icon: "bi-link-45deg",
+    icon: "link-45deg",
     title: "Self-booking page",
     desc: "Your own page at yourname.dinaya.lk. Share it anywhere — Instagram bio, WhatsApp, Facebook — and let customers book in seconds.",
   },
   {
-    icon: "bi-calendar",
+    icon: "calendar",
     title: "Custom availability",
     desc: "Set your hours, block off personal time, and define exactly when clients can book. Changes take effect immediately.",
   },
   {
-    icon: "bi-clock",
+    icon: "clock",
     title: "Buffer time",
     desc: "Add breathing room between appointments automatically. No more back-to-back bookings that leave you rushing.",
   },
   {
-    icon: "bi-people",
+    icon: "people",
     title: "Multi-staff calendar",
     desc: "Manage your whole team from one place. Each staff member gets their own schedule and bookings roll up to you.",
   },
   {
-    icon: "bi-patch-check-fill",
+    icon: "patch-check-fill",
     title: "Shareable link",
     desc: "One link for everything. Paste it in your bio, print it on a card, or text it directly — it always works.",
   },
@@ -41,32 +42,32 @@ const bookingFeatures = [
 
 const paymentFeatures = [
   {
-    icon: "bi-credit-card",
+    icon: "credit-card",
     title: "PayHere checkout",
     desc: "Sri Lanka's most trusted payment gateway built in. Customers pay with cards or bank transfer without leaving your booking page.",
   },
   {
-    icon: "bi-wallet2",
+    icon: "wallet2",
     title: "Deposit collection",
     desc: "Require a deposit to confirm a booking. Reduce no-shows without turning away genuine clients.",
   },
   {
-    icon: "bi-patch-check-fill",
+    icon: "patch-check-fill",
     title: "Full payment",
     desc: "Collect the full amount upfront for high-demand services. Money in your account before the appointment starts.",
   },
   {
-    icon: "bi-arrow-counterclockwise",
+    icon: "arrow-counterclockwise",
     title: "Refunds & cancellations",
     desc: "Handle refunds cleanly from your dashboard. Set your cancellation policy and let Dinaya enforce it for you.",
   },
   {
-    icon: "bi-bar-chart",
+    icon: "bar-chart",
     title: "Revenue tracking",
     desc: "See exactly what you've earned, what's pending, and what's been refunded — all in one view.",
   },
   {
-    icon: "bi-receipt",
+    icon: "receipt",
     title: "Invoice receipts",
     desc: "Every paid booking generates a clean receipt. Customers get it automatically; you never have to send one manually.",
   },
@@ -74,32 +75,32 @@ const paymentFeatures = [
 
 const engagementFeatures = [
   {
-    icon: "bi-chat-square-text",
+    icon: "chat-square-text",
     title: "SMS reminders",
     desc: "Automated texts sent before every appointment. Customers show up because they remembered — not because you chased them.",
   },
   {
-    icon: "bi-envelope",
+    icon: "envelope",
     title: "Email confirmations",
     desc: "Instant confirmation the moment a booking is made. Customers get all the details; you don't lift a finger.",
   },
   {
-    icon: "bi-shield-exclamation",
+    icon: "shield-exclamation",
     title: "No-show protection",
     desc: "Deposits and reminders working together mean far fewer empty slots. And when someone does cancel, you're protected.",
   },
   {
-    icon: "bi-grid",
+    icon: "grid",
     title: "Client dashboard",
     desc: "Your clients can view, reschedule, or cancel upcoming appointments without calling you. Everyone saves time.",
   },
   {
-    icon: "bi-clock-history",
+    icon: "clock-history",
     title: "Booking history",
     desc: "A full timeline of every appointment, payment, and cancellation. Perfect for spotting loyal customers or quiet periods.",
   },
   {
-    icon: "bi-arrow-repeat",
+    icon: "arrow-repeat",
     title: "Rebooking nudges",
     desc: "Friendly follow-ups that encourage clients to book again after their appointment. Repeat business on autopilot.",
   },
@@ -107,37 +108,37 @@ const engagementFeatures = [
 
 const proAiFeatures = [
   {
-    icon: "bi-robot",
+    icon: "robot",
     title: "AI Booking Autopilot",
     desc: "Let AI handle reschedules, confirmations, and follow-ups so your calendar stays full without manual chasing.",
   },
   {
-    icon: "bi-bell-fill",
+    icon: "bell-fill",
     title: "Smart reminder system",
     desc: "AI-timed reminders across SMS, email, and WhatsApp — optimized for each client so fewer appointments slip through.",
   },
   {
-    icon: "bi-star",
+    icon: "star",
     title: "Review engine",
     desc: "Automatically request reviews after appointments, draft replies, and grow your reputation while you focus on clients.",
   },
   {
-    icon: "bi-arrow-repeat",
+    icon: "arrow-repeat",
     title: "Client Reactivation Campaign",
     desc: "Win back lapsed clients with personalized outreach that brings quiet customers back to your booking page.",
   },
   {
-    icon: "bi-graph-up-arrow",
+    icon: "graph-up-arrow",
     title: "AI upsell assistant",
     desc: "Suggest add-ons and upgrades at the right moment — during booking or after checkout — to grow revenue per visit.",
   },
   {
-    icon: "bi-calendar3",
+    icon: "calendar3",
     title: "30-Day AI Content Machine",
     desc: "A month of social posts, captions, and promos generated for your business — ready to share on Instagram and WhatsApp.",
   },
   {
-    icon: "bi-gem",
+    icon: "gem",
     title: "VIP Loyalty Sequence",
     desc: "Reward your best clients with automated loyalty messages, perks, and rebooking nudges that keep them coming back.",
   },
@@ -160,7 +161,7 @@ export default function FeaturesPage() {
         <FadeContainer className="flex flex-col items-center">
           <FadeDiv className="mb-6">
             <span className="inline-flex items-center gap-2 rounded-full border bg-white px-3 py-1 text-xs font-medium text-gray-700 shadow-sm">
-              <i className="bi bi-stars text-xs text-primary" />
+              <Icon name="stars" className="text-xs text-primary" />
               Built for Sri Lankan businesses
             </span>
           </FadeDiv>
@@ -207,7 +208,7 @@ export default function FeaturesPage() {
         <div className="mb-10">
           <div className="inline-flex items-center gap-2 rounded-xl ring-1 ring-amber-100 bg-amber-50/50 px-3.5 py-2 mb-4">
             <span className="flex h-6 w-6 items-center justify-center rounded-md bg-amber-500 text-white">
-              <i className="bi bi-calendar text-xs" />
+              <Icon name="calendar" className="text-xs" />
             </span>
             <span className="text-sm font-semibold text-gray-900">Booking</span>
           </div>
@@ -225,7 +226,7 @@ export default function FeaturesPage() {
               <div className="relative mb-5 inline-flex">
                 <div className="absolute inset-0 rounded-xl bg-amber-500/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-amber-500/15 to-amber-500/5">
-                  <i className={`bi ${f.icon} text-[1.15rem] text-amber-600`} />
+                  <Icon name={f.icon} className="text-[1.15rem] text-amber-600" />
                 </div>
               </div>
               <h3 className="font-cal text-lg mb-2 tracking-tight">{f.title}</h3>
@@ -241,7 +242,7 @@ export default function FeaturesPage() {
         <div className="mb-10">
           <div className="inline-flex items-center gap-2 rounded-xl ring-1 ring-blue-100 bg-blue-50/50 px-3.5 py-2 mb-4">
             <span className="flex h-6 w-6 items-center justify-center rounded-md bg-blue-600 text-white">
-              <i className="bi bi-credit-card text-xs" />
+              <Icon name="credit-card" className="text-xs" />
             </span>
             <span className="text-sm font-semibold text-gray-900">Payments</span>
           </div>
@@ -259,7 +260,7 @@ export default function FeaturesPage() {
               <div className="relative mb-5 inline-flex">
                 <div className="absolute inset-0 rounded-xl bg-blue-600/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-blue-600/15 to-blue-600/5">
-                  <i className={`bi ${f.icon} text-[1.15rem] text-blue-600`} />
+                  <Icon name={f.icon} className="text-[1.15rem] text-blue-600" />
                 </div>
               </div>
               <h3 className="font-cal text-lg mb-2 tracking-tight">{f.title}</h3>
@@ -275,7 +276,7 @@ export default function FeaturesPage() {
         <div className="mb-10">
           <div className="inline-flex items-center gap-2 rounded-xl ring-1 ring-violet-100 bg-violet-50/50 px-3.5 py-2 mb-4">
             <span className="flex h-6 w-6 items-center justify-center rounded-md bg-violet-500 text-white">
-              <i className="bi bi-bell text-xs" />
+              <Icon name="bell" className="text-xs" />
             </span>
             <span className="text-sm font-semibold text-gray-900">Engagement</span>
           </div>
@@ -293,7 +294,7 @@ export default function FeaturesPage() {
               <div className="relative mb-5 inline-flex">
                 <div className="absolute inset-0 rounded-xl bg-violet-500/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-violet-500/15 to-violet-500/5">
-                  <i className={`bi ${f.icon} text-[1.15rem] text-violet-600`} />
+                  <Icon name={f.icon} className="text-[1.15rem] text-violet-600" />
                 </div>
               </div>
               <h3 className="font-cal text-lg mb-2 tracking-tight">{f.title}</h3>
@@ -309,7 +310,7 @@ export default function FeaturesPage() {
         <div className="mb-10">
           <div className="inline-flex items-center gap-2 rounded-xl ring-1 ring-amber-100 bg-amber-50/50 px-3.5 py-2 mb-4">
             <span className="flex h-6 w-6 items-center justify-center rounded-md bg-amber-600 text-white">
-              <i className="bi bi-stars text-xs" />
+              <Icon name="stars" className="text-xs" />
             </span>
             <span className="text-sm font-semibold text-gray-900">Pro AI growth</span>
             <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-800">
@@ -330,7 +331,7 @@ export default function FeaturesPage() {
               <div className="relative mb-5 inline-flex">
                 <div className="absolute inset-0 rounded-xl bg-amber-500/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-amber-500/15 to-amber-500/5">
-                  <i className={`bi ${f.icon} text-[1.15rem] text-amber-600`} />
+                  <Icon name={f.icon} className="text-[1.15rem] text-amber-600" />
                 </div>
               </div>
               <h3 className="font-cal text-lg mb-2 tracking-tight">{f.title}</h3>
@@ -346,7 +347,7 @@ export default function FeaturesPage() {
             className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
           >
             See Pro pricing
-            <i className="bi bi-arrow-right text-sm" />
+            <Icon name="arrow-right" className="text-sm" />
           </Link>
         </div>
       </section>
@@ -431,7 +432,7 @@ export default function FeaturesPage() {
             ].map((f) => (
               <div key={f} className="flex items-center gap-2.5">
                 <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-primary/15">
-                  <i className="bi bi-check text-primary" style={{ fontSize: '0.625rem' }} />
+                  <Icon name="check" className="text-primary" style={{ fontSize: '0.625rem' }} />
                 </span>
                 <span className="text-gray-700">{f}</span>
               </div>
@@ -458,7 +459,7 @@ export default function FeaturesPage() {
                 className="inline-flex items-center gap-2 bg-white text-blue-700 px-7 py-3.5 rounded-xl font-semibold shadow-lg hover:bg-white/95 transition-colors"
               >
                 Create your page — it&apos;s free
-                <i className="bi bi-arrow-right text-sm" />
+                <Icon name="arrow-right" className="text-sm" />
               </Link>
             </div>
           </div>
