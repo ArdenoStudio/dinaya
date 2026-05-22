@@ -26,27 +26,11 @@
   <a href="https://github.com/ArdenoStudio/dinaya/actions/workflows/ci.yml">
     <img src="https://github.com/ArdenoStudio/dinaya/actions/workflows/ci.yml/badge.svg" alt="CI" />
   </a>
-  <a href="https://github.com/ArdenoStudio/dinaya/actions/workflows/automations-cron.yml">
-    <img src="https://github.com/ArdenoStudio/dinaya/actions/workflows/automations-cron.yml/badge.svg" alt="Automations cron" />
-  </a>
-  <a href="https://github.com/ArdenoStudio/dinaya/actions/workflows/booking-reminders-cron.yml">
-    <img src="https://github.com/ArdenoStudio/dinaya/actions/workflows/booking-reminders-cron.yml/badge.svg" alt="Booking reminders cron" />
-  </a>
-  <a href="https://github.com/ArdenoStudio/dinaya/actions/workflows/google-calendar-cron.yml">
-    <img src="https://github.com/ArdenoStudio/dinaya/actions/workflows/google-calendar-cron.yml/badge.svg" alt="Google Calendar sync cron" />
-  </a>
-</p>
-
-<p align="center">
-  <a href="https://github.com/ArdenoStudio/dinaya/actions/workflows/ai-workflows-cron.yml">
-    <img src="https://github.com/ArdenoStudio/dinaya/actions/workflows/ai-workflows-cron.yml/badge.svg" alt="AI workflows cron" />
-  </a>
-  <a href="https://github.com/ArdenoStudio/dinaya/actions/workflows/webhook-retries-cron.yml">
-    <img src="https://github.com/ArdenoStudio/dinaya/actions/workflows/webhook-retries-cron.yml/badge.svg" alt="Webhook retries cron" />
-  </a>
   <img src="https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black" alt="React 19" />
   <img src="https://img.shields.io/badge/TypeScript-5.8-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript" />
   <img src="https://img.shields.io/badge/Node.js-22-339933?style=flat-square&logo=node.js&logoColor=white" alt="Node.js 22" />
+  <img src="https://img.shields.io/badge/PayHere-payments-111111?style=flat-square" alt="PayHere payments" />
+  <img src="https://img.shields.io/badge/Neon-Postgres-00E599?style=flat-square&logo=neon&logoColor=black" alt="Neon Postgres" />
 </p>
 
 <p align="center">
