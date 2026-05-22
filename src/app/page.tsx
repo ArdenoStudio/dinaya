@@ -1,16 +1,19 @@
-import Link from "next/link";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { LandingNav } from "@/components/LandingNav";
-import { FadeContainer, FadeDiv, FadeSpan } from "@/components/Fade";
+import { ProductMockupSkeleton } from "@/components/ProductMockupSkeleton";
 import { WordRotate } from "@/components/WordRotate";
 import { CTAPrimaryButton } from "@/components/cta-primary-button";
-import ProductMockup from "@/components/ProductMockup";
 import { LandingFooter } from "@/components/LandingFooter";
 import { Icon } from "@/components/ui/Icon";
 
 const HowItWorks = dynamic(() =>
   import("@/components/HowItWorks").then((m) => ({ default: m.HowItWorks }))
 );
+
+const ProductMockup = dynamic(() => import("@/components/ProductMockup"), {
+  loading: () => <ProductMockupSkeleton />,
+});
 
 const features = [
   {
@@ -96,15 +99,15 @@ const testimonials = [
 
 export default function LandingPage() {
   return (
-    <main className="min-h-dvh bg-white">
+    <div className="min-h-dvh bg-white">
 
       {/* Nav — fix #5 (mobile menu) + fix #6 (dead resource links) via LandingNav */}
       <LandingNav />
 
-      {/* Hero */}
+      {/* Hero — static markup for fast LCP (no Motion fade-in on headline) */}
       <section className="max-w-4xl mx-auto px-6 pt-28 pb-12 text-center">
-        <FadeContainer className="flex flex-col items-center">
-          <FadeDiv className="mb-8">
+        <div className="flex flex-col items-center">
+          <div className="mb-8">
             <a
               href="/register"
               className="inline-flex items-center gap-3 rounded-full bg-white px-2.5 py-0.5 pr-3 pl-0.5 text-sm font-medium text-gray-900 ring-1 shadow-lg shadow-primary/10 ring-black/10 transition-colors hover:bg-primary/5"
@@ -117,11 +120,11 @@ export default function LandingPage() {
                 <Icon name="arrow-up-right" className="text-xs shrink-0 text-gray-700" />
               </span>
             </a>
-          </FadeDiv>
+          </div>
 
           <h1 className="font-cal text-5xl tracking-tight mb-6 text-balance">
-            <FadeSpan>Stop the</FadeSpan>{" "}
-            <FadeSpan className="text-primary">
+            Stop the{" "}
+            <span className="text-primary">
               <WordRotate
                 words={[
                   "WhatsApp chaos.",
@@ -132,35 +135,29 @@ export default function LandingPage() {
                 ]}
                 className="text-primary"
               />
-            </FadeSpan>
+            </span>
             <br />
-            <FadeSpan>Get a real booking page in 5 minutes.</FadeSpan>
+            Get a real booking page in 5 minutes.
           </h1>
 
-          <FadeDiv>
-            <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto text-pretty">
-              Give your salon, clinic, or tuition class a free booking page. Clients
-              pick a time, pay online, and you get notified.
-            </p>
-          </FadeDiv>
+          <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto text-pretty">
+            Give your salon, clinic, or tuition class a free booking page. Clients
+            pick a time, pay online, and you get notified.
+          </p>
 
-          <FadeDiv>
-            <div className="flex flex-wrap items-center justify-center gap-3">
-              <CTAPrimaryButton>Create your booking page</CTAPrimaryButton>
-              <Link
-                href="#demo"
-                className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-6 py-3 text-sm font-medium text-gray-800 shadow-sm hover:bg-gray-50 transition-colors"
-              >
-                <Icon name="play-circle" className="text-base" />
-                See a live demo
-              </Link>
-            </div>
-          </FadeDiv>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <CTAPrimaryButton>Create your booking page</CTAPrimaryButton>
+            <Link
+              href="#demo"
+              className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-6 py-3 text-sm font-medium text-gray-800 shadow-sm hover:bg-gray-50 transition-colors"
+            >
+              <Icon name="play-circle" className="text-base" />
+              See a live demo
+            </Link>
+          </div>
 
-          <FadeDiv>
-            <p className="text-sm text-muted-foreground mt-4">Free forever. No credit card needed.</p>
-          </FadeDiv>
-        </FadeContainer>
+          <p className="text-sm text-muted-foreground mt-4">Free forever. No credit card needed.</p>
+        </div>
       </section>
 
       <div id="demo">
@@ -410,6 +407,6 @@ export default function LandingPage() {
 
       {/* Footer */}
       <LandingFooter />
-    </main>
+    </div>
   );
 }
