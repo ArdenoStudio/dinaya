@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import IPhoneMockup from "@/components/ui/iphone-mockup";
+import { Icon } from "@/components/ui/Icon";
 
 const mockDays = [null, null, null, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25];
 
@@ -9,7 +10,7 @@ const mockups = [
   {
     business: "Dilini's Beauty Studio",
     location: "Colombo 3 · Open Mon–Sat, 9am–6pm",
-    icon: "bi-scissors",
+    icon: "scissors",
     url: "dilini.dinaya.lk",
     services: [
       { name: "Haircut & Style", duration: "45 min", price: "Rs. 2,500", selected: true },
@@ -24,7 +25,7 @@ const mockups = [
   {
     business: "NF Wellness Clinic",
     location: "Kandy · Open Mon–Fri, 8am–5pm",
-    icon: "bi-hospital",
+    icon: "hospital",
     url: "nf-clinic.dinaya.lk",
     services: [
       { name: "General Consultation", duration: "30 min", price: "Rs. 1,500", selected: true },
@@ -39,7 +40,7 @@ const mockups = [
   {
     business: "Priya's Tuition Centre",
     location: "Nugegoda · Open Mon–Sat, 2pm–8pm",
-    icon: "bi-book-half",
+    icon: "book-half",
     url: "priya-tuition.dinaya.lk",
     services: [
       { name: "Maths (O/L)", duration: "90 min", price: "Rs. 2,000", selected: true },
@@ -68,7 +69,7 @@ function PhoneScreen({ m }: { m: Mockup }) {
         {/* Business row */}
         <div className="flex items-center gap-[12px] mb-[14px]">
           <div className="size-[42px] rounded-[13px] bg-white/20 flex items-center justify-center ring-1 ring-white/25 shrink-0">
-            <i className={`bi ${m.icon} text-white text-[18px]`} />
+            <Icon name={m.icon} className="text-white text-[18px]" />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-white font-semibold text-[16px] leading-tight truncate">{m.business}</p>
@@ -94,7 +95,7 @@ function PhoneScreen({ m }: { m: Mockup }) {
                   : "bg-white text-blue-600 shadow-sm"
               }`}>
                 {step.done
-                  ? <i className="bi bi-check-lg text-[9px]" />
+                  ? <Icon name="check-lg" className="text-[9px]" />
                   : <span className="size-[8px] rounded-full bg-blue-300 inline-block" />
                 }
                 {step.label}
@@ -115,7 +116,7 @@ function PhoneScreen({ m }: { m: Mockup }) {
             <div>
               <p className="text-[15px] font-semibold text-gray-900 leading-snug">{selectedService.name}</p>
               <div className="flex items-center gap-[4px] mt-[3px]">
-                <i className="bi bi-clock text-gray-300 text-[10px]" />
+                <Icon name="clock" className="text-gray-300 text-[10px]" />
                 <p className="text-[11px] text-gray-400">{selectedService.duration}</p>
               </div>
             </div>
@@ -128,7 +129,7 @@ function PhoneScreen({ m }: { m: Mockup }) {
           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.08em] mb-[9px]">Appointment</p>
           <div className="flex items-center gap-[11px] mb-[9px]">
             <div className="size-[34px] rounded-[10px] bg-blue-50 flex items-center justify-center shrink-0">
-              <i className="bi bi-calendar3 text-blue-500 text-[13px]" />
+              <Icon name="calendar3" className="text-blue-500 text-[13px]" />
             </div>
             <div>
               <p className="text-[13px] font-semibold text-gray-900">Thursday, May 15</p>
@@ -138,7 +139,7 @@ function PhoneScreen({ m }: { m: Mockup }) {
           <div className="h-px bg-gray-100 mb-[9px]" />
           <div className="flex items-center gap-[11px]">
             <div className="size-[34px] rounded-[10px] bg-emerald-50 flex items-center justify-center shrink-0">
-              <i className="bi bi-clock text-emerald-500 text-[13px]" />
+              <Icon name="clock" className="text-emerald-500 text-[13px]" />
             </div>
             <div className="flex-1">
               <p className="text-[13px] font-semibold text-gray-900">{m.slots[m.selectedSlot]}</p>
@@ -175,7 +176,7 @@ function PhoneScreen({ m }: { m: Mockup }) {
           Confirm & Pay — {selectedService.price}
         </button>
         <div className="flex items-center justify-center gap-[5px] mt-[9px]">
-          <i className="bi bi-shield-check text-gray-300 text-[11px]" />
+          <Icon name="shield-check" className="text-gray-300 text-[11px]" />
           <span className="text-[11px] text-gray-400">Secured by PayHere · SSL encrypted</span>
         </div>
         <div className="flex items-center justify-center gap-[5px] mt-[6px]">
@@ -233,7 +234,7 @@ export default function ProductMockup() {
       aria-label={label}
       className={`z-20 size-10 rounded-full bg-white border border-gray-200 shadow-lg flex items-center justify-center text-gray-400 hover:text-blue-600 hover:border-blue-200 hover:shadow-md transition-all ${extraClass}`}
     >
-      <i className={`bi bi-chevron-${dir === -1 ? "left" : "right"} text-sm`} />
+      <Icon name={`chevron-${dir === -1 ? "left" : "right"}`} className="text-sm" />
     </button>
   );
 
@@ -309,7 +310,7 @@ export default function ProductMockup() {
                   <div className="size-3 rounded-full bg-[#28c840]" />
                 </div>
                 <div className="flex-1 max-w-xs mx-auto bg-white rounded-md border border-gray-200/80 px-3 py-1.5 text-xs text-gray-400 font-mono text-center flex items-center justify-center gap-1.5">
-                  <i className="bi bi-lock-fill text-blue-400 text-[9px]" />
+                  <Icon name="lock-fill" className="text-blue-400 text-[9px]" />
                   {m.url}
                 </div>
               </div>
@@ -319,7 +320,7 @@ export default function ProductMockup() {
                 {/* Business header */}
                 <div className="flex items-center gap-3 mb-6 pb-5 border-b border-gray-100">
                   <div className="size-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center shrink-0 shadow-lg shadow-blue-500/25">
-                    <i className={`bi ${m.icon} text-white text-xl`} />
+                    <Icon name={m.icon} className="text-white text-xl" />
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900">{m.business}</h3>
@@ -368,10 +369,10 @@ export default function ProductMockup() {
                         <span className="text-sm font-bold text-gray-800">May 2025</span>
                         <div className="flex gap-1">
                           <button className="size-7 rounded-lg flex items-center justify-center hover:bg-white hover:shadow-sm text-gray-400 transition-all" aria-label="Previous month">
-                            <i className="bi bi-chevron-left text-[10px]" />
+                            <Icon name="chevron-left" className="text-[10px]" />
                           </button>
                           <button className="size-7 rounded-lg flex items-center justify-center hover:bg-white hover:shadow-sm text-gray-400 transition-all" aria-label="Next month">
-                            <i className="bi bi-chevron-right text-[10px]" />
+                            <Icon name="chevron-right" className="text-[10px]" />
                           </button>
                         </div>
                       </div>
@@ -418,7 +419,7 @@ export default function ProductMockup() {
                     Confirm & Pay — {m.services.find((s) => s.selected)?.price}
                   </button>
                   <div className="flex items-center gap-1.5 text-xs text-gray-400 shrink-0">
-                    <i className="bi bi-shield-check text-blue-400" />
+                    <Icon name="shield-check" className="text-blue-400" />
                     Secured by PayHere
                   </div>
                 </div>
@@ -441,7 +442,7 @@ export default function ProductMockup() {
             {/* Floating: new booking notification (top-right) */}
             <div className="absolute -top-5 -right-5 flex bg-white/90 backdrop-blur-md rounded-2xl border border-white/70 shadow-2xl shadow-gray-900/12 p-3.5 items-center gap-3 max-w-[230px]">
               <div className="size-10 bg-gradient-to-br from-amber-400 to-amber-500 rounded-full flex items-center justify-center shrink-0 shadow-md shadow-amber-500/30">
-                <i className="bi bi-check-lg text-white text-sm" />
+                <Icon name="check-lg" className="text-white text-sm" />
               </div>
               <div>
                 <p className="text-xs font-bold text-gray-900">{m.notif.title}</p>
@@ -453,7 +454,7 @@ export default function ProductMockup() {
             {/* Floating: payment notification (bottom-left) */}
             <div className="absolute -bottom-5 -left-5 flex bg-white/90 backdrop-blur-md rounded-2xl border border-white/70 shadow-2xl shadow-gray-900/12 p-3.5 items-center gap-3 max-w-[210px]">
               <div className="size-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shrink-0 shadow-md shadow-blue-500/30">
-                <i className="bi bi-credit-card text-white text-sm" />
+                <Icon name="credit-card" className="text-white text-sm" />
               </div>
               <div>
                 <p className="text-xs font-bold text-gray-900">{m.payment.title}</p>

@@ -5,6 +5,7 @@ import type { Staff } from "@/db/schema";
 import type { BookingService } from "./BookingWizard";
 import type { BookingCopy } from "@/lib/i18n";
 import { formatLkr } from "@/lib/utils";
+import { Icon } from "@/components/ui/Icon";
 
 interface Props {
   copy: BookingCopy;
@@ -26,7 +27,7 @@ export default function BookingDesktopSummary({
       <div className="mt-6 rounded-xl border border-dashed border-gray-200 bg-gray-50/80 p-5">
         <div className="flex items-start gap-3">
           <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-blue-50">
-            <i className="bi bi-calendar2-week text-lg text-blue-500" />
+            <Icon name="calendar2-week" className="text-lg text-blue-500" />
           </div>
           <div>
             <p className="text-sm font-medium text-gray-700">{copy.selectServiceHint}</p>
@@ -50,7 +51,7 @@ export default function BookingDesktopSummary({
       </p>
       <ul className="space-y-3 text-sm">
         <li className="flex items-start gap-3">
-          <i className="bi bi-scissors mt-0.5 text-blue-500" />
+          <Icon name="scissors" className="mt-0.5 text-blue-500" />
           <div className="min-w-0 flex-1">
             <p className="font-semibold text-gray-900">{service.name}</p>
             <p className="text-xs text-gray-500">
@@ -61,19 +62,19 @@ export default function BookingDesktopSummary({
         </li>
         {staff && (
           <li className="flex items-center gap-3">
-            <i className="bi bi-person text-blue-500" />
+            <Icon name="person" className="text-blue-500" />
             <span className="text-gray-700">{staff.name}</span>
           </li>
         )}
         {dateLabel && (
           <li className="flex items-center gap-3">
-            <i className="bi bi-calendar3 text-blue-500" />
+            <Icon name="calendar3" className="text-blue-500" />
             <span className="text-gray-700">{dateLabel}</span>
           </li>
         )}
         {timeLabel && (
           <li className="flex items-center gap-3">
-            <i className="bi bi-clock text-emerald-500" />
+            <Icon name="clock" className="text-emerald-500" />
             <span className="font-medium text-emerald-700">{timeLabel}</span>
           </li>
         )}

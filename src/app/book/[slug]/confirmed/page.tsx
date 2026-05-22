@@ -8,6 +8,7 @@ import Link from "next/link";
 import ReviewPrompt from "./ReviewPrompt";
 import { buildClientBookingUrl } from "@/lib/client-tokens";
 import { createReviewToken } from "@/lib/ai/review-links";
+import { Icon } from "@/components/ui/Icon";
 
 const COLOMBO_TZ = "Asia/Colombo";
 
@@ -62,10 +63,10 @@ export default async function BookingConfirmedPage({ params, searchParams }: Pro
   });
 
   const details = [
-    { icon: "bi-tag", label: "Service", value: booking.serviceName },
-    { icon: "bi-person", label: "With", value: booking.staffName },
-    { icon: "bi-calendar", label: "Date", value: format(local, "d MMMM yyyy") },
-    { icon: "bi-clock", label: "Time", value: format(local, "h:mm a") },
+    { icon: "tag", label: "Service", value: booking.serviceName },
+    { icon: "person", label: "With", value: booking.staffName },
+    { icon: "calendar", label: "Date", value: format(local, "d MMMM yyyy") },
+    { icon: "clock", label: "Time", value: format(local, "h:mm a") },
   ];
 
   return (
@@ -79,8 +80,9 @@ export default async function BookingConfirmedPage({ params, searchParams }: Pro
                 : "border-amber-100 bg-amber-50"
             }`}
           >
-            <i
-              className={`bi ${isConfirmed ? "bi-check-circle text-emerald-500" : "bi-hourglass-split text-amber-500"} text-2xl`}
+            <Icon
+              name={isConfirmed ? "check-circle" : "hourglass-split"}
+              className={isConfirmed ? "text-emerald-500 text-2xl" : "text-amber-500 text-2xl"}
             />
           </div>
 
@@ -98,7 +100,7 @@ export default async function BookingConfirmedPage({ params, searchParams }: Pro
             {details.map((d) => (
               <div key={d.label} className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-2 text-muted-foreground">
-                  <i className={`bi ${d.icon} shrink-0 text-xs`} />
+                  <Icon name={d.icon} className="shrink-0 text-xs" />
                   <span>{d.label}</span>
                 </div>
                 <span className="text-right font-medium">{d.value}</span>

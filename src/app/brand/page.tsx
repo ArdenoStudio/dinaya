@@ -5,6 +5,7 @@ import { FadeContainer, FadeDiv, FadeSpan } from "@/components/Fade";
 import ColorScale from "./ColorScale";
 import { FluidParticlesBackground } from "@/components/ui/fluid-particles-background";
 import { LandingFooter } from "@/components/LandingFooter";
+import { Icon } from "@/components/ui/Icon";
 
 export const metadata: Metadata = {
   title: "Brand Guidelines — Logo, Colors & Typography | Dinaya",
@@ -78,17 +79,17 @@ const slateScale = [
 const voice = [
   {
     trait: "Direct",
-    icon: "bi-arrow-right",
+    icon: "arrow-right",
     desc: "We say what we mean. No filler words, no corporate speak. Clients book. You get paid. Done.",
   },
   {
     trait: "Warm",
-    icon: "bi-heart",
+    icon: "heart",
     desc: "We're building for real people running real businesses in Sri Lanka. We know the context, and we speak the language.",
   },
   {
     trait: "Confident",
-    icon: "bi-shield-check",
+    icon: "shield-check",
     desc: "We don't hedge. Dinaya works. Our copy reflects that without being arrogant.",
   },
 ];
@@ -132,7 +133,7 @@ export default function BrandPage() {
           <FadeContainer className="flex flex-col items-center">
             <FadeDiv className="mb-5">
               <SectionLabel>
-                <i className="bi bi-palette text-primary" />
+                <Icon name="palette" className="text-primary" />
                 Brand
               </SectionLabel>
             </FadeDiv>
@@ -157,7 +158,7 @@ export default function BrandPage() {
         <FadeContainer>
           <FadeDiv className="mb-2">
             <SectionLabel>
-              <i className="bi bi-vector-pen text-primary" />
+              <Icon name="vector-pen" className="text-primary" />
               Logo
             </SectionLabel>
           </FadeDiv>
@@ -177,7 +178,7 @@ export default function BrandPage() {
               <div className="flex items-center justify-between mt-3 px-1">
                 <span className="text-sm font-medium text-gray-700">Default</span>
                 <span className="inline-flex items-center gap-1 rounded-md bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-500">
-                  <i className="bi bi-download text-[10px]" /> SVG
+                  <Icon name="download" className="text-[10px]" /> SVG
                 </span>
               </div>
             </FadeDiv>
@@ -200,7 +201,7 @@ export default function BrandPage() {
               <div className="flex items-center justify-between mt-3 px-1">
                 <span className="text-sm font-medium text-gray-700">Icon only</span>
                 <span className="inline-flex items-center gap-1 rounded-md bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-500">
-                  <i className="bi bi-download text-[10px]" /> SVG
+                  <Icon name="download" className="text-[10px]" /> SVG
                 </span>
               </div>
             </FadeDiv>
@@ -225,7 +226,7 @@ export default function BrandPage() {
               <div className="flex items-center justify-between mt-3 px-1">
                 <span className="text-sm font-medium text-gray-700">Dark</span>
                 <span className="inline-flex items-center gap-1 rounded-md bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-500">
-                  <i className="bi bi-download text-[10px]" /> SVG
+                  <Icon name="download" className="text-[10px]" /> SVG
                 </span>
               </div>
             </FadeDiv>
@@ -250,7 +251,7 @@ export default function BrandPage() {
               <div className="flex items-center justify-between mt-3 px-1">
                 <span className="text-sm font-medium text-gray-700">Brand blue</span>
                 <span className="inline-flex items-center gap-1 rounded-md bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-500">
-                  <i className="bi bi-download text-[10px]" /> SVG
+                  <Icon name="download" className="text-[10px]" /> SVG
                 </span>
               </div>
             </FadeDiv>
@@ -263,7 +264,7 @@ export default function BrandPage() {
         <FadeContainer>
           <FadeDiv className="mb-2">
             <SectionLabel>
-              <i className="bi bi-droplet-half text-primary" />
+              <Icon name="droplet-half" className="text-primary" />
               Colours
             </SectionLabel>
           </FadeDiv>
@@ -299,7 +300,7 @@ export default function BrandPage() {
         <FadeContainer>
           <FadeDiv className="mb-2">
             <SectionLabel>
-              <i className="bi bi-type text-primary" />
+              <Icon name="type" className="text-primary" />
               Typography
             </SectionLabel>
           </FadeDiv>
@@ -359,7 +360,7 @@ export default function BrandPage() {
         <FadeContainer>
           <FadeDiv className="mb-2">
             <SectionLabel>
-              <i className="bi bi-chat-quote text-primary" />
+              <Icon name="chat-quote" className="text-primary" />
               Voice &amp; Tone
             </SectionLabel>
           </FadeDiv>
@@ -374,7 +375,7 @@ export default function BrandPage() {
             {voice.map((v) => (
               <FadeDiv key={v.trait} className="rounded-2xl border bg-white shadow-sm p-7">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 mb-5">
-                  <i className={`bi ${v.icon} text-blue-600 text-base`} />
+                  <Icon name={v.icon} className="text-blue-600 text-base" />
                 </div>
                 <h3 className="font-cal text-xl tracking-tight mb-2">{v.trait}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">{v.desc}</p>
@@ -389,7 +390,7 @@ export default function BrandPage() {
         <FadeContainer>
           <FadeDiv className="mb-2">
             <SectionLabel>
-              <i className="bi bi-shield text-primary" />
+              <Icon name="shield" className="text-primary" />
               Usage guidelines
             </SectionLabel>
           </FadeDiv>
@@ -405,14 +406,14 @@ export default function BrandPage() {
             <FadeDiv className="rounded-2xl border bg-white shadow-sm p-7">
               <div className="flex items-center gap-2 mb-5">
                 <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50">
-                  <i className="bi bi-check-lg text-blue-600 text-sm" />
+                  <Icon name="check-lg" className="text-blue-600 text-sm" />
                 </span>
                 <span className="font-semibold text-gray-900">Do</span>
               </div>
               <ul className="space-y-3">
                 {dos.map((d) => (
                   <li key={d} className="flex items-start gap-3 text-sm text-gray-700">
-                    <i className="bi bi-check text-blue-500 text-base mt-0.5 shrink-0" />
+                    <Icon name="check" className="text-blue-500 text-base mt-0.5 shrink-0" />
                     {d}
                   </li>
                 ))}
@@ -423,14 +424,14 @@ export default function BrandPage() {
             <FadeDiv className="rounded-2xl border bg-white shadow-sm p-7">
               <div className="flex items-center gap-2 mb-5">
                 <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-red-50">
-                  <i className="bi bi-x-lg text-red-500 text-sm" />
+                  <Icon name="x-lg" className="text-red-500 text-sm" />
                 </span>
                 <span className="font-semibold text-gray-900">Don&apos;t</span>
               </div>
               <ul className="space-y-3">
                 {donts.map((d) => (
                   <li key={d} className="flex items-start gap-3 text-sm text-gray-700">
-                    <i className="bi bi-x text-red-400 text-base mt-0.5 shrink-0" />
+                    <Icon name="x-lg" className="text-red-400 text-base mt-0.5 shrink-0" />
                     {d}
                   </li>
                 ))}

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { slugify } from "@/lib/utils";
 import { Logo } from "@/components/Logo";
+import { Icon } from "@/components/ui/Icon";
 
 const perks = [
   "Your own booking page at yourname.dinaya.lk",
@@ -152,7 +153,7 @@ export default function RegisterPage() {
           <ul className="space-y-3 mb-9">
             {perks.map((p) => (
               <li key={p} className="flex items-start gap-3">
-                <i className="bi bi-check-circle text-sm text-primary shrink-0 mt-0.5" />
+                <Icon name="check-circle" className="text-sm text-primary shrink-0 mt-0.5" />
                 <span className="text-white/65 text-sm">{p}</span>
               </li>
             ))}
@@ -232,7 +233,7 @@ export default function RegisterPage() {
                       <button type="button" onClick={() => setShowPassword((s) => !s)}
                         className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-gray-300 hover:text-gray-500 rounded-md transition-colors"
                         aria-label={showPassword ? "Hide password" : "Show password"} tabIndex={-1}>
-                        {showPassword ? <i className="bi bi-eye-slash text-sm" /> : <i className="bi bi-eye text-sm" />}
+                        {showPassword ? <Icon name="eye-slash" className="text-sm" /> : <Icon name="eye" className="text-sm" />}
                       </button>
                     </div>
                     {form.password.length > 0 && (
@@ -257,13 +258,13 @@ export default function RegisterPage() {
 
                   {error && (
                     <div role="alert" className="flex items-start gap-2 px-3 py-2.5 rounded-lg bg-red-50 border border-red-100 text-red-600 text-sm">
-                      <i className="bi bi-exclamation-circle text-sm mt-0.5 shrink-0" /><span>{error}</span>
+                      <Icon name="exclamation-circle" className="text-sm mt-0.5 shrink-0" /><span>{error}</span>
                     </div>
                   )}
 
                   <button type="submit"
                     className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-b from-primary/90 to-primary text-primary-foreground py-3 rounded-lg text-sm font-medium border-b-2 border-primary/70 shadow-[0_0_0_2px_rgba(0,0,0,0.04),0_0_14px_0_rgba(99,102,241,0.2)] transition-all hover:shadow-primary/30 hover:shadow-md mt-1">
-                    Continue <i className="bi bi-arrow-right text-sm" />
+                    Continue <Icon name="arrow-right" className="text-sm" />
                   </button>
                 </form>
               </>
@@ -271,7 +272,7 @@ export default function RegisterPage() {
               <>
                 <button type="button" onClick={() => { setStep(1); setError(""); }}
                   className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 mb-5 -ml-0.5 transition-colors">
-                  <i className="bi bi-arrow-left text-xs" /> Back
+                  <Icon name="arrow-left" className="text-xs" /> Back
                 </button>
 
                 <h1 className="font-cal text-2xl mb-1">Set up your booking page</h1>
@@ -298,7 +299,7 @@ export default function RegisterPage() {
                     </div>
                     {form.slug && (
                       <p className="text-xs text-gray-400 mt-1.5 flex items-center gap-1">
-                        <i className="bi bi-check-circle text-emerald-500" style={{ fontSize: '0.75rem' }} />
+                        <Icon name="check-circle" className="text-emerald-500" />
                         Clients will book at <span className="font-medium text-gray-600">dinaya.lk/{form.slug}</span>
                       </p>
                     )}
@@ -340,13 +341,13 @@ export default function RegisterPage() {
 
                   {error && (
                     <div role="alert" className="flex items-start gap-2 px-3 py-2.5 rounded-lg bg-red-50 border border-red-100 text-red-600 text-sm">
-                      <i className="bi bi-exclamation-circle text-sm mt-0.5 shrink-0" /><span>{error}</span>
+                      <Icon name="exclamation-circle" className="text-sm mt-0.5 shrink-0" /><span>{error}</span>
                     </div>
                   )}
 
                   <button type="submit" disabled={loading}
                     className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-b from-primary/90 to-primary text-primary-foreground py-3 rounded-lg text-sm font-medium border-b-2 border-primary/70 shadow-[0_0_0_2px_rgba(0,0,0,0.04),0_0_14px_0_rgba(99,102,241,0.2)] transition-all hover:shadow-primary/30 hover:shadow-md disabled:cursor-not-allowed mt-1">
-                    {loading && <i className="bi bi-arrow-repeat text-sm animate-spin" />}
+                    {loading && <Icon name="arrow-repeat" className="text-sm animate-spin" />}
                     {loading ? "Creating…" : "Create free account"}
                   </button>
                 </form>
@@ -354,7 +355,7 @@ export default function RegisterPage() {
             )}
 
             <div className="flex items-center justify-center gap-1.5 mt-4 text-xs text-gray-400">
-              <i className="bi bi-lock" style={{ fontSize: '0.75rem' }} /><span>Secure sign-up · No credit card required</span>
+              <Icon name="lock" /><span>Secure sign-up · No credit card required</span>
             </div>
           </div>
 

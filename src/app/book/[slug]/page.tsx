@@ -10,6 +10,7 @@ import { resolveEffectivePlan } from "@/lib/plan";
 import { isOptimizableRemoteImage } from "@/lib/utils";
 import { canUseFeature, type Plan } from "@/lib/plan";
 import { normalizePublicHttpsUrl } from "@/lib/public-url";
+import { Icon } from "@/components/ui/Icon";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -35,9 +36,10 @@ function StarRating({ rating, size = "sm" }: { rating: number; size?: "sm" | "md
   return (
     <span className="inline-flex items-center gap-0.5">
       {[1, 2, 3, 4, 5].map((n) => (
-        <i
+        <Icon
           key={n}
-          className={`bi ${n <= Math.round(rating) ? "bi-star-fill text-amber-400" : "bi-star text-gray-300"} ${starSize}`}
+          name={n <= Math.round(rating) ? "star-fill" : "star"}
+          className={`${n <= Math.round(rating) ? "text-amber-400" : "text-gray-300"} ${starSize}`}
         />
       ))}
     </span>
@@ -280,13 +282,13 @@ export default async function BookingPage({ params }: Props) {
             <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-gray-500">
               {business.address && (
                 <span className="flex items-center gap-1.5">
-                  <i className="bi bi-geo-alt text-gray-400" />
+                  <Icon name="geo-alt" className="text-gray-400" />
                   {business.address}
                 </span>
               )}
               {business.phone && (
                 <a href={`tel:${business.phone}`} className="flex items-center gap-1.5 hover:text-gray-800">
-                  <i className="bi bi-telephone text-gray-400" />
+                  <Icon name="telephone" className="text-gray-400" />
                   {business.phone}
                 </a>
               )}
@@ -300,7 +302,7 @@ export default async function BookingPage({ params }: Props) {
                     rel="noopener noreferrer"
                     className="flex size-9 items-center justify-center rounded-lg bg-gray-50 text-gray-500 transition-colors hover:bg-pink-50 hover:text-pink-600"
                   >
-                    <i className="bi bi-instagram" />
+                    <Icon name="instagram" />
                   </a>
                 )}
                 {facebookUrl && (
@@ -310,7 +312,7 @@ export default async function BookingPage({ params }: Props) {
                     rel="noopener noreferrer"
                     className="flex size-9 items-center justify-center rounded-lg bg-gray-50 text-gray-500 transition-colors hover:bg-blue-50 hover:text-blue-600"
                   >
-                    <i className="bi bi-facebook" />
+                    <Icon name="facebook" />
                   </a>
                 )}
                 {websiteUrl && (
@@ -320,7 +322,7 @@ export default async function BookingPage({ params }: Props) {
                     rel="noopener noreferrer"
                     className="flex size-9 items-center justify-center rounded-lg bg-gray-50 text-gray-500 transition-colors hover:bg-gray-100"
                   >
-                    <i className="bi bi-globe" />
+                    <Icon name="globe" />
                   </a>
                 )}
               </div>

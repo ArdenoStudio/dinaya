@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { Icon } from "@/components/ui/Icon";
 
 export default function AdminError({
   error,
@@ -18,7 +19,7 @@ export default function AdminError({
       <div className="text-center">
         <div className="mb-4 flex justify-center">
           <div className="flex size-16 items-center justify-center rounded-full bg-red-100">
-            <i className="bi bi-shield-exclamation text-2xl text-red-600" aria-hidden="true" />
+            <Icon name="shield-exclamation" className="text-2xl text-red-600" aria-hidden="true" />
           </div>
         </div>
         <h2 className="mb-2 text-xl font-semibold">

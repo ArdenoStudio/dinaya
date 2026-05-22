@@ -1,6 +1,7 @@
 "use client";
 
 import type { Location } from "@/db/schema";
+import { Icon } from "@/components/ui/Icon";
 
 interface Props {
   locations: Pick<Location, "id" | "name" | "address">[];
@@ -37,7 +38,7 @@ export default function StepLocation({ locations, selected, copy, onSelect, comp
                   active ? "border-blue-600 bg-blue-600 text-white" : "border-gray-300"
                 }`}
               >
-                {active && <i className="bi bi-check text-[10px]" />}
+                {active && <Icon name="check" className="text-[10px]" />}
               </span>
               <span className="min-w-0">
                 <span className="block text-sm font-medium text-gray-900">{loc.name}</span>

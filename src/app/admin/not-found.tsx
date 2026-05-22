@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Icon } from "@/components/ui/Icon";
 
 export default function AdminNotFound() {
   return (
@@ -6,7 +7,7 @@ export default function AdminNotFound() {
       <div className="text-center">
         <div className="mb-4 flex justify-center">
           <div className="flex size-16 items-center justify-center rounded-full bg-muted">
-            <i className="bi bi-shield-x text-2xl text-muted-foreground" aria-hidden="true" />
+            <Icon name="shield-x" className="text-2xl text-muted-foreground" aria-hidden="true" />
           </div>
         </div>
         <h2 className="mb-2 font-cal text-xl tracking-tight">

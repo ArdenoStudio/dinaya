@@ -1,5 +1,6 @@
 "use client";
 
+import { Icon } from "@/components/ui/Icon";
 import {
   addMonths,
   eachDayOfInterval,
@@ -86,7 +87,7 @@ export default function MonthCalendar({
             }`}
             aria-label="Previous month"
           >
-            <i className={`bi bi-chevron-left ${comfortable ? "text-sm" : "text-[10px]"}`} />
+            <Icon name="chevron-left" className={comfortable ? "text-sm" : "text-[10px]"} />
           </button>
           <button
             type="button"
@@ -96,7 +97,7 @@ export default function MonthCalendar({
             }`}
             aria-label="Next month"
           >
-            <i className={`bi bi-chevron-right ${comfortable ? "text-sm" : "text-[10px]"}`} />
+            <Icon name="chevron-right" className={comfortable ? "text-sm" : "text-[10px]"} />
           </button>
         </div>
       </div>

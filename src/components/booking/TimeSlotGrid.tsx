@@ -3,6 +3,7 @@
 import { parseISO } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import type { BookingCopy } from "@/lib/i18n";
+import { Icon } from "@/components/ui/Icon";
 
 const COLOMBO_TZ = "Asia/Colombo";
 
@@ -57,7 +58,7 @@ export default function TimeSlotGrid({
   if (slots.length === 0) {
     return (
       <div className="rounded-xl border border-dashed border-gray-200 bg-gray-50/50 px-4 py-10 text-center">
-        <i className="bi bi-calendar-x mb-2 block text-2xl text-gray-300" />
+        <Icon name="calendar-x" className="mb-2 block text-2xl text-gray-300" />
         <p className="text-sm text-gray-500">{copy.noSlots}</p>
       </div>
     );

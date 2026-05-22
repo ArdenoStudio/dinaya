@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Icon } from "@/components/ui/Icon";
 
 export function ReviewForm({ token, clientName }: { token: string; clientName: string }) {
   const [rating, setRating] = useState(5);
@@ -29,7 +30,7 @@ export function ReviewForm({ token, clientName }: { token: string; clientName: s
     return (
       <div className="rounded-2xl border bg-white p-8 text-center shadow-sm">
         <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
-          <i className="bi bi-check-lg" aria-hidden="true" />
+          <Icon name="check-lg" aria-hidden="true" />
         </div>
         <h1 className="font-cal text-2xl">Thank you</h1>
         <p className="mt-2 text-sm text-muted-foreground">Your review has been submitted.</p>

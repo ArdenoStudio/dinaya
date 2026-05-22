@@ -4,6 +4,7 @@ import Image from "next/image";
 import { PublicNav } from "@/components/PublicNav";
 import { FadeContainer, FadeDiv, FadeSpan } from "@/components/Fade";
 import { LandingFooter } from "@/components/LandingFooter";
+import { Icon } from "@/components/ui/Icon";
 
 export const metadata: Metadata = {
   title: "About Us — The Booking Tool Sri Lanka Needed | Dinaya",
@@ -13,25 +14,25 @@ export const metadata: Metadata = {
 
 const values = [
   {
-    icon: "bi-geo-alt-fill",
+    icon: "geo-alt-fill",
     color: "bg-blue-600",
     title: "Built for Sri Lanka",
     desc: "Every decision — currency, payment gateway, language, pricing — is made with Sri Lankan businesses in mind. Not adapted from a global product.",
   },
   {
-    icon: "bi-lightning-charge",
+    icon: "lightning-charge",
     color: "bg-amber-500",
     title: "Radically simple",
     desc: "If a salon owner in Kandy can't set it up in five minutes, we haven't done our job. Simplicity isn't a feature — it's the product.",
   },
   {
-    icon: "bi-shield-check",
+    icon: "shield-check",
     color: "bg-violet-500",
     title: "Honest pricing",
     desc: "Free forever on the essentials. No hidden fees, no commission on your bookings, no USD subscriptions. You keep what you earn.",
   },
   {
-    icon: "bi-people-fill",
+    icon: "people-fill",
     color: "bg-blue-600",
     title: "Our users first",
     desc: "We talk to business owners every week. Features come from real problems, not roadmap guesswork. Your feedback shapes the product.",
@@ -55,7 +56,7 @@ export default function AboutPage() {
         <FadeContainer className="flex flex-col items-center">
           <FadeDiv className="mb-6">
             <span className="inline-flex items-center gap-2 rounded-full border bg-white px-3 py-1 text-xs font-medium text-gray-700 shadow-sm">
-              <i className="bi bi-geo-alt-fill text-xs text-primary" />
+              <Icon name="geo-alt-fill" className="text-xs text-primary" />
               Made in Sri Lanka
             </span>
           </FadeDiv>
@@ -119,12 +120,12 @@ export default function AboutPage() {
 
           <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100/60 p-8 flex flex-col gap-5">
             {[
-              { icon: "bi-whatsapp", color: "text-gray-400", label: "Before Dinaya", msg: "Hi are you free Thursday at 3? Actually maybe 3:30? Let me check… never mind I'll call" },
-              { icon: "bi-calendar-check", color: "text-primary", label: "After Dinaya", msg: "Booking confirmed — Thursday 3:30 PM · Deposit paid · Reminder set" },
+              { icon: "whatsapp", color: "text-gray-400", label: "Before Dinaya", msg: "Hi are you free Thursday at 3? Actually maybe 3:30? Let me check… never mind I'll call" },
+              { icon: "calendar-check", color: "text-primary", label: "After Dinaya", msg: "Booking confirmed — Thursday 3:30 PM · Deposit paid · Reminder set" },
             ].map((item) => (
               <div key={item.label} className="rounded-xl bg-white border p-5 shadow-sm">
                 <div className="flex items-center gap-2 mb-3">
-                  <i className={`bi ${item.icon} text-lg ${item.color}`} />
+                  <Icon name={item.icon} className={`text-lg ${item.color}`} />
                   <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{item.label}</span>
                 </div>
                 <p className="text-sm text-gray-700 leading-relaxed">{item.msg}</p>
@@ -151,7 +152,7 @@ export default function AboutPage() {
             <div key={v.title} className="group p-8 bg-white hover:bg-gray-50/60 transition-colors">
               <div className="mb-5 inline-flex">
                 <div className={`flex items-center justify-center size-11 rounded-xl ${v.color} text-white`}>
-                  <i className={`bi ${v.icon} text-[1.1rem]`} />
+                  <Icon name={v.icon} className="text-[1.1rem]" />
                 </div>
               </div>
               <h3 className="font-cal text-xl mb-2 tracking-tight">{v.title}</h3>
@@ -204,7 +205,7 @@ export default function AboutPage() {
                   className="inline-flex items-center gap-2 bg-white text-blue-700 px-7 py-3.5 rounded-xl font-semibold shadow-lg hover:bg-white/95 transition-colors"
                 >
                   Create your page — it&apos;s free
-                  <i className="bi bi-arrow-right text-sm" />
+                  <Icon name="arrow-right" className="text-sm" />
                 </Link>
                 <Link
                   href="/features"

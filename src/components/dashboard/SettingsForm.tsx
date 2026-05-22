@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useDashboardCopy } from "@/components/dashboard/DashboardLocaleProvider";
 import { buildPublicBookingUrl } from "@/lib/booking-url";
 import { isOptimizableRemoteImage } from "@/lib/utils";
+import { Icon } from "@/components/ui/Icon";
 
 type SettingsBusiness = {
   address: string | null;
@@ -210,7 +211,7 @@ export default function SettingsForm({ business }: Props) {
         {/* Booking policies */}
         <div className="bg-white border rounded-xl p-6 space-y-4">
           <div className="flex items-center gap-2">
-            <i className="bi bi-shield-check text-sm text-muted-foreground" />
+            <Icon name="shield-check" className="text-sm text-muted-foreground" />
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Booking trust</p>
           </div>
           <p className="text-xs text-muted-foreground -mt-2">
@@ -241,7 +242,7 @@ export default function SettingsForm({ business }: Props) {
         {/* Local payment fallback */}
         <div className="bg-white border rounded-xl p-6 space-y-4">
           <div className="flex items-center gap-2">
-            <i className="bi bi-bank text-sm text-muted-foreground" />
+            <Icon name="bank" className="text-sm text-muted-foreground" />
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Local payment fallback</p>
           </div>
           <p className="text-xs text-muted-foreground -mt-2">
@@ -271,7 +272,7 @@ export default function SettingsForm({ business }: Props) {
         {/* Social links */}
         <div className="bg-white border rounded-xl p-6 space-y-4">
           <div className="flex items-center gap-2">
-            <i className="bi bi-share text-sm text-muted-foreground" />
+            <Icon name="share" className="text-sm text-muted-foreground" />
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Social links</p>
           </div>
           <p className="text-xs text-muted-foreground -mt-2">
@@ -279,7 +280,7 @@ export default function SettingsForm({ business }: Props) {
           </p>
           <div>
             <label className="text-sm font-medium flex items-center gap-1.5">
-              <i className="bi bi-instagram text-pink-500" /> Instagram
+              <Icon name="instagram" className="text-pink-500" /> Instagram
             </label>
             <input
               value={form.instagramUrl}
@@ -290,7 +291,7 @@ export default function SettingsForm({ business }: Props) {
           </div>
           <div>
             <label className="text-sm font-medium flex items-center gap-1.5">
-              <i className="bi bi-facebook text-blue-600" /> Facebook
+              <Icon name="facebook" className="text-blue-600" /> Facebook
             </label>
             <input
               value={form.facebookUrl}
@@ -301,7 +302,7 @@ export default function SettingsForm({ business }: Props) {
           </div>
           <div>
             <label className="text-sm font-medium flex items-center gap-1.5">
-              <i className="bi bi-globe text-gray-500" /> Website
+              <Icon name="globe" className="text-gray-500" /> Website
             </label>
             <input
               value={form.websiteUrl}
@@ -315,7 +316,7 @@ export default function SettingsForm({ business }: Props) {
         {/* Portfolio gallery */}
         <div className="bg-white border rounded-xl p-6 space-y-4">
           <div className="flex items-center gap-2">
-            <i className="bi bi-images text-sm text-muted-foreground" />
+            <Icon name="images" className="text-sm text-muted-foreground" />
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Portfolio gallery</p>
           </div>
           <p className="text-xs text-muted-foreground -mt-2">
@@ -340,7 +341,7 @@ export default function SettingsForm({ business }: Props) {
                     onClick={() => removeGalleryImage(url)}
                     className="absolute top-1 right-1 size-6 rounded-full bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs"
                   >
-                    <i className="bi bi-x" />
+                    <Icon name="x-lg" />
                   </button>
                 </div>
               ))}
@@ -376,7 +377,7 @@ export default function SettingsForm({ business }: Props) {
         {/* Pro branding */}
         <div className="bg-white border rounded-xl p-6 space-y-4">
           <div className="flex items-center gap-2">
-            <i className="bi bi-palette text-sm text-muted-foreground" />
+            <Icon name="palette" className="text-sm text-muted-foreground" />
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Booking page branding</p>
           </div>
           {canCustomizeBookingPage ? (
@@ -426,7 +427,7 @@ export default function SettingsForm({ business }: Props) {
         {/* PayHere */}
         <div className="bg-white border rounded-xl p-6 space-y-4">
           <div className="flex items-center gap-2">
-            <i className="bi bi-credit-card text-sm text-muted-foreground" />
+            <Icon name="credit-card" className="text-sm text-muted-foreground" />
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">PayHere</p>
           </div>
           <p className="text-xs text-muted-foreground">
@@ -478,7 +479,7 @@ export default function SettingsForm({ business }: Props) {
         {/* Data controls */}
         <div className="bg-white border rounded-xl p-6 space-y-3">
           <div className="flex items-center gap-2">
-            <i className="bi bi-download text-sm text-muted-foreground" />
+            <Icon name="download" className="text-sm text-muted-foreground" />
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Data controls</p>
           </div>
           <p className="text-xs text-muted-foreground">
@@ -504,7 +505,7 @@ export default function SettingsForm({ business }: Props) {
           </button>
           {saved && (
             <span className="flex items-center gap-1.5 text-green-600 text-sm">
-              <i className="bi bi-check-circle text-sm" /> Saved
+              <Icon name="check-circle" className="text-sm" /> Saved
             </span>
           )}
         </div>

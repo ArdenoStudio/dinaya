@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Icon } from "@/components/ui/Icon";
 
 interface Props {
   reviewToken: string;
@@ -21,7 +22,7 @@ export default function ReviewPrompt({ reviewToken, businessName }: Props) {
   if (done) {
     return (
       <div className="rounded-2xl border bg-white p-6 text-center shadow-sm">
-        <i className="bi bi-stars mb-2 block text-2xl text-amber-400" />
+        <Icon name="stars" className="mb-2 block text-2xl text-amber-400" />
         <p className="text-sm font-medium">Thanks for your review!</p>
         <p className="mt-1 text-xs text-muted-foreground">It helps others discover {businessName}.</p>
       </div>
@@ -59,7 +60,7 @@ export default function ReviewPrompt({ reviewToken, businessName }: Props) {
           onClick={() => setDismissed(true)}
           className="mt-0.5 text-lg leading-none text-muted-foreground transition-colors hover:text-foreground"
         >
-          <i className="bi bi-x" />
+          <Icon name="x-lg" />
         </button>
       </div>
 
@@ -73,7 +74,7 @@ export default function ReviewPrompt({ reviewToken, businessName }: Props) {
             onMouseLeave={() => setHovered(0)}
             className="text-2xl transition-transform hover:scale-110"
           >
-            <i className={`bi ${n <= displayRating ? "bi-star-fill text-amber-400" : "bi-star text-gray-300"}`} />
+            <Icon name={n <= displayRating ? "star-fill" : "star"} className={n <= displayRating ? "text-amber-400" : "text-gray-300"} />
           </button>
         ))}
         {rating > 0 && (

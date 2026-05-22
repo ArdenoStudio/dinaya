@@ -5,7 +5,6 @@ import { Analytics } from "@vercel/analytics/next";
 import { NavProvider } from "@/context/NavContext";
 import { SmoothScroll } from "@/components/SmoothScroll";
 import "./globals.css";
-import "bootstrap-icons/font/bootstrap-icons.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 

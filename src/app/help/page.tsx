@@ -3,6 +3,7 @@
 import { PublicNav } from "@/components/PublicNav";
 import { LandingFooter } from "@/components/LandingFooter";
 import { HelpFaqSections } from "@/components/docs/HelpFaqSections";
+import { Icon } from "@/components/ui/Icon";
 
 export default function HelpPage() {
   return (
@@ -26,7 +27,7 @@ export default function HelpPage() {
                   href="mailto:support@dinaya.lk"
                   className="inline-flex items-center justify-center gap-2 rounded-xl bg-white text-gray-900 px-5 py-3 text-sm font-semibold"
                 >
-                  <i className="bi bi-envelope text-sm" />
+                  <Icon name="envelope" className="text-sm" />
                   Email support
                 </a>
                 <a
@@ -35,7 +36,7 @@ export default function HelpPage() {
                   rel="noopener noreferrer"
                   className="inline-flex items-center justify-center gap-2 rounded-xl bg-white/10 border border-white/20 text-white px-5 py-3 text-sm font-medium"
                 >
-                  <i className="bi bi-whatsapp text-sm" />
+                  <Icon name="whatsapp" className="text-sm" />
                   WhatsApp us
                 </a>
               </div>

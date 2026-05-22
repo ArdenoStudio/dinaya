@@ -3,6 +3,7 @@
 import { cn } from "@/lib/utils";
 import { DocsTargetHighlight } from "../DocsTargetHighlight";
 import { DocsCursor } from "../DocsCursor";
+import { Icon } from "@/components/ui/Icon";
 import {
   DASHBOARD_NAV_GROUPS,
   resolveActiveNav,
@@ -92,10 +93,11 @@ export function DocsDashboardMockup({ variant, highlightNav, highlightTarget }: 
                     )}
                   >
                     <span>{s}</span>
-                    <i
+                    <Icon
+                      name={i < 2 ? "check-circle-fill" : "circle"}
                       className={cn(
-                        "bi text-[10px]",
-                        i < 2 ? "bi-check-circle-fill text-emerald-600" : "bi-circle text-gray-300",
+                        "text-[10px]",
+                        i < 2 ? "text-emerald-600" : "text-gray-300",
                       )}
                     />
                   </div>
@@ -137,7 +139,7 @@ export function DocsDashboardMockup({ variant, highlightNav, highlightTarget }: 
                   <p className="font-medium text-gray-900">Dilini Perera</p>
                   <div className="mt-0.5 flex gap-0.5 text-amber-400">
                     {[1, 2, 3, 4, 5].map((n) => (
-                      <i key={n} className="bi bi-star-fill text-[8px]" />
+                      <Icon key={n} name="star-fill" className="text-[8px]" />
                     ))}
                   </div>
                   <p className="mt-1 text-[9px] text-gray-500">Great service, will book again!</p>

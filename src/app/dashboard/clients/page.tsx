@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { Icon } from "@/components/ui/Icon";
 
 type Stage = "lead" | "prospect" | "active" | "churned";
 
@@ -126,7 +127,7 @@ export default function ClientsPage() {
     {
       label: "Total customers",
       value: stats.total,
-      icon: "bi-people",
+      icon: "people",
       iconColor: "text-primary",
       iconBg: "bg-primary/10",
       accent: "bg-primary",
@@ -134,7 +135,7 @@ export default function ClientsPage() {
     {
       label: "Active",
       value: stats.active,
-      icon: "bi-person-check",
+      icon: "person-check",
       iconColor: "text-emerald-600",
       iconBg: "bg-emerald-50",
       accent: "bg-emerald-500",
@@ -142,7 +143,7 @@ export default function ClientsPage() {
     {
       label: "Leads",
       value: stats.leads,
-      icon: "bi-person-plus",
+      icon: "person-plus",
       iconColor: "text-blue-600",
       iconBg: "bg-blue-50",
       accent: "bg-blue-500",
@@ -150,7 +151,7 @@ export default function ClientsPage() {
     {
       label: "Prospects",
       value: stats.prospects,
-      icon: "bi-stars",
+      icon: "stars",
       iconColor: "text-violet-600",
       iconBg: "bg-violet-50",
       accent: "bg-violet-500",
@@ -177,13 +178,13 @@ export default function ClientsPage() {
             disabled={clients.length === 0}
             className="flex items-center gap-1.5 border bg-white px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:border-gray-300 hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
-            <i className="bi bi-download text-xs" /> Export CSV
+            <Icon name="download" className="text-xs" /> Export CSV
           </button>
           <Link
             href="/dashboard/clients/new"
             className="flex items-center gap-1.5 bg-gradient-to-b from-primary/90 to-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium border-b-2 border-primary/70 shadow-sm transition-all hover:shadow-primary/30 hover:shadow-md"
           >
-            <i className="bi bi-plus text-xs" /> Add customer
+            <Icon name="plus" className="text-xs" /> Add customer
           </Link>
         </div>
       </div>
@@ -197,7 +198,7 @@ export default function ClientsPage() {
               <div
                 className={`flex items-center justify-center w-9 h-9 rounded-lg shrink-0 ${s.iconBg}`}
               >
-                <i className={`bi ${s.icon} text-sm ${s.iconColor}`} />
+                <Icon name={s.icon} className={`text-sm ${s.iconColor}`} />
               </div>
               <div className="min-w-0">
                 <p className="text-xs text-muted-foreground truncate leading-tight">
@@ -219,7 +220,7 @@ export default function ClientsPage() {
       {/* Filters */}
       <div className="flex flex-wrap gap-2.5 items-center mb-4">
         <div className="relative flex-1 min-w-[220px]">
-          <i className="bi bi-search absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none" />
+          <Icon name="search" className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none" />
           <input
             type="text"
             placeholder="Search by name, phone, or email…"
@@ -234,7 +235,7 @@ export default function ClientsPage() {
               aria-label="Clear search"
               className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
             >
-              <i className="bi bi-x text-xs" />
+              <Icon name="x-lg" className="text-xs" />
             </button>
           )}
         </div>
@@ -278,7 +279,7 @@ export default function ClientsPage() {
       ) : showEmptyAll ? (
         <div className="bg-white border rounded-xl p-14 text-center">
           <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-            <i className="bi bi-people text-[1.15rem] text-primary" />
+            <Icon name="people" className="text-[1.15rem] text-primary" />
           </div>
           <h3 className="font-semibold text-base mb-1">No customers yet</h3>
           <p className="text-sm text-muted-foreground mb-5 max-w-xs mx-auto">
@@ -288,13 +289,13 @@ export default function ClientsPage() {
             href="/dashboard/clients/new"
             className="inline-flex items-center gap-1.5 bg-gradient-to-b from-primary/90 to-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium border-b-2 border-primary/70 shadow-sm hover:shadow-md hover:shadow-primary/30 transition-all"
           >
-            <i className="bi bi-plus text-xs" /> Add your first customer
+            <Icon name="plus" className="text-xs" /> Add your first customer
           </Link>
         </div>
       ) : showEmptyFiltered ? (
         <div className="bg-white border rounded-xl p-14 text-center">
           <div className="w-12 h-12 rounded-full bg-muted/40 flex items-center justify-center mx-auto mb-4">
-            <i className="bi bi-search text-[1.15rem] text-muted-foreground" />
+            <Icon name="search" className="text-[1.15rem] text-muted-foreground" />
           </div>
           <h3 className="font-semibold text-base mb-1">No matches found</h3>
           <p className="text-sm text-muted-foreground mb-5">
@@ -304,7 +305,7 @@ export default function ClientsPage() {
             onClick={clearFilters}
             className="inline-flex items-center gap-1.5 border bg-white px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:border-gray-300 hover:text-foreground transition-colors"
           >
-            <i className="bi bi-x text-xs" /> Clear filters
+            <Icon name="x-lg" className="text-xs" /> Clear filters
           </button>
         </div>
       ) : (
@@ -355,12 +356,12 @@ export default function ClientsPage() {
                 {/* Contact (desktop) */}
                 <div className="hidden md:flex flex-col justify-center min-w-0 gap-0.5">
                   <span className="text-sm text-foreground/80 flex items-center gap-1.5 truncate">
-                    <i className="bi bi-telephone shrink-0 text-muted-foreground/50" style={{ fontSize: '0.75rem' }} />
+                    <Icon name="telephone" className="shrink-0 text-muted-foreground/50" />
                     <span className="truncate tabular-nums">{c.phone}</span>
                   </span>
                   {c.email && (
                     <span className="text-xs text-muted-foreground flex items-center gap-1.5 truncate">
-                      <i className="bi bi-envelope shrink-0 text-muted-foreground/50" style={{ fontSize: '0.75rem' }} />
+                      <Icon name="envelope" className="shrink-0 text-muted-foreground/50" />
                       <span className="truncate">{c.email}</span>
                     </span>
                   )}
@@ -391,7 +392,7 @@ export default function ClientsPage() {
                 <div className="hidden md:flex justify-end">
                   <span className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground/50 group-hover:text-primary transition-colors">
                     View
-                    <i className="bi bi-arrow-right group-hover:translate-x-0.5 transition-transform" style={{ fontSize: '0.75rem' }} />
+                    <Icon name="arrow-right" className="group-hover:translate-x-0.5 transition-transform" />
                   </span>
                 </div>
               </Link>
@@ -412,7 +413,7 @@ export default function ClientsPage() {
                 onClick={clearFilters}
                 className="text-primary hover:underline font-medium flex items-center gap-1"
               >
-                <i className="bi bi-x" style={{ fontSize: '0.75rem' }} /> Clear filters
+                <Icon name="x-lg" /> Clear filters
               </button>
             )}
           </div>

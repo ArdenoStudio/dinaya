@@ -6,6 +6,7 @@ import { and, eq, isNull } from "drizzle-orm";
 import { PublicNav } from "@/components/PublicNav";
 import { LandingFooter } from "@/components/LandingFooter";
 import { DIRECTORY_CATEGORIES, categoryLabel, cityToSlug } from "@/lib/directory";
+import { Icon } from "@/components/ui/Icon";
 
 export const dynamic = "force-dynamic";
 
@@ -46,7 +47,7 @@ export default async function DiscoverPage() {
       <section className="mx-auto max-w-6xl px-6 py-16">
         <div className="mb-10 max-w-3xl">
           <span className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium text-gray-700">
-            <i className="bi bi-compass text-primary" />
+            <Icon name="compass" className="text-primary" />
             Dinaya Directory
           </span>
           <h1 className="mt-4 font-cal text-4xl tracking-tight">Discover bookable businesses</h1>

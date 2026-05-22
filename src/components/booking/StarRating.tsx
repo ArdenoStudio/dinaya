@@ -1,3 +1,5 @@
+import { Icon } from "@/components/ui/Icon";
+
 interface Props {
   rating: number;
   size?: "sm" | "md";
@@ -9,9 +11,10 @@ export function StarRating({ rating, size = "sm" }: Props) {
   return (
     <span className="inline-flex gap-0.5">
       {[1, 2, 3, 4, 5].map((value) => (
-        <i
+        <Icon
           key={value}
-          className={`bi ${value <= rating ? "bi-star-fill text-amber-400" : "bi-star text-gray-300"} ${iconClass}`}
+          name={value <= rating ? "star-fill" : "star"}
+          className={`${value <= rating ? "text-amber-400" : "text-gray-300"} ${iconClass}`}
         />
       ))}
     </span>

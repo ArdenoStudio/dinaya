@@ -2,6 +2,7 @@ import Image from "next/image";
 import type { Staff } from "@/db/schema";
 import type { BookingCopy } from "@/lib/i18n";
 import { isOptimizableRemoteImage } from "@/lib/utils";
+import { Icon } from "@/components/ui/Icon";
 
 interface Props {
   allStaff: Staff[];
@@ -76,7 +77,7 @@ export default function StepStaff({
                       : "border-muted-foreground/30"
                   }`}
                 >
-                  {isSelected && <i className="bi bi-check text-white" style={{ fontSize: '0.75rem' }} />}
+                  {isSelected && <Icon name="check" className="text-white" style={{ fontSize: '0.75rem' }} />}
                 </div>
               </button>
             );
@@ -88,7 +89,7 @@ export default function StepStaff({
         onClick={onBack}
         className="mt-5 flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
       >
-        <i className="bi bi-chevron-left text-sm" /> {copy.back}
+        <Icon name="chevron-left" className="text-sm" /> {copy.back}
       </button>
     </div>
   );

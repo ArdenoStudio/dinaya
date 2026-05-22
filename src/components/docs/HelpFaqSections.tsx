@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { faqCategories, popularHelpArticles } from "@content/docs/faq";
+import { Icon } from "@/components/ui/Icon";
 
 export function HelpFaqSections() {
   const [search, setSearch] = useState("");
@@ -42,7 +43,7 @@ export function HelpFaqSections() {
         />
         <div className="relative max-w-3xl mx-auto px-6 py-20 text-center">
           <span className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white px-3 py-1 text-xs font-medium text-blue-700 shadow-sm mb-5">
-            <i className="bi bi-question-circle text-xs" />
+            <Icon name="question-circle" className="text-xs" />
             Help Center
           </span>
           <h1 className="font-cal text-4xl md:text-5xl tracking-tight mb-3">How can we help?</h1>
@@ -55,7 +56,7 @@ export function HelpFaqSections() {
             </Link>
           </p>
           <div className="w-full max-w-xl mx-auto relative">
-            <i className="bi bi-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none" />
+            <Icon name="search" className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none" />
             <input
               type="text"
               value={search}
@@ -88,10 +89,10 @@ export function HelpFaqSections() {
               const inner = (
                 <>
                   <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${cat.colorClasses.icon} text-white`}>
-                    <i className={`bi ${a.icon} text-xs`} />
+                    <Icon name={a.icon} className="text-xs" />
                   </span>
                   <span className="text-sm text-gray-700 group-hover:text-gray-900 leading-snug">{a.label}</span>
-                  <i className="bi bi-chevron-right ml-auto text-xs text-gray-300" />
+                  <Icon name="chevron-right" className="ml-auto text-xs text-gray-300" />
                 </>
               );
               if (a.guideSlug) {
@@ -159,7 +160,7 @@ export function HelpFaqSections() {
           <section key={cat.id} id={cat.id} className="scroll-mt-28">
             <div className="flex items-center gap-3 mb-6">
               <span className={`flex h-10 w-10 items-center justify-center rounded-xl ${cat.colorClasses.icon} text-white`}>
-                <i className={`bi ${cat.icon} text-base`} />
+                <Icon name={cat.icon} className="text-base" />
               </span>
               <div>
                 <h2 className="font-cal text-xl tracking-tight">{cat.label}</h2>
@@ -185,7 +186,7 @@ export function HelpFaqSections() {
                         className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
                       >
                         Read full guide
-                        <i className="bi bi-arrow-right text-xs" />
+                        <Icon name="arrow-right" className="text-xs" />
                       </Link>
                     ) : null}
                   </div>
