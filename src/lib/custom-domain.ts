@@ -1,6 +1,14 @@
-import { neon } from "@neondatabase/serverless";
+import { neon, type NeonQueryFunction } from "@neondatabase/serverless";
 
-const slugCache = new Map<string, { slug: string; expiresAt: number }>();
+const slugCache = new Map<string, { slug: string | null; expiresAt: number }>();
+const POSITIVE_CACHE_MS = 5 * 60 * 1000;
+const NEGATIVE_CACHE_MS = 60 * 1000;
+let sqlClient: NeonQueryFunction<false, false> | null = null;
+
+function getSqlClient(): NeonQueryFunction<false, false> {
+  sqlClient ??= neon(process.env.DATABASE_URL!);
+  return sqlClient;
+}
 
 export async function lookupCustomDomainSlug(host: string): Promise<string | null> {
   if (!process.env.DATABASE_URL) return null;
@@ -12,7 +20,7 @@ export async function lookupCustomDomainSlug(host: string): Promise<string | nul
   }
 
   try {
-    const sql = neon(process.env.DATABASE_URL);
+    const sql = getSqlClient();
     const rows = await sql`
       SELECT slug FROM businesses
       WHERE lower(custom_domain) = ${normalized}
@@ -23,9 +31,10 @@ export async function lookupCustomDomainSlug(host: string): Promise<string | nul
     `;
     const slug = rows[0]?.slug as string | undefined;
     if (slug) {
-      slugCache.set(normalized, { slug, expiresAt: Date.now() + 5 * 60 * 1000 });
+      slugCache.set(normalized, { slug, expiresAt: Date.now() + POSITIVE_CACHE_MS });
       return slug;
     }
+    slugCache.set(normalized, { slug: null, expiresAt: Date.now() + NEGATIVE_CACHE_MS });
   } catch (error) {
     console.error("[custom-domain] lookup failed", error);
   }

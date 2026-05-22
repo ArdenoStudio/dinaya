@@ -7,15 +7,19 @@ import { lookupCustomDomainSlug } from "@/lib/custom-domain";
 const { auth } = NextAuth(authConfig);
 
 const APP_DOMAIN = process.env.NEXT_PUBLIC_APP_DOMAIN ?? "dinaya.lk";
+const DEFAULT_APP_ORIGIN = APP_DOMAIN.startsWith("localhost") || APP_DOMAIN.startsWith("127.")
+  ? `http://${APP_DOMAIN}`
+  : `https://${APP_DOMAIN}`;
+const APP_ORIGIN = (process.env.NEXT_PUBLIC_APP_URL ?? DEFAULT_APP_ORIGIN).replace(/\/$/, "");
 
-function appUrl(req: NextRequest, path: string): URL {
-  const proto = req.headers.get("x-forwarded-proto") ?? "https";
-  const host =
-    req.headers.get("x-forwarded-host") ??
-    req.headers.get("host") ??
-    req.nextUrl.host;
+function trustedAppUrl(path: string): URL {
+  return new URL(path, APP_ORIGIN);
+}
 
-  return new URL(path, `${proto}://${host}`);
+function rewriteUrl(req: NextRequest, path: string): URL {
+  const url = req.nextUrl.clone();
+  url.pathname = path;
+  return url;
 }
 
 export default auth(async (req) => {
@@ -28,37 +32,37 @@ export default auth(async (req) => {
   const isRootHost =
     hostWithoutPort === rootDomain || hostWithoutPort === `www.${rootDomain}`;
 
-  if (!isRootHost) {
-    const customSlug = await lookupCustomDomainSlug(hostWithoutPort);
-    if (customSlug) {
-      return NextResponse.rewrite(appUrl(req, `/book/${customSlug}${pathname}`));
-    }
-  }
-
   const isSubdomain =
     !isRootHost && hostWithoutPort.endsWith(`.${rootDomain}`);
 
   if (isSubdomain) {
     const slug = hostWithoutPort.replace(`.${rootDomain}`, "");
-    return NextResponse.rewrite(appUrl(req, `/book/${slug}${pathname}`));
+    return NextResponse.rewrite(rewriteUrl(req, `/book/${slug}${pathname}`));
+  }
+
+  if (!isRootHost) {
+    const customSlug = await lookupCustomDomainSlug(hostWithoutPort);
+    if (customSlug) {
+      return NextResponse.rewrite(rewriteUrl(req, `/book/${customSlug}${pathname}`));
+    }
   }
 
   if (pathname === "/login") {
-    const signInUrl = appUrl(req, "/auth/signin");
+    const signInUrl = trustedAppUrl("/auth/signin");
     signInUrl.search = req.nextUrl.search;
     return NextResponse.redirect(signInUrl);
   }
 
   if (pathname.startsWith("/dashboard")) {
     if (!req.auth) {
-      return NextResponse.redirect(appUrl(req, "/auth/signin"));
+      return NextResponse.redirect(trustedAppUrl("/auth/signin"));
     }
   }
 
   if (pathname.startsWith("/admin")) {
     if (!req.auth) {
       return NextResponse.redirect(
-        appUrl(req, `/auth/signin?callbackUrl=${encodeURIComponent(pathname)}`),
+        trustedAppUrl(`/auth/signin?callbackUrl=${encodeURIComponent(pathname)}`),
       );
     }
   }

@@ -5,7 +5,7 @@ import { db } from "@/db";
 import { users } from "@/db/schema";
 import { withApiHandler } from "@/lib/api-handler";
 import { withRateLimit } from "@/lib/rate-limit";
-import { verifyPasswordResetToken } from "@/lib/password-reset";
+import { isPasswordResetTokenCurrent, verifyPasswordResetToken } from "@/lib/password-reset";
 import { z } from "@/lib/validation";
 
 const resetPasswordSchema = z.object({
@@ -41,12 +41,16 @@ export async function POST(req: NextRequest) {
     }
 
     const [user] = await db
-      .select({ id: users.id, email: users.email })
+      .select({ id: users.id, email: users.email, passwordHash: users.passwordHash })
       .from(users)
       .where(eq(users.id, payload.userId))
       .limit(1);
 
-    if (!user || user.email.toLowerCase() !== payload.email.toLowerCase()) {
+    if (
+      !user ||
+      user.email.toLowerCase() !== payload.email.toLowerCase() ||
+      !isPasswordResetTokenCurrent(payload, user.passwordHash)
+    ) {
       return NextResponse.json(
         { error: "This reset link is invalid or has expired." },
         { status: 400 }

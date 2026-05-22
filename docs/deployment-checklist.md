@@ -27,6 +27,7 @@ If either secret is missing, e2e is skipped with a workflow warning (verify stil
 Optional but recommended:
 
 - `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` — distributed rate limiting (falls back to in-memory)
+- `VERCEL_TOKEN`, `VERCEL_PROJECT_ID_OR_NAME`, `VERCEL_TEAM_ID` or `VERCEL_TEAM_SLUG` — custom-domain provisioning for tenant-owned domains
 - `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` — Google Calendar OAuth on integrations
 - `CONTACT_INBOX_EMAIL` — contact form destination (defaults to hello@dinaya.lk)
 - `PLATFORM_ADMIN_EMAILS` — comma-separated allowlist for `/admin`
@@ -56,6 +57,24 @@ All cron workflows use `DINAYA_APP_URL` and `CRON_SECRET`. Schedules are UTC:
 
 `SECRET_ENCRYPTION_KEY` must stay stable. Rotating it without re-encrypting stored secrets will make PayHere merchant secrets unreadable.
 
+## Custom domains
+
+Built-in tenant subdomains need `NEXT_PUBLIC_APP_DOMAIN=dinaya.lk` and a wildcard domain such as `*.dinaya.lk` assigned to the Vercel project. Vercel wildcard domains require the nameservers method so Vercel can issue wildcard SSL certificates.
+
+Tenant-owned domains such as `book.salon.lk` require Vercel automation:
+
+- `VERCEL_TOKEN`
+- `VERCEL_PROJECT_ID_OR_NAME`
+- `VERCEL_TEAM_ID` or `VERCEL_TEAM_SLUG` if the project belongs to a team
+
+The dashboard flow is:
+
+1. Tenant saves the domain.
+2. Tenant adds the Dinaya TXT ownership record shown in `/dashboard/settings/integrations`.
+3. Dinaya verifies TXT ownership.
+4. Dinaya adds/checks the project domain through Vercel and shows the Vercel CNAME/A/TXT records.
+5. Dinaya marks the custom domain active only after Vercel reports the project domain verified and not misconfigured.
+
 ## Local verification
 
 ```bash
@@ -79,6 +98,7 @@ npm run db:migrate
    - `0012_pro_growth.sql`
    - `0013_platform_settings.sql`
    - `0014_phase5_growth.sql`
+   - `0015_security_performance_indexes.sql`
 4. Deploy the app.
 5. Smoke test:
    - `GET /api/health`

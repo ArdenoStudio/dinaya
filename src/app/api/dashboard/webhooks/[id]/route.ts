@@ -5,7 +5,7 @@ import { eq, and } from "drizzle-orm";
 import { z } from "@/lib/validation";
 import { PlanRequiredError, requirePro } from "@/lib/plan";
 import { requireApiBusiness } from "@/lib/api-auth";
-import { isSafeWebhookUrl } from "@/lib/webhook-url";
+import { isSafeWebhookDestination } from "@/lib/webhook-url";
 
 const patchSchema = z.object({
   isActive: z.boolean().optional(),
@@ -48,7 +48,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     return NextResponse.json({ error: "Invalid webhook update." }, { status: 400 });
   }
   const body = parsed.data;
-  if (body.url && !isSafeWebhookUrl(body.url)) {
+  if (body.url && !(await isSafeWebhookDestination(body.url))) {
     return NextResponse.json({ error: "Webhook URL must be a public HTTPS endpoint." }, { status: 400 });
   }
   const update: Record<string, unknown> = {};

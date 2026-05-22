@@ -9,6 +9,7 @@ import { getBookingCopy } from "@/lib/i18n";
 import { resolveEffectivePlan } from "@/lib/plan";
 import { isOptimizableRemoteImage } from "@/lib/utils";
 import { canUseFeature, type Plan } from "@/lib/plan";
+import { normalizePublicHttpsUrl } from "@/lib/public-url";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -144,6 +145,9 @@ export default async function BookingPage({ params }: Props) {
   const gallery = business.galleryImages ?? [];
   const staffWithBio = staffList.filter((s) => s.bio || s.avatarUrl);
   const copy = getBookingCopy(business.language);
+  const instagramUrl = normalizePublicHttpsUrl(business.instagramUrl);
+  const facebookUrl = normalizePublicHttpsUrl(business.facebookUrl);
+  const websiteUrl = normalizePublicHttpsUrl(business.websiteUrl);
 
   const appDomain = process.env.NEXT_PUBLIC_APP_DOMAIN ?? "";
   const bookingUrlLabel =
@@ -160,9 +164,9 @@ export default async function BookingPage({ params }: Props) {
     business.description ||
       business.address ||
       business.phone ||
-      business.instagramUrl ||
-      business.facebookUrl ||
-      business.websiteUrl ||
+      instagramUrl ||
+      facebookUrl ||
+      websiteUrl ||
       (avgRating !== null && reviewCount > 0)
   );
 
@@ -287,11 +291,11 @@ export default async function BookingPage({ params }: Props) {
                 </a>
               )}
             </div>
-            {(business.instagramUrl || business.facebookUrl || business.websiteUrl) && (
+            {(instagramUrl || facebookUrl || websiteUrl) && (
               <div className="mt-4 flex items-center gap-2 border-t border-gray-100 pt-4">
-                {business.instagramUrl && (
+                {instagramUrl && (
                   <a
-                    href={business.instagramUrl}
+                    href={instagramUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex size-9 items-center justify-center rounded-lg bg-gray-50 text-gray-500 transition-colors hover:bg-pink-50 hover:text-pink-600"
@@ -299,9 +303,9 @@ export default async function BookingPage({ params }: Props) {
                     <i className="bi bi-instagram" />
                   </a>
                 )}
-                {business.facebookUrl && (
+                {facebookUrl && (
                   <a
-                    href={business.facebookUrl}
+                    href={facebookUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex size-9 items-center justify-center rounded-lg bg-gray-50 text-gray-500 transition-colors hover:bg-blue-50 hover:text-blue-600"
@@ -309,9 +313,9 @@ export default async function BookingPage({ params }: Props) {
                     <i className="bi bi-facebook" />
                   </a>
                 )}
-                {business.websiteUrl && (
+                {websiteUrl && (
                   <a
-                    href={business.websiteUrl}
+                    href={websiteUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex size-9 items-center justify-center rounded-lg bg-gray-50 text-gray-500 transition-colors hover:bg-gray-100"

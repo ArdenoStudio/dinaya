@@ -39,6 +39,7 @@ export async function POST(req: NextRequest) {
         name: users.name,
         email: users.email,
         businessId: users.businessId,
+        passwordHash: users.passwordHash,
       })
       .from(users)
       .where(eq(users.email, email))
@@ -58,6 +59,7 @@ export async function POST(req: NextRequest) {
         const token = createPasswordResetToken({
           userId: user.id,
           email: user.email,
+          passwordHash: user.passwordHash,
         });
         const resetUrl = buildPasswordResetUrl(token);
 

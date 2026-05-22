@@ -5,6 +5,7 @@ type PasswordResetPayload = {
   userId: string;
   email: string;
   exp: number;
+  passwordVersion: string;
 };
 
 function secret(): string {
@@ -23,9 +24,22 @@ function sign(payload: string): string {
   return createHmac("sha256", secret()).update(payload).digest("base64url");
 }
 
+function passwordVersionForHash(passwordHash: string): string {
+  return createHmac("sha256", secret())
+    .update(`password-version:${passwordHash}`)
+    .digest("base64url");
+}
+
+function timingSafeStringEqual(a: string, b: string): boolean {
+  const aBuffer = Buffer.from(a);
+  const bBuffer = Buffer.from(b);
+  return aBuffer.length === bBuffer.length && timingSafeEqual(aBuffer, bBuffer);
+}
+
 export function createPasswordResetToken(input: {
   userId: string;
   email: string;
+  passwordHash: string;
   expiresInHours?: number;
 }): string {
   const expiresInHours = input.expiresInHours ?? 1;
@@ -34,6 +48,7 @@ export function createPasswordResetToken(input: {
       userId: input.userId,
       email: input.email,
       exp: Date.now() + expiresInHours * 60 * 60 * 1000,
+      passwordVersion: passwordVersionForHash(input.passwordHash),
     } satisfies PasswordResetPayload)
   );
   return `${payload}.${sign(payload)}`;
@@ -44,23 +59,26 @@ export function verifyPasswordResetToken(token: string): PasswordResetPayload | 
   if (!payload || !signature) return null;
 
   const expected = sign(payload);
-  const providedBuffer = Buffer.from(signature);
-  const expectedBuffer = Buffer.from(expected);
-  if (
-    providedBuffer.length !== expectedBuffer.length ||
-    !timingSafeEqual(providedBuffer, expectedBuffer)
-  ) {
+  if (!timingSafeStringEqual(signature, expected)) {
     return null;
   }
 
   try {
     const parsed = JSON.parse(decode(payload)) as PasswordResetPayload;
-    if (!parsed.userId || !parsed.email) return null;
+    if (!parsed.userId || !parsed.email || !parsed.passwordVersion) return null;
     if (parsed.exp < Date.now()) return null;
     return parsed;
   } catch {
     return null;
   }
+}
+
+export function isPasswordResetTokenCurrent(
+  payload: PasswordResetPayload | null,
+  passwordHash: string,
+): boolean {
+  if (!payload) return false;
+  return timingSafeStringEqual(payload.passwordVersion, passwordVersionForHash(passwordHash));
 }
 
 export function buildPasswordResetUrl(token: string): string {

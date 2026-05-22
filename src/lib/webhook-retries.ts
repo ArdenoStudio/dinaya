@@ -3,12 +3,28 @@ import { webhookDeliveries, webhooks } from "@/db/schema";
 import { eq, and, lte, lt } from "drizzle-orm";
 import crypto from "crypto";
 import type { WebhookEvent, WebhookPayload } from "@/lib/webhooks";
+import { isSafeWebhookDestination } from "@/lib/webhook-url";
 
 function sign(secret: string, body: string): string {
   return crypto.createHmac("sha256", secret).update(body).digest("hex");
 }
 
 const MAX_ATTEMPTS = 5;
+const UNSAFE_WEBHOOK_DESTINATION_ERROR = "Webhook URL must resolve to a public HTTPS endpoint.";
+
+async function currentAttempts(deliveryId?: string): Promise<number> {
+  if (!deliveryId) return 0;
+  const [row] = await db
+    .select({ attempts: webhookDeliveries.attempts })
+    .from(webhookDeliveries)
+    .where(eq(webhookDeliveries.id, deliveryId))
+    .limit(1);
+  return row?.attempts ?? 0;
+}
+
+function nextRetryAt(attempts: number): Date | null {
+  return attempts >= MAX_ATTEMPTS ? null : new Date(Date.now() + attempts * 15 * 60 * 1000);
+}
 
 async function deliverWebhook(
   hook: typeof webhooks.$inferSelect,
@@ -25,8 +41,13 @@ async function deliverWebhook(
   if (hook.secret) {
     headers["X-Dinaya-Signature"] = `sha256=${sign(hook.secret, body)}`;
   }
+  const previousAttempts = await currentAttempts(deliveryId);
 
   try {
+    if (!(await isSafeWebhookDestination(hook.url))) {
+      throw new Error(UNSAFE_WEBHOOK_DESTINATION_ERROR);
+    }
+
     const response = await fetch(hook.url, {
       method: "POST",
       headers,
@@ -34,6 +55,7 @@ async function deliverWebhook(
       signal: AbortSignal.timeout(10_000),
     });
     const responseBody = await response.text().catch(() => null);
+    const attempts = deliveryId ? previousAttempts + 1 : 1;
     if (deliveryId) {
       await db
         .update(webhookDeliveries)
@@ -41,8 +63,8 @@ async function deliverWebhook(
           status: response.ok ? "success" : "failed",
           statusCode: response.status,
           responseBody,
-          attempts: MAX_ATTEMPTS,
-          nextAttemptAt: null,
+          attempts,
+          nextAttemptAt: response.ok ? null : nextRetryAt(attempts),
           error: response.ok ? null : `HTTP ${response.status}`,
         })
         .where(eq(webhookDeliveries.id, deliveryId));
@@ -64,20 +86,18 @@ async function deliverWebhook(
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Webhook delivery failed";
+    const attempts = message === UNSAFE_WEBHOOK_DESTINATION_ERROR
+      ? MAX_ATTEMPTS
+      : deliveryId
+      ? previousAttempts + 1
+      : 1;
     if (deliveryId) {
-      const [row] = await db
-        .select({ attempts: webhookDeliveries.attempts })
-        .from(webhookDeliveries)
-        .where(eq(webhookDeliveries.id, deliveryId))
-        .limit(1);
-      const attempts = (row?.attempts ?? 0) + 1;
       await db
         .update(webhookDeliveries)
         .set({
           status: "failed",
           attempts,
-          nextAttemptAt:
-            attempts >= MAX_ATTEMPTS ? null : new Date(Date.now() + attempts * 15 * 60 * 1000),
+          nextAttemptAt: nextRetryAt(attempts),
           error: message,
         })
         .where(eq(webhookDeliveries.id, deliveryId));
@@ -90,7 +110,8 @@ async function deliverWebhook(
       requestBody: payload,
       status: "failed",
       attempts: 1,
-      nextAttemptAt: new Date(Date.now() + 15 * 60 * 1000),
+      nextAttemptAt:
+        message === UNSAFE_WEBHOOK_DESTINATION_ERROR ? null : new Date(Date.now() + 15 * 60 * 1000),
       error: message,
     });
   }

@@ -66,6 +66,10 @@ export const clients = pgTable("clients", {
       table.businessId,
       table.phone
     ),
+    businessCreatedAtIdx: index("clients_business_created_at_idx").on(
+      table.businessId,
+      table.createdAt,
+    ),
   };
 });
 
@@ -107,6 +111,11 @@ export const businesses = pgTable("businesses", {
   customDomain: varchar("custom_domain", { length: 255 }),
   customDomainVerified: boolean("custom_domain_verified").default(false).notNull(),
   customDomainVerificationToken: varchar("custom_domain_verification_token", { length: 64 }),
+  customDomainStatus: varchar("custom_domain_status", { length: 40 }).default("none").notNull(),
+  customDomainLastCheckedAt: timestamp("custom_domain_last_checked_at"),
+  customDomainError: text("custom_domain_error"),
+  customDomainConfig: jsonb("custom_domain_config"),
+  customDomainVerification: jsonb("custom_domain_verification"),
   isSuspended: boolean("is_suspended").default(false).notNull(),
   deletedAt: timestamp("deleted_at"),
   payhereEnabled: boolean("payhere_enabled").default(false).notNull(),
@@ -383,7 +392,21 @@ export const bookings = pgTable("bookings", {
   cancellationReason: text("cancellation_reason"),
   googleCalendarEventId: varchar("google_calendar_event_id", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (table) => ({
+  businessStartsAtIdx: index("bookings_business_starts_at_idx").on(
+    table.businessId,
+    table.startsAt,
+  ),
+  businessStatusStartsAtIdx: index("bookings_business_status_starts_at_idx").on(
+    table.businessId,
+    table.status,
+    table.startsAt,
+  ),
+  staffStartsAtIdx: index("bookings_staff_starts_at_idx").on(
+    table.staffId,
+    table.startsAt,
+  ),
+}));
 
 export const bookingNotifications = pgTable("booking_notifications", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -426,6 +449,11 @@ export const reviews = pgTable("reviews", {
 }, (table) => {
   return {
     bookingUnique: uniqueIndex("reviews_booking_id_unique").on(table.bookingId),
+    businessPublishedCreatedAtIdx: index("reviews_business_published_created_at_idx").on(
+      table.businessId,
+      table.isPublished,
+      table.createdAt,
+    ),
   };
 });
 
@@ -450,7 +478,9 @@ export const webhooks = pgTable("webhooks", {
   events: webhookEventEnum("events").array().notNull(),
   isActive: boolean("is_active").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (table) => ({
+  businessActiveIdx: index("webhooks_business_active_idx").on(table.businessId, table.isActive),
+}));
 
 // ─── Payments ─────────────────────────────────────────────────────────────────
 
@@ -465,7 +495,10 @@ export const payments = pgTable("payments", {
   payherePayload: jsonb("payhere_payload"),
   receiptSentAt: timestamp("receipt_sent_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (table) => ({
+  bookingIdIdx: index("payments_booking_id_idx").on(table.bookingId),
+  statusCreatedAtIdx: index("payments_status_created_at_idx").on(table.status, table.createdAt),
+}));
 
 // ─── Automations / Messaging ─────────────────────────────────────────────────
 

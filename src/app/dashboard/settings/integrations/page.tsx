@@ -16,6 +16,11 @@ export default async function IntegrationsPage() {
         payhereMerchantId: businesses.payhereMerchantId,
         customDomain: businesses.customDomain,
         customDomainVerified: businesses.customDomainVerified,
+        customDomainVerificationToken: businesses.customDomainVerificationToken,
+        customDomainStatus: businesses.customDomainStatus,
+        customDomainError: businesses.customDomainError,
+        customDomainConfig: businesses.customDomainConfig,
+        customDomainVerification: businesses.customDomainVerification,
       })
       .from(businesses)
       .where(eq(businesses.id, businessId))
@@ -120,6 +125,31 @@ export default async function IntegrationsPage() {
       <CustomDomainPanel
         initialDomain={business?.customDomain ?? null}
         initialVerified={Boolean(business?.customDomainVerified)}
+        initialStatus={business?.customDomainStatus ?? "none"}
+        initialError={business?.customDomainError ?? null}
+        initialVerificationHost={
+          business?.customDomain && business.customDomainVerificationToken
+            ? `_dinaya-verify.${business.customDomain}`
+            : null
+        }
+        initialVerificationValue={
+          business?.customDomainVerificationToken
+            ? `dinaya-verify=${business.customDomainVerificationToken}`
+            : null
+        }
+        initialDnsInstructions={
+          typeof business?.customDomainConfig === "object" &&
+          business.customDomainConfig &&
+          "dnsInstructions" in business.customDomainConfig &&
+          Array.isArray(business.customDomainConfig.dnsInstructions)
+            ? business.customDomainConfig.dnsInstructions
+            : []
+        }
+        initialVercelVerification={
+          Array.isArray(business?.customDomainVerification)
+            ? business.customDomainVerification
+            : []
+        }
       />
     </div>
   );

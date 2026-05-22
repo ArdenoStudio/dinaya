@@ -8,7 +8,18 @@ import { logActivity } from "@/lib/activity-log";
 import { encryptSecret } from "@/lib/secrets";
 import { syncBusinessPrimaryLocation } from "@/lib/locations";
 import { PlanRequiredError, requirePro } from "@/lib/plan";
+import { isPublicHttpsUrl, normalizePublicHttpsUrl } from "@/lib/public-url";
 import { z } from "@/lib/validation";
+
+const publicHttpsUrlSchema = z
+  .string()
+  .trim()
+  .max(500)
+  .optional()
+  .nullable()
+  .refine((value) => !value || isPublicHttpsUrl(value), {
+    message: "URL must be a public HTTPS link.",
+  });
 
 const settingsSchema = z.object({
   name: z.string().trim().min(1, "Business name is required.").max(100),
@@ -22,9 +33,9 @@ const settingsSchema = z.object({
   depositPolicy: z.string().trim().max(2000).optional().nullable(),
   bankTransferInstructions: z.string().trim().max(2000).optional().nullable(),
   lankaqrImageUrl: z.string().trim().max(1000).optional().nullable(),
-  instagramUrl: z.string().trim().max(500).optional().nullable(),
-  facebookUrl: z.string().trim().max(500).optional().nullable(),
-  websiteUrl: z.string().trim().max(500).optional().nullable(),
+  instagramUrl: publicHttpsUrlSchema,
+  facebookUrl: publicHttpsUrlSchema,
+  websiteUrl: publicHttpsUrlSchema,
   galleryImages: z.array(z.string().trim().max(1000)).max(12).optional().default([]),
   payhereEnabled: z.boolean().optional(),
   payhereMerchantId: z.string().trim().max(100).optional().nullable(),
@@ -94,9 +105,9 @@ export async function PATCH(req: NextRequest) {
       depositPolicy: depositPolicy || null,
       bankTransferInstructions: bankTransferInstructions || null,
       lankaqrImageUrl: lankaqrImageUrl || null,
-      instagramUrl: instagramUrl || null,
-      facebookUrl: facebookUrl || null,
-      websiteUrl: websiteUrl || null,
+      instagramUrl: normalizePublicHttpsUrl(instagramUrl),
+      facebookUrl: normalizePublicHttpsUrl(facebookUrl),
+      websiteUrl: normalizePublicHttpsUrl(websiteUrl),
       galleryImages: Array.isArray(galleryImages) ? galleryImages.filter(Boolean) : null,
       ...(payhereEnabled !== undefined && { payhereEnabled: Boolean(payhereEnabled) }),
       ...(payhereMerchantId !== undefined && { payhereMerchantId: payhereMerchantId || null }),

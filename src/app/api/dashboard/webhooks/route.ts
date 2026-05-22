@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { webhooks } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { count, eq } from "drizzle-orm";
 import crypto from "crypto";
 import { z } from "@/lib/validation";
 import { PlanRequiredError, requirePro } from "@/lib/plan";
 import { requireApiBusiness } from "@/lib/api-auth";
-import { isSafeWebhookUrl } from "@/lib/webhook-url";
+import { isSafeWebhookDestination } from "@/lib/webhook-url";
 
 const EVENTS = [
   "booking.created",
@@ -22,6 +22,8 @@ const webhookSchema = z.object({
   events: z.array(z.enum(EVENTS)).min(1),
   secret: z.string().trim().min(16).max(200).optional(),
 });
+
+const MAX_WEBHOOKS_PER_BUSINESS = 10;
 
 async function requireWebhooks(businessId: string) {
   try {
@@ -75,8 +77,20 @@ export async function POST(req: NextRequest) {
   }
 
   const { url, events, secret: providedSecret } = parsed.data;
-  if (!isSafeWebhookUrl(url)) {
+  if (!(await isSafeWebhookDestination(url))) {
     return NextResponse.json({ error: "Webhook URL must be a public HTTPS endpoint." }, { status: 400 });
+  }
+
+  const [{ webhookCount }] = await db
+    .select({ webhookCount: count() })
+    .from(webhooks)
+    .where(eq(webhooks.businessId, businessId));
+
+  if (Number(webhookCount) >= MAX_WEBHOOKS_PER_BUSINESS) {
+    return NextResponse.json(
+      { error: `You can create up to ${MAX_WEBHOOKS_PER_BUSINESS} webhooks per business.` },
+      { status: 409 },
+    );
   }
 
   const secret = providedSecret || crypto.randomBytes(24).toString("hex");
