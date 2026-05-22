@@ -2,7 +2,7 @@
   <a href="https://dinaya.lk">
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset="public/dinaya-brand-dark.svg" />
-      <img src="public/dinaya-brand-light.svg" alt="Dinaya" width="280" />
+      <img src="public/dinaya-brand-light.svg" alt="Dinaya" width="200" />
     </picture>
   </a>
 </p>
