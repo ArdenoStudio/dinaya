@@ -12,8 +12,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/ardenostudio/dinaya/actions/workflows/ci.yml">
-    <img src="https://github.com/ardenostudio/dinaya/actions/workflows/ci.yml/badge.svg" alt="CI status" />
+  <a href="https://github.com/ArdenoStudio/dinaya/actions/workflows/ci.yml">
+    <img src="https://github.com/ArdenoStudio/dinaya/actions/workflows/ci.yml/badge.svg" alt="CI status" />
   </a>
   <a href="https://dinaya.lk">
     <img src="https://img.shields.io/badge/website-dinaya.lk-0ea5e9?style=flat-square" alt="Production website" />
@@ -29,7 +29,7 @@
   ·
   <a href="docs/deployment-checklist.md">Deployment checklist</a>
   ·
-  <a href="https://github.com/ardenostudio/dinaya/actions">GitHub Actions</a>
+  <a href="https://github.com/ArdenoStudio/dinaya/actions">GitHub Actions</a>
 </p>
 
 ---
@@ -160,5 +160,5 @@ public/           Static assets (including dinaya-logo.svg)
 ---
 
 <p align="center">
-  Built by <a href="https://github.com/ardenostudio">Ardeno Studio</a>
+  Built by <a href="https://github.com/ArdenoStudio">Ardeno Studio</a>
 </p>
