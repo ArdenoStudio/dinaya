@@ -1,24 +1,49 @@
 <p align="center">
   <a href="https://dinaya.lk">
-    <img src="public/dinaya-logo.svg" alt="Dinaya logo" width="96" height="96" />
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="public/dinaya-brand-dark.svg" />
+      <img src="public/dinaya-brand-light.svg" alt="Dinaya" width="280" />
+    </picture>
   </a>
 </p>
 
-<h1 align="center">Dinaya</h1>
-
 <p align="center">
-  <strong>Sri Lanka–focused booking platform for local businesses.</strong><br />
+  Sri Lanka booking platform for local businesses — built by <strong>Ardeno Studio</strong><br />
   Public booking pages, PayHere payments, automated reminders, CRM, and AI growth workflows.
 </p>
 
 <p align="center">
-  <a href="https://github.com/ArdenoStudio/dinaya/actions/workflows/ci.yml">
-    <img src="https://github.com/ArdenoStudio/dinaya/actions/workflows/ci.yml/badge.svg" alt="CI status" />
-  </a>
+  <img src="https://img.shields.io/badge/status-live-F97316?style=flat-square" alt="Status live" />
   <a href="https://dinaya.lk">
-    <img src="https://img.shields.io/badge/website-dinaya.lk-0ea5e9?style=flat-square" alt="Production website" />
+    <img src="https://img.shields.io/badge/website-dinaya.lk-0EA5E9?style=flat-square" alt="Website dinaya.lk" />
   </a>
-  <img src="https://img.shields.io/badge/Next.js-16.2-black?style=flat-square&logo=next.js&logoColor=white" alt="Next.js 16" />
+  <img src="https://img.shields.io/badge/stack-Next.js%2016%20%2B%20Neon-111111?style=flat-square&logo=next.js&logoColor=white" alt="Stack Next.js and Neon" />
+  <img src="https://img.shields.io/badge/deployed-Vercel-111111?style=flat-square&logo=vercel&logoColor=white" alt="Deployed on Vercel" />
+  <img src="https://img.shields.io/badge/market-Sri%20Lanka-111111?style=flat-square" alt="Market Sri Lanka" />
+</p>
+
+<p align="center">
+  <a href="https://github.com/ArdenoStudio/dinaya/actions/workflows/ci.yml">
+    <img src="https://github.com/ArdenoStudio/dinaya/actions/workflows/ci.yml/badge.svg" alt="CI" />
+  </a>
+  <a href="https://github.com/ArdenoStudio/dinaya/actions/workflows/automations-cron.yml">
+    <img src="https://github.com/ArdenoStudio/dinaya/actions/workflows/automations-cron.yml/badge.svg" alt="Automations cron" />
+  </a>
+  <a href="https://github.com/ArdenoStudio/dinaya/actions/workflows/booking-reminders-cron.yml">
+    <img src="https://github.com/ArdenoStudio/dinaya/actions/workflows/booking-reminders-cron.yml/badge.svg" alt="Booking reminders cron" />
+  </a>
+  <a href="https://github.com/ArdenoStudio/dinaya/actions/workflows/google-calendar-cron.yml">
+    <img src="https://github.com/ArdenoStudio/dinaya/actions/workflows/google-calendar-cron.yml/badge.svg" alt="Google Calendar sync cron" />
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/ArdenoStudio/dinaya/actions/workflows/ai-workflows-cron.yml">
+    <img src="https://github.com/ArdenoStudio/dinaya/actions/workflows/ai-workflows-cron.yml/badge.svg" alt="AI workflows cron" />
+  </a>
+  <a href="https://github.com/ArdenoStudio/dinaya/actions/workflows/webhook-retries-cron.yml">
+    <img src="https://github.com/ArdenoStudio/dinaya/actions/workflows/webhook-retries-cron.yml/badge.svg" alt="Webhook retries cron" />
+  </a>
   <img src="https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black" alt="React 19" />
   <img src="https://img.shields.io/badge/TypeScript-5.8-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript" />
   <img src="https://img.shields.io/badge/Node.js-22-339933?style=flat-square&logo=node.js&logoColor=white" alt="Node.js 22" />
