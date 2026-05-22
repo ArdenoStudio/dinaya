@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Prevent horizontal scroll when the underlay nav shifts main content left */
+body {
+  overflow-x: hidden;
+}
+
+/* Scroll lock applied by UnderlayNav when the drawer is open */
+html.nav-open {
+  overflow-y: hidden;
+}
+
 @keyframes promo-gradient {
   0%   { background-position: 0% 50%; }
   50%  { background-position: 100% 50%; }

@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import localFont from "next/font/local";
 import { Analytics } from "@vercel/analytics/next";
+import { NavProvider } from "@/context/NavContext";
+import { SmoothScroll } from "@/components/SmoothScroll";
 import "./globals.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 
@@ -33,9 +35,12 @@ export default function RootLayout({
         >
           Skip to main content
         </a>
-        <main id="main-content">
-          {children}
-        </main>
+        <SmoothScroll />
+        <NavProvider>
+          <main id="main-content">
+            {children}
+          </main>
+        </NavProvider>
         <Analytics />
       </body>
     </html>

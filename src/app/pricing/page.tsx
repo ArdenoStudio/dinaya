@@ -144,33 +144,33 @@ export default async function PricingPage() {
           </div>
 
           {/* Pro plan */}
-          <div className="relative z-10 flex w-full max-w-[calc((64rem-1.25rem)/2)] shrink-0 flex-col overflow-hidden rounded-2xl border bg-gradient-to-br from-gray-950 via-gray-900 to-blue-950 p-8 text-white shadow-xl shadow-blue-900/20">
-            <div className="pointer-events-none absolute -top-16 -right-16 size-48 rounded-full bg-primary/30 blur-3xl" />
+          <div className="relative z-10 flex w-full max-w-[calc((64rem-1.25rem)/2)] shrink-0 flex-col overflow-hidden rounded-2xl border border-blue-200 bg-gradient-to-br from-white via-blue-50 to-blue-100 p-8 shadow-xl shadow-blue-200/60">
+            <div className="pointer-events-none absolute -top-16 -right-16 size-48 rounded-full bg-blue-300/30 blur-3xl" />
 
             <div className="relative">
               <div className="flex items-center gap-2 mb-2">
                 <h3 className="font-cal text-2xl tracking-tight">Pro</h3>
               </div>
-              <p className="text-sm text-white/60 mb-6">
+              <p className="text-sm text-gray-500 mb-6">
                 For growing teams — up to 3 branches, all seven AI growth tools, and advanced operations.
               </p>
 
               <div className="mb-6">
                 <div className="flex items-baseline gap-1">
                   <span className="font-cal text-5xl tracking-tight">LKR {config.proMonthlyPriceLkr.toLocaleString("en-LK")}</span>
-                  <span className="text-sm text-white/60">/month</span>
+                  <span className="text-sm text-gray-500">/month</span>
                 </div>
-                <p className="mt-2 text-sm text-white/70">
+                <p className="mt-2 text-sm text-gray-600">
                   or LKR {config.proAnnualPriceLkr.toLocaleString("en-LK")}/year
                   {proAnnualSavings > 0 && (
-                    <span className="ml-1 text-emerald-300">· save {proAnnualSavings}%</span>
+                    <span className="ml-1 text-emerald-600">· save {proAnnualSavings}%</span>
                   )}
                 </p>
               </div>
 
               <Link
                 href={upgradeHref}
-                className="inline-flex items-center justify-center gap-2 bg-white/10 border border-white/20 text-white px-5 py-3 rounded-lg text-sm font-medium hover:bg-white/15 transition-colors mb-7"
+                className="inline-flex items-center justify-center gap-2 bg-primary text-white px-5 py-3 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors mb-7"
               >
                 {upgradeLabel}
                 <i className="bi bi-arrow-right text-sm" />
@@ -179,10 +179,10 @@ export default async function PricingPage() {
               <ul className="space-y-3 text-sm">
                 {proOperationalFeatures.map((f) => (
                   <li key={f} className="flex items-start gap-2.5">
-                    <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-primary/30">
+                    <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-primary/15">
                       <i className="bi bi-check text-primary" style={{ fontSize: '0.625rem' }} />
                     </span>
-                    <span className="text-white/85">{f}</span>
+                    <span className="text-gray-700">{f}</span>
                   </li>
                 ))}
               </ul>
@@ -191,48 +191,48 @@ export default async function PricingPage() {
           </div>
 
           {/* Max plan */}
-          <div className="relative flex w-full max-w-[calc((64rem-1.25rem)/2)] shrink-0 flex-col overflow-hidden rounded-2xl border bg-gradient-to-br from-gray-950 via-gray-900 to-amber-700 p-8 text-white shadow-xl shadow-amber-700/25">
-            <div className="pointer-events-none absolute -top-16 -right-16 size-48 rounded-full bg-amber-400/35 blur-3xl" />
+          <div className="relative flex w-full max-w-[calc((64rem-1.25rem)/2)] shrink-0 flex-col overflow-hidden rounded-2xl border border-amber-200 bg-gradient-to-br from-white via-yellow-50 to-amber-100 p-8 shadow-xl shadow-amber-200/60">
+            <div className="pointer-events-none absolute -top-16 -right-16 size-48 rounded-full bg-amber-200/50 blur-3xl" />
 
             <div className="relative">
               <div className="flex items-center gap-2 mb-2">
                 <h3 className="font-cal text-2xl tracking-tight">Max</h3>
               </div>
-              <p className="text-sm text-white/60 mb-6">
+              <p className="text-sm text-gray-500 mb-6">
                 Everything in Pro — plus unlimited branches for larger teams.
               </p>
 
               <div className="mb-6">
                 <div className="flex items-baseline gap-1">
                   <span className="font-cal text-5xl tracking-tight">LKR {config.maxMonthlyPriceLkr.toLocaleString("en-LK")}</span>
-                  <span className="text-sm text-white/60">/month</span>
+                  <span className="text-sm text-gray-500">/month</span>
                 </div>
-                <p className="mt-2 text-sm text-white/70">
+                <p className="mt-2 text-sm text-gray-600">
                   or LKR {config.maxAnnualPriceLkr.toLocaleString("en-LK")}/year
                   {maxAnnualSavings > 0 && (
-                    <span className="ml-1 text-emerald-300">· save {maxAnnualSavings}%</span>
+                    <span className="ml-1 text-emerald-600">· save {maxAnnualSavings}%</span>
                   )}
                 </p>
               </div>
 
               <Link
                 href={upgradeHref}
-                className="inline-flex items-center justify-center gap-2 bg-white/10 border border-white/20 text-white px-5 py-3 rounded-lg text-sm font-medium hover:bg-white/15 transition-colors mb-7"
+                className="inline-flex items-center justify-center gap-2 bg-gray-900 text-white px-5 py-3 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors mb-7"
               >
                 {upgradeLabel}
                 <i className="bi bi-arrow-right text-sm" />
               </Link>
 
-              <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-white/50">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
                 Multi-branch scale
               </p>
               <ul className="space-y-3 text-sm">
                 {maxAiFeatures.map((f) => (
                   <li key={f} className="flex items-start gap-2.5">
                     <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-amber-400/25">
-                      <i className="bi bi-check text-amber-200" style={{ fontSize: '0.625rem' }} />
+                      <i className="bi bi-check text-amber-600" style={{ fontSize: '0.625rem' }} />
                     </span>
-                    <span className="text-white/85">{f}</span>
+                    <span className="text-gray-700">{f}</span>
                   </li>
                 ))}
               </ul>
