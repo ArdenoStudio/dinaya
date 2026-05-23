@@ -56,15 +56,15 @@ export function UnderlayNav() {
   }, []);
 
   const [layout, setLayout] = useState({
-    open: 9999, closed: 1152, isMobile: false, fullWidth: 390,
+    open: 1152, closed: 768, isMobile: false, fullWidth: 390,
   });
   useLayoutEffect(() => {
     const compute = () => {
       const w = window.innerWidth;
       const isMobile = w < 640;
       setLayout({
-        open:      w - 24,
-        closed:    isMobile ? w - 16 : Math.min(1152, w - 48),
+        open:      isMobile ? w - 24 : Math.min(1152, w - 48),
+        closed:    isMobile ? w - 16 : Math.min(768, w - 48),
         isMobile,
         fullWidth: w,
       });
@@ -310,9 +310,9 @@ export function UnderlayNav() {
             </>
           ) : (
             /* ── Desktop menu (original layout) ── */
-            <>
+            <div style={{ width: layout.open }}>
               <div className="mx-5 h-px bg-gray-200" />
-              <div className="px-5 pt-5 pb-6 grid grid-cols-[1fr_auto_auto] gap-8">
+              <div className="px-5 pt-5 pb-6 grid grid-cols-[1.2fr_1fr_auto_auto] gap-8">
 
                 {/* Column 1 — main nav links */}
                 <div>
@@ -346,13 +346,66 @@ export function UnderlayNav() {
                   </ul>
                 </div>
 
-                {/* Column 2 — account + legal */}
-                <div className="flex flex-col gap-6 min-w-[8rem]">
+                {/* Column 2 — Popular Resources (Fills middle space) */}
+                <div className="hidden lg:block border-l border-gray-100 pl-8">
+                  <p className="text-[0.6875rem] font-semibold tracking-[0.12em] text-gray-400 uppercase mb-4">
+                    Popular Guides
+                  </p>
+                  <div className="flex flex-col gap-6 mt-2">
+                    <motion.div
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={isOpen ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 }}
+                      transition={{ delay: isOpen ? 0.40 : 0, duration: 0.5, ease: "easeOut" }}
+                    >
+                      <Link href="/help" onClick={close} className="group flex flex-col gap-1">
+                        <span className="text-sm font-bold text-gray-900 group-hover:text-primary transition-colors">
+                          Setting up AI Hub
+                        </span>
+                        <span className="text-[0.8rem] text-gray-500 leading-snug">
+                          Automate your schedule in 5 minutes with our smart booking rules.
+                        </span>
+                      </Link>
+                    </motion.div>
+                    
+                    <motion.div
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={isOpen ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 }}
+                      transition={{ delay: isOpen ? 0.44 : 0, duration: 0.5, ease: "easeOut" }}
+                    >
+                      <Link href="/help" onClick={close} className="group flex flex-col gap-1">
+                        <span className="text-sm font-bold text-gray-900 group-hover:text-primary transition-colors">
+                          Google Calendar Sync
+                        </span>
+                        <span className="text-[0.8rem] text-gray-500 leading-snug">
+                          Keep your personal events strictly private while avoiding double bookings.
+                        </span>
+                      </Link>
+                    </motion.div>
+
+                    <motion.div
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={isOpen ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 }}
+                      transition={{ delay: isOpen ? 0.48 : 0, duration: 0.5, ease: "easeOut" }}
+                    >
+                      <Link href="/help" onClick={close} className="group flex flex-col gap-1">
+                        <span className="text-sm font-bold text-gray-900 group-hover:text-primary transition-colors">
+                          Client Booking Tips
+                        </span>
+                        <span className="text-[0.8rem] text-gray-500 leading-snug">
+                          Best practices for reducing no-shows and maximizing attendance.
+                        </span>
+                      </Link>
+                    </motion.div>
+                  </div>
+                </div>
+
+                {/* Column 3 — account + legal */}
+                <div className="flex flex-col gap-6 min-w-[8rem] pl-4">
                   <SubCol heading="Account" items={ACCOUNT_LINKS} isOpen={isOpen} onClose={close} baseDelay={0.42} />
                   <SubCol heading="Legal"   items={QUICK_LINKS}   isOpen={isOpen} onClose={close} baseDelay={0.52} />
                 </div>
 
-                {/* Column 3 — featured CTA card */}
+                {/* Column 4 — original CTA card */}
                 <motion.div
                   className="w-52 rounded-xl bg-gray-900/5 border border-gray-200 p-5 flex flex-col justify-between gap-4"
                   initial={{ opacity: 0, scale: 0.96 }}
@@ -380,7 +433,7 @@ export function UnderlayNav() {
                 </motion.div>
 
               </div>
-            </>
+            </div>
           )}
         </motion.div>
       </motion.header>
