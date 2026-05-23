@@ -7,13 +7,11 @@ import { lookupCustomDomainSlug } from "@/lib/custom-domain";
 const { auth } = NextAuth(authConfig);
 
 const APP_DOMAIN = process.env.NEXT_PUBLIC_APP_DOMAIN ?? "dinaya.lk";
-const DEFAULT_APP_ORIGIN = APP_DOMAIN.startsWith("localhost") || APP_DOMAIN.startsWith("127.")
-  ? `http://${APP_DOMAIN}`
-  : `https://${APP_DOMAIN}`;
-const APP_ORIGIN = (process.env.NEXT_PUBLIC_APP_URL ?? DEFAULT_APP_ORIGIN).replace(/\/$/, "");
 
-function trustedAppUrl(path: string): URL {
-  return new URL(path, APP_ORIGIN);
+function redirectOnSameOrigin(req: NextRequest, pathname: string): URL {
+  const url = req.nextUrl.clone();
+  url.pathname = pathname;
+  return url;
 }
 
 function rewriteUrl(req: NextRequest, path: string): URL {
@@ -48,22 +46,22 @@ export default auth(async (req) => {
   }
 
   if (pathname === "/login") {
-    const signInUrl = trustedAppUrl("/auth/signin");
+    const signInUrl = redirectOnSameOrigin(req, "/auth/signin");
     signInUrl.search = req.nextUrl.search;
     return NextResponse.redirect(signInUrl);
   }
 
   if (pathname.startsWith("/dashboard")) {
     if (!req.auth) {
-      return NextResponse.redirect(trustedAppUrl("/auth/signin"));
+      return NextResponse.redirect(redirectOnSameOrigin(req, "/auth/signin"));
     }
   }
 
   if (pathname.startsWith("/admin")) {
     if (!req.auth) {
-      return NextResponse.redirect(
-        trustedAppUrl(`/auth/signin?callbackUrl=${encodeURIComponent(pathname)}`),
-      );
+      const signInUrl = redirectOnSameOrigin(req, "/auth/signin");
+      signInUrl.searchParams.set("callbackUrl", pathname);
+      return NextResponse.redirect(signInUrl);
     }
   }
 

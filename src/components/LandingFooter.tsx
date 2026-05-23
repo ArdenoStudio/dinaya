@@ -43,7 +43,7 @@ export function LandingFooter() {
                 { label: "Pricing",        href: "/pricing"   },
                 { label: "Solutions",      href: "/solutions" },
                 { label: "Get started",    href: "/register"  },
-                { label: "Sign in",        href: "/login"     },
+                { label: "Sign in",        href: "/auth/signin" },
               ].map(({ label, href }) => (
                 <li key={href}>
                   <Link href={href} className="text-gray-400 hover:text-white transition-colors">

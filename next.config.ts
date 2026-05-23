@@ -1,5 +1,4 @@
 import type { NextConfig } from "next";
-import path from "path";
 
 const securityHeaders = [
   { key: "X-Frame-Options", value: "SAMEORIGIN" },
@@ -28,7 +27,6 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  outputFileTracingRoot: path.join(__dirname),
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "*.dinaya.lk" },

@@ -46,7 +46,7 @@ export async function registerViaApi(
 }
 
 export async function loginViaUi(page: Page, account: TestAccount): Promise<void> {
-  await page.goto("/login");
+  await page.goto("/auth/signin");
   await page.getByLabel("Email").fill(account.email);
   await page.getByLabel("Password", { exact: true }).fill(account.password);
   await page.getByRole("button", { name: "Sign in" }).click();

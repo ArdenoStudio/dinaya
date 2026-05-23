@@ -1,9 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { allGuides } from "@content/docs/guides";
 
 export function DocsMobileNav() {
+  const router = useRouter();
+
   return (
     <div className="lg:hidden mb-6">
       <label htmlFor="docs-mobile-nav" className="sr-only">
@@ -14,7 +17,7 @@ export function DocsMobileNav() {
         className="w-full rounded-lg border bg-white px-3 py-2 text-sm"
         defaultValue=""
         onChange={(e) => {
-          if (e.target.value) window.location.href = e.target.value;
+          if (e.target.value) router.push(e.target.value);
         }}
       >
         <option value="">Browse guides…</option>
