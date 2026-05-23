@@ -1,4 +1,4 @@
-/** Mirrors SidebarNav groups in src/components/dashboard/SidebarNav.tsx */
+/** Mirrors SidebarNav groups in src/lib/dashboard-nav.ts */
 export const DASHBOARD_NAV_GROUPS = [
   {
     label: "Workspace",
