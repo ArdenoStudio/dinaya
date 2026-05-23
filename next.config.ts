@@ -42,6 +42,15 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async redirects() {
+    return [
+      {
+        source: "/login",
+        destination: "/auth/signin",
+        permanent: false,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

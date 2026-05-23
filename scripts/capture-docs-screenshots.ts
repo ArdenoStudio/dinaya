@@ -70,7 +70,7 @@ async function main() {
   });
   const page = await context.newPage();
 
-  await page.goto(`${baseURL}/login`);
+  await page.goto(`${baseURL}/auth/signin`);
   await page.getByLabel("Email").fill(account.email);
   await page.getByLabel("Password", { exact: true }).fill(account.password);
   await page.getByRole("button", { name: "Sign in" }).click();

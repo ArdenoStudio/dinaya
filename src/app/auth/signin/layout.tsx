@@ -6,7 +6,7 @@ export const metadata: Metadata = {
     "Sign in to your Dinaya dashboard to manage bookings, clients, and services.",
 };
 
-export default function LoginLayout({
+export default function SignInLayout({
   children,
 }: {
   children: React.ReactNode;
