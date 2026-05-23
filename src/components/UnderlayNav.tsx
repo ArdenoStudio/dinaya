@@ -21,7 +21,7 @@ const NAV_LINKS = [
 ];
 
 const ACCOUNT_LINKS = [
-  { label: "Log in",           href: "/login"    },
+  { label: "Log in",           href: "/auth/signin"    },
   { label: "Get started free", href: "/register" },
 ];
 
@@ -194,7 +194,7 @@ export function UnderlayNav() {
           {/* Auth CTAs */}
           <div className="flex items-center gap-2">
             <Link
-              href="/login"
+              href="/auth/signin"
               className="hidden sm:block text-base text-gray-600 hover:text-gray-900 transition-colors
                          px-4 py-2 rounded-full border border-gray-300 hover:border-gray-400"
             >
@@ -277,7 +277,7 @@ export function UnderlayNav() {
                   transition={{ delay: isOpen ? 0.52 : 0, duration: 0.35, ease: "easeOut" }}
                 >
                   <Link
-                    href="/login"
+                    href="/auth/signin"
                     onClick={close}
                     className="block text-center py-3.5 rounded-xl text-sm font-semibold border border-gray-200 text-gray-700 hover:bg-black/5 transition-colors"
                   >

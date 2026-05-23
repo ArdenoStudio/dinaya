@@ -394,7 +394,7 @@ export default function LandingPage() {
                   <Icon name="arrow-right" className="text-sm" />
                 </Link>
                 <Link
-                  href="/login"
+                  href="/auth/signin"
                   className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-white px-7 py-3.5 rounded-xl font-medium hover:bg-white/20 transition-colors"
                 >
                   Sign in
