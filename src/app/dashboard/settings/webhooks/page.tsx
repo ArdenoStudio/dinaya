@@ -1,6 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { ConfirmDialog } from "@/components/dashboard/ConfirmDialog";
+import { EmptyState } from "@/components/dashboard/EmptyState";
+import { Webhook } from "lucide-react";
 
 const ALL_EVENTS = [
   { value: "booking.created", label: "Booking created" },
@@ -78,7 +81,6 @@ export default function WebhooksPage() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("Delete this webhook?")) return;
     await fetch(`/api/dashboard/webhooks/${id}`, { method: "DELETE" });
     setHooks((prev) => prev.filter((h) => h.id !== id));
   }
@@ -154,9 +156,20 @@ export default function WebhooksPage() {
       {loading ? (
         <p className="text-muted-foreground text-sm">Loading…</p>
       ) : hooks.length === 0 ? (
-        <div className="bg-white border rounded-xl p-12 text-center text-muted-foreground text-sm">
-          No webhooks yet. Add one above.
-        </div>
+        <EmptyState
+          icon={Webhook}
+          title="No webhooks yet"
+          description="Add a webhook endpoint to receive booking events at your server."
+          action={
+            <button
+              type="button"
+              onClick={() => setShowForm(true)}
+              className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+            >
+              Add webhook
+            </button>
+          }
+        />
       ) : (
         <div className="bg-white border rounded-xl divide-y">
           {hooks.map((hook) => (
@@ -177,7 +190,17 @@ export default function WebhooksPage() {
                   >
                     {hook.isActive ? "Active" : "Paused"}
                   </button>
-                  <button onClick={() => handleDelete(hook.id)} className="text-xs text-muted-foreground hover:text-destructive">Delete</button>
+                  <ConfirmDialog
+                    title="Delete webhook"
+                    description="Delete this webhook? Your server will stop receiving events."
+                    confirmLabel="Delete"
+                    onConfirm={() => handleDelete(hook.id)}
+                    trigger={
+                      <button type="button" className="text-xs text-muted-foreground hover:text-destructive">
+                        Delete
+                      </button>
+                    }
+                  />
                 </div>
               </div>
             </div>

@@ -1,7 +1,7 @@
 import {
   BarChart3,
-  Bot,
   BookOpen,
+  Bot,
   CalendarDays,
   Clock3,
   CreditCard,
@@ -15,6 +15,7 @@ import {
   UserRoundCheck,
   Users,
   Wallet,
+  Zap,
   type LucideIcon,
 } from "lucide-react";
 import type { DashboardCopy } from "@/lib/dashboard-i18n";
@@ -65,7 +66,7 @@ export const dashboardNavGroups: NavGroupConfig[] = [
     labelKey: "configure",
     links: [
       { href: "/dashboard/settings/integrations", labelKey: "integrations", icon: Plug, ownerOnly: true },
-      { href: "/dashboard/automations", labelKey: "automations", icon: Bot, ownerOnly: true },
+      { href: "/dashboard/automations", labelKey: "automations", icon: Zap, ownerOnly: true },
       { href: "/dashboard/billing", labelKey: "billing", icon: Wallet, ownerOnly: true },
       { href: "/dashboard/settings", labelKey: "settings", icon: Settings, ownerOnly: true },
     ],
