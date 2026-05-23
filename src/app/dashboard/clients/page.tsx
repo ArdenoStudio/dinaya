@@ -167,7 +167,7 @@ export default function ClientsPage() {
       {/* Header */}
       <div className="flex items-start justify-between mb-8 gap-4 flex-wrap">
         <div>
-          <h1 className="font-cal text-3xl tracking-tight">Customers</h1>
+          <h1 className="font-cal text-3xl tracking-tight">Clients</h1>
           <p className="text-muted-foreground mt-1 text-sm">
             Manage your customer list, track leads, and grow your business.
           </p>

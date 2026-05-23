@@ -7,8 +7,10 @@ import { notFound } from "next/navigation";
 import { requireBusiness } from "@/lib/auth";
 import { formatLkr } from "@/lib/utils";
 import { OnboardingWizard } from "@/components/dashboard/OnboardingWizard";
+import { StatCard } from "@/components/dashboard/StatCard";
 import { buildPublicBookingUrl, buildPublicBookingUrlLabel } from "@/lib/booking-url";
 import { Icon } from "@/components/ui/Icon";
+import { Banknote, CalendarCheck, TrendingUp, UserPlus } from "lucide-react";
 
 async function safeRecentActivity(businessId: string) {
   try {
@@ -158,10 +160,16 @@ export default async function DashboardOverview() {
   const showOnboarding = onboarding.some((item) => !item.done);
 
   const stats = [
-    { label: "Today revenue", value: formatLkr(Number(todayRevenue ?? 0)), icon: "cash-stack", accent: "bg-primary" },
-    { label: "Today bookings", value: todayBookings, icon: "calendar2-check", accent: "bg-amber-500" },
-    { label: "Week revenue", value: `${formatLkr(currentWeekRevenue)} (${revenueDelta >= 0 ? "+" : ""}${revenueDelta}%)`, icon: "graph-up", accent: "bg-violet-600" },
-    { label: "New clients", value: newClientsThisWeek, icon: "person-plus", accent: "bg-primary" },
+    { label: "Today revenue", value: formatLkr(Number(todayRevenue ?? 0)), icon: Banknote, tone: "cobalt" as const, delta: undefined },
+    { label: "Today bookings", value: todayBookings, icon: CalendarCheck, tone: "amber" as const, delta: undefined },
+    {
+      label: "Week revenue",
+      value: formatLkr(currentWeekRevenue),
+      icon: TrendingUp,
+      tone: "violet" as const,
+      delta: `${revenueDelta >= 0 ? "+" : ""}${revenueDelta}% vs last week`,
+    },
+    { label: "New clients", value: newClientsThisWeek, icon: UserPlus, tone: "cobalt" as const, delta: "This week" },
   ];
 
   return (
@@ -177,18 +185,14 @@ export default async function DashboardOverview() {
       {Number(totalBookings) === 0 && showOnboarding ? null : (
         <div className="grid gap-4 md:grid-cols-4">
           {stats.map((stat) => (
-            <div key={stat.label} className="overflow-hidden rounded-xl border bg-white">
-              <div className={`h-[3px] ${stat.accent}`} />
-              <div className="flex items-start gap-3 p-5">
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                  <Icon name={stat.icon} aria-hidden="true" />
-                </span>
-                <div>
-                  <p className="text-xs text-muted-foreground">{stat.label}</p>
-                  <p className="mt-1 text-2xl font-bold tracking-tight">{stat.value}</p>
-                </div>
-              </div>
-            </div>
+            <StatCard
+              key={stat.label}
+              label={stat.label}
+              value={stat.value}
+              icon={stat.icon}
+              tone={stat.tone}
+              delta={stat.delta}
+            />
           ))}
         </div>
       )}

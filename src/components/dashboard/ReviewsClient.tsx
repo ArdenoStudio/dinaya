@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { useDashboardCopy } from "@/components/dashboard/DashboardLocaleProvider";
+import { ConfirmDialog } from "@/components/dashboard/ConfirmDialog";
 import { Icon } from "@/components/ui/Icon";
 
 type Review = {
@@ -60,7 +61,6 @@ export function ReviewsClient({ canUseAiReplies }: { canUseAiReplies: boolean })
   }
 
   async function deleteReview(id: string) {
-    if (!confirm("Delete this review? This cannot be undone.")) return;
     const response = await fetch(`/api/dashboard/reviews/${id}`, { method: "DELETE" });
     if (response.ok) setReviewList((prev) => prev.filter((review) => review.id !== id));
   }
@@ -155,13 +155,21 @@ export function ReviewsClient({ canUseAiReplies }: { canUseAiReplies: boolean })
                   >
                     <span className={`absolute top-0.5 size-4 rounded-full bg-white shadow transition-transform ${review.isPublished ? "translate-x-4" : "translate-x-0.5"}`} />
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => deleteReview(review.id)}
-                    className="text-sm text-muted-foreground transition-colors hover:text-destructive"
-                  >
-                    <Icon name="trash" />
-                  </button>
+                  <ConfirmDialog
+                    title="Delete review"
+                    description="Delete this review? This cannot be undone."
+                    confirmLabel="Delete"
+                    onConfirm={() => deleteReview(review.id)}
+                    trigger={
+                      <button
+                        type="button"
+                        className="text-sm text-muted-foreground transition-colors hover:text-destructive"
+                        aria-label="Delete review"
+                      >
+                        <Icon name="trash" />
+                      </button>
+                    }
+                  />
                 </div>
               </div>
 

@@ -4,6 +4,8 @@ import { ProGate } from "@/lib/plan";
 import { requireBusiness } from "@/lib/auth";
 import { formatLkr } from "@/lib/utils";
 import { and, count, desc, eq, sql } from "drizzle-orm";
+import { StatCard } from "@/components/dashboard/StatCard";
+import { BarChart3, CalendarDays, Star, Users } from "lucide-react";
 
 export default async function ReportsPage() {
   const { businessId } = await requireBusiness();
@@ -82,17 +84,10 @@ export default async function ReportsPage() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-4">
-          {[
-            ["Revenue", formatLkr(Number(totalRevenue ?? 0))],
-            ["Bookings", totalBookings],
-            ["Clients", totalClients],
-            ["Avg. rating", Number(averageRating).toFixed(1)],
-          ].map(([label, value]) => (
-            <div key={label} className="rounded-xl border bg-white p-5">
-              <p className="text-xs text-muted-foreground">{label}</p>
-              <p className="mt-1 text-2xl font-bold">{value}</p>
-            </div>
-          ))}
+          <StatCard label="Revenue" value={formatLkr(Number(totalRevenue ?? 0))} icon={BarChart3} tone="cobalt" />
+          <StatCard label="Bookings" value={totalBookings} icon={CalendarDays} tone="amber" />
+          <StatCard label="Clients" value={totalClients} icon={Users} tone="slate" />
+          <StatCard label="Avg. rating" value={Number(averageRating).toFixed(1)} icon={Star} tone="violet" />
         </div>
 
         <div className="grid gap-6 lg:grid-cols-2">

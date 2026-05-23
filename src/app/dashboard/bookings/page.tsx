@@ -3,8 +3,10 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
+import { CalendarPlus, Download } from "lucide-react";
 import { bookingReminderText, whatsappUrl } from "@/lib/whatsapp";
-import { Icon } from "@/components/ui/Icon";
+import { DataTable } from "@/components/dashboard/DataTable";
+import { EmptyState } from "@/components/dashboard/EmptyState";
 
 type Booking = {
   id: string;
@@ -37,7 +39,6 @@ const TABS = [
 
 type Tab = (typeof TABS)[number]["key"];
 
-// Actions available per status
 const ACTIONS: Record<string, { label: string; next: string; style: string }[]> = {
   pending: [
     { label: "Confirm", next: "confirmed", style: "text-green-700 hover:bg-green-50 border-green-200" },
@@ -60,7 +61,10 @@ export default function BookingsPage() {
     setLoading(true);
     fetch(`/api/dashboard/bookings?tab=${tab}`)
       .then((r) => r.json())
-      .then((data) => { setRows(data); setLoading(false); });
+      .then((data) => {
+        setRows(data);
+        setLoading(false);
+      });
   }, [tab]);
 
   async function updateStatus(bookingId: string, status: string) {
@@ -73,7 +77,7 @@ export default function BookingsPage() {
     if (res.ok) {
       const updated = await res.json();
       setRows((prev) =>
-        prev.map((b) => (b.id === bookingId ? { ...b, status: updated.status } : b))
+        prev.map((b) => (b.id === bookingId ? { ...b, status: updated.status } : b)),
       );
     }
     setUpdating(null);
@@ -81,28 +85,40 @@ export default function BookingsPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="mb-6 flex items-center justify-between">
         <h1 className="font-cal text-2xl">Bookings</h1>
-	        <div className="flex gap-2">
-          <a href={`/api/dashboard/bookings?tab=${tab}&export=csv`} className="flex items-center gap-1.5 border px-4 py-2 rounded-md text-sm font-medium text-muted-foreground hover:border-primary/50 hover:text-foreground transition-colors">
-            <Icon name="download" className="text-xs" /> Export CSV
+        <div className="flex gap-2">
+          <a
+            href={`/api/dashboard/bookings?tab=${tab}&export=csv`}
+            className="flex items-center gap-1.5 rounded-md border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground"
+          >
+            <Download className="size-3.5" aria-hidden="true" />
+            Export CSV
           </a>
-	          <Link href="/dashboard/calendar" className="flex items-center gap-1.5 border px-4 py-2 rounded-md text-sm font-medium text-muted-foreground hover:border-primary/50 hover:text-foreground transition-colors">
-            <Icon name="calendar" className="text-xs" /> Calendar
+          <Link
+            href="/dashboard/calendar"
+            className="flex items-center gap-1.5 rounded-md border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground"
+          >
+            Calendar
           </Link>
-          <Link href="/dashboard/bookings/new" className="flex items-center gap-1.5 bg-gradient-to-b from-primary/90 to-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium border-b-2 border-primary/70 shadow-sm transition-all hover:shadow-primary/30 hover:shadow-md">
-            <Icon name="plus" className="text-xs" /> New booking
+          <Link
+            href="/dashboard/bookings/new"
+            className="flex items-center gap-1.5 rounded-md border-b-2 border-primary/70 bg-gradient-to-b from-primary/90 to-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-all hover:shadow-md hover:shadow-primary/30"
+          >
+            + New booking
           </Link>
         </div>
       </div>
 
-      {/* Filter tabs */}
-      <div className="flex gap-1 mb-5 border-b">
+      <div className="mb-5 flex gap-1 border-b" role="tablist" aria-label="Booking filters">
         {TABS.map((t) => (
           <button
             key={t.key}
+            type="button"
+            role="tab"
+            aria-selected={tab === t.key}
             onClick={() => setTab(t.key)}
-            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+            className={`border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
               tab === t.key
                 ? "border-primary text-primary"
                 : "border-transparent text-muted-foreground hover:text-foreground"
@@ -114,105 +130,141 @@ export default function BookingsPage() {
       </div>
 
       {loading ? (
-        <div className="bg-white border rounded-xl p-12 text-center text-muted-foreground text-sm">
+        <div className="rounded-xl border bg-white p-12 text-center text-sm text-muted-foreground">
           Loading…
         </div>
-      ) : rows.length === 0 ? (
-        <div className="bg-white border rounded-xl p-12 text-center text-muted-foreground">
-          No bookings here yet.
-        </div>
       ) : (
-        <div className="bg-white border rounded-xl overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b bg-muted/30">
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Client</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Service</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Staff</th>
-	                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Date & Time</th>
-	                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Status</th>
-	                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Payment</th>
-	                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Source</th>
-	                <th className="px-4 py-3" />
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((row, i) => {
+        <DataTable
+          rows={rows}
+          getRowId={(row) => row.id}
+          empty={
+            <EmptyState
+              icon={CalendarPlus}
+              title="No bookings here yet"
+              description="New bookings from your booking page or manual entries will appear here."
+              action={
+                <Link
+                  href="/dashboard/bookings/new"
+                  className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+                >
+                  Create booking
+                </Link>
+              }
+            />
+          }
+          columns={[
+            {
+              key: "client",
+              header: "Client",
+              render: (row) => (
+                <>
+                  {row.clientId ? (
+                    <Link
+                      href={`/dashboard/clients/${row.clientId}`}
+                      className="font-medium hover:text-primary hover:underline"
+                    >
+                      {row.clientName}
+                    </Link>
+                  ) : (
+                    <p className="font-medium">{row.clientName}</p>
+                  )}
+                  <p className="text-xs text-muted-foreground">{row.clientPhone}</p>
+                </>
+              ),
+            },
+            { key: "service", header: "Service", render: (row) => row.serviceName },
+            { key: "staff", header: "Staff", render: (row) => row.staffName },
+            {
+              key: "datetime",
+              header: "Date & Time",
+              render: (row) => (
+                <>
+                  <p>{format(new Date(row.startsAt), "d MMM yyyy")}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {format(new Date(row.startsAt), "h:mm a")}
+                  </p>
+                </>
+              ),
+            },
+            {
+              key: "status",
+              header: "Status",
+              render: (row) => (
+                <span
+                  className={`rounded-full px-2 py-0.5 text-xs font-medium capitalize ${STATUS_STYLES[row.status] ?? ""}`}
+                >
+                  {row.status.replace("_", " ")}
+                </span>
+              ),
+            },
+            {
+              key: "payment",
+              header: "Payment",
+              render: (row) => (
+                <>
+                  <p className="tabular-nums">
+                    {row.amountLkr ? `LKR ${row.amountLkr.toLocaleString()}` : "-"}
+                  </p>
+                  {row.paymentStatus ? (
+                    <p className="text-xs capitalize text-muted-foreground">{row.paymentStatus}</p>
+                  ) : null}
+                </>
+              ),
+            },
+            {
+              key: "source",
+              header: "Source",
+              className: "text-muted-foreground",
+              render: (row) => <span className="text-xs capitalize">{row.source}</span>,
+            },
+            {
+              key: "actions",
+              header: "",
+              align: "right",
+              render: (row) => {
                 const actions = ACTIONS[row.status] ?? [];
                 const isUpdating = updating === row.id;
                 return (
-                  <tr key={row.id} className={`border-b last:border-0 ${i % 2 === 1 ? "bg-muted/10" : ""}`}>
-                    <td className="px-4 py-3">
-                      {row.clientId ? (
-                        <Link
-                          href={`/dashboard/clients/${row.clientId}`}
-                          className="font-medium hover:text-primary hover:underline"
-                        >
-                          {row.clientName}
-                        </Link>
-                      ) : (
-                        <p className="font-medium">{row.clientName}</p>
+                  <div className="flex items-center justify-end gap-1.5">
+                    <Link
+                      href={`/dashboard/bookings/${row.id}`}
+                      className="rounded border border-gray-200 px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/50"
+                    >
+                      View
+                    </Link>
+                    <a
+                      href={whatsappUrl(
+                        row.clientPhone,
+                        bookingReminderText({
+                          clientName: row.clientName,
+                          serviceName: row.serviceName,
+                          startsAt: row.startsAt,
+                        }),
                       )}
-                      <p className="text-xs text-muted-foreground">{row.clientPhone}</p>
-                    </td>
-                    <td className="px-4 py-3">{row.serviceName}</td>
-                    <td className="px-4 py-3">{row.staffName}</td>
-                    <td className="px-4 py-3">
-                      <p>{format(new Date(row.startsAt), "d MMM yyyy")}</p>
-                      <p className="text-xs text-muted-foreground">{format(new Date(row.startsAt), "h:mm a")}</p>
-                    </td>
-                    <td className="px-4 py-3">
-	                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_STYLES[row.status] ?? ""}`}>
-	                        {row.status.replace("_", " ")}
-	                      </span>
-	                    </td>
-	                    <td className="px-4 py-3">
-	                      <p className="tabular-nums">{row.amountLkr ? `LKR ${row.amountLkr.toLocaleString()}` : "-"}</p>
-	                      {row.paymentStatus && <p className="text-xs text-muted-foreground capitalize">{row.paymentStatus}</p>}
-	                    </td>
-	                    <td className="px-4 py-3 text-xs text-muted-foreground capitalize">{row.source}</td>
-	                    <td className="px-4 py-3">
-                      <div className="flex gap-1.5 justify-end items-center">
-                        <Link
-                          href={`/dashboard/bookings/${row.id}`}
-                          className="text-xs px-2.5 py-1 rounded border font-medium text-muted-foreground hover:bg-muted/50 border-gray-200 transition-colors"
-                        >
-                          View
-                        </Link>
-                        <a
-                          href={whatsappUrl(
-                            row.clientPhone,
-                            bookingReminderText({
-                              clientName: row.clientName,
-                              serviceName: row.serviceName,
-                              startsAt: row.startsAt,
-                            })
-                          )}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs px-2.5 py-1 rounded border font-medium text-green-700 hover:bg-green-50 border-green-200 transition-colors"
-                          title="Message on WhatsApp"
-                        >
-                          WhatsApp
-                        </a>
-                        {actions.map((a) => (
-                          <button
-                            key={a.next}
-                            disabled={isUpdating}
-                            onClick={() => updateStatus(row.id, a.next)}
-                            className={`text-xs px-2.5 py-1 rounded border font-medium transition-colors disabled:opacity-40 ${a.style}`}
-                          >
-                            {isUpdating ? "…" : a.label}
-                          </button>
-                        ))}
-                      </div>
-                    </td>
-                  </tr>
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="rounded border border-green-200 px-2.5 py-1 text-xs font-medium text-green-700 transition-colors hover:bg-green-50"
+                      title="Message on WhatsApp"
+                    >
+                      WhatsApp
+                    </a>
+                    {actions.map((a) => (
+                      <button
+                        key={a.next}
+                        type="button"
+                        disabled={isUpdating}
+                        onClick={() => updateStatus(row.id, a.next)}
+                        className={`rounded border px-2.5 py-1 text-xs font-medium transition-colors disabled:opacity-40 ${a.style}`}
+                      >
+                        {isUpdating ? "…" : a.label}
+                      </button>
+                    ))}
+                  </div>
                 );
-              })}
-            </tbody>
-          </table>
-        </div>
+              },
+            },
+          ]}
+        />
       )}
     </div>
   );

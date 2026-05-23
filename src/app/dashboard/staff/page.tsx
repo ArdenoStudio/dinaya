@@ -4,7 +4,9 @@ import { eq } from "drizzle-orm";
 import Link from "next/link";
 import { requireOwner } from "@/lib/auth";
 import { StaffInviteForm } from "@/components/dashboard/StaffInviteForm";
+import { EmptyState } from "@/components/dashboard/EmptyState";
 import { Icon } from "@/components/ui/Icon";
+import { UserRoundCheck } from "lucide-react";
 
 export default async function StaffPage() {
   const { businessId } = await requireOwner();
@@ -26,12 +28,19 @@ export default async function StaffPage() {
       <StaffInviteForm />
 
       {list.length === 0 ? (
-        <div className="bg-white border rounded-xl p-12 text-center text-muted-foreground">
-          No staff yet.{" "}
-          <Link href="/dashboard/staff/new" className="text-primary hover:underline">
-            Add your first team member →
-          </Link>
-        </div>
+        <EmptyState
+          icon={UserRoundCheck}
+          title="No staff yet"
+          description="Add team members so bookings can be assigned and availability can be managed."
+          action={
+            <Link
+              href="/dashboard/staff/new"
+              className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+            >
+              Add your first team member
+            </Link>
+          }
+        />
       ) : (
         <div className="bg-white border rounded-xl divide-y">
           {list.map((s) => (
