@@ -116,7 +116,7 @@ export const SwapForm: FC<SwapFormProps> = ({
           ease: "easeIn",
           duration: 0.3,
         }}
-        className="theme-injected font-sans w-xs sm:w-sm bg-muted shadow-[0_10px_20px_rgba(0,0,0,0.08)] rounded-2xl overflow-hidden border border-border transition-colors"
+        className="font-sans w-xs sm:w-sm bg-muted shadow-[0_10px_20px_rgba(0,0,0,0.08)] rounded-2xl overflow-hidden border border-border transition-colors"
       >
         <form
           onSubmit={handleSubmit}
