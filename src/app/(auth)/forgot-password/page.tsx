@@ -72,7 +72,7 @@ function ForgotPasswordForm() {
               <span>{success}</span>
             </div>
             <Link
-              href="/login"
+              href="/auth/signin"
               className="inline-flex w-full items-center justify-center rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-muted"
             >
               Back to sign in
@@ -124,7 +124,7 @@ function ForgotPasswordForm() {
       {!success && (
         <p className="text-center text-sm text-gray-400 mt-5">
           Remember your password?{" "}
-          <Link href="/login" className="text-primary hover:underline font-medium">
+          <Link href="/auth/signin" className="text-primary hover:underline font-medium">
             Sign in
           </Link>
         </p>

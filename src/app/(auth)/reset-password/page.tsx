@@ -75,7 +75,7 @@ function ResetPasswordForm() {
         return;
       }
 
-      router.push("/login?reset=1");
+      router.push("/auth/signin?reset=1");
     } catch {
       setError("Something went wrong. Please try again.");
       setLoading(false);
@@ -209,7 +209,7 @@ function ResetPasswordForm() {
       </div>
 
       <p className="text-center text-sm text-gray-400 mt-5">
-        <Link href="/login" className="text-primary hover:underline font-medium">
+        <Link href="/auth/signin" className="text-primary hover:underline font-medium">
           Back to sign in
         </Link>
       </p>

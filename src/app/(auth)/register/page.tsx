@@ -106,7 +106,7 @@ export default function RegisterPage() {
     });
     const data = await res.json();
     if (!res.ok) { setError(data.error ?? "Something went wrong."); setLoading(false); return; }
-    router.push("/login?registered=1");
+    router.push("/auth/signin?registered=1");
   }
 
   const strength = getPasswordStrength(form.password);
@@ -365,7 +365,7 @@ export default function RegisterPage() {
 
           <p className="text-center text-sm text-gray-400 mt-5">
             Already have an account?{" "}
-            <Link href="/login" className="text-primary hover:underline font-medium">Sign in</Link>
+            <Link href="/auth/signin" className="text-primary hover:underline font-medium">Sign in</Link>
           </p>
         </div>
       </div>
