@@ -1,10 +1,11 @@
 "use client";
 
-import { PlusSignIcon, SidebarLeftIcon } from "@hugeicons/core-free-icons";
+import { PlusSignIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { useState, type ReactNode } from "react";
+import { SidebarToggleIcon } from "@/components/unlumen-ui/sidebar-toggle-icon";
 import { cn } from "@/lib/utils";
 
 export interface MacOSSidebarItem {
@@ -90,10 +91,10 @@ export function MacOSSidebar({
             type="button"
             layout
             aria-label={isOpen ? "Collapse sidebar" : "Expand sidebar"}
-            className="shrink-0 flex items-center justify-center rounded-md p-1 hover:bg-neutral-200/80 dark:hover:bg-neutral-700/80 transition-colors"
+            className="shrink-0 flex items-center justify-center rounded-md p-1 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200/80 dark:hover:bg-neutral-700/80 transition-colors"
             onClick={() => setIsOpen((open) => !open)}
           >
-            <HugeiconsIcon icon={SidebarLeftIcon} className="size-5" />
+            <SidebarToggleIcon isOpen={isOpen} strokeWidth={2} className="size-6" />
           </motion.button>
         </div>
 
@@ -282,10 +283,11 @@ export function MacOSSidebarDemo({
           <motion.button
             type="button"
             layout
+            aria-label={isOpen ? "Collapse sidebar" : "Expand sidebar"}
             className="shrink-0 flex items-center justify-center"
             onClick={() => setIsOpen((open) => !open)}
           >
-            <HugeiconsIcon icon={SidebarLeftIcon} className="size-5 cursor-pointer" />
+            <SidebarToggleIcon isOpen={isOpen} strokeWidth={2} className="size-6" />
           </motion.button>
         </div>
 
