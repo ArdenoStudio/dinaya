@@ -72,6 +72,10 @@ export default function RegisterPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     setReferrerCode(params.get("ref")?.trim().toLowerCase() ?? "");
+    const emailFromQuery = params.get("email")?.trim();
+    if (emailFromQuery) {
+      setForm((f) => ({ ...f, email: emailFromQuery }));
+    }
   }, []);
   useEffect(() => { if (step === 2) step2Ref.current?.focus(); }, [step]);
 
