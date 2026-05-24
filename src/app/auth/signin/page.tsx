@@ -35,7 +35,6 @@ function LoginForm() {
   const callbackUrl = getSafeCallbackUrl(searchParams.get("callbackUrl"));
 
   const emailRef = useRef<HTMLInputElement>(null);
-  const [isSignIn, setIsSignIn] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -43,7 +42,7 @@ function LoginForm() {
 
   useEffect(() => {
     emailRef.current?.focus();
-  }, [isSignIn]);
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -71,13 +70,6 @@ function LoginForm() {
     }
   }
 
-  function handleSignUpContinue() {
-    const params = new URLSearchParams();
-    if (email.trim()) params.set("email", email.trim());
-    const query = params.toString();
-    router.push(query ? `/register?${query}` : "/register");
-  }
-
   const banner = (
     <>
       {justRegistered && (
@@ -103,14 +95,13 @@ function LoginForm() {
       </div>
 
       <SwapForm
-        isSignIn={isSignIn}
-        onModeChange={setIsSignIn}
+        isSignIn
+        signUpHref="/register"
         email={email}
         onEmailChange={setEmail}
         password={password}
         onPasswordChange={setPassword}
         onSubmit={handleSubmit}
-        onSignUpContinue={handleSignUpContinue}
         loading={loading}
         error={error}
         emailInputRef={emailRef}
@@ -118,15 +109,10 @@ function LoginForm() {
         banner={banner}
         texts={{
           signInTitle: "Welcome back",
-          signUpTitle: "Create your account",
           signInSubtitle: "Sign in to your dashboard",
-          signUpSubtitle: "Free forever. No credit card needed.",
           signInButton: "Sign in",
-          signUpButton: "Continue",
           footerSignIn: "No account?",
-          footerSignUp: "Already have an account?",
           footerSignInCta: "Create one free",
-          footerSignUpCta: "Sign in",
         }}
       />
 
