@@ -66,4 +66,11 @@ test.describe("Auth & registration", () => {
     await page.getByRole("link", { name: /Sign in/i }).click();
     await page.waitForURL("**/auth/signin**");
   });
+
+  test("sign-in page links to register", async ({ page }) => {
+    await page.goto("/auth/signin");
+    await page.getByRole("link", { name: /Create one free/i }).click();
+    await page.waitForURL("**/register**");
+    await expect(page.getByRole("heading", { name: /Create your account/i })).toBeVisible();
+  });
 });

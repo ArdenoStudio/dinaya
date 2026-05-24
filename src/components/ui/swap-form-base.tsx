@@ -22,7 +22,12 @@ interface SwapFormTexts {
 
 export interface SwapFormProps {
   isSignIn: boolean;
-  onModeChange: (isSignIn: boolean) => void;
+  /** Toggle sign-in/sign-up in place. Omit when using signUpHref / signInHref. */
+  onModeChange?: (isSignIn: boolean) => void;
+  /** Link to full registration flow instead of in-form sign-up mode. */
+  signUpHref?: string;
+  /** Link back to sign-in when rendered in sign-up mode. */
+  signInHref?: string;
   texts?: Partial<SwapFormTexts>;
   email: string;
   onEmailChange: (value: string) => void;
@@ -58,6 +63,8 @@ const DEFAULT_TEXTS: SwapFormTexts = {
 export const SwapForm: FC<SwapFormProps> = ({
   isSignIn,
   onModeChange,
+  signUpHref,
+  signInHref,
   texts = {},
   email,
   onEmailChange,
@@ -251,14 +258,23 @@ export const SwapForm: FC<SwapFormProps> = ({
 
         <div className="bg-muted py-3 sm:py-4 text-center">
           <p className="font-sans text-muted-foreground text-[13px] sm:text-[14px]">
-            {isSignIn ? mergedTexts.footerSignIn : mergedTexts.footerSignUp}
-            <button
-              type="button"
-              onClick={() => onModeChange(!isSignIn)}
-              className="ml-1 font-medium text-foreground hover:underline"
-            >
-              {isSignIn ? mergedTexts.footerSignInCta : mergedTexts.footerSignUpCta}
-            </button>
+            {isSignIn ? mergedTexts.footerSignIn : mergedTexts.footerSignUp}{" "}
+            {(isSignIn ? signUpHref : signInHref) ? (
+              <Link
+                href={(isSignIn ? signUpHref : signInHref)!}
+                className="font-medium text-foreground hover:underline"
+              >
+                {isSignIn ? mergedTexts.footerSignInCta : mergedTexts.footerSignUpCta}
+              </Link>
+            ) : onModeChange ? (
+              <button
+                type="button"
+                onClick={() => onModeChange(!isSignIn)}
+                className="font-medium text-foreground hover:underline"
+              >
+                {isSignIn ? mergedTexts.footerSignInCta : mergedTexts.footerSignUpCta}
+              </button>
+            ) : null}
           </p>
         </div>
       </motion.div>
