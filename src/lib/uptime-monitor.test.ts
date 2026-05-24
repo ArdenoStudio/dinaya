@@ -9,6 +9,7 @@ describe("getUptimeSummarySources", () => {
     delete process.env.UPTIME_MONITOR_SUMMARY_URL;
     delete process.env.UPTIME_MONITOR_GITHUB_REPO;
     delete process.env.UPTIME_MONITOR_GITHUB_BRANCH;
+    delete process.env.UPTIME_MONITOR_GITHUB_TOKEN;
   });
 
   afterEach(() => {
@@ -20,9 +21,10 @@ describe("getUptimeSummarySources", () => {
     expect(getUptimeSummarySources()).toEqual(["https://example.com/summary.json"]);
   });
 
-  it("builds GitHub raw URL from repo and branch defaults", () => {
+  it("builds GitHub raw URLs for master and main when using defaults", () => {
     expect(getUptimeSummarySources()).toEqual([
       "https://raw.githubusercontent.com/ArdenoStudio/dinaya-uptime-monitor/master/history/summary.json",
+      "https://raw.githubusercontent.com/ArdenoStudio/dinaya-uptime-monitor/main/history/summary.json",
     ]);
   });
 
@@ -31,6 +33,16 @@ describe("getUptimeSummarySources", () => {
     process.env.UPTIME_MONITOR_GITHUB_BRANCH = "main";
     expect(getUptimeSummarySources()).toEqual([
       "https://raw.githubusercontent.com/Acme/status/main/history/summary.json",
+    ]);
+  });
+
+  it("prefers GitHub Contents API when token is set", () => {
+    process.env.UPTIME_MONITOR_GITHUB_TOKEN = "ghp_test";
+    expect(getUptimeSummarySources()).toEqual([
+      "https://api.github.com/repos/ArdenoStudio/dinaya-uptime-monitor/contents/history/summary.json?ref=master",
+      "https://api.github.com/repos/ArdenoStudio/dinaya-uptime-monitor/contents/history/summary.json?ref=main",
+      "https://raw.githubusercontent.com/ArdenoStudio/dinaya-uptime-monitor/master/history/summary.json",
+      "https://raw.githubusercontent.com/ArdenoStudio/dinaya-uptime-monitor/main/history/summary.json",
     ]);
   });
 });
