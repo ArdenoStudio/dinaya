@@ -75,6 +75,9 @@ const industries = [
   { icon: "heart-pulse", label: "Wellness" },
 ];
 
+/** Visual scale for the landing demo carousel (~20% larger). */
+const DEMO_SCALE = 1.2;
+
 function DinayaLogo({ size = 13 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="318 319 875 866" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" fill="currentColor">
@@ -380,30 +383,30 @@ function CustomerBookingDesktop({ persona }: { persona: PersonaData }) {
   const selectedService = persona.services.find((s) => s.selected);
 
   return (
-    <div className="h-full flex flex-col bg-white p-4 sm:p-5 overflow-hidden">
-      <div className="flex items-center gap-3 mb-3 pb-3 border-b border-gray-100 shrink-0">
-        <div className="size-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center shrink-0 shadow-lg shadow-blue-500/25">
-          <Icon name={persona.icon} className="text-white text-lg" />
+    <div className="h-full flex flex-col bg-white p-5 sm:p-6 overflow-hidden">
+      <div className="flex items-center gap-3.5 mb-3.5 pb-3.5 border-b border-gray-100 shrink-0">
+        <div className="size-11 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center shrink-0 shadow-lg shadow-blue-500/25">
+          <Icon name={persona.icon} className="text-white text-xl" />
         </div>
         <div className="min-w-0">
-          <h3 className="font-semibold text-sm text-gray-900 truncate">{persona.business}</h3>
-          <p className="text-[11px] text-gray-400 mt-0.5 truncate">{persona.location}</p>
+          <h3 className="font-semibold text-base text-gray-900 truncate">{persona.business}</h3>
+          <p className="text-xs text-gray-400 mt-0.5 truncate">{persona.location}</p>
           <TrustLine persona={persona} />
         </div>
-        <div className="ml-auto flex items-center gap-1.5 text-[11px] text-green-600 font-medium bg-green-50 px-2 py-0.5 rounded-full border border-green-100/80 shrink-0">
+        <div className="ml-auto flex items-center gap-1.5 text-xs text-green-600 font-medium bg-green-50 px-2.5 py-1 rounded-full border border-green-100/80 shrink-0">
           <span className="size-1.5 rounded-full bg-green-500 animate-pulse" />
           Available today
         </div>
       </div>
 
-      <div className="flex-1 min-h-0 grid sm:grid-cols-2 gap-4">
+      <div className="flex-1 min-h-0 grid sm:grid-cols-2 gap-5">
         <div className="min-h-0 flex flex-col">
           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 shrink-0">Choose a service</p>
           <div className="space-y-1.5 min-h-0">
             {persona.services.map((s) => (
               <div
                 key={s.name}
-                className={`flex justify-between items-center p-2.5 rounded-xl cursor-pointer transition-all ${
+                className={`flex justify-between items-center p-3 rounded-xl cursor-pointer transition-all ${
                   s.selected
                     ? "border border-blue-500 ring-2 ring-blue-500/10 bg-blue-50/60 shadow-sm"
                     : "border border-gray-100 hover:border-gray-200"
@@ -418,11 +421,11 @@ function CustomerBookingDesktop({ persona }: { persona: PersonaData }) {
                     {s.selected && <div className="size-1 rounded-full bg-white" />}
                   </div>
                   <div className="min-w-0">
-                    <p className={`text-xs font-medium truncate ${s.selected ? "text-blue-900" : "text-gray-800"}`}>{s.name}</p>
-                    <p className="text-[10px] text-gray-400">{s.duration}</p>
+                    <p className={`text-sm font-medium truncate ${s.selected ? "text-blue-900" : "text-gray-800"}`}>{s.name}</p>
+                    <p className="text-xs text-gray-400">{s.duration}</p>
                   </div>
                 </div>
-                <span className={`text-xs font-bold shrink-0 tabular-nums ml-2 ${s.selected ? "text-blue-600" : "text-gray-600"}`}>
+                <span className={`text-sm font-bold shrink-0 tabular-nums ml-2 ${s.selected ? "text-blue-600" : "text-gray-600"}`}>
                   {s.price}
                 </span>
               </div>
@@ -434,7 +437,7 @@ function CustomerBookingDesktop({ persona }: { persona: PersonaData }) {
           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 shrink-0">Pick a date &amp; time</p>
           <div className="rounded-xl border border-gray-100 bg-gray-50/60 p-2.5 mb-2 shrink-0">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-xs font-bold text-gray-800">May 2025</span>
+              <span className="text-sm font-bold text-gray-800">May 2025</span>
               <div className="flex gap-1">
                 <button className="size-6 rounded-lg flex items-center justify-center hover:bg-white hover:shadow-sm text-gray-400 transition-all" aria-label="Previous month">
                   <Icon name="chevron-left" className="text-[10px]" />
@@ -459,7 +462,7 @@ function CustomerBookingDesktop({ persona }: { persona: PersonaData }) {
             {persona.slots.map((slot, i) => (
               <button
                 key={slot.label}
-                className={`relative flex flex-col items-center justify-center text-[11px] py-1.5 rounded-lg font-semibold transition-all min-h-[36px] ${
+                className={`relative flex flex-col items-center justify-center text-xs py-2 rounded-lg font-semibold transition-all min-h-[40px] ${
                   i === persona.selectedSlot
                     ? "bg-blue-600 text-white shadow-md shadow-blue-500/25"
                     : "border border-gray-200 text-gray-600 hover:border-blue-300 hover:text-blue-600 bg-white"
@@ -481,11 +484,11 @@ function CustomerBookingDesktop({ persona }: { persona: PersonaData }) {
         </div>
       </div>
 
-      <div className="mt-3 pt-3 border-t border-gray-100 flex items-center gap-3 shrink-0">
-        <button className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white py-2.5 rounded-xl font-semibold text-xs shadow-lg shadow-blue-500/25">
+      <div className="mt-3.5 pt-3.5 border-t border-gray-100 flex items-center gap-3 shrink-0">
+        <button className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 rounded-xl font-semibold text-sm shadow-lg shadow-blue-500/25">
           Confirm & Pay — {selectedService?.price}
         </button>
-        <div className="flex items-center gap-1 text-[10px] text-gray-400 shrink-0">
+        <div className="flex items-center gap-1.5 text-xs text-gray-400 shrink-0">
           <Icon name="shield-check" className="text-blue-400 text-xs" />
           PayHere
         </div>
@@ -647,15 +650,15 @@ function BrowserChrome({ url, children }: { url: string; children: ReactNode }) 
 
 function AlsoWorksFor() {
   return (
-    <div className="mt-6 text-center">
-      <p className="text-xs text-gray-400 mb-2">Also works for</p>
-      <div className="flex flex-wrap justify-center gap-3">
+    <div className="mt-7 text-center">
+      <p className="text-sm text-gray-400 mb-2.5">Also works for</p>
+      <div className="flex flex-wrap justify-center gap-3.5">
         {industries.map((item) => (
           <div
             key={item.label}
-            className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-600 shadow-sm"
+            className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-600 shadow-sm"
           >
-            <Icon name={item.icon} className="text-blue-500 text-sm" />
+            <Icon name={item.icon} className="text-blue-500 text-base" />
             {item.label}
           </div>
         ))}
@@ -672,13 +675,13 @@ function SlideIndicators({
   onGoTo: (index: number) => void;
 }) {
   return (
-    <div className="mt-8">
-      <div className="flex justify-center gap-4 mb-3">
+    <div className="mt-9">
+      <div className="flex justify-center gap-5 mb-3.5">
         {slides.map((slide, i) => (
           <button
             key={slide.type}
             onClick={() => onGoTo(i)}
-            className={`text-xs font-medium transition-colors ${
+            className={`text-sm font-medium transition-colors ${
               i === current ? "text-blue-600" : "text-gray-400 hover:text-gray-600"
             }`}
           >
@@ -750,23 +753,29 @@ export default function ProductMockup() {
     <button
       onClick={() => navigate(dir)}
       aria-label={label}
-      className={`z-20 size-10 rounded-full bg-white border border-gray-200 shadow-lg flex items-center justify-center text-gray-400 hover:text-blue-600 hover:border-blue-200 hover:shadow-md transition-all ${extraClass}`}
+      className={`z-20 size-12 rounded-full bg-white border border-gray-200 shadow-lg flex items-center justify-center text-gray-400 hover:text-blue-600 hover:border-blue-200 hover:shadow-md transition-all ${extraClass}`}
     >
-      <Icon name={`chevron-${dir === -1 ? "left" : "right"}`} className="text-sm" />
+      <Icon name={`chevron-${dir === -1 ? "left" : "right"}`} className="text-base" />
     </button>
   );
 
   const browserUrl =
     slide.type === "owner" ? "dashboard.dinaya.lk" : slide.type === "confirmation" ? "messages" : persona.url;
 
-  const mobileScale = 0.72;
+  const mobileScale = 0.72 * DEMO_SCALE;
   const mobileOuterWidth = 417; // 15-pro screen + bezel
   const mobileOuterHeight = 876;
   const mobileScaledWidth = Math.round(mobileOuterWidth * mobileScale);
   const mobileScaledHeight = Math.round(mobileOuterHeight * mobileScale);
 
+  const desktopPhoneScale = 0.62 * DEMO_SCALE;
+  const desktopPhoneWidth = Math.round(260 * DEMO_SCALE);
+  const desktopPhoneHeight = Math.round(360 * DEMO_SCALE);
+  const desktopPhoneRight = Math.round(16 * DEMO_SCALE);
+  const desktopPhoneBottom = Math.round(-48 * DEMO_SCALE);
+
   return (
-    <section className="max-w-5xl mx-auto px-6 md:px-16 pb-16 relative overflow-x-clip">
+    <section className="max-w-[77rem] mx-auto px-6 md:px-12 lg:px-16 pb-16 relative overflow-x-clip">
       <div className="pointer-events-none absolute inset-0 overflow-hidden -z-10">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[680px] h-[480px] rounded-full bg-blue-500/[0.07] blur-3xl" />
         <div className="absolute top-1/3 right-1/4 w-[220px] h-[220px] rounded-full bg-violet-500/[0.05] blur-3xl" />
@@ -827,12 +836,12 @@ export default function ProductMockup() {
               {slide.type === "customer" && (
                 <div
                   className="absolute pointer-events-none overflow-hidden"
-                  style={{ right: 16, bottom: -48, zIndex: 20, width: 260, height: 360 }}
+                  style={{ right: desktopPhoneRight, bottom: desktopPhoneBottom, zIndex: 20, width: desktopPhoneWidth, height: desktopPhoneHeight }}
                 >
                   <IPhoneMockup
                     model="15-pro"
                     color="space-black"
-                    scale={0.62}
+                    scale={desktopPhoneScale}
                     screenBg="#f9f9f9"
                     shadow={false}
                     safeArea={false}
