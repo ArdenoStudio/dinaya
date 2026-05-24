@@ -27,6 +27,8 @@ If either secret is missing, e2e is skipped with a workflow warning (verify stil
 Optional but recommended:
 
 - `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` — distributed rate limiting (falls back to in-memory)
+- `UPTIME_MONITOR_SUMMARY_URL` — full URL to `history/summary.json` for `/admin/health` (from the separate `dinaya-uptime-monitor` Upptime repo)
+- `UPTIME_MONITOR_GITHUB_REPO`, `UPTIME_MONITOR_GITHUB_BRANCH`, `UPTIME_MONITOR_GITHUB_TOKEN` — alternative to the URL above; defaults to `ArdenoStudio/dinaya-uptime-monitor` @ `master`
 - `VERCEL_TOKEN`, `VERCEL_PROJECT_ID_OR_NAME`, `VERCEL_TEAM_ID` or `VERCEL_TEAM_SLUG` — custom-domain provisioning for tenant-owned domains
 - `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` — Google Calendar OAuth on integrations
 - `CONTACT_INBOX_EMAIL` — contact form destination (defaults to hello@dinaya.lk)
