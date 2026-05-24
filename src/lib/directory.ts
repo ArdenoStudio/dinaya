@@ -95,7 +95,8 @@ export const listDirectoryBusinesses = unstable_cache(
 
 export function buildDirectoryBookingUrl(slug: string): string {
   const appDomain = process.env.NEXT_PUBLIC_APP_DOMAIN ?? "localhost:3000";
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const rawAppUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const appUrl = rawAppUrl.startsWith("http") ? rawAppUrl : `https://${rawAppUrl}`;
   const base = appDomain === "dinaya.lk"
     ? `https://${slug}.dinaya.lk`
     : `${appUrl}/book/${slug}`;
