@@ -1,4 +1,5 @@
 import type { NextAuthConfig } from "next-auth";
+import { resolveAuthRedirect } from "@/lib/auth-redirect";
 
 /**
  * Edge-safe auth config shared by middleware and the full NextAuth instance.
@@ -11,6 +12,9 @@ export const authConfig = {
   },
   providers: [],
   callbacks: {
+    redirect({ url, baseUrl }) {
+      return resolveAuthRedirect(url, baseUrl);
+    },
     jwt({ token, user }) {
       if (user) {
         token.businessId = user.businessId;
