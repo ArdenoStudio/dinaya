@@ -16,7 +16,6 @@ export default defineConfig([
     "next-env.d.ts",
     "tsconfig.tsbuildinfo",
     // Sibling projects with their own toolchains
-    "dinaya-status/**",
     "dinaya-uptime-monitor/**",
   ]),
 ]);
