@@ -125,6 +125,7 @@ export async function POST() {
       businessType: businesses.businessType,
       address: businesses.address,
       onboardingCompletedAt: businesses.onboardingCompletedAt,
+      directoryListed: businesses.directoryListed,
     })
     .from(businesses)
     .where(eq(businesses.id, businessId))
@@ -134,12 +135,22 @@ export async function POST() {
     return NextResponse.json({ error: "Business not found." }, { status: 404 });
   }
 
-  if (business.onboardingCompletedAt) {
-    return NextResponse.json({ ok: true, alreadyCompleted: true });
-  }
-
   const directoryCategory = inferDirectoryCategory(business.businessType);
   const directoryCity = inferDirectoryCity(business.address);
+
+  if (business.onboardingCompletedAt) {
+    if (!business.directoryListed) {
+      await db
+        .update(businesses)
+        .set({
+          directoryListed: true,
+          directoryCategory,
+          directoryCity,
+        })
+        .where(eq(businesses.id, businessId));
+    }
+    return NextResponse.json({ ok: true, alreadyCompleted: true });
+  }
 
   await db
     .update(businesses)
