@@ -129,7 +129,7 @@ export default function BrandPage() {
         particleSize={{ min: 0.4, max: 1.8 }}
         className="min-h-[420px]"
       >
-        <section className="w-full max-w-4xl mx-auto px-6 pt-24 pb-20 text-center">
+        <section className="w-full max-w-4xl mx-auto px-6 public-page-offset pb-20 text-center">
           <FadeContainer className="flex flex-col items-center">
             <FadeDiv className="mb-5">
               <SectionLabel>

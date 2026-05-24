@@ -14,7 +14,7 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
   return (
     <main className="min-h-screen bg-white">
       <PublicNav />
-      <div className="max-w-6xl mx-auto px-6 py-10 flex gap-10">
+      <div className="max-w-6xl mx-auto px-6 public-page-offset pb-10 flex gap-10">
         <DocsSidebar />
         <div className="flex-1 min-w-0">
           <DocsMobileNav />
