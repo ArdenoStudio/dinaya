@@ -12,8 +12,6 @@ import {
   type DirectoryCategory,
 } from "@/lib/directory";
 
-export const dynamic = "force-dynamic";
-
 interface Props {
   params: Promise<{ city: string }>;
   searchParams: Promise<{ category?: string }>;

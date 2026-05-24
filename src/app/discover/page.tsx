@@ -11,8 +11,6 @@ import {
 } from "@/lib/directory";
 import { Icon } from "@/components/ui/Icon";
 
-export const dynamic = "force-dynamic";
-
 interface Props {
   searchParams: Promise<{ category?: string }>;
 }

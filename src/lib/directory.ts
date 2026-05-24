@@ -58,33 +58,40 @@ export type DirectoryListing = {
   logoUrl: string | null;
 };
 
-export async function listDirectoryBusinesses(filters?: {
-  city?: string;
-  category?: DirectoryCategory;
-}): Promise<DirectoryListing[]> {
-  const { db } = await import("@/db");
-  const { businesses } = await import("@/db/schema");
-  const { and, eq, isNull } = await import("drizzle-orm");
+import { unstable_cache } from "next/cache";
 
-  return db
-    .select({
-      name: businesses.name,
-      slug: businesses.slug,
-      description: businesses.description,
-      directoryCity: businesses.directoryCity,
-      directoryCategory: businesses.directoryCategory,
-      logoUrl: businesses.logoUrl,
-    })
-    .from(businesses)
-    .where(and(
-      eq(businesses.directoryListed, true),
-      eq(businesses.isSuspended, false),
-      isNull(businesses.deletedAt),
-      ...(filters?.city ? [eq(businesses.directoryCity, filters.city)] : []),
-      ...(filters?.category ? [eq(businesses.directoryCategory, filters.category)] : []),
-    ))
-    .orderBy(businesses.name);
-}
+export const listDirectoryBusinesses = unstable_cache(
+  async (filters?: { city?: string; category?: DirectoryCategory }): Promise<DirectoryListing[]> => {
+    try {
+      const { db } = await import("@/db");
+      const { businesses } = await import("@/db/schema");
+      const { and, eq, isNull } = await import("drizzle-orm");
+
+      return await db
+        .select({
+          name: businesses.name,
+          slug: businesses.slug,
+          description: businesses.description,
+          directoryCity: businesses.directoryCity,
+          directoryCategory: businesses.directoryCategory,
+          logoUrl: businesses.logoUrl,
+        })
+        .from(businesses)
+        .where(and(
+          eq(businesses.directoryListed, true),
+          eq(businesses.isSuspended, false),
+          isNull(businesses.deletedAt),
+          ...(filters?.city ? [eq(businesses.directoryCity, filters.city)] : []),
+          ...(filters?.category ? [eq(businesses.directoryCategory, filters.category)] : []),
+        ))
+        .orderBy(businesses.name);
+    } catch {
+      return [];
+    }
+  },
+  ["discover-listings"],
+  { revalidate: 60 },
+);
 
 export function buildDirectoryBookingUrl(slug: string): string {
   const appDomain = process.env.NEXT_PUBLIC_APP_DOMAIN ?? "localhost:3000";

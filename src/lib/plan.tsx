@@ -257,13 +257,13 @@ export function invalidatePlanConfigCache(): void {
 }
 
 export function savePlanConfig(next: PlanConfig): void {
+  cached = next;
   try {
     mkdirSync(CONFIG_DIR, { recursive: true });
+    writeFileSync(CONFIG_FILE, JSON.stringify(next, null, 2), "utf8");
   } catch {
-    // ignore
+    // Vercel filesystem is read-only; DB persistence via savePlanConfigAsync is the source of truth
   }
-  writeFileSync(CONFIG_FILE, JSON.stringify(next, null, 2), "utf8");
-  cached = next;
   void import("@/lib/platform-settings").then(({ setPlatformSetting }) =>
     setPlatformSetting("plan_config", next, next.updatedBy).catch(() => undefined),
   );
