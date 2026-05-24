@@ -1,36 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
-import { neon } from "@neondatabase/serverless";
+import { checkDatabaseHealth } from "@/lib/platform-health";
 import { requireHealthAuth } from "@/lib/health-auth";
 
 export const runtime = "edge";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-const DB_TIMEOUT_MS = 8000;
-
 export async function GET(req: NextRequest) {
   const authError = requireHealthAuth(req);
   if (authError) return authError;
   const startedAt = Date.now();
 
-  let dbOk = false;
-  let dbLatencyMs: number | null = null;
-  let dbError: string | null = null;
-
-  try {
-    const sql = neon(process.env.DATABASE_URL!);
-    const dbStart = Date.now();
-    await Promise.race([
-      sql`SELECT 1`,
-      new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("db_timeout")), DB_TIMEOUT_MS),
-      ),
-    ]);
-    dbLatencyMs = Date.now() - dbStart;
-    dbOk = true;
-  } catch (err) {
-    dbError = err instanceof Error ? err.message : "unknown_error";
-  }
+  const db = await checkDatabaseHealth();
+  const dbOk = db.status === "up";
 
   const body = {
     status: dbOk ? "ok" : "degraded",
@@ -38,8 +20,8 @@ export async function GET(req: NextRequest) {
     checks: {
       db: {
         ok: dbOk,
-        latencyMs: dbLatencyMs,
-        error: dbError,
+        latencyMs: db.latencyMs,
+        error: db.error ?? null,
       },
     },
     responseTimeMs: Date.now() - startedAt,

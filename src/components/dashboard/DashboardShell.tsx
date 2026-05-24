@@ -157,7 +157,7 @@ export function DashboardShell({
             </div>
             <button
               type="button"
-              onClick={() => signOut({ callbackUrl: "/auth/signin" })}
+              onClick={() => void signOut({ redirectTo: "/auth/signin" })}
               className="px-1 text-xs text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
             >
               {copy.layout.signOut}

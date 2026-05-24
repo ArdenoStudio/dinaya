@@ -16,8 +16,19 @@ export type UptimeService = {
   dailyMinutesDown?: Record<string, number>;
 };
 
+export type UptimeFetchError = {
+  url: string;
+  status?: number;
+  message: string;
+};
+
+export type UptimeFetchResult = {
+  services: UptimeService[] | null;
+  error: UptimeFetchError | null;
+};
+
 const DEFAULT_REPO = "ArdenoStudio/dinaya-uptime-monitor";
-const DEFAULT_BRANCH = "master";
+const DEFAULT_BRANCHES = ["master", "main"] as const;
 const SUMMARY_PATH = "history/summary.json";
 
 const LOCAL_SUMMARY_FILE = path.join(
@@ -31,6 +42,10 @@ function githubRawUrl(repo: string, branch: string, filePath: string): string {
   return `https://raw.githubusercontent.com/${repo}/${branch}/${filePath}`;
 }
 
+function githubContentsApiUrl(repo: string, branch: string, filePath: string): string {
+  return `https://api.github.com/repos/${repo}/contents/${filePath}?ref=${encodeURIComponent(branch)}`;
+}
+
 function parseSummary(raw: string): UptimeService[] | null {
   try {
     const parsed = JSON.parse(raw) as unknown;
@@ -41,21 +56,90 @@ function parseSummary(raw: string): UptimeService[] | null {
   }
 }
 
-async function fetchSummaryFromUrl(url: string): Promise<UptimeService[] | null> {
+function decodeGitHubContent(content: string, encoding: string): string | null {
+  if (encoding !== "base64") return null;
+  return Buffer.from(content, "base64").toString("utf8");
+}
+
+type FetchAttempt = {
+  summary: UptimeService[] | null;
+  error: UptimeFetchError | null;
+};
+
+async function fetchSummaryFromUrl(url: string): Promise<FetchAttempt> {
   const token = process.env.UPTIME_MONITOR_GITHUB_TOKEN?.trim();
-  const headers: HeadersInit = {};
-  if (token && url.includes("raw.githubusercontent.com")) {
-    headers.Authorization = `token ${token}`;
+  const headers: HeadersInit = {
+    Accept: "application/json",
+  };
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+    if (url.includes("raw.githubusercontent.com")) {
+      headers.Authorization = `token ${token}`;
+    }
   }
 
-  const res = await fetch(url, {
-    headers,
-    next: { revalidate: 300 },
-  });
-  if (!res.ok) return null;
+  try {
+    const res = await fetch(url, {
+      headers,
+      next: { revalidate: 300 },
+    });
 
-  const raw = await res.text();
-  return parseSummary(raw);
+    if (!res.ok) {
+      return {
+        summary: null,
+        error: {
+          url,
+          status: res.status,
+          message: res.statusText || `HTTP ${res.status}`,
+        },
+      };
+    }
+
+    const contentType = res.headers.get("content-type") ?? "";
+    if (contentType.includes("application/json") && url.includes("api.github.com")) {
+      const payload = (await res.json()) as {
+        content?: string;
+        encoding?: string;
+        message?: string;
+      };
+      if (!payload.content) {
+        return {
+          summary: null,
+          error: {
+            url,
+            message: payload.message ?? "GitHub API returned no content",
+          },
+        };
+      }
+      const raw = decodeGitHubContent(payload.content, payload.encoding ?? "base64");
+      if (!raw) {
+        return {
+          summary: null,
+          error: { url, message: "Unsupported GitHub content encoding" },
+        };
+      }
+      const summary = parseSummary(raw);
+      if (!summary) {
+        return { summary: null, error: { url, message: "Invalid summary.json format" } };
+      }
+      return { summary, error: null };
+    }
+
+    const raw = await res.text();
+    const summary = parseSummary(raw);
+    if (!summary) {
+      return { summary: null, error: { url, message: "Invalid summary.json format" } };
+    }
+    return { summary, error: null };
+  } catch (err) {
+    return {
+      summary: null,
+      error: {
+        url,
+        message: err instanceof Error ? err.message : "fetch_failed",
+      },
+    };
+  }
 }
 
 async function readLocalSummary(): Promise<UptimeService[] | null> {
@@ -67,14 +151,33 @@ async function readLocalSummary(): Promise<UptimeService[] | null> {
   }
 }
 
+function resolveRepoAndBranches(): { repo: string; branches: string[] } {
+  const repo = process.env.UPTIME_MONITOR_GITHUB_REPO?.trim() || DEFAULT_REPO;
+  const explicitBranch = process.env.UPTIME_MONITOR_GITHUB_BRANCH?.trim();
+  const branches = explicitBranch ? [explicitBranch] : [...DEFAULT_BRANCHES];
+  return { repo, branches };
+}
+
 /** Resolve candidate URLs for the Upptime-style summary.json file. */
 export function getUptimeSummarySources(): string[] {
   const explicit = process.env.UPTIME_MONITOR_SUMMARY_URL?.trim();
   if (explicit) return [explicit];
 
-  const repo = process.env.UPTIME_MONITOR_GITHUB_REPO?.trim() || DEFAULT_REPO;
-  const branch = process.env.UPTIME_MONITOR_GITHUB_BRANCH?.trim() || DEFAULT_BRANCH;
-  return [githubRawUrl(repo, branch, SUMMARY_PATH)];
+  const { repo, branches } = resolveRepoAndBranches();
+  const token = process.env.UPTIME_MONITOR_GITHUB_TOKEN?.trim();
+  const sources: string[] = [];
+
+  if (token) {
+    for (const branch of branches) {
+      sources.push(githubContentsApiUrl(repo, branch, SUMMARY_PATH));
+    }
+  }
+
+  for (const branch of branches) {
+    sources.push(githubRawUrl(repo, branch, SUMMARY_PATH));
+  }
+
+  return sources;
 }
 
 /**
@@ -84,15 +187,29 @@ export function getUptimeSummarySources(): string[] {
  * private Upptime repo). Local dev: clone dinaya-uptime-monitor as a sibling
  * folder, or point the env var at a hosted summary.json.
  */
-export async function fetchUptimeSummary(): Promise<UptimeService[] | null> {
+export async function fetchUptimeSummary(): Promise<UptimeFetchResult> {
+  let lastError: UptimeFetchError | null = null;
+
   for (const url of getUptimeSummarySources()) {
-    try {
-      const summary = await fetchSummaryFromUrl(url);
-      if (summary) return summary;
-    } catch (err) {
-      console.error("[uptime-monitor] fetch failed:", url, err instanceof Error ? err.message : err);
+    const attempt = await fetchSummaryFromUrl(url);
+    if (attempt.summary) {
+      return { services: attempt.summary, error: null };
+    }
+    if (attempt.error) {
+      lastError = attempt.error;
+      console.error(
+        "[uptime-monitor] fetch failed:",
+        url,
+        attempt.error.status ?? "",
+        attempt.error.message,
+      );
     }
   }
 
-  return readLocalSummary();
+  const local = await readLocalSummary();
+  if (local) {
+    return { services: local, error: null };
+  }
+
+  return { services: null, error: lastError };
 }
