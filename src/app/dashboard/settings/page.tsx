@@ -42,7 +42,7 @@ export default async function SettingsPage() {
   if (!business) notFound();
 
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className="space-y-6">
       <DashboardPageHeader
         title="Settings"
         description="Business profile, booking policies, payments, and public page branding."

@@ -116,7 +116,7 @@ export default function SettingsForm({ business }: Props) {
 
   return (
     <div className="space-y-5">
-      <form onSubmit={handleSave} className="space-y-5">
+      <form onSubmit={handleSave} className="grid gap-5 xl:grid-cols-2">
         {/* Business info */}
         <div className="bg-white border rounded-xl p-6 space-y-4">
           <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Business info</p>
@@ -493,9 +493,9 @@ export default function SettingsForm({ business }: Props) {
           </a>
         </div>
 
-        {error && <p className="text-destructive text-sm">{error}</p>}
+        {error && <p className="text-destructive text-sm xl:col-span-2">{error}</p>}
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 xl:col-span-2 sticky bottom-0 -mx-1 border-t border-neutral-200/80 bg-neutral-50/95 px-1 py-4 backdrop-blur-sm dark:border-neutral-800 dark:bg-neutral-950/95">
           <button
             type="submit"
             disabled={saving}
