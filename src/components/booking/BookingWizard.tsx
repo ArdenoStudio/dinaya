@@ -225,7 +225,7 @@ export default function BookingWizard({
     .join(" · ");
 
   return (
-    <div className="overflow-hidden md:rounded-2xl md:border md:border-gray-100/80 md:bg-white md:shadow-[0_24px_64px_-12px_rgba(37,99,235,0.12),0_8px_24px_-8px_rgba(0,0,0,0.08)]">
+    <div className="min-w-0 md:overflow-hidden md:rounded-2xl md:border md:border-gray-100/80 md:bg-white md:shadow-[0_24px_64px_-12px_rgba(37,99,235,0.12),0_8px_24px_-8px_rgba(0,0,0,0.08)]">
       <BookingAttributionCapture businessId={business.id} />
       {/* Mobile header + progress */}
       <div className="bg-blue-600 px-[18px] pt-5 pb-[18px] md:hidden">
@@ -340,7 +340,7 @@ export default function BookingWizard({
                 </div>
               </div>
 
-              <div className="bg-[#f2f2f7] p-[14px] md:flex md:flex-col md:rounded-2xl md:border md:border-gray-100 md:bg-gray-50/40 md:p-5">
+              <div className="min-w-0 bg-[#f2f2f7] p-[14px] md:flex md:flex-col md:rounded-2xl md:border md:border-gray-100 md:bg-gray-50/40 md:p-5">
                 <StepDateTime
                   businessId={business.id}
                   copy={copy}

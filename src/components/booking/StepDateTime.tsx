@@ -92,14 +92,14 @@ export default function StepDateTime({
   }
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full min-w-0 flex-col">
       <p className="mb-4 text-[10px] font-bold uppercase tracking-widest text-gray-400">
         {copy.pickDateTime}
       </p>
 
-      <div className="flex flex-col gap-4 md:gap-5">
-        {/* Date selection */}
-        <section className="rounded-xl border border-gray-100 bg-white p-4 md:p-5">
+      <div className="flex min-w-0 flex-col gap-4 md:gap-5">
+        {/* Date selection — quick strip on mobile, full calendar on desktop */}
+        <section className="min-w-0 rounded-xl border border-gray-100 bg-white p-4 md:p-5">
           <p className="mb-3 text-xs font-semibold text-gray-700">{copy.chooseDate}</p>
           <DateQuickStrip
             selectedDate={selectedDate}
@@ -108,7 +108,7 @@ export default function StepDateTime({
             copy={copy}
             onSelect={onDateChange}
           />
-          <div className="mt-4 hidden md:block">
+          <div className="mt-4 hidden min-w-0 md:block">
             <MonthCalendar
               selectedDate={selectedDate}
               minDate={today}
@@ -117,19 +117,10 @@ export default function StepDateTime({
               size="comfortable"
             />
           </div>
-          <div className="mt-3 md:hidden">
-            <MonthCalendar
-              selectedDate={selectedDate}
-              minDate={today}
-              maxDate={maxDate}
-              onSelect={onDateChange}
-              size="compact"
-            />
-          </div>
         </section>
 
         {/* Time selection */}
-        <section className="rounded-xl border border-gray-100 bg-white p-4 md:p-5">
+        <section className="min-w-0 rounded-xl border border-gray-100 bg-white p-4 md:p-5">
           {dateHeading ? (
             <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2 border-b border-gray-100 pb-3">
               <h3 className="text-sm font-semibold text-gray-900">{dateHeading}</h3>

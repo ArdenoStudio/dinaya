@@ -72,7 +72,9 @@ export default function MonthCalendar({
   const canGoPrev = startOfMonth(viewMonth) > startOfMonth(minDate);
 
   return (
-    <div className={comfortable ? "" : "rounded-xl border border-gray-100 bg-gray-50/60 p-3.5"}>
+    <div
+      className={`min-w-0 w-full ${comfortable ? "" : "rounded-xl border border-gray-100 bg-gray-50/60 p-3.5"}`}
+    >
       <div className={`flex items-center justify-between ${comfortable ? "mb-4" : "mb-3"}`}>
         <span className={`font-bold text-gray-800 ${comfortable ? "text-base" : "text-sm"}`}>
           {format(viewMonth, "MMMM yyyy")}
@@ -101,13 +103,15 @@ export default function MonthCalendar({
           </button>
         </div>
       </div>
-      <div className={`grid grid-cols-7 text-center ${comfortable ? "gap-1" : "gap-y-0.5"}`}>
+      <div
+        className={`grid w-full min-w-0 grid-cols-7 text-center ${comfortable ? "gap-1" : "gap-0.5"}`}
+      >
         {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
           <div
             key={d}
-            className={`font-bold text-gray-400 ${comfortable ? "pb-3 text-[11px] tracking-wide" : "pb-2 text-[9px] tracking-wider"}`}
+            className={`font-bold text-gray-400 ${comfortable ? "pb-3 text-[11px] tracking-wide" : "pb-1.5 text-[10px] tracking-wide"}`}
           >
-            {comfortable ? d : d.charAt(0)}
+            {comfortable ? d : d.slice(0, 3)}
           </div>
         ))}
         {weeks.flat().map((day) => {
@@ -115,23 +119,26 @@ export default function MonthCalendar({
           const dateStr = format(day, "yyyy-MM-dd");
           const isSelected = selectedDate === dateStr;
           const disabled = !inMonth || isDisabled(day);
+          const showToday = isToday(day) && !isSelected && !disabled;
           return (
             <button
               key={dateStr}
               type="button"
               disabled={disabled}
               onClick={() => !disabled && onSelect(dateStr)}
-              className={`font-medium transition-all ${
-                comfortable ? "mx-auto flex size-10 items-center justify-center rounded-xl text-sm" : "rounded-lg py-1 text-[11px]"
+              className={`min-w-0 font-medium transition-all ${
+                comfortable
+                  ? "mx-auto flex size-10 items-center justify-center rounded-xl text-sm"
+                  : "mx-auto flex aspect-square w-full max-w-10 items-center justify-center rounded-lg text-xs"
               } ${
                 !inMonth
-                  ? "invisible"
+                  ? "pointer-events-none opacity-0"
                   : isSelected
                   ? "bg-blue-600 text-white shadow-md shadow-blue-500/30"
                   : disabled
                   ? "cursor-not-allowed text-gray-300"
-                  : isToday(day)
-                  ? "text-blue-600 ring-2 ring-blue-200 ring-offset-1"
+                  : showToday
+                  ? "font-semibold text-blue-600 ring-2 ring-blue-200"
                   : "text-gray-700 hover:bg-blue-50"
               }`}
             >

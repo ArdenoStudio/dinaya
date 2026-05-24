@@ -22,7 +22,7 @@ export default function DateQuickStrip({ selectedDate, minDate, maxDate, copy, o
   const maxStr = maxDate ? format(maxDate, "yyyy-MM-dd") : null;
 
   return (
-    <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide md:hidden">
+    <div className="-mx-4 flex gap-2 overflow-x-auto scroll-px-4 px-4 pb-1 scrollbar-hide snap-x snap-mandatory md:hidden">
       {dates.map((d) => {
         const dateStr = format(d, "yyyy-MM-dd");
         const isSelected = selectedDate === dateStr;
@@ -33,7 +33,7 @@ export default function DateQuickStrip({ selectedDate, minDate, maxDate, copy, o
             key={dateStr}
             type="button"
             onClick={() => onSelect(dateStr)}
-            className={`flex shrink-0 flex-col items-center rounded-xl border px-3.5 py-2.5 transition-all ${
+            className={`flex shrink-0 snap-start flex-col items-center rounded-xl border px-3.5 py-2.5 transition-all ${
               isSelected
                 ? "border-blue-600 bg-blue-600 text-white shadow-md shadow-blue-500/25"
                 : "border-gray-200 bg-white text-gray-600"

@@ -47,9 +47,9 @@ export default function TimeSlotGrid({
 }: Props) {
   if (loading) {
     return (
-      <div className="flex flex-wrap gap-2">
+      <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
         {Array.from({ length: 10 }).map((_, i) => (
-          <div key={i} className="h-11 w-[5.5rem] animate-pulse rounded-xl bg-gray-100" />
+          <div key={i} className="h-11 animate-pulse rounded-xl bg-gray-100" />
         ))}
       </div>
     );
@@ -75,7 +75,7 @@ export default function TimeSlotGrid({
       {grouped.map(({ period, label, slots: periodSlots }) => (
         <div key={period}>
           <p className="mb-2.5 text-xs font-semibold text-gray-500">{label}</p>
-          <div className="flex flex-wrap gap-2">
+          <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
             {periodSlots.map((slot) => {
               const isSelected = selectedStartUtc === slot.startUtc;
               return (
@@ -83,7 +83,7 @@ export default function TimeSlotGrid({
                   key={slot.startUtc}
                   type="button"
                   onClick={() => onSelect(slot)}
-                  className={`min-w-[5.25rem] rounded-xl px-4 py-2.5 text-sm font-semibold tabular-nums transition-all ${
+                  className={`w-full rounded-xl px-2 py-2.5 text-sm font-semibold tabular-nums transition-all ${
                     isSelected
                       ? "bg-blue-600 text-white shadow-md shadow-blue-500/25 ring-2 ring-blue-600/20"
                       : "border border-gray-200 bg-white text-gray-700 hover:border-blue-400 hover:bg-blue-50/50 hover:text-blue-700"
