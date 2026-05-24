@@ -3,9 +3,9 @@
 import { Suspense, useEffect, useRef, useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { Logo } from "@/components/Logo";
 import { Icon } from "@/components/ui/Icon";
-import { SwapForm } from "@/components/ui/swap-form-base";
 
 const perks = [
   { icon: "calendar", text: "Clients book 24/7 without calling you" },
@@ -19,6 +19,9 @@ const testimonial = {
   name: "Kavinda Jayasuriya",
   role: "Owner, The Barber Room · Kandy",
 };
+
+const inputCls =
+  "mt-1.5 w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 placeholder:text-gray-300 transition-all";
 
 function getSafeCallbackUrl(raw: string | null): string {
   if (!raw || !raw.startsWith("/") || raw.startsWith("//")) {
@@ -37,6 +40,7 @@ function LoginForm() {
   const emailRef = useRef<HTMLInputElement>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -70,56 +74,125 @@ function LoginForm() {
     }
   }
 
-  const banner = (
-    <>
-      {justRegistered && (
-        <div className="flex items-start gap-2 mb-5 px-3 py-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm">
-          <Icon name="check-circle-fill" className="text-sm mt-0.5 shrink-0" />
-          <span>Account created. Sign in to get started.</span>
-        </div>
-      )}
-
-      {passwordReset && (
-        <div className="flex items-start gap-2 mb-5 px-3 py-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm">
-          <Icon name="check-circle-fill" className="text-sm mt-0.5 shrink-0" />
-          <span>Password updated. Sign in with your new password.</span>
-        </div>
-      )}
-    </>
-  );
-
   return (
-    <div className="w-full flex flex-col items-center">
+    <div className="w-full max-w-sm">
       <div className="lg:hidden mb-6 flex justify-center">
         <Logo size="md" />
       </div>
 
-      <SwapForm
-        isSignIn
-        signUpHref="/register"
-        email={email}
-        onEmailChange={setEmail}
-        password={password}
-        onPasswordChange={setPassword}
-        onSubmit={handleSubmit}
-        loading={loading}
-        error={error}
-        emailInputRef={emailRef}
-        forgotPasswordHref="/forgot-password"
-        banner={banner}
-        texts={{
-          signInTitle: "Welcome back",
-          signInSubtitle: "Sign in to your dashboard",
-          signInButton: "Sign in",
-          footerSignIn: "No account?",
-          footerSignInCta: "Create one free",
-        }}
-      />
+      <div
+        className="bg-white rounded-2xl px-7 py-8"
+        style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.05), 0 8px 32px rgba(0,0,0,0.07)" }}
+      >
+        <h1 className="font-cal text-2xl mb-1">Welcome back</h1>
+        <p className="text-muted-foreground text-sm mb-6">Sign in to your dashboard</p>
 
-      <div className="flex items-center justify-center gap-1.5 mt-4 text-xs text-muted-foreground">
-        <Icon name="lock" />
-        <span>Secure sign-in · Your data is encrypted</span>
+        {justRegistered && (
+          <div className="flex items-start gap-2 mb-5 px-3 py-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm">
+            <Icon name="check-circle-fill" className="text-sm mt-0.5 shrink-0" />
+            <span>Account created. Sign in to get started.</span>
+          </div>
+        )}
+
+        {passwordReset && (
+          <div className="flex items-start gap-2 mb-5 px-3 py-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm">
+            <Icon name="check-circle-fill" className="text-sm mt-0.5 shrink-0" />
+            <span>Password updated. Sign in with your new password.</span>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+          <div>
+            <label className="text-sm font-medium text-gray-700" htmlFor="email">
+              Email
+            </label>
+            <input
+              ref={emailRef}
+              id="email"
+              name="email"
+              type="email"
+              required
+              autoComplete="email"
+              inputMode="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className={inputCls}
+              placeholder="you@example.com"
+            />
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium text-gray-700" htmlFor="password">
+                Password
+              </label>
+              <Link
+                href="/forgot-password"
+                className="text-xs text-gray-400 hover:text-primary transition-colors"
+              >
+                Forgot password?
+              </Link>
+            </div>
+            <div className="relative mt-1.5">
+              <input
+                id="password"
+                name="password"
+                type={showPassword ? "text" : "password"}
+                required
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full border border-gray-200 rounded-lg pl-3 pr-10 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 placeholder:text-gray-300 transition-all"
+                placeholder="••••••••"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((s) => !s)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-gray-300 hover:text-gray-500 rounded-md transition-colors"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                tabIndex={-1}
+              >
+                {showPassword ? (
+                  <Icon name="eye-slash" className="text-sm" />
+                ) : (
+                  <Icon name="eye" className="text-sm" />
+                )}
+              </button>
+            </div>
+          </div>
+
+          {error && (
+            <div
+              role="alert"
+              className="flex items-start gap-2 px-3 py-2.5 rounded-lg bg-red-50 border border-red-100 text-red-600 text-sm"
+            >
+              <Icon name="exclamation-circle" className="text-sm mt-0.5 shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-b from-primary/90 to-primary text-primary-foreground py-3 rounded-lg text-sm font-medium border-b-2 border-primary/70 shadow-[0_0_0_2px_rgba(0,0,0,0.04),0_0_14px_0_rgba(99,102,241,0.2)] transition-all hover:shadow-primary/30 hover:shadow-md disabled:cursor-not-allowed mt-1"
+          >
+            {loading && <Icon name="arrow-repeat" className="text-sm animate-spin" />}
+            {loading ? "Signing in…" : "Sign in"}
+          </button>
+        </form>
+
+        <div className="flex items-center justify-center gap-1.5 mt-4 text-xs text-gray-400">
+          <Icon name="lock" />
+          <span>Secure sign-in · Your data is encrypted</span>
+        </div>
       </div>
+
+      <p className="text-center text-sm text-gray-400 mt-5">
+        No account?{" "}
+        <Link href="/register" className="text-primary hover:underline font-medium">
+          Create one free
+        </Link>
+      </p>
     </div>
   );
 }
@@ -200,7 +273,7 @@ export default function SignInPage() {
         className="flex-1 flex items-center justify-center px-4 py-12"
         style={{ background: "#f5f4f1" }}
       >
-        <Suspense fallback={<div className="w-xs sm:w-sm h-[420px]" />}>
+        <Suspense fallback={<div className="w-full max-w-sm h-[360px]" />}>
           <LoginForm />
         </Suspense>
       </div>
