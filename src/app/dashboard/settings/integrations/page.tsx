@@ -82,6 +82,13 @@ export default async function IntegrationsPage() {
       action: "Use in AI Hub",
     },
     {
+      name: "AI Voice Receptionist",
+      description: "Let callers ask questions and book appointments through a managed phone agent.",
+      status: "Max add-on",
+      href: "/dashboard/settings/voice-receptionist",
+      action: "Set up",
+    },
+    {
       name: "API keys",
       description: "Scoped API access for custom integrations and /api/v1 routes.",
       status: "Available",

@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "VERCEL_PREVIEW_COMMENTS_ENABLED=0 next build",
+    "build": "node scripts/next-build.mjs",
     "start": "next start",
     "test": "vitest run",
     "test:e2e": "playwright test",
