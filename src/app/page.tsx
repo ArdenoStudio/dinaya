@@ -106,7 +106,7 @@ export default function LandingPage() {
       <LandingNav />
 
       {/* Hero — static markup for fast LCP (no Motion fade-in on headline) */}
-      <section className="max-w-4xl mx-auto px-6 pt-28 pb-12 text-center">
+      <section className="max-w-4xl mx-auto px-6 public-page-offset-lg pb-12 text-center">
         <div className="flex flex-col items-center">
           <div className="mb-8">
             <a

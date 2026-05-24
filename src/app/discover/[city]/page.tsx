@@ -48,7 +48,7 @@ export default async function DiscoverCityPage({ params, searchParams }: Props) 
     <main className="min-h-screen bg-white">
       <PublicNav />
 
-      <section className="mx-auto max-w-6xl px-6 py-16">
+      <section className="mx-auto max-w-6xl px-6 public-page-offset pb-16">
         <Link href="/discover" className="text-sm text-primary hover:underline">← All cities</Link>
         <h1 className="mt-4 font-cal text-4xl tracking-tight">
           Book in {city}

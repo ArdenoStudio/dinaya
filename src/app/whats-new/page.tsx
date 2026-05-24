@@ -225,7 +225,7 @@ export default function WhatsNewPage() {
         {/* Soft glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-48 bg-primary/8 blur-3xl rounded-full" />
 
-        <div className="relative max-w-4xl mx-auto px-6 pt-20 pb-16">
+        <div className="relative max-w-4xl mx-auto px-6 public-page-offset pb-16">
           <FadeContainer>
             <FadeDiv>
               <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-white px-3.5 py-1.5 text-xs font-medium text-primary shadow-sm mb-6">

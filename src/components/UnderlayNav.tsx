@@ -107,7 +107,7 @@ export function UnderlayNav() {
         className="fixed z-[100] text-gray-900 overflow-hidden"
         initial={false}
         animate={{
-          top:          mobileOpen ? 0 : 12,
+          top:          0,
           left:         mobileOpen ? 0 : "50%",
           x:            mobileOpen ? 0 : "-50%",
           width:        isOpen ? (layout.isMobile ? layout.fullWidth : layout.open) : layout.closed,

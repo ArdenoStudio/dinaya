@@ -11,7 +11,7 @@ export function DocsSidebar() {
 
   return (
     <aside className="hidden lg:block w-64 shrink-0">
-      <nav className="sticky top-24 space-y-6 text-sm" aria-label="Documentation">
+      <nav className="sticky top-20 space-y-6 text-sm" aria-label="Documentation">
         <div>
           <Link
             href="/docs"
