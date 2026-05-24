@@ -2,14 +2,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function SettingsLoading() {
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className="space-y-6">
       <div>
         <Skeleton className="h-8 w-32" />
         <Skeleton className="mt-2 h-4 w-96 max-w-full" />
       </div>
 
-      <div className="space-y-5">
-        {[1, 2, 3, 4].map((section) => (
+      <div className="grid gap-5 xl:grid-cols-2">
+        {[1, 2, 3, 4, 5, 6].map((section) => (
           <div key={section} className="rounded-xl border bg-white p-6">
             <Skeleton className="mb-4 h-4 w-40" />
             <div className="space-y-4">
@@ -23,7 +23,7 @@ export default function SettingsLoading() {
           </div>
         ))}
 
-        <Skeleton className="h-10 w-32 rounded-lg" />
+        <Skeleton className="h-14 w-full rounded-lg xl:col-span-2" />
       </div>
     </div>
   );
