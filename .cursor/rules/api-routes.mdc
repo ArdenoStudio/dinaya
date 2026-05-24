@@ -1,0 +1,27 @@
+---
+description: API route auth and validation patterns
+globs: src/app/api/**
+alwaysApply: false
+---
+
+# API routes
+
+Follow existing auth patterns in sibling routes:
+
+| Prefix | Auth |
+|--------|------|
+| `/api/cron/*` | `Authorization: Bearer $CRON_SECRET` — return 401 if missing/wrong |
+| `/api/dashboard/*` | `requireApiBusiness()` from `@/lib/api-auth` |
+| `/api/v1/*` | `requireApiKey(req, scope)` from `@/lib/api-key-auth` |
+| Admin routes | Platform admin checks (see `src/lib/platform-admin.ts`) |
+
+## Validation and errors
+
+- Validate bodies with Zod (`@/lib/validation` or colocated schemas).
+- Plan-gated features: `requirePro(businessId, feature)` — catch `PlanRequiredError` and return 402 with a clear message.
+- Never log secrets (PayHere, webhook HMAC, API keys, cron secret).
+
+## Webhooks and external callbacks
+
+- Verify signatures where the integration supports it (PayHere, inbound Meta/Twilio).
+- Use idempotent patterns for payment and booking side effects.

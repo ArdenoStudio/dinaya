@@ -102,6 +102,8 @@ npm run db:migrate
 npm run dev
 ```
 
+Contributors using Cursor: see [`AGENTS.md`](AGENTS.md) for repo conventions and agent context.
+
 - Sign in: [`/auth/signin`](http://localhost:3000/auth/signin)
 - Register a business: [`/register`](http://localhost:3000/register)
 

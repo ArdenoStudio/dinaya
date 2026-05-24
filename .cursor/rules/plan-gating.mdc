@@ -1,0 +1,35 @@
+---
+description: Free / Pro / Max plan gating for dashboard and plan logic
+globs: src/app/dashboard/**,src/lib/plan*.ts,src/lib/plan-features.ts
+alwaysApply: false
+---
+
+# Plan gating
+
+Plans: **free**, **pro**, **max**. Feature entitlements are defined in `src/lib/plan-features.ts` and enforced in `src/lib/plan.tsx`.
+
+## API enforcement
+
+```typescript
+await requirePro(businessId, "featureName"); // throws PlanRequiredError
+```
+
+Handle `PlanRequiredError` in route handlers (typically HTTP 402).
+
+## UI enforcement
+
+Use `<ProGate businessId={…} feature="…">` for server components that hide paid UI.
+
+## Checks
+
+- `canUseFeature(plan, feature)` — boolean check
+- `minimumPlanForFeature(feature)` — required tier
+- `getBusinessPlan(businessId)` — resolves effective plan (handles expiry)
+
+## Examples
+
+- `aiVoiceReceptionist` — **Max only**
+- `webhooks`, `reports` — **Pro+**
+- `publicBookingPage` — all plans
+
+When adding a new paid feature, update plan features, tests in `src/lib/plan.test.ts`, and admin plan config if applicable.

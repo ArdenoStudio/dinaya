@@ -1,0 +1,21 @@
+---
+description: Dinaya stack, imports, and boundaries for all work in this repo
+alwaysApply: true
+---
+
+# Dinaya stack
+
+- Node.js 22, Next.js 16 App Router, React 19, TypeScript, Neon Postgres, Drizzle ORM, NextAuth, Vercel.
+- Use the `@/` import alias.
+- Domain logic lives in `src/lib/`; UI in `src/components/` and `src/app/`. Do not import components into lib.
+- Match naming, types, and patterns in neighboring files; keep diffs minimal.
+
+## Boundaries
+
+- Never add `@cursor/sdk` or Cursor SDK dependencies to root `package.json` or `src/app/`.
+- `.cursor/` and `AGENTS.md` are dev-only — not bundled for production.
+- Product AI for tenants uses `src/lib/ai/` (Groq/OpenAI HTTP), not Cursor agents.
+
+## Before finishing
+
+Run `npm run verify` (lint + test + build) for any non-trivial change.
