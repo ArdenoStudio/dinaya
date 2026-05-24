@@ -25,6 +25,7 @@ type DashboardShellProps = {
   impersonatedBy?: string;
   planUsage?: PlanUsage;
   copy: DashboardCopy;
+  minimalChrome?: boolean;
   children: React.ReactNode;
 };
 
@@ -38,6 +39,7 @@ export function DashboardShell({
   impersonatedBy,
   planUsage,
   copy,
+  minimalChrome = false,
   children,
 }: DashboardShellProps) {
   const pathname = usePathname();
@@ -45,10 +47,19 @@ export function DashboardShell({
   const role = useDashboardRole();
   const isOwner = role === "owner";
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const isSetupFlow = minimalChrome || pathname.startsWith("/dashboard/setup");
 
   useEffect(() => {
     setMobileNavOpen(false);
   }, [pathname]);
+
+  if (isSetupFlow) {
+    return (
+      <DashboardToastProvider>
+        {children}
+      </DashboardToastProvider>
+    );
+  }
 
   const sections = dashboardNavGroups
     .map((group) => {

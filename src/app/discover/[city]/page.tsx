@@ -1,52 +1,48 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { db } from "@/db";
-import { businesses } from "@/db/schema";
-import { and, eq, isNull } from "drizzle-orm";
 import { PublicNav } from "@/components/PublicNav";
 import { LandingFooter } from "@/components/LandingFooter";
-import { categoryLabel, slugToCity } from "@/lib/directory";
+import { DiscoverListings } from "@/components/discover/DiscoverListings";
+import {
+  categoryLabel,
+  isValidDirectoryCategory,
+  listDirectoryBusinesses,
+  slugToCity,
+  type DirectoryCategory,
+} from "@/lib/directory";
 
 export const dynamic = "force-dynamic";
 
 interface Props {
   params: Promise<{ city: string }>;
+  searchParams: Promise<{ category?: string }>;
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
   const { city } = await params;
+  const { category: rawCategory } = await searchParams;
   const resolved = slugToCity(city);
   if (!resolved) return {};
+  const category = isValidDirectoryCategory(rawCategory) ? rawCategory : null;
+  const categorySuffix = category ? ` · ${categoryLabel(category)}` : "";
   return {
-    title: `Book businesses in ${resolved} | Dinaya Directory`,
+    title: `Book businesses in ${resolved}${categorySuffix} | Dinaya Directory`,
     description: `Find bookable salons, clinics, tutors, and services in ${resolved}.`,
   };
 }
 
-export default async function DiscoverCityPage({ params }: Props) {
+export default async function DiscoverCityPage({ params, searchParams }: Props) {
   const { city: citySlug } = await params;
+  const { category: rawCategory } = await searchParams;
   const city = slugToCity(citySlug);
   if (!city) notFound();
 
-  const listings = await db
-    .select({
-      name: businesses.name,
-      slug: businesses.slug,
-      description: businesses.description,
-      directoryCategory: businesses.directoryCategory,
-    })
-    .from(businesses)
-    .where(and(
-      eq(businesses.directoryListed, true),
-      eq(businesses.directoryCity, city),
-      eq(businesses.isSuspended, false),
-      isNull(businesses.deletedAt),
-    ))
-    .orderBy(businesses.name);
-
-  const appDomain = process.env.NEXT_PUBLIC_APP_DOMAIN ?? "localhost:3000";
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const activeCategory: DirectoryCategory | null = isValidDirectoryCategory(rawCategory) ? rawCategory : null;
+  const listings = await listDirectoryBusinesses({
+    city,
+    ...(activeCategory ? { category: activeCategory } : {}),
+  });
 
   return (
     <main className="min-h-screen bg-white">
@@ -54,31 +50,21 @@ export default async function DiscoverCityPage({ params }: Props) {
 
       <section className="mx-auto max-w-6xl px-6 py-16">
         <Link href="/discover" className="text-sm text-primary hover:underline">← All cities</Link>
-        <h1 className="mt-4 font-cal text-4xl tracking-tight">Book in {city}</h1>
+        <h1 className="mt-4 font-cal text-4xl tracking-tight">
+          Book in {city}
+          {activeCategory ? ` · ${categoryLabel(activeCategory)}` : ""}
+        </h1>
         <p className="mt-3 text-muted-foreground">
           {listings.length} business{listings.length === 1 ? "" : "es"} accepting online bookings.
         </p>
 
-        <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {listings.map((business) => {
-            const bookingUrl = appDomain === "dinaya.lk"
-              ? `https://${business.slug}.dinaya.lk`
-              : `${appUrl}/book/${business.slug}`;
-
-            return (
-              <Link
-                key={business.slug}
-                href={bookingUrl}
-                className="rounded-2xl border bg-white p-5 shadow-sm transition hover:border-primary/30"
-              >
-                <h2 className="font-cal text-xl tracking-tight">{business.name}</h2>
-                <p className="mt-1 text-xs text-muted-foreground">{categoryLabel(business.directoryCategory)}</p>
-                {business.description ? (
-                  <p className="mt-3 line-clamp-3 text-sm text-muted-foreground">{business.description}</p>
-                ) : null}
-              </Link>
-            );
-          })}
+        <div className="mt-8">
+          <DiscoverListings
+            listings={listings}
+            activeCategory={activeCategory}
+            activeCity={city}
+            showCityFilters={false}
+          />
         </div>
       </section>
 

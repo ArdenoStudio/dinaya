@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { slugify } from "@/lib/utils";
 import { Logo } from "@/components/Logo";
@@ -106,6 +107,19 @@ export default function RegisterPage() {
     });
     const data = await res.json();
     if (!res.ok) { setError(data.error ?? "Something went wrong."); setLoading(false); return; }
+
+    const signInResult = await signIn("credentials", {
+      email: form.email,
+      password: form.password,
+      redirect: false,
+    });
+
+    if (signInResult?.ok) {
+      router.push("/dashboard/setup");
+      router.refresh();
+      return;
+    }
+
     router.push("/auth/signin?registered=1");
   }
 

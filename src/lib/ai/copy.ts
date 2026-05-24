@@ -98,12 +98,54 @@ const FALLBACKS: Record<PlanFeature, (input: AiCopyInput) => AiCopyResult> = {
 };
 
 export async function generateAiCopy(input: AiCopyInput): Promise<AiCopyResult> {
+  const provider = (process.env.AI_PROVIDER ?? "").toLowerCase();
+  const model = process.env.AI_MODEL ?? (provider === "anthropic" ? "claude-sonnet-4-20250514" : "gpt-4o-mini");
+
+  if (provider === "anthropic") {
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+    if (!apiKey) return FALLBACKS[input.feature](input);
+
+    try {
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "x-api-key": apiKey,
+          "anthropic-version": "2023-06-01",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model,
+          max_tokens: 400,
+          system:
+            "Write concise, warm Sri Lanka-local booking business copy for WhatsApp or SMS. Respond with JSON only: {\"subject\":\"...\",\"body\":\"...\"}. Keep body under 320 characters.",
+          messages: [
+            {
+              role: "user",
+              content: JSON.stringify(input),
+            },
+          ],
+        }),
+      });
+
+      if (!response.ok) return FALLBACKS[input.feature](input);
+      const data = await response.json() as {
+        content?: { type?: string; text?: string }[];
+      };
+      const raw = data.content?.find((block) => block.type === "text")?.text;
+      if (!raw) return FALLBACKS[input.feature](input);
+      const parsed = JSON.parse(raw) as Partial<AiCopyResult>;
+      if (!parsed.subject || !parsed.body) return FALLBACKS[input.feature](input);
+      return { subject: parsed.subject, body: parsed.body, source: "ai" };
+    } catch {
+      return FALLBACKS[input.feature](input);
+    }
+  }
+
   const apiKey = process.env.AI_API_KEY || process.env.OPENAI_API_KEY || process.env.GEMINI_API_KEY;
-  const provider = process.env.AI_PROVIDER ?? (process.env.OPENAI_API_KEY ? "openai" : "");
-  const model = process.env.AI_MODEL ?? "gpt-4o-mini";
+  const openAiProvider = provider || (process.env.OPENAI_API_KEY ? "openai" : "");
   const baseUrl = process.env.AI_BASE_URL ?? "https://api.openai.com/v1";
 
-  if (!apiKey || provider !== "openai") {
+  if (!apiKey || openAiProvider !== "openai") {
     return FALLBACKS[input.feature](input);
   }
 

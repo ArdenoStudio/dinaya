@@ -16,8 +16,11 @@ describe("directory helpers", () => {
   it("labels categories and infers from business type", () => {
     expect(categoryLabel("salon")).toBe("Salon & beauty");
     expect(categoryLabel(null)).toBe("Services");
-    expect(inferDirectoryCategory("salon_barber")).toBe("other");
+    expect(inferDirectoryCategory("salon_barber")).toBe("salon");
     expect(inferDirectoryCategory("clinic")).toBe("clinic");
+    expect(inferDirectoryCategory("tuition")).toBe("tutoring");
+    expect(inferDirectoryCategory("spa_wellness")).toBe("fitness");
+    expect(inferDirectoryCategory("consulting")).toBe("consulting");
     expect(inferDirectoryCategory("tutoring")).toBe("tutoring");
   });
 });

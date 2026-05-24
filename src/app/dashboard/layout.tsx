@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import { count, eq } from "drizzle-orm";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { DashboardLocaleProvider } from "@/components/dashboard/DashboardLocaleProvider";
+import { OnboardingGate } from "@/components/dashboard/OnboardingGate";
 import { db } from "@/db";
-import { locations, services, staff } from "@/db/schema";
+import { businesses, locations, services, staff } from "@/db/schema";
 import { requireBusiness } from "@/lib/auth";
 import { getDashboardCopy } from "@/lib/dashboard-i18n";
 import type { DashboardLanguage } from "@/lib/dashboard-i18n";
@@ -44,21 +45,31 @@ export default async function DashboardLayout({
   const copy = getDashboardCopy(language);
   const planUsage = role === "owner" ? await getPlanUsage(businessId, business.plan as Plan) : undefined;
 
+  const [onboardingRow] = await db
+    .select({ onboardingCompletedAt: businesses.onboardingCompletedAt })
+    .from(businesses)
+    .where(eq(businesses.id, businessId))
+    .limit(1);
+  const onboardingCompleted = Boolean(onboardingRow?.onboardingCompletedAt);
+
   return (
     <DashboardLocaleProvider language={language} role={role}>
-      <DashboardShell
-        businessName={business.name}
-        userEmail={user.email ?? ""}
-        userName={user.name ?? null}
-        plan={business.plan}
-        showAdminLink={showAdminLink}
-        readOnlyImpersonation={Boolean(readOnlyImpersonation)}
-        impersonatedBy={impersonatedBy}
-        planUsage={planUsage}
-        copy={copy}
-      >
-        {children}
-      </DashboardShell>
+      <OnboardingGate completed={onboardingCompleted}>
+        <DashboardShell
+          businessName={business.name}
+          userEmail={user.email ?? ""}
+          userName={user.name ?? null}
+          plan={business.plan}
+          showAdminLink={showAdminLink}
+          readOnlyImpersonation={Boolean(readOnlyImpersonation)}
+          impersonatedBy={impersonatedBy}
+          planUsage={planUsage}
+          copy={copy}
+          minimalChrome={!onboardingCompleted}
+        >
+          {children}
+        </DashboardShell>
+      </OnboardingGate>
     </DashboardLocaleProvider>
   );
 }

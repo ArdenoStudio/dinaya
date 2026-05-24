@@ -34,8 +34,9 @@ Optional but recommended:
 - `CONTACT_INBOX_EMAIL` — contact form destination (defaults to hello@dinaya.lk)
 - `PLATFORM_ADMIN_EMAILS` — comma-separated allowlist for `/admin`
 - `HEALTH_CHECK_SECRET` — dedicated secret for `/api/health/*` (falls back to `CRON_SECRET`)
-- AI workflows: `AI_PROVIDER`, `AI_API_KEY`, `AI_BASE_URL`, `AI_MODEL`
+- AI workflows: `AI_PROVIDER`, `AI_API_KEY`, `AI_BASE_URL`, `AI_MODEL`, `ANTHROPIC_API_KEY`, `AI_REACTIVATION_DAYS`
 - WhatsApp/social publishing: `META_WHATSAPP_TOKEN`, `META_WHATSAPP_PHONE_NUMBER_ID`, `META_SOCIAL_ACCESS_TOKEN`, `META_SOCIAL_PAGE_ID`
+- Twilio WhatsApp fallback: `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_WHATSAPP_FROM`
 - SMS gateway: `SMS_HTTP_ENDPOINT`, `SMS_HTTP_API_KEY`, `SMS_HTTP_METHOD`, `SMS_HTTP_SENDER`
 
 ## Scheduled jobs
@@ -101,16 +102,32 @@ npm run db:migrate
    - `0013_platform_settings.sql`
    - `0014_phase5_growth.sql`
    - `0015_security_performance_indexes.sql`
+   - `0016_voice_receptionist.sql`
+   - `0017_onboarding.sql`
 4. Deploy the app.
 5. Smoke test:
    - `GET /api/health`
    - `/auth/signin`
-   - `/dashboard`
-   - `/dashboard/ai`
+   - `/register` → `/dashboard/setup` (4-step onboarding wizard)
+   - `/discover?category=salon`
+   - `/dashboard/reports` (analytics charts)
+   - `/dashboard/ai` (reactivation manual trigger)
    - one public booking page at `/book/[slug]`
    - signed review page at `/reviews/[token]`
    - client booking manage link at `/client/[token]` (if enabled)
    - a test booking conflict attempt for the same staff/time
+
+## Live stream demo loop
+
+Run in order after deploy:
+
+1. Register at `/register` — auto sign-in redirects to `/dashboard/setup`
+2. Complete onboarding wizard → `{slug}.dinaya.lk` goes live and lists on `/discover`
+3. Book as a client on `/book/{slug}` with a WhatsApp-capable phone
+4. Confirm client + owner WhatsApp notifications in `communications`
+5. Open `/dashboard/reports` — verify charts reflect the booking
+6. Seed demo reactivation client: `npx tsx scripts/seed-reactivation-demo.ts <businessId> +94...`
+7. Run **Run reactivation now** in `/dashboard/ai`
 
 ## Production safety notes
 

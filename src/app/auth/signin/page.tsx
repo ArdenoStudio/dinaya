@@ -23,7 +23,8 @@ const testimonial = {
 const inputCls =
   "mt-1.5 w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 placeholder:text-gray-300 transition-all";
 
-function getSafeCallbackUrl(raw: string | null): string {
+function getSafeCallbackUrl(raw: string | null, justRegistered: boolean): string {
+  if (justRegistered) return "/dashboard/setup";
   if (!raw || !raw.startsWith("/") || raw.startsWith("//")) {
     return "/dashboard";
   }
@@ -35,7 +36,7 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const justRegistered = searchParams.get("registered") === "1";
   const passwordReset = searchParams.get("reset") === "1";
-  const callbackUrl = getSafeCallbackUrl(searchParams.get("callbackUrl"));
+  const callbackUrl = getSafeCallbackUrl(searchParams.get("callbackUrl"), justRegistered);
 
   const emailRef = useRef<HTMLInputElement>(null);
   const [email, setEmail] = useState("");
