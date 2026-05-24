@@ -305,23 +305,23 @@ export default function FeaturesPage() {
         </div>
       </section>
 
-      {/* Pro AI growth */}
+      {/* Max AI growth */}
       <section className="max-w-6xl mx-auto px-6 pb-20" id="max-ai">
         <div className="mb-10">
           <div className="inline-flex items-center gap-2 rounded-xl ring-1 ring-amber-100 bg-amber-50/50 px-3.5 py-2 mb-4">
             <span className="flex h-6 w-6 items-center justify-center rounded-md bg-amber-600 text-white">
               <Icon name="stars" className="text-xs" />
             </span>
-            <span className="text-sm font-semibold text-gray-900">Pro AI growth</span>
+            <span className="text-sm font-semibold text-gray-900">Max AI growth</span>
             <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-800">
-              Available on Pro and Max
+              Available on Max
             </span>
           </div>
           <h2 className="font-cal text-3xl md:text-4xl tracking-tight mb-3">
             Growth on autopilot.
           </h2>
           <p className="text-muted-foreground max-w-xl">
-            Seven AI-powered Pro tools that fill your calendar, win back clients, and keep your social presence active — without adding hours to your week.
+            Seven AI-powered Max tools that fill your calendar, win back clients, and keep your social presence active — without adding hours to your week.
           </p>
         </div>
 
@@ -346,7 +346,7 @@ export default function FeaturesPage() {
             href="/pricing"
             className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
           >
-            See Pro pricing
+            See Max pricing
             <Icon name="arrow-right" className="text-sm" />
           </Link>
         </div>

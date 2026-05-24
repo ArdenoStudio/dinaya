@@ -168,7 +168,7 @@ export default function AiHubClient() {
       <div>
         <h1 className="font-cal text-2xl">AI Growth Hub</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Configure Pro AI tools per branch. Max keeps the same tools and removes branch limits.
+          Configure Max AI tools per branch. Unlimited branches and per-branch workflow controls included.
         </p>
       </div>
 
