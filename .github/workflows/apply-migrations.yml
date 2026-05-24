@@ -1,0 +1,18 @@
+name: Apply DB Migrations
+
+on:
+  workflow_dispatch:
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call migration endpoint
+        env:
+          APP_URL: ${{ vars.DINAYA_APP_URL || secrets.DINAYA_APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          curl --fail-with-body --show-error \
+            --header "Authorization: Bearer ${CRON_SECRET}" \
+            --request POST \
+            "${APP_URL%/}/api/admin/apply-migrations"
