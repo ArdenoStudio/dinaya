@@ -1,0 +1,17 @@
+---
+description: Drizzle migration conventions for Dinaya
+globs: drizzle/**,src/db/**
+alwaysApply: false
+---
+
+# Migrations
+
+- Add a new numbered SQL file: `drizzle/00NN_descriptive_name.sql` (use the next sequence number after the latest in `drizzle/`).
+- Update `src/db/schema.ts` to reflect schema changes.
+- Do not modify migrations that may already be applied in production — add a new migration instead.
+- After schema changes, run `npm run db:migrate` locally and ensure related tests pass.
+
+## Related
+
+- Archived migrations live under `drizzle/_archive/` — do not revive without explicit intent.
+- Platform plan config may mirror to `.dinaya/plans.json` in local dev (gitignored runtime data).
