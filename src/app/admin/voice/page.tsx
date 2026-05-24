@@ -2,7 +2,8 @@ import { desc, eq } from "drizzle-orm";
 import { format } from "date-fns";
 import { PhoneCall } from "lucide-react";
 import { db } from "@/db";
-import { businesses, voiceIntegrations } from "@/db/schema";
+import { businesses, voiceIntegrations, type VoiceIntegration } from "@/db/schema";
+import { safeAdminQuery } from "@/lib/admin-db";
 import { requirePlatformAdmin } from "@/lib/platform-admin";
 import {
   VOICE_LANGUAGES,
@@ -14,6 +15,17 @@ import { updateVoiceIntegration } from "./actions";
 
 export const dynamic = "force-dynamic";
 
+type VoiceAdminRow = {
+  integration: VoiceIntegration;
+  business: {
+    id: string;
+    name: string;
+    slug: string;
+    plan: "free" | "pro" | "max";
+    phone: string | null;
+  };
+};
+
 function dateLabel(value: Date | null): string {
   return value ? format(value, "d MMM, h:mm a") : "Not set";
 }
@@ -21,20 +33,23 @@ function dateLabel(value: Date | null): string {
 export default async function AdminVoicePage() {
   await requirePlatformAdmin();
 
-  const rows = await db
-    .select({
-      integration: voiceIntegrations,
-      business: {
-        id: businesses.id,
-        name: businesses.name,
-        slug: businesses.slug,
-        plan: businesses.plan,
-        phone: businesses.phone,
-      },
-    })
-    .from(voiceIntegrations)
-    .innerJoin(businesses, eq(businesses.id, voiceIntegrations.businessId))
-    .orderBy(desc(voiceIntegrations.updatedAt));
+  const rows = await safeAdminQuery(
+    db
+      .select({
+        integration: voiceIntegrations,
+        business: {
+          id: businesses.id,
+          name: businesses.name,
+          slug: businesses.slug,
+          plan: businesses.plan,
+          phone: businesses.phone,
+        },
+      })
+      .from(voiceIntegrations)
+      .innerJoin(businesses, eq(businesses.id, voiceIntegrations.businessId))
+      .orderBy(desc(voiceIntegrations.updatedAt)),
+    [] as VoiceAdminRow[],
+  );
 
   const languageLabels = new Map(VOICE_LANGUAGES.map((language) => [language.value, language.label]));
 

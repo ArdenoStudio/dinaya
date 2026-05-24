@@ -9,6 +9,7 @@ import {
   type Plan,
   type PlanFeature,
 } from "@/lib/plan";
+import { safeAdminQuery } from "@/lib/admin-db";
 import { formatLkr } from "@/lib/utils";
 import { requirePlatformAdmin } from "@/lib/platform-admin";
 import { resetPlansToDefaults, savePlans } from "./actions";
@@ -78,14 +79,29 @@ export default async function AdminPlansPage() {
     [{ activeSubCount }],
     [{ activeMrr }],
   ] = await Promise.all([
-    db.select({ freeCount: count() }).from(businesses).where(eq(businesses.plan, "free")),
-    db.select({ proCount: count() }).from(businesses).where(eq(businesses.plan, "pro")),
-    db.select({ maxCount: count() }).from(businesses).where(eq(businesses.plan, "max")),
-    db.select({ activeSubCount: count() }).from(subscriptions).where(eq(subscriptions.status, "active")),
-    db
+    safeAdminQuery(
+      db.select({ freeCount: count() }).from(businesses).where(eq(businesses.plan, "free")),
+      [{ freeCount: 0 }] as { freeCount: number }[],
+    ),
+    safeAdminQuery(
+      db.select({ proCount: count() }).from(businesses).where(eq(businesses.plan, "pro")),
+      [{ proCount: 0 }] as { proCount: number }[],
+    ),
+    safeAdminQuery(
+      db.select({ maxCount: count() }).from(businesses).where(eq(businesses.plan, "max")),
+      [{ maxCount: 0 }] as { maxCount: number }[],
+    ),
+    safeAdminQuery(
+      db.select({ activeSubCount: count() }).from(subscriptions).where(eq(subscriptions.status, "active")),
+      [{ activeSubCount: 0 }] as { activeSubCount: number }[],
+    ),
+    safeAdminQuery(
+      db
       .select({ activeMrr: sql<number>`coalesce(sum(${subscriptions.amountLkr}), 0)::int` })
       .from(subscriptions)
       .where(eq(subscriptions.status, "active")),
+      [{ activeMrr: 0 }] as { activeMrr: number }[],
+    ),
   ]);
 
   const total = Number(freeCount) + Number(proCount) + Number(maxCount);

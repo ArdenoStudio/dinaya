@@ -25,6 +25,11 @@ import {
   subscriptions,
   users,
 } from "@/db/schema";
+import {
+  adminBusinessProfileSelect,
+  adminSubscriptionHistorySelect,
+  safeAdminQuery,
+} from "@/lib/admin-db";
 import { formatLkr } from "@/lib/utils";
 import { requirePlatformAdmin } from "@/lib/platform-admin";
 import { AccountModerationPanel } from "./AccountModerationPanel";
@@ -40,7 +45,7 @@ export default async function AdminAccountDetailPage({
   const { id } = await params;
 
   const [biz] = await db
-    .select()
+    .select(adminBusinessProfileSelect)
     .from(businesses)
     .where(eq(businesses.id, id))
     .limit(1);
@@ -97,11 +102,14 @@ export default async function AdminAccountDetailPage({
       .from(users)
       .where(eq(users.businessId, id))
       .orderBy(desc(users.createdAt)),
-    db
-      .select()
-      .from(subscriptions)
-      .where(eq(subscriptions.businessId, id))
-      .orderBy(desc(subscriptions.createdAt)),
+    safeAdminQuery(
+      db
+        .select(adminSubscriptionHistorySelect)
+        .from(subscriptions)
+        .where(eq(subscriptions.businessId, id))
+        .orderBy(desc(subscriptions.createdAt)),
+      [],
+    ),
     db
       .select({
         id: bookings.id,

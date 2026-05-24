@@ -3,6 +3,7 @@ import { LifeBuoy, Search } from "lucide-react";
 import Link from "next/link";
 import { db } from "@/db";
 import { businesses, users } from "@/db/schema";
+import { safeAdminQuery } from "@/lib/admin-db";
 import { requirePlatformAdmin } from "@/lib/platform-admin";
 import { RefundPaymentForm } from "./RefundPaymentForm";
 import { SupportClient } from "./SupportClient";
@@ -22,19 +23,28 @@ export default async function AdminSupportPage({
     ? or(ilike(users.email, `%${q}%`), ilike(users.name, `%${q}%`), ilike(businesses.name, `%${q}%`))
     : undefined;
 
-  const rows = await db
-    .select({
-      id: users.id,
-      name: users.name,
-      email: users.email,
-      role: users.role,
-      businessName: businesses.name,
-    })
-    .from(users)
-    .innerJoin(businesses, eq(businesses.id, users.businessId))
-    .where(whereExpr)
-    .orderBy(desc(users.createdAt))
-    .limit(50);
+  const rows = await safeAdminQuery(
+    db
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        role: users.role,
+        businessName: businesses.name,
+      })
+      .from(users)
+      .innerJoin(businesses, eq(businesses.id, users.businessId))
+      .where(whereExpr)
+      .orderBy(desc(users.createdAt))
+      .limit(50),
+    [] as {
+      id: string;
+      name: string;
+      email: string;
+      role: "owner" | "staff";
+      businessName: string;
+    }[],
+  );
 
   return (
     <div className="space-y-6">
