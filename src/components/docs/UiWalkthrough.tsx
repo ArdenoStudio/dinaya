@@ -230,7 +230,7 @@ export function UiWalkthrough({ steps }: Props) {
             )}
           </div>
         </div>
-        <div className="lg:sticky lg:top-24">
+        <div className="lg:sticky lg:top-28">
           <StepVisual step={step} />
         </div>
       </div>

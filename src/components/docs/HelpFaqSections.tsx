@@ -125,7 +125,7 @@ export function HelpFaqSections() {
       )}
 
       {!search && (
-        <div className="sticky top-20 z-40 bg-white/90 backdrop-blur-sm border-b">
+        <div className="sticky top-24 z-40 bg-white/90 backdrop-blur-sm border-b">
           <div className="max-w-4xl mx-auto px-6 flex gap-1 overflow-x-auto py-2">
             <button
               type="button"

@@ -60,8 +60,9 @@ html.nav-open {
     --input: 214.3 31.8% 91.4%;
     --ring: 220 84% 67%;
     --radius: 0.5rem;
+    --public-nav-top: 0.75rem;
     --public-nav-height: 3.75rem;
-    --public-nav-gap: 1.25rem;
+    --public-nav-gap: 2rem;
   }
 
   .dark {
@@ -94,11 +95,11 @@ html.nav-open {
 
 @layer utilities {
   .public-page-offset {
-    padding-top: calc(var(--public-nav-height) + var(--public-nav-gap));
+    padding-top: calc(var(--public-nav-top) + var(--public-nav-height) + var(--public-nav-gap));
   }
 
   .public-page-offset-lg {
-    padding-top: calc(var(--public-nav-height) + 2rem);
+    padding-top: calc(var(--public-nav-top) + var(--public-nav-height) + 2.75rem);
   }
 }
 
