@@ -1,12 +1,12 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { subscriptions } from "@/db/schema";
 import { eq, and, inArray } from "drizzle-orm";
 import { cancelPayhereSubscription } from "@/lib/payhere-subscriptions";
 import { requireApiBusiness } from "@/lib/api-auth";
 
-export async function POST() {
-  const authResult = await requireApiBusiness({ ownerOnly: true });
+export async function POST(req: NextRequest) {
+  const authResult = await requireApiBusiness({ ownerOnly: true, req });
   if (!authResult.ok) return authResult.response;
   const { businessId } = authResult.context;
 

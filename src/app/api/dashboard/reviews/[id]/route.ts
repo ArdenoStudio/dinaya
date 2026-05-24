@@ -17,7 +17,7 @@ interface Ctx {
 }
 
 export async function PATCH(req: NextRequest, { params }: Ctx) {
-  const authResult = await requireApiBusiness({ ownerOnly: true });
+  const authResult = await requireApiBusiness({ ownerOnly: true, req });
   if (!authResult.ok) return authResult.response;
   const { businessId } = authResult.context;
   const { id } = await params;
@@ -66,8 +66,8 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
   }, "Unable to update review.");
 }
 
-export async function DELETE(_req: NextRequest, { params }: Ctx) {
-  const authResult = await requireApiBusiness();
+export async function DELETE(req: NextRequest, { params }: Ctx) {
+  const authResult = await requireApiBusiness({ req });
   if (!authResult.ok) return authResult.response;
   const { businessId } = authResult.context;
   const { id } = await params;

@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { eq } from "drizzle-orm";
 import { auth } from "@/auth";
+import { db } from "@/db";
+import { users } from "@/db/schema";
 import { hasApiKeyAuth, requireApiKey } from "@/lib/api-key-auth";
 import {
   businessInactiveMessage,
@@ -59,11 +62,39 @@ export async function requireApiBusiness({
   }
 
   const session = await auth();
-  const businessId = session?.user?.businessId;
-  const userId = session?.user?.id;
-  const role = session?.user?.role;
+  const sessionUserId = session?.user?.id;
 
-  if (!businessId || !userId || !role) {
+  if (!sessionUserId) {
+    return {
+      ok: false,
+      response: NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
+    };
+  }
+
+  const [dbUser] = await db
+    .select({
+      id: users.id,
+      businessId: users.businessId,
+      role: users.role,
+      email: users.email,
+      name: users.name,
+    })
+    .from(users)
+    .where(eq(users.id, sessionUserId))
+    .limit(1);
+
+  if (!dbUser) {
+    return {
+      ok: false,
+      response: NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
+    };
+  }
+
+  const businessId = dbUser.businessId;
+  const userId = dbUser.id;
+  const role = dbUser.role;
+
+  if (session?.user?.businessId && session.user.businessId !== businessId) {
     return {
       ok: false,
       response: NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
@@ -77,9 +108,9 @@ export async function requireApiBusiness({
     };
   }
 
-  if (session.user.readOnlyImpersonation) {
-    const method = req?.method ?? "GET";
-    if (method !== "GET") {
+  if (session?.user?.readOnlyImpersonation) {
+    const method = req?.method?.toUpperCase();
+    if (method !== "GET" && method !== "HEAD") {
       return {
         ok: false,
         response: NextResponse.json(
@@ -101,9 +132,9 @@ export async function requireApiBusiness({
       businessId,
       role,
       user: {
-        email: session.user.email,
+        email: dbUser.email,
         id: userId,
-        name: session.user.name,
+        name: dbUser.name,
       },
     },
   };

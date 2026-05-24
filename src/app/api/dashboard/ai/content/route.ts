@@ -48,7 +48,7 @@ async function resolveLocation(businessId: string, requestedLocationId?: string)
 }
 
 export async function GET(req: NextRequest) {
-  const authResult = await requireApiBusiness();
+  const authResult = await requireApiBusiness({ req });
   if (!authResult.ok) return authResult.response;
   const { businessId } = authResult.context;
   const accessError = await requireAiContentAccess(businessId);
@@ -60,7 +60,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const authResult = await requireApiBusiness({ ownerOnly: true });
+  const authResult = await requireApiBusiness({ ownerOnly: true, req });
   if (!authResult.ok) return authResult.response;
   const { businessId } = authResult.context;
 

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { payments, bookings, businesses, services, staff } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { verifyPayhereWebhook } from "@/lib/payhere";
+import { payhereAmountMatches, verifyPayhereWebhook } from "@/lib/payhere";
 import { parsePayhereWebhookFields } from "@/lib/payhere-webhook";
 import { sendBookingNotificationToBusiness } from "@/lib/resend";
 import { sendBookingConfirmationMessage, sendBookingNotificationToBusinessMessage } from "@/lib/messaging/booking-messages";
@@ -14,17 +14,18 @@ import { decryptSecret } from "@/lib/secrets";
 import { processBookingAutomationTrigger } from "@/lib/automations/engine";
 import { sendPaymentReceiptEmail } from "@/lib/receipts";
 
+const WEBHOOK_REJECTED = NextResponse.json({ error: "Invalid webhook" }, { status: 400 });
+
 export async function POST(req: NextRequest) {
   const form = await req.formData();
   const fields = parsePayhereWebhookFields(form);
 
   if (!fields) {
-    return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+    return WEBHOOK_REJECTED;
   }
 
   const { merchantId, orderId, payhereAmount, payhereCurrency, statusCode, md5sig } = fields;
 
-  // Look up payment to get the merchant secret
   const [payment] = await db
     .select()
     .from(payments)
@@ -32,7 +33,7 @@ export async function POST(req: NextRequest) {
     .limit(1);
 
   if (!payment) {
-    return NextResponse.json({ error: "Order not found" }, { status: 404 });
+    return WEBHOOK_REJECTED;
   }
 
   const [booking] = await db
@@ -51,7 +52,7 @@ export async function POST(req: NextRequest) {
     .limit(1);
 
   if (!booking) {
-    return NextResponse.json({ error: "Booking not found" }, { status: 404 });
+    return WEBHOOK_REJECTED;
   }
 
   const [business] = await db
@@ -59,6 +60,7 @@ export async function POST(req: NextRequest) {
       email: businesses.email,
       phone: businesses.phone,
       name: businesses.name,
+      payhereMerchantId: businesses.payhereMerchantId,
       payhereMerchantSecret: businesses.payhereMerchantSecret,
       slug: businesses.slug,
       plan: businesses.plan,
@@ -69,12 +71,16 @@ export async function POST(req: NextRequest) {
     .limit(1);
 
   if (!business) {
-    return NextResponse.json({ error: "Business not found" }, { status: 404 });
+    return WEBHOOK_REJECTED;
   }
 
   const merchantSecret = decryptSecret(business.payhereMerchantSecret);
   if (!merchantSecret) {
-    return NextResponse.json({ error: "Payment secret is not configured" }, { status: 400 });
+    return WEBHOOK_REJECTED;
+  }
+
+  if (business.payhereMerchantId && business.payhereMerchantId !== merchantId) {
+    return WEBHOOK_REJECTED;
   }
 
   const valid = verifyPayhereWebhook({
@@ -88,7 +94,7 @@ export async function POST(req: NextRequest) {
   });
 
   if (!valid) {
-    return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
+    return WEBHOOK_REJECTED;
   }
 
   const allFields: Record<string, string> = {};
@@ -99,7 +105,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ received: true, duplicate: true });
     }
 
-    // Payment success
+    if (
+      payhereCurrency !== "LKR" ||
+      !payhereAmountMatches(payment.amountLkr, payhereAmount)
+    ) {
+      return WEBHOOK_REJECTED;
+    }
+
     await db
       .update(payments)
       .set({ status: "success", payherePayload: allFields })
@@ -122,7 +134,6 @@ export async function POST(req: NextRequest) {
       meta: { orderId, amount: payhereAmount, currency: payhereCurrency },
     });
 
-    // Send confirmation emails
     const [service] = await db
       .select({ name: services.name })
       .from(services)
@@ -199,10 +210,12 @@ export async function POST(req: NextRequest) {
         : Promise.resolve(),
     ]);
   } else if (statusCode === "-1" || statusCode === "-2" || statusCode === "-3") {
-    await db
-      .update(payments)
-      .set({ status: "failed", payherePayload: allFields })
-      .where(eq(payments.id, payment.id));
+    if (payment.status !== "success") {
+      await db
+        .update(payments)
+        .set({ status: "failed", payherePayload: allFields })
+        .where(eq(payments.id, payment.id));
+    }
   }
 
   return NextResponse.json({ received: true });

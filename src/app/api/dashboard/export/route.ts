@@ -23,7 +23,7 @@ import { withRateLimit } from "@/lib/rate-limit";
 import { eq, inArray } from "drizzle-orm";
 
 export async function GET(req: NextRequest) {
-  const authResult = await requireApiBusiness({ ownerOnly: true });
+  const authResult = await requireApiBusiness({ ownerOnly: true, req });
   if (!authResult.ok) return authResult.response;
   const { businessId, user } = authResult.context;
 

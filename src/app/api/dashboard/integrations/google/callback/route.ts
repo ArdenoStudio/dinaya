@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { and, eq } from "drizzle-orm";
+import { auth } from "@/auth";
 import { db } from "@/db";
 import { socialConnections } from "@/db/schema";
 import { exchangeGoogleCode, GOOGLE_PROVIDER } from "@/lib/google-calendar";
@@ -15,8 +16,23 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(`${appUrl}/dashboard/settings/integrations?google=error`);
   }
 
-  const businessId = verifyGoogleOAuthState(state);
-  if (!businessId) {
+  const statePayload = verifyGoogleOAuthState(state);
+  if (!statePayload) {
+    return NextResponse.redirect(`${appUrl}/dashboard/settings/integrations?google=error`);
+  }
+
+  const session = await auth();
+  const businessId = session?.user?.businessId;
+  const userId = session?.user?.id;
+  const role = session?.user?.role;
+
+  if (
+    !businessId ||
+    !userId ||
+    role !== "owner" ||
+    businessId !== statePayload.businessId ||
+    userId !== statePayload.userId
+  ) {
     return NextResponse.redirect(`${appUrl}/dashboard/settings/integrations?google=error`);
   }
 

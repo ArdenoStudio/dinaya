@@ -15,8 +15,8 @@ const ruleSchema = z.object({
   isActive: z.boolean().optional(),
 });
 
-export async function GET() {
-  const authResult = await requireApiBusiness();
+export async function GET(req: NextRequest) {
+  const authResult = await requireApiBusiness({ req });
   if (!authResult.ok) return authResult.response;
   const { businessId } = authResult.context;
   await requirePro(businessId, "automations");
@@ -31,7 +31,7 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const authResult = await requireApiBusiness({ ownerOnly: true });
+  const authResult = await requireApiBusiness({ ownerOnly: true, req });
   if (!authResult.ok) return authResult.response;
   const { businessId } = authResult.context;
   await requirePro(businessId, "automations");

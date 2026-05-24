@@ -52,8 +52,8 @@ async function requireVoiceAccess(businessId: string): Promise<NextResponse | nu
   }
 }
 
-export async function GET() {
-  const authResult = await requireApiBusiness({ ownerOnly: true });
+export async function GET(req: NextRequest) {
+  const authResult = await requireApiBusiness({ ownerOnly: true, req });
   if (!authResult.ok) return authResult.response;
   const { businessId } = authResult.context;
 
@@ -82,7 +82,7 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const authResult = await requireApiBusiness({ ownerOnly: true });
+  const authResult = await requireApiBusiness({ ownerOnly: true, req });
   if (!authResult.ok) return authResult.response;
   const { businessId } = authResult.context;
 

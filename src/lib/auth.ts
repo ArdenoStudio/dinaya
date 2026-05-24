@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import { db } from "@/db";
-import { businesses } from "@/db/schema";
+import { businesses, users } from "@/db/schema";
 import { resolveEffectivePlan } from "@/lib/plan";
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
@@ -28,13 +28,31 @@ export type BusinessContext = {
 
 export async function getBusinessContext(): Promise<BusinessContext | null> {
   const session = await auth();
-  const businessId = session?.user?.businessId;
-  const userId = session?.user?.id;
-  const role = session?.user?.role;
+  const sessionUserId = session?.user?.id;
 
-  if (!businessId || !userId || !role) {
+  if (!sessionUserId) {
     return null;
   }
+
+  const [dbUser] = await db
+    .select({
+      id: users.id,
+      businessId: users.businessId,
+      role: users.role,
+      email: users.email,
+      name: users.name,
+    })
+    .from(users)
+    .where(eq(users.id, sessionUserId))
+    .limit(1);
+
+  if (!dbUser) {
+    return null;
+  }
+
+  const businessId = dbUser.businessId;
+  const userId = dbUser.id;
+  const role = dbUser.role;
 
   const [business] = await db
     .select({
@@ -71,9 +89,9 @@ export async function getBusinessContext(): Promise<BusinessContext | null> {
     businessId,
     role,
     user: {
-      email: session.user.email,
+      email: dbUser.email,
       id: userId,
-      name: session.user.name,
+      name: dbUser.name,
     },
     readOnlyImpersonation: session.user.readOnlyImpersonation,
     impersonatedBy: session.user.impersonatedBy,
@@ -97,6 +115,25 @@ export async function requireOwner(): Promise<BusinessContext> {
     redirect("/dashboard");
   }
 
+  return context;
+}
+
+/** Throws when a read-only impersonation session attempts a mutation. */
+export function assertMutableSession(context: BusinessContext): void {
+  if (context.readOnlyImpersonation) {
+    throw new Error("Read-only impersonation session — mutations are blocked.");
+  }
+}
+
+export async function requireMutableBusiness(): Promise<BusinessContext> {
+  const context = await requireBusiness();
+  assertMutableSession(context);
+  return context;
+}
+
+export async function requireMutableOwner(): Promise<BusinessContext> {
+  const context = await requireOwner();
+  assertMutableSession(context);
   return context;
 }
 

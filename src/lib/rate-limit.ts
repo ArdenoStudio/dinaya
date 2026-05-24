@@ -96,13 +96,33 @@ export async function withRateLimit(
   options?: { keySuffix?: string },
 ): Promise<{ ok: true } | { ok: false; response: NextResponse }> {
   if (process.env.E2E_DISABLE_RATE_LIMIT === "true") {
-    return { ok: true };
+    if (process.env.NODE_ENV === "production") {
+      console.error("[rate-limit] E2E_DISABLE_RATE_LIMIT is not allowed in production");
+    } else {
+      return { ok: true };
+    }
   }
 
   const key = rateLimitKey(config.scope, req, options?.keySuffix);
 
   const upstash = await checkUpstashLimit(key, config);
-  const result = upstash ?? checkMemoryLimit(key, config);
+  if (upstash) {
+    if (upstash.ok) return { ok: true };
+    return { ok: false, response: tooManyRequests(upstash.retryAfter) };
+  }
+
+  if (process.env.NODE_ENV === "production") {
+    console.error("[rate-limit] Upstash is required in production but is not configured");
+    return {
+      ok: false,
+      response: NextResponse.json(
+        { error: "Service temporarily unavailable." },
+        { status: 503 },
+      ),
+    };
+  }
+
+  const result = checkMemoryLimit(key, config);
 
   if (result.ok) return { ok: true };
   return { ok: false, response: tooManyRequests(result.retryAfter) };

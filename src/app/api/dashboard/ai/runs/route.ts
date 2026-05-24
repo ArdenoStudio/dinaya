@@ -1,12 +1,12 @@
-import { NextResponse } from "next/server";
+import {NextResponse, NextRequest} from "next/server";
 import { desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { aiWorkflowRuns } from "@/db/schema";
 import { requireApiBusiness } from "@/lib/api-auth";
 import { PlanRequiredError, requirePro } from "@/lib/plan";
 
-export async function GET() {
-  const authResult = await requireApiBusiness();
+export async function GET(req: NextRequest) {
+  const authResult = await requireApiBusiness({ req });
   if (!authResult.ok) return authResult.response;
   const { businessId } = authResult.context;
 

@@ -3,11 +3,10 @@ import { requireApiBusiness } from "@/lib/api-auth";
 import { approveContentItem } from "@/lib/ai/content";
 import { PlanRequiredError, requirePro } from "@/lib/plan";
 
-export async function POST(
-  _req: NextRequest,
+export async function POST(req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const authResult = await requireApiBusiness({ ownerOnly: true });
+  const authResult = await requireApiBusiness({ ownerOnly: true, req });
   if (!authResult.ok) return authResult.response;
   const { businessId } = authResult.context;
 

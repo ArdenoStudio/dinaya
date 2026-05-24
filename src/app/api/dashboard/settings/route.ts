@@ -21,6 +21,16 @@ const publicHttpsUrlSchema = z
     message: "URL must be a public HTTPS link.",
   });
 
+const publicImageUrlSchema = z
+  .string()
+  .trim()
+  .max(1000)
+  .optional()
+  .nullable()
+  .refine((value) => !value || isPublicHttpsUrl(value), {
+    message: "Image URL must be a public HTTPS link.",
+  });
+
 const settingsSchema = z.object({
   name: z.string().trim().min(1, "Business name is required.").max(100),
   description: z.string().trim().max(2000).optional().nullable(),
@@ -32,11 +42,23 @@ const settingsSchema = z.object({
   cancellationPolicy: z.string().trim().max(2000).optional().nullable(),
   depositPolicy: z.string().trim().max(2000).optional().nullable(),
   bankTransferInstructions: z.string().trim().max(2000).optional().nullable(),
-  lankaqrImageUrl: z.string().trim().max(1000).optional().nullable(),
+  lankaqrImageUrl: publicImageUrlSchema,
   instagramUrl: publicHttpsUrlSchema,
   facebookUrl: publicHttpsUrlSchema,
   websiteUrl: publicHttpsUrlSchema,
-  galleryImages: z.array(z.string().trim().max(1000)).max(12).optional().default([]),
+  galleryImages: z
+    .array(
+      z
+        .string()
+        .trim()
+        .max(1000)
+        .refine((value) => isPublicHttpsUrl(value), {
+          message: "Gallery image URL must be a public HTTPS link.",
+        }),
+    )
+    .max(12)
+    .optional()
+    .default([]),
   payhereEnabled: z.boolean().optional(),
   payhereMerchantId: z.string().trim().max(100).optional().nullable(),
   payhereMerchantSecret: z.string().trim().max(1000).optional().nullable(),
@@ -44,7 +66,7 @@ const settingsSchema = z.object({
 });
 
 export async function PATCH(req: NextRequest) {
-  const authResult = await requireApiBusiness({ ownerOnly: true });
+  const authResult = await requireApiBusiness({ ownerOnly: true, req });
   if (!authResult.ok) {
     return authResult.response;
   }

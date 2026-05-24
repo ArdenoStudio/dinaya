@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { businesses, subscriptions, users } from "@/db/schema";
 import { eq, and, inArray } from "drizzle-orm";
@@ -18,8 +18,8 @@ import {
   type PaidPlan,
 } from "@/lib/plan";
 
-export async function POST(req: Request) {
-  const authResult = await requireApiBusiness({ ownerOnly: true });
+export async function POST(req: NextRequest) {
+  const authResult = await requireApiBusiness({ ownerOnly: true, req });
   if (!authResult.ok) return authResult.response;
   const { businessId, user } = authResult.context;
 

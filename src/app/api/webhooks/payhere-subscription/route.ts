@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { subscriptions, businesses } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { verifyRecurringWebhook } from "@/lib/payhere-subscriptions";
+import { payhereAmountMatches } from "@/lib/payhere";
 import { addMonths, addYears } from "date-fns";
 
 // PayHere status codes:
@@ -33,6 +34,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Server misconfigured" }, { status: 500 });
   }
 
+  const platformMerchantId = process.env.DINAYA_PAYHERE_MERCHANT_ID;
+  if (platformMerchantId && platformMerchantId !== merchantId) {
+    return NextResponse.json({ error: "Invalid webhook" }, { status: 400 });
+  }
+
   const valid = verifyRecurringWebhook({
     merchantId,
     orderId,
@@ -56,13 +62,33 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Subscription not found" }, { status: 404 });
   }
 
-  // Apply status update
   switch (statusCode) {
     case "2": {
+      if (
+        sub.status === "active" &&
+        sub.currentPeriodEnd &&
+        sub.currentPeriodEnd > new Date() &&
+        sub.payhereOrderId === orderId
+      ) {
+        return NextResponse.json({ received: true, duplicate: true });
+      }
+
+      if (
+        payhereCurrency !== "LKR" ||
+        !payhereAmountMatches(sub.amountLkr, payhereAmount)
+      ) {
+        return NextResponse.json({ error: "Invalid webhook amount" }, { status: 400 });
+      }
+
+      const anchor =
+        sub.currentPeriodEnd && sub.currentPeriodEnd > new Date()
+          ? sub.currentPeriodEnd
+          : new Date();
       const periodEnd =
         sub.billingInterval === "annual"
-          ? addYears(new Date(), 1)
-          : addMonths(new Date(), 1);
+          ? addYears(anchor, 1)
+          : addMonths(anchor, 1);
+
       await db
         .update(subscriptions)
         .set({

@@ -5,8 +5,8 @@ import { eq, and, gte, inArray } from "drizzle-orm";
 import { requireApiBusiness } from "@/lib/api-auth";
 import { serviceUpdateSchema } from "@/lib/schemas/services";
 
-export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const authResult = await requireApiBusiness();
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const authResult = await requireApiBusiness({ req });
   if (!authResult.ok) return authResult.response;
   const { businessId } = authResult.context;
 
@@ -37,7 +37,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const authResult = await requireApiBusiness({ ownerOnly: true });
+  const authResult = await requireApiBusiness({ ownerOnly: true, req });
   if (!authResult.ok) return authResult.response;
   const { businessId } = authResult.context;
 
@@ -133,8 +133,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   return NextResponse.json(updated);
 }
 
-export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const authResult = await requireApiBusiness({ ownerOnly: true });
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const authResult = await requireApiBusiness({ ownerOnly: true, req });
   if (!authResult.ok) return authResult.response;
   const { businessId } = authResult.context;
 

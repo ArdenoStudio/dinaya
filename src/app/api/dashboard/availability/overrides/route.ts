@@ -14,7 +14,7 @@ async function verifyStaff(staffId: string, businessId: string) {
 }
 
 export async function GET(req: NextRequest) {
-  const authResult = await requireApiBusiness();
+  const authResult = await requireApiBusiness({ req });
   if (!authResult.ok) return authResult.response;
   const { businessId } = authResult.context;
   const staffId = req.nextUrl.searchParams.get("staffId");
@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const authResult = await requireApiBusiness();
+  const authResult = await requireApiBusiness({ req });
   if (!authResult.ok) return authResult.response;
   const { businessId } = authResult.context;
   const { staffId, date, isBlocked, startTime, endTime, reason } = await req.json();
@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-  const authResult = await requireApiBusiness();
+  const authResult = await requireApiBusiness({ req });
   if (!authResult.ok) return authResult.response;
   const { businessId } = authResult.context;
   const id = req.nextUrl.searchParams.get("id");
