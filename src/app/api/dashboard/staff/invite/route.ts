@@ -16,7 +16,7 @@ const inviteSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
-  const authResult = await requireApiBusiness({ ownerOnly: true });
+  const authResult = await requireApiBusiness({ ownerOnly: true, req });
   if (!authResult.ok) return authResult.response;
   const { businessId, user } = authResult.context;
 

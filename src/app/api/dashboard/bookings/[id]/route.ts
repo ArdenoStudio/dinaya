@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireApiBusiness } from "@/lib/api-auth";
 import { db } from "@/db";
-import { bookings, services, staff, clients } from "@/db/schema";
+import { bookings, services, staff, clients, payments } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { dispatchWebhooks } from "@/lib/webhooks";
 import { logActivity } from "@/lib/activity-log";
@@ -27,11 +27,10 @@ const ALLOWED_TRANSITIONS: Record<BookingStatus, BookingStatus[]> = {
   no_show: [],
 };
 
-export async function GET(
-  _req: NextRequest,
+export async function GET(req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const authResult = await requireApiBusiness();
+  const authResult = await requireApiBusiness({ req });
   if (!authResult.ok) return authResult.response;
   const { businessId } = authResult.context;
   const { id } = await params;
@@ -69,7 +68,7 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const authResult = await requireApiBusiness();
+  const authResult = await requireApiBusiness({ req });
   if (!authResult.ok) return authResult.response;
   const { businessId, user } = authResult.context;
   const { id } = await params;
@@ -133,6 +132,21 @@ export async function PATCH(
         { error: `Cannot change a ${existing.status.replace("_", " ")} booking to ${status.replace("_", " ")}.` },
         { status: 400 }
       );
+    }
+
+    if (existing.status === "pending" && status === "confirmed") {
+      const [unpaidPayment] = await db
+        .select({ id: payments.id })
+        .from(payments)
+        .where(and(eq(payments.bookingId, id), eq(payments.status, "pending")))
+        .limit(1);
+
+      if (unpaidPayment) {
+        return NextResponse.json(
+          { error: "This booking has an unpaid PayHere payment. Confirm only after payment succeeds or cancel the booking." },
+          { status: 400 },
+        );
+      }
     }
   }
 

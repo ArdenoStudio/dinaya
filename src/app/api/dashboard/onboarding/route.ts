@@ -21,8 +21,8 @@ function inferDirectoryCity(address: string | null | undefined): string {
   return "Colombo";
 }
 
-export async function GET() {
-  const authResult = await requireApiBusiness({ ownerOnly: true });
+export async function GET(req: NextRequest) {
+  const authResult = await requireApiBusiness({ ownerOnly: true, req });
   if (!authResult.ok) return authResult.response;
   const { businessId } = authResult.context;
 
@@ -98,7 +98,7 @@ export async function GET() {
 }
 
 export async function PATCH(req: NextRequest) {
-  const authResult = await requireApiBusiness({ ownerOnly: true });
+  const authResult = await requireApiBusiness({ ownerOnly: true, req });
   if (!authResult.ok) return authResult.response;
   const { businessId } = authResult.context;
 
@@ -115,8 +115,8 @@ export async function PATCH(req: NextRequest) {
   return NextResponse.json({ ok: true, step: parsed.data.step });
 }
 
-export async function POST() {
-  const authResult = await requireApiBusiness({ ownerOnly: true });
+export async function POST(req: NextRequest) {
+  const authResult = await requireApiBusiness({ ownerOnly: true, req });
   if (!authResult.ok) return authResult.response;
   const { businessId } = authResult.context;
 

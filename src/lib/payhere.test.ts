@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import { describe, expect, it } from "vitest";
-import { buildPayhereFormData, generatePayhereHash, verifyPayhereWebhook } from "./payhere";
+import { buildPayhereFormData, generatePayhereHash, payhereAmountMatches, verifyPayhereWebhook } from "./payhere";
 
 function md5(str: string): string {
   return crypto.createHash("md5").update(str).digest("hex").toUpperCase();
@@ -74,5 +74,10 @@ describe("payhere", () => {
         merchantSecret,
       }),
     ).toBe(false);
+  });
+
+  it("matches PayHere amount strings to stored LKR integers", () => {
+    expect(payhereAmountMatches(1500, "1500.00")).toBe(true);
+    expect(payhereAmountMatches(1500, "1500.01")).toBe(false);
   });
 });

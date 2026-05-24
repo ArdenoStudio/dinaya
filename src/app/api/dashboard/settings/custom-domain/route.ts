@@ -83,7 +83,7 @@ async function assertDomainAvailable(domain: string, businessId: string): Promis
 }
 
 export async function PATCH(req: NextRequest) {
-  const authResult = await requireApiBusiness({ ownerOnly: true });
+  const authResult = await requireApiBusiness({ ownerOnly: true, req });
   if (!authResult.ok) return authResult.response;
   const { businessId } = authResult.context;
 

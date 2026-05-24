@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { socialConnections } from "@/db/schema";
@@ -11,8 +11,8 @@ import {
 import { createGoogleOAuthState } from "@/lib/google-oauth-state";
 import { PlanRequiredError, requirePro } from "@/lib/plan";
 
-export async function GET() {
-  const authResult = await requireApiBusiness({ ownerOnly: true });
+export async function GET(req: NextRequest) {
+  const authResult = await requireApiBusiness({ ownerOnly: true, req });
   if (!authResult.ok) return authResult.response;
   const { businessId } = authResult.context;
 
@@ -29,12 +29,12 @@ export async function GET() {
     throw error;
   }
 
-  const state = createGoogleOAuthState(businessId);
+  const state = createGoogleOAuthState(businessId, authResult.context.user.id);
   return NextResponse.redirect(buildGoogleAuthUrl(state));
 }
 
-export async function DELETE() {
-  const authResult = await requireApiBusiness({ ownerOnly: true });
+export async function DELETE(req: NextRequest) {
+  const authResult = await requireApiBusiness({ ownerOnly: true, req });
   if (!authResult.ok) return authResult.response;
   const { businessId } = authResult.context;
 

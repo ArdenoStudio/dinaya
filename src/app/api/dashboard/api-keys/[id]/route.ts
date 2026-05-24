@@ -4,11 +4,10 @@ import { db } from "@/db";
 import { apiKeys } from "@/db/schema";
 import { requireApiBusiness } from "@/lib/api-auth";
 
-export async function DELETE(
-  _req: NextRequest,
+export async function DELETE(req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const authResult = await requireApiBusiness({ ownerOnly: true });
+  const authResult = await requireApiBusiness({ ownerOnly: true, req });
   if (!authResult.ok) return authResult.response;
   const { businessId } = authResult.context;
   const { id } = await params;

@@ -102,6 +102,16 @@ export async function POST(req: NextRequest) {
 
   const isOwnerBooking = session?.user?.businessId === businessId;
   const isApiBooking = apiBusinessId !== null && apiBusinessId === businessId;
+
+  if (!isOwnerBooking && !isApiBooking) {
+    const businessLimited = await withRateLimit(
+      req,
+      { scope: "bookings-business", limit: 10, windowSeconds: 60 },
+      { keySuffix: businessId },
+    );
+    if (!businessLimited.ok) return businessLimited.response;
+  }
+
   if (isApiBooking && requestedSource === "voice_agent" && !apiKeyScopes.includes("voice:write")) {
     return NextResponse.json({ error: "Voice booking scope required." }, { status: 403 });
   }

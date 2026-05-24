@@ -4,6 +4,14 @@ import Utf8 from "crypto-js/enc-utf8";
 const PREFIX = "enc:v1:";
 
 function getSecretKey(): string {
+  if (process.env.NODE_ENV === "production") {
+    const productionKey = process.env.SECRET_ENCRYPTION_KEY;
+    if (!productionKey) {
+      throw new Error("SECRET_ENCRYPTION_KEY is required in production.");
+    }
+    return productionKey;
+  }
+
   const key = process.env.SECRET_ENCRYPTION_KEY ?? process.env.AUTH_SECRET;
   if (!key) {
     throw new Error("SECRET_ENCRYPTION_KEY or AUTH_SECRET is required for secret encryption.");

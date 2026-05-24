@@ -4,22 +4,30 @@ import { db } from "@/db";
 import { bookings, locations, services, staff, staffLocations, staffServices } from "@/db/schema";
 import { requireApiBusiness } from "@/lib/api-auth";
 import { replaceStaffLocations } from "@/lib/locations";
+import { isPublicHttpsUrl } from "@/lib/public-url";
 import { z } from "@/lib/validation";
 
 const staffSchema = z.object({
   name: z.string().trim().min(1, "Name is required.").max(100).optional(),
   bio: z.string().trim().max(1000).optional().nullable(),
-  avatarUrl: z.url().optional().nullable().or(z.literal("")),
+  avatarUrl: z
+    .string()
+    .trim()
+    .max(1000)
+    .optional()
+    .nullable()
+    .refine((value) => !value || value === "" || isPublicHttpsUrl(value), {
+      message: "Avatar URL must be a public HTTPS link.",
+    }),
   isActive: z.boolean().optional(),
   serviceIds: z.array(z.uuid()).optional(),
   locationIds: z.array(z.uuid()).optional(),
 });
 
-export async function GET(
-  _req: NextRequest,
+export async function GET(req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const authResult = await requireApiBusiness();
+  const authResult = await requireApiBusiness({ req });
   if (!authResult.ok) return authResult.response;
   const { businessId } = authResult.context;
   const { id } = await params;
@@ -63,7 +71,7 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const authResult = await requireApiBusiness({ ownerOnly: true });
+  const authResult = await requireApiBusiness({ ownerOnly: true, req });
   if (!authResult.ok) return authResult.response;
   const { businessId } = authResult.context;
   const { id } = await params;
@@ -146,11 +154,10 @@ export async function PATCH(
   return NextResponse.json({ id });
 }
 
-export async function DELETE(
-  _req: NextRequest,
+export async function DELETE(req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const authResult = await requireApiBusiness({ ownerOnly: true });
+  const authResult = await requireApiBusiness({ ownerOnly: true, req });
   if (!authResult.ok) return authResult.response;
   const { businessId } = authResult.context;
   const { id } = await params;

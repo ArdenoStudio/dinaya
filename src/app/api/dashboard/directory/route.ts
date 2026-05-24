@@ -14,8 +14,8 @@ const directorySchema = z.object({
   directoryCategory: z.string().trim().max(80).optional().nullable(),
 });
 
-export async function GET() {
-  const authResult = await requireApiBusiness({ ownerOnly: true });
+export async function GET(req: NextRequest) {
+  const authResult = await requireApiBusiness({ ownerOnly: true, req });
   if (!authResult.ok) return authResult.response;
 
   const [business] = await db
@@ -42,7 +42,7 @@ export async function GET() {
 }
 
 export async function PATCH(req: NextRequest) {
-  const authResult = await requireApiBusiness({ ownerOnly: true });
+  const authResult = await requireApiBusiness({ ownerOnly: true, req });
   if (!authResult.ok) return authResult.response;
 
   const parsed = directorySchema.safeParse(await req.json());

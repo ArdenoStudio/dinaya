@@ -95,3 +95,7 @@ export function getPayhereUrl(): string {
     ? "https://sandbox.payhere.lk/pay/checkout"
     : "https://www.payhere.lk/pay/checkout";
 }
+
+export function payhereAmountMatches(amountLkr: number, payhereAmount: string): boolean {
+  return payhereAmount === amountLkr.toFixed(2);
+}
