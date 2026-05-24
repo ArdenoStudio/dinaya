@@ -11,11 +11,11 @@ export const planLimitsReference: ReferencePage = {
     },
     {
       heading: "Pro",
-      body: "Everything in Free plus AI Hub, automations, up to 3 locations, multi-staff, custom domain, branding removal, reports, webhooks, WhatsApp/SMS, and Google Calendar sync.",
+      body: "Everything in Free plus automations, up to 3 locations, multi-staff, custom domain, branding removal, reports, webhooks, WhatsApp/SMS, and Google Calendar sync.",
     },
     {
       heading: "Max",
-      body: "Everything in Pro plus unlimited locations and per-branch AI controls.",
+      body: "Everything in Pro plus AI Hub, all seven AI growth workflows, AI Voice Receptionist setup, unlimited locations, and per-branch AI controls.",
     },
     {
       heading: "Bookings",

@@ -368,6 +368,12 @@ async function clientHasFutureBooking(clientId: string): Promise<boolean> {
   return Boolean(future);
 }
 
+function reactivationDays(): number {
+  const raw = process.env.AI_REACTIVATION_DAYS;
+  const parsed = raw ? Number.parseInt(raw, 10) : 30;
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 30;
+}
+
 async function runReactivation(business: BusinessRow): Promise<WorkflowStats> {
   const stats = emptyStats();
   if ((await activeAiLocations(business.id, "clientReactivationCampaign")).length === 0) return stats;
@@ -391,15 +397,19 @@ async function runReactivation(business: BusinessRow): Promise<WorkflowStats> {
     if (!cooldownHasElapsed(client.lastAiContactAt, 30)) return null;
     if (await clientHasFutureBooking(client.id)) return null;
     const [lastCompleted] = await db
-      .select({ startsAt: bookings.startsAt })
+      .select({
+        startsAt: bookings.startsAt,
+        serviceName: services.name,
+      })
       .from(bookings)
+      .innerJoin(services, eq(services.id, bookings.serviceId))
       .where(and(
         eq(bookings.clientId, client.id),
         eq(bookings.status, "completed"),
       ))
       .orderBy(desc(bookings.startsAt))
       .limit(1);
-    if (!lastCompleted || lastCompleted.startsAt > subDays(new Date(), 45)) return null;
+    if (!lastCompleted || lastCompleted.startsAt > subDays(new Date(), reactivationDays())) return null;
     return sendWorkflowMessage({
       business,
       clientId: client.id,
@@ -409,6 +419,8 @@ async function runReactivation(business: BusinessRow): Promise<WorkflowStats> {
       feature: "clientReactivationCampaign",
       workflowKey: "client-reactivation",
       idempotencyKey: `reactivation:${client.id}:${format(new Date(), "yyyy-MM")}`,
+      serviceName: lastCompleted.serviceName,
+      startsAtLabel: localLabel(lastCompleted.startsAt, business.timezone),
       meta: { lastVisit: lastCompleted.startsAt.toISOString() },
     });
   });
@@ -677,7 +689,7 @@ export async function runAiWorkflows(): Promise<Record<PlanFeature, WorkflowStat
       customDomainVerified: businesses.customDomainVerified,
     })
     .from(businesses)
-    .where(inArray(businesses.plan, ["pro", "max"]));
+    .where(inArray(businesses.plan, ["max"]));
 
   const eligibleBusinesses = businessRows.filter((business) =>
     AI_FEATURES.some((feature) => canRunAiWorkflow(business.plan as Plan, feature)),
@@ -719,4 +731,133 @@ function mergeStats(a: WorkflowStats, b: WorkflowStats): WorkflowStats {
     failed: a.failed + b.failed,
     duplicate: a.duplicate + b.duplicate,
   };
+}
+
+export type ManualReactivationPreview = {
+  clientId: string;
+  clientName: string;
+  status: string;
+  subject?: string;
+  body?: string;
+  error?: string;
+};
+
+export async function runManualReactivation(
+  businessId: string,
+  opts?: { clientId?: string },
+): Promise<{ stats: WorkflowStats; previews: ManualReactivationPreview[] }> {
+  const stats = emptyStats();
+  const previews: ManualReactivationPreview[] = [];
+
+  const [business] = await db
+    .select({
+      id: businesses.id,
+      name: businesses.name,
+      slug: businesses.slug,
+      email: businesses.email,
+      plan: businesses.plan,
+      timezone: businesses.timezone,
+      customDomain: businesses.customDomain,
+      customDomainVerified: businesses.customDomainVerified,
+    })
+    .from(businesses)
+    .where(eq(businesses.id, businessId))
+    .limit(1);
+
+  if (!business) {
+    return { stats, previews };
+  }
+
+  const typedBusiness = business as BusinessRow;
+  if (!canRunAiWorkflow(typedBusiness.plan, "clientReactivationCampaign")) {
+    return { stats, previews };
+  }
+
+  const rows = await db
+    .select({
+      id: clients.id,
+      name: clients.name,
+      phone: clients.phone,
+      email: clients.email,
+      lastAiContactAt: clients.lastAiContactAt,
+    })
+    .from(clients)
+    .where(and(
+      eq(clients.businessId, businessId),
+      eq(clients.communicationOptOut, false),
+      ...(opts?.clientId ? [eq(clients.id, opts.clientId)] : []),
+    ))
+    .orderBy(asc(clients.lastAiContactAt))
+    .limit(opts?.clientId ? 1 : 30);
+
+  const results = await mapWithConcurrency(rows, 5, async (client) => {
+    if (await clientHasFutureBooking(client.id)) return null;
+    const [lastCompleted] = await db
+      .select({
+        startsAt: bookings.startsAt,
+        serviceName: services.name,
+      })
+      .from(bookings)
+      .innerJoin(services, eq(services.id, bookings.serviceId))
+      .where(and(
+        eq(bookings.clientId, client.id),
+        eq(bookings.status, "completed"),
+      ))
+      .orderBy(desc(bookings.startsAt))
+      .limit(1);
+    if (!lastCompleted || lastCompleted.startsAt > subDays(new Date(), reactivationDays())) return null;
+
+    const idempotencyKey = `reactivation:manual:${client.id}:${Date.now()}`;
+    const result = await sendWorkflowMessage({
+      business: typedBusiness,
+      clientId: client.id,
+      clientName: client.name,
+      clientEmail: client.email,
+      clientPhone: client.phone,
+      feature: "clientReactivationCampaign",
+      workflowKey: "client-reactivation-manual",
+      idempotencyKey,
+      serviceName: lastCompleted.serviceName,
+      startsAtLabel: localLabel(lastCompleted.startsAt, typedBusiness.timezone),
+      meta: { lastVisit: lastCompleted.startsAt.toISOString(), manual: true },
+    });
+
+    const [run] = await db
+      .select({
+        subject: aiWorkflowRuns.subject,
+        body: aiWorkflowRuns.body,
+        status: aiWorkflowRuns.status,
+        error: aiWorkflowRuns.error,
+      })
+      .from(aiWorkflowRuns)
+      .where(and(
+        eq(aiWorkflowRuns.businessId, businessId),
+        eq(aiWorkflowRuns.idempotencyKey, idempotencyKey),
+      ))
+      .limit(1);
+
+    if (!result) return null;
+
+    const status =
+      result === "duplicate"
+        ? "duplicate"
+        : run?.status ?? result.status;
+
+    previews.push({
+      clientId: client.id,
+      clientName: client.name,
+      status,
+      subject: run?.subject ?? undefined,
+      body: run?.body ?? undefined,
+      error: run?.error ?? (result !== "duplicate" && result.status === "failed" ? result.error ?? undefined : undefined),
+    });
+
+    return result;
+  });
+
+  for (const result of results) {
+    if (result) addResult(stats, result);
+  }
+
+  return { stats, previews };
 }

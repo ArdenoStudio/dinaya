@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { API_KEY_SCOPES, type ApiKeyScope } from "@/lib/api-key-scopes";
 
 type ApiKeyRow = {
   id: string;
@@ -14,6 +15,7 @@ type ApiKeyRow = {
 export function ApiKeysClient() {
   const [keys, setKeys] = useState<ApiKeyRow[]>([]);
   const [name, setName] = useState("");
+  const [scopes, setScopes] = useState<ApiKeyScope[]>(["bookings:read", "bookings:write"]);
   const [rawKey, setRawKey] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
@@ -29,6 +31,15 @@ export function ApiKeysClient() {
     void load();
   }, []);
 
+  function toggleScope(scope: ApiKeyScope) {
+    setScopes((current) => {
+      const next = current.includes(scope)
+        ? current.filter((item) => item !== scope)
+        : [...current, scope];
+      return next.length > 0 ? next : [scope];
+    });
+  }
+
   async function createKey(e: React.FormEvent) {
     e.preventDefault();
     setError("");
@@ -36,7 +47,7 @@ export function ApiKeysClient() {
     const res = await fetch("/api/dashboard/api-keys", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, scopes: ["bookings:read", "bookings:write"] }),
+      body: JSON.stringify({ name, scopes }),
     });
     const data = await res.json();
     if (!res.ok) {
@@ -65,6 +76,22 @@ export function ApiKeysClient() {
           className="w-full rounded-lg border px-3 py-2 text-sm"
           required
         />
+        <div>
+          <p className="mb-2 text-sm font-medium">Scopes</p>
+          <div className="flex flex-wrap gap-2">
+            {API_KEY_SCOPES.map((scope) => (
+              <label key={scope} className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={scopes.includes(scope)}
+                  onChange={() => toggleScope(scope)}
+                  className="size-4 rounded border-muted-foreground/30 text-primary focus:ring-primary"
+                />
+                <code className="text-xs">{scope}</code>
+              </label>
+            ))}
+          </div>
+        </div>
         {error && <p className="text-sm text-red-600">{error}</p>}
         {rawKey && (
           <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm">

@@ -4,6 +4,7 @@ import { communications } from "@/db/schema";
 import { sendEmail, isEmailReady } from "@/lib/messaging/channels/email";
 import { sendSms, isSmsReady } from "@/lib/messaging/channels/sms";
 import { sendWhatsApp, isWhatsAppReady } from "@/lib/messaging/channels/whatsapp";
+import { sendTwilioWhatsApp, isTwilioWhatsAppReady } from "@/lib/messaging/channels/twilio-whatsapp";
 import { hasBookingNotification, logBookingNotification } from "@/lib/messaging/notification-log";
 import type {
   MessageChannel,
@@ -37,7 +38,12 @@ async function sendViaChannel(
   }
 
   if (channel === "whatsapp" && input.clientPhone) {
-    return sendWhatsApp({ clientPhone: input.clientPhone, body: input.body });
+    const metaResult = await sendWhatsApp({ clientPhone: input.clientPhone, body: input.body });
+    if (metaResult.status === "sent") return metaResult;
+    if (isTwilioWhatsAppReady(input.clientPhone)) {
+      return sendTwilioWhatsApp({ clientPhone: input.clientPhone, body: input.body });
+    }
+    return metaResult;
   }
 
   if (channel === "sms" && input.clientPhone) {

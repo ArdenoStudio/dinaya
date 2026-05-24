@@ -176,3 +176,37 @@ export async function sendBookingRescheduleMessage(data: BookingMessageData) {
     meta: { html: content.html, emailText: content.body },
   });
 }
+
+type BusinessNotificationData = {
+  businessId: string;
+  bookingId: string;
+  businessPhone: string;
+  businessName: string;
+  clientName: string;
+  serviceName: string;
+  staffName: string;
+  startsAt: Date;
+  plan: Plan;
+};
+
+export async function sendBookingNotificationToBusinessMessage(data: BusinessNotificationData) {
+  const whenShort = formatBookingDateShort(data.startsAt);
+  const dashboardUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "https://dinaya.lk"}/dashboard/bookings`;
+  const body = `New booking at ${data.businessName}: ${data.clientName} — ${data.serviceName} with ${data.staffName} on ${whenShort}. View: ${dashboardUrl}`;
+
+  const channels: MessageChannel[] = canUseFeature(data.plan, "whatsappSms")
+    ? ["whatsapp", "sms"]
+    : ["sms"];
+
+  return sendMessage({
+    businessId: data.businessId,
+    bookingId: data.bookingId,
+    clientPhone: data.businessPhone,
+    feature: "confirmation",
+    notificationType: "confirmation",
+    idempotencyKey: `booking:${data.bookingId}:owner-notification`,
+    subject: `New booking — ${data.clientName}`,
+    body,
+    preferredChannels: channels,
+  });
+}

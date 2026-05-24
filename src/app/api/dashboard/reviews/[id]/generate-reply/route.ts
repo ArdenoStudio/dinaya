@@ -18,7 +18,7 @@ export async function POST(_req: Request, { params }: Ctx) {
     await requirePro(businessId, "reviewReplies");
   } catch (error) {
     if (error instanceof PlanRequiredError) {
-      return NextResponse.json({ error: "AI review replies are available on Pro." }, { status: 402 });
+      return NextResponse.json({ error: "AI review replies are available on Max." }, { status: 402 });
     }
     throw error;
   }

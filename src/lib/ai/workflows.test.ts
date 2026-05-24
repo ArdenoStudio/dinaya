@@ -3,10 +3,10 @@ import { AI_FEATURES } from "@/lib/plan";
 import { canRunAiWorkflow, cooldownHasElapsed } from "./workflows";
 
 describe("AI workflow eligibility", () => {
-  it("allows every AI workflow on Pro and Max but not Free", () => {
+  it("allows every AI workflow on Max but not Free or Pro", () => {
     for (const feature of AI_FEATURES) {
       expect(canRunAiWorkflow("free", feature)).toBe(false);
-      expect(canRunAiWorkflow("pro", feature)).toBe(true);
+      expect(canRunAiWorkflow("pro", feature)).toBe(false);
       expect(canRunAiWorkflow("max", feature)).toBe(true);
     }
   });

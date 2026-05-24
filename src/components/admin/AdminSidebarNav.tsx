@@ -8,6 +8,7 @@ import {
   Gauge,
   LayoutDashboard,
   LifeBuoy,
+  PhoneCall,
   ScrollText,
   Settings,
   ShieldCheck,
@@ -48,6 +49,7 @@ const navGroups: { label: string; links: NavLinkConfig[] }[] = [
       { href: "/admin/health", label: "System health", icon: Gauge },
       { href: "/admin/support", label: "Support", icon: LifeBuoy },
       { href: "/admin/webhooks", label: "Webhooks", icon: Webhook },
+      { href: "/admin/voice", label: "AI Voice", icon: PhoneCall },
     ],
   },
   {

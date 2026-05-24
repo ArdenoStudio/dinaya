@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { ChevronRight, Search } from "lucide-react";
 import { db } from "@/db";
 import { bookings, businesses, subscriptions, users } from "@/db/schema";
+import { safeAdminQuery } from "@/lib/admin-db";
 import { formatLkr } from "@/lib/utils";
 import { requirePlatformAdmin } from "@/lib/platform-admin";
 
@@ -37,7 +38,8 @@ export default async function AdminAccountsPage({
       ? and(searchExpr, planExpr)
       : searchExpr ?? planExpr;
 
-  const rows = await db
+  const rows = await safeAdminQuery(
+    db
     .select({
       id: businesses.id,
       name: businesses.name,
@@ -58,9 +60,14 @@ export default async function AdminAccountsPage({
     .where(whereExpr)
     .groupBy(businesses.id)
     .orderBy(desc(businesses.createdAt))
-    .limit(100);
+    .limit(100),
+    [],
+  );
 
-  const [{ totalAccounts }] = await db.select({ totalAccounts: count() }).from(businesses);
+  const [{ totalAccounts }] = await safeAdminQuery(
+    db.select({ totalAccounts: count() }).from(businesses),
+    [{ totalAccounts: 0 }] as { totalAccounts: number }[],
+  );
 
   const planChips: { value: "all" | "free" | "pro"; label: string }[] = [
     { value: "all", label: "All" },

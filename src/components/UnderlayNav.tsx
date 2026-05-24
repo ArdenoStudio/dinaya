@@ -15,6 +15,7 @@ const NAV_LINKS = [
   { label: "Features",  href: "/features"  },
   { label: "Pricing",   href: "/pricing"   },
   { label: "Solutions", href: "/solutions" },
+  { label: "Discover",  href: "/discover", matchPrefix: true },
   { label: "Help",      href: "/help"      },
   { label: "Our Story", href: "/our-story" },
   { label: "Contact",   href: "/contact"   },
@@ -28,7 +29,12 @@ const ACCOUNT_LINKS = [
 const QUICK_LINKS = [
   { label: "Privacy Policy ↗", href: "/legal/privacy" },
   { label: "Terms ↗",          href: "/legal/terms"   },
+  { label: "Refund Policy ↗",  href: "/legal/refund"  },
 ];
+
+function isNavLinkActive(pathname: string, item: { href: string; matchPrefix?: boolean }) {
+  return item.matchPrefix ? pathname.startsWith(item.href) : pathname === item.href;
+}
 
 export function UnderlayNav() {
   const { isOpen, toggle, close } = useNav();
@@ -244,11 +250,11 @@ export function UnderlayNav() {
                           <Link
                             href={item.href}
                             onClick={close}
-                            aria-current={pathname === item.href ? "page" : undefined}
+                            aria-current={isNavLinkActive(pathname, item) ? "page" : undefined}
                             className={[
                               "block py-2.5 text-[clamp(1.6rem,8vw,2.2rem)] font-bold",
                               "tracking-[-0.03em] leading-none transition-colors",
-                              pathname === item.href ? "text-primary" : "text-gray-900 hover:text-gray-400",
+                              isNavLinkActive(pathname, item) ? "text-primary" : "text-gray-900 hover:text-gray-400",
                             ].join(" ")}
                           >
                             {item.label}
@@ -330,11 +336,11 @@ export function UnderlayNav() {
                           <Link
                             href={item.href}
                             onClick={close}
-                            aria-current={pathname === item.href ? "page" : undefined}
+                            aria-current={isNavLinkActive(pathname, item) ? "page" : undefined}
                             className={[
                               "block py-2.5 text-[clamp(1.4rem,3.5vw,2rem)] font-bold",
                               "tracking-[-0.03em] leading-none transition-colors",
-                              pathname === item.href ? "text-primary" : "text-gray-900 hover:text-gray-400",
+                              isNavLinkActive(pathname, item) ? "text-primary" : "text-gray-900 hover:text-gray-400",
                             ].join(" ")}
                           >
                             {item.label}

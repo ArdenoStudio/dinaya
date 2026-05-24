@@ -15,6 +15,7 @@ const FEATURE_KEYS: PlanFeature[] = [
   "aiBookingAutopilot",
   "aiContentMachine",
   "aiUpsellAssistant",
+  "aiVoiceReceptionist",
   "automations",
   "broadcasts",
   "clientReactivationCampaign",

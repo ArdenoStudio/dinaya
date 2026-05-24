@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm";
 import { verifyPayhereWebhook } from "@/lib/payhere";
 import { parsePayhereWebhookFields } from "@/lib/payhere-webhook";
 import { sendBookingNotificationToBusiness } from "@/lib/resend";
-import { sendBookingConfirmationMessage } from "@/lib/messaging/booking-messages";
+import { sendBookingConfirmationMessage, sendBookingNotificationToBusinessMessage } from "@/lib/messaging/booking-messages";
 import { buildClientBookingUrl } from "@/lib/client-tokens";
 import type { Plan } from "@/lib/plan";
 import type { BookingLanguage } from "@/lib/i18n";
@@ -57,6 +57,7 @@ export async function POST(req: NextRequest) {
   const [business] = await db
     .select({
       email: businesses.email,
+      phone: businesses.phone,
       name: businesses.name,
       payhereMerchantSecret: businesses.payhereMerchantSecret,
       slug: businesses.slug,
@@ -181,6 +182,19 @@ export async function POST(req: NextRequest) {
             staffName: staffMember?.name ?? "Staff",
             startsAt: booking.startsAt,
             bookingId: booking.id,
+          })
+        : Promise.resolve(),
+      business.phone
+        ? sendBookingNotificationToBusinessMessage({
+            businessId: booking.businessId,
+            bookingId: booking.id,
+            businessPhone: business.phone,
+            businessName: business.name,
+            clientName: booking.clientName,
+            serviceName: service?.name ?? "Service",
+            staffName: staffMember?.name ?? "Staff",
+            startsAt: booking.startsAt,
+            plan: business.plan as Plan,
           })
         : Promise.resolve(),
     ]);

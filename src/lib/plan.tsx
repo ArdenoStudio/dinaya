@@ -13,6 +13,7 @@ export type PlanFeature =
   | "aiBookingAutopilot"
   | "aiContentMachine"
   | "aiUpsellAssistant"
+  | "aiVoiceReceptionist"
   | "automations"
   | "broadcasts"
   | "clientReactivationCampaign"
@@ -81,6 +82,7 @@ const DEFAULT_FREE_ENTITLEMENTS: Entitlements = {
     aiBookingAutopilot: false,
     aiContentMachine: false,
     aiUpsellAssistant: false,
+    aiVoiceReceptionist: false,
     automations: false,
     broadcasts: false,
     clientReactivationCampaign: false,
@@ -107,22 +109,23 @@ const DEFAULT_PRO_ENTITLEMENTS: Entitlements = {
     locations: 3,
   },
   features: {
-    aiBookingAutopilot: true,
-    aiContentMachine: true,
-    aiUpsellAssistant: true,
+    aiBookingAutopilot: false,
+    aiContentMachine: false,
+    aiUpsellAssistant: false,
+    aiVoiceReceptionist: false,
     automations: true,
     broadcasts: true,
-    clientReactivationCampaign: true,
+    clientReactivationCampaign: false,
     googleCalendarSync: true,
     payments: true,
     publicBookingPage: true,
     publicBookingPageCustomization: true,
     reports: true,
-    reviewEngine: true,
+    reviewEngine: false,
     reviews: true,
-    reviewReplies: true,
-    smartReminderSystem: true,
-    vipLoyaltySequence: true,
+    reviewReplies: false,
+    smartReminderSystem: false,
+    vipLoyaltySequence: false,
     webhooks: true,
     whatsappSms: true,
   },
@@ -139,6 +142,7 @@ const DEFAULT_MAX_ENTITLEMENTS: Entitlements = {
     aiBookingAutopilot: true,
     aiContentMachine: true,
     aiUpsellAssistant: true,
+    aiVoiceReceptionist: true,
     automations: true,
     broadcasts: true,
     clientReactivationCampaign: true,
@@ -173,6 +177,7 @@ export const DEFAULT_PLAN_CONFIG: PlanConfig = {
 
 export const ENFORCED_FEATURES: readonly PlanFeature[] = [
   ...AI_FEATURES,
+  "aiVoiceReceptionist",
   "automations",
   "googleCalendarSync",
   "payments",
@@ -346,8 +351,14 @@ export function resolveEffectivePlan(input: {
   return stored;
 }
 
+const MAX_ONLY_FEATURES: readonly PlanFeature[] = [
+  ...AI_FEATURES,
+  "aiVoiceReceptionist",
+  "reviewReplies",
+];
+
 export function minimumPlanForFeature(feature: PlanFeature): Plan {
-  void feature;
+  if (MAX_ONLY_FEATURES.includes(feature)) return "max";
   return "pro";
 }
 
@@ -387,6 +398,7 @@ const FEATURE_LABELS: Record<PlanFeature, string> = {
   aiBookingAutopilot: "AI Booking Autopilot",
   aiContentMachine: "30-Day AI Content Machine",
   aiUpsellAssistant: "AI upsell assistant",
+  aiVoiceReceptionist: "AI Voice Receptionist",
   automations: "Automations",
   broadcasts: "Broadcasts",
   clientReactivationCampaign: "Client Reactivation Campaign",

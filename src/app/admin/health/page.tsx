@@ -1,72 +1,84 @@
-import { promises as fs } from "node:fs";
-import path from "node:path";
 import { format } from "date-fns";
 import { AlertTriangle, CheckCircle2, Gauge, XCircle } from "lucide-react";
+import {
+  fetchUptimeSummary,
+  getUptimeSummarySources,
+  type UptimeService,
+} from "@/lib/uptime-monitor";
 import { requirePlatformAdmin } from "@/lib/platform-admin";
 
 export const dynamic = "force-dynamic";
-
-type UptimeService = {
-  name: string;
-  url: string;
-  icon?: string;
-  slug: string;
-  status: "up" | "down" | "degraded" | string;
-  uptime: string;
-  uptimeDay: string;
-  uptimeWeek: string;
-  uptimeMonth: string;
-  uptimeYear: string;
-  time: number; // response time ms
-  dailyMinutesDown?: Record<string, number>;
-};
-
-async function readUptimeSummary(): Promise<UptimeService[] | null> {
-  const file = path.join(
-    process.cwd(),
-    "dinaya-uptime-monitor",
-    "history",
-    "summary.json"
-  );
-  try {
-    const raw = await fs.readFile(file, "utf8");
-    return JSON.parse(raw) as UptimeService[];
-  } catch {
-    return null;
-  }
-}
 
 function parsePct(s: string): number {
   return Number(String(s).replace("%", "")) || 0;
 }
 
+function UptimeUnavailable() {
+  const sources = getUptimeSummarySources();
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="font-cal text-3xl tracking-tight">System health</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Could not load uptime data.
+        </p>
+      </div>
+      <div className="rounded-xl border bg-white p-6 text-sm text-muted-foreground">
+        <p>
+          This page reads{" "}
+          <code className="rounded bg-muted px-1 text-xs">history/summary.json</code>{" "}
+          from the separate{" "}
+          <code className="rounded bg-muted px-1 text-xs">dinaya-uptime-monitor</code>{" "}
+          Upptime repo (updated by that repo&apos;s GitHub Actions, not this app).
+        </p>
+        <p className="mt-3">
+          Set one of these in Vercel production env:
+        </p>
+        <ul className="mt-2 list-disc space-y-1 pl-5">
+          <li>
+            <code className="rounded bg-muted px-1 text-xs">UPTIME_MONITOR_SUMMARY_URL</code>{" "}
+            — full URL to summary.json
+          </li>
+          <li>
+            <code className="rounded bg-muted px-1 text-xs">UPTIME_MONITOR_GITHUB_REPO</code> +{" "}
+            <code className="rounded bg-muted px-1 text-xs">UPTIME_MONITOR_GITHUB_BRANCH</code>{" "}
+            (defaults to ArdenoStudio/dinaya-uptime-monitor @ master)
+          </li>
+          <li>
+            <code className="rounded bg-muted px-1 text-xs">UPTIME_MONITOR_GITHUB_TOKEN</code>{" "}
+            — if the monitor repo is private
+          </li>
+        </ul>
+        <p className="mt-3 text-xs">
+          Tried:{" "}
+          {sources.map((source) => (
+            <code key={source} className="mr-2 block break-all rounded bg-muted px-1">
+              {source}
+            </code>
+          ))}
+          <span className="mt-1 block">
+            Local fallback:{" "}
+            <code className="rounded bg-muted px-1">dinaya-uptime-monitor/history/summary.json</code>
+          </span>
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export default async function AdminHealthPage() {
   await requirePlatformAdmin();
-  const services = await readUptimeSummary();
+  const services = await fetchUptimeSummary();
 
   if (!services) {
-    return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="font-cal text-3xl tracking-tight">System health</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Could not read uptime data.
-          </p>
-        </div>
-        <div className="rounded-xl border bg-white p-8 text-center text-sm text-muted-foreground">
-          Expected file:{" "}
-          <code className="rounded bg-muted px-1 text-xs">
-            dinaya-uptime-monitor/history/summary.json
-          </code>
-        </div>
-      </div>
-    );
+    return <UptimeUnavailable />;
   }
 
   const upCount = services.filter((s) => s.status === "up").length;
   const downCount = services.filter((s) => s.status === "down").length;
   const degradedCount = services.filter(
-    (s) => s.status !== "up" && s.status !== "down"
+    (s) => s.status !== "up" && s.status !== "down",
   ).length;
 
   const overallUp = services.length > 0 ? upCount === services.length : true;
@@ -82,7 +94,6 @@ export default async function AdminHealthPage() {
         ).toFixed(2)
       : "0.00";
 
-  // Gather all daily-down entries across services into a unified incident list
   const incidents: { date: string; service: string; minutesDown: number }[] = [];
   for (const s of services) {
     if (!s.dailyMinutesDown) continue;
@@ -143,8 +154,9 @@ export default async function AdminHealthPage() {
           </span>
         </div>
         <p className="mt-1 text-sm text-muted-foreground">
-          Live data from{" "}
-          <code className="rounded bg-muted px-1 text-xs">dinaya-uptime-monitor</code>.
+          Live data from the{" "}
+          <code className="rounded bg-muted px-1 text-xs">dinaya-uptime-monitor</code> Upptime
+          repo (refreshed every 5 minutes).
         </p>
       </div>
 
@@ -170,57 +182,7 @@ export default async function AdminHealthPage() {
             const isUp = s.status === "up";
             const isDown = s.status === "down";
             return (
-              <div
-                key={s.slug}
-                className="flex flex-wrap items-center gap-4 px-4 py-3"
-              >
-                <span
-                  className={
-                    isUp
-                      ? "flex size-8 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-600"
-                      : isDown
-                      ? "flex size-8 shrink-0 items-center justify-center rounded-full bg-rose-500/15 text-rose-600"
-                      : "flex size-8 shrink-0 items-center justify-center rounded-full bg-amber-500/15 text-amber-600"
-                  }
-                >
-                  {isUp ? (
-                    <CheckCircle2 className="size-4" aria-hidden="true" />
-                  ) : isDown ? (
-                    <XCircle className="size-4" aria-hidden="true" />
-                  ) : (
-                    <AlertTriangle className="size-4" aria-hidden="true" />
-                  )}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="font-medium">{s.name}</p>
-                  <a
-                    href={s.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block truncate text-xs text-muted-foreground hover:text-foreground"
-                  >
-                    {s.url}
-                  </a>
-                </div>
-                <div className="text-right text-xs">
-                  <p className="font-semibold tabular-nums">
-                    {s.uptimeMonth}{" "}
-                    <span className="font-normal text-muted-foreground">30d</span>
-                  </p>
-                  <p className="text-muted-foreground">{s.time} ms</p>
-                </div>
-                <span
-                  className={
-                    isUp
-                      ? "rounded-full bg-emerald-500/10 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-emerald-700"
-                      : isDown
-                      ? "rounded-full bg-rose-500/10 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-rose-700"
-                      : "rounded-full bg-amber-500/10 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-amber-700"
-                  }
-                >
-                  {s.status}
-                </span>
-              </div>
+              <ServiceRow key={s.slug} service={s} isUp={isUp} isDown={isDown} />
             );
           })}
         </div>
@@ -256,6 +218,67 @@ export default async function AdminHealthPage() {
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+function ServiceRow({
+  service: s,
+  isUp,
+  isDown,
+}: {
+  service: UptimeService;
+  isUp: boolean;
+  isDown: boolean;
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-4 px-4 py-3">
+      <span
+        className={
+          isUp
+            ? "flex size-8 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-600"
+            : isDown
+              ? "flex size-8 shrink-0 items-center justify-center rounded-full bg-rose-500/15 text-rose-600"
+              : "flex size-8 shrink-0 items-center justify-center rounded-full bg-amber-500/15 text-amber-600"
+        }
+      >
+        {isUp ? (
+          <CheckCircle2 className="size-4" aria-hidden="true" />
+        ) : isDown ? (
+          <XCircle className="size-4" aria-hidden="true" />
+        ) : (
+          <AlertTriangle className="size-4" aria-hidden="true" />
+        )}
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="font-medium">{s.name}</p>
+        <a
+          href={s.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block truncate text-xs text-muted-foreground hover:text-foreground"
+        >
+          {s.url}
+        </a>
+      </div>
+      <div className="text-right text-xs">
+        <p className="font-semibold tabular-nums">
+          {s.uptimeMonth}{" "}
+          <span className="font-normal text-muted-foreground">30d</span>
+        </p>
+        <p className="text-muted-foreground">{s.time} ms</p>
+      </div>
+      <span
+        className={
+          isUp
+            ? "rounded-full bg-emerald-500/10 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-emerald-700"
+            : isDown
+              ? "rounded-full bg-rose-500/10 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-rose-700"
+              : "rounded-full bg-amber-500/10 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-amber-700"
+        }
+      >
+        {s.status}
+      </span>
     </div>
   );
 }

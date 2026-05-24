@@ -41,7 +41,7 @@ export function HelpFaqSections() {
             maskImage: "radial-gradient(ellipse 80% 100% at 50% 0%, black 40%, transparent 100%)",
           }}
         />
-        <div className="relative max-w-3xl mx-auto px-6 py-20 text-center">
+        <div className="relative max-w-3xl mx-auto px-6 public-page-offset pb-20 text-center">
           <span className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white px-3 py-1 text-xs font-medium text-blue-700 shadow-sm mb-5">
             <Icon name="question-circle" className="text-xs" />
             Help Center
@@ -125,7 +125,7 @@ export function HelpFaqSections() {
       )}
 
       {!search && (
-        <div className="sticky top-[65px] z-40 bg-white/90 backdrop-blur-sm border-b">
+        <div className="sticky top-24 z-40 bg-white/90 backdrop-blur-sm border-b">
           <div className="max-w-4xl mx-auto px-6 flex gap-1 overflow-x-auto py-2">
             <button
               type="button"

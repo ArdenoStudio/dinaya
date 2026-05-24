@@ -33,16 +33,26 @@ describe("plan entitlements", () => {
     expect(canUseFeature("max", "reports")).toBe(true);
   });
 
-  it("allows AI growth features on pro and max", () => {
+  it("allows AI growth features on Max but not Free or Pro", () => {
     for (const feature of AI_FEATURES) {
-      expect(minimumPlanForFeature(feature)).toBe("pro");
+      expect(minimumPlanForFeature(feature)).toBe("max");
       expect(canUseFeature("free", feature)).toBe(false);
-      expect(canUseFeature("pro", feature)).toBe(true);
+      expect(canUseFeature("pro", feature)).toBe(false);
       expect(canUseFeature("max", feature)).toBe(true);
       expect(FREE_ENTITLEMENTS.features[feature]).toBe(false);
-      expect(PRO_ENTITLEMENTS.features[feature]).toBe(true);
+      expect(PRO_ENTITLEMENTS.features[feature]).toBe(false);
       expect(MAX_ENTITLEMENTS.features[feature]).toBe(true);
     }
+  });
+
+  it("reserves AI voice receptionist for max", () => {
+    expect(minimumPlanForFeature("aiVoiceReceptionist")).toBe("max");
+    expect(canUseFeature("free", "aiVoiceReceptionist")).toBe(false);
+    expect(canUseFeature("pro", "aiVoiceReceptionist")).toBe(false);
+    expect(canUseFeature("max", "aiVoiceReceptionist")).toBe(true);
+    expect(FREE_ENTITLEMENTS.features.aiVoiceReceptionist).toBe(false);
+    expect(PRO_ENTITLEMENTS.features.aiVoiceReceptionist).toBe(false);
+    expect(MAX_ENTITLEMENTS.features.aiVoiceReceptionist).toBe(true);
   });
 
   it("keeps public booking page available on all plans", () => {
@@ -57,9 +67,10 @@ describe("plan entitlements", () => {
     expect(canUseFeature("max", "publicBookingPageCustomization")).toBe(true);
   });
 
-  it("reserves AI review replies for pro and max", () => {
+  it("reserves AI review replies for Max", () => {
+    expect(minimumPlanForFeature("reviewReplies")).toBe("max");
     expect(canUseFeature("free", "reviewReplies")).toBe(false);
-    expect(canUseFeature("pro", "reviewReplies")).toBe(true);
+    expect(canUseFeature("pro", "reviewReplies")).toBe(false);
     expect(canUseFeature("max", "reviewReplies")).toBe(true);
   });
 });

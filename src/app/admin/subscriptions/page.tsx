@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { CreditCard } from "lucide-react";
 import { db } from "@/db";
 import { businesses, subscriptions } from "@/db/schema";
+import { safeAdminQuery } from "@/lib/admin-db";
 import { formatLkr } from "@/lib/utils";
 import { requirePlatformAdmin } from "@/lib/platform-admin";
 
@@ -28,7 +29,8 @@ export default async function AdminSubscriptionsPage({
       ? (sp.status as "active" | "past_due" | "cancelled" | "ended")
       : null;
 
-  const rows = await db
+  const rows = await safeAdminQuery(
+    db
     .select({
       id: subscriptions.id,
       payhereOrderId: subscriptions.payhereOrderId,
@@ -45,16 +47,21 @@ export default async function AdminSubscriptionsPage({
     .innerJoin(businesses, eq(businesses.id, subscriptions.businessId))
     .where(statusFilter ? eq(subscriptions.status, statusFilter) : undefined)
     .orderBy(desc(subscriptions.createdAt))
-    .limit(200);
+    .limit(200),
+    [],
+  );
 
-  const summary = await db
+  const summary = await safeAdminQuery(
+    db
     .select({
       status: subscriptions.status,
       count: sql<number>`count(*)::int`,
       sum: sql<number>`coalesce(sum(${subscriptions.amountLkr}), 0)::int`,
     })
     .from(subscriptions)
-    .groupBy(subscriptions.status);
+    .groupBy(subscriptions.status),
+    [],
+  );
 
   const byStatus = Object.fromEntries(
     summary.map((s) => [s.status, { count: Number(s.count), sum: Number(s.sum) }])

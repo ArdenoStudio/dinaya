@@ -1,4 +1,5 @@
 import { createHash, randomBytes } from "node:crypto";
+export { API_KEY_SCOPES, isApiKeyScope, type ApiKeyScope } from "@/lib/api-key-scopes";
 
 const KEY_PREFIX = "dinaya_";
 
