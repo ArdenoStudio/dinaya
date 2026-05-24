@@ -93,9 +93,9 @@ export function DashboardShell({
     : [];
 
   return (
-    <div className="min-h-screen bg-neutral-200 dark:bg-neutral-900">
+    <div className="flex h-screen flex-col overflow-hidden bg-neutral-200 dark:bg-neutral-900">
       {readOnlyImpersonation ? (
-        <div className="border-b border-amber-500/30 bg-amber-50 px-4 py-2 text-center text-sm text-amber-900">
+        <div className="shrink-0 border-b border-amber-500/30 bg-amber-50 px-4 py-2 text-center text-sm text-amber-900">
           Read-only impersonation session
           {impersonatedBy ? ` (admin: ${impersonatedBy})` : ""}. Mutations are blocked.
         </div>
@@ -104,7 +104,7 @@ export function DashboardShell({
       <MacOSSidebar
         activeHref={pathname}
         sections={sections}
-        className="min-h-screen"
+        className="min-h-0 flex-1"
         header={<Logo href="/dashboard" size="sm" />}
         footer={
           <div className="space-y-3 border-t border-neutral-200/80 px-2 pt-3 dark:border-neutral-700/80">
@@ -238,7 +238,7 @@ export function DashboardShell({
         </header>
 
         <DashboardToastProvider>
-          <main className="flex-1 overflow-auto bg-neutral-50 dark:bg-neutral-950">
+          <main className="min-h-0 flex-1 overflow-auto bg-neutral-50 dark:bg-neutral-950">
             <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">{children}</div>
           </main>
         </DashboardToastProvider>
