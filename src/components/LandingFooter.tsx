@@ -15,7 +15,7 @@ export function LandingFooter() {
       <div className="absolute top-0 inset-x-1/4 h-[2px] bg-gradient-to-r from-transparent via-primary/50 to-transparent blur-sm" />
 
       <div className="max-w-7xl mx-auto px-6 lg:px-10 relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr] gap-16 lg:gap-8 mb-24">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_1fr] gap-16 lg:gap-8 mb-24">
 
           {/* Brand & CTA */}
           <div className="flex flex-col">
@@ -62,6 +62,24 @@ export function LandingFooter() {
                 { label: "About Us",   href: "/about"      },
                 { label: "Our Story",  href: "/our-story"  },
                 { label: "Contact",    href: "/contact"    },
+              ].map(({ label, href }) => (
+                <li key={href}>
+                  <Link href={href} className="text-gray-400 hover:text-white transition-colors">
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Links: Resources */}
+          <div>
+            <h3 className="font-cal text-xs tracking-widest uppercase text-gray-500 mb-6">Resources</h3>
+            <ul className="flex flex-col gap-4 text-sm">
+              {[
+                { label: "Getting started", href: "/register"   },
+                { label: "Help center",     href: "/help"       },
+                { label: "What's new",      href: "/whats-new"  },
               ].map(({ label, href }) => (
                 <li key={href}>
                   <Link href={href} className="text-gray-400 hover:text-white transition-colors">
