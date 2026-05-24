@@ -128,6 +128,8 @@ export const businesses = pgTable("businesses", {
   directoryCategory: varchar("directory_category", { length: 80 }),
   referralCode: varchar("referral_code", { length: 40 }),
   referredByBusinessId: uuid("referred_by_business_id"),
+  onboardingCompletedAt: timestamp("onboarding_completed_at"),
+  onboardingStep: integer("onboarding_step").default(0).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

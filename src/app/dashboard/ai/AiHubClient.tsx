@@ -45,6 +45,11 @@ export default function AiHubClient() {
   const [error, setError] = useState("");
   const [savingId, setSavingId] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
+  const [reactivating, setReactivating] = useState(false);
+  const [reactivationResult, setReactivationResult] = useState<{
+    stats: { sent: number; skipped: number; failed: number; checked: number };
+    previews: { clientName: string; status: string; body?: string }[];
+  } | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -130,6 +135,30 @@ export default function AiHubClient() {
     setContent((current) => current.map((item) => item.id === id ? data.item : item));
   }
 
+  async function runReactivationNow() {
+    setReactivating(true);
+    setError("");
+    setReactivationResult(null);
+    const res = await fetch("/api/dashboard/ai/reactivate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({}),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setError(data.error ?? "Could not run reactivation.");
+      setReactivating(false);
+      return;
+    }
+    setReactivationResult(data);
+    const runsRes = await fetch("/api/dashboard/ai/runs");
+    if (runsRes.ok) {
+      const runsData = await runsRes.json();
+      setRuns(runsData.runs ?? []);
+    }
+    setReactivating(false);
+  }
+
   if (loading) {
     return <p className="text-sm text-muted-foreground">Loading AI hub…</p>;
   }
@@ -144,6 +173,45 @@ export default function AiHubClient() {
       </div>
 
       {error && <p className="text-sm text-destructive">{error}</p>}
+
+      <section className="rounded-xl border bg-white p-5">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <h2 className="font-semibold">Client Reactivation Campaign</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Find clients inactive 30+ days and send a personalised WhatsApp re-engagement message.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => void runReactivationNow()}
+            disabled={reactivating}
+            className="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary/90 disabled:opacity-60"
+          >
+            {reactivating ? "Running…" : "Run reactivation now"}
+          </button>
+        </div>
+        {reactivationResult ? (
+          <div className="mt-4 rounded-lg border bg-muted/20 p-4 text-sm">
+            <p>
+              Checked {reactivationResult.stats.checked} · Sent {reactivationResult.stats.sent} · Skipped{" "}
+              {reactivationResult.stats.skipped} · Failed {reactivationResult.stats.failed}
+            </p>
+            {reactivationResult.previews.length > 0 ? (
+              <ul className="mt-3 space-y-2">
+                {reactivationResult.previews.map((preview) => (
+                  <li key={preview.clientName} className="rounded border bg-white p-3">
+                    <p className="font-medium">{preview.clientName} — {preview.status}</p>
+                    {preview.body ? (
+                      <p className="mt-1 text-xs text-muted-foreground">{preview.body}</p>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </div>
+        ) : null}
+      </section>
 
       {locations.length === 0 ? (
         <div className="rounded-xl border bg-white p-8 text-center text-muted-foreground">

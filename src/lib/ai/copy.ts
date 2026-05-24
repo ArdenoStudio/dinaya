@@ -98,12 +98,25 @@ const FALLBACKS: Record<PlanFeature, (input: AiCopyInput) => AiCopyResult> = {
 };
 
 export async function generateAiCopy(input: AiCopyInput): Promise<AiCopyResult> {
-  const apiKey = process.env.AI_API_KEY || process.env.OPENAI_API_KEY || process.env.GEMINI_API_KEY;
-  const provider = process.env.AI_PROVIDER ?? (process.env.OPENAI_API_KEY ? "openai" : "");
-  const model = process.env.AI_MODEL ?? "gpt-4o-mini";
-  const baseUrl = process.env.AI_BASE_URL ?? "https://api.openai.com/v1";
+  const provider = (process.env.AI_PROVIDER ?? "").toLowerCase();
 
-  if (!apiKey || provider !== "openai") {
+  let apiKey: string | undefined;
+  let baseUrl: string;
+  let model: string;
+
+  if (provider === "groq") {
+    apiKey = process.env.GROQ_API_KEY || process.env.AI_API_KEY;
+    baseUrl = process.env.AI_BASE_URL ?? "https://api.groq.com/openai/v1";
+    model = process.env.AI_MODEL ?? "llama-3.3-70b-versatile";
+  } else if (provider === "openai" || process.env.OPENAI_API_KEY) {
+    apiKey = process.env.AI_API_KEY || process.env.OPENAI_API_KEY || process.env.GEMINI_API_KEY;
+    baseUrl = process.env.AI_BASE_URL ?? "https://api.openai.com/v1";
+    model = process.env.AI_MODEL ?? "gpt-4o-mini";
+  } else {
+    return FALLBACKS[input.feature](input);
+  }
+
+  if (!apiKey) {
     return FALLBACKS[input.feature](input);
   }
 
@@ -120,7 +133,7 @@ export async function generateAiCopy(input: AiCopyInput): Promise<AiCopyResult> 
           {
             role: "system",
             content:
-              "Write concise Sri Lanka-local booking business copy. Return JSON with subject and body only.",
+              "Write concise, warm Sri Lanka-local booking business copy for WhatsApp or SMS. Return JSON with subject and body only. Keep body under 320 characters.",
           },
           {
             role: "user",

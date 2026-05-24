@@ -1,9 +1,15 @@
 export function isWhatsAppReady(clientPhone?: string | null): boolean {
-  return Boolean(
-    clientPhone &&
+  if (!clientPhone) return false;
+  const metaReady = Boolean(
     process.env.META_WHATSAPP_TOKEN &&
-    process.env.META_WHATSAPP_PHONE_NUMBER_ID
+    process.env.META_WHATSAPP_PHONE_NUMBER_ID,
   );
+  const twilioReady = Boolean(
+    process.env.TWILIO_ACCOUNT_SID &&
+    process.env.TWILIO_AUTH_TOKEN &&
+    process.env.TWILIO_WHATSAPP_FROM,
+  );
+  return metaReady || twilioReady;
 }
 
 export async function sendWhatsApp(input: {

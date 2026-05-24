@@ -3,6 +3,8 @@ import { generateAiCopy } from "./copy";
 
 describe("AI copy fallback", () => {
   it("generates deterministic local copy when no provider key is configured", async () => {
+    vi.stubEnv("AI_PROVIDER", "groq");
+    vi.stubEnv("GROQ_API_KEY", "");
     vi.stubEnv("AI_API_KEY", "");
     vi.stubEnv("OPENAI_API_KEY", "");
     vi.stubEnv("GEMINI_API_KEY", "");
@@ -21,6 +23,8 @@ describe("AI copy fallback", () => {
   });
 
   it("generates fallback content calendar copy without an AI provider", async () => {
+    vi.stubEnv("AI_PROVIDER", "groq");
+    vi.stubEnv("GROQ_API_KEY", "");
     vi.stubEnv("AI_API_KEY", "");
     vi.stubEnv("OPENAI_API_KEY", "");
     vi.stubEnv("GEMINI_API_KEY", "");

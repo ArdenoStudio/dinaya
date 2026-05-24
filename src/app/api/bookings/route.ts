@@ -5,7 +5,7 @@ import { bookings, payments, businesses, services, staff, clients, staffServices
 import { eq, and, lt, gt, gte, inArray, count } from "drizzle-orm";
 import { buildPayhereFormData, getPayhereUrl } from "@/lib/payhere";
 import { sendBookingNotificationToBusiness } from "@/lib/resend";
-import { sendBookingConfirmationMessage } from "@/lib/messaging/booking-messages";
+import { sendBookingConfirmationMessage, sendBookingNotificationToBusinessMessage } from "@/lib/messaging/booking-messages";
 import { buildClientBookingUrl } from "@/lib/client-tokens";
 import type { Plan } from "@/lib/plan";
 import type { BookingLanguage } from "@/lib/i18n";
@@ -137,6 +137,7 @@ export async function POST(req: NextRequest) {
     .select({
       id: businesses.id,
       email: businesses.email,
+      phone: businesses.phone,
       name: businesses.name,
       bankTransferInstructions: businesses.bankTransferInstructions,
       lankaqrImageUrl: businesses.lankaqrImageUrl,
@@ -417,6 +418,19 @@ export async function POST(req: NextRequest) {
             staffName: staffMember.name,
             startsAt: new Date(startsAt),
             bookingId: booking.id,
+          })
+        : Promise.resolve(),
+      business.phone
+        ? sendBookingNotificationToBusinessMessage({
+            businessId,
+            bookingId: booking.id,
+            businessPhone: business.phone,
+            businessName: business.name,
+            clientName,
+            serviceName: service.name,
+            staffName: staffMember.name,
+            startsAt: new Date(startsAt),
+            plan: business.plan as Plan,
           })
         : Promise.resolve(),
     ]);
