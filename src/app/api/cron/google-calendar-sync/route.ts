@@ -10,6 +10,12 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const synced = await syncGoogleCalendarBookings();
-  return NextResponse.json({ ok: true, synced });
+  try {
+    const synced = await syncGoogleCalendarBookings();
+    return NextResponse.json({ ok: true, synced });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("[cron/google-calendar-sync] unhandled error:", message, err);
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }
