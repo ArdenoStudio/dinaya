@@ -2,9 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Prevent horizontal scroll when the underlay nav shifts main content left */
+/* Prevent horizontal scroll from full-bleed sections and scaled mockups */
+html,
 body {
-  overflow-x: hidden;
+  overflow-x: clip;
+  max-width: 100%;
 }
 
 /* Scroll lock applied by UnderlayNav when the drawer is open */

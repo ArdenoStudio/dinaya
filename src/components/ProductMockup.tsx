@@ -759,30 +759,36 @@ export default function ProductMockup() {
   const browserUrl =
     slide.type === "owner" ? "dashboard.dinaya.lk" : slide.type === "confirmation" ? "messages" : persona.url;
 
+  const mobileScale = 0.72;
+  const mobileOuterWidth = 417; // 15-pro screen + bezel
+  const mobileOuterHeight = 876;
+  const mobileScaledWidth = Math.round(mobileOuterWidth * mobileScale);
+  const mobileScaledHeight = Math.round(mobileOuterHeight * mobileScale);
+
   return (
-    <section className="max-w-5xl mx-auto px-6 pb-16 relative">
+    <section className="max-w-5xl mx-auto px-6 pb-16 relative overflow-x-clip">
       <div className="pointer-events-none absolute inset-0 overflow-hidden -z-10">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[680px] h-[480px] rounded-full bg-blue-500/[0.07] blur-3xl" />
         <div className="absolute top-1/3 right-1/4 w-[220px] h-[220px] rounded-full bg-violet-500/[0.05] blur-3xl" />
         <div className="absolute bottom-1/4 left-1/3 w-[180px] h-[180px] rounded-full bg-amber-500/[0.05] blur-3xl" />
       </div>
 
-      {/* Mobile */}
+      {/* Mobile — wrapper matches scaled iPhone size so layout does not overflow */}
       <div className="md:hidden flex flex-col items-center">
         <div
-          className={`transition-opacity duration-200 ${fading ? "opacity-0" : "opacity-100"}`}
-          style={{ marginBottom: -Math.round(852 * (1 - 0.72)) }}
+          className={`relative mx-auto overflow-hidden transition-opacity duration-200 ${fading ? "opacity-0" : "opacity-100"}`}
+          style={{ width: mobileScaledWidth, height: mobileScaledHeight }}
         >
           <IPhoneMockup
             model="15-pro"
             color="space-black"
-            scale={0.72}
+            scale={mobileScale}
             screenBg="#f9f9f9"
             shadow
             safeArea={false}
             showHomeIndicator={false}
             innerShadow={false}
-            style={{ transformOrigin: "top center" }}
+            style={{ transformOrigin: "top left" }}
           >
             {renderMobileScreen(slide.type, persona)}
           </IPhoneMockup>

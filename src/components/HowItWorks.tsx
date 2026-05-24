@@ -65,7 +65,7 @@ function OrbitNode({
 
 export function HowItWorks() {
   return (
-    <section className="border-t">
+    <section className="border-t overflow-x-clip">
       <div className="max-w-6xl mx-auto px-6 py-20 grid grid-cols-1 gap-12 md:grid-cols-2 md:gap-0">
 
         {/* Left — text */}
