@@ -6,6 +6,7 @@ import { WordRotate } from "@/components/WordRotate";
 import { CTAPrimaryButton } from "@/components/cta-primary-button";
 import { LandingFooter } from "@/components/LandingFooter";
 import { Icon } from "@/components/ui/Icon";
+import { TextAnimate } from "@/components/ui/text-animate";
 
 const HowItWorks = dynamic(() =>
   import("@/components/HowItWorks").then((m) => ({ default: m.HowItWorks }))
@@ -140,10 +141,15 @@ export default function LandingPage() {
             Get a real booking page in 5 minutes.
           </h1>
 
-          <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto text-pretty">
-            Give your salon, clinic, or tuition class a free booking page. Clients
-            pick a time, pay online, and you get notified.
-          </p>
+          <TextAnimate
+            animation="fadeIn"
+            by="word"
+            as="p"
+            startOnView={false}
+            className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto text-pretty"
+          >
+            Give your salon, clinic, or tuition class a free booking page. Clients pick a time, pay online, and you get notified.
+          </TextAnimate>
 
           <div className="flex flex-wrap items-center justify-center gap-3">
             <CTAPrimaryButton>Create your booking page</CTAPrimaryButton>
@@ -233,9 +239,14 @@ export default function LandingPage() {
             <span className="absolute top-0.5 -left-3 h-4 w-[3px] rounded-r-sm bg-primary" />
             Everything you need
           </span>
-          <h2 className="font-cal text-3xl md:text-4xl mt-3 tracking-tight">
+          <TextAnimate
+            animation="fadeIn"
+            by="word"
+            as="h2"
+            className="font-cal text-3xl md:text-4xl mt-3 tracking-tight"
+          >
             Everything to replace WhatsApp booking
-          </h2>
+          </TextAnimate>
           <p className="text-muted-foreground mt-3 max-w-xl mx-auto">
             Six tools that work together — so you stop chasing clients and start filling your calendar.
           </p>
@@ -280,9 +291,14 @@ export default function LandingPage() {
             <span className="absolute top-0.5 -left-3 h-4 w-[3px] rounded-r-sm bg-primary" />
             How it works
           </span>
-          <h2 className="font-cal text-3xl md:text-4xl mt-3 tracking-tight">
+          <TextAnimate
+            animation="fadeIn"
+            by="word"
+            as="h2"
+            className="font-cal text-3xl md:text-4xl mt-3 tracking-tight"
+          >
             Up and running in minutes
-          </h2>
+          </TextAnimate>
         </div>
 
         <div className="relative grid md:grid-cols-3 gap-10">
@@ -314,9 +330,14 @@ export default function LandingPage() {
             <span className="absolute top-0.5 -left-3 h-4 w-[3px] rounded-r-sm bg-primary" />
             Early access users
           </span>
-          <h2 className="font-cal text-3xl md:text-4xl mt-3 tracking-tight">
+          <TextAnimate
+            animation="fadeIn"
+            by="word"
+            as="h2"
+            className="font-cal text-3xl md:text-4xl mt-3 tracking-tight"
+          >
             What businesses are saying
-          </h2>
+          </TextAnimate>
         </div>
 
         <div className="grid md:grid-cols-3 gap-5">
@@ -379,9 +400,14 @@ export default function LandingPage() {
                 <Icon name="lightning-charge" className="text-xs" />
                 Free forever · No credit card needed
               </div>
-              <h2 className="font-cal text-4xl md:text-5xl tracking-tight text-white mb-4">
+              <TextAnimate
+                animation="fadeIn"
+                by="word"
+                as="h2"
+                className="font-cal text-4xl md:text-5xl tracking-tight text-white mb-4"
+              >
                 Ready to go bookable?
-              </h2>
+              </TextAnimate>
               <p className="text-lg text-white/70 mb-10 max-w-md mx-auto">
                 Set up your booking page in 5 minutes. Start accepting clients today.
               </p>
