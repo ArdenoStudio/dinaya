@@ -28,6 +28,7 @@ const ACCOUNT_LINKS = [
 const QUICK_LINKS = [
   { label: "Privacy Policy ↗", href: "/legal/privacy" },
   { label: "Terms ↗",          href: "/legal/terms"   },
+  { label: "Refund Policy ↗",  href: "/legal/refund"  },
 ];
 
 export function UnderlayNav() {

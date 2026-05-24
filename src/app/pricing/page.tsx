@@ -69,6 +69,7 @@ const faqs = [
   {
     q: "Do you offer refunds?",
     a: "Free is free, so there's nothing to refund. For paid add-ons, see our refund policy — we issue refunds for any unused billing period within 14 days.",
+    link: { href: "/legal/refund", label: "refund policy" },
   },
 ];
 
@@ -368,7 +369,20 @@ export default async function PricingPage() {
                 </span>
               </summary>
               <p className="text-sm text-muted-foreground leading-relaxed mt-3 pr-10">
-                {item.a}
+                {"link" in item && item.link ? (
+                  <>
+                    {item.a.split(item.link.label)[0]}
+                    <Link
+                      href={item.link.href}
+                      className="text-primary underline underline-offset-2 hover:text-primary/80"
+                    >
+                      {item.link.label}
+                    </Link>
+                    {item.a.split(item.link.label)[1]}
+                  </>
+                ) : (
+                  item.a
+                )}
               </p>
             </details>
           ))}
