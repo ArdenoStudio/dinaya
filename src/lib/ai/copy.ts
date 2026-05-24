@@ -53,6 +53,11 @@ const FALLBACKS: Record<PlanFeature, (input: AiCopyInput) => AiCopyResult> = {
     body: `Many clients pair ${input.serviceName ?? "this booking"} with ${input.extra ?? "a follow-up service"}. Ask ${input.businessName} about it during your visit.`,
     source: "fallback",
   }),
+  aiVoiceReceptionist: (input) => ({
+    subject: `${input.businessName} AI voice receptionist`,
+    body: `When clients call ${input.businessName}, the AI receptionist can answer common questions, check availability, and book appointments through Dinaya.`,
+    source: "fallback",
+  }),
   aiContentMachine: (input) => ({
     subject: `${input.businessName} content idea`,
     body: `Appointments are open this week at ${input.businessName}${input.locationName ? ` - ${input.locationName}` : ""}. Message us or book online${input.bookingUrl ? `: ${input.bookingUrl}` : "."}`,

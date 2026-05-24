@@ -21,7 +21,7 @@ import {
   resolveClientSource,
   type BookingAttribution,
 } from "@/lib/booking-attribution";
-import { PlanLimitError, requirePlanLimit } from "@/lib/plan";
+import { canUseFeature, getBusinessPlan, PlanLimitError, requirePlanLimit } from "@/lib/plan";
 import { withRateLimit } from "@/lib/rate-limit";
 import { hasApiKeyAuth, requireApiKey } from "@/lib/api-key-auth";
 import { z } from "@/lib/validation";
@@ -38,7 +38,7 @@ const bookingSchema = z.object({
   clientPhone: z.string().trim().min(7).max(30),
   clientEmail: z.email().optional().nullable().or(z.literal("")),
   notes: z.string().trim().max(2000).optional().nullable(),
-  source: z.enum(["public", "manual", "api", "import"]).optional(),
+  source: z.enum(["public", "manual", "api", "import", "voice_agent"]).optional(),
   attribution: z.object({
     utmSource: z.string().trim().max(80).optional().nullable(),
     utmMedium: z.string().trim().max(80).optional().nullable(),
@@ -64,10 +64,12 @@ export async function POST(req: NextRequest) {
 
   const apiKeyAuth = hasApiKeyAuth(req);
   let apiBusinessId: string | null = null;
+  let apiKeyScopes: string[] = [];
   if (apiKeyAuth) {
     const keyResult = await requireApiKey(req, "bookings:write");
     if (!keyResult.ok) return keyResult.response;
     apiBusinessId = keyResult.context.businessId;
+    apiKeyScopes = keyResult.context.scopes;
   }
 
   const parsed = bookingSchema.safeParse(await req.json());
@@ -100,11 +102,20 @@ export async function POST(req: NextRequest) {
 
   const isOwnerBooking = session?.user?.businessId === businessId;
   const isApiBooking = apiBusinessId !== null && apiBusinessId === businessId;
+  if (isApiBooking && requestedSource === "voice_agent" && !apiKeyScopes.includes("voice:write")) {
+    return NextResponse.json({ error: "Voice booking scope required." }, { status: 403 });
+  }
+  if (isApiBooking && requestedSource === "voice_agent") {
+    const plan = await getBusinessPlan(businessId);
+    if (!canUseFeature(plan, "aiVoiceReceptionist")) {
+      return NextResponse.json({ error: "AI Voice Receptionist requires the Max plan." }, { status: 402 });
+    }
+  }
   const attribution = isOwnerBooking || isApiBooking
     ? null
     : (requestedAttribution as BookingAttribution | null | undefined);
   const source = isApiBooking
-    ? "api"
+    ? (requestedSource === "voice_agent" ? "voice_agent" : "api")
     : isOwnerBooking
       ? requestedSource
       : resolveBookingSource(attribution);

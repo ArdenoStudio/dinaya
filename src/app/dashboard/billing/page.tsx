@@ -160,7 +160,7 @@ export default async function BillingPage() {
           <section className="rounded-xl border border-amber-200 bg-amber-50/50 p-6">
             <h2 className="text-lg font-semibold">Upgrade to Max</h2>
             <p className="mt-1 text-sm text-neutral-700">
-              Everything in Pro, with unlimited branch locations for larger teams.
+              Everything in Pro, unlimited branch locations, and AI Voice Receptionist setup eligibility for larger teams.
             </p>
             <PlanPricing
               monthlyLkr={maxMonthlyPriceLkr}
@@ -179,7 +179,7 @@ export default async function BillingPage() {
         <section className="rounded-xl border border-amber-200 bg-amber-50/50 p-6">
           <h2 className="text-lg font-semibold">Upgrade to Max</h2>
           <p className="mt-1 text-sm text-neutral-700">
-            Keep every Pro AI workflow and remove the 3-branch limit.
+            Keep every Pro AI workflow, remove the 3-branch limit, and unlock AI Voice Receptionist setup.
           </p>
           <PlanPricing
             monthlyLkr={maxMonthlyPriceLkr}

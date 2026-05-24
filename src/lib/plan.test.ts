@@ -45,6 +45,16 @@ describe("plan entitlements", () => {
     }
   });
 
+  it("reserves AI voice receptionist for max", () => {
+    expect(minimumPlanForFeature("aiVoiceReceptionist")).toBe("max");
+    expect(canUseFeature("free", "aiVoiceReceptionist")).toBe(false);
+    expect(canUseFeature("pro", "aiVoiceReceptionist")).toBe(false);
+    expect(canUseFeature("max", "aiVoiceReceptionist")).toBe(true);
+    expect(FREE_ENTITLEMENTS.features.aiVoiceReceptionist).toBe(false);
+    expect(PRO_ENTITLEMENTS.features.aiVoiceReceptionist).toBe(false);
+    expect(MAX_ENTITLEMENTS.features.aiVoiceReceptionist).toBe(true);
+  });
+
   it("keeps public booking page available on all plans", () => {
     expect(canUseFeature("free", "publicBookingPage")).toBe(true);
     expect(canUseFeature("pro", "publicBookingPage")).toBe(true);

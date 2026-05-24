@@ -44,6 +44,7 @@ const proOperationalFeatures = [
 const maxAiFeatures = [
   "Everything in Pro",
   "Unlimited branch locations",
+  "AI Voice Receptionist setup eligibility",
   "Per-branch AI workflow controls",
   "Priority rollout support for multi-branch teams",
 ];
@@ -200,7 +201,7 @@ export default async function PricingPage() {
                 <h3 className="font-cal text-2xl tracking-tight">Max</h3>
               </div>
               <p className="text-sm text-gray-500 mb-6">
-                Everything in Pro — plus unlimited branches for larger teams.
+                Everything in Pro — plus unlimited branches and AI Voice Receptionist setup for larger teams.
               </p>
 
               <div className="mb-6">
@@ -301,6 +302,7 @@ export default async function PricingPage() {
                 { f: "AI upsell assistant", a: "—", b: "Yes", icon: "graph-up-arrow", c: "Yes" },
                 { f: "30-Day AI Content Machine", a: "—", b: "Yes", icon: "calendar3", c: "Yes" },
                 { f: "VIP Loyalty Sequence", a: "—", b: "Yes", icon: "gem", c: "Yes" },
+                { f: "AI Voice Receptionist setup", a: "—", b: "—", icon: "telephone", c: "Yes" },
               ].map((row) => (
                 <tr key={row.f} className="hover:bg-gray-50/50 transition-colors">
                   <td className="px-5 py-3.5 text-gray-800">

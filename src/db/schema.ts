@@ -776,6 +776,39 @@ export const apiKeys = pgTable("api_keys", {
   };
 });
 
+export const voiceIntegrations = pgTable("voice_integrations", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  businessId: uuid("business_id")
+    .notNull()
+    .references(() => businesses.id, { onDelete: "cascade" }),
+  apiKeyId: uuid("api_key_id").references(() => apiKeys.id, {
+    onDelete: "set null",
+  }),
+  status: varchar("status", { length: 40 }).default("not_requested").notNull(),
+  providerName: varchar("provider_name", { length: 120 }).default("Peak Agents").notNull(),
+  businessPhone: varchar("business_phone", { length: 30 }),
+  aiPhoneNumber: varchar("ai_phone_number", { length: 30 }),
+  handoffPhone: varchar("handoff_phone", { length: 30 }),
+  languages: text("languages").array().default(sql`ARRAY['en']::text[]`).notNull(),
+  welcomeMessage: text("welcome_message"),
+  fallbackMessage: text("fallback_message"),
+  openingRules: text("opening_rules"),
+  serviceRules: text("service_rules"),
+  bookingRules: text("booking_rules"),
+  faqNotes: text("faq_notes"),
+  setupNotes: text("setup_notes"),
+  requestedAt: timestamp("requested_at"),
+  lastTestedAt: timestamp("last_tested_at"),
+  activatedAt: timestamp("activated_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => {
+  return {
+    businessUnique: uniqueIndex("voice_integrations_business_id_unique").on(table.businessId),
+    statusIdx: index("voice_integrations_status_idx").on(table.status),
+  };
+});
+
 // ─── Relations ────────────────────────────────────────────────────────────────
 
 export const businessesRelations = relations(businesses, ({ many }) => ({
@@ -796,6 +829,7 @@ export const businessesRelations = relations(businesses, ({ many }) => ({
   socialConnections: many(socialConnections),
   metricsDaily: many(metricsDaily),
   apiKeys: many(apiKeys),
+  voiceIntegrations: many(voiceIntegrations),
 }));
 
 export const usersRelations = relations(users, ({ one, many }) => ({
@@ -989,6 +1023,17 @@ export const apiKeysRelations = relations(apiKeys, ({ one }) => ({
   business: one(businesses, { fields: [apiKeys.businessId], references: [businesses.id] }),
 }));
 
+export const voiceIntegrationsRelations = relations(voiceIntegrations, ({ one }) => ({
+  business: one(businesses, {
+    fields: [voiceIntegrations.businessId],
+    references: [businesses.id],
+  }),
+  apiKey: one(apiKeys, {
+    fields: [voiceIntegrations.apiKeyId],
+    references: [apiKeys.id],
+  }),
+}));
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export type Business = typeof businesses.$inferSelect;
@@ -1031,6 +1076,8 @@ export type NewAiContentCalendarItem = typeof aiContentCalendar.$inferInsert;
 export type SocialConnection = typeof socialConnections.$inferSelect;
 export type MetricsDaily = typeof metricsDaily.$inferSelect;
 export type ApiKey = typeof apiKeys.$inferSelect;
+export type VoiceIntegration = typeof voiceIntegrations.$inferSelect;
+export type NewVoiceIntegration = typeof voiceIntegrations.$inferInsert;
 export type PlatformSetting = typeof platformSettings.$inferSelect;
 export type AdminAuditEventRow = typeof adminAuditEvents.$inferSelect;
 export type Location = typeof locations.$inferSelect;

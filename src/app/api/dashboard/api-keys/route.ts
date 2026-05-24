@@ -3,14 +3,14 @@ import { desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { apiKeys } from "@/db/schema";
 import { requireApiBusiness } from "@/lib/api-auth";
-import { generateApiKey } from "@/lib/api-keys";
+import { API_KEY_SCOPES, generateApiKey } from "@/lib/api-keys";
 import { PlanRequiredError, requirePro } from "@/lib/plan";
 import { withApiHandler } from "@/lib/api-handler";
 import { z } from "@/lib/validation";
 
 const createSchema = z.object({
   name: z.string().trim().min(1).max(120),
-  scopes: z.array(z.string().trim().min(1).max(40)).min(1).max(10).default(["bookings:read"]),
+  scopes: z.array(z.enum(API_KEY_SCOPES)).min(1).max(10).default(["bookings:read"]),
 });
 
 export async function GET() {
