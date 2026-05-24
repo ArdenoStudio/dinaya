@@ -98,7 +98,7 @@ export function MacOSSidebar({
           </motion.button>
         </div>
 
-        <nav className="mt-2 w-full shrink-0">
+        <nav className="scrollbar-hide mt-2 min-h-0 w-full flex-1 overflow-y-auto overflow-x-hidden">
           <AnimatePresence>
             {isOpen ? (
               <motion.div
@@ -214,7 +214,7 @@ export function MacOSSidebar({
         </nav>
 
         {footer ? (
-          <div className={cn("mt-auto w-full shrink-0 pt-3", !isOpen && "hidden")}>
+          <div className={cn("w-full shrink-0 pt-3", !isOpen && "hidden")}>
             {footer}
           </div>
         ) : null}
