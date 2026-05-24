@@ -20,17 +20,24 @@ export const metadata: Metadata = {
 
 async function getPlanUsage(businessId: string, plan: Plan): Promise<PlanUsage> {
   const limits = getEntitlements(plan).limits;
-  const [[{ servicesCount }], [{ staffCount }], [{ locationsCount }]] = await Promise.all([
-    db.select({ servicesCount: count() }).from(services).where(eq(services.businessId, businessId)),
-    db.select({ staffCount: count() }).from(staff).where(eq(staff.businessId, businessId)),
-    db.select({ locationsCount: count() }).from(locations).where(eq(locations.businessId, businessId)),
-  ]);
-
-  return {
-    services: { used: Number(servicesCount), limit: limits.services },
-    staff: { used: Number(staffCount), limit: limits.staff },
-    locations: { used: Number(locationsCount), limit: limits.locations },
-  };
+  try {
+    const [[{ servicesCount }], [{ staffCount }], [{ locationsCount }]] = await Promise.all([
+      db.select({ servicesCount: count() }).from(services).where(eq(services.businessId, businessId)),
+      db.select({ staffCount: count() }).from(staff).where(eq(staff.businessId, businessId)),
+      db.select({ locationsCount: count() }).from(locations).where(eq(locations.businessId, businessId)),
+    ]);
+    return {
+      services: { used: Number(servicesCount), limit: limits.services },
+      staff: { used: Number(staffCount), limit: limits.staff },
+      locations: { used: Number(locationsCount), limit: limits.locations },
+    };
+  } catch {
+    return {
+      services: { used: 0, limit: limits.services },
+      staff: { used: 0, limit: limits.staff },
+      locations: { used: 0, limit: limits.locations },
+    };
+  }
 }
 
 export default async function DashboardLayout({
@@ -45,12 +52,17 @@ export default async function DashboardLayout({
   const copy = getDashboardCopy(language);
   const planUsage = role === "owner" ? await getPlanUsage(businessId, business.plan as Plan) : undefined;
 
-  const [onboardingRow] = await db
-    .select({ onboardingCompletedAt: businesses.onboardingCompletedAt })
-    .from(businesses)
-    .where(eq(businesses.id, businessId))
-    .limit(1);
-  const onboardingCompleted = Boolean(onboardingRow?.onboardingCompletedAt);
+  let onboardingCompleted = true; // default to completed so existing users aren't blocked
+  try {
+    const [onboardingRow] = await db
+      .select({ onboardingCompletedAt: businesses.onboardingCompletedAt })
+      .from(businesses)
+      .where(eq(businesses.id, businessId))
+      .limit(1);
+    onboardingCompleted = Boolean(onboardingRow?.onboardingCompletedAt);
+  } catch {
+    // column may not exist yet if migrations are pending; treat as completed
+  }
 
   return (
     <DashboardLocaleProvider language={language} role={role}>
