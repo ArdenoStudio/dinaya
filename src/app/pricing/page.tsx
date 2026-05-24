@@ -50,6 +50,20 @@ const maxFeatures = [
   "Priority rollout support for multi-branch teams",
 ];
 
+function PlanCell({ value }: { value: string }) {
+  return (
+    <td className="px-5 py-3.5">
+      <div className="flex items-center justify-center">
+        {value === "Yes" ? (
+          <Icon name="check" className="text-sm text-primary" />
+        ) : (
+          <span className="text-gray-700">{value}</span>
+        )}
+      </div>
+    </td>
+  );
+}
+
 const faqs = [
   {
     q: "Is Dinaya really free?",
@@ -313,27 +327,9 @@ export default async function PricingPage() {
                       {row.f}
                     </span>
                   </td>
-                  <td className="px-5 py-3.5 text-center">
-                    {row.a === "Yes" ? (
-                      <Icon name="check" className="text-sm text-primary" />
-                    ) : (
-                      <span className="text-gray-700">{row.a}</span>
-                    )}
-                  </td>
-                  <td className="px-5 py-3.5 text-center">
-                    {row.b === "Yes" ? (
-                      <Icon name="check" className="text-sm text-primary" />
-                    ) : (
-                      <span className="text-gray-700">{row.b}</span>
-                    )}
-                  </td>
-                  <td className="px-5 py-3.5 text-center">
-                    {row.c === "Yes" ? (
-                      <Icon name="check" className="text-sm text-primary" />
-                    ) : (
-                      <span className="text-gray-700">{row.c}</span>
-                    )}
-                  </td>
+                  <PlanCell value={row.a} />
+                  <PlanCell value={row.b} />
+                  <PlanCell value={row.c} />
                 </tr>
               ))}
             </tbody>
