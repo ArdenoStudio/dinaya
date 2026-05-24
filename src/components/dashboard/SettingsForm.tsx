@@ -115,7 +115,7 @@ export default function SettingsForm({ business }: Props) {
   const inputCls = "mt-1 w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 bg-white";
 
   return (
-    <div className="max-w-lg space-y-5">
+    <div className="space-y-5">
       <form onSubmit={handleSave} className="space-y-5">
         {/* Business info */}
         <div className="bg-white border rounded-xl p-6 space-y-4">
@@ -325,7 +325,7 @@ export default function SettingsForm({ business }: Props) {
 
           {/* Existing images */}
           {galleryImages.length > 0 && (
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
               {galleryImages.map((url) => (
                 <div key={url} className="relative group aspect-square rounded-lg overflow-hidden border bg-muted/20">
                   <Image

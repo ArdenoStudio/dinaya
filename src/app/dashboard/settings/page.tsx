@@ -1,4 +1,5 @@
 import SettingsForm from "@/components/dashboard/SettingsForm";
+import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
 import { db } from "@/db";
 import { businesses } from "@/db/schema";
 import { requireOwner } from "@/lib/auth";
@@ -41,8 +42,11 @@ export default async function SettingsPage() {
   if (!business) notFound();
 
   return (
-    <div>
-      <h1 className="font-cal text-2xl mb-6">Settings</h1>
+    <div className="max-w-2xl space-y-6">
+      <DashboardPageHeader
+        title="Settings"
+        description="Business profile, booking policies, payments, and public page branding."
+      />
       <SettingsForm
         business={{
           ...business,
