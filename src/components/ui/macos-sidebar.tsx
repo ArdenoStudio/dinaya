@@ -62,7 +62,7 @@ export function MacOSSidebar({
         animate={{ width: isOpen ? 240 : 64 }}
         transition={{ type: "spring", bounce: 0.4, duration: 0.8 }}
         className={cn(
-          "hidden lg:flex p-2 shrink-0 flex-col items-start transition-colors duration-300 ease-out h-full",
+          "hidden lg:sticky lg:top-0 lg:flex lg:h-screen lg:max-h-screen p-2 shrink-0 flex-col items-start transition-colors duration-300 ease-out",
           isOpen ? "bg-neutral-100 dark:bg-neutral-800" : "bg-transparent",
         )}
         aria-label="Sidebar"
@@ -98,7 +98,7 @@ export function MacOSSidebar({
           </motion.button>
         </div>
 
-        <nav className="mt-2 flex-1 w-full overflow-y-auto overflow-x-hidden">
+        <nav className="mt-2 min-h-0 w-full flex-1 overflow-y-auto overflow-x-hidden">
           <AnimatePresence>
             {isOpen ? (
               <motion.div
@@ -214,7 +214,7 @@ export function MacOSSidebar({
         </nav>
 
         {footer ? (
-          <div className={cn("mt-auto w-full pt-3 shrink-0", !isOpen && "hidden")}>
+          <div className={cn("w-full shrink-0 pt-3", !isOpen && "hidden")}>
             {footer}
           </div>
         ) : null}

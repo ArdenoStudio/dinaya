@@ -104,7 +104,7 @@ export function DashboardShell({
       <MacOSSidebar
         activeHref={pathname}
         sections={sections}
-        className="min-h-[calc(100vh-0px)]"
+        className="min-h-screen"
         header={<Logo href="/dashboard" size="sm" />}
         footer={
           <div className="space-y-3 border-t border-neutral-200/80 px-2 pt-3 dark:border-neutral-700/80">
