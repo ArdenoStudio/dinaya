@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { businesses, socialConnections, webhooks } from "@/db/schema";
 import { requireOwner } from "@/lib/auth";
 import { CustomDomainPanel } from "@/components/dashboard/CustomDomainPanel";
+import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
 import { GoogleCalendarDisconnect } from "@/components/dashboard/GoogleCalendarDisconnect";
 import { GOOGLE_PROVIDER, googleOAuthConfigured } from "@/lib/google-calendar";
 
@@ -99,12 +100,10 @@ export default async function IntegrationsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-cal text-2xl">Integrations</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Connect payments, messaging, calendar sync, and external systems.
-        </p>
-      </div>
+      <DashboardPageHeader
+        title="Integrations"
+        description="Connect payments, messaging, calendar sync, and external systems."
+      />
 
       <div className="grid gap-4 md:grid-cols-2">
         {integrations.map((item) => (

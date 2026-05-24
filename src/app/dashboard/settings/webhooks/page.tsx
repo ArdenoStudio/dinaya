@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { ConfirmDialog } from "@/components/dashboard/ConfirmDialog";
+import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
 import { EmptyState } from "@/components/dashboard/EmptyState";
 import { Webhook } from "lucide-react";
 
@@ -86,21 +87,21 @@ export default function WebhooksPage() {
   }
 
   return (
-    <div className="max-w-2xl">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="font-cal text-2xl">Webhooks</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Get notified at a URL when booking events happen. Verified with an HMAC-SHA256 signature.
-          </p>
-        </div>
-        <button
-          onClick={() => setShowForm((v) => !v)}
-          className="bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90"
-        >
-          + Add webhook
-        </button>
-      </div>
+    <div className="max-w-2xl space-y-6">
+      <DashboardPageHeader
+        title="Webhooks"
+        description="Get notified at a URL when booking events happen. Verified with an HMAC-SHA256 signature."
+        backHref="/dashboard/settings/integrations"
+        backLabel="Integrations"
+        actions={
+          <button
+            onClick={() => setShowForm((v) => !v)}
+            className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+          >
+            + Add webhook
+          </button>
+        }
+      />
 
       {/* Newly created secret banner */}
       {revealedSecret && (

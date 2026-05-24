@@ -68,7 +68,7 @@ export const dashboardNavGroups: NavGroupConfig[] = [
       { href: "/dashboard/settings/integrations", labelKey: "integrations", icon: Plug, ownerOnly: true },
       { href: "/dashboard/automations", labelKey: "automations", icon: Zap, ownerOnly: true },
       { href: "/dashboard/billing", labelKey: "billing", icon: Wallet, ownerOnly: true },
-      { href: "/dashboard/settings", labelKey: "settings", icon: Settings, ownerOnly: true },
+      { href: "/dashboard/settings", labelKey: "settings", icon: Settings, ownerOnly: true, exact: true },
     ],
   },
 ];

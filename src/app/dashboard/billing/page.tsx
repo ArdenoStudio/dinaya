@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { businesses, subscriptions } from "@/db/schema";
 import { eq, and, inArray, desc } from "drizzle-orm";
 import { requireOwner } from "@/lib/auth";
+import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
 import {
   annualSavingsPercent,
   getPlanConfigAsync,
@@ -100,13 +101,11 @@ export default async function BillingPage() {
   const isPaid = plan === "pro" || plan === "max";
 
   return (
-    <div className="max-w-3xl space-y-8 p-6">
-      <header>
-        <h1 className="text-2xl font-semibold tracking-tight">Billing</h1>
-        <p className="mt-1 text-sm text-neutral-600">
-          Manage your Dinaya plan and subscription.
-        </p>
-      </header>
+    <div className="max-w-3xl space-y-6">
+      <DashboardPageHeader
+        title="Billing"
+        description="Manage your Dinaya plan and subscription."
+      />
 
       <section className="rounded-xl border border-neutral-200 bg-white p-6">
         <div className="flex items-center justify-between">
