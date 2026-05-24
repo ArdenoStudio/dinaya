@@ -2,7 +2,18 @@
 
 import { cn } from "@/lib/utils"
 import { AnimatePresence, motion, useInView, MotionProps, Variants } from "framer-motion"
-import { ElementType, useRef } from "react"
+import { useRef } from "react"
+
+type MotionTag = "p" | "h1" | "h2" | "h3" | "span" | "div"
+
+const motionByTag = {
+  p: motion.p,
+  h1: motion.h1,
+  h2: motion.h2,
+  h3: motion.h3,
+  span: motion.span,
+  div: motion.div,
+} as const
 
 type AnimationType =
   | "fadeIn"
@@ -32,7 +43,7 @@ interface TextAnimateProps extends MotionProps {
   /**
    * The base component to use for the wrapper
    */
-  as?: ElementType
+  as?: MotionTag
   /**
    * The base delay for the animation
    */
@@ -188,9 +199,7 @@ export function TextAnimate({
   }
 
   const finalVariants = itemVariants[animation]
-
-  // Use the 'as' prop to dynmically render the motion component
-  const MotionComponent = motion.create(Component)
+  const MotionComponent = motionByTag[Component]
 
   return (
     <AnimatePresence mode="popLayout">
