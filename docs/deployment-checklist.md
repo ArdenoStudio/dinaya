@@ -34,7 +34,7 @@ Optional but recommended:
 - `CONTACT_INBOX_EMAIL` — contact form destination (defaults to hello@dinaya.lk)
 - `PLATFORM_ADMIN_EMAILS` — comma-separated allowlist for `/admin`
 - `HEALTH_CHECK_SECRET` — dedicated secret for `/api/health/*` (falls back to `CRON_SECRET`)
-- AI workflows: `AI_PROVIDER`, `AI_API_KEY`, `AI_BASE_URL`, `AI_MODEL`, `ANTHROPIC_API_KEY`, `AI_REACTIVATION_DAYS`
+- AI workflows: `AI_PROVIDER=groq`, `GROQ_API_KEY`, `AI_BASE_URL`, `AI_MODEL`, `AI_REACTIVATION_DAYS`
 - WhatsApp/social publishing: `META_WHATSAPP_TOKEN`, `META_WHATSAPP_PHONE_NUMBER_ID`, `META_SOCIAL_ACCESS_TOKEN`, `META_SOCIAL_PAGE_ID`
 - Twilio WhatsApp fallback: `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_WHATSAPP_FROM`
 - SMS gateway: `SMS_HTTP_ENDPOINT`, `SMS_HTTP_API_KEY`, `SMS_HTTP_METHOD`, `SMS_HTTP_SENDER`
