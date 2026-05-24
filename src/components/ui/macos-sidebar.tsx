@@ -62,7 +62,7 @@ export function MacOSSidebar({
         animate={{ width: isOpen ? 240 : 64 }}
         transition={{ type: "spring", bounce: 0.4, duration: 0.8 }}
         className={cn(
-          "hidden lg:sticky lg:top-0 lg:flex lg:h-screen lg:max-h-screen p-2 shrink-0 flex-col items-start transition-colors duration-300 ease-out",
+          "hidden lg:flex lg:h-full lg:max-h-full p-2 shrink-0 flex-col items-start transition-colors duration-300 ease-out",
           isOpen ? "bg-neutral-100 dark:bg-neutral-800" : "bg-transparent",
         )}
         aria-label="Sidebar"
@@ -220,7 +220,7 @@ export function MacOSSidebar({
         ) : null}
       </motion.aside>
 
-      <div className="flex-1 min-w-0 flex flex-col h-full overflow-hidden">
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
         {children}
       </div>
     </div>
