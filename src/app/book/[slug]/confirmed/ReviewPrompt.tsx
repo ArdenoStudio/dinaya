@@ -1,15 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { Icon } from "@/components/ui/Icon";
 
 interface Props {
-  slug: string;
-  bookingId: string;
-  clientName: string;
+  reviewToken: string;
   businessName: string;
 }
 
-export default function ReviewPrompt({ slug, bookingId, clientName, businessName }: Props) {
+export default function ReviewPrompt({ reviewToken, businessName }: Props) {
   const [rating, setRating] = useState(0);
   const [hovered, setHovered] = useState(0);
   const [comment, setComment] = useState("");
@@ -22,10 +21,10 @@ export default function ReviewPrompt({ slug, bookingId, clientName, businessName
 
   if (done) {
     return (
-      <div className="bg-white border rounded-2xl p-6 text-center shadow-sm">
-        <i className="bi bi-stars text-2xl text-amber-400 mb-2 block" />
-        <p className="font-medium text-sm">Thanks for your review!</p>
-        <p className="text-xs text-muted-foreground mt-1">It helps others discover {businessName}.</p>
+      <div className="rounded-2xl border bg-white p-6 text-center shadow-sm">
+        <Icon name="stars" className="mb-2 block text-2xl text-amber-400" />
+        <p className="text-sm font-medium">Thanks for your review!</p>
+        <p className="mt-1 text-xs text-muted-foreground">It helps others discover {businessName}.</p>
       </div>
     );
   }
@@ -34,16 +33,16 @@ export default function ReviewPrompt({ slug, bookingId, clientName, businessName
     if (rating === 0) return;
     setSubmitting(true);
     setError("");
-    const res = await fetch(`/api/reviews/${slug}`, {
+    const res = await fetch("/api/reviews/signed", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ bookingId, clientName, rating, comment }),
+      body: JSON.stringify({ token: reviewToken, rating, comment }),
     });
     if (res.ok) {
       setDone(true);
     } else {
-      const d = await res.json();
-      setError(d.error ?? "Something went wrong.");
+      const data = await res.json().catch(() => ({})) as { error?: string };
+      setError(data.error ?? "Something went wrong.");
     }
     setSubmitting(false);
   }
@@ -51,22 +50,21 @@ export default function ReviewPrompt({ slug, bookingId, clientName, businessName
   const displayRating = hovered || rating;
 
   return (
-    <div className="bg-white border rounded-2xl p-6 shadow-sm">
-      <div className="flex items-start justify-between mb-3">
+    <div className="rounded-2xl border bg-white p-6 shadow-sm">
+      <div className="mb-3 flex items-start justify-between">
         <div>
-          <p className="font-medium text-sm">How was your experience?</p>
-          <p className="text-xs text-muted-foreground mt-0.5">Leave a quick review for {businessName}</p>
+          <p className="text-sm font-medium">How was your experience?</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">Leave a quick review for {businessName}</p>
         </div>
         <button
           onClick={() => setDismissed(true)}
-          className="text-muted-foreground hover:text-foreground transition-colors text-lg leading-none mt-0.5"
+          className="mt-0.5 text-lg leading-none text-muted-foreground transition-colors hover:text-foreground"
         >
-          <i className="bi bi-x" />
+          <Icon name="x-lg" />
         </button>
       </div>
 
-      {/* Stars */}
-      <div className="flex items-center gap-1 mb-4">
+      <div className="mb-4 flex items-center gap-1">
         {[1, 2, 3, 4, 5].map((n) => (
           <button
             key={n}
@@ -76,40 +74,39 @@ export default function ReviewPrompt({ slug, bookingId, clientName, businessName
             onMouseLeave={() => setHovered(0)}
             className="text-2xl transition-transform hover:scale-110"
           >
-            <i className={`bi ${n <= displayRating ? "bi-star-fill text-amber-400" : "bi-star text-gray-300"}`} />
+            <Icon name={n <= displayRating ? "star-fill" : "star"} className={n <= displayRating ? "text-amber-400" : "text-gray-300"} />
           </button>
         ))}
         {rating > 0 && (
-          <span className="text-xs text-muted-foreground ml-1">
+          <span className="ml-1 text-xs text-muted-foreground">
             {["", "Poor", "Fair", "Good", "Very good", "Excellent"][rating]}
           </span>
         )}
       </div>
 
-      {/* Comment */}
       {rating > 0 && (
         <textarea
           rows={3}
           value={comment}
           onChange={(e) => setComment(e.target.value)}
           placeholder="Share a few words about your experience (optional)…"
-          className="w-full border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 resize-none mb-3"
+          className="mb-3 w-full resize-none rounded-xl border px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
         />
       )}
 
-      {error && <p className="text-destructive text-xs mb-3">{error}</p>}
+      {error ? <p className="mb-3 text-xs text-destructive">{error}</p> : null}
 
       <div className="flex items-center gap-2">
         <button
           onClick={submit}
           disabled={rating === 0 || submitting}
-          className="flex-1 bg-primary text-primary-foreground py-2.5 rounded-xl text-sm font-medium hover:bg-primary/90 disabled:opacity-40 transition-colors"
+          className="flex-1 rounded-xl bg-primary py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-40"
         >
           {submitting ? "Submitting…" : "Submit review"}
         </button>
         <button
           onClick={() => setDismissed(true)}
-          className="px-4 py-2.5 rounded-xl border text-sm text-muted-foreground hover:text-foreground transition-colors"
+          className="rounded-xl border px-4 py-2.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           Skip
         </button>

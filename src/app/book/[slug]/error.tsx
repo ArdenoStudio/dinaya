@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect } from "react";
+import { Icon } from "@/components/ui/Icon";
 
 export default function BookingError({
   error,
@@ -19,7 +20,7 @@ export default function BookingError({
       <div className="text-center max-w-md">
         <div className="mb-4 flex justify-center">
           <div className="flex size-16 items-center justify-center rounded-full bg-red-100">
-            <i className="bi bi-calendar-x text-2xl text-red-600" aria-hidden="true" />
+            <Icon name="calendar-x" className="text-2xl text-red-600" aria-hidden="true" />
           </div>
         </div>
         <h2 className="mb-2 text-xl font-semibold">

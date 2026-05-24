@@ -7,7 +7,19 @@ import { requireApiBusiness } from "@/lib/api-auth";
 import { logActivity } from "@/lib/activity-log";
 import { encryptSecret } from "@/lib/secrets";
 import { syncBusinessPrimaryLocation } from "@/lib/locations";
+import { PlanRequiredError, requirePro } from "@/lib/plan";
+import { isPublicHttpsUrl, normalizePublicHttpsUrl } from "@/lib/public-url";
 import { z } from "@/lib/validation";
+
+const publicHttpsUrlSchema = z
+  .string()
+  .trim()
+  .max(500)
+  .optional()
+  .nullable()
+  .refine((value) => !value || isPublicHttpsUrl(value), {
+    message: "URL must be a public HTTPS link.",
+  });
 
 const settingsSchema = z.object({
   name: z.string().trim().min(1, "Business name is required.").max(100),
@@ -21,13 +33,14 @@ const settingsSchema = z.object({
   depositPolicy: z.string().trim().max(2000).optional().nullable(),
   bankTransferInstructions: z.string().trim().max(2000).optional().nullable(),
   lankaqrImageUrl: z.string().trim().max(1000).optional().nullable(),
-  instagramUrl: z.string().trim().max(500).optional().nullable(),
-  facebookUrl: z.string().trim().max(500).optional().nullable(),
-  websiteUrl: z.string().trim().max(500).optional().nullable(),
+  instagramUrl: publicHttpsUrlSchema,
+  facebookUrl: publicHttpsUrlSchema,
+  websiteUrl: publicHttpsUrlSchema,
   galleryImages: z.array(z.string().trim().max(1000)).max(12).optional().default([]),
   payhereEnabled: z.boolean().optional(),
   payhereMerchantId: z.string().trim().max(100).optional().nullable(),
   payhereMerchantSecret: z.string().trim().max(1000).optional().nullable(),
+  hideDinayaBranding: z.boolean().optional(),
 });
 
 export async function PATCH(req: NextRequest) {
@@ -58,10 +71,25 @@ export async function PATCH(req: NextRequest) {
     payhereEnabled,
     payhereMerchantId,
     payhereMerchantSecret,
+    hideDinayaBranding,
     phone,
     timezone,
     websiteUrl,
   } = parsed.data;
+
+  if (hideDinayaBranding === true) {
+    try {
+      await requirePro(context.businessId, "publicBookingPageCustomization");
+    } catch (error) {
+      if (error instanceof PlanRequiredError) {
+        return NextResponse.json(
+          { error: "Remove Dinaya branding is available on Pro." },
+          { status: 402 },
+        );
+      }
+      throw error;
+    }
+  }
 
   await db
     .update(businesses)
@@ -77,9 +105,9 @@ export async function PATCH(req: NextRequest) {
       depositPolicy: depositPolicy || null,
       bankTransferInstructions: bankTransferInstructions || null,
       lankaqrImageUrl: lankaqrImageUrl || null,
-      instagramUrl: instagramUrl || null,
-      facebookUrl: facebookUrl || null,
-      websiteUrl: websiteUrl || null,
+      instagramUrl: normalizePublicHttpsUrl(instagramUrl),
+      facebookUrl: normalizePublicHttpsUrl(facebookUrl),
+      websiteUrl: normalizePublicHttpsUrl(websiteUrl),
       galleryImages: Array.isArray(galleryImages) ? galleryImages.filter(Boolean) : null,
       ...(payhereEnabled !== undefined && { payhereEnabled: Boolean(payhereEnabled) }),
       ...(payhereMerchantId !== undefined && { payhereMerchantId: payhereMerchantId || null }),
@@ -88,6 +116,7 @@ export async function PATCH(req: NextRequest) {
           ? encryptSecret(payhereMerchantSecret)
           : null,
       }),
+      ...(hideDinayaBranding !== undefined && { hideDinayaBranding: Boolean(hideDinayaBranding) }),
     })
     .where(eq(businesses.id, context.businessId));
 

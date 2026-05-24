@@ -1,15 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/auth";
 import { db } from "@/db";
 import { services } from "@/db/schema";
 import { count, eq } from "drizzle-orm";
+import { requireApiBusiness } from "@/lib/api-auth";
 import { PlanLimitError, requirePlanLimit } from "@/lib/plan";
+import { serviceCreateSchema } from "@/lib/schemas/services";
 
 export async function GET() {
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const authResult = await requireApiBusiness();
+  if (!authResult.ok) return authResult.response;
+  const { businessId } = authResult.context;
 
-  const businessId = (session.user as { businessId: string }).businessId;
   const list = await db
     .select({
       id: services.id,
@@ -28,43 +29,50 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const authResult = await requireApiBusiness({ ownerOnly: true });
+  if (!authResult.ok) return authResult.response;
+  const { businessId } = authResult.context;
 
-  const businessId = (session.user as { businessId: string }).businessId;
-  const { name, description, durationMinutes, priceLkr, requiresPayment, depositPercent, beforeBuffer, afterBuffer, minimumNoticeHours, dailyCapacity } = await req.json();
-
-  if (!name || !durationMinutes) {
-    return NextResponse.json({ error: "Name and duration are required." }, { status: 400 });
+  const parsed = serviceCreateSchema.safeParse(await req.json());
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: "Please check the service details.", fieldErrors: parsed.error.flatten().fieldErrors },
+      { status: 400 },
+    );
   }
 
   const [{ value: serviceCount }] = await db
     .select({ value: count() })
     .from(services)
     .where(eq(services.businessId, businessId));
+
   try {
     await requirePlanLimit(businessId, "services", Number(serviceCount));
   } catch (error) {
     if (error instanceof PlanLimitError) {
-      return NextResponse.json({ error: "Free businesses can publish up to 5 services. Upgrade to Pro for unlimited services." }, { status: 402 });
+      return NextResponse.json(
+        { error: "Free businesses can publish up to 5 services. Upgrade to Pro for unlimited services." },
+        { status: 402 },
+      );
     }
     throw error;
   }
 
+  const data = parsed.data;
   const [service] = await db
     .insert(services)
     .values({
       businessId,
-      name,
-      description,
-      durationMinutes,
-      priceLkr: priceLkr ?? 0,
-      requiresPayment: !!requiresPayment,
-      depositPercent: Math.min(100, Math.max(0, Number(depositPercent) || 0)),
-      beforeBuffer: beforeBuffer ?? 0,
-      afterBuffer: afterBuffer ?? 0,
-      minimumNoticeHours: minimumNoticeHours ?? 0,
-      dailyCapacity: dailyCapacity ? parseInt(dailyCapacity) : null,
+      name: data.name,
+      description: data.description,
+      durationMinutes: data.durationMinutes,
+      priceLkr: data.priceLkr ?? 0,
+      requiresPayment: !!data.requiresPayment,
+      depositPercent: data.depositPercent ?? 0,
+      beforeBuffer: data.beforeBuffer ?? 0,
+      afterBuffer: data.afterBuffer ?? 0,
+      minimumNoticeHours: data.minimumNoticeHours ?? 0,
+      dailyCapacity: data.dailyCapacity ?? null,
     })
     .returning({ id: services.id });
 

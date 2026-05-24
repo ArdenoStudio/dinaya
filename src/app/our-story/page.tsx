@@ -4,6 +4,7 @@ import Image from "next/image";
 import { PublicNav } from "@/components/PublicNav";
 import { FadeContainer, FadeDiv, FadeSpan } from "@/components/Fade";
 import { LandingFooter } from "@/components/LandingFooter";
+import { Icon } from "@/components/ui/Icon";
 
 export const metadata: Metadata = {
   title: "Our Story — From WhatsApp Chaos to Dinaya | Dinaya",
@@ -13,17 +14,17 @@ export const metadata: Metadata = {
 
 const problems = [
   {
-    icon: "bi-chat-square-dots",
+    icon: "chat-square-dots",
     title: "Inbox overload",
     desc: "Every booking is a thread. Confirm the time, re-confirm the date, follow up again when they go quiet.",
   },
   {
-    icon: "bi-x-circle",
+    icon: "x-circle",
     title: "No-shows with no warning",
     desc: "No deposit, no system, no recourse. Clients forget and you're left with an empty slot and lost income.",
   },
   {
-    icon: "bi-journal-x",
+    icon: "journal-x",
     title: "Scheduling by notebook",
     desc: "Paper diaries, voice notes, and memory. One mix-up means a double booking and an uncomfortable conversation.",
   },
@@ -85,11 +86,11 @@ export default function OurStoryPage() {
       <PublicNav />
 
       {/* Hero */}
-      <section className="max-w-4xl mx-auto px-6 pt-20 pb-16 text-center">
+      <section className="max-w-4xl mx-auto px-6 public-page-offset pb-16 text-center">
         <FadeContainer className="flex flex-col items-center">
           <FadeDiv className="mb-6">
             <span className="inline-flex items-center gap-2 rounded-full border bg-white px-3 py-1 text-xs font-medium text-gray-700 shadow-sm">
-              <i className="bi bi-heart-fill text-xs text-primary" />
+              <Icon name="heart-fill" className="text-xs text-primary" />
               Our story
             </span>
           </FadeDiv>
@@ -126,7 +127,7 @@ export default function OurStoryPage() {
             <div key={p.title} className="bg-white p-8 hover:bg-gray-50/60 transition-colors">
               <div className="mb-5 inline-flex">
                 <div className="flex items-center justify-center size-11 rounded-xl bg-gray-100 text-gray-500">
-                  <i className={`bi ${p.icon} text-[1.1rem]`} />
+                  <Icon name={p.icon} className="text-[1.1rem]" />
                 </div>
               </div>
               <h3 className="font-cal text-lg tracking-tight mb-2">{p.title}</h3>
@@ -304,7 +305,7 @@ export default function OurStoryPage() {
                   className="inline-flex items-center gap-2 bg-white text-blue-700 px-7 py-3.5 rounded-xl font-semibold shadow-lg hover:bg-white/95 transition-colors"
                 >
                   Create your page — it&apos;s free
-                  <i className="bi bi-arrow-right text-sm" />
+                  <Icon name="arrow-right" className="text-sm" />
                 </Link>
                 <Link
                   href="/about"

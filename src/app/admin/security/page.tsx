@@ -29,6 +29,31 @@ const ACTION_META: Record<
     icon: Megaphone,
     tone: "bg-muted text-muted-foreground",
   },
+  "support.impersonate": {
+    label: "User impersonation",
+    icon: ShieldCheck,
+    tone: "bg-violet-500/15 text-violet-700",
+  },
+  "support.refund_payment": {
+    label: "Payment refund",
+    icon: KeyRound,
+    tone: "bg-amber-500/15 text-amber-700",
+  },
+  "support.replay_webhook": {
+    label: "Webhook replay",
+    icon: Activity,
+    tone: "bg-primary/10 text-primary",
+  },
+  "plans.updated": {
+    label: "Plans updated",
+    icon: ShieldCheck,
+    tone: "bg-primary/10 text-primary",
+  },
+  "plans.reset_to_defaults": {
+    label: "Plans reset",
+    icon: ShieldCheck,
+    tone: "bg-muted text-muted-foreground",
+  },
 };
 
 export default async function AdminSecurityPage() {
@@ -56,8 +81,8 @@ export default async function AdminSecurityPage() {
       <div>
         <h1 className="font-cal text-3xl tracking-tight">Security</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Every action a platform admin takes is recorded here. Log is stored at{" "}
-          <code className="rounded bg-muted px-1 text-xs">.dinaya/admin-audit.log.jsonl</code>.
+          Every action a platform admin takes is recorded here. Events are stored in Postgres with a
+          local JSONL fallback for development.
         </p>
       </div>
 

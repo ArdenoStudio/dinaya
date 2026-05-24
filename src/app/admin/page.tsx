@@ -4,18 +4,11 @@ import { format, subDays } from "date-fns";
 import { ArrowUpRight, Building2, CalendarCheck, CreditCard, TrendingUp, UserPlus, Users } from "lucide-react";
 import { db } from "@/db";
 import { activityLog, bookings, businesses, payments, subscriptions, users } from "@/db/schema";
+import { safeAdminQuery } from "@/lib/admin-db";
 import { formatLkr } from "@/lib/utils";
 import { requirePlatformAdmin } from "@/lib/platform-admin";
 
 export const dynamic = "force-dynamic";
-
-async function safe<T>(q: Promise<T>, fallback: T): Promise<T> {
-  try {
-    return await q;
-  } catch {
-    return fallback;
-  }
-}
 
 export default async function AdminOverviewPage() {
   await requirePlatformAdmin();
@@ -41,38 +34,38 @@ export default async function AdminOverviewPage() {
     recentSignups,
     recentActivity,
   ] = await Promise.all([
-    safe(db.select({ totalAccounts: count() }).from(businesses), [{ totalAccounts: 0 }] as { totalAccounts: number }[]),
-    safe(
+    safeAdminQuery(db.select({ totalAccounts: count() }).from(businesses), [{ totalAccounts: 0 }] as { totalAccounts: number }[]),
+    safeAdminQuery(
       db.select({ proAccounts: count() }).from(businesses).where(eq(businesses.plan, "pro")),
       [{ proAccounts: 0 }] as { proAccounts: number }[]
     ),
-    safe(
+    safeAdminQuery(
       db.select({ newAccounts30: count() }).from(businesses).where(gte(businesses.createdAt, last30)),
       [{ newAccounts30: 0 }] as { newAccounts30: number }[]
     ),
-    safe(
+    safeAdminQuery(
       db
         .select({ newAccounts60to30: count() })
         .from(businesses)
         .where(and(gte(businesses.createdAt, last60), sql`${businesses.createdAt} < ${last30}`)),
       [{ newAccounts60to30: 0 }] as { newAccounts60to30: number }[]
     ),
-    safe(
+    safeAdminQuery(
       db.select({ activeSubs: count() }).from(subscriptions).where(eq(subscriptions.status, "active")),
       [{ activeSubs: 0 }] as { activeSubs: number }[]
     ),
-    safe(
+    safeAdminQuery(
       db.select({ pastDueSubs: count() }).from(subscriptions).where(eq(subscriptions.status, "past_due")),
       [{ pastDueSubs: 0 }] as { pastDueSubs: number }[]
     ),
-    safe(
+    safeAdminQuery(
       db
         .select({ cancelledSubs30: count() })
         .from(subscriptions)
         .where(and(eq(subscriptions.status, "cancelled"), gte(subscriptions.cancelledAt, last30))),
       [{ cancelledSubs30: 0 }] as { cancelledSubs30: number }[]
     ),
-    safe(
+    safeAdminQuery(
       db
         .select({
           mrrLkr: sql<number>`coalesce(sum(${subscriptions.amountLkr}), 0)::int`,
@@ -81,26 +74,26 @@ export default async function AdminOverviewPage() {
         .where(eq(subscriptions.status, "active")),
       [{ mrrLkr: 0 }] as { mrrLkr: number }[]
     ),
-    safe(db.select({ totalUsers: count() }).from(users), [{ totalUsers: 0 }] as { totalUsers: number }[]),
-    safe(
+    safeAdminQuery(db.select({ totalUsers: count() }).from(users), [{ totalUsers: 0 }] as { totalUsers: number }[]),
+    safeAdminQuery(
       db.select({ bookings30: count() }).from(bookings).where(gte(bookings.createdAt, last30)),
       [{ bookings30: 0 }] as { bookings30: number }[]
     ),
-    safe(
+    safeAdminQuery(
       db
         .select({ bookings60to30: count() })
         .from(bookings)
         .where(and(gte(bookings.createdAt, last60), sql`${bookings.createdAt} < ${last30}`)),
       [{ bookings60to30: 0 }] as { bookings60to30: number }[]
     ),
-    safe(
+    safeAdminQuery(
       db
         .select({ gmv30: sql<number>`coalesce(sum(${payments.amountLkr}), 0)::int` })
         .from(payments)
         .where(and(eq(payments.status, "success"), gte(payments.createdAt, last30))),
       [{ gmv30: 0 }] as { gmv30: number }[]
     ),
-    safe(
+    safeAdminQuery(
       db
         .select({
           id: businesses.id,
@@ -116,7 +109,7 @@ export default async function AdminOverviewPage() {
         .limit(6),
       [] as { id: string; name: string; slug: string; plan: "free" | "pro"; bookingCount: number }[]
     ),
-    safe(
+    safeAdminQuery(
       db
         .select({
           id: businesses.id,
@@ -130,7 +123,7 @@ export default async function AdminOverviewPage() {
         .limit(5),
       [] as { id: string; name: string; slug: string; plan: "free" | "pro"; createdAt: Date }[]
     ),
-    safe(
+    safeAdminQuery(
       db
         .select({
           businessName: businesses.name,

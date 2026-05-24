@@ -9,12 +9,16 @@ declare module "next-auth" {
       id: string;
       businessId: string;
       role: UserRole;
+      impersonatedBy?: string;
+      readOnlyImpersonation?: boolean;
     } & DefaultSession["user"];
   }
 
   interface User {
     businessId: string;
     role: UserRole;
+    impersonatedBy?: string;
+    readOnlyImpersonation?: boolean;
   }
 }
 
@@ -22,5 +26,7 @@ declare module "next-auth/jwt" {
   interface JWT {
     businessId?: string;
     role?: UserRole;
+    impersonatedBy?: string;
+    readOnlyImpersonation?: boolean;
   }
 }

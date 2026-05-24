@@ -3,6 +3,7 @@ import Link from "next/link";
 import { FadeContainer, FadeDiv, FadeSpan } from "@/components/Fade";
 import { PublicNav } from "@/components/PublicNav";
 import { LandingFooter } from "@/components/LandingFooter";
+import { Icon } from "@/components/ui/Icon";
 
 export const metadata: Metadata = {
   title: "Solutions — Salons, Clinics, Tutors & More | Dinaya",
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
 const industries = [
   {
     id: "salons",
-    icon: "bi-scissors",
+    icon: "scissors",
     color: {
       bg: "bg-amber-500",
       light: "bg-amber-50/50",
@@ -30,22 +31,22 @@ const industries = [
     pain: "Running a salon means your hands are always busy. Taking bookings by phone while a client is in your chair, managing last-minute cancellations via WhatsApp at 11pm — it's exhausting and unprofessional.",
     features: [
       {
-        icon: "bi-link-45deg",
+        icon: "link-45deg",
         title: "Booking page in minutes",
         desc: "List all your services with prices and duration. Clients pick what they want, choose a time, and confirm. No back and forth.",
       },
       {
-        icon: "bi-credit-card",
+        icon: "credit-card",
         title: "Deposits stop no-shows",
         desc: "Require a small deposit to hold a slot. Clients who pay show up. Empty chairs cost you money — deposits prevent them.",
       },
       {
-        icon: "bi-bell",
+        icon: "bell",
         title: "Automatic reminders",
         desc: "SMS and email reminders go out before every appointment. You never have to chase a client again.",
       },
       {
-        icon: "bi-people",
+        icon: "people",
         title: "Manage your whole team",
         desc: "Each stylist gets their own schedule. Clients book with their preferred person. You see everything from one dashboard.",
       },
@@ -57,7 +58,7 @@ const industries = [
   },
   {
     id: "clinics",
-    icon: "bi-heart-pulse",
+    icon: "heart-pulse",
     color: {
       bg: "bg-violet-500",
       light: "bg-violet-50/50",
@@ -74,22 +75,22 @@ const industries = [
     pain: "Clinic receptionists spend hours on the phone confirming, rescheduling, and chasing patients who forget their appointments. That time should go toward care, not coordination.",
     features: [
       {
-        icon: "bi-calendar",
+        icon: "calendar",
         title: "24/7 self-booking",
         desc: "Patients book when it suits them — evenings, weekends, whenever. You wake up to a full calendar, not a voicemail inbox.",
       },
       {
-        icon: "bi-clock",
+        icon: "clock",
         title: "Buffer time between sessions",
         desc: "Add automatic gaps between appointments for notes, cleanup, or prep. No more running behind from the first hour.",
       },
       {
-        icon: "bi-chat-square-text",
+        icon: "chat-square-text",
         title: "Confirmation & reminders",
         desc: "Every booking triggers an instant confirmation. A reminder goes out the day before. Fewer missed appointments, automatically.",
       },
       {
-        icon: "bi-bar-chart",
+        icon: "bar-chart",
         title: "Revenue & booking reports",
         desc: "See which services fill up fastest, track revenue by week, and spot quiet periods to run promotions — all from your dashboard.",
       },
@@ -101,7 +102,7 @@ const industries = [
   },
   {
     id: "tuition",
-    icon: "bi-mortarboard",
+    icon: "mortarboard",
     color: {
       bg: "bg-indigo-500",
       light: "bg-indigo-50/50",
@@ -118,22 +119,22 @@ const industries = [
     pain: "Managing a tuition class means handling a dozen parent chats, remembering who paid this week, and juggling reschedules every time there's a holiday. There's a better way.",
     features: [
       {
-        icon: "bi-people",
+        icon: "people",
         title: "Per-student scheduling",
         desc: "Each student or class gets its own slot. Parents see exactly what's available and book without needing to message you.",
       },
       {
-        icon: "bi-credit-card",
+        icon: "credit-card",
         title: "Collect fees upfront",
         desc: "Require full payment at booking. No more chasing parents for the monthly fee — it's handled before the lesson starts.",
       },
       {
-        icon: "bi-bell",
+        icon: "bell",
         title: "Reminders for parents",
         desc: "Automated SMS reminders go to parents before each session. Fewer last-minute 'oh we forgot' cancellations.",
       },
       {
-        icon: "bi-calendar",
+        icon: "calendar",
         title: "Block out holidays easily",
         desc: "Mark term breaks and public holidays in seconds. Your booking page updates automatically — no parent questions needed.",
       },
@@ -145,7 +146,7 @@ const industries = [
   },
   {
     id: "freelancers",
-    icon: "bi-briefcase",
+    icon: "briefcase",
     color: {
       bg: "bg-sky-500",
       light: "bg-sky-50/50",
@@ -162,22 +163,22 @@ const industries = [
     pain: "Freelancers lose hours every week to discovery calls that go nowhere, clients who reschedule at the last minute, and chasing invoices after the work is done.",
     features: [
       {
-        icon: "bi-link-45deg",
+        icon: "link-45deg",
         title: "One link for everything",
         desc: "Share your dinaya.lk page in your email signature, LinkedIn, and Instagram. Clients see your services, rates, and availability in one place.",
       },
       {
-        icon: "bi-credit-card",
+        icon: "credit-card",
         title: "Get paid before you show up",
         desc: "Require a deposit or full payment at booking. Only serious clients make it to the call — time-wasters don't bother paying.",
       },
       {
-        icon: "bi-clock",
+        icon: "clock",
         title: "Set your own hours",
         desc: "Block off focused work time, personal days, and holidays. Your booking page only shows when you actually want to be available.",
       },
       {
-        icon: "bi-chat-square-text",
+        icon: "chat-square-text",
         title: "Automated confirmations",
         desc: "Every booked session gets a confirmation with all the details. You never have to send a calendar invite or follow-up message manually.",
       },
@@ -195,7 +196,7 @@ export default function SolutionsPage() {
       <PublicNav />
 
       {/* Hero */}
-      <section className="max-w-4xl mx-auto px-6 pt-20 pb-16 text-center">
+      <section className="max-w-4xl mx-auto px-6 public-page-offset pb-16 text-center">
         <FadeContainer className="flex flex-col items-center">
           <FadeDiv className="mb-6">
             <span className="inline-flex items-center gap-2 rounded-full border bg-white px-3 py-1 text-xs font-medium text-gray-700 shadow-sm">
@@ -225,7 +226,7 @@ export default function SolutionsPage() {
                   className="inline-flex items-center gap-2 rounded-full border bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:shadow-md hover:border-gray-300 transition-all"
                 >
                   <span className={`flex h-5 w-5 items-center justify-center rounded-md ${ind.color.bg} text-white`}>
-                    <i className={`bi ${ind.icon} text-[10px]`} />
+                    <Icon name={ind.icon} className="text-[10px]" />
                   </span>
                   {ind.label}
                 </a>
@@ -248,7 +249,7 @@ export default function SolutionsPage() {
             <div className="max-w-2xl mb-12">
               <div className={`inline-flex items-center gap-2 rounded-xl ring-1 ${ind.color.ring} ${ind.color.light} px-3.5 py-2 mb-5`}>
                 <span className={`flex h-6 w-6 items-center justify-center rounded-md ${ind.color.bg} text-white`}>
-                  <i className={`bi ${ind.icon} text-xs`} />
+                  <Icon name={ind.icon} className="text-xs" />
                 </span>
                 <span className="text-sm font-semibold text-gray-900">{ind.label}</span>
               </div>
@@ -274,7 +275,7 @@ export default function SolutionsPage() {
                   <div className="relative mb-5 inline-flex">
                     <div className={`absolute inset-0 rounded-xl ${ind.color.glow} blur-md opacity-0 group-hover:opacity-100 transition-opacity`} />
                     <div className={`relative flex items-center justify-center w-11 h-11 rounded-xl ${ind.color.iconBg}`}>
-                      <i className={`bi ${f.icon} text-[1.15rem] ${ind.color.text}`} />
+                      <Icon name={f.icon} className={`text-[1.15rem] ${ind.color.text}`} />
                     </div>
                   </div>
                   <h3 className="font-semibold text-sm mb-2">{f.title}</h3>
@@ -307,7 +308,7 @@ export default function SolutionsPage() {
                   <ul className="space-y-1.5 mb-5">
                     {["Free to start", "Live in 5 minutes", "No credit card"].map((item) => (
                       <li key={item} className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <i className="bi bi-check text-xs text-primary shrink-0" />
+                        <Icon name="check" className="text-xs text-primary shrink-0" />
                         {item}
                       </li>
                     ))}
@@ -318,7 +319,7 @@ export default function SolutionsPage() {
                   className="inline-flex items-center justify-center gap-2 bg-gradient-to-b from-primary/90 to-primary text-primary-foreground px-4 py-2.5 rounded-lg text-sm font-medium border-b-2 border-primary/70 shadow-sm transition-all hover:shadow-primary/30 hover:shadow-md"
                 >
                   Create your page
-                  <i className="bi bi-arrow-right text-sm" />
+                  <Icon name="arrow-right" className="text-sm" />
                 </Link>
               </div>
             </div>
@@ -365,7 +366,7 @@ export default function SolutionsPage() {
                 className="inline-flex items-center gap-2 bg-white text-blue-700 px-7 py-3.5 rounded-xl font-semibold shadow-lg hover:bg-white/95 transition-colors"
               >
                 Create your page — it&apos;s free
-                <i className="bi bi-arrow-right text-sm" />
+                <Icon name="arrow-right" className="text-sm" />
               </Link>
             </div>
           </div>

@@ -1,17 +1,24 @@
 import { db } from "@/db";
-import { businesses } from "@/db/schema";
-import { requireBusiness } from "@/lib/auth";
-import { eq } from "drizzle-orm";
+import { bookings, businesses } from "@/db/schema";
+import { requireOwner } from "@/lib/auth";
+import { and, count, eq } from "drizzle-orm";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
+import { DirectorySettings } from "@/components/dashboard/DirectorySettings";
+import { ReferralSettings } from "@/components/dashboard/ReferralSettings";
+import { buildPublicBookingUrl, getAppBaseUrl } from "@/lib/booking-url";
 
 export default async function MarketingPage() {
-  const { businessId } = await requireBusiness();
+  const { businessId } = await requireOwner();
   const [business] = await db
     .select({
       name: businesses.name,
       slug: businesses.slug,
       description: businesses.description,
+      customDomain: businesses.customDomain,
+      customDomainVerified: businesses.customDomainVerified,
+      referralCode: businesses.referralCode,
     })
     .from(businesses)
     .where(eq(businesses.id, businessId))
@@ -19,17 +26,26 @@ export default async function MarketingPage() {
 
   if (!business) notFound();
 
-  const appDomain = process.env.NEXT_PUBLIC_APP_DOMAIN ?? "localhost:3000";
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-  const bookingUrl = appDomain === "dinaya.lk"
-    ? `https://${business.slug}.dinaya.lk`
-    : `${appUrl}/book/${business.slug}`;
+  const [{ referralBookings }] = await db
+    .select({ referralBookings: count() })
+    .from(bookings)
+    .where(and(eq(bookings.businessId, businessId), eq(bookings.source, "referral")));
+
+  const referralCode = business.referralCode ?? business.slug;
+
+  const bookingUrl = buildPublicBookingUrl({
+    slug: business.slug,
+    customDomain: business.customDomain,
+    customDomainVerified: business.customDomainVerified,
+  });
   const encodedUrl = encodeURIComponent(bookingUrl);
   const qrPng = `https://api.qrserver.com/v1/create-qr-code/?size=1024x1024&format=png&data=${encodedUrl}`;
   const qrSvg = `https://api.qrserver.com/v1/create-qr-code/?size=1024x1024&format=svg&data=${encodedUrl}`;
   const whatsappSnippet = `Book your appointment online with ${business.name}: ${bookingUrl}`;
   const instagramSnippet = `${business.name} bookings are open. Tap the link in bio: ${bookingUrl}`;
   const embedSnippet = `<iframe src="${bookingUrl}" width="100%" height="720" style="border:0;border-radius:8px"></iframe>`;
+  const reviewsEmbedUrl = `${getAppBaseUrl().replace(/\/$/, "")}/embed/reviews/${business.slug}`;
+  const reviewsEmbedSnippet = `<iframe src="${reviewsEmbedUrl}" width="100%" height="420" style="border:0;border-radius:8px"></iframe>`;
 
   return (
     <div className="space-y-6">
@@ -50,6 +66,17 @@ export default async function MarketingPage() {
 
       <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
         <div className="space-y-6">
+          <DirectorySettings />
+
+          <ReferralSettings
+            businessName={business.name}
+            slug={business.slug}
+            referralCode={referralCode}
+            customDomain={business.customDomain}
+            customDomainVerified={Boolean(business.customDomainVerified)}
+            referralBookings={Number(referralBookings ?? 0)}
+          />
+
           <div className="rounded-xl border bg-white p-5">
             <h2 className="mb-3 font-semibold">Share tools</h2>
             <code className="block truncate rounded-md border bg-muted/30 px-3 py-2 text-sm text-primary">
@@ -65,8 +92,13 @@ export default async function MarketingPage() {
 
           <div className="rounded-xl border bg-white p-5">
             <h2 className="mb-3 font-semibold">QR poster</h2>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={qrPng} alt="Booking page QR code" className="mx-auto size-52 rounded-lg border p-3" />
+            <Image
+              src={qrPng}
+              alt="Booking page QR code"
+              width={208}
+              height={208}
+              className="mx-auto size-52 rounded-lg border p-3"
+            />
             <p className="mt-3 text-center text-xs text-muted-foreground">
               Add this to your counter, Instagram story, or printed price list.
             </p>
@@ -80,6 +112,8 @@ export default async function MarketingPage() {
             <textarea readOnly value={instagramSnippet} className="mt-1 h-20 w-full resize-none rounded-md border p-2 text-sm" />
             <label className="mt-4 block text-xs font-medium text-muted-foreground">Website embed</label>
             <textarea readOnly value={embedSnippet} className="mt-1 h-24 w-full resize-none rounded-md border p-2 font-mono text-xs" />
+            <label className="mt-4 block text-xs font-medium text-muted-foreground">Reviews widget embed</label>
+            <textarea readOnly value={reviewsEmbedSnippet} className="mt-1 h-24 w-full resize-none rounded-md border p-2 font-mono text-xs" />
           </div>
         </div>
 

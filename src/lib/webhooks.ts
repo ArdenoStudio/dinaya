@@ -2,6 +2,7 @@ import { db } from "@/db";
 import { webhookDeliveries, webhooks } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import crypto from "crypto";
+import { isSafeWebhookDestination } from "@/lib/webhook-url";
 
 export type WebhookEvent =
   | "booking.created"
@@ -19,6 +20,34 @@ export interface WebhookPayload {
 
 function sign(secret: string, body: string): string {
   return crypto.createHmac("sha256", secret).update(body).digest("hex");
+}
+
+const WEBHOOK_DELIVERY_CONCURRENCY = 5;
+const UNSAFE_WEBHOOK_DESTINATION_ERROR = "Webhook URL must resolve to a public HTTPS endpoint.";
+
+async function forEachWithConcurrency<T>(
+  items: T[],
+  limit: number,
+  worker: (item: T) => Promise<void>,
+): Promise<void> {
+  const executing = new Set<Promise<void>>();
+
+  for (const item of items) {
+    const promise = worker(item)
+      .catch((error) => {
+        console.error("[webhooks] delivery worker failed", error);
+      })
+      .finally(() => {
+        executing.delete(promise);
+      });
+    executing.add(promise);
+
+    if (executing.size >= limit) {
+      await Promise.race(executing);
+    }
+  }
+
+  await Promise.allSettled(executing);
 }
 
 export async function dispatchWebhooks(
@@ -42,8 +71,10 @@ export async function dispatchWebhooks(
   };
   const body = JSON.stringify(payload);
 
-  await Promise.allSettled(
-    listeners.map(async (hook) => {
+  await forEachWithConcurrency(
+    listeners,
+    WEBHOOK_DELIVERY_CONCURRENCY,
+    async (hook) => {
       const headers: Record<string, string> = {
         "Content-Type": "application/json",
         "X-Dinaya-Event": event,
@@ -60,20 +91,31 @@ export async function dispatchWebhooks(
       };
 
       try {
+        if (!(await isSafeWebhookDestination(hook.url))) {
+          throw new Error(UNSAFE_WEBHOOK_DESTINATION_ERROR);
+        }
+
         const response = await fetch(hook.url, { method: "POST", headers, body, signal: AbortSignal.timeout(10_000) });
         await db.insert(webhookDeliveries).values({
           ...deliveryBase,
           status: response.ok ? "success" : "failed",
           statusCode: response.status,
           responseBody: await response.text().catch(() => null),
+          attempts: 1,
+          nextAttemptAt: response.ok ? null : new Date(Date.now() + 15 * 60 * 1000),
+          error: response.ok ? null : `HTTP ${response.status}`,
         });
       } catch (error) {
+        const message = error instanceof Error ? error.message : "Webhook delivery failed";
         await db.insert(webhookDeliveries).values({
           ...deliveryBase,
           status: "failed",
-          error: error instanceof Error ? error.message : "Webhook delivery failed",
+          attempts: 1,
+          nextAttemptAt:
+            message === UNSAFE_WEBHOOK_DESTINATION_ERROR ? null : new Date(Date.now() + 15 * 60 * 1000),
+          error: message,
         });
       }
-    })
+    },
   );
 }

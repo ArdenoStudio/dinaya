@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { Icon } from "@/components/ui/Icon";
 
 export default function MarketingError({
   error,
@@ -18,7 +19,7 @@ export default function MarketingError({
       <div className="text-center">
         <div className="mb-4 flex justify-center">
           <div className="flex size-16 items-center justify-center rounded-full bg-red-100">
-            <i className="bi bi-exclamation-triangle text-2xl text-red-600" aria-hidden="true" />
+            <Icon name="exclamation-triangle" className="text-2xl text-red-600" aria-hidden="true" />
           </div>
         </div>
         <h2 className="mb-2 text-xl font-semibold text-foreground">

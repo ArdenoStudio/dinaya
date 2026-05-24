@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import localFont from "next/font/local";
 import { Analytics } from "@vercel/analytics/next";
+import { AuthProvider } from "@/components/AuthProvider";
+import { NavProvider } from "@/context/NavContext";
 import "./globals.css";
-import "bootstrap-icons/font/bootstrap-icons.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
@@ -33,9 +34,13 @@ export default function RootLayout({
         >
           Skip to main content
         </a>
-        <main id="main-content">
-          {children}
-        </main>
+        <AuthProvider>
+          <NavProvider>
+            <main id="main-content">
+              {children}
+            </main>
+          </NavProvider>
+        </AuthProvider>
         <Analytics />
       </body>
     </html>

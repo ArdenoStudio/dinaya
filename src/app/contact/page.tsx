@@ -5,10 +5,11 @@ import { useState } from "react";
 import { PublicNav } from "@/components/PublicNav";
 import { FadeContainer, FadeDiv, FadeSpan } from "@/components/Fade";
 import { LandingFooter } from "@/components/LandingFooter";
+import { Icon } from "@/components/ui/Icon";
 
 const channels = [
   {
-    icon: "bi-envelope-fill",
+    icon: "envelope-fill",
     color: "bg-blue-600",
     label: "Email us",
     value: "hello@dinaya.lk",
@@ -16,7 +17,7 @@ const channels = [
     href: "mailto:hello@dinaya.lk",
   },
   {
-    icon: "bi-whatsapp",
+    icon: "whatsapp",
     color: "bg-amber-500",
     label: "WhatsApp",
     value: "+94 77 000 0000",
@@ -24,7 +25,7 @@ const channels = [
     href: "https://wa.me/94770000000",
   },
   {
-    icon: "bi-geo-alt-fill",
+    icon: "geo-alt-fill",
     color: "bg-violet-500",
     label: "Based in",
     value: "Colombo, Sri Lanka",
@@ -65,9 +66,20 @@ export default function ContactPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setStatus("sending");
-    // Simulate async — wire up a real API route or service here
-    await new Promise((r) => setTimeout(r, 900));
-    setStatus("sent");
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) {
+        setStatus("error");
+        return;
+      }
+      setStatus("sent");
+    } catch {
+      setStatus("error");
+    }
   }
 
   return (
@@ -75,11 +87,11 @@ export default function ContactPage() {
       <PublicNav />
 
       {/* Hero */}
-      <section className="max-w-4xl mx-auto px-6 pt-20 pb-16 text-center">
+      <section className="max-w-4xl mx-auto px-6 public-page-offset pb-16 text-center">
         <FadeContainer className="flex flex-col items-center">
           <FadeDiv className="mb-6">
             <span className="inline-flex items-center gap-2 rounded-full border bg-white px-3 py-1 text-xs font-medium text-gray-700 shadow-sm">
-              <i className="bi bi-chat-dots-fill text-xs text-primary" />
+              <Icon name="chat-dots-fill" className="text-xs text-primary" />
               Get in touch
             </span>
           </FadeDiv>
@@ -104,7 +116,7 @@ export default function ContactPage() {
           {channels.map((c) => (
             <div key={c.label} className="group p-8 bg-white hover:bg-gray-50/60 transition-colors">
               <div className={`inline-flex items-center justify-center size-11 rounded-xl ${c.color} text-white mb-5`}>
-                <i className={`bi ${c.icon} text-[1.1rem]`} />
+                <Icon name={c.icon} className="text-[1.1rem]" />
               </div>
               <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-1">{c.label}</p>
               {c.href ? (
@@ -140,7 +152,7 @@ export default function ContactPage() {
             {status === "sent" ? (
               <div className="rounded-2xl border border-blue-100 bg-blue-50/60 p-10 text-center flex flex-col items-center gap-4">
                 <div className="flex items-center justify-center size-14 rounded-full bg-blue-600 text-white">
-                  <i className="bi bi-check-lg text-2xl" />
+                  <Icon name="check-lg" className="text-2xl" />
                 </div>
                 <div>
                   <p className="font-cal text-xl tracking-tight mb-1">Message sent!</p>
@@ -226,13 +238,13 @@ export default function ContactPage() {
                 >
                   {status === "sending" ? (
                     <>
-                      <i className="bi bi-arrow-repeat animate-spin text-sm" />
+                      <Icon name="arrow-repeat" className="animate-spin text-sm" />
                       Sending…
                     </>
                   ) : (
                     <>
                       Send message
-                      <i className="bi bi-arrow-right text-sm" />
+                      <Icon name="arrow-right" className="text-sm" />
                     </>
                   )}
                 </button>
@@ -261,7 +273,7 @@ export default function ContactPage() {
 
             <div className="mt-6 rounded-xl border border-amber-100 bg-amber-50/50 p-5 flex items-start gap-4">
               <div className="flex-shrink-0 flex items-center justify-center size-9 rounded-lg bg-amber-500 text-white mt-0.5">
-                <i className="bi bi-book text-sm" />
+                <Icon name="book" className="text-sm" />
               </div>
               <div>
                 <p className="text-sm font-semibold text-foreground mb-0.5">Help centre</p>
@@ -296,7 +308,7 @@ export default function ContactPage() {
                   className="inline-flex items-center gap-2 bg-white text-blue-700 px-7 py-3.5 rounded-xl font-semibold shadow-lg hover:bg-white/95 transition-colors"
                 >
                   Create your page — it&apos;s free
-                  <i className="bi bi-arrow-right text-sm" />
+                  <Icon name="arrow-right" className="text-sm" />
                 </Link>
                 <Link
                   href="/features"

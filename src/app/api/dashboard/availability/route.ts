@@ -1,14 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/auth";
+import { requireApiBusiness } from "@/lib/api-auth";
 import { db } from "@/db";
 import { availability, staff } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
+import { withDashboardRateLimit } from "@/lib/rate-limit";
+import { z } from "@/lib/validation";
 
-type AvailabilityInput = { dayOfWeek: number; startTime: string; endTime: string };
+const availabilityRowSchema = z.object({
+  dayOfWeek: z.number().int().min(0).max(6),
+  startTime: z.string().trim().min(1).max(8),
+  endTime: z.string().trim().min(1).max(8),
+});
+
+const availabilityPostSchema = z.object({
+  staffId: z.uuid(),
+  rows: z.array(availabilityRowSchema).default([]),
+});
+
+type AvailabilityInput = z.infer<typeof availabilityRowSchema>;
 
 function validateAvailabilityRows(rows: AvailabilityInput[]): string | null {
   for (const row of rows) {
-    if (row.dayOfWeek < 0 || row.dayOfWeek > 6 || row.startTime >= row.endTime) {
+    if (row.startTime >= row.endTime) {
       return "Availability contains an invalid day or time range.";
     }
   }
@@ -28,13 +41,12 @@ function validateAvailabilityRows(rows: AvailabilityInput[]): string | null {
 }
 
 export async function GET(req: NextRequest) {
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const authResult = await requireApiBusiness();
+  if (!authResult.ok) return authResult.response;
+  const { businessId } = authResult.context;
 
   const staffId = req.nextUrl.searchParams.get("staffId");
   if (!staffId) return NextResponse.json({ error: "staffId required" }, { status: 400 });
-
-  const businessId = (session.user as { businessId: string }).businessId;
 
   // Verify staff belongs to this business
   const [member] = await db
@@ -50,13 +62,19 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const authResult = await requireApiBusiness();
+  if (!authResult.ok) return authResult.response;
+  const { businessId } = authResult.context;
 
-  const businessId = (session.user as { businessId: string }).businessId;
-  const { staffId, rows } = await req.json() as { staffId?: string; rows?: AvailabilityInput[] };
+  const rateLimit = await withDashboardRateLimit(req, businessId);
+  if (!rateLimit.ok) return rateLimit.response;
 
-  if (!staffId) return NextResponse.json({ error: "staffId required" }, { status: 400 });
+  const parsed = availabilityPostSchema.safeParse(await req.json());
+  if (!parsed.success) {
+    return NextResponse.json({ error: "Invalid availability payload." }, { status: 400 });
+  }
+
+  const { staffId, rows } = parsed.data;
 
   // Verify ownership
   const [member] = await db
@@ -67,8 +85,7 @@ export async function POST(req: NextRequest) {
 
   if (!member) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  const safeRows = Array.isArray(rows) ? rows : [];
-  const validationError = validateAvailabilityRows(safeRows);
+  const validationError = validateAvailabilityRows(rows);
   if (validationError) {
     return NextResponse.json({ error: validationError }, { status: 400 });
   }
@@ -76,9 +93,9 @@ export async function POST(req: NextRequest) {
   // Replace all rows for this staff member
   await db.delete(availability).where(eq(availability.staffId, staffId));
 
-  if (safeRows.length) {
+  if (rows.length) {
     await db.insert(availability).values(
-      safeRows.map((r) => ({
+      rows.map((r) => ({
         staffId,
         dayOfWeek: r.dayOfWeek,
         startTime: r.startTime,

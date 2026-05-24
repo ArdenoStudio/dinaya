@@ -1,0 +1,26 @@
+---
+description: Vitest and Playwright testing conventions
+globs: "**/*.test.ts,e2e/**"
+alwaysApply: false
+---
+
+# Testing
+
+## Unit tests (Vitest)
+
+- Colocate tests as `*.test.ts` next to source (e.g. `src/lib/plan.test.ts`).
+- Run: `npm test` or `npm run verify`.
+- Prefer testing real behavior over mocking internals when cost is low.
+
+## E2E (Playwright)
+
+- Specs live in `e2e/` (e.g. `e2e/locations.spec.ts`).
+- Helpers: `e2e/helpers/auth.ts`.
+- Run: `npm run test:e2e` (needs `DATABASE_URL`, `AUTH_SECRET`).
+
+## When adding features
+
+- Add or extend unit tests for lib logic (validation, plan gating, availability, webhooks).
+- Add e2e coverage for critical user flows when touching booking or dashboard paths.
+
+Do not weaken tests to make CI pass — fix the underlying issue.

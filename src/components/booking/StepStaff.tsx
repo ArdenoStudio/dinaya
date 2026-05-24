@@ -1,5 +1,8 @@
+import Image from "next/image";
 import type { Staff } from "@/db/schema";
 import type { BookingCopy } from "@/lib/i18n";
+import { isOptimizableRemoteImage } from "@/lib/utils";
+import { Icon } from "@/components/ui/Icon";
 
 interface Props {
   allStaff: Staff[];
@@ -49,8 +52,14 @@ export default function StepStaff({
               >
                 <div className="size-10 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center text-sm shrink-0 overflow-hidden">
                   {s.avatarUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={s.avatarUrl} alt={s.name} className="size-10 rounded-full object-cover" />
+                    <Image
+                      src={s.avatarUrl}
+                      alt={s.name}
+                      width={40}
+                      height={40}
+                      className="size-10 rounded-full object-cover"
+                      unoptimized={!isOptimizableRemoteImage(s.avatarUrl)}
+                    />
                   ) : (
                     s.name.charAt(0).toUpperCase()
                   )}
@@ -68,7 +77,7 @@ export default function StepStaff({
                       : "border-muted-foreground/30"
                   }`}
                 >
-                  {isSelected && <i className="bi bi-check text-white" style={{ fontSize: '0.75rem' }} />}
+                  {isSelected && <Icon name="check" className="text-white" style={{ fontSize: '0.75rem' }} />}
                 </div>
               </button>
             );
@@ -80,7 +89,7 @@ export default function StepStaff({
         onClick={onBack}
         className="mt-5 flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
       >
-        <i className="bi bi-chevron-left text-sm" /> {copy.back}
+        <Icon name="chevron-left" className="text-sm" /> {copy.back}
       </button>
     </div>
   );

@@ -12,30 +12,18 @@ import {
   staffServices,
   users,
 } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
+import { normalizeReferralCode } from "@/lib/referrals";
+import { withApiHandler } from "@/lib/api-handler";
+import { withRateLimit } from "@/lib/rate-limit";
+import { registerSchema, type RegisterInput } from "@/lib/schemas/register";
 
-type BusinessType =
-  | "salon_barber"
-  | "clinic"
-  | "tuition"
-  | "vehicle_service"
-  | "photography"
-  | "consulting"
-  | "spa_wellness"
-  | "other";
+type BusinessType = NonNullable<RegisterInput["businessType"]>;
 
-const BUSINESS_TYPES = new Set<BusinessType>([
-  "salon_barber",
-  "clinic",
-  "tuition",
-  "vehicle_service",
-  "photography",
-  "consulting",
-  "spa_wellness",
-  "other",
-]);
-
-const PRESET_SERVICES: Record<BusinessType, { name: string; durationMinutes: number; priceLkr: number; description: string }[]> = {
+const PRESET_SERVICES: Record<
+  BusinessType,
+  { name: string; durationMinutes: number; priceLkr: number; description: string }[]
+> = {
   salon_barber: [
     { name: "Haircut", durationMinutes: 30, priceLkr: 1500, description: "Standard cut and styling." },
     { name: "Hair colouring consultation", durationMinutes: 45, priceLkr: 2500, description: "Consultation before colour work." },
@@ -71,158 +59,219 @@ const PRESET_SERVICES: Record<BusinessType, { name: string; durationMinutes: num
   ],
 };
 
-function cleanBusinessType(value: unknown): BusinessType {
-  return typeof value === "string" && BUSINESS_TYPES.has(value as BusinessType)
-    ? (value as BusinessType)
-    : "other";
-}
-
-function cleanLanguage(value: unknown): "en" | "si" | "ta" {
-  return value === "si" || value === "ta" ? value : "en";
+async function cleanupRegistration(input: {
+  businessId?: string;
+  userId?: string;
+  staffId?: string;
+  serviceIds?: string[];
+  locationId?: string;
+}): Promise<void> {
+  try {
+    if (input.serviceIds?.length) {
+      await db.delete(staffServices).where(inArray(staffServices.serviceId, input.serviceIds));
+      await db.delete(services).where(inArray(services.id, input.serviceIds));
+    }
+    if (input.staffId) {
+      await db.delete(staffLocations).where(eq(staffLocations.staffId, input.staffId));
+      await db.delete(availability).where(eq(availability.staffId, input.staffId));
+      await db.delete(staff).where(eq(staff.id, input.staffId));
+    }
+    if (input.locationId) {
+      await db.delete(locations).where(eq(locations.id, input.locationId));
+    }
+    if (input.businessId) {
+      await db.delete(messageTemplates).where(eq(messageTemplates.businessId, input.businessId));
+      await db.delete(users).where(eq(users.businessId, input.businessId));
+      await db.delete(businesses).where(eq(businesses.id, input.businessId));
+    } else if (input.userId) {
+      await db.delete(users).where(eq(users.id, input.userId));
+    }
+  } catch (cleanupError) {
+    console.error("[register] cleanup failed", cleanupError);
+  }
 }
 
 export async function POST(req: NextRequest) {
-  const { name, businessName, slug, email, password, businessType, language } = await req.json();
-
-  if (!name || !businessName || !slug || !email || !password) {
-    return NextResponse.json({ error: "All fields are required." }, { status: 400 });
-  }
-
-  if (password.length < 8) {
-    return NextResponse.json({ error: "Password must be at least 8 characters." }, { status: 400 });
-  }
-
-  if (!/^[a-z0-9-]+$/.test(slug)) {
-    return NextResponse.json(
-      { error: "Slug may only contain lowercase letters, numbers, and hyphens." },
-      { status: 400 }
-    );
-  }
-
-  const [existingBusiness] = await db
-    .select({ id: businesses.id })
-    .from(businesses)
-    .where(eq(businesses.slug, slug))
-    .limit(1);
-
-  if (existingBusiness) {
-    return NextResponse.json({ error: "That URL is already taken. Try a different one." }, { status: 409 });
-  }
-
-  const [existingUser] = await db
-    .select({ id: users.id })
-    .from(users)
-    .where(eq(users.email, email))
-    .limit(1);
-
-  if (existingUser) {
-    return NextResponse.json({ error: "An account with this email already exists." }, { status: 409 });
-  }
-
-  const passwordHash = await bcrypt.hash(password, 12);
-  const selectedBusinessType = cleanBusinessType(businessType);
-  const selectedLanguage = cleanLanguage(language);
-
-  // neon-http does not support db.transaction(); use sequential inserts.
-  const [business] = await db
-    .insert(businesses)
-    .values({
-      slug,
-      name: businessName,
-      email,
-      businessType: selectedBusinessType,
-      language: selectedLanguage,
-      cancellationPolicy: "Please contact the business as early as possible if you need to cancel or reschedule.",
-      depositPolicy: "Some services may require a deposit to reduce no-shows.",
-    })
-    .returning({ id: businesses.id });
-
-  await db.insert(users).values({
-    businessId: business.id,
-    name,
-    email,
-    passwordHash,
-    role: "owner",
+  const limited = await withRateLimit(req, {
+    scope: "register",
+    limit: 5,
+    windowSeconds: 60 * 15,
   });
+  if (!limited.ok) return limited.response;
 
-  const [ownerStaff] = await db
-    .insert(staff)
-    .values({
-      businessId: business.id,
-      name,
-      bio: "Owner",
-      isActive: true,
-    })
-    .returning({ id: staff.id });
+  return withApiHandler(async () => {
+    const parsed = registerSchema.safeParse(await req.json());
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Please check your registration details.", fieldErrors: parsed.error.flatten().fieldErrors },
+        { status: 400 },
+      );
+    }
 
-  const serviceRows = await db
-    .insert(services)
-    .values(
-      PRESET_SERVICES[selectedBusinessType].map((preset) => ({
-        businessId: business.id,
-        ...preset,
-        requiresPayment: false,
-        depositPercent: 0,
-        beforeBuffer: 0,
-        afterBuffer: 0,
-        minimumNoticeHours: 2,
-      }))
-    )
-    .returning({ id: services.id });
+    const { name, businessName, slug, email, password, businessType, language, referrerCode } = parsed.data;
+    const selectedBusinessType = businessType ?? "other";
+    const selectedLanguage = language ?? "en";
+    let referredByBusinessId: string | null = null;
 
-  if (serviceRows.length > 0) {
-    await db.insert(staffServices).values(
-      serviceRows.map((service) => ({
+    if (referrerCode) {
+      const normalizedReferrer = normalizeReferralCode(referrerCode);
+      const [referrer] = await db
+        .select({ id: businesses.id })
+        .from(businesses)
+        .where(eq(businesses.referralCode, normalizedReferrer))
+        .limit(1);
+      referredByBusinessId = referrer?.id ?? null;
+    }
+
+    const [existingBusiness] = await db
+      .select({ id: businesses.id })
+      .from(businesses)
+      .where(eq(businesses.slug, slug))
+      .limit(1);
+
+    if (existingBusiness) {
+      return NextResponse.json({ error: "That URL is already taken. Try a different one." }, { status: 409 });
+    }
+
+    const [existingUser] = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.email, email))
+      .limit(1);
+
+    if (existingUser) {
+      return NextResponse.json({ error: "An account with this email already exists." }, { status: 409 });
+    }
+
+    const passwordHash = await bcrypt.hash(password, 12);
+    const cleanupState: {
+      businessId?: string;
+      userId?: string;
+      staffId?: string;
+      serviceIds?: string[];
+      locationId?: string;
+    } = {};
+
+    try {
+      const [business] = await db
+        .insert(businesses)
+        .values({
+          slug,
+          name: businessName,
+          email,
+          businessType: selectedBusinessType,
+          language: selectedLanguage,
+          referralCode: slug,
+          referredByBusinessId,
+          cancellationPolicy: "Please contact the business as early as possible if you need to cancel or reschedule.",
+          depositPolicy: "Some services may require a deposit to reduce no-shows.",
+        })
+        .returning({ id: businesses.id });
+
+      cleanupState.businessId = business.id;
+
+      const [user] = await db
+        .insert(users)
+        .values({
+          businessId: business.id,
+          name,
+          email,
+          passwordHash,
+          role: "owner",
+        })
+        .returning({ id: users.id });
+
+      cleanupState.userId = user.id;
+
+      const [ownerStaff] = await db
+        .insert(staff)
+        .values({
+          businessId: business.id,
+          name,
+          bio: "Owner",
+          isActive: true,
+        })
+        .returning({ id: staff.id });
+
+      cleanupState.staffId = ownerStaff.id;
+
+      const serviceRows = await db
+        .insert(services)
+        .values(
+          PRESET_SERVICES[selectedBusinessType].map((preset) => ({
+            businessId: business.id,
+            ...preset,
+            requiresPayment: false,
+            depositPercent: 0,
+            beforeBuffer: 0,
+            afterBuffer: 0,
+            minimumNoticeHours: 2,
+          })),
+        )
+        .returning({ id: services.id });
+
+      cleanupState.serviceIds = serviceRows.map((row) => row.id);
+
+      if (serviceRows.length > 0) {
+        await db.insert(staffServices).values(
+          serviceRows.map((service) => ({
+            staffId: ownerStaff.id,
+            serviceId: service.id,
+          })),
+        );
+      }
+
+      await db.insert(availability).values(
+        [1, 2, 3, 4, 5].map((dayOfWeek) => ({
+          staffId: ownerStaff.id,
+          dayOfWeek,
+          startTime: "09:00",
+          endTime: "17:00",
+        })),
+      );
+
+      const [defaultLocation] = await db
+        .insert(locations)
+        .values({
+          businessId: business.id,
+          name: businessName,
+          slug: "main",
+          timezone: "Asia/Colombo",
+          isDefault: true,
+          isActive: true,
+          sortOrder: 0,
+        })
+        .returning({ id: locations.id });
+
+      cleanupState.locationId = defaultLocation.id;
+
+      await db.insert(staffLocations).values({
         staffId: ownerStaff.id,
-        serviceId: service.id,
-      }))
-    );
-  }
+        locationId: defaultLocation.id,
+        isPrimary: true,
+      });
 
-  await db.insert(availability).values(
-    [1, 2, 3, 4, 5].map((dayOfWeek) => ({
-      staffId: ownerStaff.id,
-      dayOfWeek,
-      startTime: "09:00",
-      endTime: "17:00",
-    }))
-  );
+      await db.insert(messageTemplates).values([
+        {
+          businessId: business.id,
+          channel: "whatsapp",
+          name: "Booking confirmation",
+          body: "Hi {{clientName}}, your {{serviceName}} booking at {{businessName}} is confirmed for {{appointmentTime}}.",
+          variables: ["clientName", "serviceName", "businessName", "appointmentTime"],
+        },
+        {
+          businessId: business.id,
+          channel: "whatsapp",
+          name: "Appointment reminder",
+          body: "Hi {{clientName}}, reminder: your {{serviceName}} booking at {{businessName}} is on {{appointmentTime}}.",
+          variables: ["clientName", "serviceName", "businessName", "appointmentTime"],
+        },
+      ]);
 
-  const [defaultLocation] = await db
-    .insert(locations)
-    .values({
-      businessId: business.id,
-      name: businessName,
-      slug: "main",
-      timezone: "Asia/Colombo",
-      isDefault: true,
-      isActive: true,
-      sortOrder: 0,
-    })
-    .returning({ id: locations.id });
-
-  await db.insert(staffLocations).values({
-    staffId: ownerStaff.id,
-    locationId: defaultLocation.id,
-    isPrimary: true,
-  });
-
-  await db.insert(messageTemplates).values([
-    {
-      businessId: business.id,
-      channel: "whatsapp",
-      name: "Booking confirmation",
-      body: "Hi {{clientName}}, your {{serviceName}} booking at {{businessName}} is confirmed for {{appointmentTime}}.",
-      variables: ["clientName", "serviceName", "businessName", "appointmentTime"],
-    },
-    {
-      businessId: business.id,
-      channel: "whatsapp",
-      name: "Appointment reminder",
-      body: "Hi {{clientName}}, reminder: your {{serviceName}} booking at {{businessName}} is on {{appointmentTime}}.",
-      variables: ["clientName", "serviceName", "businessName", "appointmentTime"],
-    },
-  ]);
-
-  return NextResponse.json({ success: true }, { status: 201 });
+      return NextResponse.json({ success: true }, { status: 201 });
+    } catch (error) {
+      await cleanupRegistration(cleanupState);
+      throw error;
+    }
+  }, "Unable to create account.");
 }

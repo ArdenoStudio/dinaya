@@ -23,6 +23,20 @@ test.describe("AI Hub — Free plan", () => {
   });
 });
 
+test.describe("AI Hub — Pro plan", () => {
+  test.skip(!process.env.DATABASE_URL, "DATABASE_URL required to set Pro plan");
+
+  test("shows upgrade gate for Pro users", async ({ page, request }) => {
+    const account = makeAccount("ai-pro");
+    await registerLoginAndSetPlan(page, request, account, "pro");
+    await page.goto("/dashboard/ai");
+    await expect(page.getByRole("heading", { name: /AI Growth Hub/i })).toBeVisible();
+    await expect(page.getByText(/available on Dinaya Max/i)).toBeVisible();
+    await expect(page.getByRole("link", { name: /Upgrade to Max/i })).toBeVisible();
+    await expect(page.getByText("AI Booking Autopilot")).not.toBeVisible();
+  });
+});
+
 test.describe("AI Hub — Max plan", () => {
   test.skip(!process.env.DATABASE_URL, "DATABASE_URL required to set Max plan");
 

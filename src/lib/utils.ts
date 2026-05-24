@@ -25,3 +25,18 @@ export function slugify(text: string): string {
 export function generateOrderId(): string {
   return `DIN-${Date.now()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
 }
+
+export function isOptimizableRemoteImage(url: string): boolean {
+  try {
+    const { protocol, hostname } = new URL(url);
+    if (protocol !== "https:") return false;
+    return (
+      hostname === "res.cloudinary.com" ||
+      hostname === "api.qrserver.com" ||
+      hostname.endsWith(".dinaya.lk") ||
+      hostname === "dinaya.lk"
+    );
+  } catch {
+    return url.startsWith("/");
+  }
+}

@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { and, eq, gte, inArray } from "drizzle-orm";
-import { auth } from "@/auth";
 import { db } from "@/db";
 import { bookings, locations, services, staff, staffLocations, staffServices } from "@/db/schema";
+import { requireApiBusiness } from "@/lib/api-auth";
 import { replaceStaffLocations } from "@/lib/locations";
 import { z } from "@/lib/validation";
 
@@ -15,17 +15,13 @@ const staffSchema = z.object({
   locationIds: z.array(z.uuid()).optional(),
 });
 
-async function getBusinessId() {
-  const session = await auth();
-  return session?.user?.businessId ?? null;
-}
-
 export async function GET(
   _req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  const businessId = await getBusinessId();
-  if (!businessId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const authResult = await requireApiBusiness();
+  if (!authResult.ok) return authResult.response;
+  const { businessId } = authResult.context;
   const { id } = await params;
 
   const [member] = await db
@@ -65,17 +61,18 @@ export async function GET(
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  const businessId = await getBusinessId();
-  if (!businessId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const authResult = await requireApiBusiness({ ownerOnly: true });
+  if (!authResult.ok) return authResult.response;
+  const { businessId } = authResult.context;
   const { id } = await params;
 
   const parsed = staffSchema.safeParse(await req.json());
   if (!parsed.success) {
     return NextResponse.json(
       { error: "Please check the staff details.", fieldErrors: parsed.error.flatten().fieldErrors },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -118,15 +115,29 @@ export async function PATCH(
   }
 
   if (locationIds) {
-    const validLocations = locationIds.length
-      ? await db
-          .select({ id: locations.id })
-          .from(locations)
-          .where(and(eq(locations.businessId, businessId), inArray(locations.id, locationIds)))
-      : [];
+    if (locationIds.length === 0) {
+      return NextResponse.json(
+        { error: "At least one active location must be assigned to this staff member." },
+        { status: 400 }
+      );
+    }
+
+    const validLocations = await db
+      .select({ id: locations.id })
+      .from(locations)
+      .where(
+        and(
+          eq(locations.businessId, businessId),
+          eq(locations.isActive, true),
+          inArray(locations.id, locationIds)
+        )
+      );
 
     if (validLocations.length !== locationIds.length) {
-      return NextResponse.json({ error: "One or more locations are invalid." }, { status: 400 });
+      return NextResponse.json(
+        { error: "One or more locations are invalid or inactive." },
+        { status: 400 }
+      );
     }
 
     await replaceStaffLocations(id, locationIds);
@@ -137,10 +148,11 @@ export async function PATCH(
 
 export async function DELETE(
   _req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  const businessId = await getBusinessId();
-  if (!businessId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const authResult = await requireApiBusiness({ ownerOnly: true });
+  if (!authResult.ok) return authResult.response;
+  const { businessId } = authResult.context;
   const { id } = await params;
 
   const futureBookings = await db
@@ -151,15 +163,15 @@ export async function DELETE(
         eq(bookings.businessId, businessId),
         eq(bookings.staffId, id),
         gte(bookings.startsAt, new Date()),
-        inArray(bookings.status, ["pending", "confirmed"])
-      )
+        inArray(bookings.status, ["pending", "confirmed"]),
+      ),
     )
     .limit(1);
 
   if (futureBookings.length > 0) {
     return NextResponse.json(
       { error: "Reassign or cancel future bookings before deleting this staff member." },
-      { status: 409 }
+      { status: 409 },
     );
   }
 

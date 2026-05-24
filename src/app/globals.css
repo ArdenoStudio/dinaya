@@ -2,6 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Prevent horizontal scroll from full-bleed sections and scaled mockups */
+html,
+body {
+  overflow-x: clip;
+  max-width: 100%;
+}
+
+/* Scroll lock applied by UnderlayNav when the drawer is open */
+html.nav-open {
+  overflow-y: hidden;
+}
+
 @keyframes promo-gradient {
   0%   { background-position: 0% 50%; }
   50%  { background-position: 100% 50%; }
@@ -50,6 +62,9 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 220 84% 67%;
     --radius: 0.5rem;
+    --public-nav-top: 0.75rem;
+    --public-nav-height: 3.75rem;
+    --public-nav-gap: 2rem;
   }
 
   .dark {
@@ -78,4 +93,24 @@
 @layer base {
   * { @apply border-border; }
   body { @apply bg-background text-foreground; }
+}
+
+@layer utilities {
+  .public-page-offset {
+    padding-top: calc(var(--public-nav-top) + var(--public-nav-height) + var(--public-nav-gap));
+  }
+
+  .public-page-offset-lg {
+    padding-top: calc(var(--public-nav-top) + var(--public-nav-height) + 2.75rem);
+  }
+}
+
+
+/* Hide scrollbar globally but preserve scrolling functionality */
+html, body {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+html::-webkit-scrollbar, body::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
 }

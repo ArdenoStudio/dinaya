@@ -1,3 +1,13 @@
+import { lookup } from "node:dns/promises";
+import { isIP } from "node:net";
+
+export type WebhookAddress = {
+  address: string;
+  family: 4 | 6;
+};
+
+export type WebhookLookup = (hostname: string) => Promise<WebhookAddress[]>;
+
 function ipv4ToNumber(value: string): number | null {
   const parts = value.split(".");
   if (parts.length !== 4) return null;
@@ -41,13 +51,31 @@ function isUnsafeIpv6(hostname: string): boolean {
   const value = hostname.replace(/^\[|\]$/g, "").toLowerCase();
   if (!value.includes(":")) return false;
 
+  if (value.startsWith("::ffff:")) {
+    const embeddedIpv4 = value.slice("::ffff:".length);
+    return isUnsafeIpv4(embeddedIpv4);
+  }
+
   return (
+    value === "::" ||
     value === "::1" ||
     value === "0:0:0:0:0:0:0:1" ||
     value.startsWith("fc") ||
     value.startsWith("fd") ||
-    value.startsWith("fe80:")
+    value.startsWith("fe8") ||
+    value.startsWith("fe9") ||
+    value.startsWith("fea") ||
+    value.startsWith("feb") ||
+    value.startsWith("ff")
   );
+}
+
+export function isSafeResolvedWebhookAddress(address: string): boolean {
+  const normalized = address.replace(/^\[|\]$/g, "");
+  const family = isIP(normalized);
+  if (family === 4) return !isUnsafeIpv4(normalized);
+  if (family === 6) return !isUnsafeIpv6(normalized);
+  return false;
 }
 
 export function isSafeWebhookUrl(value: string): boolean {
@@ -62,6 +90,32 @@ export function isSafeWebhookUrl(value: string): boolean {
       !isUnsafeIpv4(hostname) &&
       !isUnsafeIpv6(hostname)
     );
+  } catch {
+    return false;
+  }
+}
+
+async function lookupWebhookHostname(hostname: string): Promise<WebhookAddress[]> {
+  const rows = await lookup(hostname, { all: true, verbatim: true });
+  return rows.map((row) => ({
+    address: row.address,
+    family: row.family as 4 | 6,
+  }));
+}
+
+export async function isSafeWebhookDestination(
+  value: string,
+  resolver: WebhookLookup = lookupWebhookHostname,
+): Promise<boolean> {
+  if (!isSafeWebhookUrl(value)) return false;
+
+  try {
+    const parsed = new URL(value);
+    const hostname = parsed.hostname.toLowerCase().replace(/^\[|\]$/g, "");
+    if (isIP(hostname)) return isSafeResolvedWebhookAddress(hostname);
+
+    const addresses = await resolver(hostname);
+    return addresses.length > 0 && addresses.every((row) => isSafeResolvedWebhookAddress(row.address));
   } catch {
     return false;
   }

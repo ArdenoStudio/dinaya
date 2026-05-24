@@ -34,7 +34,7 @@ test.describe("Auth & registration", () => {
     await page.locator("#slug").fill(account.slug);
     await page.getByRole("button", { name: /Create free account/i }).click();
 
-    await page.waitForURL("**/login?registered=1**");
+    await page.waitForURL("**/auth/signin?registered=1**");
     await expect(page.getByText(/Account created/i)).toBeVisible();
   });
 
@@ -48,7 +48,7 @@ test.describe("Auth & registration", () => {
   test("shows error for invalid login", async ({ page, request }) => {
     const account = makeAccount("bad-login");
     await registerViaApi(request, account);
-    await page.goto("/login");
+    await page.goto("/auth/signin");
     await page.getByLabel("Email").fill(account.email);
     await page.getByLabel("Password", { exact: true }).fill("WrongPass999!");
     await page.getByRole("button", { name: "Sign in" }).click();
@@ -64,6 +64,13 @@ test.describe("Auth & registration", () => {
   test("register page links to sign in", async ({ page }) => {
     await page.goto("/register");
     await page.getByRole("link", { name: /Sign in/i }).click();
-    await page.waitForURL("**/login**");
+    await page.waitForURL("**/auth/signin**");
+  });
+
+  test("sign-in page links to register", async ({ page }) => {
+    await page.goto("/auth/signin");
+    await page.getByRole("link", { name: /Create one free/i }).click();
+    await page.waitForURL("**/register**");
+    await expect(page.getByRole("heading", { name: /Create your account/i })).toBeVisible();
   });
 });

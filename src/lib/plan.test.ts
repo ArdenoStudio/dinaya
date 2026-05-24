@@ -23,16 +23,17 @@ describe("plan entitlements", () => {
     expect(MAX_ENTITLEMENTS.limits.locations).toBeNull();
   });
 
-  it("allows pro-only operational surfaces for pro and max", () => {
-    expect(canUseFeature("free", "payments")).toBe(false);
+  it("allows payments on all plans and pro-only ops for pro and max", () => {
+    expect(canUseFeature("free", "payments")).toBe(true);
     expect(canUseFeature("free", "reports")).toBe(false);
+    expect(canUseFeature("free", "whatsappSms")).toBe(false);
     expect(canUseFeature("pro", "payments")).toBe(true);
     expect(canUseFeature("pro", "reports")).toBe(true);
     expect(canUseFeature("max", "payments")).toBe(true);
     expect(canUseFeature("max", "reports")).toBe(true);
   });
 
-  it("keeps AI growth features max-only", () => {
+  it("allows AI growth features on Max but not Free or Pro", () => {
     for (const feature of AI_FEATURES) {
       expect(minimumPlanForFeature(feature)).toBe("max");
       expect(canUseFeature("free", feature)).toBe(false);
@@ -44,10 +45,33 @@ describe("plan entitlements", () => {
     }
   });
 
+  it("reserves AI voice receptionist for max", () => {
+    expect(minimumPlanForFeature("aiVoiceReceptionist")).toBe("max");
+    expect(canUseFeature("free", "aiVoiceReceptionist")).toBe(false);
+    expect(canUseFeature("pro", "aiVoiceReceptionist")).toBe(false);
+    expect(canUseFeature("max", "aiVoiceReceptionist")).toBe(true);
+    expect(FREE_ENTITLEMENTS.features.aiVoiceReceptionist).toBe(false);
+    expect(PRO_ENTITLEMENTS.features.aiVoiceReceptionist).toBe(false);
+    expect(MAX_ENTITLEMENTS.features.aiVoiceReceptionist).toBe(true);
+  });
+
   it("keeps public booking page available on all plans", () => {
     expect(canUseFeature("free", "publicBookingPage")).toBe(true);
     expect(canUseFeature("pro", "publicBookingPage")).toBe(true);
     expect(canUseFeature("max", "publicBookingPage")).toBe(true);
+  });
+
+  it("reserves booking page customization for pro and max", () => {
+    expect(canUseFeature("free", "publicBookingPageCustomization")).toBe(false);
+    expect(canUseFeature("pro", "publicBookingPageCustomization")).toBe(true);
+    expect(canUseFeature("max", "publicBookingPageCustomization")).toBe(true);
+  });
+
+  it("reserves AI review replies for Max", () => {
+    expect(minimumPlanForFeature("reviewReplies")).toBe("max");
+    expect(canUseFeature("free", "reviewReplies")).toBe(false);
+    expect(canUseFeature("pro", "reviewReplies")).toBe(false);
+    expect(canUseFeature("max", "reviewReplies")).toBe(true);
   });
 });
 
@@ -64,5 +88,26 @@ describe("subscription pricing", () => {
     const { annualSavingsPercent } = await import("./plan");
     expect(annualSavingsPercent(1490, 14300)).toBe(20);
     expect(annualSavingsPercent(2490, 23900)).toBe(20);
+  });
+});
+
+describe("resolveEffectivePlan", () => {
+  it("downgrades expired paid plans to free", async () => {
+    const { resolveEffectivePlan } = await import("./plan");
+    const now = new Date("2026-06-01T00:00:00.000Z");
+    expect(
+      resolveEffectivePlan({
+        storedPlan: "pro",
+        planExpiresAt: new Date("2026-05-01T00:00:00.000Z"),
+        now,
+      }),
+    ).toBe("free");
+    expect(
+      resolveEffectivePlan({
+        storedPlan: "max",
+        planExpiresAt: new Date("2026-07-01T00:00:00.000Z"),
+        now,
+      }),
+    ).toBe("max");
   });
 });

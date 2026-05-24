@@ -6,6 +6,7 @@ import { PublicNav } from "@/components/PublicNav";
 import { FadeContainer, FadeDiv } from "@/components/Fade";
 import { motion, AnimatePresence } from "motion/react";
 import { LandingFooter } from "@/components/LandingFooter";
+import { Icon } from "@/components/ui/Icon";
 
 type FilterTag = "all" | "feature" | "improvement" | "fix";
 
@@ -39,25 +40,25 @@ const releases = [
     changes: [
       {
         type: "feature" as const,
-        icon: "bi-people-fill",
+        icon: "people-fill",
         title: "Multi-staff booking",
         desc: "Clients can choose a preferred staff member when booking. Each staff member gets their own schedule, and all bookings roll up to your main dashboard.",
       },
       {
         type: "feature" as const,
-        icon: "bi-calendar-event-fill",
+        icon: "calendar-event-fill",
         title: "Real-time calendar updates",
         desc: "Your dashboard calendar now reflects new bookings instantly — no more refreshing the page to see what just came in.",
       },
       {
         type: "improvement" as const,
-        icon: "bi-lightning-charge-fill",
+        icon: "lightning-charge-fill",
         title: "50% faster booking page load",
         desc: "Rebuilt the booking wizard with server-side rendering. First paint is now under 1.2 seconds on a mobile connection.",
       },
       {
         type: "fix" as const,
-        icon: "bi-shield-fill-check",
+        icon: "shield-fill-check",
         title: "Fixed double-booking race condition",
         desc: "Resolved a rare edge case where two clients could claim the same slot simultaneously during high-traffic periods.",
       },
@@ -67,29 +68,29 @@ const releases = [
     version: "v1.3",
     date: "March 2026",
     isLatest: false,
-    highlight: "DoDo payments and SMS reminders",
+    highlight: "PayHere payments and SMS reminders",
     changes: [
       {
         type: "feature" as const,
-        icon: "bi-credit-card-2-front-fill",
-        title: "DoDo payment gateway",
-        desc: "Accept payments through DoDo alongside PayHere. More options for your clients means fewer drop-offs at checkout.",
+        icon: "credit-card-2-front-fill",
+        title: "PayHere payment gateway",
+        desc: "Accept card and mobile payments through PayHere with deposit support — fewer drop-offs at checkout.",
       },
       {
         type: "feature" as const,
-        icon: "bi-chat-dots-fill",
+        icon: "chat-dots-fill",
         title: "SMS reminders via Dialog",
         desc: "Automated appointment reminders now send via SMS through Dialog Axiata — reaching clients who rarely check email.",
       },
       {
         type: "improvement" as const,
-        icon: "bi-phone-fill",
+        icon: "phone-fill",
         title: "Redesigned mobile booking wizard",
         desc: "Larger tap targets, a cleaner step layout, and a new progress bar make booking on mobile feel significantly smoother.",
       },
       {
         type: "improvement" as const,
-        icon: "bi-alarm-fill",
+        icon: "alarm-fill",
         title: "Customisable reminder timing",
         desc: "Choose when reminders send — 24 hours, 2 hours, or 30 minutes before the appointment. Configure once and forget.",
       },
@@ -103,25 +104,25 @@ const releases = [
     changes: [
       {
         type: "feature" as const,
-        icon: "bi-question-circle-fill",
+        icon: "question-circle-fill",
         title: "Help Centre launched",
         desc: "A searchable guide covering setup, payments, staff management, and troubleshooting — live at dinaya.lk/help.",
       },
       {
         type: "feature" as const,
-        icon: "bi-x-circle-fill",
+        icon: "x-circle-fill",
         title: "Custom cancellation policies",
         desc: "Set a cancellation window — 24h, 48h, or none at all. Clients see your policy before they confirm a booking.",
       },
       {
         type: "fix" as const,
-        icon: "bi-clock-fill",
+        icon: "clock-fill",
         title: "Timezone fix for Colombo",
         desc: "Late-night bookings occasionally appeared a day off in the dashboard due to a UTC conversion error. Resolved.",
       },
       {
         type: "fix" as const,
-        icon: "bi-envelope-fill",
+        icon: "envelope-fill",
         title: "Confirmation emails hitting Gmail spam",
         desc: "Gmail was occasionally filtering our confirmation emails. Updated SPF and DKIM records — deliverability is back to normal.",
       },
@@ -135,25 +136,25 @@ const releases = [
     changes: [
       {
         type: "feature" as const,
-        icon: "bi-bar-chart-line-fill",
+        icon: "bar-chart-line-fill",
         title: "Revenue analytics dashboard",
         desc: "Total earnings, upcoming payments, refunds, and monthly trends — all visible from your main dashboard without any extra setup.",
       },
       {
         type: "improvement" as const,
-        icon: "bi-send-fill",
+        icon: "send-fill",
         title: "Faster confirmation emails",
         desc: "Booking confirmations now arrive in under 3 seconds. Previously they could take up to 30 seconds during peak load.",
       },
       {
         type: "improvement" as const,
-        icon: "bi-calendar-range-fill",
+        icon: "calendar-range-fill",
         title: "Date-range availability blocking",
         desc: "Block entire date ranges for holidays or leave. No more marking days off one at a time.",
       },
       {
         type: "fix" as const,
-        icon: "bi-calendar-x-fill",
+        icon: "calendar-x-fill",
         title: "Availability conflict bug",
         desc: "Staff availability overlapping with business-wide blocked dates would sometimes still allow bookings. Now correctly prevented.",
       },
@@ -167,19 +168,19 @@ const releases = [
     changes: [
       {
         type: "feature" as const,
-        icon: "bi-rocket-takeoff-fill",
+        icon: "rocket-takeoff-fill",
         title: "Dinaya is live",
         desc: "Online booking, PayHere payments, email reminders, and a clean dashboard — everything Sri Lankan service businesses need to stop managing appointments over WhatsApp.",
       },
       {
         type: "feature" as const,
-        icon: "bi-link-45deg",
+        icon: "link-45deg",
         title: "Your own booking page",
         desc: "Every business gets a dedicated page at yourname.dinaya.lk to share across WhatsApp, Instagram, and Facebook.",
       },
       {
         type: "feature" as const,
-        icon: "bi-grid-3x3-gap-fill",
+        icon: "grid-3x3-gap-fill",
         title: "Service and pricing management",
         desc: "Add unlimited services with custom durations and prices. Clients see exactly what they're booking and what it costs.",
       },
@@ -188,10 +189,10 @@ const releases = [
 ];
 
 const filters: { id: FilterTag; label: string; icon: string }[] = [
-  { id: "all", label: "All updates", icon: "bi-grid-fill" },
-  { id: "feature", label: "New features", icon: "bi-stars" },
-  { id: "improvement", label: "Improvements", icon: "bi-arrow-up-circle-fill" },
-  { id: "fix", label: "Bug fixes", icon: "bi-bug-fill" },
+  { id: "all", label: "All updates", icon: "grid-fill" },
+  { id: "feature", label: "New features", icon: "stars" },
+  { id: "improvement", label: "Improvements", icon: "arrow-up-circle-fill" },
+  { id: "fix", label: "Bug fixes", icon: "bug-fill" },
 ];
 
 export default function WhatsNewPage() {
@@ -224,7 +225,7 @@ export default function WhatsNewPage() {
         {/* Soft glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-48 bg-primary/8 blur-3xl rounded-full" />
 
-        <div className="relative max-w-4xl mx-auto px-6 pt-20 pb-16">
+        <div className="relative max-w-4xl mx-auto px-6 public-page-offset pb-16">
           <FadeContainer>
             <FadeDiv>
               <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-white px-3.5 py-1.5 text-xs font-medium text-primary shadow-sm mb-6">
@@ -257,14 +258,14 @@ export default function WhatsNewPage() {
                   className="inline-flex items-center gap-2 bg-primary text-white text-sm font-semibold px-5 py-2.5 rounded-lg hover:bg-primary/90 transition-colors shadow-sm shadow-primary/20"
                 >
                   Get started free
-                  <i className="bi bi-arrow-right text-xs" />
+                  <Icon name="arrow-right" className="text-xs" />
                 </Link>
                 <Link
                   href="/help"
                   className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-800 transition-colors px-2 py-2.5"
                 >
                   Visit Help Centre
-                  <i className="bi bi-arrow-up-right text-xs" />
+                  <Icon name="arrow-up-right" className="text-xs" />
                 </Link>
               </div>
             </FadeDiv>
@@ -289,7 +290,7 @@ export default function WhatsNewPage() {
                       : "bg-gray-100/80 text-gray-600 hover:bg-gray-200 hover:text-gray-900"
                   }`}
                 >
-                  <i className={`bi ${f.icon} text-[11px]`} />
+                  <Icon name={f.icon} className="text-[11px]" />
                   {f.label}
                 </button>
               ))}
@@ -388,7 +389,7 @@ export default function WhatsNewPage() {
                           <div
                             className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center ${cfg.iconBgClass}`}
                           >
-                            <i className={`bi ${change.icon} text-sm`} />
+                            <Icon name={change.icon} className="text-sm" />
                           </div>
 
                           {/* Text */}
@@ -426,7 +427,7 @@ export default function WhatsNewPage() {
                 className="py-20 text-center text-gray-400"
               >
                 <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center mx-auto mb-3">
-                  <i className="bi bi-inbox text-xl text-gray-400" />
+                  <Icon name="inbox" className="text-xl text-gray-400" />
                 </div>
                 <p className="text-sm font-medium text-gray-500">Nothing here yet</p>
                 <p className="text-xs text-gray-400 mt-1">
@@ -454,7 +455,7 @@ export default function WhatsNewPage() {
                 href="/help"
                 className="inline-flex items-center gap-2 text-sm font-semibold text-gray-700 border border-gray-200 bg-white px-4 py-2.5 rounded-lg hover:border-gray-300 hover:shadow-sm transition-all"
               >
-                <i className="bi bi-chat-dots text-xs" />
+                <Icon name="chat-dots" className="text-xs" />
                 Contact us
               </Link>
               <Link
@@ -462,7 +463,7 @@ export default function WhatsNewPage() {
                 className="inline-flex items-center gap-2 bg-primary text-white text-sm font-semibold px-4 py-2.5 rounded-lg hover:bg-primary/90 transition-colors shadow-sm shadow-primary/20"
               >
                 Get started free
-                <i className="bi bi-arrow-right text-xs" />
+                <Icon name="arrow-right" className="text-xs" />
               </Link>
             </div>
           </div>

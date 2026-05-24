@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/auth";
+import { requireApiBusiness } from "@/lib/api-auth";
 import { db } from "@/db";
 import { availabilityOverrides, staff } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
@@ -14,10 +14,9 @@ async function verifyStaff(staffId: string, businessId: string) {
 }
 
 export async function GET(req: NextRequest) {
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  const businessId = (session.user as { businessId: string }).businessId;
+  const authResult = await requireApiBusiness();
+  if (!authResult.ok) return authResult.response;
+  const { businessId } = authResult.context;
   const staffId = req.nextUrl.searchParams.get("staffId");
   if (!staffId) return NextResponse.json({ error: "staffId required" }, { status: 400 });
 
@@ -35,10 +34,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  const businessId = (session.user as { businessId: string }).businessId;
+  const authResult = await requireApiBusiness();
+  if (!authResult.ok) return authResult.response;
+  const { businessId } = authResult.context;
   const { staffId, date, isBlocked, startTime, endTime, reason } = await req.json();
 
   if (!staffId || !date) return NextResponse.json({ error: "staffId and date required" }, { status: 400 });
@@ -60,10 +58,9 @@ export async function POST(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  const businessId = (session.user as { businessId: string }).businessId;
+  const authResult = await requireApiBusiness();
+  if (!authResult.ok) return authResult.response;
+  const { businessId } = authResult.context;
   const id = req.nextUrl.searchParams.get("id");
   const staffId = req.nextUrl.searchParams.get("staffId");
   if (!id || !staffId) return NextResponse.json({ error: "id and staffId required" }, { status: 400 });

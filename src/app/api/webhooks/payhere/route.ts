@@ -3,23 +3,26 @@ import { db } from "@/db";
 import { payments, bookings, businesses, services, staff } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { verifyPayhereWebhook } from "@/lib/payhere";
-import { sendBookingConfirmationToClient, sendBookingNotificationToBusiness } from "@/lib/resend";
+import { parsePayhereWebhookFields } from "@/lib/payhere-webhook";
+import { sendBookingNotificationToBusiness } from "@/lib/resend";
+import { sendBookingConfirmationMessage, sendBookingNotificationToBusinessMessage } from "@/lib/messaging/booking-messages";
+import { buildClientBookingUrl } from "@/lib/client-tokens";
+import type { Plan } from "@/lib/plan";
+import type { BookingLanguage } from "@/lib/i18n";
 import { logActivity } from "@/lib/activity-log";
 import { decryptSecret } from "@/lib/secrets";
+import { processBookingAutomationTrigger } from "@/lib/automations/engine";
+import { sendPaymentReceiptEmail } from "@/lib/receipts";
 
 export async function POST(req: NextRequest) {
   const form = await req.formData();
+  const fields = parsePayhereWebhookFields(form);
 
-  const merchantId = form.get("merchant_id") as string;
-  const orderId = form.get("order_id") as string;
-  const payhereAmount = form.get("payhere_amount") as string;
-  const payhereCurrency = form.get("payhere_currency") as string;
-  const statusCode = form.get("status_code") as string;
-  const md5sig = form.get("md5sig") as string;
-
-  if (!merchantId || !orderId || !payhereAmount || !payhereCurrency || !statusCode || !md5sig) {
+  if (!fields) {
     return NextResponse.json({ error: "Missing fields" }, { status: 400 });
   }
+
+  const { merchantId, orderId, payhereAmount, payhereCurrency, statusCode, md5sig } = fields;
 
   // Look up payment to get the merchant secret
   const [payment] = await db
@@ -38,6 +41,7 @@ export async function POST(req: NextRequest) {
       businessId: bookings.businessId,
       clientEmail: bookings.clientEmail,
       clientName: bookings.clientName,
+      clientPhone: bookings.clientPhone,
       serviceId: bookings.serviceId,
       staffId: bookings.staffId,
       startsAt: bookings.startsAt,
@@ -53,9 +57,12 @@ export async function POST(req: NextRequest) {
   const [business] = await db
     .select({
       email: businesses.email,
+      phone: businesses.phone,
       name: businesses.name,
       payhereMerchantSecret: businesses.payhereMerchantSecret,
       slug: businesses.slug,
+      plan: businesses.plan,
+      language: businesses.language,
     })
     .from(businesses)
     .where(eq(businesses.id, booking.businessId))
@@ -103,6 +110,10 @@ export async function POST(req: NextRequest) {
       .set({ status: "confirmed" })
       .where(eq(bookings.id, booking.id));
 
+    void processBookingAutomationTrigger(booking.businessId, booking.id, "booking.confirmed").catch((error) => {
+      console.error("Automation trigger failed:", error);
+    });
+
     await logActivity({
       action: "payment_success",
       businessId: booking.businessId,
@@ -120,16 +131,45 @@ export async function POST(req: NextRequest) {
     const [staffMember] = await db.select().from(staff).where(eq(staff.id, booking.staffId)).limit(1);
 
     await Promise.allSettled([
+      sendBookingConfirmationMessage({
+        businessId: booking.businessId,
+        bookingId: booking.id,
+        clientName: booking.clientName,
+        clientEmail: booking.clientEmail,
+        clientPhone: booking.clientPhone,
+        businessName: business.name,
+        serviceName: service?.name ?? "Service",
+        staffName: staffMember?.name ?? "Staff",
+        startsAt: booking.startsAt,
+        manageUrl: buildClientBookingUrl({
+          bookingId: booking.id,
+          clientPhone: booking.clientPhone,
+        }),
+        plan: business.plan as Plan,
+        language: business.language as BookingLanguage,
+      }),
       booking.clientEmail
-        ? sendBookingConfirmationToClient({
+        ? sendPaymentReceiptEmail({
             clientName: booking.clientName,
             clientEmail: booking.clientEmail,
             businessName: business.name,
-            businessSlug: business.slug,
-            serviceName: service.name,
-            staffName: staffMember.name,
+            serviceName: service?.name ?? "Service",
+            staffName: staffMember?.name ?? "Staff",
             startsAt: booking.startsAt,
-            bookingId: booking.id,
+            amountLkr: payment.amountLkr,
+            orderId,
+            paymentId: payment.id,
+            manageUrl: buildClientBookingUrl({
+              bookingId: booking.id,
+              clientPhone: booking.clientPhone,
+            }),
+          }).then(async (result) => {
+            if (result.status === "sent") {
+              await db
+                .update(payments)
+                .set({ receiptSentAt: new Date() })
+                .where(eq(payments.id, payment.id));
+            }
           })
         : Promise.resolve(),
       business.email
@@ -138,10 +178,23 @@ export async function POST(req: NextRequest) {
             clientEmail: business.email,
             businessName: business.name,
             businessSlug: business.slug,
-            serviceName: service.name,
-            staffName: staffMember.name,
+            serviceName: service?.name ?? "Service",
+            staffName: staffMember?.name ?? "Staff",
             startsAt: booking.startsAt,
             bookingId: booking.id,
+          })
+        : Promise.resolve(),
+      business.phone
+        ? sendBookingNotificationToBusinessMessage({
+            businessId: booking.businessId,
+            bookingId: booking.id,
+            businessPhone: business.phone,
+            businessName: business.name,
+            clientName: booking.clientName,
+            serviceName: service?.name ?? "Service",
+            staffName: staffMember?.name ?? "Staff",
+            startsAt: booking.startsAt,
+            plan: business.plan as Plan,
           })
         : Promise.resolve(),
     ]);

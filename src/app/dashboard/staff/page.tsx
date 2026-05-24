@@ -2,10 +2,14 @@ import { db } from "@/db";
 import { staff } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import Link from "next/link";
-import { requireBusiness } from "@/lib/auth";
+import { requireOwner } from "@/lib/auth";
+import { StaffInviteForm } from "@/components/dashboard/StaffInviteForm";
+import { EmptyState } from "@/components/dashboard/EmptyState";
+import { Icon } from "@/components/ui/Icon";
+import { UserRoundCheck } from "lucide-react";
 
 export default async function StaffPage() {
-  const { businessId } = await requireBusiness();
+  const { businessId } = await requireOwner();
 
   const list = await db.select().from(staff).where(eq(staff.businessId, businessId));
 
@@ -17,17 +21,26 @@ export default async function StaffPage() {
           href="/dashboard/staff/new"
           className="flex items-center gap-1.5 bg-gradient-to-b from-primary/90 to-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium border-b-2 border-primary/70 shadow-sm transition-all hover:shadow-primary/30 hover:shadow-md"
         >
-          <i className="bi bi-plus text-xs" /> Add staff
+          <Icon name="plus" className="text-xs" /> Add staff
         </Link>
       </div>
 
+      <StaffInviteForm />
+
       {list.length === 0 ? (
-        <div className="bg-white border rounded-xl p-12 text-center text-muted-foreground">
-          No staff yet.{" "}
-          <Link href="/dashboard/staff/new" className="text-primary hover:underline">
-            Add your first team member →
-          </Link>
-        </div>
+        <EmptyState
+          icon={UserRoundCheck}
+          title="No staff yet"
+          description="Add team members so bookings can be assigned and availability can be managed."
+          action={
+            <Link
+              href="/dashboard/staff/new"
+              className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+            >
+              Add your first team member
+            </Link>
+          }
+        />
       ) : (
         <div className="bg-white border rounded-xl divide-y">
           {list.map((s) => (
@@ -46,7 +59,7 @@ export default async function StaffPage() {
                 href={`/dashboard/staff/${s.id}`}
                 className="flex items-center gap-1 text-xs px-2.5 py-1 rounded border font-medium text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
               >
-                <i className="bi bi-pencil" style={{ fontSize: '0.75rem' }} /> Edit
+                <Icon name="pencil" /> Edit
               </Link>
             </div>
           ))}

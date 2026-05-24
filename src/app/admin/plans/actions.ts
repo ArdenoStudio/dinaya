@@ -3,8 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { requirePlatformAdmin } from "@/lib/platform-admin";
 import {
-  getPlanConfig,
-  savePlanConfig,
+  getPlanConfigAsync,
+  savePlanConfigAsync,
   type Plan,
   type PlanConfig,
   type PlanFeature,
@@ -15,6 +15,7 @@ const FEATURE_KEYS: PlanFeature[] = [
   "aiBookingAutopilot",
   "aiContentMachine",
   "aiUpsellAssistant",
+  "aiVoiceReceptionist",
   "automations",
   "broadcasts",
   "clientReactivationCampaign",
@@ -57,7 +58,7 @@ function buildPlanEntitlements(formData: FormData, planKey: Plan) {
 
 export async function savePlans(formData: FormData): Promise<void> {
   const admin = await requirePlatformAdmin();
-  const current = getPlanConfig();
+  const current = await getPlanConfigAsync();
 
   const proMonthlyPriceLkr = Math.max(
     0,
@@ -94,7 +95,7 @@ export async function savePlans(formData: FormData): Promise<void> {
     updatedBy: admin.email,
   };
 
-  savePlanConfig(next);
+  await savePlanConfigAsync(next);
 
   await logAdminEvent({
     actorEmail: admin.email,
@@ -117,7 +118,7 @@ export async function savePlans(formData: FormData): Promise<void> {
 export async function resetPlansToDefaults(): Promise<void> {
   const admin = await requirePlatformAdmin();
   const { DEFAULT_PLAN_CONFIG } = await import("@/lib/plan");
-  savePlanConfig({
+  await savePlanConfigAsync({
     ...DEFAULT_PLAN_CONFIG,
     updatedAt: new Date().toISOString(),
     updatedBy: admin.email,

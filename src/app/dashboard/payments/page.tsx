@@ -1,13 +1,16 @@
 import { ProGate } from "@/lib/plan";
-import { requireBusiness } from "@/lib/auth";
+import { requireOwner } from "@/lib/auth";
 import { db } from "@/db";
 import { bookings, payments, services } from "@/db/schema";
 import { formatLkr } from "@/lib/utils";
 import { desc, eq } from "drizzle-orm";
 import Link from "next/link";
+import { DataTable } from "@/components/dashboard/DataTable";
+import { EmptyState } from "@/components/dashboard/EmptyState";
+import { CreditCard } from "lucide-react";
 
 export default async function PaymentsPage() {
-  const { businessId } = await requireBusiness();
+  const { businessId } = await requireOwner();
 
   const rows = await db
     .select({
@@ -45,46 +48,55 @@ export default async function PaymentsPage() {
           </Link>
         </div>
 
-        {rows.length === 0 ? (
-          <div className="rounded-xl border bg-white p-10 text-center text-sm text-muted-foreground">
-            No payment records yet. Require payment on a service to collect deposits or full payment.
-          </div>
-        ) : (
-          <div className="overflow-hidden rounded-xl border bg-white">
-            <table className="w-full text-sm">
-              <thead className="bg-muted/40 text-left text-xs uppercase tracking-wide text-muted-foreground">
-                <tr>
-                  <th className="px-4 py-3">Client</th>
-                  <th className="px-4 py-3">Service</th>
-                  <th className="px-4 py-3">Amount</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">Order</th>
-                  <th className="px-4 py-3" />
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {rows.map((row) => (
-                  <tr key={row.id}>
-                    <td className="px-4 py-3 font-medium">{row.clientName}</td>
-                    <td className="px-4 py-3 text-muted-foreground">{row.serviceName}</td>
-                    <td className="px-4 py-3 tabular-nums">{formatLkr(row.amountLkr)}</td>
-                    <td className="px-4 py-3">
-                      <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium capitalize text-primary">
-                        {row.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-xs text-muted-foreground">{row.orderId ?? "-"}</td>
-                    <td className="px-4 py-3 text-right">
-                      <Link href={`/dashboard/bookings/${row.bookingId}`} className="text-primary hover:underline">
-                        Booking
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <DataTable
+          rows={rows}
+          getRowId={(row) => row.id}
+          empty={
+            <EmptyState
+              icon={CreditCard}
+              title="No payment records yet"
+              description="Require payment on a service to collect deposits or full payment online."
+              action={
+                <Link
+                  href="/dashboard/settings"
+                  className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+                >
+                  Set up PayHere
+                </Link>
+              }
+            />
+          }
+          columns={[
+            { key: "client", header: "Client", render: (row) => <span className="font-medium">{row.clientName}</span> },
+            { key: "service", header: "Service", className: "text-muted-foreground", render: (row) => row.serviceName },
+            { key: "amount", header: "Amount", render: (row) => <span className="tabular-nums">{formatLkr(row.amountLkr)}</span> },
+            {
+              key: "status",
+              header: "Status",
+              render: (row) => (
+                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium capitalize text-primary">
+                  {row.status}
+                </span>
+              ),
+            },
+            {
+              key: "order",
+              header: "Order",
+              className: "text-xs text-muted-foreground",
+              render: (row) => row.orderId ?? "-",
+            },
+            {
+              key: "link",
+              header: "",
+              align: "right",
+              render: (row) => (
+                <Link href={`/dashboard/bookings/${row.bookingId}`} className="text-primary hover:underline">
+                  Booking
+                </Link>
+              ),
+            },
+          ]}
+        />
       </div>
     </ProGate>
   );

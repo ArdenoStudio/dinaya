@@ -1,6 +1,7 @@
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import path from "node:path";
 import type { ReactNode } from "react";
+import { Icon } from "@/components/ui/Icon";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -12,6 +13,7 @@ export type PlanFeature =
   | "aiBookingAutopilot"
   | "aiContentMachine"
   | "aiUpsellAssistant"
+  | "aiVoiceReceptionist"
   | "automations"
   | "broadcasts"
   | "clientReactivationCampaign"
@@ -80,11 +82,12 @@ const DEFAULT_FREE_ENTITLEMENTS: Entitlements = {
     aiBookingAutopilot: false,
     aiContentMachine: false,
     aiUpsellAssistant: false,
+    aiVoiceReceptionist: false,
     automations: false,
     broadcasts: false,
     clientReactivationCampaign: false,
     googleCalendarSync: false,
-    payments: false,
+    payments: true,
     publicBookingPage: true,
     publicBookingPageCustomization: false,
     reports: false,
@@ -109,6 +112,7 @@ const DEFAULT_PRO_ENTITLEMENTS: Entitlements = {
     aiBookingAutopilot: false,
     aiContentMachine: false,
     aiUpsellAssistant: false,
+    aiVoiceReceptionist: false,
     automations: true,
     broadcasts: true,
     clientReactivationCampaign: false,
@@ -119,7 +123,7 @@ const DEFAULT_PRO_ENTITLEMENTS: Entitlements = {
     reports: true,
     reviewEngine: false,
     reviews: true,
-    reviewReplies: true,
+    reviewReplies: false,
     smartReminderSystem: false,
     vipLoyaltySequence: false,
     webhooks: true,
@@ -138,6 +142,7 @@ const DEFAULT_MAX_ENTITLEMENTS: Entitlements = {
     aiBookingAutopilot: true,
     aiContentMachine: true,
     aiUpsellAssistant: true,
+    aiVoiceReceptionist: true,
     automations: true,
     broadcasts: true,
     clientReactivationCampaign: true,
@@ -161,8 +166,8 @@ export const DEFAULT_PLAN_CONFIG: PlanConfig = {
   proAnnualPriceLkr: Number(process.env.DINAYA_PRO_ANNUAL_PRICE_LKR ?? 14300),
   maxMonthlyPriceLkr: Number(process.env.DINAYA_MAX_MONTHLY_PRICE_LKR ?? 2490),
   maxAnnualPriceLkr: Number(process.env.DINAYA_MAX_ANNUAL_PRICE_LKR ?? 23900),
-  proLaunched: false,
-  maxLaunched: false,
+  proLaunched: true,
+  maxLaunched: true,
   plans: {
     free: DEFAULT_FREE_ENTITLEMENTS,
     pro: DEFAULT_PRO_ENTITLEMENTS,
@@ -171,7 +176,10 @@ export const DEFAULT_PLAN_CONFIG: PlanConfig = {
 };
 
 export const ENFORCED_FEATURES: readonly PlanFeature[] = [
+  ...AI_FEATURES,
+  "aiVoiceReceptionist",
   "automations",
+  "googleCalendarSync",
   "payments",
   "webhooks",
 ] as const;
@@ -249,13 +257,36 @@ export function invalidatePlanConfigCache(): void {
 }
 
 export function savePlanConfig(next: PlanConfig): void {
+  cached = next;
   try {
     mkdirSync(CONFIG_DIR, { recursive: true });
+    writeFileSync(CONFIG_FILE, JSON.stringify(next, null, 2), "utf8");
   } catch {
-    // ignore
+    // Vercel filesystem is read-only; DB persistence via savePlanConfigAsync is the source of truth
   }
-  writeFileSync(CONFIG_FILE, JSON.stringify(next, null, 2), "utf8");
-  cached = next;
+  void import("@/lib/platform-settings").then(({ setPlatformSetting }) =>
+    setPlatformSetting("plan_config", next, next.updatedBy).catch(() => undefined),
+  );
+}
+
+export async function getPlanConfigAsync(): Promise<PlanConfig> {
+  try {
+    const { getPlatformSetting } = await import("@/lib/platform-settings");
+    const fromDb = await getPlatformSetting<Partial<PlanConfig>>("plan_config");
+    if (fromDb?.plans?.free && fromDb?.plans?.pro) {
+      cached = mergePlanConfig(fromDb);
+      return cached;
+    }
+  } catch {
+    // fall through
+  }
+  return getPlanConfig();
+}
+
+export async function savePlanConfigAsync(next: PlanConfig): Promise<void> {
+  savePlanConfig(next);
+  const { setPlatformSetting } = await import("@/lib/platform-settings");
+  await setPlatformSetting("plan_config", next, next.updatedBy);
 }
 
 // ─── Public API ───────────────────────────────────────────────────────────────
@@ -302,8 +333,33 @@ export function isPaidPlan(plan: Plan): boolean {
   return plan === "pro" || plan === "max";
 }
 
+export function isPaidPlanAvailable(plan: PaidPlan, config: PlanConfig = getPlanConfig()): boolean {
+  return plan === "pro" ? config.proLaunched : config.maxLaunched;
+}
+
+/** Effective plan after expiry — stored plan downgrades to free when planExpiresAt is past. */
+export function resolveEffectivePlan(input: {
+  storedPlan: Plan;
+  planExpiresAt: Date | null | undefined;
+  now?: Date;
+}): Plan {
+  const now = input.now ?? new Date();
+  const stored = input.storedPlan ?? "free";
+
+  if (stored === "free") return "free";
+  if (input.planExpiresAt && input.planExpiresAt < now) return "free";
+  return stored;
+}
+
+const MAX_ONLY_FEATURES: readonly PlanFeature[] = [
+  ...AI_FEATURES,
+  "aiVoiceReceptionist",
+  "reviewReplies",
+];
+
 export function minimumPlanForFeature(feature: PlanFeature): Plan {
-  return AI_FEATURES.includes(feature) ? "max" : "pro";
+  if (MAX_ONLY_FEATURES.includes(feature)) return "max";
+  return "pro";
 }
 
 export function getEntitlements(plan: Plan): Entitlements {
@@ -342,6 +398,7 @@ const FEATURE_LABELS: Record<PlanFeature, string> = {
   aiBookingAutopilot: "AI Booking Autopilot",
   aiContentMachine: "30-Day AI Content Machine",
   aiUpsellAssistant: "AI upsell assistant",
+  aiVoiceReceptionist: "AI Voice Receptionist",
   automations: "Automations",
   broadcasts: "Broadcasts",
   clientReactivationCampaign: "Client Reactivation Campaign",
@@ -397,12 +454,18 @@ export async function getBusinessPlan(businessId: string): Promise<Plan> {
   ]);
 
   const [business] = await db
-    .select({ plan: businesses.plan })
+    .select({
+      plan: businesses.plan,
+      planExpiresAt: businesses.planExpiresAt,
+    })
     .from(businesses)
     .where(eq(businesses.id, businessId))
     .limit(1);
 
-  return (business?.plan as Plan | undefined) ?? "free";
+  return resolveEffectivePlan({
+    storedPlan: (business?.plan as Plan | undefined) ?? "free",
+    planExpiresAt: business?.planExpiresAt,
+  });
 }
 
 export async function requirePro(
@@ -453,7 +516,7 @@ export async function ProGate({
     <div className="rounded-lg border border-violet-200 bg-violet-50/70 p-5 text-sm">
       <div className="mb-2 flex items-center gap-2 font-medium text-violet-950">
         <span className="inline-flex size-8 items-center justify-center rounded-md bg-violet-600 text-white">
-          <i className="bi bi-stars text-sm" aria-hidden="true" />
+          <Icon name="stars" className="text-sm" aria-hidden="true" />
         </span>
         Upgrade to {planDisplayName(requiredPlan)}
       </div>

@@ -1,6 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3001";
+/** Use 127.0.0.1 to avoid IPv6 (::1) connection refused when the dev server binds IPv4 only. */
+const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? "http://127.0.0.1:3001";
 
 export default defineConfig({
   testDir: "./e2e",
@@ -15,6 +16,15 @@ export default defineConfig({
     trace: "on-first-retry",
     screenshot: "only-on-failure",
   },
+  // CI starts the dev server in the workflow so DATABASE_URL reaches the process.
+  webServer: process.env.CI
+    ? undefined
+    : {
+        command: "npm run dev -- -p 3001",
+        url: baseURL,
+        reuseExistingServer: true,
+        timeout: 120_000,
+      },
   projects: [
     {
       name: "chromium",

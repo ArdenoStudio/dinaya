@@ -1,22 +1,49 @@
 import Link from "next/link";
+import { and, count, eq } from "drizzle-orm";
 import { db } from "@/db";
-import { businesses, webhooks } from "@/db/schema";
-import { requireBusiness } from "@/lib/auth";
-import { count, eq } from "drizzle-orm";
+import { businesses, socialConnections, webhooks } from "@/db/schema";
+import { requireOwner } from "@/lib/auth";
+import { CustomDomainPanel } from "@/components/dashboard/CustomDomainPanel";
+import { GoogleCalendarDisconnect } from "@/components/dashboard/GoogleCalendarDisconnect";
+import { GOOGLE_PROVIDER, googleOAuthConfigured } from "@/lib/google-calendar";
 
 export default async function IntegrationsPage() {
-  const { businessId } = await requireBusiness();
-  const [[business], [{ webhookCount }]] = await Promise.all([
+  const { businessId } = await requireOwner();
+  const [[business], [{ webhookCount }], [{ googleCount }]] = await Promise.all([
     db
       .select({
         payhereEnabled: businesses.payhereEnabled,
         payhereMerchantId: businesses.payhereMerchantId,
+        customDomain: businesses.customDomain,
+        customDomainVerified: businesses.customDomainVerified,
+        customDomainVerificationToken: businesses.customDomainVerificationToken,
+        customDomainStatus: businesses.customDomainStatus,
+        customDomainError: businesses.customDomainError,
+        customDomainConfig: businesses.customDomainConfig,
+        customDomainVerification: businesses.customDomainVerification,
       })
       .from(businesses)
       .where(eq(businesses.id, businessId))
       .limit(1),
     db.select({ webhookCount: count() }).from(webhooks).where(eq(webhooks.businessId, businessId)),
+    db
+      .select({ googleCount: count() })
+      .from(socialConnections)
+      .where(
+        and(
+          eq(socialConnections.businessId, businessId),
+          eq(socialConnections.provider, GOOGLE_PROVIDER),
+          eq(socialConnections.isActive, true),
+        ),
+      ),
   ]);
+
+  const googleConnected = Number(googleCount) > 0;
+  const googleStatus = !googleOAuthConfigured()
+    ? "Env required"
+    : googleConnected
+      ? "Connected"
+      : "Not connected";
 
   const integrations = [
     {
@@ -34,6 +61,13 @@ export default async function IntegrationsPage() {
       action: "Manage",
     },
     {
+      name: "Google Calendar",
+      description: "Push confirmed bookings to your Google Calendar.",
+      status: googleStatus,
+      href: googleConnected ? "/dashboard/settings/integrations" : "/api/dashboard/integrations/google",
+      action: googleConnected ? "Connected" : googleOAuthConfigured() ? "Connect" : "Configure env",
+    },
+    {
       name: "Resend",
       description: "Transactional email for confirmations, reminders, and automations.",
       status: process.env.RESEND_API_KEY ? "Configured" : "Env required",
@@ -41,25 +75,25 @@ export default async function IntegrationsPage() {
       action: "Use in automations",
     },
     {
-      name: "Google Calendar",
-      description: "Two-way calendar sync per staff member.",
-      status: "Phase 2 adapter",
-      href: "/dashboard/settings/integrations",
-      action: "Roadmap",
+      name: "WhatsApp / SMS",
+      description: "AI reminders and campaigns through Meta WhatsApp or a configured local SMS gateway.",
+      status: process.env.META_WHATSAPP_TOKEN || process.env.SMS_HTTP_ENDPOINT ? "Configured" : "Env required",
+      href: "/dashboard/automations",
+      action: "Use in AI Hub",
     },
     {
-      name: "WhatsApp / SMS",
-      description: "Reminder and broadcast adapters for Meta, Twilio, or local SMS providers.",
-      status: "Phase 2 adapter",
-      href: "/dashboard/automations",
-      action: "Roadmap",
+      name: "AI Voice Receptionist",
+      description: "Let callers ask questions and book appointments through a managed phone agent.",
+      status: "Max add-on",
+      href: "/dashboard/settings/voice-receptionist",
+      action: "Set up",
     },
     {
       name: "API keys",
-      description: "Scoped API access for custom integrations.",
-      status: "Phase 3",
-      href: "/dashboard/settings/integrations",
-      action: "Roadmap",
+      description: "Scoped API access for custom integrations and /api/v1 routes.",
+      status: "Available",
+      href: "/dashboard/settings/api-keys",
+      action: "Manage keys",
     },
   ];
 
@@ -84,12 +118,46 @@ export default async function IntegrationsPage() {
                 {item.status}
               </span>
             </div>
-            <Link href={item.href} className="mt-4 inline-flex text-sm font-medium text-primary hover:underline">
-              {item.action}
-            </Link>
+            {item.name === "Google Calendar" && googleConnected ? (
+              <GoogleCalendarDisconnect />
+            ) : (
+              <Link href={item.href} className="mt-4 inline-flex text-sm font-medium text-primary hover:underline">
+                {item.action}
+              </Link>
+            )}
           </div>
         ))}
       </div>
+
+      <CustomDomainPanel
+        initialDomain={business?.customDomain ?? null}
+        initialVerified={Boolean(business?.customDomainVerified)}
+        initialStatus={business?.customDomainStatus ?? "none"}
+        initialError={business?.customDomainError ?? null}
+        initialVerificationHost={
+          business?.customDomain && business.customDomainVerificationToken
+            ? `_dinaya-verify.${business.customDomain}`
+            : null
+        }
+        initialVerificationValue={
+          business?.customDomainVerificationToken
+            ? `dinaya-verify=${business.customDomainVerificationToken}`
+            : null
+        }
+        initialDnsInstructions={
+          typeof business?.customDomainConfig === "object" &&
+          business.customDomainConfig &&
+          "dnsInstructions" in business.customDomainConfig &&
+          Array.isArray(business.customDomainConfig.dnsInstructions)
+            ? business.customDomainConfig.dnsInstructions
+            : []
+        }
+        initialVercelVerification={
+          Array.isArray(business?.customDomainVerification)
+            ? business.customDomainVerification
+            : []
+        }
+      />
     </div>
   );
 }

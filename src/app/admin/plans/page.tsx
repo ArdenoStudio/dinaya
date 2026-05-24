@@ -5,10 +5,11 @@ import { db } from "@/db";
 import { businesses, subscriptions } from "@/db/schema";
 import {
   ENFORCED_FEATURES,
-  getPlanConfig,
+  getPlanConfigAsync,
   type Plan,
   type PlanFeature,
 } from "@/lib/plan";
+import { safeAdminQuery } from "@/lib/admin-db";
 import { formatLkr } from "@/lib/utils";
 import { requirePlatformAdmin } from "@/lib/platform-admin";
 import { resetPlansToDefaults, savePlans } from "./actions";
@@ -19,6 +20,7 @@ const FEATURE_LABELS: Record<PlanFeature, string> = {
   aiBookingAutopilot: "AI Booking Autopilot",
   aiContentMachine: "30-Day AI Content Machine",
   aiUpsellAssistant: "AI upsell assistant",
+  aiVoiceReceptionist: "AI Voice Receptionist",
   automations: "Automations",
   broadcasts: "Broadcasts",
   clientReactivationCampaign: "Client Reactivation Campaign",
@@ -52,6 +54,7 @@ const FEATURE_ORDER: PlanFeature[] = [
   "aiUpsellAssistant",
   "aiContentMachine",
   "vipLoyaltySequence",
+  "aiVoiceReceptionist",
   "googleCalendarSync",
   "reports",
   "webhooks",
@@ -67,7 +70,7 @@ function limitInputValue(v: number | null): string {
 
 export default async function AdminPlansPage() {
   await requirePlatformAdmin();
-  const config = getPlanConfig();
+  const config = await getPlanConfigAsync();
 
   const [
     [{ freeCount }],
@@ -76,14 +79,29 @@ export default async function AdminPlansPage() {
     [{ activeSubCount }],
     [{ activeMrr }],
   ] = await Promise.all([
-    db.select({ freeCount: count() }).from(businesses).where(eq(businesses.plan, "free")),
-    db.select({ proCount: count() }).from(businesses).where(eq(businesses.plan, "pro")),
-    db.select({ maxCount: count() }).from(businesses).where(eq(businesses.plan, "max")),
-    db.select({ activeSubCount: count() }).from(subscriptions).where(eq(subscriptions.status, "active")),
-    db
+    safeAdminQuery(
+      db.select({ freeCount: count() }).from(businesses).where(eq(businesses.plan, "free")),
+      [{ freeCount: 0 }] as { freeCount: number }[],
+    ),
+    safeAdminQuery(
+      db.select({ proCount: count() }).from(businesses).where(eq(businesses.plan, "pro")),
+      [{ proCount: 0 }] as { proCount: number }[],
+    ),
+    safeAdminQuery(
+      db.select({ maxCount: count() }).from(businesses).where(eq(businesses.plan, "max")),
+      [{ maxCount: 0 }] as { maxCount: number }[],
+    ),
+    safeAdminQuery(
+      db.select({ activeSubCount: count() }).from(subscriptions).where(eq(subscriptions.status, "active")),
+      [{ activeSubCount: 0 }] as { activeSubCount: number }[],
+    ),
+    safeAdminQuery(
+      db
       .select({ activeMrr: sql<number>`coalesce(sum(${subscriptions.amountLkr}), 0)::int` })
       .from(subscriptions)
       .where(eq(subscriptions.status, "active")),
+      [{ activeMrr: 0 }] as { activeMrr: number }[],
+    ),
   ]);
 
   const total = Number(freeCount) + Number(proCount) + Number(maxCount);
@@ -106,7 +124,7 @@ export default async function AdminPlansPage() {
           )}
         </div>
         <p className="mt-1 text-sm text-muted-foreground">
-          Edit limits, features, and Pro price. Changes save to{" "}
+          Edit limits, AI access, features, and paid plan prices. Changes save to{" "}
           <code className="rounded bg-muted px-1 text-xs">.dinaya/plans.json</code>{" "}
           and apply instantly.
         </p>
@@ -355,9 +373,8 @@ export default async function AdminPlansPage() {
 
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-white p-4">
           <p className="text-xs text-muted-foreground">
-            Saving writes to <code className="rounded bg-muted px-1">.dinaya/plans.json</code>. On
-            production (Vercel), the filesystem is read-only — this file works for local dev.
-            A DB-backed config is on the roadmap.
+            Saves to Postgres (<code className="rounded bg-muted px-1">platform_settings</code>) and
+            mirrors to <code className="rounded bg-muted px-1">.dinaya/plans.json</code> for local dev.
           </p>
           <div className="flex gap-2">
             <button

@@ -9,7 +9,7 @@ interface LogoProps {
 const ICON_SIZES = { sm: 18, md: 22, lg: 30 };
 const TEXT_CLASSES = { sm: "text-base", md: "text-lg", lg: "text-xl" };
 
-function LogoIcon({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
+export function LogoIcon({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
   const px = ICON_SIZES[size];
   return (
     <svg

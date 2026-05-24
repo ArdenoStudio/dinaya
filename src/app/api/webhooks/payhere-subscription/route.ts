@@ -83,6 +83,10 @@ export async function POST(req: NextRequest) {
         .update(subscriptions)
         .set({ status: "cancelled", cancelledAt: new Date() })
         .where(eq(subscriptions.id, sub.id));
+
+      if (sub.status === "pending") {
+        break;
+      }
       break;
     }
     case "-2": {

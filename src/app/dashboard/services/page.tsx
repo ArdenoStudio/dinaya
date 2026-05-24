@@ -3,10 +3,13 @@ import { services } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import Link from "next/link";
 import { formatLkr } from "@/lib/utils";
-import { requireBusiness } from "@/lib/auth";
+import { requireOwner } from "@/lib/auth";
+import { Icon } from "@/components/ui/Icon";
+import { EmptyState } from "@/components/dashboard/EmptyState";
+import { Scissors } from "lucide-react";
 
 export default async function ServicesPage() {
-  const { businessId } = await requireBusiness();
+  const { businessId } = await requireOwner();
 
   const list = await db
     .select({
@@ -34,17 +37,24 @@ export default async function ServicesPage() {
           href="/dashboard/services/new"
           className="flex items-center gap-1.5 bg-gradient-to-b from-primary/90 to-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium border-b-2 border-primary/70 shadow-sm transition-all hover:shadow-primary/30 hover:shadow-md"
         >
-          <i className="bi bi-plus text-xs" /> Add service
+          <Icon name="plus" className="text-xs" /> Add service
         </Link>
       </div>
 
       {list.length === 0 ? (
-        <div className="bg-white border rounded-xl p-12 text-center text-muted-foreground">
-          No services yet.{" "}
-          <Link href="/dashboard/services/new" className="text-primary hover:underline">
-            Add your first service →
-          </Link>
-        </div>
+        <EmptyState
+          icon={Scissors}
+          title="No services yet"
+          description="Add the services clients can book — price, duration, and deposit rules."
+          action={
+            <Link
+              href="/dashboard/services/new"
+              className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+            >
+              Add your first service
+            </Link>
+          }
+        />
       ) : (
         <div className="bg-white border rounded-xl divide-y">
           {list.map((s) => (
@@ -56,11 +66,11 @@ export default async function ServicesPage() {
                 )}
                 <div className="flex items-center gap-3 mt-1.5 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1">
-                    <i className="bi bi-clock" style={{ fontSize: '0.75rem' }} />
+                    <Icon name="clock" />
                     {s.durationMinutes} min
                   </span>
                   <span className="flex items-center gap-1">
-                    <i className="bi bi-credit-card" style={{ fontSize: '0.75rem' }} />
+                    <Icon name="credit-card" />
                     {s.priceLkr > 0 ? formatLkr(s.priceLkr) : "Free"}
                   </span>
                   {s.requiresPayment && (
@@ -86,7 +96,7 @@ export default async function ServicesPage() {
                   href={`/dashboard/services/${s.id}`}
                   className="flex items-center gap-1 text-xs px-2.5 py-1 rounded border font-medium text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
                 >
-                  <i className="bi bi-pencil" style={{ fontSize: '0.75rem' }} /> Edit
+                  <Icon name="pencil" /> Edit
                 </Link>
               </div>
             </div>

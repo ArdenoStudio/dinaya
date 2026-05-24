@@ -1,0 +1,65 @@
+import { describe, expect, it } from "vitest";
+import { getAvailableSlots } from "./availability";
+
+describe("getAvailableSlots", () => {
+  it("returns slots within recurring availability", () => {
+    const date = "2026-06-02"; // Tuesday
+    const slots = getAvailableSlots({
+      date,
+      durationMinutes: 30,
+      staffAvailability: [
+        { id: "1", staffId: "s1", dayOfWeek: 2, startTime: "09:00", endTime: "10:00" },
+      ],
+      overrides: [],
+      existingBookings: [],
+    });
+
+    expect(slots.length).toBeGreaterThan(0);
+    expect(slots[0]?.startLocal).toBe("09:00");
+  });
+
+  it("returns no slots when the day is fully blocked", () => {
+    const slots = getAvailableSlots({
+      date: "2026-06-02",
+      durationMinutes: 30,
+      staffAvailability: [
+        { id: "1", staffId: "s1", dayOfWeek: 2, startTime: "09:00", endTime: "17:00" },
+      ],
+      overrides: [
+        {
+          id: "o1",
+          staffId: "s1",
+          date: "2026-06-02",
+          isBlocked: true,
+          startTime: null,
+          endTime: null,
+          reason: null,
+        },
+      ],
+      existingBookings: [],
+    });
+
+    expect(slots).toEqual([]);
+  });
+
+  it("excludes slots that overlap existing bookings", () => {
+    const date = "2026-06-02";
+    const slots = getAvailableSlots({
+      date,
+      durationMinutes: 30,
+      staffAvailability: [
+        { id: "1", staffId: "s1", dayOfWeek: 2, startTime: "09:00", endTime: "10:00" },
+      ],
+      overrides: [],
+      existingBookings: [
+        {
+          startsAt: new Date("2026-06-02T03:30:00.000Z"),
+          endsAt: new Date("2026-06-02T04:00:00.000Z"),
+          status: "confirmed",
+        },
+      ],
+    });
+
+    expect(slots.some((slot) => slot.startLocal === "09:00")).toBe(false);
+  });
+});

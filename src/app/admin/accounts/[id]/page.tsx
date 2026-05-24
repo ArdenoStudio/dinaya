@@ -25,8 +25,14 @@ import {
   subscriptions,
   users,
 } from "@/db/schema";
+import {
+  adminBusinessProfileSelect,
+  adminSubscriptionHistorySelect,
+  safeAdminQuery,
+} from "@/lib/admin-db";
 import { formatLkr } from "@/lib/utils";
 import { requirePlatformAdmin } from "@/lib/platform-admin";
+import { AccountModerationPanel } from "./AccountModerationPanel";
 
 export const dynamic = "force-dynamic";
 
@@ -39,7 +45,7 @@ export default async function AdminAccountDetailPage({
   const { id } = await params;
 
   const [biz] = await db
-    .select()
+    .select(adminBusinessProfileSelect)
     .from(businesses)
     .where(eq(businesses.id, id))
     .limit(1);
@@ -96,11 +102,14 @@ export default async function AdminAccountDetailPage({
       .from(users)
       .where(eq(users.businessId, id))
       .orderBy(desc(users.createdAt)),
-    db
-      .select()
-      .from(subscriptions)
-      .where(eq(subscriptions.businessId, id))
-      .orderBy(desc(subscriptions.createdAt)),
+    safeAdminQuery(
+      db
+        .select(adminSubscriptionHistorySelect)
+        .from(subscriptions)
+        .where(eq(subscriptions.businessId, id))
+        .orderBy(desc(subscriptions.createdAt)),
+      [],
+    ),
     db
       .select({
         id: bookings.id,
@@ -177,11 +186,23 @@ export default async function AdminAccountDetailPage({
                 className={
                   biz.plan === "pro"
                     ? "rounded-full bg-primary/10 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-primary"
+                    : biz.plan === "max"
+                      ? "rounded-full bg-amber-500/10 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-amber-700"
                     : "rounded-full bg-muted px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-muted-foreground"
                 }
               >
                 {biz.plan}
               </span>
+              {biz.deletedAt && (
+                <span className="rounded-full bg-rose-500/10 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-rose-700">
+                  Deleted
+                </span>
+              )}
+              {!biz.deletedAt && biz.isSuspended && (
+                <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-amber-700">
+                  Suspended
+                </span>
+              )}
             </div>
             <p className="mt-1 text-sm text-muted-foreground">
               /{biz.slug} · joined {format(biz.createdAt, "d MMM yyyy")}
@@ -353,12 +374,11 @@ export default async function AdminAccountDetailPage({
             )}
           </div>
 
-          <div className="rounded-xl border border-rose-500/20 bg-rose-50/50 p-5">
-            <h2 className="mb-2 text-sm font-semibold text-rose-900">Danger zone</h2>
-            <p className="text-xs text-rose-900/70">
-              Suspend, impersonate, and delete actions will be wired up here. Coming soon.
-            </p>
-          </div>
+          <AccountModerationPanel
+            businessId={biz.id}
+            isSuspended={biz.isSuspended}
+            deletedAt={biz.deletedAt ? biz.deletedAt.toISOString() : null}
+          />
         </div>
       </div>
     </div>

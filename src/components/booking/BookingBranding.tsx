@@ -19,9 +19,11 @@ function DinayaMark({ size = 13 }: { size?: number }) {
 
 interface Props {
   copy: BookingCopy;
+  hideBranding?: boolean;
 }
 
-export default function BookingBranding({ copy }: Props) {
+export default function BookingBranding({ copy, hideBranding = false }: Props) {
+  if (hideBranding) return null;
   return (
     <div className="flex items-center justify-center border-t border-gray-100 bg-white px-4 py-4 md:px-8 md:py-5">
       <Link

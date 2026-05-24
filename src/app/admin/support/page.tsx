@@ -1,8 +1,11 @@
 import { desc, eq, ilike, or } from "drizzle-orm";
 import { LifeBuoy, Search } from "lucide-react";
+import Link from "next/link";
 import { db } from "@/db";
 import { businesses, users } from "@/db/schema";
+import { safeAdminQuery } from "@/lib/admin-db";
 import { requirePlatformAdmin } from "@/lib/platform-admin";
+import { RefundPaymentForm } from "./RefundPaymentForm";
 import { SupportClient } from "./SupportClient";
 
 export const dynamic = "force-dynamic";
@@ -20,19 +23,28 @@ export default async function AdminSupportPage({
     ? or(ilike(users.email, `%${q}%`), ilike(users.name, `%${q}%`), ilike(businesses.name, `%${q}%`))
     : undefined;
 
-  const rows = await db
-    .select({
-      id: users.id,
-      name: users.name,
-      email: users.email,
-      role: users.role,
-      businessName: businesses.name,
-    })
-    .from(users)
-    .innerJoin(businesses, eq(businesses.id, users.businessId))
-    .where(whereExpr)
-    .orderBy(desc(users.createdAt))
-    .limit(50);
+  const rows = await safeAdminQuery(
+    db
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        role: users.role,
+        businessName: businesses.name,
+      })
+      .from(users)
+      .innerJoin(businesses, eq(businesses.id, users.businessId))
+      .where(whereExpr)
+      .orderBy(desc(users.createdAt))
+      .limit(50),
+    [] as {
+      id: string;
+      name: string;
+      email: string;
+      role: "owner" | "staff";
+      businessName: string;
+    }[],
+  );
 
   return (
     <div className="space-y-6">
@@ -45,7 +57,7 @@ export default async function AdminSupportPage({
           </span>
         </div>
         <p className="mt-1 text-sm text-muted-foreground">
-          Resetting a password generates a one-time temporary password to share with the user.
+          Password resets, read-only impersonation, payment refunds, and webhook replay tools.
           All actions are recorded in the security audit log.
         </p>
       </div>
@@ -68,14 +80,17 @@ export default async function AdminSupportPage({
 
       <SupportClient users={rows} />
 
-      <div className="rounded-xl border border-amber-500/20 bg-amber-50/60 p-4 text-xs text-amber-900">
-        <p className="font-semibold">Other support actions — coming soon</p>
-        <ul className="mt-1 list-disc pl-5 text-amber-900/80">
-          <li>Impersonate a user (read-only session)</li>
-          <li>Suspend / unsuspend an account</li>
-          <li>Manually refund a booking payment</li>
-          <li>Replay failed PayHere or webhook deliveries</li>
-        </ul>
+      <RefundPaymentForm />
+
+      <div className="rounded-xl border bg-white p-5 text-sm">
+        <p className="font-semibold">Webhook replay</p>
+        <p className="mt-1 text-muted-foreground">
+          Failed webhook deliveries can be replayed from the{" "}
+          <Link href="/admin/webhooks" className="text-primary hover:underline">
+            webhook deliveries
+          </Link>{" "}
+          page.
+        </p>
       </div>
     </div>
   );

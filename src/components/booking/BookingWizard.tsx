@@ -1,8 +1,10 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
+import Image from "next/image";
 import { format, parseISO } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
+import { Icon } from "@/components/ui/Icon";
 import type { Location, Staff } from "@/db/schema";
 import StepService from "./StepService";
 import StepLocation from "./StepLocation";
@@ -12,8 +14,9 @@ import StaffPicker from "./StaffPicker";
 import BookingDesktopSummary from "./BookingDesktopSummary";
 import { getBookingCopy } from "@/lib/i18n";
 import { getEligibleStaff, pickDefaultStaff } from "@/lib/booking-staff";
-import { formatLkr } from "@/lib/utils";
+import { formatLkr, isOptimizableRemoteImage } from "@/lib/utils";
 import BookingBranding from "./BookingBranding";
+import { BookingAttributionCapture } from "./BookingAttributionCapture";
 
 const COLOMBO_TZ = "Asia/Colombo";
 
@@ -26,6 +29,7 @@ interface Props {
   locations: Pick<Location, "id" | "name" | "address">[];
   bookingUrlLabel: string;
   businessIcon?: string | null;
+  showBranding?: boolean;
 }
 
 export type BookingBusiness = {
@@ -39,6 +43,7 @@ export type BookingBusiness = {
   payhereEnabled?: boolean;
   slug: string;
   logoUrl?: string | null;
+  hideBranding?: boolean;
 };
 
 export type BookingService = {
@@ -83,6 +88,7 @@ export default function BookingWizard({
   locations,
   bookingUrlLabel,
   businessIcon,
+  showBranding = true,
 }: Props) {
   const copy = getBookingCopy(business.language);
   const needsLocationPicker = locations.length > 1;
@@ -176,7 +182,7 @@ export default function BookingWizard({
     if (confirmed.payhereFormData && confirmed.payhereUrl) {
       return (
         <SuccessPanel
-          icon="bi-credit-card"
+          icon="credit-card"
           title="Redirecting to payment..."
           body="You'll be taken to PayHere to complete your booking."
         >
@@ -197,7 +203,7 @@ export default function BookingWizard({
 
     return (
       <SuccessPanel
-        icon="bi-check-circle-fill"
+        icon="check-circle-fill"
         title={confirmed.manualPayment ? "Booking request received" : "Booking confirmed!"}
         body={
           confirmed.manualPayment
@@ -220,6 +226,7 @@ export default function BookingWizard({
 
   return (
     <div className="overflow-hidden md:rounded-2xl md:border md:border-gray-100/80 md:bg-white md:shadow-[0_24px_64px_-12px_rgba(37,99,235,0.12),0_8px_24px_-8px_rgba(0,0,0,0.08)]">
+      <BookingAttributionCapture businessId={business.id} />
       {/* Mobile header + progress */}
       <div className="bg-blue-600 px-[18px] pt-5 pb-[18px] md:hidden">
         <BusinessIdentity
@@ -257,7 +264,7 @@ export default function BookingWizard({
                 {copy.availableToday}
               </div>
               <span className="flex items-center gap-1.5 font-mono text-xs text-blue-200/80">
-                <i className="bi bi-lock-fill text-[10px] text-blue-300" />
+                <Icon name="lock-fill" className="text-[10px] text-blue-300" />
                 {bookingUrlLabel}
               </span>
             </div>
@@ -390,7 +397,7 @@ export default function BookingWizard({
         />
       )}
 
-      <BookingBranding copy={copy} />
+      {showBranding && <BookingBranding copy={copy} hideBranding={business.hideBranding} />}
     </div>
   );
 }
@@ -432,7 +439,7 @@ function DesktopProgressBar({
                   : "bg-white text-gray-400 ring-1 ring-gray-200"
               }`}
             >
-              {done ? <i className="bi bi-check-lg text-xs" /> : i + 1}
+              {done ? <Icon name="check-lg" className="text-xs" /> : i + 1}
             </span>
             <span
               className={`whitespace-nowrap text-sm font-semibold ${
@@ -514,7 +521,7 @@ function ProgressPills({
               }`}
             >
               {done ? (
-                <i className="bi bi-check-lg text-[9px]" />
+                <Icon name="check-lg" className="text-[9px]" />
               ) : (
                 <span
                   className={`inline-block size-[8px] rounded-full ${active ? "bg-blue-300" : "bg-white/30"}`}
@@ -573,12 +580,15 @@ function BusinessAvatar({
 }) {
   const dim = size === "lg" ? "size-12 rounded-xl" : "size-[42px] rounded-[13px]";
   if (logoUrl) {
+    const pixelSize = size === "lg" ? 48 : 42;
     return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
+      <Image
         src={logoUrl}
         alt={name}
+        width={pixelSize}
+        height={pixelSize}
         className={`${dim} shrink-0 object-cover ${onDark ? "ring-2 ring-white/30" : "ring-1 ring-white/25"}`}
+        unoptimized={!isOptimizableRemoteImage(logoUrl)}
       />
     );
   }
@@ -591,7 +601,7 @@ function BusinessAvatar({
       }`}
     >
       {icon ? (
-        <i className={`bi ${icon} text-white ${size === "lg" ? "text-xl" : "text-[18px]"}`} />
+        <Icon name={icon} className={`text-white ${size === "lg" ? "text-xl" : "text-[18px]"}`} />
       ) : (
         <span className={`font-bold text-white ${size === "lg" ? "text-xl" : "text-lg"}`}>
           {name.charAt(0).toUpperCase()}
@@ -617,7 +627,7 @@ function SuccessPanel({
   return (
     <div className="rounded-2xl bg-white p-10 text-center md:border md:border-gray-100 md:shadow-sm">
       <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-blue-50">
-        <i className={`bi ${icon} text-2xl text-blue-600`} />
+        <Icon name={icon} className="text-2xl text-blue-600" />
       </div>
       <h2 className="mb-2 font-cal text-xl">{title}</h2>
       <p className="mb-6 text-pretty text-sm text-gray-500">{body}</p>

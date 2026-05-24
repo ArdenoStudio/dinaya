@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { Search } from "lucide-react";
 import { db } from "@/db";
 import { activityLog, businesses, users } from "@/db/schema";
+import { safeAdminQuery } from "@/lib/admin-db";
 import { requirePlatformAdmin } from "@/lib/platform-admin";
 
 export const dynamic = "force-dynamic";
@@ -25,7 +26,8 @@ export default async function AdminActivityPage({
   const whereExpr =
     searchExpr && entityExpr ? and(searchExpr, entityExpr) : searchExpr ?? entityExpr;
 
-  const rows = await db
+  const rows = await safeAdminQuery(
+    db
     .select({
       id: activityLog.id,
       entity: activityLog.entity,
@@ -42,7 +44,9 @@ export default async function AdminActivityPage({
     .leftJoin(users, eq(users.id, activityLog.actorUserId))
     .where(whereExpr)
     .orderBy(desc(activityLog.createdAt))
-    .limit(150);
+    .limit(150),
+    [],
+  );
 
   return (
     <div className="space-y-6">

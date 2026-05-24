@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { Search } from "lucide-react";
 import { db } from "@/db";
 import { businesses, users } from "@/db/schema";
+import { safeAdminQuery } from "@/lib/admin-db";
 import { requirePlatformAdmin, isPlatformAdmin } from "@/lib/platform-admin";
 
 export const dynamic = "force-dynamic";
@@ -30,7 +31,8 @@ export default async function AdminUsersPage({
   const whereExpr =
     searchExpr && roleExpr ? and(searchExpr, roleExpr) : searchExpr ?? roleExpr;
 
-  const rows = await db
+  const rows = await safeAdminQuery(
+    db
     .select({
       id: users.id,
       name: users.name,
@@ -45,9 +47,14 @@ export default async function AdminUsersPage({
     .innerJoin(businesses, eq(businesses.id, users.businessId))
     .where(whereExpr)
     .orderBy(desc(users.createdAt))
-    .limit(200);
+    .limit(200),
+    [],
+  );
 
-  const [{ totalUsers }] = await db.select({ totalUsers: count() }).from(users);
+  const [{ totalUsers }] = await safeAdminQuery(
+    db.select({ totalUsers: count() }).from(users),
+    [{ totalUsers: 0 }] as { totalUsers: number }[],
+  );
 
   const roleChips: { value: "all" | "owner" | "staff"; label: string }[] = [
     { value: "all", label: "All" },

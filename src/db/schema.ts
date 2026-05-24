@@ -16,7 +16,7 @@ import {
   smallint,
   uniqueIndex,
 } from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 
 // ─── Enums ────────────────────────────────────────────────────────────────────
 
@@ -56,12 +56,19 @@ export const clients = pgTable("clients", {
   source: varchar("source", { length: 100 }),
   tags: text("tags").array(),
   internalNotes: text("internal_notes"),
+  communicationOptOut: boolean("communication_opt_out").default(false).notNull(),
+  lastAiContactAt: timestamp("last_ai_contact_at"),
+  loyaltyTier: varchar("loyalty_tier", { length: 40 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 }, (table) => {
   return {
     businessPhoneUnique: uniqueIndex("clients_business_id_phone_unique").on(
       table.businessId,
       table.phone
+    ),
+    businessCreatedAtIdx: index("clients_business_created_at_idx").on(
+      table.businessId,
+      table.createdAt,
     ),
   };
 });
@@ -101,9 +108,28 @@ export const businesses = pgTable("businesses", {
   galleryImages: text("gallery_images").array(),
   plan: planEnum("plan").default("free").notNull(),
   planExpiresAt: timestamp("plan_expires_at"),
+  customDomain: varchar("custom_domain", { length: 255 }),
+  customDomainVerified: boolean("custom_domain_verified").default(false).notNull(),
+  customDomainVerificationToken: varchar("custom_domain_verification_token", { length: 64 }),
+  customDomainStatus: varchar("custom_domain_status", { length: 40 }).default("none").notNull(),
+  customDomainLastCheckedAt: timestamp("custom_domain_last_checked_at"),
+  customDomainError: text("custom_domain_error"),
+  customDomainConfig: jsonb("custom_domain_config"),
+  customDomainVerification: jsonb("custom_domain_verification"),
+  isSuspended: boolean("is_suspended").default(false).notNull(),
+  deletedAt: timestamp("deleted_at"),
   payhereEnabled: boolean("payhere_enabled").default(false).notNull(),
   payhereMerchantId: varchar("payhere_merchant_id", { length: 100 }),
   payhereMerchantSecret: text("payhere_merchant_secret"),
+  hideDinayaBranding: boolean("hide_dinaya_branding").default(false).notNull(),
+  directoryListed: boolean("directory_listed").default(false).notNull(),
+  directoryCity: varchar("directory_city", { length: 80 }),
+  directoryDistrict: varchar("directory_district", { length: 80 }),
+  directoryCategory: varchar("directory_category", { length: 80 }),
+  referralCode: varchar("referral_code", { length: 40 }),
+  referredByBusinessId: uuid("referred_by_business_id"),
+  onboardingCompletedAt: timestamp("onboarding_completed_at"),
+  onboardingStep: integer("onboarding_step").default(0).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -126,8 +152,10 @@ export const locations = pgTable("locations", {
   aiConfig: jsonb("ai_config").default({}).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 }, (table) => ({
+  // Partial index: allows multiple rows with NULL slug (no slug assigned yet)
   businessSlugUnique: uniqueIndex("locations_business_slug_unique")
-    .on(table.businessId, table.slug),
+    .on(table.businessId, table.slug)
+    .where(sql`"slug" IS NOT NULL`),
 }));
 
 export const staffLocations = pgTable("staff_locations", {
@@ -145,6 +173,7 @@ export const staffLocations = pgTable("staff_locations", {
 // ─── Pro subscriptions (Dinaya billing its own customers) ───────────────────
 
 export const subscriptionStatusEnum = pgEnum("subscription_status", [
+  "pending",
   "active",
   "past_due",
   "cancelled",
@@ -328,8 +357,11 @@ export const businessHolidays = pgTable("business_holidays", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 }, (table) => {
   return {
-    businessDateUnique: uniqueIndex("business_holidays_business_id_date_unique").on(
+    // Unique per (business, branch, date). NULL location_id = business-wide holiday;
+    // the COALESCE sentinel in migration 0009 ensures those are still unique per date.
+    businessLocationDateUnique: uniqueIndex("business_holidays_business_id_location_id_date_unique").on(
       table.businessId,
+      table.locationId,
       table.date
     ),
   };
@@ -359,11 +391,51 @@ export const bookings = pgTable("bookings", {
   endsAt: timestamp("ends_at", { withTimezone: true }).notNull(),
   status: bookingStatusEnum("status").default("pending").notNull(),
   source: varchar("source", { length: 40 }).default("public").notNull(),
+  attribution: jsonb("attribution"),
   notes: text("notes"),
   staffNotes: text("staff_notes"),
   reminderSentAt: timestamp("reminder_sent_at"),
+  cancelledAt: timestamp("cancelled_at"),
+  cancellationReason: text("cancellation_reason"),
+  googleCalendarEventId: varchar("google_calendar_event_id", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (table) => ({
+  businessStartsAtIdx: index("bookings_business_starts_at_idx").on(
+    table.businessId,
+    table.startsAt,
+  ),
+  businessStatusStartsAtIdx: index("bookings_business_status_starts_at_idx").on(
+    table.businessId,
+    table.status,
+    table.startsAt,
+  ),
+  staffStartsAtIdx: index("bookings_staff_starts_at_idx").on(
+    table.staffId,
+    table.startsAt,
+  ),
+}));
+
+export const bookingNotifications = pgTable("booking_notifications", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  bookingId: uuid("booking_id")
+    .notNull()
+    .references(() => bookings.id, { onDelete: "cascade" }),
+  type: varchar("type", { length: 40 }).notNull(),
+  channel: varchar("channel", { length: 20 }).notNull(),
+  status: varchar("status", { length: 20 }).default("pending").notNull(),
+  provider: varchar("provider", { length: 40 }),
+  providerMessageId: varchar("provider_message_id", { length: 180 }),
+  error: text("error"),
+  sentAt: timestamp("sent_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  bookingTypeChannelUnique: uniqueIndex("booking_notifications_booking_type_channel_unique").on(
+    table.bookingId,
+    table.type,
+    table.channel
+  ),
+  typeSentAtIdx: index("booking_notifications_type_sent_at_idx").on(table.type, table.sentAt),
+}));
 
 // ─── Reviews ──────────────────────────────────────────────────────────────────
 
@@ -376,11 +448,19 @@ export const reviews = pgTable("reviews", {
   clientName: varchar("client_name", { length: 100 }).notNull(),
   rating: smallint("rating").notNull(), // 1–5
   comment: text("comment"),
+  ownerReply: text("owner_reply"),
+  ownerRepliedAt: timestamp("owner_replied_at"),
+  ownerReplySource: varchar("owner_reply_source", { length: 20 }),
   isPublished: boolean("is_published").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 }, (table) => {
   return {
     bookingUnique: uniqueIndex("reviews_booking_id_unique").on(table.bookingId),
+    businessPublishedCreatedAtIdx: index("reviews_business_published_created_at_idx").on(
+      table.businessId,
+      table.isPublished,
+      table.createdAt,
+    ),
   };
 });
 
@@ -405,7 +485,9 @@ export const webhooks = pgTable("webhooks", {
   events: webhookEventEnum("events").array().notNull(),
   isActive: boolean("is_active").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (table) => ({
+  businessActiveIdx: index("webhooks_business_active_idx").on(table.businessId, table.isActive),
+}));
 
 // ─── Payments ─────────────────────────────────────────────────────────────────
 
@@ -418,8 +500,12 @@ export const payments = pgTable("payments", {
   payhereOrderId: varchar("payhere_order_id", { length: 100 }).unique(),
   status: paymentStatusEnum("status").default("pending").notNull(),
   payherePayload: jsonb("payhere_payload"),
+  receiptSentAt: timestamp("receipt_sent_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (table) => ({
+  bookingIdIdx: index("payments_booking_id_idx").on(table.bookingId),
+  statusCreatedAtIdx: index("payments_status_created_at_idx").on(table.status, table.createdAt),
+}));
 
 // ─── Automations / Messaging ─────────────────────────────────────────────────
 
@@ -496,6 +582,10 @@ export const communications = pgTable("communications", {
   subject: varchar("subject", { length: 200 }),
   body: text("body"),
   providerMessageId: varchar("provider_message_id", { length: 180 }),
+  provider: varchar("provider", { length: 80 }),
+  feature: varchar("feature", { length: 80 }),
+  idempotencyKey: varchar("idempotency_key", { length: 180 }),
+  meta: jsonb("meta"),
   error: text("error"),
   sentAt: timestamp("sent_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -505,8 +595,123 @@ export const communications = pgTable("communications", {
       table.businessId,
       table.createdAt
     ),
+    businessIdempotencyUnique: uniqueIndex("communications_business_idempotency_unique").on(
+      table.businessId,
+      table.idempotencyKey
+    ),
   };
 });
+
+// ─── AI Growth Workflows ──────────────────────────────────────────────────────
+
+export const aiWorkflowRuns = pgTable("ai_workflow_runs", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  businessId: uuid("business_id")
+    .notNull()
+    .references(() => businesses.id, { onDelete: "cascade" }),
+  locationId: uuid("location_id").references(() => locations.id, {
+    onDelete: "set null",
+  }),
+  feature: varchar("feature", { length: 80 }).notNull(),
+  workflowKey: varchar("workflow_key", { length: 160 }).notNull(),
+  entityType: varchar("entity_type", { length: 40 }),
+  entityId: uuid("entity_id"),
+  channel: varchar("channel", { length: 40 }),
+  provider: varchar("provider", { length: 80 }),
+  status: varchar("status", { length: 40 }).default("queued").notNull(),
+  subject: varchar("subject", { length: 200 }),
+  body: text("body"),
+  scheduledFor: timestamp("scheduled_for"),
+  executedAt: timestamp("executed_at"),
+  idempotencyKey: varchar("idempotency_key", { length: 180 }).notNull(),
+  error: text("error"),
+  meta: jsonb("meta"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  businessFeatureIdx: index("ai_workflow_runs_business_feature_idx").on(
+    table.businessId,
+    table.feature
+  ),
+  businessCreatedAtIdx: index("ai_workflow_runs_business_created_at_idx").on(
+    table.businessId,
+    table.createdAt
+  ),
+  businessIdempotencyUnique: uniqueIndex("ai_workflow_runs_business_idempotency_unique").on(
+    table.businessId,
+    table.idempotencyKey
+  ),
+}));
+
+export const aiContentCalendar = pgTable("ai_content_calendar", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  businessId: uuid("business_id")
+    .notNull()
+    .references(() => businesses.id, { onDelete: "cascade" }),
+  locationId: uuid("location_id")
+    .notNull()
+    .references(() => locations.id, { onDelete: "cascade" }),
+  contentDate: date("content_date").notNull(),
+  channel: varchar("channel", { length: 40 }).default("social").notNull(),
+  title: varchar("title", { length: 160 }).notNull(),
+  caption: text("caption").notNull(),
+  status: varchar("status", { length: 40 }).default("draft").notNull(),
+  approvedAt: timestamp("approved_at"),
+  publishedAt: timestamp("published_at"),
+  provider: varchar("provider", { length: 80 }),
+  providerMessageId: varchar("provider_message_id", { length: 180 }),
+  error: text("error"),
+  meta: jsonb("meta"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  businessDateIdx: index("ai_content_calendar_business_date_idx").on(
+    table.businessId,
+    table.contentDate
+  ),
+  businessLocationDateUnique: uniqueIndex("ai_content_calendar_business_location_date_unique").on(
+    table.businessId,
+    table.locationId,
+    table.contentDate
+  ),
+}));
+
+export const socialConnections = pgTable("social_connections", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  businessId: uuid("business_id")
+    .notNull()
+    .references(() => businesses.id, { onDelete: "cascade" }),
+  provider: varchar("provider", { length: 80 }).notNull(),
+  accountId: varchar("account_id", { length: 160 }),
+  accountName: varchar("account_name", { length: 160 }),
+  accessTokenEncrypted: text("access_token_encrypted"),
+  isActive: boolean("is_active").default(true).notNull(),
+  meta: jsonb("meta"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  businessProviderUnique: uniqueIndex("social_connections_business_provider_unique").on(
+    table.businessId,
+    table.provider
+  ),
+}));
+
+export const platformSettings = pgTable("platform_settings", {
+  key: varchar("key", { length: 120 }).primaryKey(),
+  value: jsonb("value").notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  updatedBy: varchar("updated_by", { length: 255 }),
+});
+
+export const adminAuditEvents = pgTable("admin_audit_events", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  at: timestamp("at").defaultNow().notNull(),
+  actorEmail: varchar("actor_email", { length: 255 }).notNull(),
+  action: varchar("action", { length: 120 }).notNull(),
+  target: varchar("target", { length: 500 }),
+  meta: jsonb("meta"),
+}, (table) => ({
+  atIdx: index("admin_audit_events_at_idx").on(table.at),
+}));
 
 // ─── Webhook Deliveries / Reporting / API Access ─────────────────────────────
 
@@ -573,6 +778,39 @@ export const apiKeys = pgTable("api_keys", {
   };
 });
 
+export const voiceIntegrations = pgTable("voice_integrations", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  businessId: uuid("business_id")
+    .notNull()
+    .references(() => businesses.id, { onDelete: "cascade" }),
+  apiKeyId: uuid("api_key_id").references(() => apiKeys.id, {
+    onDelete: "set null",
+  }),
+  status: varchar("status", { length: 40 }).default("not_requested").notNull(),
+  providerName: varchar("provider_name", { length: 120 }).default("Peak Agents").notNull(),
+  businessPhone: varchar("business_phone", { length: 30 }),
+  aiPhoneNumber: varchar("ai_phone_number", { length: 30 }),
+  handoffPhone: varchar("handoff_phone", { length: 30 }),
+  languages: text("languages").array().default(sql`ARRAY['en']::text[]`).notNull(),
+  welcomeMessage: text("welcome_message"),
+  fallbackMessage: text("fallback_message"),
+  openingRules: text("opening_rules"),
+  serviceRules: text("service_rules"),
+  bookingRules: text("booking_rules"),
+  faqNotes: text("faq_notes"),
+  setupNotes: text("setup_notes"),
+  requestedAt: timestamp("requested_at"),
+  lastTestedAt: timestamp("last_tested_at"),
+  activatedAt: timestamp("activated_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => {
+  return {
+    businessUnique: uniqueIndex("voice_integrations_business_id_unique").on(table.businessId),
+    statusIdx: index("voice_integrations_status_idx").on(table.status),
+  };
+});
+
 // ─── Relations ────────────────────────────────────────────────────────────────
 
 export const businessesRelations = relations(businesses, ({ many }) => ({
@@ -588,8 +826,12 @@ export const businessesRelations = relations(businesses, ({ many }) => ({
   automationRules: many(automationRules),
   messageTemplates: many(messageTemplates),
   communications: many(communications),
+  aiWorkflowRuns: many(aiWorkflowRuns),
+  aiContentCalendar: many(aiContentCalendar),
+  socialConnections: many(socialConnections),
   metricsDaily: many(metricsDaily),
   apiKeys: many(apiKeys),
+  voiceIntegrations: many(voiceIntegrations),
 }));
 
 export const usersRelations = relations(users, ({ one, many }) => ({
@@ -667,6 +909,11 @@ export const bookingsRelations = relations(bookings, ({ one, many }) => ({
   client: one(clients, { fields: [bookings.clientId], references: [clients.id] }),
   payment: one(payments, { fields: [bookings.id], references: [payments.bookingId] }),
   communications: many(communications),
+  notifications: many(bookingNotifications),
+}));
+
+export const bookingNotificationsRelations = relations(bookingNotifications, ({ one }) => ({
+  booking: one(bookings, { fields: [bookingNotifications.bookingId], references: [bookings.id] }),
 }));
 
 export const clientsRelations = relations(clients, ({ one, many }) => ({
@@ -731,6 +978,35 @@ export const communicationsRelations = relations(communications, ({ one }) => ({
   }),
 }));
 
+export const aiWorkflowRunsRelations = relations(aiWorkflowRuns, ({ one }) => ({
+  business: one(businesses, {
+    fields: [aiWorkflowRuns.businessId],
+    references: [businesses.id],
+  }),
+  location: one(locations, {
+    fields: [aiWorkflowRuns.locationId],
+    references: [locations.id],
+  }),
+}));
+
+export const aiContentCalendarRelations = relations(aiContentCalendar, ({ one }) => ({
+  business: one(businesses, {
+    fields: [aiContentCalendar.businessId],
+    references: [businesses.id],
+  }),
+  location: one(locations, {
+    fields: [aiContentCalendar.locationId],
+    references: [locations.id],
+  }),
+}));
+
+export const socialConnectionsRelations = relations(socialConnections, ({ one }) => ({
+  business: one(businesses, {
+    fields: [socialConnections.businessId],
+    references: [businesses.id],
+  }),
+}));
+
 export const webhookDeliveriesRelations = relations(webhookDeliveries, ({ one }) => ({
   webhook: one(webhooks, {
     fields: [webhookDeliveries.webhookId],
@@ -747,6 +1023,17 @@ export const metricsDailyRelations = relations(metricsDaily, ({ one }) => ({
 
 export const apiKeysRelations = relations(apiKeys, ({ one }) => ({
   business: one(businesses, { fields: [apiKeys.businessId], references: [businesses.id] }),
+}));
+
+export const voiceIntegrationsRelations = relations(voiceIntegrations, ({ one }) => ({
+  business: one(businesses, {
+    fields: [voiceIntegrations.businessId],
+    references: [businesses.id],
+  }),
+  apiKey: one(apiKeys, {
+    fields: [voiceIntegrations.apiKeyId],
+    references: [apiKeys.id],
+  }),
 }));
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -766,6 +1053,8 @@ export type AvailabilityOverride = typeof availabilityOverrides.$inferSelect;
 export type BusinessHoliday = typeof businessHolidays.$inferSelect;
 export type Booking = typeof bookings.$inferSelect;
 export type NewBooking = typeof bookings.$inferInsert;
+export type BookingNotification = typeof bookingNotifications.$inferSelect;
+export type NewBookingNotification = typeof bookingNotifications.$inferInsert;
 export type Payment = typeof payments.$inferSelect;
 export type Client = typeof clients.$inferSelect;
 export type NewClient = typeof clients.$inferInsert;
@@ -782,7 +1071,16 @@ export type NewAutomationRule = typeof automationRules.$inferInsert;
 export type AutomationRun = typeof automationRuns.$inferSelect;
 export type MessageTemplate = typeof messageTemplates.$inferSelect;
 export type Communication = typeof communications.$inferSelect;
+export type AiWorkflowRun = typeof aiWorkflowRuns.$inferSelect;
+export type NewAiWorkflowRun = typeof aiWorkflowRuns.$inferInsert;
+export type AiContentCalendarItem = typeof aiContentCalendar.$inferSelect;
+export type NewAiContentCalendarItem = typeof aiContentCalendar.$inferInsert;
+export type SocialConnection = typeof socialConnections.$inferSelect;
 export type MetricsDaily = typeof metricsDaily.$inferSelect;
 export type ApiKey = typeof apiKeys.$inferSelect;
+export type VoiceIntegration = typeof voiceIntegrations.$inferSelect;
+export type NewVoiceIntegration = typeof voiceIntegrations.$inferInsert;
+export type PlatformSetting = typeof platformSettings.$inferSelect;
+export type AdminAuditEventRow = typeof adminAuditEvents.$inferSelect;
 export type Location = typeof locations.$inferSelect;
 export type NewLocation = typeof locations.$inferInsert;

@@ -12,10 +12,10 @@ type Rule = {
 
 const templates = [
   {
-    name: "24h appointment reminder",
+    name: "Booking confirmation message",
     trigger: "booking.confirmed",
     delayMinutes: 0,
-    actions: [{ type: "send_email", template: "appointment_reminder_24h" }],
+    actions: [{ type: "send_email", template: "booking_confirmation" }],
   },
   {
     name: "Post-visit review request",
@@ -67,6 +67,9 @@ export function AutomationsClient({ initialRules }: { initialRules: Rule[] }) {
 
   return (
     <div className="space-y-6">
+      <p className="text-sm text-muted-foreground">
+        Active rules are processed every 30 minutes by Dinaya automations cron.
+      </p>
       <div className="grid gap-3 md:grid-cols-3">
         {templates.map((template) => (
           <button

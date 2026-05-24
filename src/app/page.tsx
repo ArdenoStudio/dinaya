@@ -1,40 +1,49 @@
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { LandingNav } from "@/components/LandingNav";
-import { FadeContainer, FadeDiv, FadeSpan } from "@/components/Fade";
+import { ProductMockupSkeleton } from "@/components/ProductMockupSkeleton";
 import { WordRotate } from "@/components/WordRotate";
-import ProductMockup from "@/components/ProductMockup";
 import { CTAPrimaryButton } from "@/components/cta-primary-button";
 import { LandingFooter } from "@/components/LandingFooter";
-import { HowItWorks } from "@/components/HowItWorks";
+import { Icon } from "@/components/ui/Icon";
+import { TextAnimate } from "@/components/ui/text-animate";
+
+const HowItWorks = dynamic(() =>
+  import("@/components/HowItWorks").then((m) => ({ default: m.HowItWorks }))
+);
+
+const ProductMockup = dynamic(() => import("@/components/ProductMockup"), {
+  loading: () => <ProductMockupSkeleton />,
+});
 
 const features = [
   {
-    icon: "bi-calendar-check",
+    icon: "calendar-check",
     title: "Self-booking page",
     desc: "Your own link at yourname.dinaya.lk. Clients book 24/7 without calling you.",
   },
   {
-    icon: "bi-credit-card",
+    icon: "credit-card",
     title: "Online payments",
     desc: "Accept deposits or full payment via PayHere. Eliminate no-shows instantly.",
   },
   {
-    icon: "bi-grid",
+    icon: "grid",
     title: "Simple dashboard",
     desc: "See all your bookings in one place. Cancel, reschedule, and track revenue.",
   },
   {
-    icon: "bi-bell",
+    icon: "bell",
     title: "Automated reminders",
     desc: "Clients get SMS and email reminders before their appointment — automatically.",
   },
   {
-    icon: "bi-clock",
+    icon: "clock",
     title: "Custom availability",
     desc: "Set your working hours, block dates, and add buffer time between sessions.",
   },
   {
-    icon: "bi-share",
+    icon: "share",
     title: "Shareable link",
     desc: "One link for Instagram, WhatsApp, and Facebook. Share everywhere in seconds.",
   },
@@ -43,19 +52,19 @@ const features = [
 const steps = [
   {
     number: "01",
-    icon: "bi-sliders",
+    icon: "sliders",
     title: "Set up your page",
     desc: "Add your services, prices, and availability. Takes less than 5 minutes.",
   },
   {
     number: "02",
-    icon: "bi-send",
+    icon: "send",
     title: "Share your link",
     desc: "Send your dinaya.lk/yourname link via WhatsApp, Instagram, or Facebook.",
   },
   {
     number: "03",
-    icon: "bi-calendar-check",
+    icon: "calendar-check",
     title: "Get booked",
     desc: "Clients pick a time, pay online. You get an instant notification.",
   },
@@ -91,15 +100,15 @@ const testimonials = [
 
 export default function LandingPage() {
   return (
-    <main className="min-h-dvh bg-white">
+    <div className="min-h-dvh bg-white">
 
       {/* Nav — fix #5 (mobile menu) + fix #6 (dead resource links) via LandingNav */}
       <LandingNav />
 
-      {/* Hero */}
-      <section className="max-w-4xl mx-auto px-6 pt-10 pb-12 text-center">
-        <FadeContainer className="flex flex-col items-center">
-          <FadeDiv className="mb-8">
+      {/* Hero — static markup for fast LCP (no Motion fade-in on headline) */}
+      <section className="max-w-4xl mx-auto px-6 public-page-offset-lg pb-12 text-center">
+        <div className="flex flex-col items-center">
+          <div className="mb-8">
             <a
               href="/register"
               className="inline-flex items-center gap-3 rounded-full bg-white px-2.5 py-0.5 pr-3 pl-0.5 text-sm font-medium text-gray-900 ring-1 shadow-lg shadow-primary/10 ring-black/10 transition-colors hover:bg-primary/5"
@@ -109,14 +118,14 @@ export default function LandingPage() {
               </span>
               <span className="flex items-center gap-1 truncate">
                 Free for Sri Lankan businesses
-                <i className="bi bi-arrow-up-right text-xs shrink-0 text-gray-700" />
+                <Icon name="arrow-up-right" className="text-xs shrink-0 text-gray-700" />
               </span>
             </a>
-          </FadeDiv>
+          </div>
 
           <h1 className="font-cal text-5xl tracking-tight mb-6 text-balance">
-            <FadeSpan>Stop the</FadeSpan>{" "}
-            <FadeSpan className="text-primary">
+            Stop the{" "}
+            <span className="text-primary">
               <WordRotate
                 words={[
                   "WhatsApp chaos.",
@@ -127,35 +136,34 @@ export default function LandingPage() {
                 ]}
                 className="text-primary"
               />
-            </FadeSpan>
+            </span>
             <br />
-            <FadeSpan>Get a real booking page in 5 minutes.</FadeSpan>
+            Get a real booking page in 5 minutes.
           </h1>
 
-          <FadeDiv>
-            <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto text-pretty">
-              Give your salon, clinic, or tuition class a free booking page. Clients
-              pick a time, pay online, and you get notified.
-            </p>
-          </FadeDiv>
+          <TextAnimate
+            animation="fadeIn"
+            by="word"
+            as="p"
+            startOnView={false}
+            className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto text-pretty"
+          >
+            Give your salon, clinic, or tuition class a free booking page. Clients pick a time, pay online, and you get notified.
+          </TextAnimate>
 
-          <FadeDiv>
-            <div className="flex flex-wrap items-center justify-center gap-3">
-              <CTAPrimaryButton>Create your booking page</CTAPrimaryButton>
-              <Link
-                href="#demo"
-                className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-6 py-3 text-sm font-medium text-gray-800 shadow-sm hover:bg-gray-50 transition-colors"
-              >
-                <i className="bi bi-play-circle text-base" />
-                See a live demo
-              </Link>
-            </div>
-          </FadeDiv>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <CTAPrimaryButton>Create your booking page</CTAPrimaryButton>
+            <Link
+              href="#demo"
+              className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-6 py-3 text-sm font-medium text-gray-800 shadow-sm hover:bg-gray-50 transition-colors"
+            >
+              <Icon name="play-circle" className="text-base" />
+              See a live demo
+            </Link>
+          </div>
 
-          <FadeDiv>
-            <p className="text-sm text-muted-foreground mt-4">Free forever. No credit card needed.</p>
-          </FadeDiv>
-        </FadeContainer>
+          <p className="text-sm text-muted-foreground mt-4">Free forever. No credit card needed.</p>
+        </div>
       </section>
 
       <div id="demo">
@@ -167,13 +175,13 @@ export default function LandingPage() {
       <section className="max-w-6xl mx-auto px-6 py-6 border-t">
         <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-xs text-muted-foreground">
           {[
-            { icon: "bi-geo-alt-fill", text: "Built exclusively for Sri Lanka" },
-            { icon: "bi-currency-dollar", text: "No USD subscriptions" },
-            { icon: "bi-percent", text: "Zero commission on bookings" },
-            { icon: "bi-whatsapp", text: "Replace WhatsApp chaos for good" },
+            { icon: "geo-alt-fill", text: "Built exclusively for Sri Lanka" },
+            { icon: "currency-dollar", text: "No USD subscriptions" },
+            { icon: "percent", text: "Zero commission on bookings" },
+            { icon: "whatsapp", text: "Replace WhatsApp chaos for good" },
           ].map((item) => (
             <div key={item.text} className="flex items-center gap-1.5">
-              <i className={`bi ${item.icon} text-primary text-xs`} />
+              <Icon name={item.icon} className="text-primary text-xs" />
               <span>{item.text}</span>
             </div>
           ))}
@@ -231,9 +239,14 @@ export default function LandingPage() {
             <span className="absolute top-0.5 -left-3 h-4 w-[3px] rounded-r-sm bg-primary" />
             Everything you need
           </span>
-          <h2 className="font-cal text-3xl md:text-4xl mt-3 tracking-tight">
+          <TextAnimate
+            animation="fadeIn"
+            by="word"
+            as="h2"
+            className="font-cal text-3xl md:text-4xl mt-3 tracking-tight"
+          >
             Everything to replace WhatsApp booking
-          </h2>
+          </TextAnimate>
           <p className="text-muted-foreground mt-3 max-w-xl mx-auto">
             Six tools that work together — so you stop chasing clients and start filling your calendar.
           </p>
@@ -251,7 +264,7 @@ export default function LandingPage() {
 
               <div className="mb-5 inline-flex">
                 <div className="flex items-center justify-center size-11 rounded-xl bg-primary/10 ring-1 ring-primary/15 group-hover:ring-primary/25 transition-colors">
-                  <i className={`bi ${f.icon} text-[1.15rem] text-primary`} />
+                  <Icon name={f.icon} className="text-[1.15rem] text-primary" />
                 </div>
               </div>
 
@@ -262,7 +275,7 @@ export default function LandingPage() {
                 href="/features"
                 className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-primary opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 hover:underline"
               >
-                Explore <i className="bi bi-arrow-right" />
+                Explore <Icon name="arrow-right" />
               </Link>
 
               <span className="absolute bottom-0 left-7 right-7 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
@@ -278,9 +291,14 @@ export default function LandingPage() {
             <span className="absolute top-0.5 -left-3 h-4 w-[3px] rounded-r-sm bg-primary" />
             How it works
           </span>
-          <h2 className="font-cal text-3xl md:text-4xl mt-3 tracking-tight">
+          <TextAnimate
+            animation="fadeIn"
+            by="word"
+            as="h2"
+            className="font-cal text-3xl md:text-4xl mt-3 tracking-tight"
+          >
             Up and running in minutes
-          </h2>
+          </TextAnimate>
         </div>
 
         <div className="relative grid md:grid-cols-3 gap-10">
@@ -292,7 +310,7 @@ export default function LandingPage() {
               {/* Icon badge with step number dot */}
               <div className="relative z-10 mb-6">
                 <div className="flex size-14 items-center justify-center rounded-2xl bg-white border border-gray-200 shadow-sm ring-4 ring-white">
-                  <i className={`bi ${step.icon} text-xl text-primary`} />
+                  <Icon name={step.icon} className="text-xl text-primary" />
                 </div>
                 <span className="absolute -top-2 -right-2 flex size-5 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-white">
                   {parseInt(step.number)}
@@ -312,9 +330,14 @@ export default function LandingPage() {
             <span className="absolute top-0.5 -left-3 h-4 w-[3px] rounded-r-sm bg-primary" />
             Early access users
           </span>
-          <h2 className="font-cal text-3xl md:text-4xl mt-3 tracking-tight">
+          <TextAnimate
+            animation="fadeIn"
+            by="word"
+            as="h2"
+            className="font-cal text-3xl md:text-4xl mt-3 tracking-tight"
+          >
             What businesses are saying
-          </h2>
+          </TextAnimate>
         </div>
 
         <div className="grid md:grid-cols-3 gap-5">
@@ -325,7 +348,7 @@ export default function LandingPage() {
             >
               <div className="flex gap-0.5 mb-4">
                 {[...Array(5)].map((_, i) => (
-                  <i key={i} className="bi bi-star-fill text-xs text-amber-400" />
+                  <Icon key={i} name="star-fill" className="text-xs text-amber-400" />
                 ))}
               </div>
               <blockquote className="text-sm leading-relaxed text-gray-700 flex-1 mb-6 text-pretty">
@@ -374,12 +397,17 @@ export default function LandingPage() {
 
             <div className="relative z-10">
               <div className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/20 px-4 py-1.5 text-sm text-white/80 mb-6">
-                <i className="bi bi-lightning-charge text-xs" />
+                <Icon name="lightning-charge" className="text-xs" />
                 Free forever · No credit card needed
               </div>
-              <h2 className="font-cal text-4xl md:text-5xl tracking-tight text-white mb-4">
+              <TextAnimate
+                animation="fadeIn"
+                by="word"
+                as="h2"
+                className="font-cal text-4xl md:text-5xl tracking-tight text-white mb-4"
+              >
                 Ready to go bookable?
-              </h2>
+              </TextAnimate>
               <p className="text-lg text-white/70 mb-10 max-w-md mx-auto">
                 Set up your booking page in 5 minutes. Start accepting clients today.
               </p>
@@ -389,10 +417,10 @@ export default function LandingPage() {
                   className="inline-flex items-center gap-2 bg-white text-blue-700 px-7 py-3.5 rounded-xl font-semibold shadow-lg hover:bg-white/95 transition-colors"
                 >
                   Create your page
-                  <i className="bi bi-arrow-right text-sm" />
+                  <Icon name="arrow-right" className="text-sm" />
                 </Link>
                 <Link
-                  href="/login"
+                  href="/auth/signin"
                   className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-white px-7 py-3.5 rounded-xl font-medium hover:bg-white/20 transition-colors"
                 >
                   Sign in
@@ -405,6 +433,6 @@ export default function LandingPage() {
 
       {/* Footer */}
       <LandingFooter />
-    </main>
+    </div>
   );
 }

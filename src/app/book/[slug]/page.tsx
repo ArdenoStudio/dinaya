@@ -1,10 +1,16 @@
 import { notFound } from "next/navigation";
+import Image from "next/image";
 import { db } from "@/db";
 import { businesses, services, staff, staffServices, reviews } from "@/db/schema";
 import { listActiveLocations, getStaffLocationMap, ensureBusinessHasDefaultLocation } from "@/lib/locations";
 import { eq, and, avg, count } from "drizzle-orm";
 import BookingWizard from "@/components/booking/BookingWizard";
 import { getBookingCopy } from "@/lib/i18n";
+import { resolveEffectivePlan } from "@/lib/plan";
+import { isOptimizableRemoteImage } from "@/lib/utils";
+import { canUseFeature, type Plan } from "@/lib/plan";
+import { normalizePublicHttpsUrl } from "@/lib/public-url";
+import { Icon } from "@/components/ui/Icon";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -30,9 +36,10 @@ function StarRating({ rating, size = "sm" }: { rating: number; size?: "sm" | "md
   return (
     <span className="inline-flex items-center gap-0.5">
       {[1, 2, 3, 4, 5].map((n) => (
-        <i
+        <Icon
           key={n}
-          className={`bi ${n <= Math.round(rating) ? "bi-star-fill text-amber-400" : "bi-star text-gray-300"} ${starSize}`}
+          name={n <= Math.round(rating) ? "star-fill" : "star"}
+          className={`${n <= Math.round(rating) ? "text-amber-400" : "text-gray-300"} ${starSize}`}
         />
       ))}
     </span>
@@ -48,27 +55,51 @@ export default async function BookingPage({ params }: Props) {
       address: businesses.address,
       bankTransferInstructions: businesses.bankTransferInstructions,
       cancellationPolicy: businesses.cancellationPolicy,
+      deletedAt: businesses.deletedAt,
       description: businesses.description,
       depositPolicy: businesses.depositPolicy,
       facebookUrl: businesses.facebookUrl,
       galleryImages: businesses.galleryImages,
       instagramUrl: businesses.instagramUrl,
+      isSuspended: businesses.isSuspended,
       language: businesses.language,
       lankaqrImageUrl: businesses.lankaqrImageUrl,
       logoUrl: businesses.logoUrl,
       name: businesses.name,
+      plan: businesses.plan,
+      planExpiresAt: businesses.planExpiresAt,
       payhereEnabled: businesses.payhereEnabled,
       phone: businesses.phone,
       slug: businesses.slug,
       websiteUrl: businesses.websiteUrl,
+      hideDinayaBranding: businesses.hideDinayaBranding,
     })
     .from(businesses)
     .where(eq(businesses.slug, slug))
     .limit(1);
 
-  if (!business) notFound();
+  if (!business || business.deletedAt) notFound();
+
+  if (business.isSuspended) {
+    return (
+      <main className="min-h-screen bg-gray-50 flex items-center justify-center px-6">
+        <div className="max-w-md rounded-2xl border bg-white p-8 text-center shadow-sm">
+          <h1 className="font-cal text-2xl tracking-tight">{business.name}</h1>
+          <p className="mt-3 text-sm text-muted-foreground">
+            Online booking is temporarily unavailable for this business.
+          </p>
+        </div>
+      </main>
+    );
+  }
 
   await ensureBusinessHasDefaultLocation(business.id);
+
+  const effectivePlan = resolveEffectivePlan({
+    storedPlan: business.plan,
+    planExpiresAt: business.planExpiresAt,
+  });
+  const showBranding = effectivePlan === "free";
 
   const [serviceList, staffList, reviewList, ratingData, locationList, staffLocationMap] = await Promise.all([
     db
@@ -116,6 +147,9 @@ export default async function BookingPage({ params }: Props) {
   const gallery = business.galleryImages ?? [];
   const staffWithBio = staffList.filter((s) => s.bio || s.avatarUrl);
   const copy = getBookingCopy(business.language);
+  const instagramUrl = normalizePublicHttpsUrl(business.instagramUrl);
+  const facebookUrl = normalizePublicHttpsUrl(business.facebookUrl);
+  const websiteUrl = normalizePublicHttpsUrl(business.websiteUrl);
 
   const appDomain = process.env.NEXT_PUBLIC_APP_DOMAIN ?? "";
   const bookingUrlLabel =
@@ -132,9 +166,9 @@ export default async function BookingPage({ params }: Props) {
     business.description ||
       business.address ||
       business.phone ||
-      business.instagramUrl ||
-      business.facebookUrl ||
-      business.websiteUrl ||
+      instagramUrl ||
+      facebookUrl ||
+      websiteUrl ||
       (avgRating !== null && reviewCount > 0)
   );
 
@@ -164,8 +198,14 @@ export default async function BookingPage({ params }: Props) {
                       : "aspect-square"
                   }`}
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={url} alt="" className="h-full w-full object-cover" />
+                  <Image
+                    src={url}
+                    alt=""
+                    fill
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                    className="object-cover"
+                    unoptimized={!isOptimizableRemoteImage(url)}
+                  />
                   {i === 5 && gallery.length > 6 && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black/50">
                       <span className="text-lg font-semibold text-white">+{gallery.length - 6}</span>
@@ -209,13 +249,20 @@ export default async function BookingPage({ params }: Props) {
         )}
 
         <BookingWizard
-          business={business}
+          business={{
+            ...business,
+            hideBranding: Boolean(
+              business.hideDinayaBranding &&
+              canUseFeature(business.plan as Plan, "publicBookingPageCustomization")
+            ),
+          }}
           services={serviceList}
           staff={staffList}
           staffServiceMap={assignments}
           staffLocationMap={staffLocationMap}
           locations={locationList}
           bookingUrlLabel={bookingUrlLabel}
+          showBranding={showBranding}
         />
 
         {hasAboutSection && (
@@ -235,47 +282,47 @@ export default async function BookingPage({ params }: Props) {
             <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-gray-500">
               {business.address && (
                 <span className="flex items-center gap-1.5">
-                  <i className="bi bi-geo-alt text-gray-400" />
+                  <Icon name="geo-alt" className="text-gray-400" />
                   {business.address}
                 </span>
               )}
               {business.phone && (
                 <a href={`tel:${business.phone}`} className="flex items-center gap-1.5 hover:text-gray-800">
-                  <i className="bi bi-telephone text-gray-400" />
+                  <Icon name="telephone" className="text-gray-400" />
                   {business.phone}
                 </a>
               )}
             </div>
-            {(business.instagramUrl || business.facebookUrl || business.websiteUrl) && (
+            {(instagramUrl || facebookUrl || websiteUrl) && (
               <div className="mt-4 flex items-center gap-2 border-t border-gray-100 pt-4">
-                {business.instagramUrl && (
+                {instagramUrl && (
                   <a
-                    href={business.instagramUrl}
+                    href={instagramUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex size-9 items-center justify-center rounded-lg bg-gray-50 text-gray-500 transition-colors hover:bg-pink-50 hover:text-pink-600"
                   >
-                    <i className="bi bi-instagram" />
+                    <Icon name="instagram" />
                   </a>
                 )}
-                {business.facebookUrl && (
+                {facebookUrl && (
                   <a
-                    href={business.facebookUrl}
+                    href={facebookUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex size-9 items-center justify-center rounded-lg bg-gray-50 text-gray-500 transition-colors hover:bg-blue-50 hover:text-blue-600"
                   >
-                    <i className="bi bi-facebook" />
+                    <Icon name="facebook" />
                   </a>
                 )}
-                {business.websiteUrl && (
+                {websiteUrl && (
                   <a
-                    href={business.websiteUrl}
+                    href={websiteUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex size-9 items-center justify-center rounded-lg bg-gray-50 text-gray-500 transition-colors hover:bg-gray-100"
                   >
-                    <i className="bi bi-globe" />
+                    <Icon name="globe" />
                   </a>
                 )}
               </div>
@@ -294,11 +341,13 @@ export default async function BookingPage({ params }: Props) {
                   className="flex flex-col items-center gap-2 rounded-xl border border-gray-100 bg-white p-4 text-center"
                 >
                   {member.avatarUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
+                    <Image
                       src={member.avatarUrl}
                       alt={member.name}
+                      width={56}
+                      height={56}
                       className="size-14 rounded-full border object-cover"
+                      unoptimized={!isOptimizableRemoteImage(member.avatarUrl)}
                     />
                   ) : (
                     <div className="flex size-14 items-center justify-center rounded-full border border-blue-100 bg-blue-50 text-xl font-bold text-blue-600">
@@ -353,6 +402,12 @@ export default async function BookingPage({ params }: Props) {
                   {review.comment && (
                     <p className="text-sm leading-relaxed text-gray-500">{review.comment}</p>
                   )}
+                  {review.ownerReply ? (
+                    <div className="mt-3 rounded-lg border border-gray-100 bg-gray-50 p-3">
+                      <p className="text-xs font-medium text-gray-700">Response from {business.name}</p>
+                      <p className="mt-1 text-sm leading-relaxed text-gray-500">{review.ownerReply}</p>
+                    </div>
+                  ) : null}
                 </div>
               ))}
             </div>
