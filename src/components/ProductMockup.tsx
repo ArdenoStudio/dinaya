@@ -113,7 +113,7 @@ function CalendarDay({ cell }: { cell: DayCell }) {
 
   return (
     <div
-      className={`relative flex flex-col items-center justify-center text-[11px] py-1 rounded-lg font-medium transition-all min-h-[28px] ${
+      className={`relative flex flex-col items-center justify-center text-[10px] py-0.5 rounded-lg font-medium transition-all min-h-[22px] ${
         isSelected
           ? "bg-blue-600 text-white shadow-sm shadow-blue-500/40"
           : isBooked
@@ -380,49 +380,49 @@ function CustomerBookingDesktop({ persona }: { persona: PersonaData }) {
   const selectedService = persona.services.find((s) => s.selected);
 
   return (
-    <div className="bg-white p-6 sm:p-8">
-      <div className="flex items-center gap-3 mb-6 pb-5 border-b border-gray-100">
-        <div className="size-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center shrink-0 shadow-lg shadow-blue-500/25">
-          <Icon name={persona.icon} className="text-white text-xl" />
+    <div className="h-full flex flex-col bg-white p-4 sm:p-5 overflow-hidden">
+      <div className="flex items-center gap-3 mb-3 pb-3 border-b border-gray-100 shrink-0">
+        <div className="size-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center shrink-0 shadow-lg shadow-blue-500/25">
+          <Icon name={persona.icon} className="text-white text-lg" />
         </div>
-        <div>
-          <h3 className="font-semibold text-gray-900">{persona.business}</h3>
-          <p className="text-xs text-gray-400 mt-0.5">{persona.location}</p>
+        <div className="min-w-0">
+          <h3 className="font-semibold text-sm text-gray-900 truncate">{persona.business}</h3>
+          <p className="text-[11px] text-gray-400 mt-0.5 truncate">{persona.location}</p>
           <TrustLine persona={persona} />
         </div>
-        <div className="ml-auto flex items-center gap-1.5 text-xs text-green-600 font-medium bg-green-50 px-2.5 py-1 rounded-full border border-green-100/80">
+        <div className="ml-auto flex items-center gap-1.5 text-[11px] text-green-600 font-medium bg-green-50 px-2 py-0.5 rounded-full border border-green-100/80 shrink-0">
           <span className="size-1.5 rounded-full bg-green-500 animate-pulse" />
           Available today
         </div>
       </div>
 
-      <div className="grid sm:grid-cols-2 gap-6">
-        <div>
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Choose a service</p>
-          <div className="space-y-2">
+      <div className="flex-1 min-h-0 grid sm:grid-cols-2 gap-4">
+        <div className="min-h-0 flex flex-col">
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 shrink-0">Choose a service</p>
+          <div className="space-y-1.5 min-h-0">
             {persona.services.map((s) => (
               <div
                 key={s.name}
-                className={`flex justify-between items-center p-3.5 rounded-xl cursor-pointer transition-all ${
+                className={`flex justify-between items-center p-2.5 rounded-xl cursor-pointer transition-all ${
                   s.selected
                     ? "border border-blue-500 ring-2 ring-blue-500/10 bg-blue-50/60 shadow-sm"
                     : "border border-gray-100 hover:border-gray-200"
                 }`}
               >
-                <div className="flex items-center gap-2.5">
+                <div className="flex items-center gap-2 min-w-0">
                   <div
-                    className={`size-4 rounded-full border-2 shrink-0 flex items-center justify-center ${
+                    className={`size-3.5 rounded-full border-2 shrink-0 flex items-center justify-center ${
                       s.selected ? "border-blue-500 bg-blue-500" : "border-gray-300"
                     }`}
                   >
-                    {s.selected && <div className="size-1.5 rounded-full bg-white" />}
+                    {s.selected && <div className="size-1 rounded-full bg-white" />}
                   </div>
-                  <div>
-                    <p className={`text-sm font-medium ${s.selected ? "text-blue-900" : "text-gray-800"}`}>{s.name}</p>
-                    <p className="text-xs text-gray-400">{s.duration}</p>
+                  <div className="min-w-0">
+                    <p className={`text-xs font-medium truncate ${s.selected ? "text-blue-900" : "text-gray-800"}`}>{s.name}</p>
+                    <p className="text-[10px] text-gray-400">{s.duration}</p>
                   </div>
                 </div>
-                <span className={`text-sm font-bold shrink-0 tabular-nums ${s.selected ? "text-blue-600" : "text-gray-600"}`}>
+                <span className={`text-xs font-bold shrink-0 tabular-nums ml-2 ${s.selected ? "text-blue-600" : "text-gray-600"}`}>
                   {s.price}
                 </span>
               </div>
@@ -430,23 +430,23 @@ function CustomerBookingDesktop({ persona }: { persona: PersonaData }) {
           </div>
         </div>
 
-        <div>
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Pick a date &amp; time</p>
-          <div className="rounded-xl border border-gray-100 bg-gray-50/60 p-3.5 mb-3">
-            <div className="flex justify-between items-center mb-3">
-              <span className="text-sm font-bold text-gray-800">May 2025</span>
+        <div className="min-h-0 flex flex-col">
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 shrink-0">Pick a date &amp; time</p>
+          <div className="rounded-xl border border-gray-100 bg-gray-50/60 p-2.5 mb-2 shrink-0">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-xs font-bold text-gray-800">May 2025</span>
               <div className="flex gap-1">
-                <button className="size-7 rounded-lg flex items-center justify-center hover:bg-white hover:shadow-sm text-gray-400 transition-all" aria-label="Previous month">
+                <button className="size-6 rounded-lg flex items-center justify-center hover:bg-white hover:shadow-sm text-gray-400 transition-all" aria-label="Previous month">
                   <Icon name="chevron-left" className="text-[10px]" />
                 </button>
-                <button className="size-7 rounded-lg flex items-center justify-center hover:bg-white hover:shadow-sm text-gray-400 transition-all" aria-label="Next month">
+                <button className="size-6 rounded-lg flex items-center justify-center hover:bg-white hover:shadow-sm text-gray-400 transition-all" aria-label="Next month">
                   <Icon name="chevron-right" className="text-[10px]" />
                 </button>
               </div>
             </div>
             <div className="grid grid-cols-7 text-center gap-y-0.5">
               {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => (
-                <div key={i} className="text-[9px] font-bold text-gray-400 pb-2 tracking-wider">
+                <div key={i} className="text-[8px] font-bold text-gray-400 pb-1 tracking-wider">
                   {d}
                 </div>
               ))}
@@ -455,11 +455,11 @@ function CustomerBookingDesktop({ persona }: { persona: PersonaData }) {
               ))}
             </div>
           </div>
-          <div className="grid grid-cols-3 gap-1.5">
+          <div className="grid grid-cols-3 gap-1 shrink-0">
             {persona.slots.map((slot, i) => (
               <button
                 key={slot.label}
-                className={`relative flex flex-col items-center justify-center text-xs py-2 rounded-xl font-semibold transition-all min-h-[44px] ${
+                className={`relative flex flex-col items-center justify-center text-[11px] py-1.5 rounded-lg font-semibold transition-all min-h-[36px] ${
                   i === persona.selectedSlot
                     ? "bg-blue-600 text-white shadow-md shadow-blue-500/25"
                     : "border border-gray-200 text-gray-600 hover:border-blue-300 hover:text-blue-600 bg-white"
@@ -468,7 +468,7 @@ function CustomerBookingDesktop({ persona }: { persona: PersonaData }) {
                 {slot.label}
                 {slot.badge && (
                   <span
-                    className={`text-[9px] font-bold mt-0.5 ${
+                    className={`text-[8px] font-bold mt-0.5 leading-none ${
                       i === persona.selectedSlot ? "text-blue-100" : "text-amber-600"
                     }`}
                   >
@@ -481,18 +481,18 @@ function CustomerBookingDesktop({ persona }: { persona: PersonaData }) {
         </div>
       </div>
 
-      <div className="mt-6 pt-5 border-t border-gray-100 flex items-center gap-3">
-        <button className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3.5 rounded-xl font-semibold text-sm shadow-lg shadow-blue-500/25">
+      <div className="mt-3 pt-3 border-t border-gray-100 flex items-center gap-3 shrink-0">
+        <button className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white py-2.5 rounded-xl font-semibold text-xs shadow-lg shadow-blue-500/25">
           Confirm & Pay — {selectedService?.price}
         </button>
-        <div className="flex items-center gap-1.5 text-xs text-gray-400 shrink-0">
-          <Icon name="shield-check" className="text-blue-400" />
-          Secured by PayHere
+        <div className="flex items-center gap-1 text-[10px] text-gray-400 shrink-0">
+          <Icon name="shield-check" className="text-blue-400 text-xs" />
+          PayHere
         </div>
       </div>
 
-      <div className="mt-4 flex justify-center">
-        <DinayaBranding />
+      <div className="mt-2 flex justify-center shrink-0">
+        <DinayaBranding compact />
       </div>
     </div>
   );
@@ -508,18 +508,18 @@ function OwnerDashboardDesktop({ persona }: { persona: PersonaData }) {
   ];
 
   return (
-    <div className="bg-gray-50 p-6 sm:p-8 min-h-[420px]">
-      <div className="flex gap-4">
-        <aside className="hidden sm:flex w-[28%] shrink-0 flex-col bg-white rounded-xl border border-gray-100 overflow-hidden">
-          <div className="border-b px-3 py-2.5">
-            <p className="font-cal text-sm font-semibold text-gray-900">Dinaya</p>
-            <p className="text-[10px] text-gray-400 truncate">{persona.business}</p>
+    <div className="h-full bg-gray-50 p-4 sm:p-5 overflow-hidden">
+      <div className="flex h-full gap-3">
+        <aside className="hidden sm:flex w-[26%] shrink-0 flex-col bg-white rounded-xl border border-gray-100 overflow-hidden">
+          <div className="border-b px-3 py-2">
+            <p className="font-cal text-xs font-semibold text-gray-900">Dinaya</p>
+            <p className="text-[9px] text-gray-400 truncate">{persona.business}</p>
           </div>
-          <nav className="flex-1 px-2 py-2 space-y-0.5">
+          <nav className="flex-1 px-1.5 py-1.5 space-y-0.5">
             {["Overview", "Bookings", "Clients", "Payments", "Settings"].map((item) => (
               <div
                 key={item}
-                className={`rounded-lg px-2.5 py-1.5 text-xs ${
+                className={`rounded-lg px-2 py-1 text-[11px] ${
                   item === "Bookings" ? "bg-blue-50 font-semibold text-blue-700" : "text-gray-600"
                 }`}
               >
@@ -529,24 +529,24 @@ function OwnerDashboardDesktop({ persona }: { persona: PersonaData }) {
           </nav>
         </aside>
 
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between mb-4">
+        <div className="flex-1 min-w-0 flex flex-col">
+          <div className="flex items-center justify-between mb-2 shrink-0">
             <div>
-              <h3 className="font-semibold text-gray-900">Today&apos;s schedule</h3>
-              <p className="text-xs text-gray-400 mt-0.5">Thursday, May 15, 2025</p>
+              <h3 className="text-sm font-semibold text-gray-900">Today&apos;s schedule</h3>
+              <p className="text-[10px] text-gray-400 mt-0.5">Thursday, May 15, 2025</p>
             </div>
-            <div className="flex gap-2">
-              <span className="text-xs font-semibold text-gray-700 bg-white border border-gray-200 rounded-full px-3 py-1">
+            <div className="flex gap-1.5">
+              <span className="text-[10px] font-semibold text-gray-700 bg-white border border-gray-200 rounded-full px-2 py-0.5">
                 Rs. 7,100 today
               </span>
-              <span className="text-xs font-semibold text-blue-700 bg-blue-50 border border-blue-100 rounded-full px-3 py-1">
+              <span className="text-[10px] font-semibold text-blue-700 bg-blue-50 border border-blue-100 rounded-full px-2 py-0.5">
                 3 bookings
               </span>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-            <div className="grid grid-cols-[auto_1fr_auto_auto] gap-x-4 gap-y-0 text-[10px] font-bold text-gray-400 uppercase tracking-wider px-4 py-2.5 border-b bg-gray-50/80">
+          <div className="flex-1 min-h-0 bg-white rounded-xl border border-gray-100 overflow-hidden">
+            <div className="grid grid-cols-[auto_1fr_auto_auto] gap-x-3 gap-y-0 text-[9px] font-bold text-gray-400 uppercase tracking-wider px-3 py-2 border-b bg-gray-50/80">
               <span>Time</span>
               <span>Client</span>
               <span>Status</span>
@@ -555,15 +555,15 @@ function OwnerDashboardDesktop({ persona }: { persona: PersonaData }) {
             {todayBookings.map((b) => (
               <div
                 key={b.time}
-                className="grid grid-cols-[auto_1fr_auto_auto] gap-x-4 items-center px-4 py-3 border-b last:border-b-0 text-sm hover:bg-gray-50/50"
+                className="grid grid-cols-[auto_1fr_auto_auto] gap-x-3 items-center px-3 py-2 border-b last:border-b-0 text-xs hover:bg-gray-50/50"
               >
-                <span className="text-xs font-medium text-gray-500 tabular-nums w-16">{b.time}</span>
-                <div>
-                  <p className="font-medium text-gray-900">{b.client}</p>
-                  <p className="text-xs text-gray-400">{b.service}</p>
+                <span className="text-[10px] font-medium text-gray-500 tabular-nums w-14">{b.time}</span>
+                <div className="min-w-0">
+                  <p className="font-medium text-gray-900 truncate">{b.client}</p>
+                  <p className="text-[10px] text-gray-400 truncate">{b.service}</p>
                 </div>
                 <span
-                  className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
+                  className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full whitespace-nowrap ${
                     b.status === "Confirmed"
                       ? "bg-emerald-50 text-emerald-700"
                       : b.status === "Completed"
@@ -573,7 +573,7 @@ function OwnerDashboardDesktop({ persona }: { persona: PersonaData }) {
                 >
                   {b.status}
                 </span>
-                <span className="text-xs font-semibold text-gray-700 tabular-nums text-right">{b.amount}</span>
+                <span className="text-[10px] font-semibold text-gray-700 tabular-nums text-right">{b.amount}</span>
               </div>
             ))}
           </div>
@@ -585,37 +585,37 @@ function OwnerDashboardDesktop({ persona }: { persona: PersonaData }) {
 
 function ConfirmationDesktop({ persona }: { persona: PersonaData }) {
   return (
-    <div className="bg-gradient-to-br from-gray-50 to-white p-6 sm:p-10 min-h-[420px] flex flex-col items-center justify-center">
+    <div className="h-full bg-gradient-to-br from-gray-50 to-white p-4 sm:p-6 flex flex-col items-center justify-center overflow-hidden">
       <div className="w-full max-w-md">
-        <div className="flex items-center gap-2 mb-4">
-          <div className="size-10 rounded-full bg-[#25D366] flex items-center justify-center">
-            <Icon name="whatsapp" className="text-white text-lg" />
+        <div className="flex items-center gap-2 mb-3">
+          <div className="size-8 rounded-full bg-[#25D366] flex items-center justify-center shrink-0">
+            <Icon name="whatsapp" className="text-white text-base" />
           </div>
-          <div>
-            <p className="font-semibold text-gray-900">{persona.business}</p>
-            <p className="text-xs text-gray-400">WhatsApp Business</p>
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-gray-900 truncate">{persona.business}</p>
+            <p className="text-[10px] text-gray-400">WhatsApp Business</p>
           </div>
-          <span className="ml-auto text-[10px] font-semibold text-emerald-600 bg-emerald-50 border border-emerald-100 rounded-full px-2.5 py-1">
+          <span className="ml-auto text-[9px] font-semibold text-emerald-600 bg-emerald-50 border border-emerald-100 rounded-full px-2 py-0.5 shrink-0">
             Sent automatically
           </span>
         </div>
 
-        <div className="bg-[#e5ddd5] rounded-2xl p-4 shadow-inner">
-          <div className="bg-white rounded-xl rounded-tl-sm px-4 py-3 max-w-[90%] shadow-sm">
-            <p className="text-sm text-gray-800 leading-relaxed">{persona.confirmationMessage}</p>
-            <div className="flex items-center justify-end gap-1 mt-1.5">
-              <span className="text-[10px] text-gray-400">11:02 AM</span>
-              <Icon name="check-lg" className="text-blue-400 text-[11px]" />
+        <div className="bg-[#e5ddd5] rounded-xl p-3 shadow-inner">
+          <div className="bg-white rounded-lg rounded-tl-sm px-3 py-2.5 max-w-[90%] shadow-sm">
+            <p className="text-xs text-gray-800 leading-relaxed">{persona.confirmationMessage}</p>
+            <div className="flex items-center justify-end gap-1 mt-1">
+              <span className="text-[9px] text-gray-400">11:02 AM</span>
+              <Icon name="check-lg" className="text-blue-400 text-[10px]" />
             </div>
           </div>
         </div>
 
-        <div className="mt-4 flex items-center justify-center gap-2 text-xs text-gray-500">
-          <Icon name="envelope" className="text-gray-400" />
-          <span>Email confirmation sent to {persona.clientName.toLowerCase()}@email.com</span>
+        <div className="mt-2 flex items-center justify-center gap-1.5 text-[10px] text-gray-500">
+          <Icon name="envelope" className="text-gray-400 text-xs" />
+          <span className="truncate">Email sent to {persona.clientName.toLowerCase()}@email.com</span>
         </div>
 
-        <p className="text-center text-sm text-gray-500 mt-6">
+        <p className="text-center text-xs text-gray-500 mt-3">
           Automated WhatsApp &amp; email — no manual follow-up
         </p>
       </div>
@@ -626,21 +626,21 @@ function ConfirmationDesktop({ persona }: { persona: PersonaData }) {
 function BrowserChrome({ url, children }: { url: string; children: ReactNode }) {
   return (
     <div
-      className="rounded-2xl overflow-hidden shadow-[0_32px_80px_-8px_rgba(37,99,235,0.14),0_16px_40px_-8px_rgba(0,0,0,0.10),0_0_0_1px_rgba(0,0,0,0.05)]"
+      className="rounded-2xl overflow-hidden aspect-video flex flex-col shadow-[0_32px_80px_-8px_rgba(37,99,235,0.14),0_16px_40px_-8px_rgba(0,0,0,0.10),0_0_0_1px_rgba(0,0,0,0.05)]"
       style={{ transform: "rotateX(1.5deg)" }}
     >
-      <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-b from-gray-100/95 to-gray-50 border-b border-gray-200/80">
+      <div className="flex shrink-0 items-center gap-3 px-4 py-2.5 bg-gradient-to-b from-gray-100/95 to-gray-50 border-b border-gray-200/80">
         <div className="flex gap-1.5 shrink-0">
           <div className="size-3 rounded-full bg-[#ff5f57]" />
           <div className="size-3 rounded-full bg-[#febc2e]" />
           <div className="size-3 rounded-full bg-[#28c840]" />
         </div>
-        <div className="flex-1 max-w-xs mx-auto bg-white rounded-md border border-gray-200/80 px-3 py-1.5 text-xs text-gray-400 font-mono text-center flex items-center justify-center gap-1.5">
+        <div className="flex-1 max-w-xs mx-auto bg-white rounded-md border border-gray-200/80 px-3 py-1 text-xs text-gray-400 font-mono text-center flex items-center justify-center gap-1.5">
           <Icon name="lock-fill" className="text-blue-400 text-[9px]" />
           {url}
         </div>
       </div>
-      {children}
+      <div className="relative flex-1 min-h-0 overflow-hidden">{children}</div>
     </div>
   );
 }
@@ -827,12 +827,12 @@ export default function ProductMockup() {
               {slide.type === "customer" && (
                 <div
                   className="absolute pointer-events-none overflow-hidden"
-                  style={{ right: 20, bottom: -40, zIndex: 20, width: 280, height: 400 }}
+                  style={{ right: 16, bottom: -48, zIndex: 20, width: 260, height: 360 }}
                 >
                   <IPhoneMockup
                     model="15-pro"
                     color="space-black"
-                    scale={0.67}
+                    scale={0.62}
                     screenBg="#f9f9f9"
                     shadow={false}
                     safeArea={false}
