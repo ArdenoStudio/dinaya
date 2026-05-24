@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { unstable_cache } from "next/cache";
 import { db } from "@/db";
 import { businesses } from "@/db/schema";
 import { and, eq, isNull } from "drizzle-orm";
@@ -8,32 +9,37 @@ import { LandingFooter } from "@/components/LandingFooter";
 import { DIRECTORY_CATEGORIES, categoryLabel, cityToSlug } from "@/lib/directory";
 import { Icon } from "@/components/ui/Icon";
 
-export const dynamic = "force-dynamic";
-
 export const metadata: Metadata = {
   title: "Discover bookable businesses in Sri Lanka | Dinaya",
   description: "Find salons, clinics, tutors, and local services with online booking on Dinaya.lk.",
 };
 
-async function listDirectoryBusinesses(city?: string) {
-  return db
-    .select({
-      name: businesses.name,
-      slug: businesses.slug,
-      description: businesses.description,
-      directoryCity: businesses.directoryCity,
-      directoryCategory: businesses.directoryCategory,
-      logoUrl: businesses.logoUrl,
-    })
-    .from(businesses)
-    .where(and(
-      eq(businesses.directoryListed, true),
-      eq(businesses.isSuspended, false),
-      isNull(businesses.deletedAt),
-      ...(city ? [eq(businesses.directoryCity, city)] : []),
-    ))
-    .orderBy(businesses.name);
-}
+const listDirectoryBusinesses = unstable_cache(
+  async () => {
+    try {
+      return await db
+        .select({
+          name: businesses.name,
+          slug: businesses.slug,
+          description: businesses.description,
+          directoryCity: businesses.directoryCity,
+          directoryCategory: businesses.directoryCategory,
+          logoUrl: businesses.logoUrl,
+        })
+        .from(businesses)
+        .where(and(
+          eq(businesses.directoryListed, true),
+          eq(businesses.isSuspended, false),
+          isNull(businesses.deletedAt),
+        ))
+        .orderBy(businesses.name);
+    } catch {
+      return [];
+    }
+  },
+  ["discover-listings"],
+  { revalidate: 60 },
+);
 
 export default async function DiscoverPage() {
   const listings = await listDirectoryBusinesses();
