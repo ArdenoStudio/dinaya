@@ -1,9 +1,10 @@
 import { requireOwner } from "@/lib/auth";
+import { ProGate } from "@/lib/plan";
 import { ApiKeysClient } from "@/components/dashboard/ApiKeysClient";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
 
 export default async function ApiKeysPage() {
-  await requireOwner();
+  const { businessId } = await requireOwner();
 
   return (
     <div className="space-y-6">
@@ -18,7 +19,9 @@ export default async function ApiKeysPage() {
         backHref="/dashboard/settings/integrations"
         backLabel="Integrations"
       />
-      <ApiKeysClient />
+      <ProGate businessId={businessId} feature="webhooks">
+        <ApiKeysClient />
+      </ProGate>
     </div>
   );
 }

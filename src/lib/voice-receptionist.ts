@@ -58,5 +58,9 @@ export function serializeVoiceIntegration(row: VoiceIntegration | null) {
   return {
     ...row,
     languages: normalizeVoiceLanguages(row.languages),
+    requestedAt: row.requestedAt?.toISOString() ?? null,
+    lastTestedAt: row.lastTestedAt?.toISOString() ?? null,
+    activatedAt: row.activatedAt?.toISOString() ?? null,
+    updatedAt: row.updatedAt.toISOString(),
   };
 }

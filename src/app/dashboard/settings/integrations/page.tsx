@@ -7,9 +7,15 @@ import { CustomDomainPanel } from "@/components/dashboard/CustomDomainPanel";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
 import { GoogleCalendarDisconnect } from "@/components/dashboard/GoogleCalendarDisconnect";
 import { GOOGLE_PROVIDER, googleOAuthConfigured } from "@/lib/google-calendar";
+import { canUseFeature, getBusinessPlan, minimumPlanForFeature, planDisplayName } from "@/lib/plan";
 
 export default async function IntegrationsPage() {
   const { businessId } = await requireOwner();
+  const plan = await getBusinessPlan(businessId);
+  const canUseWebhooks = canUseFeature(plan, "webhooks");
+  const canUseGoogleCalendar = canUseFeature(plan, "googleCalendarSync");
+  const canUseApiKeys = canUseWebhooks;
+
   const [[business], [{ webhookCount }], [{ googleCount }]] = await Promise.all([
     db
       .select({
@@ -40,11 +46,6 @@ export default async function IntegrationsPage() {
   ]);
 
   const googleConnected = Number(googleCount) > 0;
-  const googleStatus = !googleOAuthConfigured()
-    ? "Env required"
-    : googleConnected
-      ? "Connected"
-      : "Not connected";
 
   const integrations = [
     {
@@ -53,20 +54,44 @@ export default async function IntegrationsPage() {
       status: business?.payhereEnabled && business.payhereMerchantId ? "Connected" : "Not connected",
       href: "/dashboard/settings",
       action: "Configure",
+      gated: false,
     },
     {
       name: "Webhooks",
       description: "Send booking events to your own systems or Zapier-style workflows.",
-      status: Number(webhookCount) > 0 ? `${webhookCount} endpoint${Number(webhookCount) === 1 ? "" : "s"}` : "Not connected",
-      href: "/dashboard/settings/webhooks",
-      action: "Manage",
+      status: canUseWebhooks
+        ? Number(webhookCount) > 0
+          ? `${webhookCount} endpoint${Number(webhookCount) === 1 ? "" : "s"}`
+          : "Not connected"
+        : `${planDisplayName(minimumPlanForFeature("webhooks"))} required`,
+      href: canUseWebhooks ? "/dashboard/settings/webhooks" : "/dashboard/billing",
+      action: canUseWebhooks ? "Manage" : "Upgrade",
+      gated: !canUseWebhooks,
     },
     {
       name: "Google Calendar",
       description: "Push confirmed bookings to your Google Calendar.",
-      status: googleStatus,
-      href: googleConnected ? "/dashboard/settings/integrations" : "/api/dashboard/integrations/google",
-      action: googleConnected ? "Connected" : googleOAuthConfigured() ? "Connect" : "Configure env",
+      status: !canUseGoogleCalendar
+        ? `${planDisplayName(minimumPlanForFeature("googleCalendarSync"))} required`
+        : !googleOAuthConfigured()
+          ? "Env required"
+          : googleConnected
+            ? "Connected"
+            : "Not connected",
+      href: canUseGoogleCalendar
+        ? googleConnected
+          ? "/dashboard/settings/integrations"
+          : "/api/dashboard/integrations/google"
+        : "/dashboard/billing",
+      action: canUseGoogleCalendar
+        ? googleConnected
+          ? "Connected"
+          : googleOAuthConfigured()
+            ? "Connect"
+            : "Configure env"
+        : "Upgrade",
+      gated: !canUseGoogleCalendar,
+      googleConnected,
     },
     {
       name: "Resend",
@@ -74,6 +99,7 @@ export default async function IntegrationsPage() {
       status: process.env.RESEND_API_KEY ? "Configured" : "Env required",
       href: "/dashboard/automations",
       action: "Use in automations",
+      gated: false,
     },
     {
       name: "WhatsApp / SMS",
@@ -81,6 +107,7 @@ export default async function IntegrationsPage() {
       status: process.env.META_WHATSAPP_TOKEN || process.env.SMS_HTTP_ENDPOINT ? "Configured" : "Env required",
       href: "/dashboard/automations",
       action: "Use in AI Hub",
+      gated: false,
     },
     {
       name: "AI Voice Receptionist",
@@ -88,13 +115,15 @@ export default async function IntegrationsPage() {
       status: "Max add-on",
       href: "/dashboard/settings/voice-receptionist",
       action: "Set up",
+      gated: false,
     },
     {
       name: "API keys",
       description: "Scoped API access for custom integrations and /api/v1 routes.",
-      status: "Available",
-      href: "/dashboard/settings/api-keys",
-      action: "Manage keys",
+      status: canUseApiKeys ? "Available" : `${planDisplayName(minimumPlanForFeature("webhooks"))} required`,
+      href: canUseApiKeys ? "/dashboard/settings/api-keys" : "/dashboard/billing",
+      action: canUseApiKeys ? "Manage keys" : "Upgrade",
+      gated: !canUseApiKeys,
     },
   ];
 
@@ -117,7 +146,7 @@ export default async function IntegrationsPage() {
                 {item.status}
               </span>
             </div>
-            {item.name === "Google Calendar" && googleConnected ? (
+            {item.name === "Google Calendar" && item.googleConnected && canUseGoogleCalendar ? (
               <GoogleCalendarDisconnect />
             ) : (
               <Link href={item.href} className="mt-4 inline-flex text-sm font-medium text-primary hover:underline">

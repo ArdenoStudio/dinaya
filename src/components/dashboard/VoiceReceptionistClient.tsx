@@ -11,14 +11,17 @@ import {
 
 type VoiceIntegrationPayload = {
   aiPhoneNumber: string | null;
+  activatedAt: string | null;
   bookingRules: string | null;
   businessPhone: string | null;
   fallbackMessage: string | null;
   faqNotes: string | null;
   handoffPhone: string | null;
   languages: VoiceLanguage[];
+  lastTestedAt: string | null;
   openingRules: string | null;
   providerName: string;
+  requestedAt: string | null;
   serviceRules: string | null;
   setupNotes: string | null;
   status: string;
@@ -70,6 +73,11 @@ function toForm(data: ApiResponse | null): FormState {
     serviceRules: integration?.serviceRules ?? DEFAULT_FORM.serviceRules,
     welcomeMessage: integration?.welcomeMessage ?? DEFAULT_FORM.welcomeMessage,
   };
+}
+
+function formatTimestamp(value: string | null | undefined): string {
+  if (!value) return "—";
+  return new Date(value).toLocaleString();
 }
 
 export function VoiceReceptionistClient() {
@@ -278,6 +286,24 @@ export function VoiceReceptionistClient() {
               <dt className="text-muted-foreground">AI phone number</dt>
               <dd className="font-medium">{data?.integration?.aiPhoneNumber ?? "Pending setup"}</dd>
             </div>
+            <div>
+              <dt className="text-muted-foreground">Requested</dt>
+              <dd className="font-medium">{formatTimestamp(data?.integration?.requestedAt)}</dd>
+            </div>
+            <div>
+              <dt className="text-muted-foreground">Last tested</dt>
+              <dd className="font-medium">{formatTimestamp(data?.integration?.lastTestedAt)}</dd>
+            </div>
+            <div>
+              <dt className="text-muted-foreground">Activated</dt>
+              <dd className="font-medium">{formatTimestamp(data?.integration?.activatedAt)}</dd>
+            </div>
+            {data?.integration?.setupNotes ? (
+              <div>
+                <dt className="text-muted-foreground">Platform notes</dt>
+                <dd className="whitespace-pre-wrap font-medium">{data.integration.setupNotes}</dd>
+              </div>
+            ) : null}
             <div>
               <dt className="text-muted-foreground">Scopes</dt>
               <dd className="font-mono text-xs">{scopeText}</dd>

@@ -73,6 +73,13 @@ describe("plan entitlements", () => {
     expect(canUseFeature("pro", "reviewReplies")).toBe(false);
     expect(canUseFeature("max", "reviewReplies")).toBe(true);
   });
+
+  it("reserves broadcasts for pro and max", () => {
+    expect(minimumPlanForFeature("broadcasts")).toBe("pro");
+    expect(canUseFeature("free", "broadcasts")).toBe(false);
+    expect(canUseFeature("pro", "broadcasts")).toBe(true);
+    expect(canUseFeature("max", "broadcasts")).toBe(true);
+  });
 });
 
 describe("subscription pricing", () => {

@@ -41,18 +41,26 @@ export async function POST(req: NextRequest) {
   const { businessId } = authResult.context;
 
   return withApiHandler(async () => {
+    const parsed = createSchema.safeParse(await req.json());
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Please check the API key details." }, { status: 400 });
+    }
+
+    const needsVoiceScopes = parsed.data.scopes.some(
+      (scope) => scope === "voice:read" || scope === "voice:write",
+    );
+
     try {
-      await requirePro(businessId, "webhooks");
+      if (needsVoiceScopes) {
+        await requirePro(businessId, "aiVoiceReceptionist");
+      } else {
+        await requirePro(businessId, "webhooks");
+      }
     } catch (error) {
       if (error instanceof PlanRequiredError) {
         return NextResponse.json({ error: error.message }, { status: 402 });
       }
       throw error;
-    }
-
-    const parsed = createSchema.safeParse(await req.json());
-    if (!parsed.success) {
-      return NextResponse.json({ error: "Please check the API key details." }, { status: 400 });
     }
 
     const { rawKey, keyHash } = generateApiKey();

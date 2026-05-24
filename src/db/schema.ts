@@ -778,6 +778,32 @@ export const apiKeys = pgTable("api_keys", {
   };
 });
 
+export const broadcasts = pgTable("broadcasts", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  businessId: uuid("business_id")
+    .notNull()
+    .references(() => businesses.id, { onDelete: "cascade" }),
+  name: varchar("name", { length: 120 }).notNull(),
+  channel: varchar("channel", { length: 40 }).notNull(),
+  subject: varchar("subject", { length: 200 }),
+  body: text("body").notNull(),
+  audienceType: varchar("audience_type", { length: 40 }).notNull(),
+  audienceFilter: jsonb("audience_filter"),
+  status: varchar("status", { length: 40 }).default("draft").notNull(),
+  recipientCount: integer("recipient_count").default(0).notNull(),
+  sentCount: integer("sent_count").default(0).notNull(),
+  skippedCount: integer("skipped_count").default(0).notNull(),
+  failedCount: integer("failed_count").default(0).notNull(),
+  sentAt: timestamp("sent_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  businessCreatedAtIdx: index("broadcasts_business_created_at_idx").on(
+    table.businessId,
+    table.createdAt,
+  ),
+}));
+
 export const voiceIntegrations = pgTable("voice_integrations", {
   id: uuid("id").defaultRandom().primaryKey(),
   businessId: uuid("business_id")
@@ -831,6 +857,7 @@ export const businessesRelations = relations(businesses, ({ many }) => ({
   socialConnections: many(socialConnections),
   metricsDaily: many(metricsDaily),
   apiKeys: many(apiKeys),
+  broadcasts: many(broadcasts),
   voiceIntegrations: many(voiceIntegrations),
 }));
 
@@ -1078,6 +1105,8 @@ export type NewAiContentCalendarItem = typeof aiContentCalendar.$inferInsert;
 export type SocialConnection = typeof socialConnections.$inferSelect;
 export type MetricsDaily = typeof metricsDaily.$inferSelect;
 export type ApiKey = typeof apiKeys.$inferSelect;
+export type Broadcast = typeof broadcasts.$inferSelect;
+export type NewBroadcast = typeof broadcasts.$inferInsert;
 export type VoiceIntegration = typeof voiceIntegrations.$inferSelect;
 export type NewVoiceIntegration = typeof voiceIntegrations.$inferInsert;
 export type PlatformSetting = typeof platformSettings.$inferSelect;
