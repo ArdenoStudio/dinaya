@@ -151,7 +151,7 @@ export function DocsDashboardMockup({ variant, highlightNav, highlightTarget }: 
               </button>
               {variant.includes("reviews") && highlight === undefined && (
                 <button type="button" className="mt-1 block text-[9px] text-violet-600">
-                  Generate reply (Pro)
+                  Generate reply (Max)
                 </button>
               )}
             </div>

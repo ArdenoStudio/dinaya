@@ -109,23 +109,23 @@ const DEFAULT_PRO_ENTITLEMENTS: Entitlements = {
     locations: 3,
   },
   features: {
-    aiBookingAutopilot: true,
-    aiContentMachine: true,
-    aiUpsellAssistant: true,
+    aiBookingAutopilot: false,
+    aiContentMachine: false,
+    aiUpsellAssistant: false,
     aiVoiceReceptionist: false,
     automations: true,
     broadcasts: true,
-    clientReactivationCampaign: true,
+    clientReactivationCampaign: false,
     googleCalendarSync: true,
     payments: true,
     publicBookingPage: true,
     publicBookingPageCustomization: true,
     reports: true,
-    reviewEngine: true,
+    reviewEngine: false,
     reviews: true,
-    reviewReplies: true,
-    smartReminderSystem: true,
-    vipLoyaltySequence: true,
+    reviewReplies: false,
+    smartReminderSystem: false,
+    vipLoyaltySequence: false,
     webhooks: true,
     whatsappSms: true,
   },
@@ -351,8 +351,14 @@ export function resolveEffectivePlan(input: {
   return stored;
 }
 
+const MAX_ONLY_FEATURES: readonly PlanFeature[] = [
+  ...AI_FEATURES,
+  "aiVoiceReceptionist",
+  "reviewReplies",
+];
+
 export function minimumPlanForFeature(feature: PlanFeature): Plan {
-  if (feature === "aiVoiceReceptionist") return "max";
+  if (MAX_ONLY_FEATURES.includes(feature)) return "max";
   return "pro";
 }
 

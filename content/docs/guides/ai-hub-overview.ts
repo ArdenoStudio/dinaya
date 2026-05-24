@@ -6,12 +6,12 @@ export const aiHubOverviewGuide: DocsGuide = {
   description: "Seven AI workflows to grow bookings, reviews, and repeat visits.",
   category: "growth",
   estimatedMinutes: 10,
-  planRequired: "pro",
+  planRequired: "max",
   relatedGuides: ["automations", "upgrade-plan"],
   steps: [
     {
       title: "Open AI Hub",
-      body: "Pro and Max plans include AI Hub under Dashboard → AI. Each workflow runs on a schedule in the background.",
+      body: "Max plans include AI Hub under Dashboard → AI. Each workflow runs on a schedule in the background.",
       visual: { type: "mockup", mockupId: "dashboard-ai" },
       highlightNav: "AI Hub",
     },

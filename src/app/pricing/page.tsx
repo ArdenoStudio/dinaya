@@ -25,15 +25,8 @@ const freeFeatures = [
   "Free updates forever",
 ];
 
-const proOperationalFeatures = [
+const proFeatures = [
   "Everything in Free",
-  "AI Booking Autopilot",
-  "Smart reminder system",
-  "Review engine",
-  "Client Reactivation Campaign",
-  "AI upsell assistant",
-  "30-Day AI Content Machine",
-  "VIP Loyalty Sequence",
   "Multi-staff calendar & permissions",
   "Custom domain (e.g. book.yoursalon.lk)",
   "Remove Dinaya branding",
@@ -41,10 +34,18 @@ const proOperationalFeatures = [
   "Priority WhatsApp support",
 ];
 
-const maxAiFeatures = [
+const maxFeatures = [
   "Everything in Pro",
-  "Unlimited branch locations",
+  "All seven AI growth tools",
+  "AI Booking Autopilot",
+  "Smart reminder system",
+  "Review engine",
+  "Client Reactivation Campaign",
+  "AI upsell assistant",
+  "30-Day AI Content Machine",
+  "VIP Loyalty Sequence",
   "AI Voice Receptionist setup eligibility",
+  "Unlimited branch locations",
   "Per-branch AI workflow controls",
   "Priority rollout support for multi-branch teams",
 ];
@@ -56,11 +57,11 @@ const faqs = [
   },
   {
     q: "Are there transaction fees?",
-    a: "Free includes email confirmations and a 24-hour email reminder. Pro adds SMS and WhatsApp reminders, plus AI-timed smart reminders. PayHere card fees (typically 3.3% + LKR 30) are charged by PayHere directly — Dinaya does not add a commission.",
+    a: "Free includes email confirmations and a 24-hour email reminder. Pro adds SMS and WhatsApp reminders. Max adds AI-timed smart reminders and the full AI growth toolkit. PayHere card fees (typically 3.3% + LKR 30) are charged by PayHere directly — Dinaya does not add a commission.",
   },
   {
     q: "Is Pro available?",
-    a: "Yes — Pro and Max are available now. Start on Free and upgrade anytime from your dashboard billing page when you're ready for multi-staff tools, AI growth features, or unlimited branches.",
+    a: "Yes — Pro and Max are available now. Start on Free and upgrade anytime from your dashboard billing page when you're ready for multi-staff tools, advanced operations, or Max AI growth features.",
   },
   {
     q: "Can I switch plans later?",
@@ -155,7 +156,7 @@ export default async function PricingPage() {
                 <h3 className="font-cal text-2xl tracking-tight">Pro</h3>
               </div>
               <p className="text-sm text-gray-500 mb-6">
-                For growing teams — up to 3 branches, all seven AI growth tools, and advanced operations.
+                For growing teams — up to 3 branches and advanced operations.
               </p>
 
               <div className="mb-6">
@@ -180,7 +181,7 @@ export default async function PricingPage() {
               </Link>
 
               <ul className="space-y-3 text-sm">
-                {proOperationalFeatures.map((f) => (
+                {proFeatures.map((f) => (
                   <li key={f} className="flex items-start gap-2.5">
                     <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-primary/15">
                       <Icon name="check" className="text-primary" style={{ fontSize: '0.625rem' }} />
@@ -202,7 +203,7 @@ export default async function PricingPage() {
                 <h3 className="font-cal text-2xl tracking-tight">Max</h3>
               </div>
               <p className="text-sm text-gray-500 mb-6">
-                Everything in Pro — plus unlimited branches and AI Voice Receptionist setup for larger teams.
+                Everything in Pro — plus all seven AI growth tools, unlimited branches, and AI Voice Receptionist setup.
               </p>
 
               <div className="mb-6">
@@ -230,7 +231,7 @@ export default async function PricingPage() {
                 Multi-branch scale
               </p>
               <ul className="space-y-3 text-sm">
-                {maxAiFeatures.map((f) => (
+                {maxFeatures.map((f) => (
                   <li key={f} className="flex items-start gap-2.5">
                     <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-amber-400/25">
                       <Icon name="check" className="text-amber-600" style={{ fontSize: '0.625rem' }} />
@@ -296,13 +297,13 @@ export default async function PricingPage() {
                 { f: "Remove Dinaya branding", a: "—", b: "Yes", icon: "eye-slash", c: "Yes" },
                 { f: "Advanced reports & exports", a: "—", b: "Yes", icon: "bar-chart", c: "Yes" },
                 { f: "Priority support", a: "Email", b: "WhatsApp", icon: "headset", c: "WhatsApp" },
-                { f: "AI Booking Autopilot", a: "—", b: "Yes", icon: "robot", c: "Yes" },
-                { f: "Smart reminder system", a: "—", b: "Yes", icon: "bell-fill", c: "Yes" },
-                { f: "Review engine", a: "—", b: "Yes", icon: "star", c: "Yes" },
-                { f: "Client Reactivation Campaign", a: "—", b: "Yes", icon: "arrow-repeat", c: "Yes" },
-                { f: "AI upsell assistant", a: "—", b: "Yes", icon: "graph-up-arrow", c: "Yes" },
-                { f: "30-Day AI Content Machine", a: "—", b: "Yes", icon: "calendar3", c: "Yes" },
-                { f: "VIP Loyalty Sequence", a: "—", b: "Yes", icon: "gem", c: "Yes" },
+                { f: "AI Booking Autopilot", a: "—", b: "—", icon: "robot", c: "Yes" },
+                { f: "Smart reminder system", a: "—", b: "—", icon: "bell-fill", c: "Yes" },
+                { f: "Review engine", a: "—", b: "—", icon: "star", c: "Yes" },
+                { f: "Client Reactivation Campaign", a: "—", b: "—", icon: "arrow-repeat", c: "Yes" },
+                { f: "AI upsell assistant", a: "—", b: "—", icon: "graph-up-arrow", c: "Yes" },
+                { f: "30-Day AI Content Machine", a: "—", b: "—", icon: "calendar3", c: "Yes" },
+                { f: "VIP Loyalty Sequence", a: "—", b: "—", icon: "gem", c: "Yes" },
                 { f: "AI Voice Receptionist setup", a: "—", b: "—", icon: "telephone", c: "Yes" },
               ].map((row) => (
                 <tr key={row.f} className="hover:bg-gray-50/50 transition-colors">

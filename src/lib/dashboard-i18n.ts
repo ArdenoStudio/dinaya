@@ -54,7 +54,7 @@ export const dashboardCopy = {
       generateReply: "Generate with AI",
       saveReply: "Save reply",
       replySaved: "Reply saved",
-      upgradeReply: "Upgrade to Pro to generate AI replies to reviews.",
+      upgradeReply: "Upgrade to Max to generate AI replies to reviews.",
       noComment: "No comment",
     },
     settings: {
@@ -113,7 +113,7 @@ export const dashboardCopy = {
       generateReply: "AI සමඟ සාදන්න",
       saveReply: "පිළිතුර සුරකින්න",
       replySaved: "පිළිතුර සුරකින ලදී",
-      upgradeReply: "සමාලෝචනවලට AI පිළිතුර සඳහා Pro වෙත යන්න.",
+      upgradeReply: "සමාලෝචනවලට AI පිළිතුර සඳහා Max වෙත යන්න.",
       noComment: "අදහසක් නැත",
     },
     settings: {
@@ -172,7 +172,7 @@ export const dashboardCopy = {
       generateReply: "AI உடன் உருவாக்கு",
       saveReply: "பதிலை சேமி",
       replySaved: "பதில் சேமிக்கப்பட்டது",
-      upgradeReply: "விமர்சன AI பதில்களுக்கு Pro-க்கு மேம்படுத்துங்கள்.",
+      upgradeReply: "விமர்சன AI பதில்களுக்கு Max-க்கு மேம்படுத்துங்கள்.",
       noComment: "கருத்து இல்லை",
     },
     settings: {

@@ -199,7 +199,7 @@ export const faqCategories: FaqCategory[] = [
       {
         id: "multi-staff-locations",
         q: "Can I have multiple staff or locations?",
-        a: "Yes. Free includes 1 location, Pro supports up to 3 branches with per-branch AI tools, and Max offers unlimited locations. Staff can be assigned to specific branches, and clients pick a branch when booking online.",
+        a: "Yes. Free includes 1 location, Pro supports up to 3 branches, and Max offers unlimited locations with per-branch AI tools. Staff can be assigned to specific branches, and clients pick a branch when booking online.",
         guideSlug: "manage-locations",
       },
       {

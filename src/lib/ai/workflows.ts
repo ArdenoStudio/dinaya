@@ -689,7 +689,7 @@ export async function runAiWorkflows(): Promise<Record<PlanFeature, WorkflowStat
       customDomainVerified: businesses.customDomainVerified,
     })
     .from(businesses)
-    .where(inArray(businesses.plan, ["pro", "max"]));
+    .where(inArray(businesses.plan, ["max"]));
 
   const eligibleBusinesses = businessRows.filter((business) =>
     AI_FEATURES.some((feature) => canRunAiWorkflow(business.plan as Plan, feature)),
