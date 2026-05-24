@@ -760,7 +760,7 @@ export default function ProductMockup() {
     slide.type === "owner" ? "dashboard.dinaya.lk" : slide.type === "confirmation" ? "messages" : persona.url;
 
   return (
-    <section className="max-w-5xl mx-auto px-6 pb-16 relative">
+    <section className="max-w-5xl mx-auto px-6 md:px-16 pb-16 relative overflow-visible">
       <div className="pointer-events-none absolute inset-0 overflow-hidden -z-10">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[680px] h-[480px] rounded-full bg-blue-500/[0.07] blur-3xl" />
         <div className="absolute top-1/3 right-1/4 w-[220px] h-[220px] rounded-full bg-violet-500/[0.05] blur-3xl" />
@@ -809,38 +809,41 @@ export default function ProductMockup() {
 
       {/* Desktop */}
       <div className="hidden md:block">
-        <div className="relative" style={{ perspective: "1200px" }}>
-          {navBtn(-1, "Previous", "absolute -left-14 top-1/2 -translate-y-1/2")}
-          {navBtn(1, "Next", "absolute -right-14 top-1/2 -translate-y-1/2")}
+        <div className="flex items-center gap-3 lg:gap-5">
+          {navBtn(-1, "Previous", "shrink-0")}
 
-          <div className={`relative transition-opacity duration-200 ${fading ? "opacity-0" : "opacity-100"}`}>
-            <BrowserChrome url={browserUrl}>{renderDesktopContent(slide.type, persona)}</BrowserChrome>
+          <div className="relative flex-1 min-w-0" style={{ perspective: "1200px" }}>
+            <div className={`relative transition-opacity duration-200 ${fading ? "opacity-0" : "opacity-100"}`}>
+              <BrowserChrome url={browserUrl}>{renderDesktopContent(slide.type, persona)}</BrowserChrome>
 
-            {slide.type === "owner" && <FloatingToasts persona={persona} />}
+              {slide.type === "owner" && <FloatingToasts persona={persona} />}
 
-            {slide.type === "customer" && (
-              <div
-                className="absolute pointer-events-none"
-                style={{ right: 20, bottom: 0, zIndex: 20, width: 290, height: 480 }}
-              >
-                <IPhoneMockup
-                  model="15-pro"
-                  color="space-black"
-                  scale={0.70}
-                  screenBg="#f9f9f9"
-                  shadow={false}
-                  safeArea={false}
-                  showHomeIndicator={false}
-                  innerShadow={false}
+              {slide.type === "customer" && (
+                <div
+                  className="absolute pointer-events-none overflow-hidden"
+                  style={{ right: 20, bottom: -40, zIndex: 20, width: 280, height: 400 }}
                 >
-                  <PhoneScreen persona={persona} />
-                </IPhoneMockup>
-              </div>
-            )}
+                  <IPhoneMockup
+                    model="15-pro"
+                    color="space-black"
+                    scale={0.67}
+                    screenBg="#f9f9f9"
+                    shadow={false}
+                    safeArea={false}
+                    showHomeIndicator={false}
+                    innerShadow={false}
+                  >
+                    <PhoneScreen persona={persona} />
+                  </IPhoneMockup>
+                </div>
+              )}
+            </div>
           </div>
 
-          <SlideIndicators current={current} onGoTo={goTo} />
+          {navBtn(1, "Next", "shrink-0")}
         </div>
+
+        <SlideIndicators current={current} onGoTo={goTo} />
       </div>
     </section>
   );
