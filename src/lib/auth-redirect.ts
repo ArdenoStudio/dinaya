@@ -16,6 +16,13 @@ export function resolveAuthRedirect(url: string, baseUrl: string): string {
       if (target.origin === appOrigin) return url;
     }
 
+    // Trust the current Vercel deployment URL (set automatically on all
+    // Vercel deployments — covers preview branches and production aliases).
+    for (const key of ["VERCEL_URL", "VERCEL_PROJECT_PRODUCTION_URL"] as const) {
+      const vercelHost = process.env[key];
+      if (vercelHost && target.hostname === vercelHost.split("/")[0]) return url;
+    }
+
     const domain = process.env.NEXT_PUBLIC_APP_DOMAIN ?? "dinaya.lk";
     const rootHost = domain.split(":")[0];
     const allowedHosts = new Set([rootHost, `www.${rootHost}`]);
@@ -24,5 +31,5 @@ export function resolveAuthRedirect(url: string, baseUrl: string): string {
     // fall through
   }
 
-  return "/auth/signin";
+  return "/dashboard";
 }

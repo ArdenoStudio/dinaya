@@ -16,6 +16,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         impersonationToken: { label: "Impersonation token", type: "text" },
       },
       async authorize(credentials) {
+        try {
         const impersonationToken = credentials?.impersonationToken as string | undefined;
         if (impersonationToken) {
           const { verifyImpersonationToken } = await import("@/lib/impersonation");
@@ -86,6 +87,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           businessId: user.businessId,
           role: user.role,
         };
+        } catch (err) {
+          console.error("[authorize] unexpected error", err);
+          return null;
+        }
       },
     }),
   ],
