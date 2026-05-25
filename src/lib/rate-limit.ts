@@ -78,11 +78,19 @@ async function checkUpstashLimit(
       limiter: Ratelimit.slidingWindow(config.limit, `${config.windowSeconds} s`),
       prefix: `dinaya:${config.scope}`,
     });
-    const result = await ratelimit.limit(key);
-    if (result.success) return { ok: true };
+
+    const timeout = new Promise<null>((resolve) =>
+      setTimeout(() => resolve(null), 1500),
+    );
+    const limitResult = await Promise.race([ratelimit.limit(key), timeout]);
+    if (limitResult === null) {
+      console.error("[rate-limit] Upstash timed out, falling back to memory");
+      return null;
+    }
+    if (limitResult.success) return { ok: true };
     return {
       ok: false,
-      retryAfter: Math.max(1, Math.ceil((result.reset - Date.now()) / 1000)),
+      retryAfter: Math.max(1, Math.ceil((limitResult.reset - Date.now()) / 1000)),
     };
   } catch (error) {
     console.error("[rate-limit] Upstash unavailable, falling back to memory", error);

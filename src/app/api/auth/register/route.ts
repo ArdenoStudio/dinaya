@@ -143,7 +143,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "An account with this email already exists." }, { status: 409 });
     }
 
-    const passwordHash = await bcrypt.hash(password, 12);
+    const passwordHash = await bcrypt.hash(password, 10);
     const cleanupState: {
       businessId?: string;
       userId?: string;
