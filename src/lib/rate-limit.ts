@@ -119,17 +119,7 @@ export async function withRateLimit(
     return { ok: false, response: tooManyRequests(upstash.retryAfter) };
   }
 
-  if (process.env.NODE_ENV === "production") {
-    console.error("[rate-limit] Upstash is required in production but is not configured");
-    return {
-      ok: false,
-      response: NextResponse.json(
-        { error: "Service temporarily unavailable." },
-        { status: 503 },
-      ),
-    };
-  }
-
+  // Upstash unavailable or not configured — fall back to in-memory limiter.
   const result = checkMemoryLimit(key, config);
 
   if (result.ok) return { ok: true };
