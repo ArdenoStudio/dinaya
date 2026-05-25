@@ -59,6 +59,7 @@ function LoginForm() {
         email,
         password,
         redirect: false,
+        callbackUrl: window.location.origin + callbackUrl,
       });
 
       if (!result || result.error) {
