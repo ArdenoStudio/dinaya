@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { Icon } from "@/components/ui/Icon";
 
 // Each pill scattered in its own direction — no pattern, like cards thrown on a table
@@ -26,14 +26,14 @@ const container = {
 };
 
 // "Without" pills — enter scattered, exit with blur
-const withoutVariant = {
+const withoutVariant: Variants = {
   hidden: { opacity: 0, y: 10, filter: "blur(0px)" },
   show:   { opacity: 1, y: 0,  filter: "blur(0px)", transition: { type: "spring", stiffness: 300, damping: 28 } },
   exit:   { opacity: 0, filter: "blur(10px)", scale: 0.97, transition: { duration: 0.22, ease: "easeIn" } },
 };
 
 // "With" pills — enter blurred from slightly below, unblur and snap into place
-const withVariant = {
+const withVariant: Variants = {
   hidden: { opacity: 0, y: 18, filter: "blur(8px)" },
   show:   { opacity: 1, y: 0,  filter: "blur(0px)", transition: { type: "spring", stiffness: 280, damping: 24 } },
   exit:   { opacity: 0, filter: "blur(10px)", scale: 0.97, transition: { duration: 0.2, ease: "easeIn" } },
@@ -181,7 +181,7 @@ export function BeforeAfterToggle() {
               exit="exit"
               className="relative space-y-3"
             >
-              {withoutItems.map((item, i) => (
+              {withoutItems.map((item) => (
                 <WithoutPill key={item.num} item={item} />
               ))}
             </motion.div>

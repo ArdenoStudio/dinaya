@@ -125,7 +125,7 @@ function BookingMockup() {
 
     run();
     return () => { alive = false; };
-  }, []);
+  }, [cOpacity, cScale, cx, cy]);
 
   return (
     <div ref={containerRef} className="relative w-full max-w-xs mx-auto">
@@ -135,7 +135,7 @@ function BookingMockup() {
             <Icon name="scissors" className="text-white text-xs" />
           </div>
           <div>
-            <div className="text-white font-semibold text-xs">Dilini's Beauty Studio</div>
+            <div className="text-white font-semibold text-xs">Dilini&apos;s Beauty Studio</div>
             <div className="text-white/70 text-[11px]">dilini.dinaya.lk</div>
           </div>
         </div>
@@ -222,7 +222,7 @@ function PaymentMockup() {
         <div className="flex size-5 items-center justify-center rounded-full bg-primary/10">
           <Icon name="bell" className="text-[10px] text-primary" />
         </div>
-        <span className="text-xs text-gray-700 font-medium">You've been notified</span>
+        <span className="text-xs text-gray-700 font-medium">You&apos;ve been notified</span>
       </div>
     </div>
   );
