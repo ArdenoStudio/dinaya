@@ -19,6 +19,7 @@ If either secret is missing, e2e is skipped with a workflow warning (verify stil
 - `SECRET_ENCRYPTION_KEY`
 - `NEXT_PUBLIC_APP_URL`
 - `NEXT_PUBLIC_APP_DOMAIN`
+- `NEXT_PUBLIC_GA_MEASUREMENT_ID` — optional GA4 measurement ID for public deal funnel analytics
 - `PAYHERE_SANDBOX`
 - `RESEND_API_KEY`
 - `RESEND_FROM`

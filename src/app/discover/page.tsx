@@ -3,16 +3,18 @@ import Link from "next/link";
 import { PublicNav } from "@/components/PublicNav";
 import { LandingFooter } from "@/components/LandingFooter";
 import { DiscoverCityLinks, DiscoverListings } from "@/components/discover/DiscoverListings";
+import { DiscoverDeals } from "@/components/discover/DiscoverDeals";
 import {
   DIRECTORY_CATEGORIES,
   categoryLabel,
   isValidDirectoryCategory,
   listDirectoryBusinesses,
 } from "@/lib/directory";
+import { listActiveDeals } from "@/lib/deals/queries";
 import { Icon } from "@/components/ui/Icon";
 
 interface Props {
-  searchParams: Promise<{ category?: string }>;
+  searchParams: Promise<{ category?: string; city?: string; minDiscount?: string }>;
 }
 
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
@@ -32,10 +34,19 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
 }
 
 export default async function DiscoverPage({ searchParams }: Props) {
-  const { category: rawCategory } = await searchParams;
+  const { category: rawCategory, city: rawCity, minDiscount: rawMinDiscount } = await searchParams;
   const activeCategory = isValidDirectoryCategory(rawCategory) ? rawCategory : null;
+  const activeCity = rawCity?.trim() || null;
+  const minDiscount = rawMinDiscount ? Number(rawMinDiscount) : undefined;
 
-  const allListings = await listDirectoryBusinesses();
+  const [allListings, activeDeals] = await Promise.all([
+    listDirectoryBusinesses(),
+    listActiveDeals({
+      category: activeCategory ?? undefined,
+      city: activeCity ?? undefined,
+      minDiscount: Number.isFinite(minDiscount) ? minDiscount : undefined,
+    }),
+  ]);
   const listings = activeCategory
     ? await listDirectoryBusinesses({ category: activeCategory })
     : allListings;
@@ -59,6 +70,15 @@ export default async function DiscoverPage({ searchParams }: Props) {
         </div>
 
         <DiscoverCityLinks listings={allListings} activeCategory={activeCategory} />
+
+        <DiscoverDeals deals={activeDeals} activeCity={activeCity} minDiscount={minDiscount} />
+
+        <div className="mb-8">
+          <h2 className="font-cal text-2xl tracking-tight">Browse businesses</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            All listed businesses with online booking on Dinaya.
+          </p>
+        </div>
 
         <DiscoverListings
           listings={listings}

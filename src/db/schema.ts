@@ -41,6 +41,18 @@ export const paymentStatusEnum = pgEnum("payment_status", [
   "failed",
   "refunded",
 ]);
+export const dealStatusEnum = pgEnum("deal_status", [
+  "active",
+  "expired",
+  "cancelled",
+  "sold_out",
+]);
+export const dealSuggestionStatusEnum = pgEnum("deal_suggestion_status", [
+  "pending",
+  "accepted",
+  "dismissed",
+  "expired",
+]);
 
 // ─── Clients (CRM) ────────────────────────────────────────────────────────────
 
@@ -367,6 +379,72 @@ export const businessHolidays = pgTable("business_holidays", {
   };
 });
 
+// ─── Deals ────────────────────────────────────────────────────────────────────
+
+export const deals = pgTable("deals", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  businessId: uuid("business_id")
+    .notNull()
+    .references(() => businesses.id, { onDelete: "cascade" }),
+  locationId: uuid("location_id")
+    .notNull()
+    .references(() => locations.id, { onDelete: "cascade" }),
+  serviceId: uuid("service_id")
+    .notNull()
+    .references(() => services.id, { onDelete: "cascade" }),
+  staffId: uuid("staff_id").references(() => staff.id, { onDelete: "set null" }),
+  discountPercent: integer("discount_percent").notNull(),
+  slotsTotal: integer("slots_total").notNull(),
+  slotsRedeemed: integer("slots_redeemed").default(0).notNull(),
+  impressionCount: integer("impression_count").default(0).notNull(),
+  dealWindowStart: timestamp("deal_window_start", { withTimezone: true }).notNull(),
+  dealWindowEnd: timestamp("deal_window_end", { withTimezone: true }).notNull(),
+  apptWindowStart: timestamp("appt_window_start", { withTimezone: true }).notNull(),
+  apptWindowEnd: timestamp("appt_window_end", { withTimezone: true }).notNull(),
+  status: dealStatusEnum("status").default("active").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  statusDealWindowEndIdx: index("deals_status_deal_window_end_idx").on(
+    table.status,
+    table.dealWindowEnd,
+  ),
+  businessStatusIdx: index("deals_business_status_idx").on(table.businessId, table.status),
+  businessCreatedAtIdx: index("deals_business_created_at_idx").on(
+    table.businessId,
+    table.createdAt,
+  ),
+}));
+
+export const dealSuggestions = pgTable("deal_suggestions", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  businessId: uuid("business_id")
+    .notNull()
+    .references(() => businesses.id, { onDelete: "cascade" }),
+  locationId: uuid("location_id")
+    .notNull()
+    .references(() => locations.id, { onDelete: "cascade" }),
+  staffId: uuid("staff_id")
+    .notNull()
+    .references(() => staff.id, { onDelete: "cascade" }),
+  serviceId: uuid("service_id")
+    .notNull()
+    .references(() => services.id, { onDelete: "cascade" }),
+  suggestedDiscountPercent: integer("suggested_discount_percent").notNull(),
+  suggestedSlotsTotal: integer("suggested_slots_total").notNull(),
+  apptWindowStart: timestamp("appt_window_start", { withTimezone: true }).notNull(),
+  apptWindowEnd: timestamp("appt_window_end", { withTimezone: true }).notNull(),
+  gapMinutes: integer("gap_minutes").notNull(),
+  reason: text("reason").notNull(),
+  status: dealSuggestionStatusEnum("status").default("pending").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+}, (table) => ({
+  businessStatusIdx: index("deal_suggestions_business_status_idx").on(
+    table.businessId,
+    table.status,
+  ),
+}));
+
 // ─── Bookings ─────────────────────────────────────────────────────────────────
 
 export const bookings = pgTable("bookings", {
@@ -391,6 +469,8 @@ export const bookings = pgTable("bookings", {
   endsAt: timestamp("ends_at", { withTimezone: true }).notNull(),
   status: bookingStatusEnum("status").default("pending").notNull(),
   source: varchar("source", { length: 40 }).default("public").notNull(),
+  dealId: uuid("deal_id").references(() => deals.id, { onDelete: "set null" }),
+  discountedPriceLkr: integer("discounted_price_lkr"),
   attribution: jsonb("attribution"),
   notes: text("notes"),
   staffNotes: text("staff_notes"),
@@ -413,6 +493,7 @@ export const bookings = pgTable("bookings", {
     table.staffId,
     table.startsAt,
   ),
+  dealIdIdx: index("bookings_deal_id_idx").on(table.dealId),
 }));
 
 export const bookingNotifications = pgTable("booking_notifications", {

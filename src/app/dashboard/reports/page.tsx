@@ -4,7 +4,9 @@ import { ProGate } from "@/lib/plan";
 import { requireBusiness } from "@/lib/auth";
 import { formatLkr } from "@/lib/utils";
 import { AnalyticsCharts } from "@/components/dashboard/AnalyticsCharts";
+import { DealAnalyticsPanel } from "@/components/dashboard/DealAnalyticsPanel";
 import { StatCard } from "@/components/dashboard/StatCard";
+import { getDealAnalytics } from "@/lib/deals/analytics";
 import { and, count, desc, eq, gte, lt, sql } from "drizzle-orm";
 import { startOfWeek, subWeeks } from "date-fns";
 import { BarChart3, CalendarDays, Star, Users } from "lucide-react";
@@ -152,6 +154,8 @@ export default async function ReportsPage() {
     return `${normalized}${suffix}`;
   };
 
+  const dealAnalytics = await getDealAnalytics(businessId);
+
   return (
     <ProGate businessId={businessId} feature="reports">
       <div className="space-y-6">
@@ -244,6 +248,8 @@ export default async function ReportsPage() {
             )}
           </div>
         </div>
+
+        <DealAnalyticsPanel analytics={dealAnalytics} />
       </div>
     </ProGate>
   );

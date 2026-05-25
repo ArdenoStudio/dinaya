@@ -7,12 +7,16 @@ import type { BookingBusiness, BookingState } from "./BookingWizard";
 import { formatLkr, isOptimizableRemoteImage } from "@/lib/utils";
 import type { BookingCopy } from "@/lib/i18n";
 import { readStoredAttribution } from "@/lib/booking-attribution";
+import { computeAmountDueFromDiscountedPrice, computeDiscountedPrice } from "@/lib/deals/pricing";
+import { trackDealBookingComplete, trackDealBookingStart } from "@/lib/analytics/gtag";
+import type { DealListItem } from "@/lib/deals/queries";
 import { Icon } from "@/components/ui/Icon";
 
 interface Props {
   state: BookingState;
   business: BookingBusiness;
   copy: BookingCopy;
+  selectedDeal?: DealListItem | null;
   onUpdate: (partial: Partial<BookingState>) => void;
   onBack: () => void;
   onConfirmed: (data: {
@@ -24,7 +28,7 @@ interface Props {
   }) => void;
 }
 
-export default function StepConfirm({ state, business, copy, onUpdate, onBack, onConfirmed }: Props) {
+export default function StepConfirm({ state, business, copy, selectedDeal, onUpdate, onBack, onConfirmed }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [upsell, setUpsell] = useState<{
@@ -34,15 +38,20 @@ export default function StepConfirm({ state, business, copy, onUpdate, onBack, o
   } | null>(null);
 
   const service = state.service;
+  const discountedPrice = service && selectedDeal
+    ? computeDiscountedPrice(service.priceLkr, selectedDeal.discountPercent)
+    : service?.priceLkr ?? 0;
   const depositAmount =
     service && service.depositPercent > 0
-      ? Math.ceil((service.priceLkr * service.depositPercent) / 100)
-      : service?.priceLkr ?? 0;
+      ? selectedDeal
+        ? computeAmountDueFromDiscountedPrice(discountedPrice, service.depositPercent)
+        : Math.ceil((service.priceLkr * service.depositPercent) / 100)
+      : discountedPrice;
   const dueNow =
-    service?.requiresPayment && service.priceLkr > 0
+    service?.requiresPayment && discountedPrice > 0
       ? service.depositPercent > 0
         ? depositAmount
-        : service.priceLkr
+        : discountedPrice
       : 0;
 
   const dateLabel = state.date
@@ -63,7 +72,7 @@ export default function StepConfirm({ state, business, copy, onUpdate, onBack, o
       : copy.confirmBooking;
 
   useEffect(() => {
-    if (!service) {
+    if (!service || selectedDeal) {
       setUpsell(null);
       return;
     }
@@ -76,7 +85,18 @@ export default function StepConfirm({ state, business, copy, onUpdate, onBack, o
       .then((res) => res.json())
       .then((data) => setUpsell(data.recommendation ?? null))
       .catch(() => setUpsell(null));
-  }, [business.id, service, state.location?.id]);
+  }, [business.id, service, state.location?.id, selectedDeal]);
+
+  useEffect(() => {
+    if (selectedDeal) {
+      trackDealBookingStart({
+        dealId: selectedDeal.id,
+        businessSlug: business.slug,
+        serviceId: service?.id,
+        discountPercent: selectedDeal.discountPercent,
+      });
+    }
+  }, [selectedDeal, business.slug, service?.id]);
 
   async function handleBook() {
     setLoading(true);
@@ -98,6 +118,7 @@ export default function StepConfirm({ state, business, copy, onUpdate, onBack, o
         clientPhone: state.clientPhone,
         clientEmail: state.clientEmail,
         notes: state.notes,
+        dealId: selectedDeal?.id ?? null,
         attribution,
       }),
     });
@@ -108,6 +129,16 @@ export default function StepConfirm({ state, business, copy, onUpdate, onBack, o
       setError(data.error ?? "Something went wrong. Please try again.");
       setLoading(false);
       return;
+    }
+
+    if (selectedDeal) {
+      trackDealBookingComplete({
+        dealId: selectedDeal.id,
+        businessSlug: business.slug,
+        discountPercent: selectedDeal.discountPercent,
+        bookingId: data.bookingId,
+        discountedPriceLkr: discountedPrice,
+      });
     }
 
     onConfirmed({

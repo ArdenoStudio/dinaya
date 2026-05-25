@@ -48,6 +48,11 @@ const FALLBACKS: Record<PlanFeature, (input: AiCopyInput) => AiCopyResult> = {
     source: "fallback",
   }),
   clientReactivationCampaign: reactivationFallback,
+  aiDealSuggestions: (input) => ({
+    subject: `Fill slow slots at ${input.businessName}`,
+    body: `${input.extra ?? "You have open appointment time coming up."} Post a flash deal to fill it on Dinaya Deals.`,
+    source: "fallback",
+  }),
   aiUpsellAssistant: (input) => ({
     subject: `Recommended add-on from ${input.businessName}`,
     body: `Many clients pair ${input.serviceName ?? "this booking"} with ${input.extra ?? "a follow-up service"}. Ask ${input.businessName} about it during your visit.`,
@@ -70,6 +75,11 @@ const FALLBACKS: Record<PlanFeature, (input: AiCopyInput) => AiCopyResult> = {
   }),
   automations: reminderFallback,
   broadcasts: reactivationFallback,
+  deals: (input) => ({
+    subject: `New deal from ${input.businessName}`,
+    body: `${input.businessName} posted a limited-time booking deal${input.extra ? `: ${input.extra}` : "."}`,
+    source: "fallback",
+  }),
   googleCalendarSync: reminderFallback,
   payments: reminderFallback,
   publicBookingPage: (input) => ({

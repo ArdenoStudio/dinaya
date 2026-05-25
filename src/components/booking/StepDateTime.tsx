@@ -21,6 +21,7 @@ interface Props {
   staff: Staff | null;
   selectedDate: string;
   selectedSlot: SlotOption | null;
+  dealId?: string | null;
   onDateChange: (date: string) => void;
   onSlotSelect: (slot: SlotOption) => void;
   showContinue?: boolean;
@@ -35,6 +36,7 @@ export default function StepDateTime({
   staff,
   selectedDate,
   selectedSlot,
+  dealId,
   onDateChange,
   onSlotSelect,
   showContinue,
@@ -60,9 +62,14 @@ export default function StepDateTime({
     async function load() {
       setLoadingSlots(true);
       setHasFetched(false);
-      const res = await fetch(
-        `/api/availability?businessId=${businessId}&staffId=${staff!.id}&serviceId=${service!.id}&date=${selectedDate}`
-      );
+      const query = new URLSearchParams({
+        businessId,
+        staffId: staff!.id,
+        serviceId: service!.id,
+        date: selectedDate,
+      });
+      if (dealId) query.set("dealId", dealId);
+      const res = await fetch(`/api/availability?${query.toString()}`);
       const data = await res.json();
       if (!cancelled) {
         setSlots(data.slots ?? []);
@@ -74,7 +81,7 @@ export default function StepDateTime({
     return () => {
       cancelled = true;
     };
-  }, [businessId, staff, service, selectedDate, canLoad]);
+  }, [businessId, staff, service, selectedDate, canLoad, dealId]);
 
   const dateHeading = selectedDate
     ? format(parseISO(selectedDate + "T12:00:00"), "EEEE, d MMMM yyyy")

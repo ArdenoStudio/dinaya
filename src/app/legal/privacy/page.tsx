@@ -54,6 +54,7 @@ export default function PrivacyPage() {
         <li><strong>Neon / Vercel</strong> — our database and hosting providers</li>
         <li><strong>Upstash</strong> — rate limiting and abuse prevention</li>
         <li><strong>Vercel Analytics</strong> — anonymous usage metrics (no ad tracking)</li>
+        <li><strong>Google Analytics (GA4)</strong> — optional platform analytics for deal discovery and booking funnels when enabled</li>
       </ul>
       <p>
         AI inputs are sent to Groq only when you actively use AI features. We do not use your
@@ -70,8 +71,10 @@ export default function PrivacyPage() {
       <h2>6. Cookies &amp; Analytics</h2>
       <p>
         We use session cookies required for authentication. We also use Vercel Analytics to collect
-        anonymous usage metrics that help us understand how the platform is used. We do not use
-        advertising or third-party tracking cookies.
+        anonymous usage metrics that help us understand how the platform is used. When configured,
+        Google Analytics (GA4) may also collect anonymous interaction events on public pages such as
+        deal discovery. We do not use advertising or third-party tracking cookies beyond these
+        analytics tools.
       </p>
 
       <h2>7. Your Rights</h2>
