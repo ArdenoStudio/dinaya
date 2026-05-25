@@ -97,6 +97,7 @@ export default async function MarketingPage() {
               alt="Booking page QR code"
               width={208}
               height={208}
+              unoptimized
               className="mx-auto size-52 rounded-lg border p-3"
             />
             <p className="mt-3 text-center text-xs text-muted-foreground">

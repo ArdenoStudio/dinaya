@@ -42,6 +42,9 @@ export default function MarketingError({
             Go to Dashboard
           </a>
         </div>
+        {process.env.NODE_ENV === "development" && error.message ? (
+          <p className="mt-4 max-w-md text-xs text-red-600">{error.message}</p>
+        ) : null}
         {error.digest && (
           <p className="mt-4 text-xs text-muted-foreground">
             Error ID: {error.digest}
