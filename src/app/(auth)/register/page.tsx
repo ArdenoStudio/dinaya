@@ -97,30 +97,40 @@ export default function RegisterPage() {
     e.preventDefault();
     setLoading(true);
     setError("");
-    const res = await fetch("/api/auth/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...form,
-        referrerCode: referrerCode || undefined,
-      }),
-    });
-    const data = await res.json();
-    if (!res.ok) { setError(data.error ?? "Something went wrong."); setLoading(false); return; }
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...form,
+          referrerCode: referrerCode || undefined,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "Something went wrong.");
+        setLoading(false);
+        return;
+      }
 
-    const signInResult = await signIn("credentials", {
-      email: form.email,
-      password: form.password,
-      redirect: false,
-    });
+      const signInResult = await signIn("credentials", {
+        email: form.email,
+        password: form.password,
+        redirect: false,
+        callbackUrl: `${window.location.origin}/dashboard/setup`,
+      });
 
-    if (signInResult?.ok) {
-      router.push("/dashboard/setup");
-      router.refresh();
-      return;
+      if (signInResult?.ok) {
+        router.push("/dashboard/setup");
+        router.refresh();
+        return;
+      }
+
+      router.push("/auth/signin?registered=1");
+    } catch {
+      setError("Something went wrong. Please try signing in.");
+      setLoading(false);
     }
-
-    router.push("/auth/signin?registered=1");
   }
 
   const strength = getPasswordStrength(form.password);
