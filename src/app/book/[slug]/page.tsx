@@ -6,14 +6,15 @@ import { listActiveLocations, getStaffLocationMap, ensureBusinessHasDefaultLocat
 import { eq, and, avg, count } from "drizzle-orm";
 import BookingWizard from "@/components/booking/BookingWizard";
 import { getBookingCopy } from "@/lib/i18n";
-import { resolveEffectivePlan } from "@/lib/plan";
+import { canUseFeature, resolveEffectivePlan, type Plan } from "@/lib/plan";
 import { isOptimizableRemoteImage } from "@/lib/utils";
-import { canUseFeature, type Plan } from "@/lib/plan";
+import { listActiveDealsForBusiness } from "@/lib/deals/queries";
 import { normalizePublicHttpsUrl } from "@/lib/public-url";
 import { Icon } from "@/components/ui/Icon";
 
 interface Props {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ dealId?: string }>;
 }
 
 export async function generateMetadata({ params }: Props) {
@@ -46,8 +47,9 @@ function StarRating({ rating, size = "sm" }: { rating: number; size?: "sm" | "md
   );
 }
 
-export default async function BookingPage({ params }: Props) {
+export default async function BookingPage({ params, searchParams }: Props) {
   const { slug } = await params;
+  const { dealId } = await searchParams;
 
   const [business] = await db
     .select({
@@ -101,7 +103,7 @@ export default async function BookingPage({ params }: Props) {
   });
   const showBranding = effectivePlan === "free";
 
-  const [serviceList, staffList, reviewList, ratingData, locationList, staffLocationMap] = await Promise.all([
+  const [serviceList, staffList, reviewList, ratingData, locationList, staffLocationMap, activeDeals] = await Promise.all([
     db
       .select({
         id: services.id,
@@ -134,6 +136,7 @@ export default async function BookingPage({ params }: Props) {
       .where(and(eq(reviews.businessId, business.id), eq(reviews.isPublished, true))),
     listActiveLocations(business.id),
     getStaffLocationMap(business.id),
+    listActiveDealsForBusiness(business.id),
   ]);
 
   const assignments = await db
@@ -263,6 +266,8 @@ export default async function BookingPage({ params }: Props) {
           locations={locationList}
           bookingUrlLabel={bookingUrlLabel}
           showBranding={showBranding}
+          activeDeals={activeDeals}
+          initialDealId={dealId ?? null}
         />
 
         {hasAboutSection && (

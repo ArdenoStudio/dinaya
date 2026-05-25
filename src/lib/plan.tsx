@@ -12,11 +12,13 @@ export type PaidPlan = "pro" | "max";
 export type PlanFeature =
   | "aiBookingAutopilot"
   | "aiContentMachine"
+  | "aiDealSuggestions"
   | "aiUpsellAssistant"
   | "aiVoiceReceptionist"
   | "automations"
   | "broadcasts"
   | "clientReactivationCampaign"
+  | "deals"
   | "googleCalendarSync"
   | "payments"
   | "publicBookingPage"
@@ -38,6 +40,7 @@ export const AI_FEATURES: readonly PlanFeature[] = [
   "aiUpsellAssistant",
   "aiContentMachine",
   "vipLoyaltySequence",
+  "aiDealSuggestions",
 ] as const;
 
 export type Entitlements = {
@@ -81,11 +84,13 @@ const DEFAULT_FREE_ENTITLEMENTS: Entitlements = {
   features: {
     aiBookingAutopilot: false,
     aiContentMachine: false,
+    aiDealSuggestions: false,
     aiUpsellAssistant: false,
     aiVoiceReceptionist: false,
     automations: false,
     broadcasts: false,
     clientReactivationCampaign: false,
+    deals: false,
     googleCalendarSync: false,
     payments: true,
     publicBookingPage: true,
@@ -111,11 +116,13 @@ const DEFAULT_PRO_ENTITLEMENTS: Entitlements = {
   features: {
     aiBookingAutopilot: false,
     aiContentMachine: false,
+    aiDealSuggestions: false,
     aiUpsellAssistant: false,
     aiVoiceReceptionist: false,
     automations: true,
     broadcasts: true,
     clientReactivationCampaign: false,
+    deals: true,
     googleCalendarSync: true,
     payments: true,
     publicBookingPage: true,
@@ -141,11 +148,13 @@ const DEFAULT_MAX_ENTITLEMENTS: Entitlements = {
   features: {
     aiBookingAutopilot: true,
     aiContentMachine: true,
+    aiDealSuggestions: true,
     aiUpsellAssistant: true,
     aiVoiceReceptionist: true,
     automations: true,
     broadcasts: true,
     clientReactivationCampaign: true,
+    deals: true,
     googleCalendarSync: true,
     payments: true,
     publicBookingPage: true,
@@ -353,6 +362,7 @@ export function resolveEffectivePlan(input: {
 
 const MAX_ONLY_FEATURES: readonly PlanFeature[] = [
   ...AI_FEATURES,
+  "aiDealSuggestions",
   "aiVoiceReceptionist",
   "reviewReplies",
 ];
@@ -397,10 +407,12 @@ export const PLAN_ENTITLEMENTS: Record<Plan, Entitlements> = {
 const FEATURE_LABELS: Record<PlanFeature, string> = {
   aiBookingAutopilot: "AI Booking Autopilot",
   aiContentMachine: "30-Day AI Content Machine",
+  aiDealSuggestions: "Smart deal suggestions",
   aiUpsellAssistant: "AI upsell assistant",
   aiVoiceReceptionist: "AI Voice Receptionist",
   automations: "Automations",
   broadcasts: "Broadcasts",
+  deals: "Dinaya Deals",
   clientReactivationCampaign: "Client Reactivation Campaign",
   googleCalendarSync: "Google Calendar sync",
   payments: "PayHere payments",

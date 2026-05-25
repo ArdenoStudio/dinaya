@@ -80,6 +80,20 @@ describe("plan entitlements", () => {
     expect(canUseFeature("pro", "broadcasts")).toBe(true);
     expect(canUseFeature("max", "broadcasts")).toBe(true);
   });
+
+  it("reserves deals for pro and max", () => {
+    expect(minimumPlanForFeature("deals")).toBe("pro");
+    expect(canUseFeature("free", "deals")).toBe(false);
+    expect(canUseFeature("pro", "deals")).toBe(true);
+    expect(canUseFeature("max", "deals")).toBe(true);
+  });
+
+  it("reserves smart deal suggestions for max", () => {
+    expect(minimumPlanForFeature("aiDealSuggestions")).toBe("max");
+    expect(canUseFeature("free", "aiDealSuggestions")).toBe(false);
+    expect(canUseFeature("pro", "aiDealSuggestions")).toBe(false);
+    expect(canUseFeature("max", "aiDealSuggestions")).toBe(true);
+  });
 });
 
 describe("subscription pricing", () => {

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { availability, availabilityOverrides, bookings, businesses, staff, services } from "@/db/schema";
+import { getDealById } from "@/lib/deals/queries";
 import { eq, and, gte, lt, count } from "drizzle-orm";
 import { getAvailableSlots } from "@/lib/availability";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -22,6 +23,7 @@ export async function GET(req: NextRequest) {
   const serviceId = searchParams.get("serviceId");
   const businessId = searchParams.get("businessId");
   const date = searchParams.get("date"); // "YYYY-MM-DD" in Colombo time
+  const dealId = searchParams.get("dealId");
 
   if (!staffId || !serviceId || !date) {
     return NextResponse.json({ error: "Missing params" }, { status: 400 });
@@ -123,8 +125,18 @@ export async function GET(req: NextRequest) {
     timezone,
   });
 
+  let filteredSlots = slots;
+  if (dealId) {
+    const deal = await getDealById(dealId);
+    if (deal) {
+      filteredSlots = slots.filter((slot) =>
+        slot.startUtc >= deal.apptWindowStart && slot.startUtc <= deal.apptWindowEnd
+      );
+    }
+  }
+
   return NextResponse.json({
-    slots: slots.map((s) => ({
+    slots: filteredSlots.map((s) => ({
       startUtc: s.startUtc.toISOString(),
       endUtc: s.endUtc.toISOString(),
       label: s.label,

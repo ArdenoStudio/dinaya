@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { format, parseISO } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
@@ -17,6 +17,9 @@ import { getEligibleStaff, pickDefaultStaff } from "@/lib/booking-staff";
 import { formatLkr, isOptimizableRemoteImage } from "@/lib/utils";
 import BookingBranding from "./BookingBranding";
 import { BookingAttributionCapture } from "./BookingAttributionCapture";
+import { BookingDealsSection } from "./BookingDealsSection";
+import type { DealListItem } from "@/lib/deals/queries";
+import { computeDiscountedPrice } from "@/lib/deals/pricing";
 
 const COLOMBO_TZ = "Asia/Colombo";
 
@@ -30,6 +33,8 @@ interface Props {
   bookingUrlLabel: string;
   businessIcon?: string | null;
   showBranding?: boolean;
+  activeDeals?: DealListItem[];
+  initialDealId?: string | null;
 }
 
 export type BookingBusiness = {
@@ -89,6 +94,8 @@ export default function BookingWizard({
   bookingUrlLabel,
   businessIcon,
   showBranding = true,
+  activeDeals = [],
+  initialDealId = null,
 }: Props) {
   const copy = getBookingCopy(business.language);
   const needsLocationPicker = locations.length > 1;
@@ -111,6 +118,11 @@ export default function BookingWizard({
     notes: "",
   });
   const [selectedSlot, setSelectedSlot] = useState<SlotData | null>(null);
+  const [selectedDealId, setSelectedDealId] = useState<string | null>(initialDealId);
+  const selectedDeal = useMemo(
+    () => activeDeals.find((deal) => deal.id === selectedDealId) ?? null,
+    [activeDeals, selectedDealId],
+  );
   const [confirmed, setConfirmed] = useState<{
     bookingId: string;
     manualPayment?: boolean;
@@ -140,12 +152,47 @@ export default function BookingWizard({
         timeLabel: "",
       });
       setSelectedSlot(null);
+      setSelectedDealId(null);
       if (typeof window !== "undefined" && window.innerWidth < 768) {
         setStep(1);
       }
     },
     [staff, staffServiceMap, staffLocationMap, state.location?.id, todayStr]
   );
+
+  const applyDeal = useCallback((deal: DealListItem | null) => {
+    setSelectedDealId(deal?.id ?? null);
+    if (!deal) return;
+
+    const service = services.find((item) => item.id === deal.serviceId) ?? null;
+    const location = locations.find((item) => item.id === deal.locationId) ?? state.location;
+    const eligibleStaff = service
+      ? getEligibleStaff(staff, staffServiceMap, service.id, staffLocationMap, location?.id)
+      : [];
+    const dealStaff = deal.staffId
+      ? eligibleStaff.find((member) => member.id === deal.staffId) ?? null
+      : pickDefaultStaff(staff, staffServiceMap, deal.serviceId, staffLocationMap, location?.id);
+
+    update({
+      location: location ?? null,
+      service,
+      staff: dealStaff,
+      date: todayStr,
+      timeSlot: "",
+      timeSlotEnd: "",
+      timeLabel: "",
+    });
+    setSelectedSlot(null);
+    if (typeof window !== "undefined" && window.innerWidth < 768) {
+      setStep(1);
+    }
+  }, [locations, services, staff, staffServiceMap, staffLocationMap, state.location, todayStr]);
+
+  useEffect(() => {
+    if (!initialDealId || activeDeals.length === 0) return;
+    const deal = activeDeals.find((item) => item.id === initialDealId);
+    if (deal) applyDeal(deal);
+  }, [initialDealId, activeDeals, applyDeal]);
 
   function selectSlot(slot: SlotData) {
     setSelectedSlot(slot);
@@ -168,9 +215,11 @@ export default function BookingWizard({
     step < 2;
 
   const depositPreview = state.service
-    ? state.service.depositPercent > 0
-      ? Math.ceil((state.service.priceLkr * state.service.depositPercent) / 100)
-      : state.service.priceLkr
+    ? selectedDeal
+      ? computeDiscountedPrice(state.service.priceLkr, selectedDeal.discountPercent)
+      : state.service.depositPercent > 0
+        ? Math.ceil((state.service.priceLkr * state.service.depositPercent) / 100)
+        : state.service.priceLkr
     : 0;
 
   const desktopPayCta =
@@ -227,6 +276,11 @@ export default function BookingWizard({
   return (
     <div className="min-w-0 md:overflow-hidden md:rounded-2xl md:border md:border-gray-100/80 md:bg-white md:shadow-[0_24px_64px_-12px_rgba(37,99,235,0.12),0_8px_24px_-8px_rgba(0,0,0,0.08)]">
       <BookingAttributionCapture businessId={business.id} />
+      <BookingDealsSection
+        deals={activeDeals}
+        selectedDealId={selectedDealId}
+        onSelectDeal={applyDeal}
+      />
       {/* Mobile header + progress */}
       <div className="bg-blue-600 px-[18px] pt-5 pb-[18px] md:hidden">
         <BusinessIdentity
@@ -348,6 +402,7 @@ export default function BookingWizard({
                   staff={state.staff}
                   selectedDate={state.date}
                   selectedSlot={selectedSlot}
+                  dealId={selectedDealId}
                   onDateChange={(date) => {
                     update({ date, timeSlot: "", timeSlotEnd: "", timeLabel: "" });
                     setSelectedSlot(null);
@@ -391,6 +446,7 @@ export default function BookingWizard({
           state={state}
           business={business}
           copy={copy}
+          selectedDeal={selectedDeal}
           onUpdate={update}
           onBack={() => setStep(1)}
           onConfirmed={setConfirmed}

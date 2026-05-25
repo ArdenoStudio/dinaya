@@ -50,6 +50,7 @@ export function resolveBookingSource(attribution?: BookingAttribution | null): s
 
   if (attribution.referralCode) return "referral";
   if (attribution.channel === "directory") return "directory";
+  if (attribution.channel === "deals") return "deals";
   if (attribution.channel === "embed") return "embed";
 
   const utmSource = attribution.utmSource?.toLowerCase();

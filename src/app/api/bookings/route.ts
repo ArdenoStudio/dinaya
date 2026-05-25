@@ -26,6 +26,10 @@ import { withRateLimit } from "@/lib/rate-limit";
 import { hasApiKeyAuth, requireApiKey } from "@/lib/api-key-auth";
 import { z } from "@/lib/validation";
 import { startOfMonth } from "date-fns";
+import { claimDealSlot } from "@/lib/deals/claim";
+import { computeAmountDueFromDiscountedPrice, computeDiscountedPrice } from "@/lib/deals/pricing";
+import { getDealForBooking } from "@/lib/deals/queries";
+import { DealValidationError, validateDealForBooking } from "@/lib/deals/validation";
 
 const bookingSchema = z.object({
   businessId: z.uuid(),
@@ -38,7 +42,8 @@ const bookingSchema = z.object({
   clientPhone: z.string().trim().min(7).max(30),
   clientEmail: z.email().optional().nullable().or(z.literal("")),
   notes: z.string().trim().max(2000).optional().nullable(),
-  source: z.enum(["public", "manual", "api", "import", "voice_agent"]).optional(),
+  dealId: z.uuid().optional().nullable(),
+  source: z.enum(["public", "manual", "api", "import", "voice_agent", "deals"]).optional(),
   attribution: z.object({
     utmSource: z.string().trim().max(80).optional().nullable(),
     utmMedium: z.string().trim().max(80).optional().nullable(),
@@ -91,6 +96,7 @@ export async function POST(req: NextRequest) {
     clientName,
     clientEmail,
     notes,
+    dealId: requestedDealId,
     source: requestedSource = "public",
     attribution: requestedAttribution,
   } = parsed.data;
@@ -128,7 +134,9 @@ export async function POST(req: NextRequest) {
     ? (requestedSource === "voice_agent" ? "voice_agent" : "api")
     : isOwnerBooking
       ? requestedSource
-      : resolveBookingSource(attribution);
+      : requestedDealId || attribution?.channel === "deals"
+        ? "deals"
+        : resolveBookingSource(attribution);
   const clientSource = resolveClientSource(source, attribution);
 
   const start = new Date(startsAt);
@@ -250,6 +258,38 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  let claimedDealId: string | null = null;
+  let discountedPriceLkr: number | null = null;
+  let validatedDealId: string | null = null;
+
+  if (requestedDealId) {
+    const deal = await getDealForBooking(requestedDealId, businessId);
+    if (!deal) {
+      return NextResponse.json({ error: "Deal not found." }, { status: 404 });
+    }
+
+    try {
+      validateDealForBooking({
+        deal,
+        businessId,
+        serviceId,
+        staffId,
+        locationId: resolvedLocationId,
+        appointmentStart: start,
+      });
+    } catch (error) {
+      if (error instanceof DealValidationError) {
+        return NextResponse.json({ error: error.message }, { status: 409 });
+      }
+      throw error;
+    }
+
+    validatedDealId = deal.id;
+    discountedPriceLkr = computeDiscountedPrice(service.priceLkr, deal.discountPercent);
+  }
+
+  const effectivePriceLkr = discountedPriceLkr ?? service.priceLkr;
+
   const expectedEnd = new Date(start.getTime() + service.durationMinutes * 60_000);
   if (Math.abs(expectedEnd.getTime() - end.getTime()) > 60_000) {
     return NextResponse.json({ error: "Booking duration does not match the selected service." }, { status: 400 });
@@ -279,7 +319,7 @@ export async function POST(req: NextRequest) {
   // Create booking (pending until payment/proof is confirmed, or immediately confirmed if free)
   const payhereEnabled = Boolean(
     service.requiresPayment &&
-    service.priceLkr > 0 &&
+    effectivePriceLkr > 0 &&
     business.payhereEnabled &&
     business.payhereMerchantId
   );
@@ -297,7 +337,7 @@ export async function POST(req: NextRequest) {
 
   const manualPaymentRequired = Boolean(
     service.requiresPayment &&
-    service.priceLkr > 0 &&
+    effectivePriceLkr > 0 &&
     !payhereEnabled &&
     (business.bankTransferInstructions || business.lankaqrImageUrl)
   );
@@ -344,6 +384,8 @@ export async function POST(req: NextRequest) {
         endsAt: end,
         status: initialStatus,
         source,
+        dealId: validatedDealId,
+        discountedPriceLkr,
         attribution: attribution && Object.values(attribution).some(Boolean) ? attribution : null,
         notes: notes || null,
       })
@@ -362,12 +404,28 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Could not create booking." }, { status: 500 });
   }
 
+  if (validatedDealId) {
+    const claimed = await claimDealSlot(validatedDealId);
+    if (!claimed) {
+      await db
+        .update(bookings)
+        .set({
+          status: "cancelled",
+          cancelledAt: new Date(),
+          cancellationReason: "Deal sold out during booking.",
+        })
+        .where(eq(bookings.id, booking.id));
+      return NextResponse.json({ error: "This deal just sold out." }, { status: 409 });
+    }
+    claimedDealId = claimed.id;
+  }
+
   void logActivity({
     action: "created",
     businessId,
     entity: "booking",
     entityId: booking.id,
-    meta: { source, status: initialStatus },
+    meta: { source, status: initialStatus, dealId: claimedDealId },
   }).catch((error) => {
     console.error("Activity log write failed:", error);
   });
@@ -462,9 +520,11 @@ export async function POST(req: NextRequest) {
   }
 
   const orderId = generateOrderId();
-  const amountDueLkr = service.depositPercent > 0
-    ? Math.ceil((service.priceLkr * service.depositPercent) / 100)
-    : service.priceLkr;
+  const amountDueLkr = discountedPriceLkr !== null
+    ? computeAmountDueFromDiscountedPrice(discountedPriceLkr, service.depositPercent)
+    : service.depositPercent > 0
+      ? Math.ceil((service.priceLkr * service.depositPercent) / 100)
+      : service.priceLkr;
 
   await db.insert(payments).values({
     bookingId: booking.id,

@@ -6,6 +6,7 @@ export const AI_FEATURES = [
   "aiUpsellAssistant",
   "aiContentMachine",
   "vipLoyaltySequence",
+  "aiDealSuggestions",
 ] as const;
 
 export type AiFeatureKey = (typeof AI_FEATURES)[number];
@@ -41,5 +42,9 @@ export const AI_FEATURE_META: Record<
   vipLoyaltySequence: {
     label: "VIP Loyalty Sequence",
     description: "Reward repeat clients with automated loyalty touchpoints.",
+  },
+  aiDealSuggestions: {
+    label: "Smart Deal Suggestions",
+    description: "AI recommends flash discounts for slow appointment slots.",
   },
 };

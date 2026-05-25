@@ -8,6 +8,7 @@ import { sendBookingCancellationMessage } from "@/lib/messaging/booking-messages
 import { processBookingAutomationTrigger } from "@/lib/automations/engine";
 import { dispatchWebhooks } from "@/lib/webhooks";
 import { logActivity } from "@/lib/activity-log";
+import { releaseDealSlotForBooking } from "@/lib/deals/claim";
 import type { Plan } from "@/lib/plan";
 import { withRateLimit } from "@/lib/rate-limit";
 import { z } from "@/lib/validation";
@@ -49,6 +50,8 @@ export async function POST(
     return NextResponse.json({ error: cancelCheck.reason ?? "Cannot cancel this booking." }, { status: 400 });
   }
 
+  const priorStatus = booking.status;
+
   await db
     .update(bookings)
     .set({
@@ -57,6 +60,10 @@ export async function POST(
       cancellationReason: parsed.data.reason ?? "Cancelled by client",
     })
     .where(eq(bookings.id, booking.id));
+
+  void releaseDealSlotForBooking(booking.id, priorStatus).catch((error) => {
+    console.error("Deal slot release failed:", error);
+  });
 
   const [business] = await db
     .select({ plan: businesses.plan })

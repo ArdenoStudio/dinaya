@@ -7,6 +7,7 @@ import { dispatchWebhooks } from "@/lib/webhooks";
 import { logActivity } from "@/lib/activity-log";
 import { rescheduleBooking } from "@/lib/booking-reschedule";
 import { processBookingAutomationTrigger } from "@/lib/automations/engine";
+import { releaseDealSlotForBooking } from "@/lib/deals/claim";
 import { z } from "@/lib/validation";
 
 const VALID_STATUSES = ["pending", "confirmed", "cancelled", "completed", "no_show"] as const;
@@ -160,6 +161,12 @@ export async function PATCH(
     .returning();
 
   if (!updated) return NextResponse.json({ error: "Not found." }, { status: 404 });
+
+  if (status === "cancelled" && existing.status !== "cancelled") {
+    void releaseDealSlotForBooking(updated.id, existing.status).catch((error) => {
+      console.error("Deal slot release failed:", error);
+    });
+  }
 
   if (status && status !== existing.status) {
     void logActivity({
