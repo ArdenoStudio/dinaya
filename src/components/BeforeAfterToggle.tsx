@@ -28,15 +28,15 @@ const container = {
 // "Without" pills — enter scattered, exit with blur
 const withoutVariant: Variants = {
   hidden: { opacity: 0, y: 10, filter: "blur(0px)" },
-  show:   { opacity: 1, y: 0,  filter: "blur(0px)", transition: { type: "spring", stiffness: 300, damping: 28 } },
-  exit:   { opacity: 0, filter: "blur(10px)", scale: 0.97, transition: { duration: 0.22, ease: "easeIn" } },
+  show:   { opacity: 1, y: 0,  filter: "blur(0px)", transition: { type: "spring" as const, stiffness: 300, damping: 28 } },
+  exit:   { opacity: 0, filter: "blur(10px)", scale: 0.97, transition: { duration: 0.22, ease: "easeIn" as const } },
 };
 
 // "With" pills — enter blurred from slightly below, unblur and snap into place
 const withVariant: Variants = {
   hidden: { opacity: 0, y: 18, filter: "blur(8px)" },
-  show:   { opacity: 1, y: 0,  filter: "blur(0px)", transition: { type: "spring", stiffness: 280, damping: 24 } },
-  exit:   { opacity: 0, filter: "blur(10px)", scale: 0.97, transition: { duration: 0.2, ease: "easeIn" } },
+  show:   { opacity: 1, y: 0,  filter: "blur(0px)", transition: { type: "spring" as const, stiffness: 280, damping: 24 } },
+  exit:   { opacity: 0, filter: "blur(10px)", scale: 0.97, transition: { duration: 0.2, ease: "easeIn" as const } },
 };
 
 function WithoutPill({ item }: { item: typeof withoutItems[number] }) {
