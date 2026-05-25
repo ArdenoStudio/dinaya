@@ -7,6 +7,8 @@ import { CTAPrimaryButton } from "@/components/cta-primary-button";
 import { LandingFooter } from "@/components/LandingFooter";
 import { Icon } from "@/components/ui/Icon";
 import { TextAnimate } from "@/components/ui/text-animate";
+import { BeforeAfterToggle } from "@/components/BeforeAfterToggle";
+import { FeatureShowcase } from "@/components/FeatureShowcase";
 
 const HowItWorks = dynamic(() =>
   import("@/components/HowItWorks").then((m) => ({ default: m.HowItWorks }))
@@ -202,6 +204,29 @@ export default function LandingPage() {
           ))}
         </div>
       </section>
+
+      {/* Before / After toggle */}
+      <section className="max-w-6xl mx-auto px-6 py-20 border-t">
+        <div className="grid md:grid-cols-2 gap-12 items-center">
+          <BeforeAfterToggle />
+          <div>
+            <span className="relative text-sm font-semibold tracking-tight text-primary">
+              <span className="absolute top-0.5 -left-3 h-4 w-[3px] rounded-r-sm bg-primary" />
+              The difference
+            </span>
+            <h2 className="font-cal text-3xl md:text-4xl mt-3 tracking-tight text-balance">
+              See what changes when you switch
+            </h2>
+            <p className="text-muted-foreground mt-3 max-w-md text-pretty">
+              Most Sri Lankan businesses still manage bookings over WhatsApp. Dinaya replaces all of that — automatically.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <div id="feature-showcase">
+        <FeatureShowcase />
+      </div>
 
       <HowItWorks />
 
