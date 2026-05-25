@@ -15,6 +15,7 @@ import {
 } from "@/db/schema";
 import { generateDealSuggestionCopy } from "@/lib/ai/deals";
 import { getAvailableSlots } from "@/lib/availability";
+import { recommendDiscountPercent, formatDiscountLearningMessage } from "@/lib/deals/conversion";
 import { canUseFeature } from "@/lib/plan";
 
 const MIN_GAP_MINUTES = 45;
@@ -175,9 +176,15 @@ export async function generateDealSuggestionsForBusiness(businessId: string): Pr
 
         if (existingSuggestion) continue;
 
-        const discountPercent = suggestDiscountPercent(gap.gapMinutes);
+        const { discountPercent, meta } = await recommendDiscountPercent({
+          businessId,
+          serviceId: service.id,
+          gapMinutes: gap.gapMinutes,
+        });
         const suggestedSlotsTotal = suggestSlotCount(gap.gapMinutes, service.durationMinutes);
-        const reason = `You have ${Math.round(gap.gapMinutes / 60)} free hours ${formatWindowLabel(gap.apptWindowStart, gap.apptWindowEnd, business.timezone)}.`;
+        const learningLine = formatDiscountLearningMessage(meta);
+        const reason = learningLine
+          ?? `You have ${Math.round(gap.gapMinutes / 60)} free hours ${formatWindowLabel(gap.apptWindowStart, gap.apptWindowEnd, business.timezone)}.`;
         const copy = await generateDealSuggestionCopy({
           businessName: business.name,
           serviceName: service.name,
@@ -198,6 +205,7 @@ export async function generateDealSuggestionsForBusiness(businessId: string): Pr
           apptWindowEnd: gap.apptWindowEnd,
           gapMinutes: gap.gapMinutes,
           reason: copy.headline,
+          meta,
           expiresAt: gap.apptWindowStart,
         });
         created++;
@@ -245,6 +253,7 @@ export async function listPendingDealSuggestions(businessId: string) {
       apptWindowStart: dealSuggestions.apptWindowStart,
       apptWindowEnd: dealSuggestions.apptWindowEnd,
       reason: dealSuggestions.reason,
+      meta: dealSuggestions.meta,
     })
     .from(dealSuggestions)
     .innerJoin(services, eq(services.id, dealSuggestions.serviceId))

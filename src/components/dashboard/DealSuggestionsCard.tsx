@@ -17,6 +17,7 @@ type Suggestion = {
   apptWindowEnd: string;
   reason: string;
   headline?: string;
+  learningLine?: string | null;
 };
 
 export function DealSuggestionsCard({ businessId }: { businessId: string }) {
@@ -46,6 +47,9 @@ export function DealSuggestionsCard({ businessId }: { businessId: string }) {
     <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
       <p className="text-sm font-medium text-primary">Smart deal suggestion</p>
       <p className="mt-1 text-sm">{suggestion.headline ?? suggestion.reason}</p>
+      {suggestion.learningLine && (
+        <p className="mt-1 text-xs text-muted-foreground">{suggestion.learningLine}</p>
+      )}
       <div className="mt-3 flex flex-wrap gap-2">
         <Link
           href={buildDealFormUrl({

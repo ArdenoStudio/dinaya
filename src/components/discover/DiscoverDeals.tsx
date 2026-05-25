@@ -10,6 +10,24 @@ import { formatLkr, isOptimizableRemoteImage } from "@/lib/utils";
 import { trackDealClick, trackDealImpression } from "@/lib/analytics/gtag";
 import type { DealListItem } from "@/lib/deals/queries";
 
+const IMPRESSIONS_STORAGE_KEY = "dinaya_deal_impressions";
+
+function markDealImpression(dealId: string): void {
+  if (typeof window === "undefined") return;
+
+  const seen = new Set<string>(JSON.parse(sessionStorage.getItem(IMPRESSIONS_STORAGE_KEY) ?? "[]"));
+  if (seen.has(dealId)) return;
+
+  seen.add(dealId);
+  sessionStorage.setItem(IMPRESSIONS_STORAGE_KEY, JSON.stringify([...seen]));
+
+  void fetch("/api/deals/impressions", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ dealIds: [dealId] }),
+  }).catch(() => undefined);
+}
+
 type Props = {
   deals: DealListItem[];
   activeCity?: string | null;
@@ -36,6 +54,7 @@ function DealCard({ deal, sourcePage }: { deal: DealListItem; sourcePage: string
               city: deal.directoryCity,
               category: deal.directoryCategory,
             });
+            markDealImpression(deal.id);
             observer.disconnect();
           }
         }

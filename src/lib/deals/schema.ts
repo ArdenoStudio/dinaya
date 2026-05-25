@@ -10,6 +10,7 @@ export const dealCreateSchema = z.object({
   dealWindowEnd: z.iso.datetime(),
   apptWindowStart: z.iso.datetime(),
   apptWindowEnd: z.iso.datetime(),
+  notifyClients: z.boolean().optional().default(false),
 }).refine(
   (data) => new Date(data.dealWindowEnd) > new Date(data.dealWindowStart),
   { message: "Deal end must be after deal start.", path: ["dealWindowEnd"] },

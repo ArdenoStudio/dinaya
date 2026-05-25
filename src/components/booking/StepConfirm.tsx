@@ -225,10 +225,29 @@ export default function StepConfirm({ state, business, copy, selectedDeal, onUpd
             </div>
           )}
           <div className="my-2 h-px bg-gray-100" />
+          {selectedDeal && (
+            <div className="mb-2 flex items-center justify-between text-emerald-700">
+              <p className="text-[12px] font-medium">
+                Deal discount ({selectedDeal.discountPercent}%)
+              </p>
+              <p className="text-[12px] font-semibold tabular-nums">
+                −{formatLkr(service.priceLkr - discountedPrice)}
+              </p>
+            </div>
+          )}
           <div className="flex items-center justify-between">
             <p className="text-[13px] font-bold text-gray-900">{copy.fullAmount}</p>
             <p className="text-[14px] font-bold tabular-nums text-gray-900">
-              {formatLkr(service.priceLkr)}
+              {selectedDeal ? (
+                <>
+                  <span className="mr-2 text-[12px] font-medium text-gray-400 line-through">
+                    {formatLkr(service.priceLkr)}
+                  </span>
+                  {formatLkr(discountedPrice)}
+                </>
+              ) : (
+                formatLkr(service.priceLkr)
+              )}
             </p>
           </div>
         </div>

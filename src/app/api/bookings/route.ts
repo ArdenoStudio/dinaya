@@ -260,6 +260,7 @@ export async function POST(req: NextRequest) {
 
   let claimedDealId: string | null = null;
   let discountedPriceLkr: number | null = null;
+  let validatedDealId: string | null = null;
 
   if (requestedDealId) {
     const deal = await getDealForBooking(requestedDealId, businessId);
@@ -283,13 +284,8 @@ export async function POST(req: NextRequest) {
       throw error;
     }
 
-    const claimed = await claimDealSlot(requestedDealId);
-    if (!claimed) {
-      return NextResponse.json({ error: "This deal just sold out." }, { status: 409 });
-    }
-
-    claimedDealId = claimed.id;
-    discountedPriceLkr = computeDiscountedPrice(service.priceLkr, claimed.discountPercent);
+    validatedDealId = deal.id;
+    discountedPriceLkr = computeDiscountedPrice(service.priceLkr, deal.discountPercent);
   }
 
   const effectivePriceLkr = discountedPriceLkr ?? service.priceLkr;
@@ -388,7 +384,7 @@ export async function POST(req: NextRequest) {
         endsAt: end,
         status: initialStatus,
         source,
-        dealId: claimedDealId,
+        dealId: validatedDealId,
         discountedPriceLkr,
         attribution: attribution && Object.values(attribution).some(Boolean) ? attribution : null,
         notes: notes || null,
@@ -406,6 +402,22 @@ export async function POST(req: NextRequest) {
 
   if (!booking) {
     return NextResponse.json({ error: "Could not create booking." }, { status: 500 });
+  }
+
+  if (validatedDealId) {
+    const claimed = await claimDealSlot(validatedDealId);
+    if (!claimed) {
+      await db
+        .update(bookings)
+        .set({
+          status: "cancelled",
+          cancelledAt: new Date(),
+          cancellationReason: "Deal sold out during booking.",
+        })
+        .where(eq(bookings.id, booking.id));
+      return NextResponse.json({ error: "This deal just sold out." }, { status: 409 });
+    }
+    claimedDealId = claimed.id;
   }
 
   void logActivity({

@@ -12,6 +12,7 @@ import type { BookingLanguage } from "@/lib/i18n";
 import { logActivity } from "@/lib/activity-log";
 import { decryptSecret } from "@/lib/secrets";
 import { processBookingAutomationTrigger } from "@/lib/automations/engine";
+import { releaseDealSlotForBooking } from "@/lib/deals/claim";
 import { sendPaymentReceiptEmail } from "@/lib/receipts";
 
 const WEBHOOK_REJECTED = NextResponse.json({ error: "Invalid webhook" }, { status: 400 });
@@ -40,6 +41,7 @@ export async function POST(req: NextRequest) {
     .select({
       id: bookings.id,
       businessId: bookings.businessId,
+      status: bookings.status,
       clientEmail: bookings.clientEmail,
       clientName: bookings.clientName,
       clientPhone: bookings.clientPhone,
@@ -215,6 +217,12 @@ export async function POST(req: NextRequest) {
         .update(payments)
         .set({ status: "failed", payherePayload: allFields })
         .where(eq(payments.id, payment.id));
+
+      if (booking.status === "pending") {
+        void releaseDealSlotForBooking(booking.id, "pending").catch((error) => {
+          console.error("Deal slot release failed:", error);
+        });
+      }
     }
   }
 

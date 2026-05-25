@@ -12,6 +12,7 @@ import { and, eq } from "drizzle-orm";
 import { requireApiBusiness } from "@/lib/api-auth";
 import { logActivity } from "@/lib/activity-log";
 import { listBusinessDeals } from "@/lib/deals/queries";
+import { notifyDealAudience } from "@/lib/deals/notify";
 import { dealCreateSchema } from "@/lib/deals/schema";
 import { PlanRequiredError, requirePro } from "@/lib/plan";
 
@@ -94,6 +95,20 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  if (data.notifyClients) {
+    try {
+      await requirePro(businessId, "whatsappSms");
+    } catch (error) {
+      if (error instanceof PlanRequiredError) {
+        return NextResponse.json(
+          { error: "Notify clients requires WhatsApp/SMS on Pro or Max." },
+          { status: 402 },
+        );
+      }
+      throw error;
+    }
+  }
+
   const [deal] = await db
     .insert(deals)
     .values({
@@ -120,10 +135,21 @@ export async function POST(req: NextRequest) {
       serviceId: data.serviceId,
       discountPercent: data.discountPercent,
       slotsTotal: data.slotsTotal,
+      notifyClients: data.notifyClients,
     },
   }).catch((error) => {
     console.error("Activity log write failed:", error);
   });
+
+  let notified = 0;
+  if (data.notifyClients) {
+    const notifyResult = await notifyDealAudience({
+      businessId,
+      dealId: deal.id,
+      audience: "past_clients",
+    });
+    notified = notifyResult.recipientCount;
+  }
 
   const [business] = await db
     .select({ directoryListed: businesses.directoryListed })
@@ -134,5 +160,6 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({
     id: deal.id,
     directoryListed: business?.directoryListed ?? false,
+    notified,
   }, { status: 201 });
 }

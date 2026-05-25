@@ -25,6 +25,7 @@ export default function NewDealPage() {
   const [locations, setLocations] = useState<LocationOption[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [notifyResult, setNotifyResult] = useState<number | null>(null);
 
   const [form, setForm] = useState({
     serviceId: searchParams.get("serviceId") ?? "",
@@ -36,6 +37,7 @@ export default function NewDealPage() {
     dealWindowEnd: "",
     apptWindowStart: toLocalInputValue(searchParams.get("apptWindowStart")),
     apptWindowEnd: toLocalInputValue(searchParams.get("apptWindowEnd")),
+    notifyClients: false,
   });
 
   useEffect(() => {
@@ -102,6 +104,12 @@ export default function NewDealPage() {
     const suggestionId = searchParams.get("suggestionId");
     if (suggestionId) {
       await fetch(`/api/dashboard/deals/suggestions/${suggestionId}`, { method: "PATCH" }).catch(() => undefined);
+    }
+
+    if (data.notified > 0) {
+      setNotifyResult(data.notified);
+      setLoading(false);
+      return;
     }
 
     router.push("/dashboard/deals");
@@ -230,6 +238,34 @@ export default function NewDealPage() {
         {selectedService && previewPrice !== null && (
           <div className="rounded-lg bg-gray-50 px-4 py-3 text-sm">
             Clients pay <strong>{formatLkr(previewPrice)}</strong> instead of {formatLkr(selectedService.priceLkr)}.
+          </div>
+        )}
+
+        <label className="flex items-start gap-3 rounded-lg border px-4 py-3 text-sm">
+          <input
+            type="checkbox"
+            checked={form.notifyClients}
+            onChange={(e) => setForm((prev) => ({ ...prev, notifyClients: e.target.checked }))}
+            className="mt-0.5"
+          />
+          <span>
+            <span className="font-medium">Notify past clients (WhatsApp/SMS)</span>
+            <span className="mt-1 block text-xs text-muted-foreground">
+              Sends a one-time message to active clients who opted in. Requires Pro messaging.
+            </span>
+          </span>
+        </label>
+
+        {notifyResult !== null && (
+          <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+            Deal published. Notified {notifyResult} past client{notifyResult === 1 ? "" : "s"}.
+            <button
+              type="button"
+              onClick={() => router.push("/dashboard/deals")}
+              className="ml-2 font-medium underline"
+            >
+              View deals
+            </button>
           </div>
         )}
 
