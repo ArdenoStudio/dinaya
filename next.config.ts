@@ -18,7 +18,7 @@ const securityHeaders = [
       "img-src 'self' data: blob: https:",
       "font-src 'self' data:",
       "connect-src 'self' https:",
-      "frame-src 'self' https://www.payhere.lk https://sandbox.payhere.lk",
+      "frame-src 'self' https://www.payhere.lk https://sandbox.payhere.lk https://vercel.live",
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self' https://www.payhere.lk https://sandbox.payhere.lk",
