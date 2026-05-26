@@ -38,6 +38,8 @@ jobs:
 
       - run: npm --prefix apps/desktop exec tauri info
 
+      - run: npm --prefix apps/desktop run frontend:build
+
       - run: cargo check --manifest-path apps/desktop/src-tauri/Cargo.toml
 
   e2e:
