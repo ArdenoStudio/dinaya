@@ -12,6 +12,8 @@ export default defineConfig([
   },
   globalIgnores([
     ".next/**",
+    "apps/desktop/dist/**",
+    "apps/desktop/src-tauri/target/**",
     "node_modules/**",
     "next-env.d.ts",
     "tsconfig.tsbuildinfo",

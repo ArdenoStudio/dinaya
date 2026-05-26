@@ -1,0 +1,27 @@
+{
+  "name": "dinaya-desktop",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tauri dev",
+    "dev:local-api": "set DINAYA_API_BASE_URL=http://localhost:3000&& tauri dev",
+    "build": "tauri build",
+    "frontend:dev": "vite --host 127.0.0.1",
+    "frontend:build": "vite build"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.1.0",
+    "@types/react": "^19.2.15",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.2",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.14"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2.11.0",
+    "dinaya": "file:../..",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6"
+  }
+}
