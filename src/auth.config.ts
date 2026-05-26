@@ -6,6 +6,7 @@ import { resolveAuthRedirect } from "@/lib/auth-redirect";
  * Keep this file free of Node-only imports (db, bcrypt, node:crypto, etc.).
  */
 export const authConfig = {
+  trustHost: true,
   session: { strategy: "jwt" },
   pages: {
     signIn: "/auth/signin",
