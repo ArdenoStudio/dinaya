@@ -24,3 +24,19 @@ export type DealCreateInput = z.infer<typeof dealCreateSchema>;
 export const dealCancelSchema = z.object({
   status: z.literal("cancelled"),
 });
+
+export const dealUpdateSchema = z.object({
+  dealWindowEnd: z.iso.datetime().optional(),
+  apptWindowEnd: z.iso.datetime().optional(),
+  slotsTotal: z.number().int().min(1).max(20).optional(),
+}).refine(
+  (data) => data.dealWindowEnd || data.apptWindowEnd || data.slotsTotal,
+  { message: "Provide at least one field to update." },
+);
+
+export type DealUpdateInput = z.infer<typeof dealUpdateSchema>;
+
+export const dealPublishFromSuggestionSchema = z.object({
+  suggestionId: z.uuid(),
+  notifyClients: z.boolean().optional().default(false),
+});

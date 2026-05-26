@@ -15,7 +15,7 @@ export const planLimitsReference: ReferencePage = {
     },
     {
       heading: "Max",
-      body: "Everything in Pro plus AI Hub, all seven AI growth workflows, AI Voice Receptionist setup, unlimited locations, and per-branch AI controls.",
+      body: "Everything in Pro plus AI Hub, all eight AI growth workflows (including smart deal suggestions), AI Voice Receptionist setup, unlimited locations, and per-branch AI controls.",
     },
     {
       heading: "Bookings",

@@ -29,6 +29,8 @@ export default async function AdminLayout({
       actorEmail: admin.email,
       action: "admin.view",
       target: pathHeader || undefined,
+      ipAddress: h.get("x-forwarded-for")?.split(",")[0]?.trim() ?? h.get("x-real-ip") ?? undefined,
+      userAgent: h.get("user-agent") ?? undefined,
     });
   } catch {
     // ignore

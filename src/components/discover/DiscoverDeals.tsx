@@ -8,25 +8,8 @@ import { buildDealBookingUrl } from "@/lib/deals/urls";
 import { computeDiscountedPrice } from "@/lib/deals/pricing";
 import { formatLkr, isOptimizableRemoteImage } from "@/lib/utils";
 import { trackDealClick, trackDealImpression } from "@/lib/analytics/gtag";
+import { markDealImpression } from "@/lib/deals/impressions-client";
 import type { DealListItem } from "@/lib/deals/queries";
-
-const IMPRESSIONS_STORAGE_KEY = "dinaya_deal_impressions";
-
-function markDealImpression(dealId: string): void {
-  if (typeof window === "undefined") return;
-
-  const seen = new Set<string>(JSON.parse(sessionStorage.getItem(IMPRESSIONS_STORAGE_KEY) ?? "[]"));
-  if (seen.has(dealId)) return;
-
-  seen.add(dealId);
-  sessionStorage.setItem(IMPRESSIONS_STORAGE_KEY, JSON.stringify([...seen]));
-
-  void fetch("/api/deals/impressions", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ dealIds: [dealId] }),
-  }).catch(() => undefined);
-}
 
 type Props = {
   deals: DealListItem[];

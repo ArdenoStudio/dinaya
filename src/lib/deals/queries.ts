@@ -221,12 +221,7 @@ export async function listActiveDealsForBusiness(businessId: string): Promise<De
     .innerJoin(businesses, eq(deals.businessId, businesses.id))
     .innerJoin(services, eq(deals.serviceId, services.id))
     .leftJoin(staff, eq(deals.staffId, staff.id))
-    .where(and(
-      eq(deals.businessId, businessId),
-      eq(deals.status, "active"),
-      gt(deals.dealWindowEnd, sql`now()`),
-      lt(deals.slotsRedeemed, deals.slotsTotal),
-    ))
+    .where(and(eq(deals.businessId, businessId), activeDealConditions))
     .orderBy(desc(deals.discountPercent), desc(deals.createdAt));
 
   return rows.map(mapDealRow);

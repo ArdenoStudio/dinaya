@@ -122,3 +122,17 @@ Transfer or escalate to the handoff phone when:
 - Confirm customer and business notifications still send.
 - Confirm handoff transfers to the configured phone.
 - Revoke the API key and confirm provider calls fail with `401`.
+
+## Phase 2: Dinaya-hosted Twilio voice
+
+When Dinaya runs the voice layer directly:
+
+1. Set `TWILIO_CONVERSATION_RELAY_WS_URL` to your ConversationRelay WebSocket handler.
+2. Point the Twilio number voice webhook to:
+
+```http
+POST /api/v1/voice/twilio?businessId={businessId}
+```
+
+3. The webhook returns TwiML that connects callers to ConversationRelay using the business welcome message from voice setup.
+4. Booking creation still uses `POST /api/v1/bookings` with source `voice_agent`.

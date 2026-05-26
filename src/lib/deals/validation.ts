@@ -70,3 +70,36 @@ export function getDealDisplayStatus(
 export function slotsRemaining(deal: Pick<DealRow, "slotsTotal" | "slotsRedeemed">): number {
   return Math.max(0, deal.slotsTotal - deal.slotsRedeemed);
 }
+
+export function validateDealUpdate(
+  deal: DealRow,
+  updates: {
+    dealWindowEnd?: Date;
+    apptWindowEnd?: Date;
+    slotsTotal?: number;
+  },
+): void {
+  if (deal.status === "cancelled") {
+    throw new DealValidationError("Cancelled deals cannot be edited.");
+  }
+  if (deal.status === "expired") {
+    throw new DealValidationError("Expired deals cannot be edited.");
+  }
+
+  const dealWindowEnd = updates.dealWindowEnd ?? deal.dealWindowEnd;
+  const apptWindowEnd = updates.apptWindowEnd ?? deal.apptWindowEnd;
+  const slotsTotal = updates.slotsTotal ?? deal.slotsTotal;
+
+  if (dealWindowEnd <= deal.dealWindowStart) {
+    throw new DealValidationError("Deal end must be after deal start.");
+  }
+  if (apptWindowEnd <= deal.apptWindowStart) {
+    throw new DealValidationError("Appointment end must be after appointment start.");
+  }
+  if (slotsTotal < deal.slotsRedeemed) {
+    throw new DealValidationError("Slots total cannot be less than slots already redeemed.");
+  }
+  if (updates.dealWindowEnd && updates.dealWindowEnd < new Date()) {
+    throw new DealValidationError("Deal end must be in the future.");
+  }
+}

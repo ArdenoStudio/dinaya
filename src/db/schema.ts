@@ -792,8 +792,24 @@ export const adminAuditEvents = pgTable("admin_audit_events", {
   action: varchar("action", { length: 120 }).notNull(),
   target: varchar("target", { length: 500 }),
   meta: jsonb("meta"),
+  ipAddress: varchar("ip_address", { length: 45 }),
+  userAgent: text("user_agent"),
+  previousHash: varchar("previous_hash", { length: 64 }),
+  eventHash: varchar("event_hash", { length: 64 }),
 }, (table) => ({
   atIdx: index("admin_audit_events_at_idx").on(table.at),
+}));
+
+export const platformAdminMembers = pgTable("platform_admin_members", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  email: varchar("email", { length: 255 }).notNull().unique(),
+  invitedBy: varchar("invited_by", { length: 255 }),
+  invitedAt: timestamp("invited_at").defaultNow().notNull(),
+  acceptedAt: timestamp("accepted_at"),
+  revokedAt: timestamp("revoked_at"),
+  status: varchar("status", { length: 40 }).default("active").notNull(),
+}, (table) => ({
+  statusIdx: index("platform_admin_members_status_idx").on(table.status),
 }));
 
 // ─── Webhook Deliveries / Reporting / API Access ─────────────────────────────

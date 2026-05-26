@@ -3,11 +3,11 @@ import type { DocsGuide } from "../types";
 export const aiHubOverviewGuide: DocsGuide = {
   slug: "ai-hub-overview",
   title: "AI Hub overview",
-  description: "Seven AI workflows to grow bookings, reviews, and repeat visits.",
+  description: "Eight AI workflows to grow bookings, reviews, repeat visits, and flash deals.",
   category: "growth",
   estimatedMinutes: 10,
   planRequired: "max",
-  relatedGuides: ["automations", "upgrade-plan"],
+  relatedGuides: ["automations", "upgrade-plan", "dinaya-deals"],
   steps: [
     {
       title: "Open AI Hub",
@@ -43,6 +43,11 @@ export const aiHubOverviewGuide: DocsGuide = {
     {
       title: "Content machine & loyalty",
       body: "Drafts social posts for your business and runs VIP loyalty sequences for top clients.",
+      visual: { type: "mockup", mockupId: "dashboard-ai" },
+    },
+    {
+      title: "Smart deal suggestions",
+      body: "Detects calendar gaps and recommends flash discounts you can publish as Dinaya Deals.",
       visual: { type: "mockup", mockupId: "dashboard-ai" },
     },
   ],

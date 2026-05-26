@@ -69,6 +69,36 @@ export default async function AdminVoicePage() {
         </div>
       </div>
 
+      <div className="rounded-xl border border-primary/20 bg-primary/5 p-5">
+        <h2 className="text-sm font-semibold text-primary">Phase 2: Dinaya-hosted Twilio voice</h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Set <code className="rounded bg-white px-1 text-xs">TWILIO_CONVERSATION_RELAY_WS_URL</code> to
+          enable ConversationRelay for inbound calls. Point a Twilio number voice webhook to:
+        </p>
+        <p className="mt-2 rounded-md border bg-white px-3 py-2 font-mono text-xs">
+          POST /api/v1/voice/twilio?businessId=&lt;business-uuid&gt;
+        </p>
+        <p className="mt-2 text-xs text-muted-foreground">
+          The webhook returns TwiML that streams audio to your ConversationRelay WebSocket handler.
+          Booking still flows through existing <code className="rounded bg-white px-1">/api/v1/bookings</code> with source <code className="rounded bg-white px-1">voice_agent</code>.
+        </p>
+      </div>
+
+      <div className="rounded-xl border border-primary/20 bg-primary/5 p-5">
+        <h2 className="text-sm font-semibold text-primary">Phase 2: Dinaya-hosted Twilio voice</h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Set <code className="rounded bg-white px-1 text-xs">TWILIO_CONVERSATION_RELAY_WS_URL</code> to
+          enable ConversationRelay for inbound calls. Point a Twilio number voice webhook to:
+        </p>
+        <p className="mt-2 rounded-md border bg-white px-3 py-2 font-mono text-xs">
+          POST /api/v1/voice/twilio?businessId=&lt;business-uuid&gt;
+        </p>
+        <p className="mt-2 text-xs text-muted-foreground">
+          The webhook returns TwiML that streams audio to your ConversationRelay WebSocket handler.
+          Booking still flows through existing <code className="rounded bg-white px-1">/api/v1/bookings</code> with source <code className="rounded bg-white px-1">voice_agent</code>.
+        </p>
+      </div>
+
       {rows.length === 0 ? (
         <div className="rounded-xl border border-dashed bg-white p-8 text-center">
           <p className="font-medium">No voice setup requests yet.</p>

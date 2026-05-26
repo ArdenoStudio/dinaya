@@ -58,6 +58,8 @@ All cron workflows use `DINAYA_APP_URL` and `CRON_SECRET`. Schedules are UTC:
 | `webhook-retries-cron.yml` | `/api/cron/webhook-retries` | every 15 minutes |
 | `google-calendar-cron.yml` | `/api/cron/google-calendar-sync` | hourly |
 | `booking-reminders-cron.yml` | `/api/cron/reminders` | daily at 04:30 |
+| `deal-suggestions-cron.yml` | `/api/cron/deal-suggestions` | daily at 03:00 |
+| `deal-holds-cron.yml` | `/api/cron/deal-holds` | every 15 minutes |
 
 `SECRET_ENCRYPTION_KEY` must stay stable. Rotating it without re-encrypting stored secrets will make PayHere merchant secrets unreadable.
 
@@ -105,14 +107,22 @@ npm run db:migrate
    - `0015_security_performance_indexes.sql`
    - `0016_voice_receptionist.sql`
    - `0017_onboarding.sql`
+   - `0018_directory_backfill.sql`
+   - `0019_broadcasts.sql`
+   - `0020_deals.sql`
+   - `0021_deal_slot_release.sql`
+   - `0022_platform_admin_security.sql`
 4. Deploy the app.
 5. Smoke test:
    - `GET /api/health`
    - `/auth/signin`
    - `/register` → `/dashboard/setup` (4-step onboarding wizard)
    - `/discover?category=salon`
-   - `/dashboard/reports` (analytics charts)
+   - `/dashboard/reports` (analytics charts + deal analytics)
+   - `/dashboard/deals` (create/cancel/edit deals on Pro+)
    - `/dashboard/ai` (reactivation manual trigger)
+   - `/dashboard/settings/voice-receptionist` (Max voice setup)
+   - `/dashboard/broadcasts` (Max broadcast panel, if enabled)
    - one public booking page at `/book/[slug]`
    - signed review page at `/reviews/[token]`
    - client booking manage link at `/client/[token]` (if enabled)

@@ -10,7 +10,7 @@ import { getDashboardCopy } from "@/lib/dashboard-i18n";
 import type { DashboardLanguage } from "@/lib/dashboard-i18n";
 import type { PlanUsage } from "@/lib/dashboard-usage";
 import { getEntitlements, type Plan } from "@/lib/plan";
-import { isPlatformAdmin } from "@/lib/platform-admin";
+import { isPlatformAdmin } from "@/lib/platform-admin-members";
 
 export const metadata: Metadata = {
   title: "Dashboard | Dinaya",
@@ -47,7 +47,7 @@ export default async function DashboardLayout({
 }) {
   const { business, user, role, readOnlyImpersonation, impersonatedBy, businessId } =
     await requireBusiness();
-  const showAdminLink = isPlatformAdmin(user.email);
+  const showAdminLink = await isPlatformAdmin(user.email);
   const language = (business.language ?? "en") as DashboardLanguage;
   const copy = getDashboardCopy(language);
   const planUsage = role === "owner" ? await getPlanUsage(businessId, business.plan as Plan) : undefined;
