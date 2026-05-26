@@ -1,7 +1,6 @@
 "use client";
 
 import { Suspense, useEffect, useRef, useState } from "react";
-import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
@@ -31,6 +30,75 @@ function getSafeCallbackUrl(raw: string | null, justRegistered: boolean): string
   return raw;
 }
 
+async function credentialsSignIn(input: {
+  callbackUrl: string;
+  email: string;
+  password: string;
+}): Promise<{ ok: true } | { ok: false; error: string }> {
+  const csrfRes = await fetch("/api/auth/csrf", {
+    cache: "no-store",
+    credentials: "same-origin",
+  });
+
+  if (!csrfRes.ok) {
+    throw new Error("Could not start sign-in.");
+  }
+
+  const csrfData = (await csrfRes.json()) as { csrfToken?: string };
+  if (!csrfData.csrfToken) {
+    throw new Error("Missing sign-in token.");
+  }
+
+  const body = new URLSearchParams({
+    callbackUrl: input.callbackUrl,
+    csrfToken: csrfData.csrfToken,
+    email: input.email,
+    json: "true",
+    password: input.password,
+  });
+
+  const res = await fetch("/api/auth/callback/credentials", {
+    body,
+    credentials: "same-origin",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      "X-Auth-Return-Redirect": "1",
+    },
+    method: "POST",
+    redirect: "manual",
+  });
+
+  if (res.type === "opaqueredirect") {
+    return { ok: true };
+  }
+
+  const text = await res.text();
+  const data = text
+    ? (() => {
+        try {
+          return JSON.parse(text) as { error?: string; url?: string };
+        } catch {
+          return { error: "AuthResponseNotJson" };
+        }
+      })()
+    : {};
+  const url = typeof data.url === "string" ? data.url : "";
+
+  if (!res.ok || url.includes("error=CredentialsSignin")) {
+    return { ok: false, error: "CredentialsSignin" };
+  }
+
+  if (data.error) {
+    return { ok: false, error: data.error };
+  }
+
+  if (url.includes("error=")) {
+    return { ok: false, error: "AuthError" };
+  }
+
+  return { ok: true };
+}
+
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -55,14 +123,13 @@ function LoginForm() {
     setError("");
 
     try {
-      const result = await signIn("credentials", {
+      const result = await credentialsSignIn({
+        callbackUrl,
         email,
         password,
-        redirect: false,
-        callbackUrl: window.location.origin + callbackUrl,
       });
 
-      if (!result || result.error) {
+      if (!result.ok) {
         setError("Invalid email or password.");
         setLoading(false);
         return;

@@ -11,6 +11,9 @@ import { z } from "@/lib/validation";
 const createSchema = z.object({
   name: z.string().trim().min(1).max(120),
   scopes: z.array(z.enum(API_KEY_SCOPES)).min(1).max(10).default(["bookings:read"]),
+  keyType: z.enum(["generic", "desktop"]).default("generic"),
+  deviceId: z.string().trim().min(1).max(120).optional(),
+  deviceName: z.string().trim().min(1).max(120).optional(),
 });
 
 export async function GET(req: NextRequest) {
@@ -22,6 +25,9 @@ export async function GET(req: NextRequest) {
     .select({
       id: apiKeys.id,
       name: apiKeys.name,
+      keyType: apiKeys.keyType,
+      deviceId: apiKeys.deviceId,
+      deviceName: apiKeys.deviceName,
       scopes: apiKeys.scopes,
       lastUsedAt: apiKeys.lastUsedAt,
       expiresAt: apiKeys.expiresAt,
@@ -49,10 +55,15 @@ export async function POST(req: NextRequest) {
     const needsVoiceScopes = parsed.data.scopes.some(
       (scope) => scope === "voice:read" || scope === "voice:write",
     );
+    const needsDesktopScopes = parsed.data.scopes.some(
+      (scope) => scope === "desktop:read" || scope === "desktop:bookings",
+    );
 
     try {
       if (needsVoiceScopes) {
         await requirePro(businessId, "aiVoiceReceptionist");
+      } else if (needsDesktopScopes) {
+        await requirePro(businessId, "webhooks");
       } else {
         await requirePro(businessId, "webhooks");
       }
@@ -69,12 +80,18 @@ export async function POST(req: NextRequest) {
       .values({
         businessId,
         name: parsed.data.name,
+        keyType: parsed.data.keyType,
+        deviceId: parsed.data.deviceId ?? null,
+        deviceName: parsed.data.deviceName ?? null,
         keyHash,
         scopes: parsed.data.scopes,
       })
       .returning({
         id: apiKeys.id,
         name: apiKeys.name,
+        keyType: apiKeys.keyType,
+        deviceId: apiKeys.deviceId,
+        deviceName: apiKeys.deviceName,
         scopes: apiKeys.scopes,
         createdAt: apiKeys.createdAt,
       });

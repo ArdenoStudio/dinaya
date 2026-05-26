@@ -20,6 +20,26 @@ jobs:
 
       - run: npm run verify
 
+  desktop-smoke:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: apps/desktop/package-lock.json
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - run: npm ci
+        working-directory: apps/desktop
+
+      - run: npm --prefix apps/desktop exec tauri info
+
+      - run: cargo check --manifest-path apps/desktop/src-tauri/Cargo.toml
+
   e2e:
     runs-on: ubuntu-latest
     needs: verify

@@ -25,6 +25,8 @@ If either secret is missing, e2e is skipped with a workflow warning (verify stil
 - `RESEND_FROM`
 - `CRON_SECRET` (same value as the GitHub Actions secret below)
 
+`AUTH_URL` and `NEXT_PUBLIC_APP_URL` must point at the active production host, for example `https://dinaya-lk.vercel.app` or `https://dinaya.lk`. Do not leave them pointing at an old preview deployment such as `dinaya-tau.vercel.app`; Auth.js will set stale callback cookies and dashboard sign-in can fail or redirect to the wrong app.
+
 Optional but recommended:
 
 - `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` — distributed rate limiting (falls back to in-memory)
