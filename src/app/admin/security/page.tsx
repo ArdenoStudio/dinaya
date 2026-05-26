@@ -1,6 +1,11 @@
 import { format } from "date-fns";
+import Link from "next/link";
 import { Activity, KeyRound, Megaphone, ShieldCheck } from "lucide-react";
-import { readAdminEvents } from "@/lib/admin-audit";
+import {
+  detectSuspiciousAdminActivity,
+  readAdminEvents,
+  verifyAdminEventChain,
+} from "@/lib/admin-audit";
 import { requirePlatformAdmin } from "@/lib/platform-admin";
 
 export const dynamic = "force-dynamic";
@@ -75,6 +80,9 @@ export default async function AdminSecurityPage() {
   const sensitive = events.filter(
     (e) => e.action !== "admin.view"
   );
+  const chainValid = verifyAdminEventChain(events);
+  const alerts = detectSuspiciousAdminActivity(events);
+  const eventsWithIp = events.filter((event) => event.ipAddress).length;
 
   return (
     <div className="space-y-6">
@@ -147,6 +155,7 @@ export default async function AdminSecurityPage() {
                       <p className="text-xs text-muted-foreground">
                         {e.actorEmail}
                         {e.target ? ` · ${e.target}` : ""}
+                        {e.ipAddress ? ` · ${e.ipAddress}` : ""}
                       </p>
                     </div>
                     <span className="shrink-0 text-xs text-muted-foreground whitespace-nowrap">
@@ -185,15 +194,45 @@ export default async function AdminSecurityPage() {
             )}
           </div>
 
+          <div className="rounded-xl border bg-white p-5">
+            <h2 className="mb-4 font-semibold">Security posture</h2>
+            <ul className="space-y-2 text-sm">
+              <li className="flex items-center justify-between gap-3">
+                <span>Tamper-evident hash chain</span>
+                <span className={chainValid ? "text-green-700" : "text-amber-700"}>
+                  {chainValid ? "Valid" : "Needs review"}
+                </span>
+              </li>
+              <li className="flex items-center justify-between gap-3">
+                <span>Events with IP capture</span>
+                <span className="text-muted-foreground">{eventsWithIp}</span>
+              </li>
+              <li className="flex items-center justify-between gap-3">
+                <span>Export for SIEM / archival</span>
+                <Link href="/admin/security/export" className="text-primary hover:underline">
+                  Download JSONL
+                </Link>
+              </li>
+            </ul>
+            {alerts.length > 0 && (
+              <div className="mt-4 rounded-md border border-amber-500/30 bg-amber-50 p-3 text-xs text-amber-900">
+                <p className="font-semibold">Suspicious activity alerts</p>
+                <ul className="mt-2 list-disc pl-4 space-y-1">
+                  {alerts.map((alert) => (
+                    <li key={alert}>{alert}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+
           <div className="rounded-xl border border-rose-500/20 bg-rose-50/40 p-5">
             <h2 className="mb-2 text-sm font-semibold text-rose-900">
-              Roadmap
+              Remaining roadmap
             </h2>
             <ul className="list-disc pl-5 text-xs text-rose-900/80 space-y-1">
-              <li>Suspicious sign-in alerts (impossible travel, brute force)</li>
-              <li>Per-event IP and user-agent capture</li>
-              <li>Tamper-evident hash chain (each event references previous hash)</li>
-              <li>Export to SIEM / S3 archival</li>
+              <li>Impossible-travel sign-in alerts for tenant accounts</li>
+              <li>Automated S3 archival cron for audit exports</li>
             </ul>
           </div>
         </div>

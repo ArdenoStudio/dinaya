@@ -1,9 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
+  DealValidationError,
   getDealDisplayStatus,
   isAppointmentInDealWindow,
   isDealClaimable,
   slotsRemaining,
+  validateDealForBooking,
+  validateDealUpdate,
 } from "./validation";
 
 const baseDeal = {
@@ -45,5 +48,45 @@ describe("deal validation", () => {
     expect(getDealDisplayStatus(baseDeal, new Date("2026-05-24T12:00:00Z"))).toBe("upcoming");
     expect(getDealDisplayStatus(baseDeal, new Date("2026-05-25T12:00:00Z"))).toBe("active");
     expect(getDealDisplayStatus({ ...baseDeal, slotsRedeemed: 5 }, new Date("2026-05-25T12:00:00Z"))).toBe("sold_out");
+  });
+
+  it("validates deal booking constraints", () => {
+    expect(() => validateDealForBooking({
+      deal: baseDeal,
+      businessId: "biz-1",
+      serviceId: "svc-1",
+      staffId: "staff-1",
+      locationId: "loc-1",
+      appointmentStart: new Date("2026-05-25T12:00:00Z"),
+      now: new Date("2026-05-25T12:00:00Z"),
+    })).not.toThrow();
+
+    expect(() => validateDealForBooking({
+      deal: baseDeal,
+      businessId: "other-biz",
+      serviceId: "svc-1",
+      staffId: "staff-1",
+      locationId: "loc-1",
+      appointmentStart: new Date("2026-05-25T12:00:00Z"),
+    })).toThrow(DealValidationError);
+
+    expect(() => validateDealForBooking({
+      deal: { ...baseDeal, slotsRedeemed: 5, status: "sold_out" },
+      businessId: "biz-1",
+      serviceId: "svc-1",
+      staffId: "staff-1",
+      locationId: "loc-1",
+      appointmentStart: new Date("2026-05-25T12:00:00Z"),
+    })).toThrow(/sold out/i);
+  });
+
+  it("validates deal updates", () => {
+    expect(() => validateDealUpdate(baseDeal, {
+      slotsTotal: 6,
+      dealWindowEnd: new Date("2026-05-26T20:00:00Z"),
+    })).not.toThrow();
+
+    expect(() => validateDealUpdate({ ...baseDeal, slotsRedeemed: 2 }, { slotsTotal: 1 })).toThrow(DealValidationError);
+    expect(() => validateDealUpdate({ ...baseDeal, status: "cancelled" }, { slotsTotal: 6 })).toThrow(/cancelled/i);
   });
 });

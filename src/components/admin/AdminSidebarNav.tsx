@@ -6,6 +6,7 @@ import {
   Building2,
   CreditCard,
   Gauge,
+  Gift,
   LayoutDashboard,
   LifeBuoy,
   PhoneCall,
@@ -40,6 +41,7 @@ const navGroups: { label: string; links: NavLinkConfig[] }[] = [
     links: [
       { href: "/admin/subscriptions", label: "Subscriptions", icon: CreditCard },
       { href: "/admin/plans", label: "Plans", icon: Tags },
+      { href: "/admin/referrals", label: "Referrals", icon: Gift },
     ],
   },
   {

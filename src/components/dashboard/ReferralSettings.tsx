@@ -52,7 +52,7 @@ export function ReferralSettings({
           {platformReferralUrl}
         </code>
         <p className="mt-2 text-xs text-muted-foreground">
-          New signups using your code are linked to {slug}.dinaya.lk in admin reporting later.
+          New signups using your code appear in Platform Admin → Referrals.
         </p>
       </div>
 

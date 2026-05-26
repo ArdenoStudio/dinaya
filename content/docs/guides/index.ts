@@ -22,6 +22,7 @@ import { clientManageBookingGuide } from "./client-manage-booking";
 import { acceptStaffInviteGuide } from "./accept-staff-invite";
 import { discoverDirectoryGuide } from "./discover-directory";
 import { dashboardReportsGuide } from "./dashboard-reports";
+import { dinayaDealsGuide } from "./dinaya-deals";
 
 export const allGuides: DocsGuide[] = [
   setupBookingPageGuide,
@@ -46,6 +47,7 @@ export const allGuides: DocsGuide[] = [
   clientManageBookingGuide,
   acceptStaffInviteGuide,
   discoverDirectoryGuide,
+  dinayaDealsGuide,
   dashboardReportsGuide,
 ];
 

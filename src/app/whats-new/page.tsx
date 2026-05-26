@@ -40,6 +40,12 @@ const releases = [
     changes: [
       {
         type: "feature" as const,
+        icon: "tag-fill",
+        title: "Dinaya Deals",
+        desc: "Post flash discounts on slow appointment slots. Clients discover deals on Dinaya, book at discounted prices, and you track impressions and conversions in Reports.",
+      },
+      {
+        type: "feature" as const,
         icon: "mic-fill",
         title: "AI voice receptionist",
         desc: "Set up an AI-powered phone agent that answers calls and books appointments automatically — even outside business hours.",

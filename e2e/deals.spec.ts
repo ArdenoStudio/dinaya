@@ -116,4 +116,60 @@ test.describe("Deals booking path", () => {
     await expect(page.getByText(formatLkr(discountedPrice)).first()).toBeVisible();
     await expect(page.getByText(formatLkr(HAIRCUT_PRICE_LKR)).first()).toBeVisible();
   });
+
+  test("releases deal slot when pending booking is cancelled", async ({ page, request }) => {
+    const [servicesRes, staffRes, locationsRes] = await Promise.all([
+      page.request.get("/api/dashboard/services"),
+      page.request.get("/api/dashboard/staff"),
+      page.request.get("/api/dashboard/locations"),
+    ]);
+
+    const services = await servicesRes.json();
+    const staffList = await staffRes.json();
+    const locations = await locationsRes.json();
+    const service = services.find((item: { name: string }) => item.name === "Haircut");
+    const staffMember = staffList[0];
+    const location = locations[0];
+    const { apptStart, apptEnd } = nextWeekdayBookingDate();
+    const now = new Date();
+
+    const dealRes = await page.request.post("/api/dashboard/deals", {
+      data: {
+        serviceId: service.id,
+        staffId: staffMember.id,
+        locationId: location.id,
+        discountPercent: DEAL_DISCOUNT_PERCENT,
+        slotsTotal: 1,
+        dealWindowStart: new Date(now.getTime() - 60 * 60 * 1000).toISOString(),
+        dealWindowEnd: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        apptWindowStart: apptStart.toISOString(),
+        apptWindowEnd: apptEnd.toISOString(),
+      },
+    });
+    const deal = await dealRes.json();
+
+    const bookingRes = await request.post(`/api/bookings`, {
+      data: {
+        businessSlug: account.slug,
+        serviceId: service.id,
+        staffId: staffMember.id,
+        locationId: location.id,
+        startsAt: apptStart.toISOString(),
+        clientName: "Deal Slot Test",
+        clientPhone: "+94771234567",
+        dealId: deal.id,
+      },
+    });
+    expect(bookingRes.ok()).toBeTruthy();
+    const booking = await bookingRes.json();
+
+    const cancelRes = await page.request.patch(`/api/dashboard/bookings/${booking.id}`, {
+      data: { status: "cancelled" },
+    });
+    expect(cancelRes.ok()).toBeTruthy();
+
+    await page.goto(`/book/${account.slug}?dealId=${deal.id}`);
+    await expect(page.getByText("Deals available")).toBeVisible();
+    await expect(page.getByText(`${DEAL_DISCOUNT_PERCENT}% OFF`)).toBeVisible();
+  });
 });

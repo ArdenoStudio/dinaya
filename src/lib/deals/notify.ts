@@ -118,7 +118,7 @@ export async function notifyDealAudience(input: {
   let sentCount = 0;
 
   for (const recipient of recipients) {
-    const result = await sendMessage({
+    const messagingResult = await sendMessage({
       businessId: input.businessId,
       clientId: recipient.id,
       clientEmail: recipient.email,
@@ -130,7 +130,25 @@ export async function notifyDealAudience(input: {
       preferredChannels: ["whatsapp", "sms"],
     });
 
-    if (result.status === "sent") sentCount += 1;
+    if (messagingResult.status === "sent") {
+      sentCount += 1;
+      continue;
+    }
+
+    if (recipient.email) {
+      const emailResult = await sendMessage({
+        businessId: input.businessId,
+        clientId: recipient.id,
+        clientEmail: recipient.email,
+        clientPhone: recipient.phone,
+        feature: "whatsappSms",
+        idempotencyKey: `deal:${input.dealId}:${recipient.id}:email`,
+        subject: `${business.name} — ${deal.discountPercent}% off ${deal.serviceName}`,
+        body,
+        preferredChannels: ["email"],
+      });
+      if (emailResult.status === "sent") sentCount += 1;
+    }
   }
 
   return { recipientCount: recipients.length, sentCount };

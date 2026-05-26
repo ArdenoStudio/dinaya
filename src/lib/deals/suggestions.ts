@@ -32,6 +32,32 @@ export function suggestSlotCount(gapMinutes: number, serviceDurationMinutes: num
   return Math.max(1, Math.min(5, slots));
 }
 
+type ServiceCandidate = {
+  id: string;
+  name: string;
+  durationMinutes: number;
+  priceLkr: number;
+  beforeBuffer: number;
+  afterBuffer: number;
+  minimumNoticeHours: number;
+};
+
+export function selectBestServiceForGap(
+  services: ServiceCandidate[],
+  gapMinutes: number,
+): ServiceCandidate | null {
+  if (services.length === 0) return null;
+
+  const fitting = services.filter((service) => service.durationMinutes <= gapMinutes);
+  const candidates = fitting.length > 0 ? fitting : services;
+
+  return [...candidates].sort((a, b) => {
+    const revenueScore = b.priceLkr - a.priceLkr;
+    if (revenueScore !== 0) return revenueScore;
+    return b.durationMinutes - a.durationMinutes;
+  })[0] ?? null;
+}
+
 type GapWindow = {
   apptWindowStart: Date;
   apptWindowEnd: Date;
@@ -146,14 +172,14 @@ export async function generateDealSuggestionsForBusiness(businessId: string): Pr
         ]);
 
         if (assignedServices.length === 0) continue;
-        const service = assignedServices[assignedServices.length - 1]!;
 
+        const probeService = assignedServices[0]!;
         const slots = getAvailableSlots({
           date,
-          durationMinutes: service.durationMinutes,
-          beforeBuffer: service.beforeBuffer,
-          afterBuffer: service.afterBuffer,
-          minimumNoticeHours: service.minimumNoticeHours,
+          durationMinutes: probeService.durationMinutes,
+          beforeBuffer: probeService.beforeBuffer,
+          afterBuffer: probeService.afterBuffer,
+          minimumNoticeHours: probeService.minimumNoticeHours,
           staffAvailability,
           overrides,
           existingBookings,
@@ -162,6 +188,9 @@ export async function generateDealSuggestionsForBusiness(businessId: string): Pr
 
         const gap = findLongestGap(slots);
         if (!gap) continue;
+
+        const service = selectBestServiceForGap(assignedServices, gap.gapMinutes);
+        if (!service) continue;
 
         const [existingSuggestion] = await db
           .select({ id: dealSuggestions.id })

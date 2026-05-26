@@ -1,21 +1,16 @@
 import { format } from "date-fns";
 import { AlertTriangle, Megaphone, ShieldCheck, UsersRound } from "lucide-react";
 import { requirePlatformAdmin } from "@/lib/platform-admin";
+import { listPlatformAdminMembers } from "@/lib/platform-admin-members";
 import { getAnnouncement } from "@/lib/platform-config";
 import { updateAnnouncement } from "./actions";
+import { inviteAdminMember, revokeAdminMember } from "./admin-team-actions";
 
 export const dynamic = "force-dynamic";
 
-function getAllowlist(): string[] {
-  return (process.env.PLATFORM_ADMIN_EMAILS ?? "")
-    .split(",")
-    .map((e) => e.trim())
-    .filter(Boolean);
-}
-
 export default async function AdminSettingsPage() {
   const admin = await requirePlatformAdmin();
-  const allow = getAllowlist();
+  const members = await listPlatformAdminMembers();
   const announcement = await getAnnouncement();
 
   return (
@@ -37,49 +32,81 @@ export default async function AdminSettingsPage() {
             <h2 className="font-semibold">Platform admin team</h2>
           </div>
           <span className="rounded-full bg-muted px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-muted-foreground">
-            {allow.length} {allow.length === 1 ? "member" : "members"}
+            {members.length} {members.length === 1 ? "member" : "members"}
           </span>
         </div>
 
         <p className="mb-3 text-sm text-muted-foreground">
-          Anyone whose Dinaya account email matches this list can sign in to{" "}
-          <code className="rounded bg-muted px-1 text-xs">/admin</code>.
+          Active members can sign in to{" "}
+          <code className="rounded bg-muted px-1 text-xs">/admin</code>. Env allowlist entries
+          remain as a bootstrap fallback.
         </p>
 
         <ul className="space-y-2">
-          {allow.map((email) => {
-            const isYou = email.toLowerCase() === admin.email.toLowerCase();
+          {members.map((member) => {
+            const isYou = member.email.toLowerCase() === admin.email.toLowerCase();
             return (
               <li
-                key={email}
+                key={member.id}
                 className="flex items-center justify-between gap-3 rounded-md border px-3 py-2.5 text-sm"
               >
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="size-4 text-primary" aria-hidden="true" />
-                  <span className="font-mono">{email}</span>
+                  <span className="font-mono">{member.email}</span>
                   {isYou && (
                     <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wider text-primary">
                       You
                     </span>
                   )}
                 </div>
-                <span className="text-xs text-muted-foreground">
-                  Source: env var
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground">
+                    Source: {member.source}
+                  </span>
+                  {member.source === "database" && !isYou && (
+                    <form action={revokeAdminMember}>
+                      <input type="hidden" name="memberId" value={member.id} />
+                      <button
+                        type="submit"
+                        className="text-xs text-red-600 hover:underline"
+                      >
+                        Revoke
+                      </button>
+                    </form>
+                  )}
+                </div>
               </li>
             );
           })}
         </ul>
 
+        <form action={inviteAdminMember} className="mt-4 flex flex-wrap items-end gap-3">
+          <label className="min-w-[16rem] flex-1">
+            <span className="mb-1 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              Invite admin by email
+            </span>
+            <input
+              type="email"
+              name="email"
+              required
+              placeholder="admin@example.com"
+              className="h-10 w-full rounded-md border px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
+            />
+          </label>
+          <button
+            type="submit"
+            className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+          >
+            Invite
+          </button>
+        </form>
+
         <div className="mt-4 flex gap-3 rounded-md border border-amber-500/20 bg-amber-50/60 p-3 text-xs text-amber-900">
           <AlertTriangle className="size-4 shrink-0" aria-hidden="true" />
           <p>
-            The admin team is currently controlled by the{" "}
-            <code className="rounded bg-white px-1">PLATFORM_ADMIN_EMAILS</code> env var.
-            To add or remove a member, edit{" "}
-            <code className="rounded bg-white px-1">.env.local</code> (locally) or
-            Vercel project settings (production) and redeploy. A database-backed admin
-            team with an invite UI is on the roadmap.
+            Invited admins must already have a Dinaya account with the same email.{" "}
+            <code className="rounded bg-white px-1">PLATFORM_ADMIN_EMAILS</code> env entries
+            still grant access for bootstrap and disaster recovery.
           </p>
         </div>
       </div>

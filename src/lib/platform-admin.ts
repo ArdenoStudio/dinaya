@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
+import { isPlatformAdmin as isPlatformAdminAsync } from "@/lib/platform-admin-members";
 
 export type PlatformAdminContext = {
   email: string;
@@ -7,17 +8,15 @@ export type PlatformAdminContext = {
   name?: string | null;
 };
 
-function getAllowlist(): string[] {
+/** @deprecated Use async isPlatformAdmin from platform-admin-members */
+export function isPlatformAdmin(email?: string | null): boolean {
+  if (!email) return false;
   const raw = process.env.PLATFORM_ADMIN_EMAILS ?? "";
   return raw
     .split(",")
     .map((e) => e.trim().toLowerCase())
-    .filter(Boolean);
-}
-
-export function isPlatformAdmin(email?: string | null): boolean {
-  if (!email) return false;
-  return getAllowlist().includes(email.toLowerCase());
+    .filter(Boolean)
+    .includes(email.toLowerCase());
 }
 
 export async function getPlatformAdminContext(): Promise<PlatformAdminContext | null> {
@@ -25,7 +24,7 @@ export async function getPlatformAdminContext(): Promise<PlatformAdminContext | 
   const email = session?.user?.email;
   const userId = session?.user?.id;
   if (!email || !userId) return null;
-  if (!isPlatformAdmin(email)) return null;
+  if (!(await isPlatformAdminAsync(email))) return null;
   return { email, userId, name: session.user.name };
 }
 

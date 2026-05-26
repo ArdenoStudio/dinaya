@@ -5,7 +5,8 @@ import { Search } from "lucide-react";
 import { db } from "@/db";
 import { businesses, users } from "@/db/schema";
 import { safeAdminQuery } from "@/lib/admin-db";
-import { requirePlatformAdmin, isPlatformAdmin } from "@/lib/platform-admin";
+import { requirePlatformAdmin } from "@/lib/platform-admin";
+import { listPlatformAdminMembers } from "@/lib/platform-admin-members";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +22,8 @@ export default async function AdminUsersPage({
 }) {
   await requirePlatformAdmin();
   const sp = await searchParams;
+  const adminMembers = await listPlatformAdminMembers();
+  const adminEmailSet = new Set(adminMembers.map((member) => member.email.toLowerCase()));
   const q = (sp.q ?? "").trim();
   const roleFilter = sp.role && sp.role !== "all" ? sp.role : null;
 
@@ -128,7 +131,7 @@ export default async function AdminUsersPage({
                 </tr>
               )}
               {rows.map((r) => {
-                const platformAdmin = isPlatformAdmin(r.email);
+                const platformAdmin = adminEmailSet.has(r.email.toLowerCase());
                 return (
                   <tr key={r.id} className="transition-colors hover:bg-muted/30">
                     <td className="px-4 py-3">
