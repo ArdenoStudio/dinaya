@@ -1,5 +1,5 @@
-import { addDays, format, startOfDay } from "date-fns";
-import { toZonedTime } from "date-fns-tz";
+import { addDays, format } from "date-fns";
+import { fromZonedTime, toZonedTime } from "date-fns-tz";
 import { and, asc, eq, gte, lt, sql } from "drizzle-orm";
 import { db } from "@/db";
 import {
@@ -16,6 +16,8 @@ import {
 import { generateDealSuggestionCopy } from "@/lib/ai/deals";
 import { getAvailableSlots } from "@/lib/availability";
 import { recommendDiscountPercent, formatDiscountLearningMessage } from "@/lib/deals/conversion";
+import { assessDemandForGap } from "@/lib/deals/demand";
+import { loadGoogleCalendarBusyWindows, type ExternalBusyResult } from "@/lib/deals/external-demand";
 import { canUseFeature } from "@/lib/plan";
 
 const MIN_GAP_MINUTES = 45;
@@ -124,6 +126,21 @@ export async function generateDealSuggestionsForBusiness(businessId: string): Pr
 
   let created = 0;
   const now = new Date();
+  const googleBusyByDate = new Map<string, Promise<ExternalBusyResult>>();
+
+  function loadExternalBusyForDate(date: string, dayStart: Date, dayEnd: Date) {
+    const existing = googleBusyByDate.get(date);
+    if (existing) return existing;
+
+    const pending = loadGoogleCalendarBusyWindows({
+      businessId,
+      timeMin: dayStart,
+      timeMax: dayEnd,
+      timezone: business.timezone,
+    });
+    googleBusyByDate.set(date, pending);
+    return pending;
+  }
 
   for (const location of activeLocations) {
     const staffRows = await db
@@ -135,21 +152,27 @@ export async function generateDealSuggestionsForBusiness(businessId: string): Pr
     for (const member of staffRows) {
       for (let offset = 1; offset <= 3; offset++) {
         const date = format(toZonedTime(addDays(now, offset), business.timezone), "yyyy-MM-dd");
-        const dayStart = startOfDay(addDays(now, offset));
+        const dayStart = fromZonedTime(`${date}T00:00:00`, business.timezone);
+        const dayEnd = addDays(dayStart, 1);
 
-        const [staffAvailability, overrides, existingBookings, assignedServices] = await Promise.all([
+        const [staffAvailability, overrides, existingBookings, assignedServices, externalBusy] = await Promise.all([
           db.select().from(availability).where(eq(availability.staffId, member.id)),
           db
             .select()
             .from(availabilityOverrides)
             .where(and(eq(availabilityOverrides.staffId, member.id), eq(availabilityOverrides.date, date))),
           db
-            .select({ startsAt: bookings.startsAt, endsAt: bookings.endsAt, status: bookings.status })
+            .select({
+              startsAt: bookings.startsAt,
+              endsAt: bookings.endsAt,
+              status: bookings.status,
+              googleCalendarEventId: bookings.googleCalendarEventId,
+            })
             .from(bookings)
             .where(and(
               eq(bookings.staffId, member.id),
               gte(bookings.startsAt, dayStart),
-              lt(bookings.startsAt, addDays(dayStart, 1)),
+              lt(bookings.startsAt, dayEnd),
             )),
           db
             .select({
@@ -169,9 +192,18 @@ export async function generateDealSuggestionsForBusiness(businessId: string): Pr
               eq(services.isActive, true),
             ))
             .orderBy(asc(services.priceLkr)),
+          loadExternalBusyForDate(date, dayStart, dayEnd),
         ]);
 
         if (assignedServices.length === 0) continue;
+        const googleBusyBookings = externalBusy.busyWindows.map((window) => ({
+          startsAt: window.startsAt,
+          endsAt: window.endsAt,
+          status: "confirmed" as const,
+          googleCalendarEventId: null,
+          source: window.source,
+        }));
+        const demandBookings = [...existingBookings, ...googleBusyBookings];
 
         const probeService = assignedServices[0]!;
         const slots = getAvailableSlots({
@@ -182,7 +214,7 @@ export async function generateDealSuggestionsForBusiness(businessId: string): Pr
           minimumNoticeHours: probeService.minimumNoticeHours,
           staffAvailability,
           overrides,
-          existingBookings,
+          existingBookings: demandBookings,
           timezone: business.timezone,
         });
 
@@ -205,15 +237,45 @@ export async function generateDealSuggestionsForBusiness(businessId: string): Pr
 
         if (existingSuggestion) continue;
 
+        const historicalBookings = await db
+          .select({
+            startsAt: bookings.startsAt,
+            endsAt: bookings.endsAt,
+            status: bookings.status,
+            googleCalendarEventId: bookings.googleCalendarEventId,
+          })
+          .from(bookings)
+          .where(and(
+            eq(bookings.businessId, businessId),
+            eq(bookings.locationId, location.id),
+            eq(bookings.staffId, member.id),
+            eq(bookings.serviceId, service.id),
+            gte(bookings.startsAt, addDays(dayStart, -84)),
+            lt(bookings.startsAt, dayStart),
+          ));
+
+        const demand = assessDemandForGap({
+          targetWindowStart: gap.apptWindowStart,
+          targetWindowEnd: gap.apptWindowEnd,
+          gapMinutes: gap.gapMinutes,
+          availableSlotCount: slots.length,
+          currentBookings: demandBookings,
+          historicalBookings,
+          timezone: business.timezone,
+          sourceStatuses: [externalBusy.sourceStatus],
+        });
+        if (!demand.shouldSuggest) continue;
+
         const { discountPercent, meta } = await recommendDiscountPercent({
           businessId,
           serviceId: service.id,
           gapMinutes: gap.gapMinutes,
+          demand,
         });
         const suggestedSlotsTotal = suggestSlotCount(gap.gapMinutes, service.durationMinutes);
         const learningLine = formatDiscountLearningMessage(meta);
         const reason = learningLine
-          ?? `You have ${Math.round(gap.gapMinutes / 60)} free hours ${formatWindowLabel(gap.apptWindowStart, gap.apptWindowEnd, business.timezone)}.`;
+          ?? `${demand.reason} ${Math.round(gap.gapMinutes / 60)} free hours ${formatWindowLabel(gap.apptWindowStart, gap.apptWindowEnd, business.timezone)}.`;
         const copy = await generateDealSuggestionCopy({
           businessName: business.name,
           serviceName: service.name,

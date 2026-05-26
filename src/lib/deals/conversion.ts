@@ -1,6 +1,7 @@
 import { and, eq, inArray } from "drizzle-orm";
 import { db } from "@/db";
 import { deals } from "@/db/schema";
+import { adjustDiscountForDemand, type DemandAssessment } from "@/lib/deals/demand";
 import { suggestDiscountPercent } from "@/lib/deals/suggestions";
 
 export type DiscountBucket = "10-20" | "25" | "30" | "35" | "40+";
@@ -13,11 +14,13 @@ export type BucketFillStats = {
 
 export type DiscountRecommendationMeta = {
   baselineDiscount: number;
+  demandAdjustedDiscount: number;
   adjustedDiscount: number;
   historicalFillRate: number | null;
   bucket: DiscountBucket | null;
   redeemed: number | null;
   total: number | null;
+  demand?: DemandAssessment;
 };
 
 export function discountToBucket(discountPercent: number): DiscountBucket {
@@ -56,40 +59,48 @@ export function computeBucketFillRates(
 export function adjustDiscountFromHistory(
   baselineDiscount: number,
   bucketStats: BucketFillStats | null,
+  demand?: DemandAssessment,
 ): { adjustedDiscount: number; meta: DiscountRecommendationMeta } {
-  const bucket = discountToBucket(baselineDiscount);
+  const demandAdjustedDiscount = demand
+    ? adjustDiscountForDemand(baselineDiscount, demand)
+    : baselineDiscount;
+  const bucket = discountToBucket(demandAdjustedDiscount);
   const historicalFillRate = bucketStats?.total ? bucketStats.fillRate : null;
 
   if (historicalFillRate === null || bucketStats?.total === 0) {
     return {
-      adjustedDiscount: baselineDiscount,
+      adjustedDiscount: demandAdjustedDiscount,
       meta: {
         baselineDiscount,
-        adjustedDiscount: baselineDiscount,
+        demandAdjustedDiscount,
+        adjustedDiscount: demandAdjustedDiscount,
         historicalFillRate: null,
         bucket,
         redeemed: null,
         total: null,
+        demand,
       },
     };
   }
 
-  let adjustedDiscount = baselineDiscount;
+  let adjustedDiscount = demandAdjustedDiscount;
   if (historicalFillRate < 0.5) {
-    adjustedDiscount = Math.min(50, baselineDiscount + 5);
+    adjustedDiscount = Math.min(50, demandAdjustedDiscount + 5);
   } else if (historicalFillRate > 0.8) {
-    adjustedDiscount = Math.max(10, baselineDiscount - 5);
+    adjustedDiscount = Math.max(10, demandAdjustedDiscount - 5);
   }
 
   return {
     adjustedDiscount,
     meta: {
       baselineDiscount,
+      demandAdjustedDiscount,
       adjustedDiscount,
       historicalFillRate,
       bucket,
       redeemed: bucketStats!.redeemed,
       total: bucketStats!.total,
+      demand,
     },
   };
 }
@@ -131,12 +142,20 @@ export async function recommendDiscountPercent(input: {
   businessId: string;
   serviceId?: string;
   gapMinutes: number;
+  demand?: DemandAssessment;
 }): Promise<{ discountPercent: number; meta: DiscountRecommendationMeta }> {
   const baselineDiscount = suggestDiscountPercent(input.gapMinutes);
   const historical = await loadHistoricalDeals(input.businessId, input.serviceId);
   const bucketRates = computeBucketFillRates(historical);
-  const bucketStats = bucketRates.get(discountToBucket(baselineDiscount)) ?? null;
-  const { adjustedDiscount, meta } = adjustDiscountFromHistory(baselineDiscount, bucketStats);
+  const demandAdjustedDiscount = input.demand
+    ? adjustDiscountForDemand(baselineDiscount, input.demand)
+    : baselineDiscount;
+  const bucketStats = bucketRates.get(discountToBucket(demandAdjustedDiscount)) ?? null;
+  const { adjustedDiscount, meta } = adjustDiscountFromHistory(
+    baselineDiscount,
+    bucketStats,
+    input.demand,
+  );
 
   return { discountPercent: adjustedDiscount, meta };
 }

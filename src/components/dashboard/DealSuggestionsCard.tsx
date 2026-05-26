@@ -19,6 +19,7 @@ type Suggestion = {
   reason: string;
   headline?: string;
   learningLine?: string | null;
+  demandLine?: string | null;
   meta?: unknown;
 };
 
@@ -35,6 +36,7 @@ function SuggestionCard({
   const [error, setError] = useState("");
 
   const learningLine = suggestion.learningLine;
+  const demandLine = suggestion.demandLine;
 
   async function publishDeal() {
     setPublishing(true);
@@ -66,6 +68,9 @@ function SuggestionCard({
       </p>
       {learningLine && (
         <p className="mt-1 text-xs text-muted-foreground">{learningLine}</p>
+      )}
+      {demandLine && (
+        <p className="mt-1 text-xs text-muted-foreground">{demandLine}</p>
       )}
       {error && <p className="mt-2 text-xs text-red-600">{error}</p>}
       <div className="mt-3 flex flex-wrap gap-2">

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireApiBusiness } from "@/lib/api-auth";
 import { formatDiscountLearningMessage } from "@/lib/deals/conversion";
+import { extractDemandAssessment, formatDemandAssessmentMessage } from "@/lib/deals/demand";
 import { listPendingDealSuggestions } from "@/lib/deals/suggestions";
 import { PlanRequiredError, requirePro } from "@/lib/plan";
 
@@ -19,13 +20,18 @@ export async function GET(req: NextRequest) {
   }
 
   const suggestions = await listPendingDealSuggestions(businessId);
-  return NextResponse.json(suggestions.map((item) => ({
-    ...item,
-    apptWindowStart: item.apptWindowStart.toISOString(),
-    apptWindowEnd: item.apptWindowEnd.toISOString(),
-    headline: item.reason,
-    learningLine: item.meta && typeof item.meta === "object" && "adjustedDiscount" in item.meta
-      ? formatDiscountLearningMessage(item.meta as Parameters<typeof formatDiscountLearningMessage>[0])
-      : null,
-  })));
+  return NextResponse.json(suggestions.map((item) => {
+    const demand = extractDemandAssessment(item.meta);
+
+    return {
+      ...item,
+      apptWindowStart: item.apptWindowStart.toISOString(),
+      apptWindowEnd: item.apptWindowEnd.toISOString(),
+      headline: item.reason,
+      learningLine: item.meta && typeof item.meta === "object" && "adjustedDiscount" in item.meta
+        ? formatDiscountLearningMessage(item.meta as Parameters<typeof formatDiscountLearningMessage>[0])
+        : null,
+      demandLine: demand ? formatDemandAssessmentMessage(demand) : null,
+    };
+  }));
 }

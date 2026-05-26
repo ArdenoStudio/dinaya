@@ -43,4 +43,27 @@ describe("deal conversion helpers", () => {
 
     expect(result.adjustedDiscount).toBe(25);
   });
+
+  it("stores demand-adjusted discount before historical learning", () => {
+    const demand = {
+      shouldSuggest: true,
+      demandLabel: "quiet" as const,
+      quietScore: 90,
+      confidence: "high" as const,
+      currentUtilizationRate: 0.1,
+      currentBookingCount: 0,
+      availableSlotCount: 12,
+      historicalBookingCount: 5,
+      historicalSameWindowBookedDays: 0,
+      historicalSameWindowSampleDays: 12,
+      historicalSameWindowFillRate: 0,
+      reason: "quiet",
+      sources: [],
+    };
+
+    const result = adjustDiscountFromHistory(30, null, demand);
+
+    expect(result.adjustedDiscount).toBe(40);
+    expect(result.meta.demandAdjustedDiscount).toBe(40);
+  });
 });

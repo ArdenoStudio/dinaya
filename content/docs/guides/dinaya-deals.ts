@@ -26,7 +26,7 @@ export const dinayaDealsGuide: DocsGuide = {
     },
     {
       title: "Smart suggestions (Max)",
-      body: "Max plans receive AI deal suggestions when the calendar has long gaps. Publish in one click or customize before sending.",
+      body: "Max plans receive demand-aware suggestions when Dinaya finds quiet slots from your bookings, history, and connected Google Calendar busy time. Publish in one click or customize before sending.",
     },
   ],
 };

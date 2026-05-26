@@ -1,7 +1,10 @@
 const GOOGLE_PROVIDER = "google_calendar";
 const GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth";
 const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
-const GOOGLE_CALENDAR_SCOPE = "https://www.googleapis.com/auth/calendar.events";
+const GOOGLE_CALENDAR_SCOPE = [
+  "https://www.googleapis.com/auth/calendar.events",
+  "https://www.googleapis.com/auth/calendar.events.freebusy",
+].join(" ");
 
 export function googleOAuthConfigured(): boolean {
   return Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
@@ -105,6 +108,45 @@ export async function createGoogleCalendarEvent(input: {
     throw new Error(data.error?.message ?? "Failed to create Google Calendar event");
   }
   return data.id;
+}
+
+export async function queryGoogleCalendarFreeBusy(input: {
+  accessToken: string;
+  calendarId?: string;
+  timeMin: Date;
+  timeMax: Date;
+  timeZone?: string;
+}): Promise<Array<{ startsAt: Date; endsAt: Date }>> {
+  const response = await fetch("https://www.googleapis.com/calendar/v3/freeBusy", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${input.accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      timeMin: input.timeMin.toISOString(),
+      timeMax: input.timeMax.toISOString(),
+      timeZone: input.timeZone,
+      items: [{ id: input.calendarId ?? "primary" }],
+    }),
+  });
+
+  const data = (await response.json()) as {
+    calendars?: Record<string, { busy?: Array<{ start?: string; end?: string }> }>;
+    error?: { message?: string };
+  };
+
+  if (!response.ok) {
+    throw new Error(data.error?.message ?? "Google Calendar free/busy query failed");
+  }
+
+  const calendar = data.calendars?.[input.calendarId ?? "primary"];
+  return (calendar?.busy ?? [])
+    .filter((slot): slot is { start: string; end: string } => Boolean(slot.start && slot.end))
+    .map((slot) => ({
+      startsAt: new Date(slot.start),
+      endsAt: new Date(slot.end),
+    }));
 }
 
 export { GOOGLE_PROVIDER };
