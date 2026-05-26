@@ -11,6 +11,9 @@ import {
 export type ApiKeyContext = {
   businessId: string;
   keyId: string;
+  keyType: string;
+  deviceId: string | null;
+  deviceName: string | null;
   scopes: string[];
 };
 
@@ -34,6 +37,13 @@ export async function requireApiKey(
   req: NextRequest,
   scope: string,
 ): Promise<ApiKeyAuthResult> {
+  return requireAnyApiKey(req, [scope]);
+}
+
+export async function requireAnyApiKey(
+  req: NextRequest,
+  scopes: readonly string[],
+): Promise<ApiKeyAuthResult> {
   const token = bearerToken(req);
   if (!token || !isApiKeyFormat(token)) {
     return {
@@ -47,6 +57,9 @@ export async function requireApiKey(
     .select({
       id: apiKeys.id,
       businessId: apiKeys.businessId,
+      keyType: apiKeys.keyType,
+      deviceId: apiKeys.deviceId,
+      deviceName: apiKeys.deviceName,
       scopes: apiKeys.scopes,
       expiresAt: apiKeys.expiresAt,
       revokedAt: apiKeys.revokedAt,
@@ -69,7 +82,8 @@ export async function requireApiKey(
     };
   }
 
-  if (!row.scopes.includes(scope)) {
+  const hasRequiredScope = scopes.some((scope) => row.scopes.includes(scope));
+  if (!hasRequiredScope) {
     return {
       ok: false,
       response: NextResponse.json({ error: "Forbidden" }, { status: 403 }),
@@ -97,6 +111,9 @@ export async function requireApiKey(
     context: {
       businessId: row.businessId,
       keyId: row.id,
+      keyType: row.keyType,
+      deviceId: row.deviceId,
+      deviceName: row.deviceName,
       scopes: row.scopes,
     },
   };

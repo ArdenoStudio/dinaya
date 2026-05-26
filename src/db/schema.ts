@@ -865,6 +865,9 @@ export const apiKeys = pgTable("api_keys", {
     .notNull()
     .references(() => businesses.id, { onDelete: "cascade" }),
   name: varchar("name", { length: 120 }).notNull(),
+  keyType: varchar("key_type", { length: 40 }).default("generic").notNull(),
+  deviceId: varchar("device_id", { length: 120 }),
+  deviceName: varchar("device_name", { length: 120 }),
   keyHash: text("key_hash").notNull(),
   scopes: text("scopes").array().notNull(),
   lastUsedAt: timestamp("last_used_at"),
@@ -874,6 +877,7 @@ export const apiKeys = pgTable("api_keys", {
 }, (table) => {
   return {
     keyHashUnique: uniqueIndex("api_keys_key_hash_unique").on(table.keyHash),
+    businessTypeIdx: index("api_keys_business_key_type_idx").on(table.businessId, table.keyType),
   };
 });
 

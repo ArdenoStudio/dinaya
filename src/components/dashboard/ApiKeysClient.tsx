@@ -6,6 +6,9 @@ import { API_KEY_SCOPES, type ApiKeyScope } from "@/lib/api-key-scopes";
 type ApiKeyRow = {
   id: string;
   name: string;
+  keyType?: "generic" | "desktop";
+  deviceId?: string | null;
+  deviceName?: string | null;
   scopes: string[];
   lastUsedAt: string | null;
   revokedAt: string | null;
@@ -59,6 +62,29 @@ export function ApiKeysClient() {
     await load();
   }
 
+  async function createDesktopKey() {
+    setError("");
+    setRawKey(null);
+    const deviceName = typeof window === "undefined" ? "Desktop Device" : window.navigator.platform || "Desktop Device";
+    const res = await fetch("/api/dashboard/api-keys", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: `Desktop - ${deviceName}`,
+        keyType: "desktop",
+        deviceName,
+        scopes: ["desktop:read", "desktop:bookings"],
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setError(data.error ?? "Could not create desktop key.");
+      return;
+    }
+    setRawKey(data.rawKey);
+    await load();
+  }
+
   async function revoke(id: string) {
     if (!confirm("Revoke this API key?")) return;
     await fetch(`/api/dashboard/api-keys/${id}`, { method: "DELETE" });
@@ -102,6 +128,13 @@ export function ApiKeysClient() {
         <button type="submit" className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">
           Generate key
         </button>
+        <button
+          type="button"
+          onClick={() => void createDesktopKey()}
+          className="ml-2 rounded-lg border px-4 py-2 text-sm font-medium"
+        >
+          Connect Desktop
+        </button>
       </form>
 
       <div className="rounded-xl border bg-white divide-y">
@@ -114,6 +147,10 @@ export function ApiKeysClient() {
             <div key={key.id} className="flex items-center justify-between gap-4 p-5">
               <div>
                 <p className="font-medium">{key.name}</p>
+                <p className="text-xs text-muted-foreground">
+                  {key.keyType === "desktop" ? "Desktop key" : "Generic key"}
+                  {key.deviceName ? ` - ${key.deviceName}` : ""}
+                </p>
                 <p className="text-xs text-muted-foreground">{key.scopes.join(", ")}</p>
               </div>
               <button
