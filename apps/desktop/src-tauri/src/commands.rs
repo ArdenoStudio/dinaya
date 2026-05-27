@@ -4,10 +4,11 @@ use keyring::Entry;
 use reqwest::header::{AUTHORIZATION, CONTENT_TYPE};
 use reqwest::Client;
 use std::collections::HashMap;
+use std::process::Command;
 use std::sync::atomic::{AtomicBool, AtomicU32, Ordering};
 use std::sync::Mutex;
 use tauri::menu::MenuItem;
-use tauri::{AppHandle, Emitter, Manager, State, WebviewUrl, WebviewWindowBuilder, Wry};
+use tauri::{AppHandle, Emitter, Manager, State, Wry};
 use tauri_plugin_notification::NotificationExt;
 
 const TRAY_ID: &str = "main_tray";
@@ -585,32 +586,29 @@ pub fn open_booking_in_web(app: &AppHandle, id: String) -> Result<(), String> {
   open_web_dashboard(app, Some(&format!("/dashboard/bookings/{}", id)))
 }
 
+fn open_url_in_default_browser(target: &str) -> Result<(), String> {
+  #[cfg(target_os = "windows")]
+  let result = Command::new("rundll32")
+    .args(["url.dll,FileProtocolHandler", target])
+    .spawn();
+
+  #[cfg(target_os = "macos")]
+  let result = Command::new("open").arg(target).spawn();
+
+  #[cfg(all(unix, not(target_os = "macos")))]
+  let result = Command::new("xdg-open").arg(target).spawn();
+
+  result
+    .map(|_| ())
+    .map_err(|err| format!("Could not open web dashboard in the default browser: {}", err))
+}
+
 pub fn open_web_dashboard(app: &AppHandle, path: Option<&str>) -> Result<(), String> {
   let target = format!("{}{}", api_base_url(), path.unwrap_or("/dashboard"));
-  if let Some(window) = app.get_webview_window("web_dashboard") {
-    let _ = window.show();
-    let _ = window.unminimize();
-    let _ = window.set_focus();
-    if let Ok(serialized) = serde_json::to_string(&target) {
-      let _ = window.eval(&format!("window.location.assign({});", serialized));
-    }
-    return Ok(());
-  }
-
-  let window = WebviewWindowBuilder::new(
-    app,
-    "web_dashboard",
-    WebviewUrl::External(target.parse::<tauri::Url>().map_err(|err| err.to_string())?),
-  )
-    .title("Dinaya Web Dashboard")
-    .inner_size(1280.0, 860.0)
-    .min_inner_size(1024.0, 700.0)
-    .resizable(true)
-    .build()
-    .map_err(|err| err.to_string())?;
-  let _ = window.show();
-  let _ = window.set_focus();
-  Ok(())
+  let _ = app;
+  // Desktop login uses a bearer key, while the web dashboard uses browser cookies.
+  // Opening the fallback in the default browser keeps those auth models separate.
+  open_url_in_default_browser(&target)
 }
 
 pub fn open_latest_notification_booking(app: &AppHandle) -> Result<(), String> {

@@ -2,7 +2,7 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "Default capability set for Dinaya Desktop.",
-  "windows": ["main", "web_dashboard"],
+  "windows": ["main"],
   "permissions": [
     "core:default"
   ]

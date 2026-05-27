@@ -44,7 +44,7 @@ pub fn configure_main_window(window: &WebviewWindow) {
 pub fn setup_tray(app: &mut App) -> tauri::Result<()> {
   let brand = MenuItem::with_id(app, "brand", "Dinaya", false, None::<&str>)?;
   let today = MenuItem::with_id(app, "today_count", "Today: 0 bookings", false, None::<&str>)?;
-  let open_dashboard = MenuItem::with_id(app, OPEN_DASHBOARD_MENU_ID, "Open Web Dashboard", true, None::<&str>)?;
+  let open_dashboard = MenuItem::with_id(app, OPEN_DASHBOARD_MENU_ID, "Open Web Dashboard in Browser", true, None::<&str>)?;
   let open_bookings_inbox = MenuItem::with_id(
     app,
     OPEN_BOOKINGS_INBOX_MENU_ID,
@@ -59,7 +59,7 @@ pub fn setup_tray(app: &mut App) -> tauri::Result<()> {
     false,
     None::<&str>,
   )?;
-  let new_booking = MenuItem::with_id(app, NEW_BOOKING_MENU_ID, "New Booking", true, None::<&str>)?;
+  let new_booking = MenuItem::with_id(app, NEW_BOOKING_MENU_ID, "New Booking in Browser", true, None::<&str>)?;
   let quit = MenuItem::with_id(app, QUIT_MENU_ID, "Quit", true, None::<&str>)?;
   let separator_1 = PredefinedMenuItem::separator(app)?;
   let separator_2 = PredefinedMenuItem::separator(app)?;

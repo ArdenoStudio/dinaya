@@ -146,10 +146,6 @@ function publicBookingUrl(business: Business | null): string {
   return `https://${business.slug}.dinaya.lk`;
 }
 
-function webPathForRoute(route: DashboardRoute): string {
-  return route.href;
-}
-
 function App() {
   const [booting, setBooting] = useState(true);
   const [authReady, setAuthReady] = useState(false);
@@ -907,7 +903,7 @@ function BookingDetailPanel(props: {
             {statusLabels[status]}
           </button>
         ))}
-        <button onClick={() => props.onOpenWeb(props.detail!.id)}>Open Web</button>
+        <button onClick={() => props.onOpenWeb(props.detail!.id)}>Open in browser</button>
       </div>
     </aside>
   );
@@ -922,11 +918,8 @@ function NativeModulePlaceholder({ route }: { route: DashboardRoute }) {
         <p>{route.summary}</p>
         <div className="module-meta">
           <span>{route.desktopApiPath ?? "Desktop API pending"}</span>
-          <span>{route.nativeStatus === "fallback" ? "Web fallback available" : "Native foundation"}</span>
+          <span>{route.nativeStatus === "fallback" ? "Native screen pending" : "Native foundation"}</span>
         </div>
-        <button onClick={() => void invoke("desktop_open_dashboard_path", { path: webPathForRoute(route) }).catch(() => invoke("desktop_open_dashboard"))}>
-          Open Web Dashboard
-        </button>
       </div>
     </section>
   );
@@ -960,7 +953,7 @@ function SettingsView({
           <dd>OS secure keyring</dd>
         </dl>
         <div className="actions">
-          <button onClick={() => void invoke("desktop_open_dashboard")}>Open Web Dashboard</button>
+          <button onClick={() => void invoke("desktop_open_dashboard")}>Open web dashboard in browser</button>
           <button className="danger" onClick={() => void onLogout()}>Log out</button>
         </div>
       </div>
