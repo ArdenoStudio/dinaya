@@ -18,39 +18,6 @@ const ProductMockup = dynamic(() => import("@/components/ProductMockup"), {
   loading: () => <ProductMockupSkeleton />,
 });
 
-const features = [
-  {
-    icon: "calendar-check",
-    title: "Self-booking page",
-    desc: "Your own link at yourname.dinaya.lk. Clients book 24/7 without calling you.",
-  },
-  {
-    icon: "credit-card",
-    title: "Online payments",
-    desc: "Accept deposits or full payment via PayHere. Eliminate no-shows instantly.",
-  },
-  {
-    icon: "grid",
-    title: "Simple dashboard",
-    desc: "See all your bookings in one place. Cancel, reschedule, and track revenue.",
-  },
-  {
-    icon: "bell",
-    title: "Automated reminders",
-    desc: "Clients get SMS and email reminders before their appointment — automatically.",
-  },
-  {
-    icon: "clock",
-    title: "Custom availability",
-    desc: "Set your working hours, block dates, and add buffer time between sessions.",
-  },
-  {
-    icon: "share",
-    title: "Shareable link",
-    desc: "One link for Instagram, WhatsApp, and Facebook. Share everywhere in seconds.",
-  },
-];
-
 const steps = [
   {
     number: "01",
@@ -229,85 +196,6 @@ export default function LandingPage() {
       </div>
 
       <HowItWorks />
-
-      {/* Features */}
-      <section className="relative max-w-6xl mx-auto px-6 py-20 border-t">
-
-        <div className="pointer-events-none absolute inset-0 select-none">
-          {[0, 1].map((pos, i) => (
-            <div
-              key={i}
-              className="absolute inset-y-0 w-px"
-              style={{
-                left: `${pos * 100}%`,
-                maskImage:
-                  "linear-gradient(transparent, white 4rem, white calc(100% - 4rem), transparent)",
-              }}
-            >
-              <svg className="h-full w-full" preserveAspectRatio="none">
-                <line
-                  x1="0"
-                  y1="0"
-                  x2="0"
-                  y2="100%"
-                  className="stroke-gray-200"
-                  strokeWidth="1.5"
-                  strokeDasharray="4 4"
-                />
-              </svg>
-            </div>
-          ))}
-        </div>
-
-        <div className="relative text-center mb-14">
-          <span className="relative text-sm font-semibold tracking-tight text-primary">
-            <span className="absolute top-0.5 -left-3 h-4 w-[3px] rounded-r-sm bg-primary" />
-            Everything you need
-          </span>
-          <TextAnimate
-            animation="fadeIn"
-            by="word"
-            as="h2"
-            className="font-cal text-3xl md:text-4xl mt-3 tracking-tight"
-          >
-            Everything to replace WhatsApp booking
-          </TextAnimate>
-          <p className="text-muted-foreground mt-3 max-w-xl mx-auto">
-            Six tools that work together — so you stop chasing clients and start filling your calendar.
-          </p>
-        </div>
-
-        <div className="relative grid md:grid-cols-3 gap-px bg-gray-200/70 rounded-2xl overflow-hidden border border-gray-200/70 shadow-sm">
-          {features.map((f, i) => (
-            <div
-              key={f.title}
-              className="group relative p-7 bg-white hover:bg-primary/[0.03] transition-colors"
-            >
-              <span className="absolute top-5 right-5 text-[10px] font-mono font-medium text-gray-300 tracking-wider">
-                {String(i + 1).padStart(2, "0")}
-              </span>
-
-              <div className="mb-5 inline-flex">
-                <div className="flex items-center justify-center size-11 rounded-xl bg-primary/10 ring-1 ring-primary/15 group-hover:ring-primary/25 transition-colors">
-                  <Icon name={f.icon} className="text-[1.15rem] text-primary" />
-                </div>
-              </div>
-
-              <h3 className="font-cal text-lg mb-2 tracking-tight text-balance">{f.title}</h3>
-              <p className="text-muted-foreground text-sm leading-relaxed text-pretty">{f.desc}</p>
-
-              <Link
-                href="/features"
-                className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-primary opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 hover:underline"
-              >
-                Explore <Icon name="arrow-right" />
-              </Link>
-
-              <span className="absolute bottom-0 left-7 right-7 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
-            </div>
-          ))}
-        </div>
-      </section>
 
       {/* How it works */}
       <section id="how-it-works" className="max-w-5xl mx-auto px-6 py-20 border-t">
