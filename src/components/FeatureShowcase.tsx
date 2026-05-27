@@ -1,18 +1,16 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { motion, animate, useMotionValue } from "framer-motion";
+import { AnimatePresence, motion, animate, useMotionValue } from "framer-motion";
 import { Icon } from "@/components/ui/Icon";
 
 // ─── Cursor SVG ───────────────────────────────────────────────────────────────
 function CursorSVG() {
   return (
-    <svg width="18" height="22" viewBox="0 0 18 22" fill="none">
+    <svg width="20" height="24" viewBox="0 0 28 28" fill="none">
       <path
-        d="M2.5 2L2.5 17L6 13.5L8.5 20L10.5 19L8 12.5L14 12.5L2.5 2Z"
-        fill="white"
-        stroke="#111827"
-        strokeWidth="1.5"
+        d="M4.5 2.3C4.5 1.69 5.23 1.39 5.67 1.81L23.2 18.2C23.67 18.64 23.36 19.43 22.72 19.44L12.7 19.53L5.67 26.01C5.23 26.41 4.5 26.1 4.5 25.5V2.3Z"
+        fill="#111111"
         strokeLinejoin="round"
         strokeLinecap="round"
       />
@@ -26,6 +24,25 @@ function Pill({ icon, children }: { icon: string; children: React.ReactNode }) {
     <span className="inline-flex items-center gap-1.5 rounded-lg bg-primary/10 px-2.5 py-0.5 text-primary font-medium mx-1 whitespace-nowrap">
       <Icon name={icon} className="text-sm shrink-0" />
       {children}
+    </span>
+  );
+}
+
+function RollingValue({ value, className }: { value: string; className?: string }) {
+  return (
+    <span className={`relative inline-flex h-[1.2em] overflow-hidden align-baseline ${className ?? ""}`}>
+      <AnimatePresence initial={false} mode="popLayout">
+        <motion.span
+          key={value}
+          initial={{ y: "100%", opacity: 0 }}
+          animate={{ y: "0%", opacity: 1 }}
+          exit={{ y: "-100%", opacity: 0 }}
+          transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
+          className="block leading-none"
+        >
+          {value}
+        </motion.span>
+      </AnimatePresence>
     </span>
   );
 }
@@ -191,19 +208,39 @@ function BookingMockup() {
 
 // ─── Mockup 2: Payment ────────────────────────────────────────────────────────
 function PaymentMockup() {
+  const [phase, setPhase] = useState(0);
+
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      setPhase((p) => (p + 1) % 3);
+    }, 1600);
+    return () => window.clearInterval(id);
+  }, []);
+
+  const isPaid = phase >= 1;
+  const notified = phase === 2;
+
   return (
     <div className="w-full max-w-xs mx-auto space-y-2.5">
       <div className="rounded-2xl border border-white/70 bg-white/80 shadow-lg shadow-green-500/10 overflow-hidden" style={{ backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}>
-        <div className="bg-gradient-to-r from-green-500 to-emerald-500 px-4 py-3 flex items-center gap-2.5">
+        <motion.div
+          animate={{
+            background: isPaid
+              ? "linear-gradient(90deg, rgb(34 197 94), rgb(16 185 129))"
+              : "linear-gradient(90deg, rgb(245 158 11), rgb(249 115 22))",
+          }}
+          transition={{ duration: 0.35 }}
+          className="px-4 py-3 flex items-center gap-2.5"
+        >
           <div className="flex size-7 items-center justify-center rounded-full bg-white/20">
-            <Icon name="check-circle" className="text-white text-sm" />
+            <Icon name={isPaid ? "check-circle" : "clock-history"} className="text-white text-sm" />
           </div>
           <div className="flex-1">
-            <div className="text-white font-semibold text-xs">Deposit received</div>
+            <div className="text-white font-semibold text-xs">{isPaid ? "Deposit received" : "Waiting for payment"}</div>
             <div className="text-white/80 text-[11px]">Via PayHere · Visa ••••4242</div>
           </div>
-          <div className="text-white font-bold text-sm">Rs. 1,250</div>
-        </div>
+          <div className="text-white font-bold text-sm">{isPaid ? "Rs. 1,250" : "Pending"}</div>
+        </motion.div>
         <div className="px-4 py-3 space-y-1.5">
           {[
             { label: "Client", value: "Kavya Senanayake" },
@@ -213,17 +250,26 @@ function PaymentMockup() {
           ].map((r) => (
             <div key={r.label} className="flex justify-between text-xs">
               <span className="text-muted-foreground">{r.label}</span>
-              <span className="font-medium text-gray-900">{r.value}</span>
+              <span className="font-medium text-gray-900">
+                {r.label === "Balance on arrival" && !isPaid ? "Rs. 2,500" : r.value}
+              </span>
             </div>
           ))}
         </div>
       </div>
-      <div className="flex items-center gap-2 rounded-full border border-white/60 bg-white/80 px-3 py-2 shadow-sm w-fit mx-auto" style={{ backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}>
+      <motion.div
+        animate={notified ? { opacity: 1, y: 0 } : { opacity: 0.45, y: 4 }}
+        transition={{ duration: 0.25 }}
+        className="flex items-center gap-2 rounded-full border border-white/60 bg-white/80 px-3 py-2 shadow-sm w-fit mx-auto"
+        style={{ backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}
+      >
         <div className="flex size-5 items-center justify-center rounded-full bg-primary/10">
-          <Icon name="bell" className="text-[10px] text-primary" />
+          <Icon name={notified ? "check-circle" : "bell"} className="text-[10px] text-primary" />
         </div>
-        <span className="text-xs text-gray-700 font-medium">You&apos;ve been notified</span>
-      </div>
+        <span className="text-xs text-gray-700 font-medium">
+          {notified ? "Owner notified instantly" : "Sending owner notification..."}
+        </span>
+      </motion.div>
     </div>
   );
 }
@@ -231,36 +277,86 @@ function PaymentMockup() {
 // ─── Mockup 3: Reminders ──────────────────────────────────────────────────────
 function RemindersMockup() {
   const reminders = [
-    { name: "Kavya S.", time: "10:30 AM", service: "Haircut & Style",   status: "Confirmed ✓", delay: 0.1 },
-    { name: "Nimal P.", time: "2:00 PM",  service: "Facial Treatment",  status: "Delivered",    delay: 0.2 },
-    { name: "Amali K.", time: "3:30 PM",  service: "Eyebrow Threading", status: "Delivered",    delay: 0.3 },
+    { name: "Kavya S.", time: "10:30 AM", service: "Haircut & Style" },
+    { name: "Nimal P.", time: "2:00 PM", service: "Facial Treatment" },
+    { name: "Amali K.", time: "3:30 PM", service: "Eyebrow Threading" },
   ];
+  const [step, setStep] = useState(0);
+
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      setStep((s) => (s + 1) % (reminders.length + 2));
+    }, 1450);
+    return () => window.clearInterval(id);
+  }, [reminders.length]);
+
+  const sendingIndex = step < reminders.length ? step : -1;
+  const sentCount = Math.min(step, reminders.length);
+
   return (
     <div className="w-full max-w-xs mx-auto space-y-2">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-1.5">
-          <div className="flex size-6 items-center justify-center rounded-full bg-violet-100">
+          <motion.div
+            key={`reminder-bell-${step}`}
+            animate={sendingIndex >= 0 ? { rotate: [0, -10, 10, -6, 6, 0], scale: [1, 1.08, 1] } : { rotate: 0, scale: 1 }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
+            className="flex size-6 items-center justify-center rounded-full bg-violet-100"
+          >
             <Icon name="bell" className="text-[10px] text-violet-600" />
-          </div>
+          </motion.div>
           <span className="text-xs font-semibold text-gray-700">Automated reminders</span>
         </div>
-        <span className="text-[11px] font-semibold text-green-600 bg-green-50 border border-green-200 rounded-full px-2 py-0.5">
-          3 sent today
-        </span>
+        <motion.span
+          key={`sent-count-${sentCount}`}
+          initial={{ scale: 0.86, opacity: 0.6 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 320, damping: 20 }}
+          className="text-[11px] font-semibold text-green-600 bg-green-50 border border-green-200 rounded-full px-2 py-0.5"
+        >
+          {sentCount} sent today
+        </motion.span>
       </div>
-      {reminders.map((r) => (
+      {reminders.map((r, i) => {
+        const isSent = i < sentCount;
+        const isSending = i === sendingIndex;
+        const status = (() => {
+          if (isSending) return "Sending";
+          if (!isSent) return "Queued";
+          if (i === 0 && sentCount >= 2) return "Confirmed ✓";
+          return "Delivered";
+        })();
+        const statusTone = status === "Confirmed ✓"
+          ? "text-green-600"
+          : status === "Delivered"
+            ? "text-emerald-600"
+            : isSending
+              ? "text-primary"
+              : "text-muted-foreground";
+
+        return (
         <motion.div
           key={r.name}
-          initial={{ opacity: 0, x: -10 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: r.delay, duration: 0.35, ease: "easeOut" }}
+          animate={{
+            opacity: isSent || isSending ? 1 : 0.62,
+            x: isSending ? 4 : 0,
+            y: isSending ? -1 : 0,
+            scale: isSending ? 1.01 : 1,
+            boxShadow: isSending
+              ? "0 8px 24px rgba(37,99,235,0.12)"
+              : "0 1px 2px rgba(15,23,42,0.03)",
+          }}
+          transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
           className="flex items-center gap-2.5 rounded-xl border border-white/60 bg-white/80 px-3 py-2.5 shadow-sm"
           style={{ backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)" }}
         >
-          <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-violet-100 text-[11px] font-bold text-violet-700">
+          <motion.div
+            animate={isSending ? { scale: [1, 1.06, 1] } : { scale: 1 }}
+            transition={{ duration: 0.9, repeat: isSending ? Number.POSITIVE_INFINITY : 0, ease: "easeInOut" }}
+            className="flex size-8 shrink-0 items-center justify-center rounded-full bg-violet-100 text-[11px] font-bold text-violet-700"
+          >
             {r.name[0]}{r.name.split(" ")[1]?.[0]}
-          </div>
+          </motion.div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-gray-900">{r.name}</span>
@@ -268,41 +364,86 @@ function RemindersMockup() {
             </div>
             <div className="flex items-center justify-between">
               <span className="text-[11px] text-muted-foreground truncate">{r.service}</span>
-              <span className="text-[11px] text-green-600 font-medium ml-2 shrink-0">{r.status}</span>
+              <motion.span
+                key={`${r.name}-${status}`}
+                initial={{ opacity: 0, y: 3 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2 }}
+                className={`text-[11px] font-medium ml-2 shrink-0 inline-flex items-center gap-0.5 ${statusTone} ${isSending ? "rounded-full bg-primary/10 px-1.5 py-0.5" : ""}`}
+              >
+                {status}
+                {isSending && (
+                  <span className="inline-flex items-center gap-[2px] ml-[1px]">
+                    {[0, 1, 2].map((dot) => (
+                      <motion.span
+                        key={`${r.name}-dot-${dot}`}
+                        animate={{ opacity: [0.25, 1, 0.25], y: [0, -1, 0] }}
+                        transition={{ duration: 0.65, repeat: Number.POSITIVE_INFINITY, delay: dot * 0.12, ease: "easeInOut" }}
+                        className="block size-[2.5px] rounded-full bg-current"
+                      />
+                    ))}
+                  </span>
+                )}
+              </motion.span>
             </div>
           </div>
         </motion.div>
-      ))}
+      );})}
     </div>
   );
 }
 
 // ─── Mockup 4: Dashboard ──────────────────────────────────────────────────────
 function DashboardMockup() {
+  const [step, setStep] = useState(0);
+
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      setStep((s) => (s + 1) % 4);
+    }, 1800);
+    return () => window.clearInterval(id);
+  }, []);
+
   const bookings = [
     { time: "10:30", name: "Kavya S.",  service: "Haircut & Style",   amount: "Rs. 2,500", color: "bg-primary/10 text-primary" },
     { time: "12:00", name: "Ravi P.",   service: "Facial Treatment",  amount: "Rs. 3,800", color: "bg-violet-100 text-violet-700" },
     { time: "14:30", name: "Amali K.",  service: "Eyebrow Threading", amount: "Rs. 800",   color: "bg-amber-100 text-amber-700" },
     { time: "16:00", name: "Nimal S.",  service: "Haircut & Style",   amount: "Rs. 2,500", color: "bg-green-100 text-green-700" },
   ];
+  const showNewBooking = step >= 2;
+  const visibleBookings = showNewBooking ? bookings : bookings.slice(0, 3);
+
   return (
-    <div className="w-full max-w-xs mx-auto rounded-2xl border border-white/70 bg-white/80 shadow-lg shadow-amber-500/10 overflow-hidden" style={{ backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}>
+    <div className="w-full max-w-xs mx-auto rounded-2xl border border-white/70 bg-white/80 shadow-lg shadow-amber-500/10 overflow-hidden relative" style={{ backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}>
       <div className="grid grid-cols-3 divide-x border-b">
-        {[{ label: "Today", value: "4" }, { label: "Revenue", value: "Rs. 9,600" }, { label: "No-shows", value: "0" }].map((s) => (
+        {[
+          { label: "Today", value: showNewBooking ? "4" : "3" },
+          { label: "Revenue", value: showNewBooking ? "Rs. 9,600" : "Rs. 7,100" },
+          { label: "No-shows", value: "0" },
+        ].map((s) => (
           <div key={s.label} className="px-3 py-2.5 text-center">
-            <div className="text-sm font-bold text-gray-900">{s.value}</div>
+            <RollingValue value={s.value} className="text-sm font-bold text-gray-900 tabular-nums" />
             <div className="text-[10px] text-muted-foreground">{s.label}</div>
           </div>
         ))}
       </div>
+      <motion.div
+        initial={false}
+        animate={showNewBooking ? { opacity: 1, y: 0, height: 30, marginTop: 8, marginBottom: 4 } : { opacity: 0, y: -6, height: 0, marginTop: 0, marginBottom: 0 }}
+        transition={{ duration: 0.25 }}
+        className="overflow-hidden px-3"
+      >
+        <div className="pointer-events-none rounded-lg border border-primary/20 bg-primary/10 px-2 py-1 text-[10px] text-primary font-semibold">
+          New booking received · 16:00
+        </div>
+      </motion.div>
       <div className="divide-y">
-        {bookings.map((b, i) => (
+        {visibleBookings.map((b, i) => (
           <motion.div
             key={b.name}
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.05 + i * 0.07 }}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.04 + i * 0.05, duration: 0.25 }}
             className="flex items-center gap-2.5 px-3 py-2.5"
           >
             <span className="text-[11px] font-mono text-muted-foreground w-9 shrink-0">{b.time}</span>
@@ -317,6 +458,427 @@ function DashboardMockup() {
           </motion.div>
         ))}
       </div>
+    </div>
+  );
+}
+
+// ─── Mockup 5: Availability ──────────────────────────────────────────────────
+function AvailabilityMockup() {
+  const [step, setStep] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const thursdayRef = useRef<HTMLDivElement>(null);
+  const bufferRef = useRef<HTMLButtonElement>(null);
+  const bufferOption30Ref = useRef<HTMLButtonElement>(null);
+  const hoursRef = useRef<HTMLButtonElement>(null);
+  const hoursOptionLateRef = useRef<HTMLButtonElement>(null);
+
+  const cx = useMotionValue(0);
+  const cy = useMotionValue(0);
+  const cScale = useMotionValue(1);
+  const cOpacity = useMotionValue(0);
+
+  const getPos = (el: HTMLElement | null) => {
+    if (!el || !containerRef.current) return { x: 0, y: 0 };
+    const cr = containerRef.current.getBoundingClientRect();
+    const er = el.getBoundingClientRect();
+    return { x: er.left - cr.left + er.width / 2, y: er.top - cr.top + er.height / 2 };
+  };
+
+  useEffect(() => {
+    let alive = true;
+    const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+
+    const run = async () => {
+      await sleep(1200);
+      while (alive) {
+        setStep(0);
+        cOpacity.set(0);
+        cScale.set(1);
+
+        const p0 = getPos(thursdayRef.current);
+        cx.set(p0.x + 24);
+        cy.set(p0.y + 26);
+        await sleep(250);
+        if (!alive) break;
+
+        await animate(cOpacity, 1, { duration: 0.22 });
+
+        // Toggle a day off.
+        await Promise.all([
+          animate(cx, p0.x, { duration: 0.36, ease: [0.25, 0.1, 0.25, 1] }),
+          animate(cy, p0.y, { duration: 0.36, ease: [0.25, 0.1, 0.25, 1] }),
+        ]);
+        await animate(cScale, 0.68, { duration: 0.08 });
+        setStep(1);
+        await animate(cScale, 1, { duration: 0.15 });
+        await sleep(420);
+        if (!alive) break;
+
+        // Open buffer dropdown.
+        const p1 = getPos(bufferRef.current);
+        await Promise.all([
+          animate(cx, p1.x, { duration: 0.42, ease: [0.25, 0.1, 0.25, 1] }),
+          animate(cy, p1.y, { duration: 0.42, ease: [0.25, 0.1, 0.25, 1] }),
+        ]);
+        await animate(cScale, 0.68, { duration: 0.08 });
+        setStep(2);
+        await animate(cScale, 1, { duration: 0.15 });
+        await sleep(260);
+        if (!alive) break;
+
+        // Select 30 min buffer from dropdown.
+        const p2 = getPos(bufferOption30Ref.current);
+        await Promise.all([
+          animate(cx, p2.x, { duration: 0.48, ease: [0.25, 0.1, 0.25, 1] }),
+          animate(cy, p2.y, { duration: 0.48, ease: [0.25, 0.1, 0.25, 1] }),
+        ]);
+        await animate(cScale, 0.68, { duration: 0.08 });
+        setStep(3);
+        await animate(cScale, 1, { duration: 0.15 });
+        await sleep(420);
+        if (!alive) break;
+
+        // Open working hours dropdown.
+        const p3 = getPos(hoursRef.current);
+        await Promise.all([
+          animate(cx, p3.x, { duration: 0.48, ease: [0.25, 0.1, 0.25, 1] }),
+          animate(cy, p3.y, { duration: 0.48, ease: [0.25, 0.1, 0.25, 1] }),
+        ]);
+        await animate(cScale, 0.68, { duration: 0.08 });
+        setStep(4);
+        await animate(cScale, 1, { duration: 0.15 });
+        await sleep(260);
+        if (!alive) break;
+
+        // Select 10:00 AM - 6:00 PM from dropdown.
+        const p4 = getPos(hoursOptionLateRef.current);
+        await Promise.all([
+          animate(cx, p4.x, { duration: 0.42, ease: [0.25, 0.1, 0.25, 1] }),
+          animate(cy, p4.y, { duration: 0.42, ease: [0.25, 0.1, 0.25, 1] }),
+        ]);
+        await animate(cScale, 0.68, { duration: 0.08 });
+        setStep(5);
+        await animate(cScale, 1, { duration: 0.15 });
+        await sleep(600);
+        if (!alive) break;
+
+        await animate(cOpacity, 0, { duration: 0.25 });
+        await sleep(1200);
+      }
+    };
+
+    run();
+    return () => {
+      alive = false;
+    };
+  }, [cOpacity, cScale, cx, cy]);
+
+  const bufferOpen = step === 2;
+  const buffer = step >= 3 ? "30 min" : "15 min";
+  const hoursOpen = step === 4;
+  const hoursValue = step >= 5 ? "10:00 AM - 6:00 PM" : "9:00 AM - 6:00 PM";
+  const dayOff = step >= 1;
+  const lateStart = step >= 5;
+
+  return (
+    <div ref={containerRef} className="relative z-10 w-full max-w-xs mx-auto rounded-2xl border border-white/70 bg-white/80 shadow-lg shadow-cyan-500/10 overflow-visible" style={{ backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}>
+      <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="flex size-7 items-center justify-center rounded-full bg-cyan-100">
+            <Icon name="calendar2-week" className="text-cyan-700 text-[11px]" />
+          </div>
+          <div>
+            <div className="text-xs font-semibold text-gray-900">Custom availability</div>
+            <div className="text-[11px] text-muted-foreground">Weekly schedule</div>
+          </div>
+        </div>
+        <div className="relative">
+          <motion.button
+            ref={bufferRef}
+            type="button"
+            animate={bufferOpen ? { y: -1 } : { y: 0 }}
+            transition={{ duration: 0.2 }}
+            className="flex items-center gap-1.5 text-[11px] font-semibold text-cyan-700 rounded-full bg-cyan-50 border border-cyan-200 px-2.5 py-0.5"
+          >
+            <span>Buffer {buffer}</span>
+            <motion.span animate={bufferOpen ? { rotate: 90 } : { rotate: 0 }} transition={{ duration: 0.2 }}>
+              <Icon name="chevron-right" className="text-[9px]" />
+            </motion.span>
+          </motion.button>
+
+          <motion.div
+            initial={false}
+            animate={bufferOpen ? { opacity: 1, y: 0, pointerEvents: "auto" } : { opacity: 0, y: -6, pointerEvents: "none" }}
+            transition={{ duration: 0.18 }}
+            className="absolute right-0 top-full mt-1 z-20 w-28 rounded-xl border border-cyan-200 bg-white/95 p-1.5 shadow-lg shadow-cyan-500/10"
+            style={{ backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}
+          >
+            {["15 min", "30 min", "45 min"].map((opt) => {
+              const selected = opt === buffer;
+              return (
+                <button
+                  key={opt}
+                  ref={opt === "30 min" ? bufferOption30Ref : null}
+                  type="button"
+                  className={`w-full rounded-md px-2 py-1 text-left text-[11px] font-medium ${
+                    selected ? "bg-cyan-50 text-cyan-700" : "text-gray-600"
+                  }`}
+                >
+                  {opt}
+                </button>
+              );
+            })}
+          </motion.div>
+        </div>
+      </div>
+
+      <div className="px-4 py-3 space-y-2.5">
+        <div className="grid grid-cols-7 gap-1 text-[10px] text-center">
+          {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => {
+            const active = i < 5 && !(dayOff && i === 3);
+            return (
+              <div
+                key={`${d}-${i}`}
+                ref={i === 3 ? thursdayRef : null}
+                className={`rounded-md border py-1 font-semibold ${active ? "border-cyan-200 bg-cyan-50 text-cyan-700" : "border-gray-200 bg-gray-50 text-gray-400"}`}
+              >
+                {d}
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="relative">
+          <motion.button
+            ref={hoursRef}
+            type="button"
+            animate={hoursOpen ? { y: -1 } : { y: 0 }}
+            transition={{ duration: 0.2 }}
+            className="w-full rounded-lg border border-gray-100 bg-gray-50 px-2.5 py-2 text-[11px] flex items-center justify-between"
+          >
+            <span className="text-muted-foreground">Working hours</span>
+            <div className="flex items-center gap-1.5">
+              <motion.span key={`hours-${hoursValue}`} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="font-semibold text-gray-800">
+                {hoursValue}
+              </motion.span>
+              <motion.span animate={hoursOpen ? { rotate: 90 } : { rotate: 0 }} transition={{ duration: 0.2 }}>
+                <Icon name="chevron-right" className="text-[9px] text-muted-foreground" />
+              </motion.span>
+            </div>
+          </motion.button>
+
+          <motion.div
+            initial={false}
+            animate={hoursOpen ? { opacity: 1, y: 0, pointerEvents: "auto" } : { opacity: 0, y: -6, pointerEvents: "none" }}
+            transition={{ duration: 0.18 }}
+            className="absolute right-0 top-full mt-1 z-30 w-44 rounded-xl border border-gray-200 bg-white/95 p-1.5 shadow-lg shadow-cyan-500/10"
+            style={{ backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}
+          >
+            {["9:00 AM - 6:00 PM", "10:00 AM - 6:00 PM", "11:00 AM - 7:00 PM"].map((opt) => {
+              const selected = opt === hoursValue;
+              return (
+                <button
+                  key={opt}
+                  ref={opt === "10:00 AM - 6:00 PM" ? hoursOptionLateRef : null}
+                  type="button"
+                  className={`w-full rounded-md px-2 py-1 text-left text-[11px] font-medium ${
+                    selected ? "bg-cyan-50 text-cyan-700" : "text-gray-600"
+                  }`}
+                >
+                  {opt}
+                </button>
+              );
+            })}
+          </motion.div>
+        </div>
+
+        <div className="space-y-1">
+          <div className="text-[11px] text-muted-foreground">Preview slots</div>
+          <div className="grid grid-cols-3 gap-1.5">
+            {["9:00 AM", "10:30 AM", "2:00 PM"].map((slot, i) => {
+              const disabled = (lateStart && i === 0) || (dayOff && i === 2);
+              return (
+                <motion.div
+                  key={`${slot}-${disabled}`}
+                  initial={{ opacity: 0.6 }}
+                  animate={{ opacity: disabled ? 0.45 : 1 }}
+                  transition={{ duration: 0.2 }}
+                  className={`rounded-lg border px-1.5 py-1 text-center text-[11px] font-medium ${disabled ? "border-gray-200 bg-gray-100 text-gray-400 line-through" : "border-cyan-200 bg-white text-gray-700"}`}
+                >
+                  {slot}
+                </motion.div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      <motion.div
+        className="pointer-events-none absolute top-0 left-0 z-50 drop-shadow-sm"
+        style={{ x: cx, y: cy, scale: cScale, opacity: cOpacity, translateX: "-3px", translateY: "-2px" }}
+      >
+        <CursorSVG />
+      </motion.div>
+    </div>
+  );
+}
+
+// ─── Mockup 6: Shareable link ────────────────────────────────────────────────
+function ShareLinkMockup() {
+  const [step, setStep] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const copyRef = useRef<HTMLButtonElement>(null);
+  const whatsappRef = useRef<HTMLDivElement>(null);
+
+  const cx = useMotionValue(0);
+  const cy = useMotionValue(0);
+  const cScale = useMotionValue(1);
+  const cOpacity = useMotionValue(0);
+
+  const getPos = (el: HTMLElement | null) => {
+    if (!el || !containerRef.current) return { x: 0, y: 0 };
+    const cr = containerRef.current.getBoundingClientRect();
+    const er = el.getBoundingClientRect();
+    return { x: er.left - cr.left + er.width / 2, y: er.top - cr.top + er.height / 2 };
+  };
+
+  useEffect(() => {
+    let alive = true;
+    const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+
+    const run = async () => {
+      await sleep(1200);
+      while (alive) {
+        setStep(0);
+        cOpacity.set(0);
+        cScale.set(1);
+
+        const p0 = getPos(copyRef.current);
+        cx.set(p0.x + 18);
+        cy.set(p0.y + 22);
+        await sleep(250);
+        if (!alive) break;
+
+        await animate(cOpacity, 1, { duration: 0.22 });
+
+        // Copy link.
+        await Promise.all([
+          animate(cx, p0.x, { duration: 0.38, ease: [0.25, 0.1, 0.25, 1] }),
+          animate(cy, p0.y, { duration: 0.38, ease: [0.25, 0.1, 0.25, 1] }),
+        ]);
+        await animate(cScale, 0.68, { duration: 0.08 });
+        setStep(1);
+        await animate(cScale, 1, { duration: 0.15 });
+        await sleep(380);
+        if (!alive) break;
+
+        // Share to WhatsApp.
+        const p1 = getPos(whatsappRef.current);
+        await Promise.all([
+          animate(cx, p1.x, { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] }),
+          animate(cy, p1.y, { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] }),
+        ]);
+        await animate(cScale, 0.68, { duration: 0.08 });
+        setStep(2);
+        await animate(cScale, 1, { duration: 0.15 });
+        await sleep(500);
+        if (!alive) break;
+
+        setStep(3);
+        await sleep(680);
+        if (!alive) break;
+
+        await animate(cOpacity, 0, { duration: 0.25 });
+        await sleep(1150);
+      }
+    };
+
+    run();
+    return () => {
+      alive = false;
+    };
+  }, [cOpacity, cScale, cx, cy]);
+
+  const copied = step >= 1;
+  const sent = step >= 2;
+  const booked = step === 3;
+
+  return (
+    <div ref={containerRef} className="relative w-full max-w-xs mx-auto space-y-2.5">
+      <div className="rounded-2xl border border-white/70 bg-white/80 shadow-lg shadow-primary/10 overflow-hidden" style={{ backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}>
+        <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-2">
+          <div className="flex size-7 items-center justify-center rounded-full bg-primary/10">
+            <Icon name="share" className="text-primary text-[11px]" />
+          </div>
+          <div>
+            <div className="text-xs font-semibold text-gray-900">Shareable booking link</div>
+            <div className="text-[11px] text-muted-foreground">yourname.dinaya.lk</div>
+          </div>
+        </div>
+
+        <div className="px-4 py-3 space-y-2.5">
+          <div className="flex items-center gap-2 rounded-lg border border-primary/15 bg-primary/[0.04] px-2.5 py-2">
+            <Icon name="link-45deg" className="text-muted-foreground text-xs" />
+            <span className="text-[11px] text-gray-700 flex-1 truncate">dilini.dinaya.lk</span>
+            <motion.button
+              ref={copyRef}
+              type="button"
+              animate={copied ? { scale: [1, 0.94, 1] } : { scale: 1 }}
+              transition={{ duration: 0.22 }}
+              className={`rounded-md px-2 py-1 text-[10px] font-semibold ${
+                copied ? "bg-primary text-white" : "bg-primary/10 text-primary"
+              }`}
+            >
+              {copied ? "Copied" : "Copy"}
+            </motion.button>
+          </div>
+
+          <div className="grid grid-cols-3 gap-1.5">
+            {[
+              { icon: "whatsapp", label: "WhatsApp" },
+              { icon: "instagram", label: "Instagram" },
+              { icon: "facebook", label: "Facebook" },
+            ].map((ch, i) => {
+              const active = sent && i === 0;
+              return (
+                <motion.div
+                  key={ch.label}
+                  ref={i === 0 ? whatsappRef : null}
+                  animate={active ? { y: -2, opacity: 1 } : { y: 0, opacity: sent ? 0.65 : 1 }}
+                  transition={{ duration: 0.22 }}
+                  className={`rounded-lg border px-1.5 py-1.5 text-center ${
+                    active ? "border-primary/40 bg-primary/10" : "border-primary/15 bg-white"
+                  }`}
+                >
+                  <Icon name={ch.icon} className={`text-[11px] mx-auto ${active ? "text-primary" : "text-gray-600"}`} />
+                  <div className={`text-[10px] mt-0.5 ${active ? "text-primary font-medium" : "text-gray-600"}`}>{ch.label}</div>
+                </motion.div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      <motion.div
+        animate={booked ? { opacity: 1, y: 0 } : { opacity: sent ? 0.8 : 0.4, y: booked ? 0 : 4 }}
+        transition={{ duration: 0.25 }}
+        className="flex items-center gap-2 rounded-full border border-primary/15 bg-white/85 px-3 py-2 shadow-sm w-fit mx-auto"
+        style={{ backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}
+      >
+        <div className="flex size-5 items-center justify-center rounded-full bg-primary/10">
+          <Icon name={booked ? "calendar-check" : sent ? "send" : "link-45deg"} className="text-[10px] text-primary" />
+        </div>
+        <span className="text-xs text-gray-700 font-medium">
+          {booked ? "1 new booking from shared link" : sent ? "Shared to WhatsApp story" : "Ready to share"}
+        </span>
+      </motion.div>
+
+      <motion.div
+        className="pointer-events-none absolute top-0 left-0 z-50 drop-shadow-sm"
+        style={{ x: cx, y: cy, scale: cScale, opacity: cOpacity, translateX: "-3px", translateY: "-2px" }}
+      >
+        <CursorSVG />
+      </motion.div>
     </div>
   );
 }
@@ -350,6 +912,20 @@ const features = [
     desc: "See your full day at a glance — who's coming, what they booked, and how much you've earned.",
     mockup: <DashboardMockup />,
     mockupBg: "bg-amber-300/20",
+  },
+  {
+    num: "05", tag: "AVAILABILITY",
+    headlinePre: "Dinaya", verb: { icon: "calendar2-week", label: "adapts" }, headlinePost: "to your real working hours.",
+    desc: "Set business hours, block dates, and add buffer time. Only the slots you want are shown.",
+    mockup: <AvailabilityMockup />,
+    mockupBg: "bg-cyan-300/20",
+  },
+  {
+    num: "06", tag: "SHARING",
+    headlinePre: "Dinaya", verb: { icon: "share", label: "spreads" }, headlinePost: "your link across socials.",
+    desc: "Copy once and share everywhere. Clients tap your link from WhatsApp, Instagram, or Facebook and book instantly.",
+    mockup: <ShareLinkMockup />,
+    mockupBg: "bg-blue-300/20",
   },
 ];
 
@@ -426,7 +1002,7 @@ export function FeatureShowcase() {
           Everything your booking needs
         </h2>
         <p className="text-muted-foreground mt-3 max-w-xl mx-auto">
-          Four things that work together — so you stop chasing clients and start filling your calendar.
+          Six things that work together — so you stop chasing clients and start filling your calendar.
         </p>
       </div>
 
