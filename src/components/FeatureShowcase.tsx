@@ -411,11 +411,23 @@ function DashboardMockup() {
     { time: "16:00", name: "Nimal S.",  service: "Haircut & Style",   amount: "Rs. 2,500", color: "bg-green-100 text-green-700" },
   ];
   const showNewBooking = step >= 2;
-  const visibleBookings = showNewBooking ? bookings : bookings.slice(0, 3);
+  const visibleBookings = showNewBooking
+    ? [bookings[3], bookings[0], bookings[1], bookings[2]]
+    : bookings.slice(0, 3);
 
   return (
-    <div className="w-full max-w-xs mx-auto rounded-2xl border border-white/70 bg-white/80 shadow-lg shadow-amber-500/10 overflow-hidden relative" style={{ backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}>
-      <div className="grid grid-cols-3 divide-x border-b">
+    <div className="relative w-full max-w-xs mx-auto pt-8">
+      <motion.div
+        initial={false}
+        animate={showNewBooking ? { opacity: 1, y: 0 } : { opacity: 0, y: -6 }}
+        transition={{ duration: 0.25 }}
+        className="pointer-events-none absolute left-3 right-3 top-0 z-20 rounded-lg border border-primary/20 bg-primary/10 px-2 py-1 text-[10px] text-primary font-semibold"
+      >
+        New booking received · 16:00
+      </motion.div>
+
+      <div className="rounded-2xl border border-white/70 bg-white/80 shadow-lg shadow-amber-500/10 overflow-hidden relative h-[212px] flex flex-col" style={{ backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}>
+        <div className="grid grid-cols-3 divide-x border-b">
         {[
           { label: "Today", value: showNewBooking ? "4" : "3" },
           { label: "Revenue", value: showNewBooking ? "Rs. 9,600" : "Rs. 7,100" },
@@ -427,36 +439,52 @@ function DashboardMockup() {
           </div>
         ))}
       </div>
-      <motion.div
-        initial={false}
-        animate={showNewBooking ? { opacity: 1, y: 0, height: 30, marginTop: 8, marginBottom: 4 } : { opacity: 0, y: -6, height: 0, marginTop: 0, marginBottom: 0 }}
-        transition={{ duration: 0.25 }}
-        className="overflow-hidden px-3"
-      >
-        <div className="pointer-events-none rounded-lg border border-primary/20 bg-primary/10 px-2 py-1 text-[10px] text-primary font-semibold">
-          New booking received · 16:00
+        <div className="relative divide-y flex-1 overflow-hidden">
+          <AnimatePresence initial={false} mode="popLayout">
+            {visibleBookings.map((b, i) => {
+              const isNewest = showNewBooking && b.name === "Nimal S.";
+              const rowDelay = showNewBooking ? i * 0.03 : 0.04 + i * 0.05;
+
+              return (
+                <motion.div
+                  key={b.name}
+                  layout="position"
+                  initial={isNewest ? { opacity: 0, y: -16 } : { opacity: 0, y: 8 }}
+                  animate={
+                    isNewest
+                      ? {
+                          opacity: 1,
+                          y: 0,
+                          backgroundColor: ["rgba(37,99,235,0.14)", "rgba(37,99,235,0.06)", "rgba(37,99,235,0)"],
+                        }
+                      : { opacity: 1, y: 0, backgroundColor: "rgba(37,99,235,0)" }
+                  }
+                  exit={isNewest ? { opacity: 0, y: -8 } : { opacity: 0, y: 6 }}
+                  transition={{
+                    delay: rowDelay,
+                    duration: isNewest ? 0.42 : 0.25,
+                    ease: [0.22, 1, 0.36, 1],
+                    layout: { type: "spring", stiffness: 420, damping: 30 },
+                  }}
+                  className="relative flex items-center gap-2.5 px-3 py-2.5"
+                >
+                  {isNewest && (
+                    <span className="absolute right-2 top-2 inline-block size-1.5 rounded-full bg-primary" />
+                  )}
+                  <span className="text-[11px] font-mono text-muted-foreground w-9 shrink-0">{b.time}</span>
+                  <div className={`flex size-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${b.color}`}>
+                    {b.name[0]}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-semibold text-gray-900 truncate">{b.name}</div>
+                    <div className="text-[10px] text-muted-foreground truncate">{b.service}</div>
+                  </div>
+                  <span className="text-[11px] font-semibold text-gray-700 shrink-0">{b.amount}</span>
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
         </div>
-      </motion.div>
-      <div className="divide-y">
-        {visibleBookings.map((b, i) => (
-          <motion.div
-            key={b.name}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.04 + i * 0.05, duration: 0.25 }}
-            className="flex items-center gap-2.5 px-3 py-2.5"
-          >
-            <span className="text-[11px] font-mono text-muted-foreground w-9 shrink-0">{b.time}</span>
-            <div className={`flex size-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${b.color}`}>
-              {b.name[0]}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-xs font-semibold text-gray-900 truncate">{b.name}</div>
-              <div className="text-[10px] text-muted-foreground truncate">{b.service}</div>
-            </div>
-            <span className="text-[11px] font-semibold text-gray-700 shrink-0">{b.amount}</span>
-          </motion.div>
-        ))}
       </div>
     </div>
   );
