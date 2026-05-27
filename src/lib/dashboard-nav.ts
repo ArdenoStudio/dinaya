@@ -21,7 +21,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import type { DashboardCopy } from "@/lib/dashboard-i18n";
-import { dashboardRouteGroups } from "@/lib/dashboard-route-map";
+import { typedDashboardRouteGroups } from "@/lib/dashboard-route-map";
 import type { DashboardNavLabelKey } from "@/lib/dashboard-route-map";
 
 export type NavLinkConfig = {
@@ -59,7 +59,7 @@ const routeIcons: Record<DashboardNavLabelKey, LucideIcon> = {
   staff: UserRoundCheck,
 };
 
-export const dashboardNavGroups: NavGroupConfig[] = dashboardRouteGroups.map((group) => ({
+export const dashboardNavGroups: NavGroupConfig[] = typedDashboardRouteGroups.map((group) => ({
   labelKey: group.labelKey,
   links: group.routes.map((route) => ({
     exact: route.exact,

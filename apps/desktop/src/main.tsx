@@ -83,6 +83,32 @@ type DashboardMetrics = {
   staffOnDeck: number;
 };
 
+type ModuleMetric = {
+  detail?: string;
+  label: string;
+  tone?: "amber" | "cobalt" | "emerald" | "slate";
+  value: string | number;
+};
+
+type ModuleItem = {
+  id: string;
+  meta?: string;
+  status?: string;
+  subtitle?: string;
+  title: string;
+};
+
+type DesktopModulePayload = {
+  emptyState: string;
+  items: ModuleItem[];
+  metrics: ModuleMetric[];
+  module: string;
+  refreshedAt: string;
+  summary: string;
+  title: string;
+  webPath: string;
+};
+
 const statusLabels: Record<BookingStatus, string> = {
   cancelled: "Cancelled",
   completed: "Completed",
@@ -159,6 +185,9 @@ function App() {
   const [rows, setRows] = useState<BookingRow[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [detail, setDetail] = useState<BookingDetail | null>(null);
+  const [moduleData, setModuleData] = useState<Partial<Record<View, DesktopModulePayload>>>({});
+  const [moduleError, setModuleError] = useState("");
+  const [moduleLoading, setModuleLoading] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [lastSync, setLastSync] = useState<string | null>(null);
   const [error, setError] = useState("");
@@ -314,6 +343,26 @@ function App() {
     }
   }
 
+  async function loadModule(nextRoute: DashboardRoute) {
+    if (!nextRoute.desktopApiPath) return;
+    setModuleLoading(true);
+    setModuleError("");
+    try {
+      const next = await desktopApiRequest<DesktopModulePayload>({
+        method: "GET",
+        path: nextRoute.desktopApiPath,
+      });
+      setModuleData((current) => ({
+        ...current,
+        [nextRoute.id]: next,
+      }));
+    } catch (loadError) {
+      setModuleError(String(loadError));
+    } finally {
+      setModuleLoading(false);
+    }
+  }
+
   async function login(email: string, password: string) {
     setError("");
     const payload = await invoke<LoginPayload>("desktop_auth_login", {
@@ -346,7 +395,17 @@ function App() {
       void runSync("today");
     } else if (nextRoute.id === "bookings") {
       void runSync(tab);
+    } else if (nextRoute.id !== "settings") {
+      void loadModule(nextRoute);
     }
+  }
+
+  function refreshCurrentView() {
+    if (view === "overview" || view === "bookings" || view === "settings") {
+      void runSync(tab);
+      return;
+    }
+    void loadModule(route);
   }
 
   async function copyBookingLink() {
@@ -403,6 +462,21 @@ function App() {
     return () => unlisten?.();
   }, []);
 
+  useEffect(() => {
+    if (
+      authReady &&
+      view !== "overview" &&
+      view !== "bookings" &&
+      view !== "settings" &&
+      !moduleData[view] &&
+      !moduleLoading
+    ) {
+      void loadModule(route);
+    }
+    // Module data is loaded on route entry; filters/search do not affect these summaries.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authReady, view]);
+
   if (booting) {
     return (
       <div className="boot-screen">
@@ -441,8 +515,8 @@ function App() {
                 if (event.key === "Enter") applyGlobalSearch();
               }}
             />
-            <button className="primary small" disabled={syncing} onClick={() => void runSync(tab)}>
-              {syncing ? "Syncing..." : "Refresh"}
+            <button className="primary small" disabled={syncing || moduleLoading} onClick={refreshCurrentView}>
+              {syncing || moduleLoading ? "Syncing..." : "Refresh"}
             </button>
           </div>
         </header>
@@ -488,7 +562,14 @@ function App() {
             onLogout={logout}
           />
         ) : (
-          <NativeModulePlaceholder route={route} />
+          <ModuleWorkspace
+            data={moduleData[view]}
+            error={moduleError}
+            loading={moduleLoading}
+            route={route}
+            onOpenBrowser={() => void invoke("desktop_open_dashboard_path", { path: route.href })}
+            onRefresh={() => void loadModule(route)}
+          />
         )}
       </main>
     </div>
@@ -909,20 +990,90 @@ function BookingDetailPanel(props: {
   );
 }
 
-function NativeModulePlaceholder({ route }: { route: DashboardRoute }) {
+function ModuleWorkspace({
+  data,
+  error,
+  loading,
+  route,
+  onOpenBrowser,
+  onRefresh,
+}: {
+  data: DesktopModulePayload | undefined;
+  error: string;
+  loading: boolean;
+  route: DashboardRoute;
+  onOpenBrowser: () => void;
+  onRefresh: () => void;
+}) {
   return (
     <section className="module-view">
       <div className="module-panel glass-surface">
-        <p className="eyebrow">Phase {route.desktopPhase}</p>
-        <h2>{route.label}</h2>
-        <p>{route.summary}</p>
-        <div className="module-meta">
-          <span>{route.desktopApiPath ?? "Desktop API pending"}</span>
-          <span>{route.nativeStatus === "fallback" ? "Native screen pending" : "Native foundation"}</span>
+        <div className="module-head">
+          <div>
+            <p className="eyebrow">Native dashboard</p>
+            <h2>{data?.title ?? route.label}</h2>
+            <p>{data?.summary ?? route.summary}</p>
+          </div>
+          <div className="module-actions">
+            <button className="primary small" disabled={loading} onClick={onRefresh}>
+              {loading ? "Loading..." : "Refresh"}
+            </button>
+            <button onClick={onOpenBrowser}>Open full web page in browser</button>
+          </div>
         </div>
+
+        {error && <div className="error-banner inline">{error}</div>}
+
+        <div className="metric-grid module-metrics">
+          {(data?.metrics ?? [
+            { label: "Status", value: loading ? "Loading" : "Ready", detail: route.desktopApiPath ?? "Desktop API", tone: "cobalt" as const },
+            { label: "Phase", value: `P${route.desktopPhase}`, detail: "Native rollout", tone: "slate" as const },
+          ]).map((metricItem) => (
+            <MetricCard
+              key={metricItem.label}
+              label={metricItem.label}
+              tone={metricItem.tone ?? "slate"}
+              value={metricItem.value}
+            />
+          ))}
+        </div>
+
+        <div className="module-meta">
+          <span>{route.desktopApiPath ?? "Desktop API"}</span>
+          <span>{data ? `Synced ${formatTime(data.refreshedAt)}` : loading ? "Loading live data" : "Ready to load"}</span>
+        </div>
+
+        {loading && !data ? (
+          <div className="empty-state">Loading {route.label.toLowerCase()}...</div>
+        ) : data?.items.length ? (
+          <ul className="module-list">
+            {data.items.map((moduleItem) => (
+              <li key={moduleItem.id} className="module-list-item">
+                <div>
+                  <strong>{moduleItem.title}</strong>
+                  {moduleItem.subtitle && <span>{moduleItem.subtitle}</span>}
+                </div>
+                <div className="module-list-meta">
+                  {moduleItem.status && <span className="module-status">{moduleItem.status}</span>}
+                  {moduleItem.meta && <span>{formatModuleMeta(moduleItem.meta)}</span>}
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div className="empty-state">{data?.emptyState ?? "No data loaded yet."}</div>
+        )}
       </div>
     </section>
   );
+}
+
+function formatModuleMeta(value: string): string {
+  const parsed = new Date(value);
+  if (!Number.isNaN(parsed.getTime()) && value.includes("T")) {
+    return formatDateTime(value);
+  }
+  return value;
 }
 
 function SettingsView({

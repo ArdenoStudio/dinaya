@@ -279,7 +279,7 @@ export const dashboardRouteGroups = [
   },
 ] as const satisfies readonly DashboardRouteGroup[];
 
-const typedDashboardRouteGroups: readonly DashboardRouteGroup[] = dashboardRouteGroups;
+export const typedDashboardRouteGroups: readonly DashboardRouteGroup[] = dashboardRouteGroups;
 
 export const dashboardRoutes: readonly DashboardRoute[] = typedDashboardRouteGroups.flatMap((group) => group.routes);
 
