@@ -156,6 +156,14 @@ pub struct DesktopLoginRequest {
   pub password: String,
 }
 
+#[derive(serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DesktopApiRequest {
+  pub body: Option<serde_json::Value>,
+  pub method: String,
+  pub path: String,
+}
+
 fn keyring_entry() -> Result<Entry, String> {
   Entry::new(DESKTOP_KEY_SERVICE, DESKTOP_KEY_USERNAME).map_err(|err| err.to_string())
 }
@@ -205,6 +213,18 @@ fn desktop_api_url(path: &str) -> String {
   format!("{}{}", api_base_url(), path)
 }
 
+fn ensure_desktop_api_path(path: &str) -> Result<(), String> {
+  if !path.starts_with("/api/v1/desktop/") {
+    return Err("Desktop API bridge only allows /api/v1/desktop/* paths.".to_string());
+  }
+
+  if path.contains("://") || path.contains("\\") || path.contains("..") {
+    return Err("Desktop API bridge received an invalid path.".to_string());
+  }
+
+  Ok(())
+}
+
 async fn parse_desktop_api_response(response: reqwest::Response) -> Result<serde_json::Value, String> {
   let status = response.status();
   let text = response.text().await.map_err(|err| err.to_string())?;
@@ -232,6 +252,8 @@ async fn parse_desktop_api_response(response: reqwest::Response) -> Result<serde
 }
 
 async fn desktop_api_get(path: &str, token: &str) -> Result<serde_json::Value, String> {
+  ensure_desktop_api_path(path)?;
+
   let client = Client::new();
   let response = client
     .get(desktop_api_url(path))
@@ -249,6 +271,8 @@ async fn desktop_api_post(
   payload: serde_json::Value,
   token: Option<String>,
 ) -> Result<serde_json::Value, String> {
+  ensure_desktop_api_path(path)?;
+
   let client = Client::new();
   let mut request = client
     .post(desktop_api_url(path))
@@ -269,6 +293,8 @@ async fn desktop_api_patch(
   payload: serde_json::Value,
   token: &str,
 ) -> Result<serde_json::Value, String> {
+  ensure_desktop_api_path(path)?;
+
   let client = Client::new();
   let response = client
     .patch(desktop_api_url(path))
@@ -280,6 +306,36 @@ async fn desktop_api_patch(
     .await
     .map_err(|err| err.to_string())?;
 
+  parse_desktop_api_response(response).await
+}
+
+async fn desktop_api_request_with_method(
+  method: &str,
+  path: &str,
+  payload: Option<serde_json::Value>,
+  token: &str,
+) -> Result<serde_json::Value, String> {
+  ensure_desktop_api_path(path)?;
+
+  let client = Client::new();
+  let method = method.trim().to_ascii_uppercase();
+  let mut request = (match method.as_str() {
+    "DELETE" => client.delete(desktop_api_url(path)),
+    "GET" => client.get(desktop_api_url(path)),
+    "PATCH" => client.patch(desktop_api_url(path)),
+    "POST" => client.post(desktop_api_url(path)),
+    _ => return Err("Unsupported desktop API method.".to_string()),
+  })
+    .header(AUTHORIZATION, format!("Bearer {}", token))
+    .header("X-Dinaya-Desktop", "1");
+
+  if method != "GET" {
+    request = request
+      .header(CONTENT_TYPE, "application/json")
+      .body(payload.unwrap_or_else(|| serde_json::json!({})).to_string());
+  }
+
+  let response = request.send().await.map_err(|err| err.to_string())?;
   parse_desktop_api_response(response).await
 }
 
@@ -420,6 +476,15 @@ pub async fn desktop_logout(state: State<'_, DesktopRuntimeState>) -> Result<(),
     *active_business = None;
   }
   Ok(())
+}
+
+#[tauri::command]
+pub async fn desktop_api_request(
+  state: State<'_, DesktopRuntimeState>,
+  request: DesktopApiRequest,
+) -> Result<serde_json::Value, String> {
+  let token = load_desktop_key(&state)?;
+  desktop_api_request_with_method(&request.method, &request.path, request.body, &token).await
 }
 
 #[tauri::command]
@@ -573,6 +638,19 @@ pub fn desktop_open_booking_web(app: AppHandle, id: String) -> Result<(), String
 #[tauri::command]
 pub fn desktop_open_dashboard(app: AppHandle) -> Result<(), String> {
   open_web_dashboard(&app, None)
+}
+
+#[tauri::command]
+pub fn desktop_open_dashboard_path(app: AppHandle, path: String) -> Result<(), String> {
+  if !path.starts_with("/dashboard") {
+    return Err("Dashboard fallback path must start with /dashboard.".to_string());
+  }
+
+  if path.contains("://") || path.contains("\\") || path.contains("..") {
+    return Err("Dashboard fallback path is invalid.".to_string());
+  }
+
+  open_web_dashboard(&app, Some(&path))
 }
 
 #[tauri::command]

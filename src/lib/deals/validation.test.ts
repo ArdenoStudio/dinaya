@@ -83,7 +83,7 @@ describe("deal validation", () => {
   it("validates deal updates", () => {
     expect(() => validateDealUpdate(baseDeal, {
       slotsTotal: 6,
-      dealWindowEnd: new Date("2026-05-26T20:00:00Z"),
+      dealWindowEnd: new Date("2100-05-26T20:00:00Z"),
     })).not.toThrow();
 
     expect(() => validateDealUpdate({ ...baseDeal, slotsRedeemed: 2 }, { slotsTotal: 1 })).toThrow(DealValidationError);
