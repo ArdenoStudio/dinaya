@@ -629,10 +629,16 @@ function LoginScreen({
   error: string;
   onLogin: (email: string, password: string) => Promise<void>;
 }) {
+  const emailRef = useRef<HTMLInputElement>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [localError, setLocalError] = useState("");
+
+  useEffect(() => {
+    emailRef.current?.focus();
+  }, []);
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
@@ -649,32 +655,107 @@ function LoginScreen({
 
   return (
     <div className="login-screen">
-      <form className="login-card glass-surface" onSubmit={submit}>
-        <div className="brand compact">
-          <div className="app-mark">D</div>
-          <div>
-            <strong>Dinaya Desktop</strong>
-            <span>Business sign in</span>
+      <section className="login-story" aria-label="Dinaya">
+        <DinayaBrand />
+
+        <div className="login-story-copy">
+          <h1>
+            Your calendar,
+            <span>always full.</span>
+          </h1>
+          <p>Thousands of appointments managed. Zero phone calls needed.</p>
+
+          <ul>
+            <li><span className="story-icon calendar-icon" />Clients book 24/7 without calling you</li>
+            <li><span className="story-icon card-icon" />Accept online payments via PayHere</li>
+            <li><span className="story-icon grid-icon" />Manage everything from one dashboard</li>
+          </ul>
+
+          <div className="login-quote">
+            <p>&quot;I used to miss bookings because of WhatsApp messages I forgot to reply to. Now everything&apos;s in Dinaya and I haven&apos;t missed one since.&quot;</p>
+            <span>Kavinda Jayasuriya - Owner, The Barber Room - Kandy</span>
           </div>
         </div>
-        <label>
-          Email
-          <input autoComplete="email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} />
-        </label>
-        <label>
-          Password
-          <input
-            autoComplete="current-password"
-            type="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-          />
-        </label>
-        {(localError || error) && <div className="error-banner inline">{localError || error}</div>}
-        <button className="primary" disabled={loading} type="submit">
-          {loading ? "Signing in..." : "Sign in"}
-        </button>
-      </form>
+
+        <p className="login-copyright">© {new Date().getFullYear()} Dinaya by Ardeno Studio</p>
+      </section>
+
+      <section className="login-form-panel">
+        <form className="login-card" onSubmit={submit}>
+          <div>
+            <h2>Welcome back</h2>
+            <p>Sign in to your dashboard</p>
+          </div>
+
+          <label>
+            Email
+            <input
+              ref={emailRef}
+              autoComplete="email"
+              inputMode="email"
+              placeholder="you@example.com"
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+            />
+          </label>
+          <label>
+            <span className="label-row">
+              Password
+              <button type="button" onClick={() => void invoke("desktop_open_app_path", { path: "/forgot-password" })}>
+                Forgot password?
+              </button>
+            </span>
+            <span className="password-field">
+              <input
+                autoComplete="current-password"
+                placeholder="••••••••"
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+              />
+              <button
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                type="button"
+                onClick={() => setShowPassword((current) => !current)}
+              >
+                {showPassword ? "Hide" : "Show"}
+              </button>
+            </span>
+          </label>
+          {(localError || error) && <div className="error-banner inline">{localError || error}</div>}
+          <button className="primary login-submit" disabled={loading} type="submit">
+            {loading ? "Signing in..." : "Sign in"}
+          </button>
+
+          <div className="secure-line">Secure sign-in · Your data is encrypted</div>
+        </form>
+
+        <p className="register-line">
+          No account?{" "}
+          <button type="button" onClick={() => void invoke("desktop_open_app_path", { path: "/register" })}>
+            Create one free
+          </button>
+        </p>
+      </section>
+    </div>
+  );
+}
+
+function DinayaBrand() {
+  return (
+    <div className="login-brand">
+      <svg
+        aria-hidden="true"
+        fill="currentColor"
+        height="30"
+        viewBox="318 319 875 866"
+        width="30"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path d="M 819.949219 499.695312 L 563.980469 755.773438 C 513.210938 806.554688 513.210938 889.15625 563.980469 939.941406 C 614.75 990.777344 697.378906 990.726562 748.09375 939.941406 L 966.117188 721.851562 C 982.484375 705.480469 982.484375 678.953125 966.117188 662.582031 C 949.75 646.207031 923.230469 646.207031 906.863281 662.582031 L 688.84375 880.671875 C 670.753906 898.707031 641.375 898.761719 623.234375 880.671875 C 605.144531 862.578125 605.144531 833.132812 623.234375 815.042969 L 879.203125 558.96875 C 931.742188 506.464844 1017.1875 506.464844 1069.671875 558.96875 C 1095.097656 584.425781 1109.117188 618.265625 1109.117188 654.257812 C 1109.117188 690.226562 1095.097656 724.0625 1069.671875 749.523438 L 782.496094 1036.789062 C 740.375 1078.921875 684.367188 1102.117188 624.816406 1102.117188 C 565.261719 1102.117188 509.285156 1078.921875 467.164062 1036.789062 C 380.222656 949.820312 380.222656 808.328125 467.164062 721.359375 L 797.144531 391.253906 C 813.511719 374.878906 813.511719 348.355469 797.144531 331.980469 C 780.773438 315.609375 754.257812 315.609375 737.890625 331.980469 L 407.910156 662.089844 C 288.285156 781.722656 288.285156 976.425781 407.910156 1096.058594 C 465.828125 1154.019531 542.867188 1185.945312 624.816406 1185.945312 C 706.765625 1185.945312 783.804688 1154.019531 841.746094 1096.058594 L 1128.925781 808.792969 C 1214.121094 723.570312 1214.121094 584.917969 1128.925781 499.695312 C 1043.78125 414.558594 905.144531 414.445312 819.949219 499.695312 Z" />
+      </svg>
+      <strong>Dinaya.lk</strong>
     </div>
   );
 }

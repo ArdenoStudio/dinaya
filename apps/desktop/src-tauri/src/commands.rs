@@ -652,6 +652,20 @@ pub fn desktop_open_dashboard_path(app: AppHandle, path: String) -> Result<(), S
 }
 
 #[tauri::command]
+pub fn desktop_open_app_path(app: AppHandle, path: String) -> Result<(), String> {
+  let allowed = ["/auth/signin", "/forgot-password", "/register", "/dashboard"];
+  if !allowed.iter().any(|prefix| path == *prefix || path.starts_with(&format!("{}/", prefix))) {
+    return Err("App browser path is not allowed.".to_string());
+  }
+
+  if path.contains("://") || path.contains("\\") || path.contains("..") || path.starts_with("//") {
+    return Err("App browser path is invalid.".to_string());
+  }
+
+  open_web_dashboard(&app, Some(&path))
+}
+
+#[tauri::command]
 pub fn desktop_take_pending_booking(
   state: State<'_, DesktopRuntimeState>,
 ) -> Result<Option<String>, String> {

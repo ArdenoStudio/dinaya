@@ -20,6 +20,7 @@
   --radius: 8px;
   --motion-fast: 140ms;
   --motion-panel: 260ms;
+  --motion-soft: cubic-bezier(0.2, 0.8, 0.2, 1);
   color: var(--text);
   font-family: Inter, "Segoe UI", system-ui, -apple-system, sans-serif;
   background: var(--canvas);
@@ -70,6 +71,7 @@ button {
 button:hover {
   border-color: #aebdd0;
   box-shadow: 0 8px 22px rgba(20, 32, 51, 0.08);
+  transform: translateY(-1px);
 }
 
 button:active {
@@ -120,9 +122,42 @@ button:focus-visible {
   }
 }
 
+@keyframes login-copy-enter {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes login-card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes surface-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .primary {
   border-color: var(--cobalt);
-  background: var(--cobalt);
+  background: linear-gradient(180deg, #3678f2 0%, var(--cobalt) 100%);
   color: #fff;
   font-weight: 700;
 }
@@ -151,6 +186,9 @@ button:focus-visible {
 .login-screen {
   display: grid;
   min-height: 100vh;
+}
+
+.boot-screen {
   place-items: center;
   background:
     linear-gradient(135deg, rgba(31, 100, 224, 0.08), transparent 40%),
@@ -162,20 +200,255 @@ button:focus-visible {
   margin: 12px 0 0;
 }
 
+.login-screen {
+  grid-template-columns: minmax(470px, 52%) minmax(420px, 1fr);
+  background: #f5f4f1;
+}
+
+.login-story {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  overflow: hidden;
+  background:
+    radial-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(145deg, #050d1f 0%, #070b18 58%, #09080f 100%);
+  background-size: 22px 22px, auto;
+  color: #fff;
+  padding: 46px 56px;
+}
+
+.login-story::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(120deg, rgba(31, 100, 224, 0.18), transparent 42%),
+    linear-gradient(320deg, rgba(245, 158, 11, 0.08), transparent 30%);
+  pointer-events: none;
+}
+
+.login-brand,
+.login-story-copy,
+.login-copyright {
+  position: relative;
+  z-index: 1;
+}
+
+.login-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #fff;
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.login-story-copy {
+  align-self: center;
+  max-width: 600px;
+  animation: login-copy-enter 520ms var(--motion-soft) both;
+}
+
+.login-story-copy h1 {
+  margin: 0 0 12px;
+  font-size: 39px;
+  line-height: 1.14;
+}
+
+.login-story-copy h1 span {
+  display: block;
+  color: #2f6df2;
+}
+
+.login-story-copy > p {
+  margin: 0 0 28px;
+  color: rgba(255, 255, 255, 0.42);
+  font-size: 14px;
+}
+
+.login-story-copy ul {
+  display: grid;
+  gap: 14px;
+  list-style: none;
+  margin: 0 0 38px;
+  padding: 0;
+}
+
+.login-story-copy li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 14px;
+}
+
+.story-icon {
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  border: 1.5px solid #2f6df2;
+  border-radius: 3px;
+  flex: 0 0 auto;
+}
+
+.card-icon {
+  height: 10px;
+}
+
+.grid-icon {
+  background:
+    linear-gradient(#2f6df2, #2f6df2) 50% 0 / 1px 100% no-repeat,
+    linear-gradient(90deg, #2f6df2, #2f6df2) 0 50% / 100% 1px no-repeat;
+}
+
+.login-quote {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 16px 18px;
+}
+
+.login-quote p {
+  margin: 0 0 10px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 12px;
+  font-style: italic;
+  font-weight: 700;
+  line-height: 1.6;
+}
+
+.login-quote span,
+.login-copyright {
+  color: rgba(255, 255, 255, 0.24);
+  font-size: 12px;
+}
+
+.login-form-panel {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  padding: 48px 28px;
+}
+
 .login-card {
   display: grid;
-  width: 380px;
-  gap: 16px;
-  border-radius: 12px;
-  padding: 24px;
+  width: 384px;
+  gap: 17px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 8px 32px rgba(0, 0, 0, 0.07);
+  padding: 32px 28px;
+  animation: login-card-enter 460ms var(--motion-soft) both;
+}
+
+.login-card h2 {
+  margin: 0 0 4px;
+  color: #071427;
+  font-size: 24px;
+}
+
+.login-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
 }
 
 .login-card label {
   display: grid;
   gap: 7px;
-  color: var(--slate);
+  color: #334155;
   font-size: 13px;
   font-weight: 700;
+}
+
+.login-card input {
+  min-height: 42px;
+  border-color: #dbe3ef;
+  border-radius: 8px;
+  background: #fff;
+  padding: 9px 11px;
+}
+
+.login-card input:focus {
+  background: #f9fbff;
+}
+
+.label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.label-row button,
+.register-line button,
+.password-field button {
+  min-height: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+}
+
+.label-row button,
+.register-line button {
+  color: var(--cobalt);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.label-row button {
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.label-row button:hover,
+.register-line button:hover,
+.password-field button:hover {
+  box-shadow: none;
+  transform: none;
+}
+
+.password-field {
+  position: relative;
+  display: block;
+}
+
+.password-field input {
+  padding-right: 58px;
+}
+
+.password-field button {
+  position: absolute;
+  top: 50%;
+  right: 11px;
+  color: #94a3b8;
+  font-size: 11px;
+  font-weight: 800;
+  transform: translateY(-50%);
+}
+
+.password-field button:hover {
+  color: var(--cobalt);
+}
+
+.login-submit {
+  min-height: 47px;
+  border-radius: 9px;
+  box-shadow: 0 7px 18px rgba(31, 100, 224, 0.2);
+}
+
+.secure-line {
+  justify-self: center;
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.register-line {
+  margin: 20px 0 0;
+  color: #94a3b8;
+  font-size: 14px;
 }
 
 .app-mark {
@@ -226,6 +499,7 @@ button:focus-visible {
     var(--canvas);
   padding: 12px;
   gap: 12px;
+  animation: surface-enter 360ms var(--motion-soft) both;
 }
 
 .sidebar {
@@ -260,6 +534,7 @@ button:focus-visible {
 }
 
 .nav-group button {
+  position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
@@ -269,6 +544,21 @@ button:focus-visible {
   background: transparent;
   color: var(--slate);
   text-align: left;
+  overflow: hidden;
+}
+
+.nav-group button::before {
+  content: "";
+  position: absolute;
+  inset: 7px auto 7px 0;
+  width: 3px;
+  border-radius: 999px;
+  background: var(--cobalt);
+  opacity: 0;
+  transform: translateX(-6px);
+  transition:
+    opacity var(--motion-fast) ease,
+    transform var(--motion-fast) ease;
 }
 
 .nav-group button span:first-child {
@@ -280,6 +570,7 @@ button:focus-visible {
 .nav-group button:hover {
   background: rgba(255, 255, 255, 0.72);
   box-shadow: none;
+  transform: none;
 }
 
 .nav-group button.active {
@@ -287,6 +578,11 @@ button:focus-visible {
   background: rgba(31, 100, 224, 0.1);
   color: var(--cobalt-deep);
   font-weight: 750;
+}
+
+.nav-group button.active::before {
+  opacity: 1;
+  transform: translateX(0);
 }
 
 .route-state {
@@ -322,6 +618,7 @@ button:focus-visible {
   gap: 18px;
   border-radius: 14px;
   padding: 14px 16px;
+  animation: surface-enter 300ms var(--motion-soft) both;
 }
 
 .topbar-title {
@@ -361,6 +658,7 @@ button:focus-visible {
   min-height: 0;
   gap: 12px;
   padding-top: 12px;
+  animation: surface-enter 320ms var(--motion-soft) both;
 }
 
 .overview-main {
@@ -458,6 +756,16 @@ button:focus-visible {
   background: var(--panel);
   padding: 15px;
   position: relative;
+  transition:
+    border-color var(--motion-fast) ease,
+    box-shadow var(--motion-fast) ease,
+    transform var(--motion-fast) ease;
+}
+
+.metric-card:hover {
+  border-color: #c3d2e8;
+  box-shadow: 0 12px 28px rgba(20, 32, 51, 0.08);
+  transform: translateY(-2px);
 }
 
 .metric-card::before {
@@ -515,6 +823,7 @@ button:focus-visible {
   min-height: 0;
   gap: 12px;
   padding-top: 12px;
+  animation: surface-enter 320ms var(--motion-soft) both;
 }
 
 .list-pane {
@@ -570,6 +879,14 @@ button:focus-visible {
   background: #fff;
   text-align: left;
   padding: 11px;
+  transition:
+    border-color var(--motion-fast) ease,
+    box-shadow var(--motion-fast) ease,
+    transform var(--motion-fast) ease;
+}
+
+.booking-row:hover {
+  transform: translateY(-1px);
 }
 
 .booking-row.selected {
@@ -685,6 +1002,7 @@ dd {
   min-height: 0;
   place-items: start center;
   padding-top: 12px;
+  animation: surface-enter 320ms var(--motion-soft) both;
 }
 
 .module-panel,
@@ -756,6 +1074,16 @@ dd {
   border-radius: 12px;
   background: #fff;
   padding: 12px;
+  transition:
+    border-color var(--motion-fast) ease,
+    box-shadow var(--motion-fast) ease,
+    transform var(--motion-fast) ease;
+}
+
+.module-list-item:hover {
+  border-color: #c3d2e8;
+  box-shadow: 0 10px 24px rgba(20, 32, 51, 0.07);
+  transform: translateY(-1px);
 }
 
 .module-list-item > div:first-child {

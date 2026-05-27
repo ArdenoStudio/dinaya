@@ -29,6 +29,7 @@ fn main() {
       commands::desktop_open_booking_web,
       commands::desktop_open_dashboard,
       commands::desktop_open_dashboard_path,
+      commands::desktop_open_app_path,
       commands::desktop_take_pending_booking,
       commands::desktop_log_event,
     ])
