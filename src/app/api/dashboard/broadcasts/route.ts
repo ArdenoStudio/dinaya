@@ -7,11 +7,11 @@ import {
   BROADCAST_AUDIENCE_TYPES,
   BROADCAST_CHANNELS,
   countMatchingRecipients,
-  listBroadcastsForBusiness,
   sendBroadcast,
   serializeBroadcast,
   type BroadcastAudienceFilter,
 } from "@/lib/broadcasts";
+import { getBroadcastsDashboardList } from "@/lib/dashboard/broadcasts";
 import { PlanRequiredError, requirePro } from "@/lib/plan";
 import { withApiHandler } from "@/lib/api-handler";
 import { z } from "@/lib/validation";
@@ -52,8 +52,8 @@ export async function GET(req: NextRequest) {
   const accessError = await requireBroadcastAccess(businessId);
   if (accessError) return accessError;
 
-  const rows = await listBroadcastsForBusiness(businessId);
-  return NextResponse.json(rows.map(serializeBroadcast));
+  const broadcastsList = await getBroadcastsDashboardList(businessId, { limit: 200 });
+  return NextResponse.json(broadcastsList.rows);
 }
 
 export async function POST(req: NextRequest) {

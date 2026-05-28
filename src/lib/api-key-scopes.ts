@@ -3,6 +3,7 @@ export const API_KEY_SCOPES = [
   "bookings:write",
   "desktop:read",
   "desktop:bookings",
+  "desktop:write",
   "voice:read",
   "voice:write",
 ] as const;

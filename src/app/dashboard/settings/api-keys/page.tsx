@@ -1,5 +1,5 @@
 import { requireOwner } from "@/lib/auth";
-import { ProGate } from "@/lib/plan";
+import { ProGate } from "@/components/ProGate";
 import { ApiKeysClient } from "@/components/dashboard/ApiKeysClient";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
 

@@ -1,4 +1,4 @@
-import { ProGate } from "@/lib/plan";
+import { ProGate } from "@/components/ProGate";
 import AiHubClient from "./AiHubClient";
 
 export default async function AiHubPage() {

@@ -1,11 +1,10 @@
 import Link from "next/link";
-import { ProGate } from "@/lib/plan";
+import { ProGate } from "@/components/ProGate";
 import { requireOwner } from "@/lib/auth";
 import { db } from "@/db";
 import { businesses } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { listBusinessDeals } from "@/lib/deals/queries";
-import { getDealDisplayStatus } from "@/lib/deals/validation";
+import { getDealsDashboardList } from "@/lib/dashboard/deals";
 import { DealsClient } from "@/components/dashboard/DealsClient";
 import { DealSuggestionsCard } from "@/components/dashboard/DealSuggestionsCard";
 import { EmptyState } from "@/components/dashboard/EmptyState";
@@ -15,8 +14,8 @@ import { Tag } from "lucide-react";
 export default async function DealsPage() {
   const { businessId } = await requireOwner();
 
-  const [rawDeals, [business]] = await Promise.all([
-    listBusinessDeals(businessId),
+  const [dealsData, [business]] = await Promise.all([
+    getDealsDashboardList(businessId, { limit: 200 }),
     db
       .select({ directoryListed: businesses.directoryListed })
       .from(businesses)
@@ -24,10 +23,7 @@ export default async function DealsPage() {
       .limit(1),
   ]);
 
-  const deals = rawDeals.map((deal) => ({
-    ...deal,
-    displayStatus: getDealDisplayStatus(deal),
-  }));
+  const deals = dealsData.rows;
 
   return (
     <ProGate businessId={businessId} feature="deals">

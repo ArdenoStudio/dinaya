@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import type { Session } from "next-auth";
 import { auth } from "@/auth";
 import { isPlatformAdmin as isPlatformAdminAsync } from "@/lib/platform-admin-members";
 
@@ -7,6 +8,8 @@ export type PlatformAdminContext = {
   userId: string;
   name?: string | null;
 };
+
+type AuthSession = Session | null;
 
 /** @deprecated Use async isPlatformAdmin from platform-admin-members */
 export function isPlatformAdmin(email?: string | null): boolean {
@@ -19,8 +22,7 @@ export function isPlatformAdmin(email?: string | null): boolean {
     .includes(email.toLowerCase());
 }
 
-export async function getPlatformAdminContext(): Promise<PlatformAdminContext | null> {
-  const session = await auth();
+async function resolvePlatformAdminContext(session: AuthSession): Promise<PlatformAdminContext | null> {
   const email = session?.user?.email;
   const userId = session?.user?.id;
   if (!email || !userId) return null;
@@ -28,10 +30,20 @@ export async function getPlatformAdminContext(): Promise<PlatformAdminContext | 
   return { email, userId, name: session.user.name };
 }
 
-export async function requirePlatformAdmin(): Promise<PlatformAdminContext> {
-  const ctx = await getPlatformAdminContext();
+export async function getPlatformAdminContext(): Promise<PlatformAdminContext | null> {
+  return resolvePlatformAdminContext(await auth());
+}
+
+export async function requirePlatformAdminFromSession(
+  session: AuthSession,
+): Promise<PlatformAdminContext> {
+  const ctx = await resolvePlatformAdminContext(session);
   if (!ctx) {
     redirect("/auth/signin?callbackUrl=/admin");
   }
   return ctx;
+}
+
+export async function requirePlatformAdmin(): Promise<PlatformAdminContext> {
+  return requirePlatformAdminFromSession(await auth());
 }

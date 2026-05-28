@@ -1,5 +1,5 @@
 import { requireOwner } from "@/lib/auth";
-import { ProGate } from "@/lib/plan";
+import { ProGate } from "@/components/ProGate";
 import { WebhooksClient } from "@/components/dashboard/WebhooksClient";
 
 export default async function WebhooksPage() {

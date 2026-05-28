@@ -99,7 +99,7 @@ describe("POST /api/v1/desktop/auth/login", () => {
       expect.objectContaining({
         businessId: "biz_1",
         keyType: "desktop",
-        scopes: ["desktop:read", "desktop:bookings"],
+        scopes: ["desktop:read", "desktop:bookings", "desktop:write"],
       }),
     );
   });

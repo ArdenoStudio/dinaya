@@ -3,6 +3,7 @@ import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { reviews } from "@/db/schema";
 import { requireApiBusiness } from "@/lib/api-auth";
+import { updateReviewDashboardFields } from "@/lib/dashboard/reviews";
 import { PlanRequiredError, requirePro } from "@/lib/plan";
 import { withApiHandler } from "@/lib/api-handler";
 import { z } from "@/lib/validation";
@@ -28,17 +29,6 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
       return NextResponse.json({ error: "Invalid review update." }, { status: 400 });
     }
 
-    const updates: {
-      isPublished?: boolean;
-      ownerReply?: string | null;
-      ownerRepliedAt?: Date | null;
-      ownerReplySource?: string | null;
-    } = {};
-
-    if (parsed.data.isPublished !== undefined) {
-      updates.isPublished = Boolean(parsed.data.isPublished);
-    }
-
     if (parsed.data.ownerReply !== undefined) {
       try {
         await requirePro(businessId, "reviewReplies");
@@ -48,18 +38,9 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
         }
         throw error;
       }
-
-      const reply = parsed.data.ownerReply?.trim() || null;
-      updates.ownerReply = reply;
-      updates.ownerRepliedAt = reply ? new Date() : null;
-      updates.ownerReplySource = reply ? "manual" : null;
     }
 
-    const [updated] = await db
-      .update(reviews)
-      .set(updates)
-      .where(and(eq(reviews.id, id), eq(reviews.businessId, businessId)))
-      .returning();
+    const updated = await updateReviewDashboardFields(businessId, id, parsed.data);
 
     if (!updated) return NextResponse.json({ error: "Not found." }, { status: 404 });
     return NextResponse.json(updated);

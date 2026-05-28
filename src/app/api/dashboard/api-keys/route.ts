@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
       (scope) => scope === "voice:read" || scope === "voice:write",
     );
     const needsDesktopScopes = parsed.data.scopes.some(
-      (scope) => scope === "desktop:read" || scope === "desktop:bookings",
+      (scope) => scope === "desktop:read" || scope === "desktop:bookings" || scope === "desktop:write",
     );
 
     try {

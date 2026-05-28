@@ -1,10 +1,11 @@
 "use server";
 
+import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { businesses } from "@/db/schema";
-import { requirePlatformAdmin } from "@/lib/platform-admin";
+import { requirePlatformAdminFromSession } from "@/lib/platform-admin";
 import { logAdminEvent } from "@/lib/admin-audit";
 
 export type ModerationResult = { ok: true } | { ok: false; error: string };
@@ -25,7 +26,8 @@ async function getBusiness(businessId: string) {
 }
 
 export async function suspendAccount(businessId: string): Promise<ModerationResult> {
-  const admin = await requirePlatformAdmin();
+  const session = await auth();
+  const admin = await requirePlatformAdminFromSession(session);
   const biz = await getBusiness(businessId);
 
   if (!biz) {
@@ -56,7 +58,8 @@ export async function suspendAccount(businessId: string): Promise<ModerationResu
 }
 
 export async function unsuspendAccount(businessId: string): Promise<ModerationResult> {
-  const admin = await requirePlatformAdmin();
+  const session = await auth();
+  const admin = await requirePlatformAdminFromSession(session);
   const biz = await getBusiness(businessId);
 
   if (!biz) {
@@ -87,7 +90,8 @@ export async function unsuspendAccount(businessId: string): Promise<ModerationRe
 }
 
 export async function softDeleteAccount(businessId: string): Promise<ModerationResult> {
-  const admin = await requirePlatformAdmin();
+  const session = await auth();
+  const admin = await requirePlatformAdminFromSession(session);
   const biz = await getBusiness(businessId);
 
   if (!biz) {

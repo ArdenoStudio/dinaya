@@ -1,0 +1,25 @@
+import type { PlanFeature } from "@/lib/plan";
+
+export const PLAN_FEATURE_ORDER: readonly PlanFeature[] = [
+  "publicBookingPage",
+  "publicBookingPageCustomization",
+  "reviews",
+  "reviewReplies",
+  "reviewEngine",
+  "payments",
+  "whatsappSms",
+  "smartReminderSystem",
+  "automations",
+  "deals",
+  "aiBookingAutopilot",
+  "aiDealSuggestions",
+  "broadcasts",
+  "clientReactivationCampaign",
+  "aiUpsellAssistant",
+  "aiContentMachine",
+  "vipLoyaltySequence",
+  "aiVoiceReceptionist",
+  "googleCalendarSync",
+  "reports",
+  "webhooks",
+] as const;

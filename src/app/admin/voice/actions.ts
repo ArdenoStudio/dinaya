@@ -1,11 +1,12 @@
 "use server";
 
+import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { voiceIntegrations } from "@/db/schema";
 import { logAdminEvent } from "@/lib/admin-audit";
-import { requirePlatformAdmin } from "@/lib/platform-admin";
+import { requirePlatformAdminFromSession } from "@/lib/platform-admin";
 import { isVoiceReceptionistStatus } from "@/lib/voice-receptionist";
 
 function value(formData: FormData, key: string): string | null {
@@ -14,7 +15,8 @@ function value(formData: FormData, key: string): string | null {
 }
 
 export async function updateVoiceIntegration(formData: FormData): Promise<void> {
-  const admin = await requirePlatformAdmin();
+  const session = await auth();
+  const admin = await requirePlatformAdminFromSession(session);
   const id = value(formData, "id");
   const status = value(formData, "status");
   if (!id || !status || !isVoiceReceptionistStatus(status)) {

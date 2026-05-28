@@ -7,18 +7,70 @@ import { exchangeGoogleCode, GOOGLE_PROVIDER } from "@/lib/google-calendar";
 import { verifyGoogleOAuthState } from "@/lib/google-oauth-state";
 import { encryptSecret } from "@/lib/secrets";
 
+function appUrlFor(req: NextRequest): string {
+  return process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ?? req.nextUrl.origin;
+}
+
+function integrationRedirect(req: NextRequest, status: "connected" | "error") {
+  return NextResponse.redirect(
+    `${appUrlFor(req)}/dashboard/settings/integrations?google=${status}`,
+  );
+}
+
+function escapeHtml(value: string): string {
+  return value.replace(/[&<>"']/g, (char) => {
+    switch (char) {
+      case "&":
+        return "&amp;";
+      case "<":
+        return "&lt;";
+      case ">":
+        return "&gt;";
+      case '"':
+        return "&quot;";
+      case "'":
+        return "&#39;";
+      default:
+        return char;
+    }
+  });
+}
+
+function renderPostBridge(req: NextRequest, code: string, state: string): Response {
+  const actionUrl = `${appUrlFor(req)}/api/dashboard/integrations/google/callback`;
+  return new Response(
+    `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Connecting Google Calendar</title><meta name="viewport" content="width=device-width,initial-scale=1"></head><body><form method="post" action="${escapeHtml(actionUrl)}"><input type="hidden" name="code" value="${escapeHtml(code)}"><input type="hidden" name="state" value="${escapeHtml(state)}"><noscript><button type="submit">Continue</button></noscript></form><script>document.forms[0].submit();</script></body></html>`,
+    {
+      headers: {
+        "Cache-Control": "no-store",
+        "Content-Security-Policy":
+          "default-src 'none'; script-src 'unsafe-inline'; form-action 'self'; base-uri 'none'",
+        "Content-Type": "text/html; charset=utf-8",
+        "Referrer-Policy": "no-referrer",
+      },
+    },
+  );
+}
+
 export async function GET(req: NextRequest) {
   const code = req.nextUrl.searchParams.get("code");
   const state = req.nextUrl.searchParams.get("state");
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ?? req.nextUrl.origin;
 
   if (!code || !state) {
-    return NextResponse.redirect(`${appUrl}/dashboard/settings/integrations?google=error`);
+    return integrationRedirect(req, "error");
+  }
+
+  return renderPostBridge(req, code, state);
+}
+
+async function completeGoogleOAuth(req: NextRequest, code: string | null, state: string | null) {
+  if (!code || !state) {
+    return integrationRedirect(req, "error");
   }
 
   const statePayload = verifyGoogleOAuthState(state);
   if (!statePayload) {
-    return NextResponse.redirect(`${appUrl}/dashboard/settings/integrations?google=error`);
+    return integrationRedirect(req, "error");
   }
 
   const session = await auth();
@@ -33,7 +85,7 @@ export async function GET(req: NextRequest) {
     businessId !== statePayload.businessId ||
     userId !== statePayload.userId
   ) {
-    return NextResponse.redirect(`${appUrl}/dashboard/settings/integrations?google=error`);
+    return integrationRedirect(req, "error");
   }
 
   try {
@@ -76,8 +128,15 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    return NextResponse.redirect(`${appUrl}/dashboard/settings/integrations?google=connected`);
+    return integrationRedirect(req, "connected");
   } catch {
-    return NextResponse.redirect(`${appUrl}/dashboard/settings/integrations?google=error`);
+    return integrationRedirect(req, "error");
   }
+}
+
+export async function POST(req: NextRequest) {
+  const formData = await req.formData();
+  const code = String(formData.get("code") ?? "");
+  const state = String(formData.get("state") ?? "");
+  return completeGoogleOAuth(req, code, state);
 }
