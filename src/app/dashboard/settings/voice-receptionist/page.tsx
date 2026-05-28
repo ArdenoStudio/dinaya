@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { requireOwner } from "@/lib/auth";
-import { ProGate } from "@/lib/plan";
+import { ProGate } from "@/components/ProGate";
 import { VoiceReceptionistClient } from "@/components/dashboard/VoiceReceptionistClient";
 
 export default async function VoiceReceptionistPage() {

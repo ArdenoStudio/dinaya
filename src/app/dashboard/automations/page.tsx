@@ -1,23 +1,11 @@
-import { ProGate } from "@/lib/plan";
+import { ProGate } from "@/components/ProGate";
 import { requireOwner } from "@/lib/auth";
-import { db } from "@/db";
-import { automationRules } from "@/db/schema";
-import { desc, eq } from "drizzle-orm";
+import { getAutomationsDashboardList } from "@/lib/dashboard/automations";
 import { AutomationsClient } from "@/components/dashboard/AutomationsClient";
 
 export default async function AutomationsPage() {
   const { businessId } = await requireOwner();
-  const rules = await db
-    .select({
-      id: automationRules.id,
-      name: automationRules.name,
-      trigger: automationRules.trigger,
-      delayMinutes: automationRules.delayMinutes,
-      isActive: automationRules.isActive,
-    })
-    .from(automationRules)
-    .where(eq(automationRules.businessId, businessId))
-    .orderBy(desc(automationRules.createdAt));
+  const rules = await getAutomationsDashboardList(businessId, { limit: 200 });
 
   return (
     <ProGate businessId={businessId} feature="automations">
@@ -28,7 +16,7 @@ export default async function AutomationsPage() {
             Start with reminder and follow-up templates. Rules run automatically on booking events; delayed steps are processed every 15 minutes.
           </p>
         </div>
-        <AutomationsClient initialRules={rules} />
+        <AutomationsClient initialRules={rules.rows} />
       </div>
     </ProGate>
   );

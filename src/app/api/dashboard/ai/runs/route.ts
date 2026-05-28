@@ -1,8 +1,6 @@
 import {NextResponse, NextRequest} from "next/server";
-import { desc, eq } from "drizzle-orm";
-import { db } from "@/db";
-import { aiWorkflowRuns } from "@/db/schema";
 import { requireApiBusiness } from "@/lib/api-auth";
+import { getAiWorkflowRunsDashboardList } from "@/lib/dashboard/ai";
 import { PlanRequiredError, requirePro } from "@/lib/plan";
 
 export async function GET(req: NextRequest) {
@@ -19,12 +17,7 @@ export async function GET(req: NextRequest) {
     throw error;
   }
 
-  const runs = await db
-    .select()
-    .from(aiWorkflowRuns)
-    .where(eq(aiWorkflowRuns.businessId, businessId))
-    .orderBy(desc(aiWorkflowRuns.createdAt))
-    .limit(100);
+  const runs = await getAiWorkflowRunsDashboardList(businessId, { limit: 100 });
 
-  return NextResponse.json({ runs });
+  return NextResponse.json({ runs: runs.rows });
 }

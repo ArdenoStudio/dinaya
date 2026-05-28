@@ -10,6 +10,7 @@ import {
   type PlanFeature,
 } from "@/lib/plan";
 import { safeAdminQuery } from "@/lib/admin-db";
+import { PLAN_FEATURE_ORDER } from "@/lib/plan-feature-order";
 import { formatLkr } from "@/lib/utils";
 import { requirePlatformAdmin } from "@/lib/platform-admin";
 import { resetPlansToDefaults, savePlans } from "./actions";
@@ -39,30 +40,6 @@ const FEATURE_LABELS: Record<PlanFeature, string> = {
   webhooks: "Webhooks and API",
   whatsappSms: "WhatsApp and SMS reminders",
 };
-
-const FEATURE_ORDER: PlanFeature[] = [
-  "publicBookingPage",
-  "publicBookingPageCustomization",
-  "reviews",
-  "reviewReplies",
-  "reviewEngine",
-  "payments",
-  "whatsappSms",
-  "smartReminderSystem",
-  "automations",
-  "deals",
-  "aiBookingAutopilot",
-  "aiDealSuggestions",
-  "broadcasts",
-  "clientReactivationCampaign",
-  "aiUpsellAssistant",
-  "aiContentMachine",
-  "vipLoyaltySequence",
-  "aiVoiceReceptionist",
-  "googleCalendarSync",
-  "reports",
-  "webhooks",
-];
 
 function isEnforced(f: PlanFeature): boolean {
   return ENFORCED_FEATURES.includes(f);
@@ -339,7 +316,7 @@ export default async function AdminPlansPage() {
                     Features
                   </p>
                   <ul className="space-y-1.5">
-                    {FEATURE_ORDER.map((f) => {
+                    {PLAN_FEATURE_ORDER.map((f) => {
                       const on = entitlements.features[f];
                       const enforced = isEnforced(f);
                       return (

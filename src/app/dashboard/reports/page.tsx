@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { bookings, clients, payments, reviews, services, staff } from "@/db/schema";
-import { ProGate } from "@/lib/plan";
+import { ProGate } from "@/components/ProGate";
 import { requireBusiness } from "@/lib/auth";
 import { formatLkr } from "@/lib/utils";
 import { AnalyticsCharts } from "@/components/dashboard/AnalyticsCharts";

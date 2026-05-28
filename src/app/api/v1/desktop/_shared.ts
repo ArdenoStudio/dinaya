@@ -35,3 +35,12 @@ export async function requireDesktopBookings(req: NextRequest) {
   }
   return keyResult;
 }
+
+export async function requireDesktopWrite(req: NextRequest) {
+  const keyResult = await requireApiKey(req, "desktop:write");
+  if (!keyResult.ok) return keyResult;
+  if (!desktopNativeBookingsEnabled(keyResult.context.businessId)) {
+    return { ok: false as const, response: featureDisabledResponse() };
+  }
+  return keyResult;
+}

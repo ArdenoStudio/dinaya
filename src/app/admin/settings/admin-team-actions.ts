@@ -1,12 +1,14 @@
 "use server";
 
+import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
-import { requirePlatformAdmin } from "@/lib/platform-admin";
+import { requirePlatformAdminFromSession } from "@/lib/platform-admin";
 import { invitePlatformAdminMember, revokePlatformAdminMember } from "@/lib/platform-admin-members";
 import { logAdminEvent } from "@/lib/admin-audit";
 
 export async function inviteAdminMember(formData: FormData): Promise<void> {
-  const admin = await requirePlatformAdmin();
+  const session = await auth();
+  const admin = await requirePlatformAdminFromSession(session);
   const email = String(formData.get("email") ?? "").trim();
 
   const result = await invitePlatformAdminMember({
@@ -28,7 +30,8 @@ export async function inviteAdminMember(formData: FormData): Promise<void> {
 }
 
 export async function revokeAdminMember(formData: FormData): Promise<void> {
-  const admin = await requirePlatformAdmin();
+  const session = await auth();
+  const admin = await requirePlatformAdminFromSession(session);
   const memberId = String(formData.get("memberId") ?? "");
 
   const revoked = await revokePlatformAdminMember(memberId);

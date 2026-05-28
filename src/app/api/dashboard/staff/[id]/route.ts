@@ -1,28 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { and, eq, gte, inArray } from "drizzle-orm";
 import { db } from "@/db";
-import { bookings, locations, services, staff, staffLocations, staffServices } from "@/db/schema";
+import { bookings, staff } from "@/db/schema";
 import { requireApiBusiness } from "@/lib/api-auth";
-import { replaceStaffLocations } from "@/lib/locations";
-import { isPublicHttpsUrl } from "@/lib/public-url";
-import { z } from "@/lib/validation";
-
-const staffSchema = z.object({
-  name: z.string().trim().min(1, "Name is required.").max(100).optional(),
-  bio: z.string().trim().max(1000).optional().nullable(),
-  avatarUrl: z
-    .string()
-    .trim()
-    .max(1000)
-    .optional()
-    .nullable()
-    .refine((value) => !value || value === "" || isPublicHttpsUrl(value), {
-      message: "Avatar URL must be a public HTTPS link.",
-    }),
-  isActive: z.boolean().optional(),
-  serviceIds: z.array(z.uuid()).optional(),
-  locationIds: z.array(z.uuid()).optional(),
-});
+import {
+  getStaffDashboardDetail,
+  staffDashboardUpdateSchema,
+  updateStaffDashboardFields,
+} from "@/lib/dashboard/staff";
 
 export async function GET(req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
@@ -32,38 +17,13 @@ export async function GET(req: NextRequest,
   const { businessId } = authResult.context;
   const { id } = await params;
 
-  const [member] = await db
-    .select({
-      id: staff.id,
-      name: staff.name,
-      bio: staff.bio,
-      avatarUrl: staff.avatarUrl,
-      isActive: staff.isActive,
-      createdAt: staff.createdAt,
-    })
-    .from(staff)
-    .where(and(eq(staff.id, id), eq(staff.businessId, businessId)))
-    .limit(1);
-
-  if (!member) return NextResponse.json({ error: "Not found." }, { status: 404 });
-
-  const [assigned, assignedLocations] = await Promise.all([
-    db
-      .select({ serviceId: staffServices.serviceId })
-      .from(staffServices)
-      .innerJoin(services, eq(services.id, staffServices.serviceId))
-      .where(and(eq(staffServices.staffId, id), eq(services.businessId, businessId))),
-    db
-      .select({ locationId: staffLocations.locationId })
-      .from(staffLocations)
-      .innerJoin(locations, eq(locations.id, staffLocations.locationId))
-      .where(and(eq(staffLocations.staffId, id), eq(locations.businessId, businessId))),
-  ]);
+  const detail = await getStaffDashboardDetail(businessId, id);
+  if (!detail) return NextResponse.json({ error: "Not found." }, { status: 404 });
 
   return NextResponse.json({
-    ...member,
-    serviceIds: assigned.map((row) => row.serviceId),
-    locationIds: assignedLocations.map((row) => row.locationId),
+    ...detail.staff,
+    serviceIds: detail.assignedServices.map((row) => row.id),
+    locationIds: detail.assignedLocations.map((row) => row.id),
   });
 }
 
@@ -76,7 +36,7 @@ export async function PATCH(
   const { businessId } = authResult.context;
   const { id } = await params;
 
-  const parsed = staffSchema.safeParse(await req.json());
+  const parsed = staffDashboardUpdateSchema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) {
     return NextResponse.json(
       { error: "Please check the staff details.", fieldErrors: parsed.error.flatten().fieldErrors },
@@ -84,72 +44,9 @@ export async function PATCH(
     );
   }
 
-  const [existing] = await db
-    .select({ id: staff.id })
-    .from(staff)
-    .where(and(eq(staff.id, id), eq(staff.businessId, businessId)))
-    .limit(1);
-
-  if (!existing) return NextResponse.json({ error: "Not found." }, { status: 404 });
-
-  const { serviceIds, locationIds, ...fields } = parsed.data;
-  const update: Partial<typeof staff.$inferInsert> = {};
-
-  if (fields.name !== undefined) update.name = fields.name;
-  if (fields.bio !== undefined) update.bio = fields.bio || null;
-  if (fields.avatarUrl !== undefined) update.avatarUrl = fields.avatarUrl || null;
-  if (fields.isActive !== undefined) update.isActive = fields.isActive;
-
-  if (Object.keys(update).length > 0) {
-    await db.update(staff).set(update).where(eq(staff.id, id));
-  }
-
-  if (serviceIds) {
-    const validServices = serviceIds.length
-      ? await db
-          .select({ id: services.id })
-          .from(services)
-          .where(and(eq(services.businessId, businessId), inArray(services.id, serviceIds)))
-      : [];
-
-    if (validServices.length !== serviceIds.length) {
-      return NextResponse.json({ error: "One or more services are invalid." }, { status: 400 });
-    }
-
-    await db.delete(staffServices).where(eq(staffServices.staffId, id));
-    if (serviceIds.length > 0) {
-      await db.insert(staffServices).values(serviceIds.map((serviceId) => ({ staffId: id, serviceId })));
-    }
-  }
-
-  if (locationIds) {
-    if (locationIds.length === 0) {
-      return NextResponse.json(
-        { error: "At least one active location must be assigned to this staff member." },
-        { status: 400 }
-      );
-    }
-
-    const validLocations = await db
-      .select({ id: locations.id })
-      .from(locations)
-      .where(
-        and(
-          eq(locations.businessId, businessId),
-          eq(locations.isActive, true),
-          inArray(locations.id, locationIds)
-        )
-      );
-
-    if (validLocations.length !== locationIds.length) {
-      return NextResponse.json(
-        { error: "One or more locations are invalid or inactive." },
-        { status: 400 }
-      );
-    }
-
-    await replaceStaffLocations(id, locationIds);
-  }
+  const result = await updateStaffDashboardFields(businessId, id, parsed.data);
+  if (result.status === "not_found") return NextResponse.json({ error: result.error }, { status: 404 });
+  if (result.status === "invalid") return NextResponse.json({ error: result.error }, { status: 400 });
 
   return NextResponse.json({ id });
 }

@@ -1,7 +1,8 @@
 "use server";
 
+import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
-import { requirePlatformAdmin } from "@/lib/platform-admin";
+import { requirePlatformAdminFromSession } from "@/lib/platform-admin";
 import {
   getPlanConfigAsync,
   savePlanConfigAsync,
@@ -10,29 +11,7 @@ import {
   type PlanFeature,
 } from "@/lib/plan";
 import { logAdminEvent } from "@/lib/admin-audit";
-
-const FEATURE_KEYS: PlanFeature[] = [
-  "aiBookingAutopilot",
-  "aiContentMachine",
-  "aiUpsellAssistant",
-  "aiVoiceReceptionist",
-  "automations",
-  "broadcasts",
-  "clientReactivationCampaign",
-  "googleCalendarSync",
-  "payments",
-  "publicBookingPage",
-  "publicBookingPageCustomization",
-  "reports",
-  "reviewEngine",
-  "reviews",
-  "reviewReplies",
-  "smartReminderSystem",
-  "vipLoyaltySequence",
-  "webhooks",
-  "whatsappSms",
-];
-
+import { PLAN_FEATURE_ORDER } from "@/lib/plan-feature-order";
 
 function parseLimit(value: FormDataEntryValue | null): number | null {
   const raw = String(value ?? "").trim();
@@ -51,13 +30,14 @@ function buildPlanEntitlements(formData: FormData, planKey: Plan) {
       locations: parseLimit(formData.get(`${planKey}.locations`)),
     },
     features: Object.fromEntries(
-      FEATURE_KEYS.map((f) => [f, formData.get(`${planKey}.feature.${f}`) === "on"])
+      PLAN_FEATURE_ORDER.map((f) => [f, formData.get(`${planKey}.feature.${f}`) === "on"])
     ) as Record<PlanFeature, boolean>,
   };
 }
 
 export async function savePlans(formData: FormData): Promise<void> {
-  const admin = await requirePlatformAdmin();
+  const session = await auth();
+  const admin = await requirePlatformAdminFromSession(session);
   const current = await getPlanConfigAsync();
 
   const proMonthlyPriceLkr = Math.max(
@@ -116,7 +96,8 @@ export async function savePlans(formData: FormData): Promise<void> {
 }
 
 export async function resetPlansToDefaults(): Promise<void> {
-  const admin = await requirePlatformAdmin();
+  const session = await auth();
+  const admin = await requirePlatformAdminFromSession(session);
   const { DEFAULT_PLAN_CONFIG } = await import("@/lib/plan");
   await savePlanConfigAsync({
     ...DEFAULT_PLAN_CONFIG,
