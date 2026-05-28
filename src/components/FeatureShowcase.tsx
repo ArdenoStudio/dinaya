@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { AnimatePresence, motion, animate, useMotionValue } from "framer-motion";
+import { AnimatePresence, motion, animate, useMotionValue } from "motion/react";
 import { Icon } from "@/components/ui/Icon";
 
 // ─── Cursor SVG ───────────────────────────────────────────────────────────────

@@ -45,6 +45,10 @@ next-env.d.ts
 # platform admin runtime data (audit log, editable plan config)
 .dinaya/
 
+# standalone repos with their own git remotes (not part of this monorepo)
+dinaya-uptime-monitor/
+dinaya-status/
+
 # drizzle migrations
 !drizzle/
 !drizzle/*.sql

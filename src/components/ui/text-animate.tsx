@@ -1,7 +1,7 @@
 "use client"
 
 import { cn } from "@/lib/utils"
-import { AnimatePresence, motion, useInView, MotionProps, Variants } from "framer-motion"
+import { AnimatePresence, motion, useInView, MotionProps, Variants } from "motion/react"
 import { useRef } from "react"
 
 type MotionTag = "p" | "h1" | "h2" | "h3" | "span" | "div"

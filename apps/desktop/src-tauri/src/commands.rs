@@ -644,7 +644,7 @@ pub fn desktop_open_dashboard_path(app: AppHandle, path: String) -> Result<(), S
     return Err("Dashboard fallback path must start with /dashboard.".to_string());
   }
 
-  if path.contains("://") || path.contains("\\") || path.contains("..") {
+  if path.contains("://") || path.contains("\\") || path.contains("..") || path.starts_with("//") {
     return Err("Dashboard fallback path is invalid.".to_string());
   }
 

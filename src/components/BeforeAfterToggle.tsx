@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 
-import { motion, AnimatePresence, type Variants } from "framer-motion";
+import { motion, AnimatePresence, type Variants } from "motion/react";
 import { Icon } from "@/components/ui/Icon";
 
 // Each pill scattered in its own direction — no pattern, like cards thrown on a table
