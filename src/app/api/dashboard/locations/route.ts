@@ -4,8 +4,12 @@ import { db } from "@/db";
 import { locations } from "@/db/schema";
 import { requireApiBusiness } from "@/lib/api-auth";
 import {
+  getLocationsDashboardList,
+  isDashboardLocationStatusFilter,
+  type DashboardLocationStatusFilter,
+} from "@/lib/dashboard/locations";
+import {
   countLocations,
-  getStaffLocationMap,
   requireCanAddLocation,
   slugifyLocationName,
 } from "@/lib/locations";
@@ -21,29 +25,33 @@ const locationCreateSchema = z.object({
   isActive: z.boolean().optional().default(true),
 });
 
+const DEFAULT_LIMIT = 200;
+const MAX_LIMIT = 500;
+
+function parseLimit(value: string | null): number {
+  const parsed = Number(value ?? DEFAULT_LIMIT);
+  if (!Number.isFinite(parsed)) return DEFAULT_LIMIT;
+  return Math.min(MAX_LIMIT, Math.max(1, Math.round(parsed)));
+}
+
 export async function GET(req: NextRequest) {
   const authResult = await requireApiBusiness({ req });
   if (!authResult.ok) return authResult.response;
   const { businessId } = authResult.context;
 
-  const rows = await db
-    .select()
-    .from(locations)
-    .where(eq(locations.businessId, businessId))
-    .orderBy(locations.sortOrder, locations.name);
-
-  const staffMap = await getStaffLocationMap(businessId);
-  const staffCountByLocation = new Map<string, number>();
-  for (const row of staffMap) {
-    staffCountByLocation.set(row.locationId, (staffCountByLocation.get(row.locationId) ?? 0) + 1);
+  const params = req.nextUrl.searchParams;
+  const statusParam = params.get("status");
+  if (statusParam && !isDashboardLocationStatusFilter(statusParam)) {
+    return NextResponse.json({ error: "status is invalid." }, { status: 400 });
   }
 
-  return NextResponse.json(
-    rows.map((row) => ({
-      ...row,
-      staffCount: staffCountByLocation.get(row.id) ?? 0,
-    }))
-  );
+  const { rows } = await getLocationsDashboardList(businessId, {
+    limit: parseLimit(params.get("limit")),
+    q: params.get("q")?.trim() ?? "",
+    status: (statusParam || "all") as DashboardLocationStatusFilter,
+  });
+
+  return NextResponse.json(rows);
 }
 
 export async function POST(req: NextRequest) {

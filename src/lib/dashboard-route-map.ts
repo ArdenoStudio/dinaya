@@ -126,7 +126,7 @@ export const dashboardRouteGroups = [
         href: "/dashboard/locations",
         desktopApiPath: "/api/v1/desktop/locations",
         desktopPhase: 3,
-        nativeStatus: "foundation",
+        nativeStatus: "native",
         ownerOnly: true,
         summary: "Branch list, active status, and booking page coverage.",
       },

@@ -458,6 +458,44 @@ type LocationEditDraft = {
   timezone: string;
 };
 
+type LocationStatusFilter = "active" | "all" | "inactive";
+
+type LocationRow = {
+  address: string | null;
+  bookingCount: number;
+  createdAt: string;
+  futureBookingCount: number;
+  id: string;
+  isActive: boolean;
+  isDefault: boolean;
+  lastBookingAt: string | null;
+  name: string;
+  phone: string | null;
+  primaryStaffCount: number;
+  slug: string | null;
+  sortOrder: number;
+  staffCount: number;
+  timezone: string;
+};
+
+type DesktopLocationsPayload = {
+  filters: {
+    limit: number;
+    q: string;
+    status: LocationStatusFilter;
+  };
+  rows: LocationRow[];
+  serverTime: string;
+  summary: {
+    activeLocations: number;
+    defaultLocations: number;
+    inactiveLocations: number;
+    totalLocations: number;
+    withAddress: number;
+  };
+  webUrl: string;
+};
+
 type AvailabilityMember = {
   assignedLocations: Array<{
     id: string;
@@ -2002,6 +2040,11 @@ function App() {
   const [staffDetailLoading, setStaffDetailLoading] = useState(false);
   const [staffDetailSaving, setStaffDetailSaving] = useState(false);
   const [selectedLocationId, setSelectedLocationId] = useState<string | null>(null);
+  const [locationsData, setLocationsData] = useState<DesktopLocationsPayload | null>(null);
+  const [locationsError, setLocationsError] = useState("");
+  const [locationsLoading, setLocationsLoading] = useState(false);
+  const [locationsQuery, setLocationsQuery] = useState("");
+  const [locationsStatusFilter, setLocationsStatusFilter] = useState<LocationStatusFilter>("all");
   const [locationDetail, setLocationDetail] = useState<LocationDetailPayload | null>(null);
   const [locationEditDraft, setLocationEditDraft] = useState<LocationEditDraft | null>(null);
   const [locationDetailError, setLocationDetailError] = useState("");
@@ -2144,6 +2187,10 @@ function App() {
 
   function staffCacheKey(nextStatus = staffStatusFilter, nextQuery = staffQuery) {
     return offlineCacheKey("staff", nextStatus, nextQuery || "all");
+  }
+
+  function locationsCacheKey(nextStatus = locationsStatusFilter, nextQuery = locationsQuery) {
+    return offlineCacheKey("locations", nextStatus, nextQuery || "all");
   }
 
   function reportsCacheKey(nextFrom = reportsFrom, nextTo = reportsTo) {
@@ -2367,6 +2414,46 @@ function App() {
       );
     } finally {
       setStaffLoading(false);
+    }
+  }
+
+  async function fetchLocations(
+    nextStatus = locationsStatusFilter,
+    nextQuery = locationsQuery,
+  ): Promise<DesktopLocationsPayload> {
+    const path = buildDesktopApiPath("/api/v1/desktop/locations", {
+      limit: 80,
+      q: nextQuery.trim() || undefined,
+      status: nextStatus === "all" ? undefined : nextStatus,
+    });
+    return desktopApiRequest<DesktopLocationsPayload>({ method: "GET", path });
+  }
+
+  async function loadLocations(
+    nextStatus = locationsStatusFilter,
+    nextQuery = locationsQuery,
+  ) {
+    setLocationsLoading(true);
+    setLocationsError("");
+    try {
+      const next = await fetchLocations(nextStatus, nextQuery);
+      setLocationsData(next);
+      setLastSync(next.serverTime);
+      writeOfflineCache(locationsCacheKey(nextStatus, nextQuery), next);
+      setOfflineNotice("");
+    } catch (loadError) {
+      restoreCachedRead<DesktopLocationsPayload>(
+        locationsCacheKey(nextStatus, nextQuery),
+        "locations",
+        loadError,
+        (cached) => {
+          setLocationsData(cached);
+          setLastSync(cached.serverTime);
+        },
+        setLocationsError,
+      );
+    } finally {
+      setLocationsLoading(false);
     }
   }
 
@@ -3147,7 +3234,11 @@ function App() {
       setLocationDetail(next);
       setLocationEditDraft(locationDraftFromDetail(next));
       setLastSync(next.serverTime);
-      await loadModule(route);
+      if (view === "locations") {
+        await loadLocations();
+      } else {
+        await loadModule(route);
+      }
     } catch (loadError) {
       setLocationDetailError(String(loadError));
     } finally {
@@ -3527,6 +3618,10 @@ function App() {
     setStaffEditDraft(null);
     setStaffDetailError("");
     setSelectedStaffId(null);
+    setLocationsData(null);
+    setLocationsError("");
+    setLocationsQuery("");
+    setLocationsStatusFilter("all");
     setLocationDetail(null);
     setLocationEditDraft(null);
     setLocationDetailError("");
@@ -3619,6 +3714,7 @@ function App() {
       setSelectedStaffId(null);
     }
     if (nextRoute.id !== "locations") {
+      setLocationsError("");
       setLocationDetail(null);
       setLocationEditDraft(null);
       setLocationDetailError("");
@@ -3684,6 +3780,8 @@ function App() {
       void loadServices();
     } else if (nextRoute.id === "staff") {
       void loadStaff();
+    } else if (nextRoute.id === "locations") {
+      void loadLocations();
     } else if (nextRoute.id === "availability") {
       void loadAvailability();
     } else if (nextRoute.id === "billing") {
@@ -3746,6 +3844,10 @@ function App() {
     }
     if (view === "staff") {
       void loadStaff();
+      return;
+    }
+    if (view === "locations") {
+      void loadLocations();
       return;
     }
     if (view === "reviews") {
@@ -4067,6 +4169,8 @@ function App() {
         void loadServices();
       } else if (authReady && !staffLoading && view === "staff") {
         void loadStaff();
+      } else if (authReady && !locationsLoading && view === "locations") {
+        void loadLocations();
       } else if (authReady && !paymentsLoading && view === "payments") {
         void loadPayments();
       } else if (authReady && !reviewsLoading && view === "reviews") {
@@ -4086,7 +4190,7 @@ function App() {
     return () => window.clearInterval(timer);
     // Recreate the polling timer only when user-controlled sync inputs change.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [aiRunsLoading, aiRunsQuery, aiRunsStatusFilter, authReady, automationsLoading, automationsQuery, automationsStatusFilter, availabilityLoading, broadcastsChannelFilter, broadcastsLoading, broadcastsQuery, broadcastsStatusFilter, calendarDate, calendarLoading, calendarMode, calendarStaffFilter, clientsLoading, clientsQuery, clientsStageFilter, dealsLoading, dealsQuery, dealsStatusFilter, integrationsLoading, integrationsQuery, integrationsStatusFilter, paymentsLoading, paymentsQuery, paymentsStatusFilter, reviewsLoading, reviewsQuery, reviewsRatingFilter, reviewsStatusFilter, servicesLoading, servicesQuery, servicesStatusFilter, staffLoading, staffQuery, staffStatusFilter, syncing, tab, query, staffFilter, statusFilter, view]);
+  }, [aiRunsLoading, aiRunsQuery, aiRunsStatusFilter, authReady, automationsLoading, automationsQuery, automationsStatusFilter, availabilityLoading, broadcastsChannelFilter, broadcastsLoading, broadcastsQuery, broadcastsStatusFilter, calendarDate, calendarLoading, calendarMode, calendarStaffFilter, clientsLoading, clientsQuery, clientsStageFilter, dealsLoading, dealsQuery, dealsStatusFilter, integrationsLoading, integrationsQuery, integrationsStatusFilter, locationsLoading, locationsQuery, locationsStatusFilter, paymentsLoading, paymentsQuery, paymentsStatusFilter, reviewsLoading, reviewsQuery, reviewsRatingFilter, reviewsStatusFilter, servicesLoading, servicesQuery, servicesStatusFilter, staffLoading, staffQuery, staffStatusFilter, syncing, tab, query, staffFilter, statusFilter, view]);
 
   useEffect(() => {
     let unlisten: (() => void) | undefined;
@@ -4148,6 +4252,11 @@ function App() {
       return;
     }
 
+    if (authReady && view === "locations" && !locationsData && !locationsLoading) {
+      void loadLocations();
+      return;
+    }
+
     if (authReady && view === "reviews" && !reviewsData && !reviewsLoading) {
       void loadReviews();
       return;
@@ -4188,6 +4297,7 @@ function App() {
       view !== "clients" &&
       view !== "services" &&
       view !== "staff" &&
+      view !== "locations" &&
       view !== "payments" &&
       view !== "reviews" &&
       view !== "deals" &&
@@ -4231,7 +4341,7 @@ function App() {
       />
 
       <main id="desktop-main" className="main-pane" tabIndex={-1}>
-        <header className="topbar glass-surface" aria-busy={syncing || moduleLoading || calendarLoading || availabilityLoading || clientsLoading || servicesLoading || staffLoading || billingLoading || paymentsLoading || reviewsLoading || dealsLoading || broadcastsLoading || aiRunsLoading || automationsLoading || integrationsLoading || reportsLoading}>
+        <header className="topbar glass-surface" aria-busy={syncing || moduleLoading || calendarLoading || availabilityLoading || clientsLoading || servicesLoading || staffLoading || locationsLoading || billingLoading || paymentsLoading || reviewsLoading || dealsLoading || broadcastsLoading || aiRunsLoading || automationsLoading || integrationsLoading || reportsLoading}>
           <div className="topbar-title">
             <p className="eyebrow">{business?.name ?? "Dinaya"}</p>
             <h1>{route.label}</h1>
@@ -4250,8 +4360,8 @@ function App() {
             <button className="small" aria-haspopup="dialog" onClick={openCommandPalette}>
               Command
             </button>
-            <button className="primary small" disabled={syncing || moduleLoading || calendarLoading || availabilityLoading || clientsLoading || servicesLoading || staffLoading || billingLoading || paymentsLoading || reviewsLoading || dealsLoading || broadcastsLoading || aiRunsLoading || automationsLoading || integrationsLoading || reportsLoading} onClick={refreshCurrentView}>
-              {syncing || moduleLoading || calendarLoading || availabilityLoading || clientsLoading || servicesLoading || staffLoading || billingLoading || paymentsLoading || reviewsLoading || dealsLoading || broadcastsLoading || aiRunsLoading || automationsLoading || integrationsLoading || reportsLoading ? "Syncing..." : "Refresh"}
+            <button className="primary small" disabled={syncing || moduleLoading || calendarLoading || availabilityLoading || clientsLoading || servicesLoading || staffLoading || locationsLoading || billingLoading || paymentsLoading || reviewsLoading || dealsLoading || broadcastsLoading || aiRunsLoading || automationsLoading || integrationsLoading || reportsLoading} onClick={refreshCurrentView}>
+              {syncing || moduleLoading || calendarLoading || availabilityLoading || clientsLoading || servicesLoading || staffLoading || locationsLoading || billingLoading || paymentsLoading || reviewsLoading || dealsLoading || broadcastsLoading || aiRunsLoading || automationsLoading || integrationsLoading || reportsLoading ? "Syncing..." : "Refresh"}
             </button>
           </div>
         </header>
@@ -4430,6 +4540,31 @@ function App() {
             onStatusFilter={(status) => {
               setStaffStatusFilter(status);
               void loadStaff(status, staffQuery);
+            }}
+          />
+        ) : view === "locations" ? (
+          <LocationsWorkspace
+            data={locationsData}
+            detail={locationDetail}
+            detailError={locationDetailError}
+            detailLoading={locationDetailLoading}
+            draft={locationEditDraft}
+            error={locationsError}
+            loading={locationsLoading}
+            query={locationsQuery}
+            saving={locationDetailSaving}
+            selectedId={selectedLocationId}
+            statusFilter={locationsStatusFilter}
+            onApply={() => void loadLocations()}
+            onDraft={setLocationEditDraft}
+            onOpenLocation={(id) => void openLocationDetail(id)}
+            onOpenWeb={(path) => void invoke("desktop_open_dashboard_path", { path })}
+            onQuery={setLocationsQuery}
+            onRefresh={() => void loadLocations()}
+            onSave={(id) => void updateLocationDetail(id)}
+            onStatusFilter={(status) => {
+              setLocationsStatusFilter(status);
+              void loadLocations(status, locationsQuery);
             }}
           />
         ) : view === "billing" ? (
@@ -6326,6 +6461,169 @@ function StaffWorkspace({
         </div>
 
         <StaffDetailPanel
+          detail={detail}
+          draft={draft}
+          error={detailError}
+          loading={detailLoading}
+          saving={saving}
+          onDraft={onDraft}
+          onOpenWeb={onOpenWeb}
+          onSave={onSave}
+        />
+      </div>
+    </section>
+  );
+}
+
+function LocationsWorkspace({
+  data,
+  detail,
+  detailError,
+  detailLoading,
+  draft,
+  error,
+  loading,
+  query,
+  saving,
+  selectedId,
+  statusFilter,
+  onApply,
+  onDraft,
+  onOpenLocation,
+  onOpenWeb,
+  onQuery,
+  onRefresh,
+  onSave,
+  onStatusFilter,
+}: {
+  data: DesktopLocationsPayload | null;
+  detail: LocationDetailPayload | null;
+  detailError: string;
+  detailLoading: boolean;
+  draft: LocationEditDraft | null;
+  error: string;
+  loading: boolean;
+  query: string;
+  saving: boolean;
+  selectedId: string | null;
+  statusFilter: LocationStatusFilter;
+  onApply: () => void;
+  onDraft: (draft: LocationEditDraft) => void;
+  onOpenLocation: (id: string) => void;
+  onOpenWeb: (path: string) => void;
+  onQuery: (value: string) => void;
+  onRefresh: () => void;
+  onSave: (id: string) => void;
+  onStatusFilter: (status: LocationStatusFilter) => void;
+}) {
+  const summary = data?.summary;
+  const statusOptions: Array<{ count: number; label: string; value: LocationStatusFilter }> = [
+    { count: summary?.totalLocations ?? 0, label: "All", value: "all" },
+    { count: summary?.activeLocations ?? 0, label: "Active", value: "active" },
+    { count: summary?.inactiveLocations ?? 0, label: "Inactive", value: "inactive" },
+  ];
+
+  return (
+    <section className="module-view has-detail locations-workspace">
+      <div className="module-split">
+        <div className="module-panel glass-surface">
+          <div className="module-head">
+            <div>
+              <p className="eyebrow">Native Locations</p>
+              <h2>Branch coverage</h2>
+              <p>Filter branches, inspect staff coverage and booking load, and edit address, slug, timezone, and default status.</p>
+            </div>
+            <div className="module-actions">
+              <button className="primary small" disabled={loading} onClick={onRefresh}>
+                {loading ? "Loading..." : "Refresh"}
+              </button>
+              <button onClick={() => onOpenWeb(data?.webUrl ?? "/dashboard/locations")}>
+                Open locations in browser
+              </button>
+            </div>
+          </div>
+
+          {error && <div className="error-banner inline">{error}</div>}
+
+          <div className="metric-grid module-metrics">
+            <MetricCard label="Locations" tone="cobalt" value={summary?.totalLocations ?? 0} />
+            <MetricCard label="Active" tone="emerald" value={summary?.activeLocations ?? 0} />
+            <MetricCard label="Default" tone="amber" value={summary?.defaultLocations ?? 0} />
+            <MetricCard label="Addresses" tone="slate" value={summary?.withAddress ?? 0} />
+          </div>
+
+          <div className="filters location-filter-row">
+            <div className="tabs">
+              {statusOptions.map((option) => (
+                <button
+                  key={option.value}
+                  className={statusFilter === option.value ? "active" : ""}
+                  type="button"
+                  onClick={() => onStatusFilter(option.value)}
+                >
+                  {option.label} ({option.count})
+                </button>
+              ))}
+            </div>
+            <div className="filter-row">
+              <input
+                placeholder="Search branch, address, phone, slug, or timezone"
+                type="search"
+                value={query}
+                onChange={(event) => onQuery(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") onApply();
+                }}
+              />
+              <button className="primary" disabled={loading} onClick={onApply}>
+                Apply
+              </button>
+            </div>
+          </div>
+
+          <div className="module-meta">
+            <span>{data ? `${data.rows.length} locations loaded` : loading ? "Loading live data" : "Ready to load"}</span>
+            <span>{data ? `Synced ${formatTime(data.serverTime)}` : "/api/v1/desktop/locations"}</span>
+          </div>
+
+          {loading && !data ? (
+            <div className="empty-state">Loading locations...</div>
+          ) : data?.rows.length ? (
+            <ul className="module-list location-list">
+              {data.rows.map((location) => (
+                <li key={location.id}>
+                  <button
+                    className={selectedId === location.id ? "module-list-item selected" : "module-list-item"}
+                    type="button"
+                    onClick={() => onOpenLocation(location.id)}
+                  >
+                    <div>
+                      <strong>{location.name}</strong>
+                      <span>{location.address ?? location.phone ?? location.slug ?? location.timezone}</span>
+                    </div>
+                    <div className="module-list-meta">
+                      <span className={`module-status ${location.isActive ? "stage-active" : "stage-churned"}`}>
+                        {location.isDefault ? "default" : location.isActive ? "active" : "inactive"}
+                      </span>
+                      <span>
+                        {location.staffCount} staff - {location.futureBookingCount} upcoming - {location.timezone}
+                      </span>
+                      <span>
+                        {location.lastBookingAt ? formatModuleMeta(location.lastBookingAt) : `${location.bookingCount} all-time bookings`}
+                      </span>
+                    </div>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="empty-state">
+              No locations match this filter.
+            </div>
+          )}
+        </div>
+
+        <LocationDetailPanel
           detail={detail}
           draft={draft}
           error={detailError}

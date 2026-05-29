@@ -1381,7 +1381,8 @@ textarea:focus-visible,
 .integration-filter-row,
 .client-filter-row,
 .service-filter-row,
-.staff-filter-row {
+.staff-filter-row,
+.location-filter-row {
   border: 1px solid var(--line);
   border-radius: 12px;
 }
@@ -1427,7 +1428,9 @@ textarea:focus-visible,
 .service-filter-row .tabs,
 .service-filter-row .filter-row,
 .staff-filter-row .tabs,
-.staff-filter-row .filter-row {
+.staff-filter-row .filter-row,
+.location-filter-row .tabs,
+.location-filter-row .filter-row {
   flex-wrap: wrap;
 }
 
@@ -1440,7 +1443,8 @@ textarea:focus-visible,
 .integration-filter-row .filter-row input,
 .client-filter-row .filter-row input,
 .service-filter-row .filter-row input,
-.staff-filter-row .filter-row input {
+.staff-filter-row .filter-row input,
+.location-filter-row .filter-row input {
   min-width: min(320px, 100%);
   flex: 1 1 260px;
 }
