@@ -159,6 +159,44 @@ type DesktopModulePayload = {
 };
 
 type ClientStage = "lead" | "prospect" | "active" | "churned";
+type ClientStageFilter = ClientStage | "all";
+
+type ClientRow = {
+  bookingCount: number;
+  communicationOptOut: boolean;
+  completedBookings: number;
+  createdAt: string;
+  email: string | null;
+  id: string;
+  lastAiContactAt: string | null;
+  lastBookingAt: string | null;
+  loyaltyTier: string | null;
+  name: string;
+  phone: string;
+  source: string | null;
+  stage: ClientStage;
+  tags: string[] | null;
+};
+
+type DesktopClientsPayload = {
+  filters: {
+    limit: number;
+    q: string;
+    stage: ClientStageFilter;
+  };
+  rows: ClientRow[];
+  serverTime: string;
+  summary: {
+    activeClients: number;
+    churnedClients: number;
+    leads: number;
+    optedOutClients: number;
+    prospects: number;
+    totalClients: number;
+    withEmail: number;
+  };
+  webUrl: string;
+};
 
 type ClientDetailPayload = {
   bookings: Array<{
@@ -982,6 +1020,49 @@ type IntegrationDetailPayload = {
   webUrl: string;
 };
 
+type IntegrationStatusFilter = "action_required" | "all" | "available" | "connected" | "env_required" | "gated";
+
+type IntegrationRow = {
+  accountName: string | null;
+  actionLabel: string;
+  category: string;
+  description: string;
+  detailId: string | null;
+  id: string;
+  kind: string;
+  name: string;
+  provider: string;
+  setupPath: string;
+  status: Exclude<IntegrationStatusFilter, "all">;
+  statusLabel: string;
+  updatedAt: string | null;
+};
+
+type DesktopIntegrationsPayload = {
+  domain: {
+    customDomain: string | null;
+    customDomainError: string | null;
+    customDomainStatus: string;
+    customDomainVerified: boolean;
+  };
+  filters: {
+    limit: number;
+    q: string;
+    status: IntegrationStatusFilter;
+  };
+  rows: IntegrationRow[];
+  serverTime: string;
+  summary: {
+    actionRequiredIntegrations: number;
+    availableIntegrations: number;
+    connectedIntegrations: number;
+    envRequiredIntegrations: number;
+    gatedIntegrations: number;
+    totalIntegrations: number;
+  };
+  webUrl: string;
+};
+
 type DesktopSettingsPayload = {
   business: Business & {
     address: string | null;
@@ -1169,6 +1250,14 @@ const integrationStatusClass: Record<string, string> = {
   paused: "integration-inactive",
   requested: "integration-pending",
   testing: "integration-pending",
+};
+
+const integrationListStatusClass: Record<Exclude<IntegrationStatusFilter, "all">, string> = {
+  action_required: "integration-pending",
+  available: "integration-pending",
+  connected: "integration-active",
+  env_required: "integration-pending",
+  gated: "integration-inactive",
 };
 
 const weekdayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -1802,6 +1891,11 @@ function App() {
   const [moduleError, setModuleError] = useState("");
   const [moduleLoading, setModuleLoading] = useState(false);
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
+  const [clientsData, setClientsData] = useState<DesktopClientsPayload | null>(null);
+  const [clientsError, setClientsError] = useState("");
+  const [clientsLoading, setClientsLoading] = useState(false);
+  const [clientsQuery, setClientsQuery] = useState("");
+  const [clientsStageFilter, setClientsStageFilter] = useState<ClientStageFilter>("all");
   const [clientDetail, setClientDetail] = useState<ClientDetailPayload | null>(null);
   const [clientDetailError, setClientDetailError] = useState("");
   const [clientDetailLoading, setClientDetailLoading] = useState(false);
@@ -1898,6 +1992,11 @@ function App() {
   const [automationDetailLoading, setAutomationDetailLoading] = useState(false);
   const [automationDetailSaving, setAutomationDetailSaving] = useState(false);
   const [selectedIntegrationId, setSelectedIntegrationId] = useState<string | null>(null);
+  const [integrationsData, setIntegrationsData] = useState<DesktopIntegrationsPayload | null>(null);
+  const [integrationsError, setIntegrationsError] = useState("");
+  const [integrationsLoading, setIntegrationsLoading] = useState(false);
+  const [integrationsQuery, setIntegrationsQuery] = useState("");
+  const [integrationsStatusFilter, setIntegrationsStatusFilter] = useState<IntegrationStatusFilter>("all");
   const [integrationDetail, setIntegrationDetail] = useState<IntegrationDetailPayload | null>(null);
   const [integrationDetailError, setIntegrationDetailError] = useState("");
   const [integrationDetailLoading, setIntegrationDetailLoading] = useState(false);
@@ -1948,6 +2047,10 @@ function App() {
     return offlineCacheKey("calendar", nextMode, nextDate, nextStaffFilter || "all");
   }
 
+  function clientsCacheKey(nextStage = clientsStageFilter, nextQuery = clientsQuery) {
+    return offlineCacheKey("clients", nextStage, nextQuery || "all");
+  }
+
   function reportsCacheKey(nextFrom = reportsFrom, nextTo = reportsTo) {
     return offlineCacheKey("reports", nextFrom, nextTo);
   }
@@ -1982,6 +2085,10 @@ function App() {
 
   function automationsCacheKey(nextStatus = automationsStatusFilter, nextQuery = automationsQuery) {
     return offlineCacheKey("automations", nextStatus, nextQuery || "all");
+  }
+
+  function integrationsCacheKey(nextStatus = integrationsStatusFilter, nextQuery = integrationsQuery) {
+    return offlineCacheKey("integrations", nextStatus, nextQuery || "all");
   }
 
   function restoreCachedRead<T>(
@@ -2046,6 +2153,46 @@ function App() {
       method: "GET",
       path: "/api/v1/desktop/availability",
     });
+  }
+
+  async function fetchClients(
+    nextStage = clientsStageFilter,
+    nextQuery = clientsQuery,
+  ): Promise<DesktopClientsPayload> {
+    const path = buildDesktopApiPath("/api/v1/desktop/clients", {
+      limit: 80,
+      q: nextQuery.trim() || undefined,
+      stage: nextStage === "all" ? undefined : nextStage,
+    });
+    return desktopApiRequest<DesktopClientsPayload>({ method: "GET", path });
+  }
+
+  async function loadClients(
+    nextStage = clientsStageFilter,
+    nextQuery = clientsQuery,
+  ) {
+    setClientsLoading(true);
+    setClientsError("");
+    try {
+      const next = await fetchClients(nextStage, nextQuery);
+      setClientsData(next);
+      setLastSync(next.serverTime);
+      writeOfflineCache(clientsCacheKey(nextStage, nextQuery), next);
+      setOfflineNotice("");
+    } catch (loadError) {
+      restoreCachedRead<DesktopClientsPayload>(
+        clientsCacheKey(nextStage, nextQuery),
+        "clients",
+        loadError,
+        (cached) => {
+          setClientsData(cached);
+          setLastSync(cached.serverTime);
+        },
+        setClientsError,
+      );
+    } finally {
+      setClientsLoading(false);
+    }
   }
 
   async function fetchPayments(
@@ -2291,6 +2438,46 @@ function App() {
       );
     } finally {
       setAutomationsLoading(false);
+    }
+  }
+
+  async function fetchIntegrations(
+    nextStatus = integrationsStatusFilter,
+    nextQuery = integrationsQuery,
+  ): Promise<DesktopIntegrationsPayload> {
+    const path = buildDesktopApiPath("/api/v1/desktop/integrations", {
+      limit: 80,
+      q: nextQuery.trim() || undefined,
+      status: nextStatus === "all" ? undefined : nextStatus,
+    });
+    return desktopApiRequest<DesktopIntegrationsPayload>({ method: "GET", path });
+  }
+
+  async function loadIntegrations(
+    nextStatus = integrationsStatusFilter,
+    nextQuery = integrationsQuery,
+  ) {
+    setIntegrationsLoading(true);
+    setIntegrationsError("");
+    try {
+      const next = await fetchIntegrations(nextStatus, nextQuery);
+      setIntegrationsData(next);
+      setLastSync(next.serverTime);
+      writeOfflineCache(integrationsCacheKey(nextStatus, nextQuery), next);
+      setOfflineNotice("");
+    } catch (loadError) {
+      restoreCachedRead<DesktopIntegrationsPayload>(
+        integrationsCacheKey(nextStatus, nextQuery),
+        "integrations",
+        loadError,
+        (cached) => {
+          setIntegrationsData(cached);
+          setLastSync(cached.serverTime);
+        },
+        setIntegrationsError,
+      );
+    } finally {
+      setIntegrationsLoading(false);
     }
   }
 
@@ -3133,6 +3320,10 @@ function App() {
     setRows([]);
     setDetail(null);
     setSelectedId(null);
+    setClientsData(null);
+    setClientsError("");
+    setClientsQuery("");
+    setClientsStageFilter("all");
     setClientDetail(null);
     setClientDetailError("");
     setClientNoteDraft("");
@@ -3196,6 +3387,10 @@ function App() {
     setAutomationDetail(null);
     setAutomationDetailError("");
     setSelectedAutomationId(null);
+    setIntegrationsData(null);
+    setIntegrationsError("");
+    setIntegrationsQuery("");
+    setIntegrationsStatusFilter("all");
     setIntegrationDetail(null);
     setIntegrationDetailError("");
     setSelectedIntegrationId(null);
@@ -3211,6 +3406,7 @@ function App() {
   function openRoute(nextRoute: DashboardRoute) {
     setView(nextRoute.id);
     if (nextRoute.id !== "clients") {
+      setClientsError("");
       setClientDetail(null);
       setClientDetailError("");
       setClientNoteDraft("");
@@ -3275,6 +3471,7 @@ function App() {
       setSelectedAutomationId(null);
     }
     if (nextRoute.id !== "integrations") {
+      setIntegrationsError("");
       setIntegrationDetail(null);
       setIntegrationDetailError("");
       setSelectedIntegrationId(null);
@@ -3286,6 +3483,8 @@ function App() {
       void loadCalendar();
     } else if (nextRoute.id === "bookings") {
       void runSync(tab);
+    } else if (nextRoute.id === "clients") {
+      void loadClients();
     } else if (nextRoute.id === "availability") {
       void loadAvailability();
     } else if (nextRoute.id === "billing") {
@@ -3306,6 +3505,8 @@ function App() {
       void loadAiRuns();
     } else if (nextRoute.id === "automations") {
       void loadAutomations();
+    } else if (nextRoute.id === "integrations") {
+      void loadIntegrations();
     } else {
       void loadModule(nextRoute);
     }
@@ -3336,6 +3537,10 @@ function App() {
       void loadPayments();
       return;
     }
+    if (view === "clients") {
+      void loadClients();
+      return;
+    }
     if (view === "reviews") {
       void loadReviews();
       return;
@@ -3354,6 +3559,10 @@ function App() {
     }
     if (view === "automations") {
       void loadAutomations();
+      return;
+    }
+    if (view === "integrations") {
+      void loadIntegrations();
       return;
     }
     if (view === "overview" || view === "bookings") {
@@ -3645,6 +3854,8 @@ function App() {
         void loadCalendar();
       } else if (authReady && !availabilityLoading && view === "availability") {
         void loadAvailability();
+      } else if (authReady && !clientsLoading && view === "clients") {
+        void loadClients();
       } else if (authReady && !paymentsLoading && view === "payments") {
         void loadPayments();
       } else if (authReady && !reviewsLoading && view === "reviews") {
@@ -3657,12 +3868,14 @@ function App() {
         void loadAiRuns();
       } else if (authReady && !automationsLoading && view === "automations") {
         void loadAutomations();
+      } else if (authReady && !integrationsLoading && view === "integrations") {
+        void loadIntegrations();
       }
     }, 45_000);
     return () => window.clearInterval(timer);
     // Recreate the polling timer only when user-controlled sync inputs change.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [aiRunsLoading, aiRunsQuery, aiRunsStatusFilter, authReady, automationsLoading, automationsQuery, automationsStatusFilter, availabilityLoading, broadcastsChannelFilter, broadcastsLoading, broadcastsQuery, broadcastsStatusFilter, calendarDate, calendarLoading, calendarMode, calendarStaffFilter, dealsLoading, dealsQuery, dealsStatusFilter, paymentsLoading, paymentsQuery, paymentsStatusFilter, reviewsLoading, reviewsQuery, reviewsRatingFilter, reviewsStatusFilter, syncing, tab, query, staffFilter, statusFilter, view]);
+  }, [aiRunsLoading, aiRunsQuery, aiRunsStatusFilter, authReady, automationsLoading, automationsQuery, automationsStatusFilter, availabilityLoading, broadcastsChannelFilter, broadcastsLoading, broadcastsQuery, broadcastsStatusFilter, calendarDate, calendarLoading, calendarMode, calendarStaffFilter, clientsLoading, clientsQuery, clientsStageFilter, dealsLoading, dealsQuery, dealsStatusFilter, integrationsLoading, integrationsQuery, integrationsStatusFilter, paymentsLoading, paymentsQuery, paymentsStatusFilter, reviewsLoading, reviewsQuery, reviewsRatingFilter, reviewsStatusFilter, syncing, tab, query, staffFilter, statusFilter, view]);
 
   useEffect(() => {
     let unlisten: (() => void) | undefined;
@@ -3709,6 +3922,11 @@ function App() {
       return;
     }
 
+    if (authReady && view === "clients" && !clientsData && !clientsLoading) {
+      void loadClients();
+      return;
+    }
+
     if (authReady && view === "reviews" && !reviewsData && !reviewsLoading) {
       void loadReviews();
       return;
@@ -3734,6 +3952,11 @@ function App() {
       return;
     }
 
+    if (authReady && view === "integrations" && !integrationsData && !integrationsLoading) {
+      void loadIntegrations();
+      return;
+    }
+
     if (
       authReady &&
       view !== "overview" &&
@@ -3741,12 +3964,14 @@ function App() {
       view !== "availability" &&
       view !== "bookings" &&
       view !== "billing" &&
+      view !== "clients" &&
       view !== "payments" &&
       view !== "reviews" &&
       view !== "deals" &&
       view !== "broadcasts" &&
       view !== "aiHub" &&
       view !== "automations" &&
+      view !== "integrations" &&
       view !== "reports" &&
       view !== "settings" &&
       !moduleData[view] &&
@@ -3783,7 +4008,7 @@ function App() {
       />
 
       <main id="desktop-main" className="main-pane" tabIndex={-1}>
-        <header className="topbar glass-surface" aria-busy={syncing || moduleLoading || calendarLoading || availabilityLoading || billingLoading || paymentsLoading || reviewsLoading || dealsLoading || broadcastsLoading || aiRunsLoading || automationsLoading || reportsLoading}>
+        <header className="topbar glass-surface" aria-busy={syncing || moduleLoading || calendarLoading || availabilityLoading || clientsLoading || billingLoading || paymentsLoading || reviewsLoading || dealsLoading || broadcastsLoading || aiRunsLoading || automationsLoading || integrationsLoading || reportsLoading}>
           <div className="topbar-title">
             <p className="eyebrow">{business?.name ?? "Dinaya"}</p>
             <h1>{route.label}</h1>
@@ -3802,8 +4027,8 @@ function App() {
             <button className="small" aria-haspopup="dialog" onClick={openCommandPalette}>
               Command
             </button>
-            <button className="primary small" disabled={syncing || moduleLoading || calendarLoading || availabilityLoading || billingLoading || paymentsLoading || reviewsLoading || dealsLoading || broadcastsLoading || aiRunsLoading || automationsLoading || reportsLoading} onClick={refreshCurrentView}>
-              {syncing || moduleLoading || calendarLoading || availabilityLoading || billingLoading || paymentsLoading || reviewsLoading || dealsLoading || broadcastsLoading || aiRunsLoading || automationsLoading || reportsLoading ? "Syncing..." : "Refresh"}
+            <button className="primary small" disabled={syncing || moduleLoading || calendarLoading || availabilityLoading || clientsLoading || billingLoading || paymentsLoading || reviewsLoading || dealsLoading || broadcastsLoading || aiRunsLoading || automationsLoading || integrationsLoading || reportsLoading} onClick={refreshCurrentView}>
+              {syncing || moduleLoading || calendarLoading || availabilityLoading || clientsLoading || billingLoading || paymentsLoading || reviewsLoading || dealsLoading || broadcastsLoading || aiRunsLoading || automationsLoading || integrationsLoading || reportsLoading ? "Syncing..." : "Refresh"}
             </button>
           </div>
         </header>
@@ -3905,6 +4130,31 @@ function App() {
             onTab={(next) => {
               setTab(next);
               void runSync(next);
+            }}
+          />
+        ) : view === "clients" ? (
+          <ClientsWorkspace
+            data={clientsData}
+            detail={clientDetail}
+            detailError={clientDetailError}
+            detailLoading={clientDetailLoading}
+            error={clientsError}
+            loading={clientsLoading}
+            noteDraft={clientNoteDraft}
+            noteSaving={clientNoteSaving}
+            query={clientsQuery}
+            selectedId={selectedClientId}
+            stageFilter={clientsStageFilter}
+            onApply={() => void loadClients()}
+            onNoteDraft={setClientNoteDraft}
+            onNoteSave={(id) => void addClientNote(id)}
+            onOpenClient={(id) => void openClientDetail(id)}
+            onOpenWeb={(path) => void invoke("desktop_open_dashboard_path", { path })}
+            onQuery={setClientsQuery}
+            onRefresh={() => void loadClients()}
+            onStageFilter={(stage) => {
+              setClientsStageFilter(stage);
+              void loadClients(stage, clientsQuery);
             }}
           />
         ) : view === "billing" ? (
@@ -4070,6 +4320,27 @@ function App() {
               void loadAutomations(status, automationsQuery);
             }}
             onToggle={(id, isActive) => void updateAutomationDetail(id, { isActive })}
+          />
+        ) : view === "integrations" ? (
+          <IntegrationsWorkspace
+            data={integrationsData}
+            detail={integrationDetail}
+            detailError={integrationDetailError}
+            detailLoading={integrationDetailLoading}
+            error={integrationsError}
+            loading={integrationsLoading}
+            query={integrationsQuery}
+            selectedId={selectedIntegrationId}
+            statusFilter={integrationsStatusFilter}
+            onApply={() => void loadIntegrations()}
+            onOpenDetail={(id) => void openIntegrationDetail(id)}
+            onOpenWeb={(path) => void invoke("desktop_open_dashboard_path", { path })}
+            onQuery={setIntegrationsQuery}
+            onRefresh={() => void loadIntegrations()}
+            onStatusFilter={(status) => {
+              setIntegrationsStatusFilter(status);
+              void loadIntegrations(status, integrationsQuery);
+            }}
           />
         ) : view === "settings" ? (
           <SettingsView
@@ -5302,6 +5573,166 @@ function BookingDetailPanel(props: {
   );
 }
 
+function ClientsWorkspace({
+  data,
+  detail,
+  detailError,
+  detailLoading,
+  error,
+  loading,
+  noteDraft,
+  noteSaving,
+  query,
+  selectedId,
+  stageFilter,
+  onApply,
+  onNoteDraft,
+  onNoteSave,
+  onOpenClient,
+  onOpenWeb,
+  onQuery,
+  onRefresh,
+  onStageFilter,
+}: {
+  data: DesktopClientsPayload | null;
+  detail: ClientDetailPayload | null;
+  detailError: string;
+  detailLoading: boolean;
+  error: string;
+  loading: boolean;
+  noteDraft: string;
+  noteSaving: boolean;
+  query: string;
+  selectedId: string | null;
+  stageFilter: ClientStageFilter;
+  onApply: () => void;
+  onNoteDraft: (value: string) => void;
+  onNoteSave: (id: string) => void;
+  onOpenClient: (id: string) => void;
+  onOpenWeb: (path: string) => void;
+  onQuery: (value: string) => void;
+  onRefresh: () => void;
+  onStageFilter: (stage: ClientStageFilter) => void;
+}) {
+  const summary = data?.summary;
+  const stageOptions: Array<{ count: number; label: string; value: ClientStageFilter }> = [
+    { count: summary?.totalClients ?? 0, label: "All", value: "all" },
+    { count: summary?.leads ?? 0, label: "Leads", value: "lead" },
+    { count: summary?.prospects ?? 0, label: "Prospects", value: "prospect" },
+    { count: summary?.activeClients ?? 0, label: "Active", value: "active" },
+    { count: summary?.churnedClients ?? 0, label: "Churned", value: "churned" },
+  ];
+
+  return (
+    <section className="module-view has-detail clients-workspace">
+      <div className="module-split">
+        <div className="module-panel glass-surface">
+          <div className="module-head">
+            <div>
+              <p className="eyebrow">Native Clients</p>
+              <h2>Customer CRM</h2>
+              <p>Search customers, filter by stage, inspect history, and keep private notes.</p>
+            </div>
+            <div className="module-actions">
+              <button className="primary small" disabled={loading} onClick={onRefresh}>
+                {loading ? "Loading..." : "Refresh"}
+              </button>
+              <button onClick={() => onOpenWeb(data?.webUrl ?? "/dashboard/clients")}>
+                Open clients in browser
+              </button>
+            </div>
+          </div>
+
+          {error && <div className="error-banner inline">{error}</div>}
+
+          <div className="metric-grid module-metrics">
+            <MetricCard label="Clients" tone="cobalt" value={summary?.totalClients ?? 0} />
+            <MetricCard label="Active" tone="emerald" value={summary?.activeClients ?? 0} />
+            <MetricCard label="Leads" tone="amber" value={summary?.leads ?? 0} />
+            <MetricCard label="Opt-outs" tone="slate" value={summary?.optedOutClients ?? 0} />
+          </div>
+
+          <div className="filters client-filter-row">
+            <div className="tabs">
+              {stageOptions.map((option) => (
+                <button
+                  key={option.value}
+                  className={stageFilter === option.value ? "active" : ""}
+                  type="button"
+                  onClick={() => onStageFilter(option.value)}
+                >
+                  {option.label} ({option.count})
+                </button>
+              ))}
+            </div>
+            <div className="filter-row">
+              <input
+                placeholder="Search name, phone, email, or source"
+                type="search"
+                value={query}
+                onChange={(event) => onQuery(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") onApply();
+                }}
+              />
+              <button className="primary" disabled={loading} onClick={onApply}>
+                Apply
+              </button>
+            </div>
+          </div>
+
+          <div className="module-meta">
+            <span>{data ? `${data.rows.length} clients loaded` : loading ? "Loading live data" : "Ready to load"}</span>
+            <span>{data ? `Synced ${formatTime(data.serverTime)}` : "/api/v1/desktop/clients"}</span>
+          </div>
+
+          {loading && !data ? (
+            <div className="empty-state">Loading clients...</div>
+          ) : data?.rows.length ? (
+            <ul className="module-list client-list">
+              {data.rows.map((client) => (
+                <li key={client.id}>
+                  <button
+                    className={selectedId === client.id ? "module-list-item selected" : "module-list-item"}
+                    type="button"
+                    onClick={() => onOpenClient(client.id)}
+                  >
+                    <div>
+                      <strong>{client.name}</strong>
+                      <span>{client.phone}{client.email ? ` - ${client.email}` : ""}</span>
+                    </div>
+                    <div className="module-list-meta">
+                      <span className={`module-status stage-${client.stage}`}>{client.stage}</span>
+                      <span>
+                        {client.bookingCount} bookings - {client.lastBookingAt ? formatModuleMeta(client.lastBookingAt) : client.source?.replaceAll("_", " ") ?? "No source"}
+                      </span>
+                    </div>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="empty-state">
+              No clients match this filter.
+            </div>
+          )}
+        </div>
+
+        <ClientDetailPanel
+          detail={detail}
+          error={detailError}
+          loading={detailLoading}
+          noteDraft={noteDraft}
+          savingNote={noteSaving}
+          onNoteDraft={onNoteDraft}
+          onNoteSave={onNoteSave}
+          onOpenWeb={onOpenWeb}
+        />
+      </div>
+    </section>
+  );
+}
+
 function ModuleWorkspace({
   aiRunDetail,
   aiRunDetailError,
@@ -5716,6 +6147,17 @@ function ClientDetailPanel({
       <div className="client-mini-grid">
         <MetricCard label="Bookings" tone="cobalt" value={detail.bookings.length} />
         <MetricCard label="Completed" tone="emerald" value={completedBookings} />
+      </div>
+
+      <div className="actions">
+        <button type="button" onClick={() => void navigator.clipboard?.writeText(detail.client.phone)}>
+          Copy phone
+        </button>
+        {detail.client.email && (
+          <button type="button" onClick={() => void navigator.clipboard?.writeText(detail.client.email ?? "")}>
+            Copy email
+          </button>
+        )}
       </div>
 
       <section className="client-section">
@@ -8138,6 +8580,165 @@ function AutomationDetailPanel({
         <button onClick={() => onOpenWeb(detail.webUrl)}>Open automations in browser</button>
       </div>
     </aside>
+  );
+}
+
+function IntegrationsWorkspace({
+  data,
+  detail,
+  detailError,
+  detailLoading,
+  error,
+  loading,
+  query,
+  selectedId,
+  statusFilter,
+  onApply,
+  onOpenDetail,
+  onOpenWeb,
+  onQuery,
+  onRefresh,
+  onStatusFilter,
+}: {
+  data: DesktopIntegrationsPayload | null;
+  detail: IntegrationDetailPayload | null;
+  detailError: string;
+  detailLoading: boolean;
+  error: string;
+  loading: boolean;
+  query: string;
+  selectedId: string | null;
+  statusFilter: IntegrationStatusFilter;
+  onApply: () => void;
+  onOpenDetail: (id: string) => void;
+  onOpenWeb: (path: string) => void;
+  onQuery: (value: string) => void;
+  onRefresh: () => void;
+  onStatusFilter: (status: IntegrationStatusFilter) => void;
+}) {
+  const summary = data?.summary;
+  const statusOptions: Array<{ count: number; label: string; value: IntegrationStatusFilter }> = [
+    { count: summary?.totalIntegrations ?? 0, label: "All", value: "all" },
+    { count: summary?.connectedIntegrations ?? 0, label: "Connected", value: "connected" },
+    { count: summary?.availableIntegrations ?? 0, label: "Available", value: "available" },
+    { count: summary?.actionRequiredIntegrations ?? 0, label: "Needs setup", value: "action_required" },
+    { count: summary?.envRequiredIntegrations ?? 0, label: "Env", value: "env_required" },
+    { count: summary?.gatedIntegrations ?? 0, label: "Gated", value: "gated" },
+  ];
+
+  function handleOpen(row: IntegrationRow) {
+    if (row.detailId) {
+      onOpenDetail(row.detailId);
+      return;
+    }
+    onOpenWeb(row.setupPath);
+  }
+
+  return (
+    <section className="module-view has-detail integrations-workspace">
+      <div className="module-split">
+        <div className="module-panel glass-surface">
+          <div className="module-head">
+            <div>
+              <p className="eyebrow">Native Integrations</p>
+              <h2>Setup and connection status</h2>
+              <p>Payments, calendar, messaging, voice, domain, webhooks, and API access.</p>
+            </div>
+            <div className="module-actions">
+              <button className="primary small" disabled={loading} onClick={onRefresh}>
+                {loading ? "Loading..." : "Refresh"}
+              </button>
+              <button onClick={() => onOpenWeb(data?.webUrl ?? "/dashboard/settings/integrations")}>
+                Open integrations in browser
+              </button>
+            </div>
+          </div>
+
+          {error && <div className="error-banner inline">{error}</div>}
+
+          <div className="metric-grid module-metrics">
+            <MetricCard label="Integrations" tone="cobalt" value={summary?.totalIntegrations ?? 0} />
+            <MetricCard label="Connected" tone="emerald" value={summary?.connectedIntegrations ?? 0} />
+            <MetricCard label="Needs setup" tone="amber" value={(summary?.actionRequiredIntegrations ?? 0) + (summary?.envRequiredIntegrations ?? 0)} />
+            <MetricCard label="Gated" tone="slate" value={summary?.gatedIntegrations ?? 0} />
+          </div>
+
+          <div className="filters integration-filter-row">
+            <div className="tabs">
+              {statusOptions.map((option) => (
+                <button
+                  key={option.value}
+                  className={statusFilter === option.value ? "active" : ""}
+                  type="button"
+                  onClick={() => onStatusFilter(option.value)}
+                >
+                  {option.label} ({option.count})
+                </button>
+              ))}
+            </div>
+            <div className="filter-row">
+              <input
+                placeholder="Search provider, category, account, or status"
+                type="search"
+                value={query}
+                onChange={(event) => onQuery(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") onApply();
+                }}
+              />
+              <button className="primary" disabled={loading} onClick={onApply}>
+                Apply
+              </button>
+            </div>
+          </div>
+
+          <div className="module-meta">
+            <span>{data ? `${data.rows.length} integration rows loaded` : loading ? "Loading live data" : "Ready to load"}</span>
+            <span>{data ? `Synced ${formatTime(data.serverTime)}` : "/api/v1/desktop/integrations"}</span>
+          </div>
+
+          {loading && !data ? (
+            <div className="empty-state">Loading integrations...</div>
+          ) : data?.rows.length ? (
+            <ul className="module-list integration-list">
+              {data.rows.map((row) => (
+                <li key={row.id}>
+                  <button
+                    className={selectedId === row.detailId ? "module-list-item selected" : "module-list-item"}
+                    type="button"
+                    onClick={() => handleOpen(row)}
+                  >
+                    <div>
+                      <strong>{row.name}</strong>
+                      <span>{row.description}</span>
+                    </div>
+                    <div className="module-list-meta">
+                      <span className={`module-status ${integrationListStatusClass[row.status]}`}>
+                        {row.statusLabel}
+                      </span>
+                      <span>
+                        {row.accountName ?? row.category} - {row.detailId ? "Native detail" : row.actionLabel}
+                      </span>
+                    </div>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="empty-state">
+              No integrations match this filter.
+            </div>
+          )}
+        </div>
+
+        <IntegrationDetailPanel
+          detail={detail}
+          error={detailError}
+          loading={detailLoading}
+          onOpenWeb={onOpenWeb}
+        />
+      </div>
+    </section>
   );
 }
 
