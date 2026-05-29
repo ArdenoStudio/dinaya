@@ -12,6 +12,7 @@ const desktopTauriMainPath = "apps/desktop/src-tauri/src/main.rs";
 const desktopSmokePath = "scripts/desktop-smoke.ps1";
 const desktopAiRoutePath = "src/app/api/v1/desktop/ai/route.ts";
 const desktopAutomationsRoutePath = "src/app/api/v1/desktop/automations/route.ts";
+const desktopIntegrationsRoutePath = "src/app/api/v1/desktop/integrations/route.ts";
 const desktopClientNoteRoutePath = "src/app/api/v1/desktop/clients/[id]/notes/route.ts";
 const desktopBroadcastsRoutePath = "src/app/api/v1/desktop/broadcasts/route.ts";
 const desktopDealsRoutePath = "src/app/api/v1/desktop/deals/route.ts";
@@ -25,6 +26,7 @@ const desktopAvailabilityOverrideRoutePath = "src/app/api/v1/desktop/availabilit
 const dashboardClientsPath = "src/lib/dashboard/clients.ts";
 const dashboardAiPath = "src/lib/dashboard/ai.ts";
 const dashboardAutomationsPath = "src/lib/dashboard/automations.ts";
+const dashboardIntegrationsPath = "src/lib/dashboard/integrations.ts";
 const dashboardBroadcastsPath = "src/lib/dashboard/broadcasts.ts";
 const dashboardDealsPath = "src/lib/dashboard/deals.ts";
 const dashboardPaymentsPath = "src/lib/dashboard/payments.ts";
@@ -81,6 +83,8 @@ const requiredFiles = [
   "src/app/api/v1/desktop/ai/route.test.ts",
   "src/app/api/v1/desktop/automations/route.ts",
   "src/app/api/v1/desktop/automations/route.test.ts",
+  "src/app/api/v1/desktop/integrations/route.ts",
+  "src/app/api/v1/desktop/integrations/route.test.ts",
   "src/app/api/v1/desktop/broadcasts/route.ts",
   "src/app/api/v1/desktop/broadcasts/route.test.ts",
   "src/app/api/v1/desktop/clients/[id]/notes/route.ts",
@@ -134,6 +138,9 @@ const requiredDesktopUiMarkers = [
   "AutomationsWorkspace",
   "automation-filter-row",
   "loadAutomations",
+  "IntegrationsWorkspace",
+  "integration-filter-row",
+  "loadIntegrations",
   "BroadcastsWorkspace",
   "broadcast-filter-row",
   "loadBroadcasts",
@@ -209,6 +216,7 @@ const desktopCommands = read(desktopCommandsPath);
 const desktopTauriMain = read(desktopTauriMainPath);
 const desktopAiRoute = read(desktopAiRoutePath);
 const desktopAutomationsRoute = read(desktopAutomationsRoutePath);
+const desktopIntegrationsRoute = read(desktopIntegrationsRoutePath);
 const desktopClientNoteRoute = read(desktopClientNoteRoutePath);
 const desktopBroadcastsRoute = read(desktopBroadcastsRoutePath);
 const desktopDealsRoute = read(desktopDealsRoutePath);
@@ -221,6 +229,7 @@ const desktopAvailabilityRoute = read(desktopAvailabilityRoutePath);
 const desktopAvailabilityOverrideRoute = read(desktopAvailabilityOverrideRoutePath);
 const dashboardAi = read(dashboardAiPath);
 const dashboardAutomations = read(dashboardAutomationsPath);
+const dashboardIntegrations = read(dashboardIntegrationsPath);
 const dashboardClients = read(dashboardClientsPath);
 const dashboardBroadcasts = read(dashboardBroadcastsPath);
 const dashboardDeals = read(dashboardDealsPath);
@@ -262,6 +271,10 @@ requireText(desktopAutomationsRoute, "export async function GET", "desktop autom
 requireText(desktopAutomationsRoute, "requireDesktopRead", "desktop automations read auth");
 requireText(dashboardAutomations, "getAutomationsDashboardList", "shared automations list helper");
 requireText(dashboardAutomations, "isDashboardAutomationStatusFilter", "shared automation status validation");
+requireText(desktopIntegrationsRoute, "export async function GET", "desktop integrations GET route");
+requireText(desktopIntegrationsRoute, "requireDesktopRead", "desktop integrations read auth");
+requireText(dashboardIntegrations, "getIntegrationsDashboardList", "shared integrations list helper");
+requireText(dashboardIntegrations, "isDashboardIntegrationStatusFilter", "shared integrations status validation");
 requireText(desktopClientNoteRoute, "export async function POST", "desktop client note POST route");
 requireText(desktopClientNoteRoute, "requireDesktopWrite", "desktop client note write auth");
 requireText(dashboardClients, "createClientDashboardNote", "shared client note create helper");

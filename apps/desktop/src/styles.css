@@ -1377,7 +1377,8 @@ textarea:focus-visible,
 .deal-filter-row,
 .broadcast-filter-row,
 .ai-filter-row,
-.automation-filter-row {
+.automation-filter-row,
+.integration-filter-row {
   border: 1px solid var(--line);
   border-radius: 12px;
 }
@@ -1415,7 +1416,9 @@ textarea:focus-visible,
 .ai-filter-row .tabs,
 .ai-filter-row .filter-row,
 .automation-filter-row .tabs,
-.automation-filter-row .filter-row {
+.automation-filter-row .filter-row,
+.integration-filter-row .tabs,
+.integration-filter-row .filter-row {
   flex-wrap: wrap;
 }
 
@@ -1424,7 +1427,8 @@ textarea:focus-visible,
 .deal-filter-row .filter-row input,
 .broadcast-filter-row .filter-row input,
 .ai-filter-row .filter-row input,
-.automation-filter-row .filter-row input {
+.automation-filter-row .filter-row input,
+.integration-filter-row .filter-row input {
   min-width: min(320px, 100%);
   flex: 1 1 260px;
 }
