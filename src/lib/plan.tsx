@@ -5,9 +5,12 @@ import { Icon } from "@/components/ui/Icon";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export type Plan = "free" | "pro" | "max";
+export type Plan = "trial" | "pro" | "max" | "expired";
 export type BillingInterval = "monthly" | "annual";
 export type PaidPlan = "pro" | "max";
+
+/** Length of the free trial granted to every new business. */
+export const TRIAL_LENGTH_DAYS = 14;
 
 export type PlanFeature =
   | "aiBookingAutopilot"
@@ -67,19 +70,56 @@ export type PlanConfig = {
 };
 
 const PLAN_RANK: Record<Plan, number> = {
-  free: 0,
+  expired: 0,
+  trial: 0,
   pro: 1,
   max: 2,
 };
 
 // ─── Defaults ─────────────────────────────────────────────────────────────────
 
-const DEFAULT_FREE_ENTITLEMENTS: Entitlements = {
+// 14-day trial: Max-level access, minus the cost-exposed extras (AI voice,
+// multi-location) which unlock on a paid plan. Tune caps here.
+const DEFAULT_TRIAL_ENTITLEMENTS: Entitlements = {
   limits: {
     bookingsPerMonth: null,
-    staff: 1,
-    services: 5,
+    staff: null,
+    services: null,
     locations: 1,
+  },
+  features: {
+    aiBookingAutopilot: true,
+    aiContentMachine: true,
+    aiDealSuggestions: true,
+    aiUpsellAssistant: true,
+    aiVoiceReceptionist: false,
+    automations: true,
+    broadcasts: true,
+    clientReactivationCampaign: true,
+    deals: true,
+    googleCalendarSync: true,
+    payments: true,
+    publicBookingPage: true,
+    publicBookingPageCustomization: true,
+    reports: true,
+    reviewEngine: true,
+    reviews: true,
+    reviewReplies: true,
+    smartReminderSystem: true,
+    vipLoyaltySequence: true,
+    webhooks: true,
+    whatsappSms: true,
+  },
+};
+
+// Locked state after the trial lapses (or a chargeback): read-only, public
+// booking page off, no new bookings until the business subscribes.
+const DEFAULT_EXPIRED_ENTITLEMENTS: Entitlements = {
+  limits: {
+    bookingsPerMonth: 0,
+    staff: 0,
+    services: 0,
+    locations: 0,
   },
   features: {
     aiBookingAutopilot: false,
@@ -92,12 +132,12 @@ const DEFAULT_FREE_ENTITLEMENTS: Entitlements = {
     clientReactivationCampaign: false,
     deals: false,
     googleCalendarSync: false,
-    payments: true,
-    publicBookingPage: true,
+    payments: false,
+    publicBookingPage: false,
     publicBookingPageCustomization: false,
     reports: false,
     reviewEngine: false,
-    reviews: true,
+    reviews: false,
     reviewReplies: false,
     smartReminderSystem: false,
     vipLoyaltySequence: false,
@@ -178,9 +218,10 @@ export const DEFAULT_PLAN_CONFIG: PlanConfig = {
   proLaunched: true,
   maxLaunched: true,
   plans: {
-    free: DEFAULT_FREE_ENTITLEMENTS,
+    trial: DEFAULT_TRIAL_ENTITLEMENTS,
     pro: DEFAULT_PRO_ENTITLEMENTS,
     max: DEFAULT_MAX_ENTITLEMENTS,
+    expired: DEFAULT_EXPIRED_ENTITLEMENTS,
   },
 };
 
@@ -200,17 +241,30 @@ const CONFIG_FILE = path.join(CONFIG_DIR, "plans.json");
 
 let cached: PlanConfig | null = null;
 
+// `null` is a meaningful limit value ("unlimited"), so only fall back to the
+// default when the saved value is actually missing (undefined). Using `??`
+// would discard an admin's intentional "unlimited" for any limit whose default
+// is a number (e.g. trial/pro locations) and silently revert it.
+function pickLimit(
+  value: number | null | undefined,
+  fallback: number | null
+): number | null {
+  return value !== undefined ? value : fallback;
+}
+
 function mergeEntitlements(
   defaults: Entitlements,
   fromDisk: Partial<Entitlements> | undefined
 ): Entitlements {
   return {
     limits: {
-      bookingsPerMonth:
-        fromDisk?.limits?.bookingsPerMonth ?? defaults.limits.bookingsPerMonth,
-      staff: fromDisk?.limits?.staff ?? defaults.limits.staff,
-      services: fromDisk?.limits?.services ?? defaults.limits.services,
-      locations: fromDisk?.limits?.locations ?? defaults.limits.locations,
+      bookingsPerMonth: pickLimit(
+        fromDisk?.limits?.bookingsPerMonth,
+        defaults.limits.bookingsPerMonth
+      ),
+      staff: pickLimit(fromDisk?.limits?.staff, defaults.limits.staff),
+      services: pickLimit(fromDisk?.limits?.services, defaults.limits.services),
+      locations: pickLimit(fromDisk?.limits?.locations, defaults.limits.locations),
     },
     features: {
       ...defaults.features,
@@ -232,12 +286,16 @@ function mergePlanConfig(fromDisk: Partial<PlanConfig>): PlanConfig {
     proLaunched: fromDisk.proLaunched ?? DEFAULT_PLAN_CONFIG.proLaunched,
     maxLaunched: fromDisk.maxLaunched ?? DEFAULT_PLAN_CONFIG.maxLaunched,
     plans: {
-      free: mergeEntitlements(
-        DEFAULT_FREE_ENTITLEMENTS,
-        fromDisk.plans?.free
+      trial: mergeEntitlements(
+        DEFAULT_TRIAL_ENTITLEMENTS,
+        fromDisk.plans?.trial
       ),
       pro: mergeEntitlements(DEFAULT_PRO_ENTITLEMENTS, fromDisk.plans?.pro),
       max: mergeEntitlements(DEFAULT_MAX_ENTITLEMENTS, fromDisk.plans?.max),
+      expired: mergeEntitlements(
+        DEFAULT_EXPIRED_ENTITLEMENTS,
+        fromDisk.plans?.expired
+      ),
     },
     updatedAt: fromDisk.updatedAt,
     updatedBy: fromDisk.updatedBy,
@@ -248,7 +306,7 @@ function loadFromDisk(): PlanConfig | null {
   try {
     const raw = readFileSync(CONFIG_FILE, "utf8");
     const parsed = JSON.parse(raw) as Partial<PlanConfig>;
-    if (!parsed.plans?.free || !parsed.plans?.pro) return null;
+    if (!parsed.plans?.pro || !parsed.plans?.max) return null;
     return mergePlanConfig(parsed);
   } catch {
     return null;
@@ -282,7 +340,7 @@ export async function getPlanConfigAsync(): Promise<PlanConfig> {
   try {
     const { getPlatformSetting } = await import("@/lib/platform-settings");
     const fromDb = await getPlatformSetting<Partial<PlanConfig>>("plan_config");
-    if (fromDb?.plans?.free && fromDb?.plans?.pro) {
+    if (fromDb?.plans?.pro && fromDb?.plans?.max) {
       cached = mergePlanConfig(fromDb);
       return cached;
     }
@@ -335,7 +393,8 @@ export function annualSavingsPercent(monthlyLkr: number, annualLkr: number): num
 export function planDisplayName(plan: Plan): string {
   if (plan === "max") return "Max";
   if (plan === "pro") return "Pro";
-  return "Free";
+  if (plan === "trial") return "Free trial";
+  return "Expired";
 }
 
 export function isPaidPlan(plan: Plan): boolean {
@@ -346,17 +405,18 @@ export function isPaidPlanAvailable(plan: PaidPlan, config: PlanConfig = getPlan
   return plan === "pro" ? config.proLaunched : config.maxLaunched;
 }
 
-/** Effective plan after expiry — stored plan downgrades to free when planExpiresAt is past. */
+/** Effective plan after expiry — trial/paid plans lock to "expired" once planExpiresAt is past. */
 export function resolveEffectivePlan(input: {
-  storedPlan: Plan;
+  storedPlan: Plan | "free" | null | undefined;
   planExpiresAt: Date | null | undefined;
   now?: Date;
 }): Plan {
   const now = input.now ?? new Date();
-  const stored = input.storedPlan ?? "free";
+  // Legacy "free" rows (pre-trial model) collapse to the locked state.
+  const stored = (input.storedPlan ?? "expired") as Plan | "free";
 
-  if (stored === "free") return "free";
-  if (input.planExpiresAt && input.planExpiresAt < now) return "free";
+  if (stored === "expired" || stored === "free") return "expired";
+  if (input.planExpiresAt && input.planExpiresAt < now) return "expired";
   return stored;
 }
 
@@ -395,13 +455,15 @@ export function canUseFeature(plan: Plan, feature: PlanFeature): boolean {
   return getEffectiveEntitlements(plan).features[feature];
 }
 
-export const FREE_ENTITLEMENTS = DEFAULT_FREE_ENTITLEMENTS;
+export const TRIAL_ENTITLEMENTS = DEFAULT_TRIAL_ENTITLEMENTS;
+export const EXPIRED_ENTITLEMENTS = DEFAULT_EXPIRED_ENTITLEMENTS;
 export const PRO_ENTITLEMENTS = DEFAULT_PRO_ENTITLEMENTS;
 export const MAX_ENTITLEMENTS = DEFAULT_MAX_ENTITLEMENTS;
 export const PLAN_ENTITLEMENTS: Record<Plan, Entitlements> = {
-  free: DEFAULT_FREE_ENTITLEMENTS,
+  trial: DEFAULT_TRIAL_ENTITLEMENTS,
   pro: DEFAULT_PRO_ENTITLEMENTS,
   max: DEFAULT_MAX_ENTITLEMENTS,
+  expired: DEFAULT_EXPIRED_ENTITLEMENTS,
 };
 
 const FEATURE_LABELS: Record<PlanFeature, string> = {
@@ -475,7 +537,7 @@ export async function getBusinessPlan(businessId: string): Promise<Plan> {
     .limit(1);
 
   return resolveEffectivePlan({
-    storedPlan: (business?.plan as Plan | undefined) ?? "free",
+    storedPlan: (business?.plan as Plan | undefined) ?? "expired",
     planExpiresAt: business?.planExpiresAt,
   });
 }
