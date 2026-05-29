@@ -21,11 +21,6 @@ const NAV_LINKS = [
   { label: "Contact",   href: "/contact"   },
 ];
 
-const ACCOUNT_LINKS = [
-  { label: "Log in",           href: "/auth/signin"    },
-  { label: "Get started free", href: "/register" },
-];
-
 const QUICK_LINKS = [
   { label: "Privacy Policy ↗", href: "/legal/privacy" },
   { label: "Terms ↗",          href: "/legal/terms"   },
@@ -171,7 +166,7 @@ export function UnderlayNav() {
                 transition={{ duration: 0.5, ease: BACK_OUT }}
               />
             </span>
-            <span className="text-base font-medium text-gray-900">Menu</span>
+            <span className="text-base font-medium text-gray-900">{isOpen ? "Close" : "Menu"}</span>
           </button>
 
           {/* Logo — threshold swap: text ↔ icon */}
@@ -266,15 +261,6 @@ export function UnderlayNav() {
                   </ul>
                 </div>
 
-                {/* Account links */}
-                <motion.div
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={isOpen ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 }}
-                  transition={{ delay: isOpen ? 0.44 : 0, duration: 0.45, ease: "easeOut" }}
-                >
-                  <SubCol heading="Account" items={ACCOUNT_LINKS} isOpen={isOpen} onClose={close} baseDelay={0.44} />
-                </motion.div>
-
                 {/* CTA buttons */}
                 <motion.div
                   className="flex flex-col gap-2"
@@ -338,7 +324,7 @@ export function UnderlayNav() {
                             onClick={close}
                             aria-current={isNavLinkActive(pathname, item) ? "page" : undefined}
                             className={[
-                              "block py-2.5 text-[clamp(1.4rem,3.5vw,2rem)] font-bold",
+                              "block py-2.5 text-[clamp(1.15rem,2.5vw,1.5rem)] font-bold",
                               "tracking-[-0.03em] leading-none transition-colors",
                               isNavLinkActive(pathname, item) ? "text-primary" : "text-gray-900 hover:text-gray-400",
                             ].join(" ")}
@@ -405,10 +391,9 @@ export function UnderlayNav() {
                   </div>
                 </div>
 
-                {/* Column 3 — account + legal */}
+                {/* Column 3 — legal */}
                 <div className="flex flex-col gap-6 min-w-[8rem] pl-4">
-                  <SubCol heading="Account" items={ACCOUNT_LINKS} isOpen={isOpen} onClose={close} baseDelay={0.42} />
-                  <SubCol heading="Legal"   items={QUICK_LINKS}   isOpen={isOpen} onClose={close} baseDelay={0.52} />
+                  <SubCol heading="Legal"   items={QUICK_LINKS}   isOpen={isOpen} onClose={close} baseDelay={0.42} />
                 </div>
 
                 {/* Column 4 — original CTA card */}
@@ -432,7 +417,7 @@ export function UnderlayNav() {
                   <Link
                     href="/register"
                     onClick={close}
-                    className="block text-center text-sm font-semibold bg-gray-900 text-white py-2.5 rounded-lg hover:bg-gray-800 transition-colors"
+                    className="block text-center text-sm font-semibold bg-primary text-white py-2.5 rounded-lg hover:bg-primary/90 transition-colors"
                   >
                     Create free account →
                   </Link>
