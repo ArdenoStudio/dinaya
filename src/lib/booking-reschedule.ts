@@ -9,6 +9,7 @@ import {
 } from "@/db/schema";
 import { and, eq, gt, inArray, lt, ne } from "drizzle-orm";
 import { getAvailableSlots } from "@/lib/availability";
+import { isRequestedSlotAvailable } from "@/lib/booking-availability";
 import { buildClientBookingUrl } from "@/lib/client-tokens";
 import { sendBookingRescheduleMessage } from "@/lib/messaging/booking-messages";
 import { logActivity } from "@/lib/activity-log";
@@ -145,11 +146,14 @@ export async function rescheduleBooking(input: {
       serviceName: services.name,
       durationMinutes: services.durationMinutes,
       minimumNoticeHours: services.minimumNoticeHours,
+      beforeBuffer: services.beforeBuffer,
+      afterBuffer: services.afterBuffer,
       staffName: staff.name,
       businessName: businesses.name,
       businessSlug: businesses.slug,
       businessPlan: businesses.plan,
       businessLanguage: businesses.language,
+      businessTimezone: businesses.timezone,
     })
     .from(bookings)
     .innerJoin(services, eq(services.id, bookings.serviceId))
@@ -185,6 +189,25 @@ export async function rescheduleBooking(input: {
   const expectedEnd = new Date(input.startsAt.getTime() + row.durationMinutes * 60_000);
   if (Math.abs(expectedEnd.getTime() - input.endsAt.getTime()) > 60_000) {
     return { ok: false, error: "Selected time does not match the service duration.", status: 400 };
+  }
+
+  // Client-portal reschedules must land on a slot the booking page would offer
+  // (working hours, blocked days, minimum notice, no past times). Dashboard
+  // reschedules by staff may move bookings freely.
+  if (input.source === "client_portal") {
+    const slotAvailable = await isRequestedSlotAvailable({
+      staffId: row.staffId,
+      start: input.startsAt,
+      durationMinutes: row.durationMinutes,
+      beforeBuffer: row.beforeBuffer,
+      afterBuffer: row.afterBuffer,
+      minimumNoticeHours: row.minimumNoticeHours,
+      timezone: row.businessTimezone,
+      excludeBookingId: row.id,
+    });
+    if (!slotAvailable) {
+      return { ok: false, error: "That time isn't available. Please pick another slot.", status: 409 };
+    }
   }
 
   const conflict = await db

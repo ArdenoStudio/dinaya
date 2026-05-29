@@ -16,6 +16,7 @@ import { processBookingAutomationTrigger } from "@/lib/automations/engine";
 import { normalizeSriLankanPhone } from "@/lib/phone";
 import { decryptSecret } from "@/lib/secrets";
 import { resolveBookingLocationId } from "@/lib/locations";
+import { isRequestedSlotAvailable } from "@/lib/booking-availability";
 import {
   resolveBookingSource,
   resolveClientSource,
@@ -165,6 +166,7 @@ export async function POST(req: NextRequest) {
       slug: businesses.slug,
       plan: businesses.plan,
       language: businesses.language,
+      timezone: businesses.timezone,
     })
     .from(businesses)
     .where(eq(businesses.id, businessId))
@@ -182,7 +184,7 @@ export async function POST(req: NextRequest) {
     await requirePlanLimit(businessId, "bookingsPerMonth", Number(monthBookingCount));
   } catch (error) {
     if (error instanceof PlanLimitError) {
-      return NextResponse.json({ error: "This business has reached the free plan limit of 50 bookings this month." }, { status: 402 });
+      return NextResponse.json({ error: "This business isn't accepting online bookings right now." }, { status: 402 });
     }
     throw error;
   }
@@ -195,6 +197,9 @@ export async function POST(req: NextRequest) {
       depositPercent: services.depositPercent,
       requiresPayment: services.requiresPayment,
       durationMinutes: services.durationMinutes,
+      beforeBuffer: services.beforeBuffer,
+      afterBuffer: services.afterBuffer,
+      minimumNoticeHours: services.minimumNoticeHours,
       isActive: services.isActive,
     })
     .from(services)
@@ -293,6 +298,28 @@ export async function POST(req: NextRequest) {
   const expectedEnd = new Date(start.getTime() + service.durationMinutes * 60_000);
   if (Math.abs(expectedEnd.getTime() - end.getTime()) > 60_000) {
     return NextResponse.json({ error: "Booking duration does not match the selected service." }, { status: 400 });
+  }
+
+  // Public bookings must land on a slot the booking page would actually offer
+  // (working hours, blocked days, minimum notice, no past times). The UI only
+  // shows valid slots, but a direct API caller could submit any time — so
+  // enforce it server-side. Owner/manual and API-key bookings may book freely.
+  if (!isOwnerBooking && !isApiBooking) {
+    const slotAvailable = await isRequestedSlotAvailable({
+      staffId,
+      start,
+      durationMinutes: service.durationMinutes,
+      beforeBuffer: service.beforeBuffer,
+      afterBuffer: service.afterBuffer,
+      minimumNoticeHours: service.minimumNoticeHours,
+      timezone: business.timezone,
+    });
+    if (!slotAvailable) {
+      return NextResponse.json(
+        { error: "That time isn't available. Please pick another slot." },
+        { status: 409 }
+      );
+    }
   }
 
   // Fast pre-check. The database exclusion constraint is the final race guard.
