@@ -1379,7 +1379,8 @@ textarea:focus-visible,
 .ai-filter-row,
 .automation-filter-row,
 .integration-filter-row,
-.client-filter-row {
+.client-filter-row,
+.service-filter-row {
   border: 1px solid var(--line);
   border-radius: 12px;
 }
@@ -1421,7 +1422,9 @@ textarea:focus-visible,
 .integration-filter-row .tabs,
 .integration-filter-row .filter-row,
 .client-filter-row .tabs,
-.client-filter-row .filter-row {
+.client-filter-row .filter-row,
+.service-filter-row .tabs,
+.service-filter-row .filter-row {
   flex-wrap: wrap;
 }
 
@@ -1432,7 +1435,8 @@ textarea:focus-visible,
 .ai-filter-row .filter-row input,
 .automation-filter-row .filter-row input,
 .integration-filter-row .filter-row input,
-.client-filter-row .filter-row input {
+.client-filter-row .filter-row input,
+.service-filter-row .filter-row input {
   min-width: min(320px, 100%);
   flex: 1 1 260px;
 }

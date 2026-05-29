@@ -229,6 +229,47 @@ type ClientDetailPayload = {
   webUrl: string;
 };
 
+type ServiceStatusFilter = "active" | "all" | "inactive";
+
+type ServiceRow = {
+  afterBuffer: number;
+  assignedStaffCount: number;
+  beforeBuffer: number;
+  bookingCount: number;
+  createdAt: string;
+  dailyCapacity: number | null;
+  depositPercent: number;
+  description: string | null;
+  durationMinutes: number;
+  futureBookingCount: number;
+  id: string;
+  isActive: boolean;
+  lastBookingAt: string | null;
+  minimumNoticeHours: number;
+  name: string;
+  priceLkr: number;
+  requiresPayment: boolean;
+};
+
+type DesktopServicesPayload = {
+  filters: {
+    limit: number;
+    q: string;
+    status: ServiceStatusFilter;
+  };
+  rows: ServiceRow[];
+  serverTime: string;
+  summary: {
+    activeServices: number;
+    averageDurationMinutes: number;
+    averagePriceLkr: number;
+    inactiveServices: number;
+    paymentRequiredServices: number;
+    totalServices: number;
+  };
+  webUrl: string;
+};
+
 type ServiceDetailPayload = {
   assignedStaff: Array<{
     id: string;
@@ -1902,6 +1943,11 @@ function App() {
   const [clientNoteDraft, setClientNoteDraft] = useState("");
   const [clientNoteSaving, setClientNoteSaving] = useState(false);
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
+  const [servicesData, setServicesData] = useState<DesktopServicesPayload | null>(null);
+  const [servicesError, setServicesError] = useState("");
+  const [servicesLoading, setServicesLoading] = useState(false);
+  const [servicesQuery, setServicesQuery] = useState("");
+  const [servicesStatusFilter, setServicesStatusFilter] = useState<ServiceStatusFilter>("all");
   const [serviceDetail, setServiceDetail] = useState<ServiceDetailPayload | null>(null);
   const [serviceEditDraft, setServiceEditDraft] = useState<ServiceEditDraft | null>(null);
   const [serviceDetailError, setServiceDetailError] = useState("");
@@ -2051,6 +2097,10 @@ function App() {
     return offlineCacheKey("clients", nextStage, nextQuery || "all");
   }
 
+  function servicesCacheKey(nextStatus = servicesStatusFilter, nextQuery = servicesQuery) {
+    return offlineCacheKey("services", nextStatus, nextQuery || "all");
+  }
+
   function reportsCacheKey(nextFrom = reportsFrom, nextTo = reportsTo) {
     return offlineCacheKey("reports", nextFrom, nextTo);
   }
@@ -2192,6 +2242,46 @@ function App() {
       );
     } finally {
       setClientsLoading(false);
+    }
+  }
+
+  async function fetchServices(
+    nextStatus = servicesStatusFilter,
+    nextQuery = servicesQuery,
+  ): Promise<DesktopServicesPayload> {
+    const path = buildDesktopApiPath("/api/v1/desktop/services", {
+      limit: 80,
+      q: nextQuery.trim() || undefined,
+      status: nextStatus === "all" ? undefined : nextStatus,
+    });
+    return desktopApiRequest<DesktopServicesPayload>({ method: "GET", path });
+  }
+
+  async function loadServices(
+    nextStatus = servicesStatusFilter,
+    nextQuery = servicesQuery,
+  ) {
+    setServicesLoading(true);
+    setServicesError("");
+    try {
+      const next = await fetchServices(nextStatus, nextQuery);
+      setServicesData(next);
+      setLastSync(next.serverTime);
+      writeOfflineCache(servicesCacheKey(nextStatus, nextQuery), next);
+      setOfflineNotice("");
+    } catch (loadError) {
+      restoreCachedRead<DesktopServicesPayload>(
+        servicesCacheKey(nextStatus, nextQuery),
+        "services",
+        loadError,
+        (cached) => {
+          setServicesData(cached);
+          setLastSync(cached.serverTime);
+        },
+        setServicesError,
+      );
+    } finally {
+      setServicesLoading(false);
     }
   }
 
@@ -2873,7 +2963,11 @@ function App() {
       setServiceEditDraft(serviceDraftFromDetail(next));
       setServiceForceDeactivate(false);
       setLastSync(next.serverTime);
-      await loadModule(route);
+      if (view === "services") {
+        await loadServices();
+      } else {
+        await loadModule(route);
+      }
     } catch (loadError) {
       setServiceDetailError(String(loadError));
     } finally {
@@ -3328,7 +3422,12 @@ function App() {
     setClientDetailError("");
     setClientNoteDraft("");
     setSelectedClientId(null);
+    setServicesData(null);
+    setServicesError("");
+    setServicesQuery("");
+    setServicesStatusFilter("all");
     setServiceDetail(null);
+    setServiceEditDraft(null);
     setServiceDetailError("");
     setSelectedServiceId(null);
     setStaffDetail(null);
@@ -3413,7 +3512,9 @@ function App() {
       setSelectedClientId(null);
     }
     if (nextRoute.id !== "services") {
+      setServicesError("");
       setServiceDetail(null);
+      setServiceEditDraft(null);
       setServiceDetailError("");
       setSelectedServiceId(null);
     }
@@ -3485,6 +3586,8 @@ function App() {
       void runSync(tab);
     } else if (nextRoute.id === "clients") {
       void loadClients();
+    } else if (nextRoute.id === "services") {
+      void loadServices();
     } else if (nextRoute.id === "availability") {
       void loadAvailability();
     } else if (nextRoute.id === "billing") {
@@ -3539,6 +3642,10 @@ function App() {
     }
     if (view === "clients") {
       void loadClients();
+      return;
+    }
+    if (view === "services") {
+      void loadServices();
       return;
     }
     if (view === "reviews") {
@@ -3856,6 +3963,8 @@ function App() {
         void loadAvailability();
       } else if (authReady && !clientsLoading && view === "clients") {
         void loadClients();
+      } else if (authReady && !servicesLoading && view === "services") {
+        void loadServices();
       } else if (authReady && !paymentsLoading && view === "payments") {
         void loadPayments();
       } else if (authReady && !reviewsLoading && view === "reviews") {
@@ -3875,7 +3984,7 @@ function App() {
     return () => window.clearInterval(timer);
     // Recreate the polling timer only when user-controlled sync inputs change.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [aiRunsLoading, aiRunsQuery, aiRunsStatusFilter, authReady, automationsLoading, automationsQuery, automationsStatusFilter, availabilityLoading, broadcastsChannelFilter, broadcastsLoading, broadcastsQuery, broadcastsStatusFilter, calendarDate, calendarLoading, calendarMode, calendarStaffFilter, clientsLoading, clientsQuery, clientsStageFilter, dealsLoading, dealsQuery, dealsStatusFilter, integrationsLoading, integrationsQuery, integrationsStatusFilter, paymentsLoading, paymentsQuery, paymentsStatusFilter, reviewsLoading, reviewsQuery, reviewsRatingFilter, reviewsStatusFilter, syncing, tab, query, staffFilter, statusFilter, view]);
+  }, [aiRunsLoading, aiRunsQuery, aiRunsStatusFilter, authReady, automationsLoading, automationsQuery, automationsStatusFilter, availabilityLoading, broadcastsChannelFilter, broadcastsLoading, broadcastsQuery, broadcastsStatusFilter, calendarDate, calendarLoading, calendarMode, calendarStaffFilter, clientsLoading, clientsQuery, clientsStageFilter, dealsLoading, dealsQuery, dealsStatusFilter, integrationsLoading, integrationsQuery, integrationsStatusFilter, paymentsLoading, paymentsQuery, paymentsStatusFilter, reviewsLoading, reviewsQuery, reviewsRatingFilter, reviewsStatusFilter, servicesLoading, servicesQuery, servicesStatusFilter, syncing, tab, query, staffFilter, statusFilter, view]);
 
   useEffect(() => {
     let unlisten: (() => void) | undefined;
@@ -3927,6 +4036,11 @@ function App() {
       return;
     }
 
+    if (authReady && view === "services" && !servicesData && !servicesLoading) {
+      void loadServices();
+      return;
+    }
+
     if (authReady && view === "reviews" && !reviewsData && !reviewsLoading) {
       void loadReviews();
       return;
@@ -3965,6 +4079,7 @@ function App() {
       view !== "bookings" &&
       view !== "billing" &&
       view !== "clients" &&
+      view !== "services" &&
       view !== "payments" &&
       view !== "reviews" &&
       view !== "deals" &&
@@ -4008,7 +4123,7 @@ function App() {
       />
 
       <main id="desktop-main" className="main-pane" tabIndex={-1}>
-        <header className="topbar glass-surface" aria-busy={syncing || moduleLoading || calendarLoading || availabilityLoading || clientsLoading || billingLoading || paymentsLoading || reviewsLoading || dealsLoading || broadcastsLoading || aiRunsLoading || automationsLoading || integrationsLoading || reportsLoading}>
+        <header className="topbar glass-surface" aria-busy={syncing || moduleLoading || calendarLoading || availabilityLoading || clientsLoading || servicesLoading || billingLoading || paymentsLoading || reviewsLoading || dealsLoading || broadcastsLoading || aiRunsLoading || automationsLoading || integrationsLoading || reportsLoading}>
           <div className="topbar-title">
             <p className="eyebrow">{business?.name ?? "Dinaya"}</p>
             <h1>{route.label}</h1>
@@ -4027,8 +4142,8 @@ function App() {
             <button className="small" aria-haspopup="dialog" onClick={openCommandPalette}>
               Command
             </button>
-            <button className="primary small" disabled={syncing || moduleLoading || calendarLoading || availabilityLoading || clientsLoading || billingLoading || paymentsLoading || reviewsLoading || dealsLoading || broadcastsLoading || aiRunsLoading || automationsLoading || integrationsLoading || reportsLoading} onClick={refreshCurrentView}>
-              {syncing || moduleLoading || calendarLoading || availabilityLoading || clientsLoading || billingLoading || paymentsLoading || reviewsLoading || dealsLoading || broadcastsLoading || aiRunsLoading || automationsLoading || integrationsLoading || reportsLoading ? "Syncing..." : "Refresh"}
+            <button className="primary small" disabled={syncing || moduleLoading || calendarLoading || availabilityLoading || clientsLoading || servicesLoading || billingLoading || paymentsLoading || reviewsLoading || dealsLoading || broadcastsLoading || aiRunsLoading || automationsLoading || integrationsLoading || reportsLoading} onClick={refreshCurrentView}>
+              {syncing || moduleLoading || calendarLoading || availabilityLoading || clientsLoading || servicesLoading || billingLoading || paymentsLoading || reviewsLoading || dealsLoading || broadcastsLoading || aiRunsLoading || automationsLoading || integrationsLoading || reportsLoading ? "Syncing..." : "Refresh"}
             </button>
           </div>
         </header>
@@ -4155,6 +4270,33 @@ function App() {
             onStageFilter={(stage) => {
               setClientsStageFilter(stage);
               void loadClients(stage, clientsQuery);
+            }}
+          />
+        ) : view === "services" ? (
+          <ServicesWorkspace
+            data={servicesData}
+            detail={serviceDetail}
+            detailError={serviceDetailError}
+            detailLoading={serviceDetailLoading}
+            draft={serviceEditDraft}
+            error={servicesError}
+            forceDeactivate={serviceForceDeactivate}
+            loading={servicesLoading}
+            query={servicesQuery}
+            saving={serviceDetailSaving}
+            selectedId={selectedServiceId}
+            statusFilter={servicesStatusFilter}
+            onApply={() => void loadServices()}
+            onDraft={setServiceEditDraft}
+            onForceDeactivate={setServiceForceDeactivate}
+            onOpenService={(id) => void openServiceDetail(id)}
+            onOpenWeb={(path) => void invoke("desktop_open_dashboard_path", { path })}
+            onQuery={setServicesQuery}
+            onRefresh={() => void loadServices()}
+            onSave={(id) => void updateServiceDetail(id)}
+            onStatusFilter={(status) => {
+              setServicesStatusFilter(status);
+              void loadServices(status, servicesQuery);
             }}
           />
         ) : view === "billing" ? (
@@ -5727,6 +5869,175 @@ function ClientsWorkspace({
           onNoteDraft={onNoteDraft}
           onNoteSave={onNoteSave}
           onOpenWeb={onOpenWeb}
+        />
+      </div>
+    </section>
+  );
+}
+
+function ServicesWorkspace({
+  data,
+  detail,
+  detailError,
+  detailLoading,
+  draft,
+  error,
+  forceDeactivate,
+  loading,
+  query,
+  saving,
+  selectedId,
+  statusFilter,
+  onApply,
+  onDraft,
+  onForceDeactivate,
+  onOpenService,
+  onOpenWeb,
+  onQuery,
+  onRefresh,
+  onSave,
+  onStatusFilter,
+}: {
+  data: DesktopServicesPayload | null;
+  detail: ServiceDetailPayload | null;
+  detailError: string;
+  detailLoading: boolean;
+  draft: ServiceEditDraft | null;
+  error: string;
+  forceDeactivate: boolean;
+  loading: boolean;
+  query: string;
+  saving: boolean;
+  selectedId: string | null;
+  statusFilter: ServiceStatusFilter;
+  onApply: () => void;
+  onDraft: (draft: ServiceEditDraft) => void;
+  onForceDeactivate: (value: boolean) => void;
+  onOpenService: (id: string) => void;
+  onOpenWeb: (path: string) => void;
+  onQuery: (value: string) => void;
+  onRefresh: () => void;
+  onSave: (id: string) => void;
+  onStatusFilter: (status: ServiceStatusFilter) => void;
+}) {
+  const summary = data?.summary;
+  const statusOptions: Array<{ count: number; label: string; value: ServiceStatusFilter }> = [
+    { count: summary?.totalServices ?? 0, label: "All", value: "all" },
+    { count: summary?.activeServices ?? 0, label: "Active", value: "active" },
+    { count: summary?.inactiveServices ?? 0, label: "Inactive", value: "inactive" },
+  ];
+
+  return (
+    <section className="module-view has-detail services-workspace">
+      <div className="module-split">
+        <div className="module-panel glass-surface">
+          <div className="module-head">
+            <div>
+              <p className="eyebrow">Native Services</p>
+              <h2>Service catalog</h2>
+              <p>Filter bookable services, inspect demand, and edit price, duration, payment, and status.</p>
+            </div>
+            <div className="module-actions">
+              <button className="primary small" disabled={loading} onClick={onRefresh}>
+                {loading ? "Loading..." : "Refresh"}
+              </button>
+              <button onClick={() => onOpenWeb(data?.webUrl ?? "/dashboard/services")}>
+                Open services in browser
+              </button>
+            </div>
+          </div>
+
+          {error && <div className="error-banner inline">{error}</div>}
+
+          <div className="metric-grid module-metrics">
+            <MetricCard label="Services" tone="cobalt" value={summary?.totalServices ?? 0} />
+            <MetricCard label="Active" tone="emerald" value={summary?.activeServices ?? 0} />
+            <MetricCard label="Deposits" tone="amber" value={summary?.paymentRequiredServices ?? 0} />
+            <MetricCard label="Avg duration" tone="slate" value={`${summary?.averageDurationMinutes ?? 0}m`} />
+          </div>
+
+          <div className="filters service-filter-row">
+            <div className="tabs">
+              {statusOptions.map((option) => (
+                <button
+                  key={option.value}
+                  className={statusFilter === option.value ? "active" : ""}
+                  type="button"
+                  onClick={() => onStatusFilter(option.value)}
+                >
+                  {option.label} ({option.count})
+                </button>
+              ))}
+            </div>
+            <div className="filter-row">
+              <input
+                placeholder="Search service name or description"
+                type="search"
+                value={query}
+                onChange={(event) => onQuery(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") onApply();
+                }}
+              />
+              <button className="primary" disabled={loading} onClick={onApply}>
+                Apply
+              </button>
+            </div>
+          </div>
+
+          <div className="module-meta">
+            <span>{data ? `${data.rows.length} services loaded` : loading ? "Loading live data" : "Ready to load"}</span>
+            <span>{data ? `Synced ${formatTime(data.serverTime)}` : "/api/v1/desktop/services"}</span>
+          </div>
+
+          {loading && !data ? (
+            <div className="empty-state">Loading services...</div>
+          ) : data?.rows.length ? (
+            <ul className="module-list service-list">
+              {data.rows.map((service) => (
+                <li key={service.id}>
+                  <button
+                    className={selectedId === service.id ? "module-list-item selected" : "module-list-item"}
+                    type="button"
+                    onClick={() => onOpenService(service.id)}
+                  >
+                    <div>
+                      <strong>{service.name}</strong>
+                      <span>{service.description ?? `${service.durationMinutes} min service`}</span>
+                    </div>
+                    <div className="module-list-meta">
+                      <span className={`module-status ${service.isActive ? "stage-active" : "stage-churned"}`}>
+                        {service.isActive ? "active" : "inactive"}
+                      </span>
+                      <span>
+                        {formatMoneyLkr(service.priceLkr)} - {service.durationMinutes}m - {service.assignedStaffCount} staff
+                      </span>
+                      <span>
+                        {service.futureBookingCount} upcoming - {service.lastBookingAt ? formatModuleMeta(service.lastBookingAt) : `${service.bookingCount} all-time`}
+                      </span>
+                    </div>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="empty-state">
+              No services match this filter.
+            </div>
+          )}
+        </div>
+
+        <ServiceDetailPanel
+          detail={detail}
+          draft={draft}
+          error={detailError}
+          forceDeactivate={forceDeactivate}
+          loading={detailLoading}
+          saving={saving}
+          onDraft={onDraft}
+          onForceDeactivate={onForceDeactivate}
+          onOpenWeb={onOpenWeb}
+          onSave={onSave}
         />
       </div>
     </section>

@@ -15,6 +15,7 @@ const desktopAutomationsRoutePath = "src/app/api/v1/desktop/automations/route.ts
 const desktopIntegrationsRoutePath = "src/app/api/v1/desktop/integrations/route.ts";
 const desktopClientsRoutePath = "src/app/api/v1/desktop/clients/route.ts";
 const desktopClientNoteRoutePath = "src/app/api/v1/desktop/clients/[id]/notes/route.ts";
+const desktopServicesRoutePath = "src/app/api/v1/desktop/services/route.ts";
 const desktopBroadcastsRoutePath = "src/app/api/v1/desktop/broadcasts/route.ts";
 const desktopDealsRoutePath = "src/app/api/v1/desktop/deals/route.ts";
 const desktopPaymentsRoutePath = "src/app/api/v1/desktop/payments/route.ts";
@@ -45,7 +46,7 @@ const expectedRoutes = [
   { api: "/api/v1/desktop/calendar", href: "/dashboard/calendar", id: "calendar", module: "calendar", phase: 2, status: "native" },
   { api: "/api/v1/desktop/bookings", href: "/dashboard/bookings", id: "bookings", phase: 2, status: "native" },
   { api: "/api/v1/desktop/clients", href: "/dashboard/clients", id: "clients", module: "clients", phase: 3, status: "foundation" },
-  { api: "/api/v1/desktop/services", href: "/dashboard/services", id: "services", module: "services", phase: 3, status: "foundation" },
+  { api: "/api/v1/desktop/services", href: "/dashboard/services", id: "services", module: "services", phase: 3, status: "native" },
   { api: "/api/v1/desktop/staff", href: "/dashboard/staff", id: "staff", module: "staff", phase: 3, status: "foundation" },
   { api: "/api/v1/desktop/locations", href: "/dashboard/locations", id: "locations", module: "locations", phase: 3, status: "foundation" },
   { api: "/api/v1/desktop/availability", href: "/dashboard/availability", id: "availability", module: "availability", phase: 3, status: "foundation" },
@@ -92,6 +93,8 @@ const requiredFiles = [
   "src/app/api/v1/desktop/clients/route.test.ts",
   "src/app/api/v1/desktop/clients/[id]/notes/route.ts",
   "src/app/api/v1/desktop/clients/[id]/notes/route.test.ts",
+  "src/app/api/v1/desktop/services/route.ts",
+  "src/app/api/v1/desktop/services/route.test.ts",
   "src/app/api/v1/desktop/deals/route.ts",
   "src/app/api/v1/desktop/deals/route.test.ts",
   "src/app/api/v1/desktop/payments/route.ts",
@@ -138,6 +141,9 @@ const requiredDesktopUiMarkers = [
   "loadClients",
   "client-note-form",
   "addClientNote",
+  "ServicesWorkspace",
+  "service-filter-row",
+  "loadServices",
   "AiHubWorkspace",
   "ai-filter-row",
   "loadAiRuns",
@@ -225,6 +231,7 @@ const desktopAutomationsRoute = read(desktopAutomationsRoutePath);
 const desktopIntegrationsRoute = read(desktopIntegrationsRoutePath);
 const desktopClientsRoute = read(desktopClientsRoutePath);
 const desktopClientNoteRoute = read(desktopClientNoteRoutePath);
+const desktopServicesRoute = read(desktopServicesRoutePath);
 const desktopBroadcastsRoute = read(desktopBroadcastsRoutePath);
 const desktopDealsRoute = read(desktopDealsRoutePath);
 const desktopPaymentsRoute = read(desktopPaymentsRoutePath);
@@ -289,6 +296,10 @@ requireText(dashboardClients, "isDashboardClientStageFilter", "shared clients st
 requireText(desktopClientNoteRoute, "export async function POST", "desktop client note POST route");
 requireText(desktopClientNoteRoute, "requireDesktopWrite", "desktop client note write auth");
 requireText(dashboardClients, "createClientDashboardNote", "shared client note create helper");
+requireText(desktopServicesRoute, "export async function GET", "desktop services GET route");
+requireText(desktopServicesRoute, "requireDesktopRead", "desktop services read auth");
+requireText(dashboardServices, "getServicesDashboardList", "shared services list helper");
+requireText(dashboardServices, "isDashboardServiceStatusFilter", "shared services status validation");
 requireText(desktopBroadcastsRoute, "export async function GET", "desktop broadcasts GET route");
 requireText(desktopBroadcastsRoute, "requireDesktopRead", "desktop broadcasts read auth");
 requireText(dashboardBroadcasts, "getBroadcastsDashboardList", "shared broadcasts list helper");

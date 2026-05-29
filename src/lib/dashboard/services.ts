@@ -1,10 +1,12 @@
-import { and, asc, desc, eq, gte, inArray } from "drizzle-orm";
+import { and, asc, count, desc, eq, gte, ilike, inArray, or, sql, type SQL } from "drizzle-orm";
 import { db } from "@/db";
 import { bookings, services, staff, staffServices } from "@/db/schema";
 import type { serviceUpdateSchema } from "@/lib/schemas/services";
 import type { z } from "@/lib/validation";
 
+export type DashboardServicesList = Awaited<ReturnType<typeof getServicesDashboardList>>;
 export type DashboardServiceDetail = Awaited<ReturnType<typeof getServiceDashboardDetail>>;
+export type DashboardServiceStatusFilter = "active" | "all" | "inactive";
 export type ServiceDashboardUpdateInput = z.infer<typeof serviceUpdateSchema>;
 export type ServiceDashboardUpdateResult =
   | { status: "future_bookings"; error: string }
@@ -28,6 +30,14 @@ export type ServiceDashboardUpdatedService = {
   requiresPayment: boolean;
 };
 
+export const dashboardServiceStatusFilters = ["all", "active", "inactive"] as const;
+
+export type DashboardServicesListOptions = {
+  limit?: number;
+  q?: string;
+  status?: DashboardServiceStatusFilter;
+};
+
 const serviceUpdateFields = [
   "name",
   "description",
@@ -41,6 +51,129 @@ const serviceUpdateFields = [
   "minimumNoticeHours",
   "dailyCapacity",
 ] as const;
+
+const DEFAULT_SERVICE_LIMIT = 200;
+const MAX_SERVICE_LIMIT = 500;
+
+function normalizeServiceLimit(limit: number | undefined): number {
+  if (!Number.isFinite(limit)) return DEFAULT_SERVICE_LIMIT;
+  return Math.min(MAX_SERVICE_LIMIT, Math.max(1, Math.round(limit ?? DEFAULT_SERVICE_LIMIT)));
+}
+
+export function isDashboardServiceStatusFilter(value: string): value is DashboardServiceStatusFilter {
+  return dashboardServiceStatusFilters.includes(value as DashboardServiceStatusFilter);
+}
+
+export async function getServicesDashboardList(
+  businessId: string,
+  options: DashboardServicesListOptions = {},
+) {
+  const query = options.q?.trim().toLowerCase() ?? "";
+  const status = options.status ?? "all";
+  const limit = normalizeServiceLimit(options.limit);
+  const conditions: SQL[] = [eq(services.businessId, businessId)];
+
+  if (status === "active") conditions.push(eq(services.isActive, true));
+  if (status === "inactive") conditions.push(eq(services.isActive, false));
+  if (query) {
+    conditions.push(or(
+      ilike(services.name, `%${query}%`),
+      ilike(services.description, `%${query}%`),
+    )!);
+  }
+
+  const [summaryRows, rows] = await Promise.all([
+    db
+      .select({
+        activeServices: sql<number>`coalesce(count(*) filter (where ${services.isActive} = true), 0)::int`,
+        averageDurationMinutes: sql<number>`coalesce(round(avg(${services.durationMinutes})), 0)::int`,
+        averagePriceLkr: sql<number>`coalesce(round(avg(${services.priceLkr})), 0)::int`,
+        inactiveServices: sql<number>`coalesce(count(*) filter (where ${services.isActive} = false), 0)::int`,
+        paymentRequiredServices: sql<number>`coalesce(count(*) filter (where ${services.requiresPayment} = true), 0)::int`,
+        totalServices: count(),
+      })
+      .from(services)
+      .where(eq(services.businessId, businessId)),
+    db
+      .select({
+        afterBuffer: services.afterBuffer,
+        beforeBuffer: services.beforeBuffer,
+        createdAt: services.createdAt,
+        dailyCapacity: services.dailyCapacity,
+        depositPercent: services.depositPercent,
+        description: services.description,
+        durationMinutes: services.durationMinutes,
+        id: services.id,
+        isActive: services.isActive,
+        minimumNoticeHours: services.minimumNoticeHours,
+        name: services.name,
+        priceLkr: services.priceLkr,
+        requiresPayment: services.requiresPayment,
+      })
+      .from(services)
+      .where(and(...conditions))
+      .orderBy(asc(services.createdAt))
+      .limit(limit),
+  ]);
+
+  const serviceIds = rows.map((row) => row.id);
+  const now = new Date();
+  const [bookingSummary, staffSummary] = serviceIds.length
+    ? await Promise.all([
+        db
+          .select({
+            bookingCount: count(),
+            futureBookingCount: sql<number>`coalesce(count(*) filter (where ${bookings.startsAt} >= ${now} and ${bookings.status} in ('pending', 'confirmed')), 0)::int`,
+            lastBookingAt: sql<Date | null>`max(${bookings.startsAt})`,
+            serviceId: bookings.serviceId,
+          })
+          .from(bookings)
+          .where(and(eq(bookings.businessId, businessId), inArray(bookings.serviceId, serviceIds)))
+          .groupBy(bookings.serviceId),
+        db
+          .select({
+            assignedStaffCount: count(),
+            serviceId: staffServices.serviceId,
+          })
+          .from(staffServices)
+          .innerJoin(staff, eq(staff.id, staffServices.staffId))
+          .where(and(eq(staff.businessId, businessId), inArray(staffServices.serviceId, serviceIds)))
+          .groupBy(staffServices.serviceId),
+      ])
+    : [[], []];
+
+  const bookingSummaryByService = new Map(bookingSummary.map((row) => [row.serviceId, row]));
+  const staffSummaryByService = new Map(staffSummary.map((row) => [row.serviceId, row]));
+  const summary = summaryRows[0];
+
+  return {
+    filters: {
+      limit,
+      q: query,
+      status,
+    },
+    rows: rows.map((row) => {
+      const rowBookingSummary = bookingSummaryByService.get(row.id);
+      const rowStaffSummary = staffSummaryByService.get(row.id);
+      return {
+        ...row,
+        assignedStaffCount: Number(rowStaffSummary?.assignedStaffCount ?? 0),
+        bookingCount: Number(rowBookingSummary?.bookingCount ?? 0),
+        createdAt: row.createdAt.toISOString(),
+        futureBookingCount: Number(rowBookingSummary?.futureBookingCount ?? 0),
+        lastBookingAt: rowBookingSummary?.lastBookingAt?.toISOString() ?? null,
+      };
+    }),
+    summary: {
+      activeServices: Number(summary?.activeServices ?? 0),
+      averageDurationMinutes: Number(summary?.averageDurationMinutes ?? 0),
+      averagePriceLkr: Number(summary?.averagePriceLkr ?? 0),
+      inactiveServices: Number(summary?.inactiveServices ?? 0),
+      paymentRequiredServices: Number(summary?.paymentRequiredServices ?? 0),
+      totalServices: Number(summary?.totalServices ?? 0),
+    },
+  };
+}
 
 export async function getServiceDashboardDetail(businessId: string, serviceId: string) {
   const [service] = await db

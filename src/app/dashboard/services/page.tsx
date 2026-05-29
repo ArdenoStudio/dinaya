@@ -1,33 +1,14 @@
-import { db } from "@/db";
-import { services } from "@/db/schema";
-import { eq } from "drizzle-orm";
 import Link from "next/link";
 import { formatLkr } from "@/lib/utils";
 import { requireOwner } from "@/lib/auth";
+import { getServicesDashboardList } from "@/lib/dashboard/services";
 import { Icon } from "@/components/ui/Icon";
 import { EmptyState } from "@/components/dashboard/EmptyState";
 import { Scissors } from "lucide-react";
 
 export default async function ServicesPage() {
   const { businessId } = await requireOwner();
-
-  const list = await db
-    .select({
-      id: services.id,
-      name: services.name,
-      description: services.description,
-      durationMinutes: services.durationMinutes,
-      priceLkr: services.priceLkr,
-      depositPercent: services.depositPercent,
-      requiresPayment: services.requiresPayment,
-      isActive: services.isActive,
-      beforeBuffer: services.beforeBuffer,
-      afterBuffer: services.afterBuffer,
-      createdAt: services.createdAt,
-    })
-    .from(services)
-    .where(eq(services.businessId, businessId))
-    .orderBy(services.createdAt);
+  const { rows: list } = await getServicesDashboardList(businessId, { limit: 200 });
 
   return (
     <div>
