@@ -10,13 +10,22 @@ import {
   isPaidPlanAvailable,
   planDisplayName,
   resolveEffectivePlan,
-  type Plan,
 } from "@/lib/plan";
 import { UpgradeButton } from "./UpgradeButton";
 import { CancelButton } from "./CancelButton";
 
 function formatRs(amount: number) {
   return amount.toLocaleString("en-LK");
+}
+
+// Kept out of component render so the impure `Date.now()` call isn't evaluated
+// during render (react-hooks/purity).
+function trialDaysLeftFrom(planExpiresAt: Date | null | undefined): number | null {
+  if (!planExpiresAt) return null;
+  return Math.max(
+    0,
+    Math.ceil((planExpiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24)),
+  );
 }
 
 function PlanPricing({
@@ -95,10 +104,13 @@ export default async function BillingPage() {
     .limit(1);
 
   const plan = resolveEffectivePlan({
-    storedPlan: (business?.plan ?? "free") as Plan,
+    storedPlan: business?.plan,
     planExpiresAt: business?.planExpiresAt,
   });
   const isPaid = plan === "pro" || plan === "max";
+
+  const trialDaysLeft =
+    plan === "trial" ? trialDaysLeftFrom(business?.planExpiresAt) : null;
 
   return (
     <div className="max-w-3xl space-y-6">
@@ -140,7 +152,31 @@ export default async function BillingPage() {
         </div>
       </section>
 
-      {plan === "free" && (
+      {plan === "trial" && (
+        <section className="rounded-xl border border-blue-200 bg-blue-50/60 p-6">
+          <h2 className="text-lg font-semibold text-blue-900">
+            {trialDaysLeft !== null && trialDaysLeft > 0
+              ? `${trialDaysLeft} ${trialDaysLeft === 1 ? "day" : "days"} left in your free trial`
+              : "Your free trial ends today"}
+          </h2>
+          <p className="mt-1 text-sm text-blue-900/80">
+            You have full access during the trial. Subscribe before it ends to keep your booking
+            page online and avoid any interruption for your clients.
+          </p>
+        </section>
+      )}
+
+      {plan === "expired" && (
+        <section className="rounded-xl border border-red-200 bg-red-50/70 p-6">
+          <h2 className="text-lg font-semibold text-red-900">Your free trial has ended</h2>
+          <p className="mt-1 text-sm text-red-900/80">
+            Your public booking page is offline and new bookings are paused. Your data is safe —
+            subscribe to a plan below to reactivate your account.
+          </p>
+        </section>
+      )}
+
+      {(plan === "trial" || plan === "expired") && (
         <>
           <section className="rounded-xl border border-blue-200 bg-blue-50/50 p-6">
             <h2 className="text-lg font-semibold">Upgrade to Pro</h2>

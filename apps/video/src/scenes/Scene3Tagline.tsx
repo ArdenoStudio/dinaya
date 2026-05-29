@@ -114,7 +114,7 @@ export const Scene3Tagline: React.FC<{ localFrame: number }> = ({ localFrame: fr
             transform: `translateY(${subY}px)`,
           }}
         >
-          Sri Lanka's first smart salon booking platform
+          Sri Lanka&apos;s first smart salon booking platform
         </div>
       </div>
     </div>
