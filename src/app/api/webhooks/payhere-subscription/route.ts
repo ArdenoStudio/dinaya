@@ -24,6 +24,9 @@ export async function POST(req: NextRequest) {
   const subscriptionId = form.get("subscription_id")
     ? String(form.get("subscription_id"))
     : null;
+  const paymentId = form.get("payment_id")
+    ? String(form.get("payment_id"))
+    : null;
 
   if (!merchantId || !orderId || !payhereAmount || !payhereCurrency || !statusCode || !md5sig) {
     return NextResponse.json({ error: "Missing fields" }, { status: 400 });
@@ -64,12 +67,17 @@ export async function POST(req: NextRequest) {
 
   switch (statusCode) {
     case "2": {
-      if (
-        sub.status === "active" &&
-        sub.currentPeriodEnd &&
-        sub.currentPeriodEnd > new Date() &&
-        sub.payhereOrderId === orderId
-      ) {
+      // Recurring charges reuse the same order_id, so dedupe on PayHere's
+      // per-charge payment_id. A time-window heuristic would wrongly treat a
+      // renewal that arrives while the current period is still active as a
+      // duplicate and silently drop it. Fall back to the time heuristic only
+      // when no payment_id is present on the notification.
+      const isDuplicate = paymentId
+        ? paymentId === sub.lastPaymentId
+        : sub.status === "active" &&
+          !!sub.currentPeriodEnd &&
+          sub.currentPeriodEnd > new Date();
+      if (isDuplicate) {
         return NextResponse.json({ received: true, duplicate: true });
       }
 
@@ -95,6 +103,7 @@ export async function POST(req: NextRequest) {
           status: "active",
           payhereSubscriptionId: subscriptionId ?? sub.payhereSubscriptionId,
           currentPeriodEnd: periodEnd,
+          lastPaymentId: paymentId ?? sub.lastPaymentId,
         })
         .where(eq(subscriptions.id, sub.id));
 
@@ -129,7 +138,7 @@ export async function POST(req: NextRequest) {
         .where(eq(subscriptions.id, sub.id));
       await db
         .update(businesses)
-        .set({ plan: "free", planExpiresAt: null })
+        .set({ plan: "expired", planExpiresAt: null })
         .where(eq(businesses.id, sub.businessId));
       break;
     }

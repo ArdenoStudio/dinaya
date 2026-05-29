@@ -20,7 +20,7 @@ import { relations, sql } from "drizzle-orm";
 
 // ─── Enums ────────────────────────────────────────────────────────────────────
 
-export const planEnum = pgEnum("plan", ["free", "pro", "max"]);
+export const planEnum = pgEnum("plan", ["free", "pro", "max", "trial", "expired"]);
 export const clientStageEnum = pgEnum("client_stage", [
   "lead",
   "prospect",
@@ -118,7 +118,7 @@ export const businesses = pgTable("businesses", {
   websiteUrl: text("website_url"),
   // Portfolio gallery — array of image URLs shown on the booking page
   galleryImages: text("gallery_images").array(),
-  plan: planEnum("plan").default("free").notNull(),
+  plan: planEnum("plan").default("trial").notNull(),
   planExpiresAt: timestamp("plan_expires_at"),
   customDomain: varchar("custom_domain", { length: 255 }),
   customDomainVerified: boolean("custom_domain_verified").default(false).notNull(),
@@ -202,6 +202,9 @@ export const subscriptions = pgTable("subscriptions", {
   // PayHere identifiers
   payhereOrderId: varchar("payhere_order_id", { length: 100 }).notNull().unique(),
   payhereSubscriptionId: varchar("payhere_subscription_id", { length: 100 }).unique(),
+  // Last processed PayHere recurring charge id. Recurring charges reuse the same
+  // order_id, so renewal webhooks are deduped by per-charge payment_id.
+  lastPaymentId: varchar("last_payment_id", { length: 100 }),
   // Plan being subscribed to (forward-compat: more tiers later)
   plan: planEnum("plan").default("pro").notNull(),
   billingInterval: billingIntervalEnum("billing_interval").default("monthly").notNull(),
