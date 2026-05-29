@@ -1,8 +1,6 @@
-import { db } from "@/db";
-import { staff } from "@/db/schema";
-import { eq } from "drizzle-orm";
 import Link from "next/link";
 import { requireOwner } from "@/lib/auth";
+import { getStaffDashboardList } from "@/lib/dashboard/staff";
 import { StaffInviteForm } from "@/components/dashboard/StaffInviteForm";
 import { EmptyState } from "@/components/dashboard/EmptyState";
 import { Icon } from "@/components/ui/Icon";
@@ -10,8 +8,7 @@ import { UserRoundCheck } from "lucide-react";
 
 export default async function StaffPage() {
   const { businessId } = await requireOwner();
-
-  const list = await db.select().from(staff).where(eq(staff.businessId, businessId));
+  const { rows: list } = await getStaffDashboardList(businessId, { limit: 200 });
 
   return (
     <div>

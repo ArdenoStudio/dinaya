@@ -4,7 +4,11 @@ import { locations, services, staff, staffLocations, staffServices } from "@/db/
 import { and, count, eq, inArray } from "drizzle-orm";
 import { PlanLimitError, requirePlanLimit } from "@/lib/plan";
 import { requireApiBusiness } from "@/lib/api-auth";
-import { getStaffLocationMap } from "@/lib/locations";
+import {
+  getStaffDashboardList,
+  isDashboardStaffStatusFilter,
+  type DashboardStaffStatusFilter,
+} from "@/lib/dashboard/staff";
 import { z } from "@/lib/validation";
 
 const staffCreateSchema = z.object({
@@ -14,30 +18,33 @@ const staffCreateSchema = z.object({
   locationIds: z.array(z.uuid()).optional().default([]),
 });
 
+const DEFAULT_LIMIT = 200;
+const MAX_LIMIT = 500;
+
+function parseLimit(value: string | null): number {
+  const parsed = Number(value ?? DEFAULT_LIMIT);
+  if (!Number.isFinite(parsed)) return DEFAULT_LIMIT;
+  return Math.min(MAX_LIMIT, Math.max(1, Math.round(parsed)));
+}
+
 export async function GET(req: NextRequest) {
   const authResult = await requireApiBusiness({ req });
   if (!authResult.ok) return authResult.response;
   const { businessId } = authResult.context;
 
-  const rows = await db
-    .select({ id: staff.id, name: staff.name, bio: staff.bio, isActive: staff.isActive })
-    .from(staff)
-    .where(eq(staff.businessId, businessId));
-
-  const locationMap = await getStaffLocationMap(businessId);
-  const locationIdsByStaff = new Map<string, string[]>();
-  for (const row of locationMap) {
-    const list = locationIdsByStaff.get(row.staffId) ?? [];
-    list.push(row.locationId);
-    locationIdsByStaff.set(row.staffId, list);
+  const params = req.nextUrl.searchParams;
+  const statusParam = params.get("status");
+  if (statusParam && !isDashboardStaffStatusFilter(statusParam)) {
+    return NextResponse.json({ error: "status is invalid." }, { status: 400 });
   }
 
-  return NextResponse.json(
-    rows.map((row) => ({
-      ...row,
-      locationIds: locationIdsByStaff.get(row.id) ?? [],
-    }))
-  );
+  const { rows } = await getStaffDashboardList(businessId, {
+    limit: parseLimit(params.get("limit")),
+    q: params.get("q")?.trim() ?? "",
+    status: (statusParam || "all") as DashboardStaffStatusFilter,
+  });
+
+  return NextResponse.json(rows);
 }
 
 export async function POST(req: NextRequest) {

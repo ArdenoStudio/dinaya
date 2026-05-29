@@ -115,7 +115,7 @@ export const dashboardRouteGroups = [
         href: "/dashboard/staff",
         desktopApiPath: "/api/v1/desktop/staff",
         desktopPhase: 3,
-        nativeStatus: "foundation",
+        nativeStatus: "native",
         ownerOnly: true,
         summary: "Staff list, role, status, assigned services, and availability summary.",
       },

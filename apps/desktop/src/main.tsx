@@ -317,6 +317,42 @@ type ServiceEditDraft = {
   requiresPayment: boolean;
 };
 
+type StaffStatusFilter = "active" | "all" | "inactive";
+
+type StaffRow = {
+  assignedLocationsCount: number;
+  assignedServicesCount: number;
+  availabilityWindowCount: number;
+  avatarUrl: string | null;
+  bio: string | null;
+  createdAt: string;
+  futureBookingCount: number;
+  id: string;
+  isActive: boolean;
+  lastBookingAt: string | null;
+  locationIds: string[];
+  name: string;
+  primaryLocationName: string | null;
+  todayBookingCount: number;
+};
+
+type DesktopStaffPayload = {
+  filters: {
+    limit: number;
+    q: string;
+    status: StaffStatusFilter;
+  };
+  rows: StaffRow[];
+  serverTime: string;
+  summary: {
+    activeStaff: number;
+    inactiveStaff: number;
+    totalStaff: number;
+    withBio: number;
+  };
+  webUrl: string;
+};
+
 type StaffDetailPayload = {
   assignedLocations: Array<{
     id: string;
@@ -1955,6 +1991,11 @@ function App() {
   const [serviceDetailSaving, setServiceDetailSaving] = useState(false);
   const [serviceForceDeactivate, setServiceForceDeactivate] = useState(false);
   const [selectedStaffId, setSelectedStaffId] = useState<string | null>(null);
+  const [staffData, setStaffData] = useState<DesktopStaffPayload | null>(null);
+  const [staffError, setStaffError] = useState("");
+  const [staffLoading, setStaffLoading] = useState(false);
+  const [staffQuery, setStaffQuery] = useState("");
+  const [staffStatusFilter, setStaffStatusFilter] = useState<StaffStatusFilter>("all");
   const [staffDetail, setStaffDetail] = useState<StaffDetailPayload | null>(null);
   const [staffEditDraft, setStaffEditDraft] = useState<StaffEditDraft | null>(null);
   const [staffDetailError, setStaffDetailError] = useState("");
@@ -2099,6 +2140,10 @@ function App() {
 
   function servicesCacheKey(nextStatus = servicesStatusFilter, nextQuery = servicesQuery) {
     return offlineCacheKey("services", nextStatus, nextQuery || "all");
+  }
+
+  function staffCacheKey(nextStatus = staffStatusFilter, nextQuery = staffQuery) {
+    return offlineCacheKey("staff", nextStatus, nextQuery || "all");
   }
 
   function reportsCacheKey(nextFrom = reportsFrom, nextTo = reportsTo) {
@@ -2282,6 +2327,46 @@ function App() {
       );
     } finally {
       setServicesLoading(false);
+    }
+  }
+
+  async function fetchStaff(
+    nextStatus = staffStatusFilter,
+    nextQuery = staffQuery,
+  ): Promise<DesktopStaffPayload> {
+    const path = buildDesktopApiPath("/api/v1/desktop/staff", {
+      limit: 80,
+      q: nextQuery.trim() || undefined,
+      status: nextStatus === "all" ? undefined : nextStatus,
+    });
+    return desktopApiRequest<DesktopStaffPayload>({ method: "GET", path });
+  }
+
+  async function loadStaff(
+    nextStatus = staffStatusFilter,
+    nextQuery = staffQuery,
+  ) {
+    setStaffLoading(true);
+    setStaffError("");
+    try {
+      const next = await fetchStaff(nextStatus, nextQuery);
+      setStaffData(next);
+      setLastSync(next.serverTime);
+      writeOfflineCache(staffCacheKey(nextStatus, nextQuery), next);
+      setOfflineNotice("");
+    } catch (loadError) {
+      restoreCachedRead<DesktopStaffPayload>(
+        staffCacheKey(nextStatus, nextQuery),
+        "staff",
+        loadError,
+        (cached) => {
+          setStaffData(cached);
+          setLastSync(cached.serverTime);
+        },
+        setStaffError,
+      );
+    } finally {
+      setStaffLoading(false);
     }
   }
 
@@ -3016,7 +3101,11 @@ function App() {
       setStaffDetail(next);
       setStaffEditDraft(staffDraftFromDetail(next));
       setLastSync(next.serverTime);
-      await loadModule(route);
+      if (view === "staff") {
+        await loadStaff();
+      } else {
+        await loadModule(route);
+      }
     } catch (loadError) {
       setStaffDetailError(String(loadError));
     } finally {
@@ -3430,6 +3519,10 @@ function App() {
     setServiceEditDraft(null);
     setServiceDetailError("");
     setSelectedServiceId(null);
+    setStaffData(null);
+    setStaffError("");
+    setStaffQuery("");
+    setStaffStatusFilter("all");
     setStaffDetail(null);
     setStaffEditDraft(null);
     setStaffDetailError("");
@@ -3519,6 +3612,7 @@ function App() {
       setSelectedServiceId(null);
     }
     if (nextRoute.id !== "staff") {
+      setStaffError("");
       setStaffDetail(null);
       setStaffEditDraft(null);
       setStaffDetailError("");
@@ -3588,6 +3682,8 @@ function App() {
       void loadClients();
     } else if (nextRoute.id === "services") {
       void loadServices();
+    } else if (nextRoute.id === "staff") {
+      void loadStaff();
     } else if (nextRoute.id === "availability") {
       void loadAvailability();
     } else if (nextRoute.id === "billing") {
@@ -3646,6 +3742,10 @@ function App() {
     }
     if (view === "services") {
       void loadServices();
+      return;
+    }
+    if (view === "staff") {
+      void loadStaff();
       return;
     }
     if (view === "reviews") {
@@ -3965,6 +4065,8 @@ function App() {
         void loadClients();
       } else if (authReady && !servicesLoading && view === "services") {
         void loadServices();
+      } else if (authReady && !staffLoading && view === "staff") {
+        void loadStaff();
       } else if (authReady && !paymentsLoading && view === "payments") {
         void loadPayments();
       } else if (authReady && !reviewsLoading && view === "reviews") {
@@ -3984,7 +4086,7 @@ function App() {
     return () => window.clearInterval(timer);
     // Recreate the polling timer only when user-controlled sync inputs change.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [aiRunsLoading, aiRunsQuery, aiRunsStatusFilter, authReady, automationsLoading, automationsQuery, automationsStatusFilter, availabilityLoading, broadcastsChannelFilter, broadcastsLoading, broadcastsQuery, broadcastsStatusFilter, calendarDate, calendarLoading, calendarMode, calendarStaffFilter, clientsLoading, clientsQuery, clientsStageFilter, dealsLoading, dealsQuery, dealsStatusFilter, integrationsLoading, integrationsQuery, integrationsStatusFilter, paymentsLoading, paymentsQuery, paymentsStatusFilter, reviewsLoading, reviewsQuery, reviewsRatingFilter, reviewsStatusFilter, servicesLoading, servicesQuery, servicesStatusFilter, syncing, tab, query, staffFilter, statusFilter, view]);
+  }, [aiRunsLoading, aiRunsQuery, aiRunsStatusFilter, authReady, automationsLoading, automationsQuery, automationsStatusFilter, availabilityLoading, broadcastsChannelFilter, broadcastsLoading, broadcastsQuery, broadcastsStatusFilter, calendarDate, calendarLoading, calendarMode, calendarStaffFilter, clientsLoading, clientsQuery, clientsStageFilter, dealsLoading, dealsQuery, dealsStatusFilter, integrationsLoading, integrationsQuery, integrationsStatusFilter, paymentsLoading, paymentsQuery, paymentsStatusFilter, reviewsLoading, reviewsQuery, reviewsRatingFilter, reviewsStatusFilter, servicesLoading, servicesQuery, servicesStatusFilter, staffLoading, staffQuery, staffStatusFilter, syncing, tab, query, staffFilter, statusFilter, view]);
 
   useEffect(() => {
     let unlisten: (() => void) | undefined;
@@ -4041,6 +4143,11 @@ function App() {
       return;
     }
 
+    if (authReady && view === "staff" && !staffData && !staffLoading) {
+      void loadStaff();
+      return;
+    }
+
     if (authReady && view === "reviews" && !reviewsData && !reviewsLoading) {
       void loadReviews();
       return;
@@ -4080,6 +4187,7 @@ function App() {
       view !== "billing" &&
       view !== "clients" &&
       view !== "services" &&
+      view !== "staff" &&
       view !== "payments" &&
       view !== "reviews" &&
       view !== "deals" &&
@@ -4123,7 +4231,7 @@ function App() {
       />
 
       <main id="desktop-main" className="main-pane" tabIndex={-1}>
-        <header className="topbar glass-surface" aria-busy={syncing || moduleLoading || calendarLoading || availabilityLoading || clientsLoading || servicesLoading || billingLoading || paymentsLoading || reviewsLoading || dealsLoading || broadcastsLoading || aiRunsLoading || automationsLoading || integrationsLoading || reportsLoading}>
+        <header className="topbar glass-surface" aria-busy={syncing || moduleLoading || calendarLoading || availabilityLoading || clientsLoading || servicesLoading || staffLoading || billingLoading || paymentsLoading || reviewsLoading || dealsLoading || broadcastsLoading || aiRunsLoading || automationsLoading || integrationsLoading || reportsLoading}>
           <div className="topbar-title">
             <p className="eyebrow">{business?.name ?? "Dinaya"}</p>
             <h1>{route.label}</h1>
@@ -4142,8 +4250,8 @@ function App() {
             <button className="small" aria-haspopup="dialog" onClick={openCommandPalette}>
               Command
             </button>
-            <button className="primary small" disabled={syncing || moduleLoading || calendarLoading || availabilityLoading || clientsLoading || servicesLoading || billingLoading || paymentsLoading || reviewsLoading || dealsLoading || broadcastsLoading || aiRunsLoading || automationsLoading || integrationsLoading || reportsLoading} onClick={refreshCurrentView}>
-              {syncing || moduleLoading || calendarLoading || availabilityLoading || clientsLoading || servicesLoading || billingLoading || paymentsLoading || reviewsLoading || dealsLoading || broadcastsLoading || aiRunsLoading || automationsLoading || integrationsLoading || reportsLoading ? "Syncing..." : "Refresh"}
+            <button className="primary small" disabled={syncing || moduleLoading || calendarLoading || availabilityLoading || clientsLoading || servicesLoading || staffLoading || billingLoading || paymentsLoading || reviewsLoading || dealsLoading || broadcastsLoading || aiRunsLoading || automationsLoading || integrationsLoading || reportsLoading} onClick={refreshCurrentView}>
+              {syncing || moduleLoading || calendarLoading || availabilityLoading || clientsLoading || servicesLoading || staffLoading || billingLoading || paymentsLoading || reviewsLoading || dealsLoading || broadcastsLoading || aiRunsLoading || automationsLoading || integrationsLoading || reportsLoading ? "Syncing..." : "Refresh"}
             </button>
           </div>
         </header>
@@ -4297,6 +4405,31 @@ function App() {
             onStatusFilter={(status) => {
               setServicesStatusFilter(status);
               void loadServices(status, servicesQuery);
+            }}
+          />
+        ) : view === "staff" ? (
+          <StaffWorkspace
+            data={staffData}
+            detail={staffDetail}
+            detailError={staffDetailError}
+            detailLoading={staffDetailLoading}
+            draft={staffEditDraft}
+            error={staffError}
+            loading={staffLoading}
+            query={staffQuery}
+            saving={staffDetailSaving}
+            selectedId={selectedStaffId}
+            statusFilter={staffStatusFilter}
+            onApply={() => void loadStaff()}
+            onDraft={setStaffEditDraft}
+            onOpenStaff={(id) => void openStaffDetail(id)}
+            onOpenWeb={(path) => void invoke("desktop_open_dashboard_path", { path })}
+            onQuery={setStaffQuery}
+            onRefresh={() => void loadStaff()}
+            onSave={(id) => void updateStaffDetail(id)}
+            onStatusFilter={(status) => {
+              setStaffStatusFilter(status);
+              void loadStaff(status, staffQuery);
             }}
           />
         ) : view === "billing" ? (
@@ -6036,6 +6169,169 @@ function ServicesWorkspace({
           saving={saving}
           onDraft={onDraft}
           onForceDeactivate={onForceDeactivate}
+          onOpenWeb={onOpenWeb}
+          onSave={onSave}
+        />
+      </div>
+    </section>
+  );
+}
+
+function StaffWorkspace({
+  data,
+  detail,
+  detailError,
+  detailLoading,
+  draft,
+  error,
+  loading,
+  query,
+  saving,
+  selectedId,
+  statusFilter,
+  onApply,
+  onDraft,
+  onOpenStaff,
+  onOpenWeb,
+  onQuery,
+  onRefresh,
+  onSave,
+  onStatusFilter,
+}: {
+  data: DesktopStaffPayload | null;
+  detail: StaffDetailPayload | null;
+  detailError: string;
+  detailLoading: boolean;
+  draft: StaffEditDraft | null;
+  error: string;
+  loading: boolean;
+  query: string;
+  saving: boolean;
+  selectedId: string | null;
+  statusFilter: StaffStatusFilter;
+  onApply: () => void;
+  onDraft: (draft: StaffEditDraft) => void;
+  onOpenStaff: (id: string) => void;
+  onOpenWeb: (path: string) => void;
+  onQuery: (value: string) => void;
+  onRefresh: () => void;
+  onSave: (id: string) => void;
+  onStatusFilter: (status: StaffStatusFilter) => void;
+}) {
+  const summary = data?.summary;
+  const statusOptions: Array<{ count: number; label: string; value: StaffStatusFilter }> = [
+    { count: summary?.totalStaff ?? 0, label: "All", value: "all" },
+    { count: summary?.activeStaff ?? 0, label: "Active", value: "active" },
+    { count: summary?.inactiveStaff ?? 0, label: "Inactive", value: "inactive" },
+  ];
+
+  return (
+    <section className="module-view has-detail staff-workspace">
+      <div className="module-split">
+        <div className="module-panel glass-surface">
+          <div className="module-head">
+            <div>
+              <p className="eyebrow">Native Staff</p>
+              <h2>Team schedule load</h2>
+              <p>Filter team members, inspect assignments, and edit profile, services, locations, and active status.</p>
+            </div>
+            <div className="module-actions">
+              <button className="primary small" disabled={loading} onClick={onRefresh}>
+                {loading ? "Loading..." : "Refresh"}
+              </button>
+              <button onClick={() => onOpenWeb(data?.webUrl ?? "/dashboard/staff")}>
+                Open staff in browser
+              </button>
+            </div>
+          </div>
+
+          {error && <div className="error-banner inline">{error}</div>}
+
+          <div className="metric-grid module-metrics">
+            <MetricCard label="Staff" tone="cobalt" value={summary?.totalStaff ?? 0} />
+            <MetricCard label="Active" tone="emerald" value={summary?.activeStaff ?? 0} />
+            <MetricCard label="Inactive" tone="amber" value={summary?.inactiveStaff ?? 0} />
+            <MetricCard label="Profiles" tone="slate" value={summary?.withBio ?? 0} />
+          </div>
+
+          <div className="filters staff-filter-row">
+            <div className="tabs">
+              {statusOptions.map((option) => (
+                <button
+                  key={option.value}
+                  className={statusFilter === option.value ? "active" : ""}
+                  type="button"
+                  onClick={() => onStatusFilter(option.value)}
+                >
+                  {option.label} ({option.count})
+                </button>
+              ))}
+            </div>
+            <div className="filter-row">
+              <input
+                placeholder="Search staff name or bio"
+                type="search"
+                value={query}
+                onChange={(event) => onQuery(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") onApply();
+                }}
+              />
+              <button className="primary" disabled={loading} onClick={onApply}>
+                Apply
+              </button>
+            </div>
+          </div>
+
+          <div className="module-meta">
+            <span>{data ? `${data.rows.length} staff loaded` : loading ? "Loading live data" : "Ready to load"}</span>
+            <span>{data ? `Synced ${formatTime(data.serverTime)}` : "/api/v1/desktop/staff"}</span>
+          </div>
+
+          {loading && !data ? (
+            <div className="empty-state">Loading staff...</div>
+          ) : data?.rows.length ? (
+            <ul className="module-list staff-list">
+              {data.rows.map((member) => (
+                <li key={member.id}>
+                  <button
+                    className={selectedId === member.id ? "module-list-item selected" : "module-list-item"}
+                    type="button"
+                    onClick={() => onOpenStaff(member.id)}
+                  >
+                    <div>
+                      <strong>{member.name}</strong>
+                      <span>{member.bio ?? member.primaryLocationName ?? "No profile bio yet"}</span>
+                    </div>
+                    <div className="module-list-meta">
+                      <span className={`module-status ${member.isActive ? "stage-active" : "stage-churned"}`}>
+                        {member.isActive ? "active" : "inactive"}
+                      </span>
+                      <span>
+                        {member.assignedServicesCount} services - {member.assignedLocationsCount} locations - {member.availabilityWindowCount} windows
+                      </span>
+                      <span>
+                        {member.todayBookingCount} today - {member.futureBookingCount} upcoming
+                      </span>
+                    </div>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="empty-state">
+              No staff match this filter.
+            </div>
+          )}
+        </div>
+
+        <StaffDetailPanel
+          detail={detail}
+          draft={draft}
+          error={detailError}
+          loading={detailLoading}
+          saving={saving}
+          onDraft={onDraft}
           onOpenWeb={onOpenWeb}
           onSave={onSave}
         />
