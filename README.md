@@ -38,6 +38,8 @@
   ·
   <a href="docs/deployment-checklist.md">Deployment checklist</a>
   ·
+  <a href="docs/mcp-dinaya.md">Dinaya MCP</a>
+  ·
   <a href="https://github.com/ArdenoStudio/dinaya/actions">GitHub Actions</a>
 </p>
 
@@ -120,6 +122,8 @@ Contributors using Cursor: see [`AGENTS.md`](AGENTS.md) for repo conventions and
 | `npm run db:migrate` | Apply Drizzle migrations |
 | `npm run db:studio` | Open Drizzle Studio |
 | `npm run docs:screenshots` | Regenerate docs UI screenshots |
+| `npm run mcp:dinaya` | Start Dinaya MCP server (stdio) |
+| `npm run mcp:dinaya:self-test` | Run Dinaya MCP self-test snapshot |
 
 ## Architecture
 
