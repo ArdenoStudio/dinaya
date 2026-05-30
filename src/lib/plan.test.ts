@@ -8,6 +8,7 @@ import {
   TRIAL_ENTITLEMENTS,
   canUseFeature,
   minimumPlanForFeature,
+  type PlanConfig,
 } from "./plan";
 
 describe("plan entitlements", () => {
@@ -140,6 +141,29 @@ describe("subscription pricing", () => {
     expect(getSubscriptionPrice("pro", "annual", DEFAULT_PLAN_CONFIG)).toBe(39900);
     expect(getSubscriptionPrice("max", "monthly", DEFAULT_PLAN_CONFIG)).toBe(6900);
     expect(getSubscriptionPrice("max", "annual", DEFAULT_PLAN_CONFIG)).toBe(69000);
+  });
+
+  it("ignores legacy saved pricing configs that predate Starter", async () => {
+    const { mergePlanConfig } = await import("./plan");
+    const config = mergePlanConfig({
+      proMonthlyPriceLkr: 1490,
+      proAnnualPriceLkr: 14300,
+      maxMonthlyPriceLkr: 2490,
+      maxAnnualPriceLkr: 23900,
+      proLaunched: true,
+      maxLaunched: true,
+      plans: {
+        trial: TRIAL_ENTITLEMENTS,
+        pro: PRO_ENTITLEMENTS,
+        max: MAX_ENTITLEMENTS,
+        expired: EXPIRED_ENTITLEMENTS,
+      } as Partial<PlanConfig["plans"]> as PlanConfig["plans"],
+    });
+
+    expect(config.starterMonthlyPriceLkr).toBe(1990);
+    expect(config.proMonthlyPriceLkr).toBe(3990);
+    expect(config.maxMonthlyPriceLkr).toBe(6900);
+    expect(config.plans.starter).toEqual(STARTER_ENTITLEMENTS);
   });
 
   it("calculates annual savings percent", async () => {

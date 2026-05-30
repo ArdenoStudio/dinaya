@@ -312,41 +312,53 @@ function mergeEntitlements(
   };
 }
 
-function mergePlanConfig(fromDisk: Partial<PlanConfig>): PlanConfig {
+function isLegacySavedPlanConfig(fromDisk: Partial<PlanConfig>): boolean {
+  return (
+    !fromDisk.plans?.starter ||
+    fromDisk.starterMonthlyPriceLkr === undefined ||
+    fromDisk.starterAnnualPriceLkr === undefined
+  );
+}
+
+export function mergePlanConfig(fromDisk: Partial<PlanConfig>): PlanConfig {
+  const source: Partial<PlanConfig> = isLegacySavedPlanConfig(fromDisk)
+    ? { updatedAt: fromDisk.updatedAt, updatedBy: fromDisk.updatedBy }
+    : fromDisk;
+
   return {
     starterMonthlyPriceLkr:
-      fromDisk.starterMonthlyPriceLkr ?? DEFAULT_PLAN_CONFIG.starterMonthlyPriceLkr,
+      source.starterMonthlyPriceLkr ?? DEFAULT_PLAN_CONFIG.starterMonthlyPriceLkr,
     starterAnnualPriceLkr:
-      fromDisk.starterAnnualPriceLkr ?? DEFAULT_PLAN_CONFIG.starterAnnualPriceLkr,
+      source.starterAnnualPriceLkr ?? DEFAULT_PLAN_CONFIG.starterAnnualPriceLkr,
     proMonthlyPriceLkr:
-      fromDisk.proMonthlyPriceLkr ?? DEFAULT_PLAN_CONFIG.proMonthlyPriceLkr,
+      source.proMonthlyPriceLkr ?? DEFAULT_PLAN_CONFIG.proMonthlyPriceLkr,
     proAnnualPriceLkr:
-      fromDisk.proAnnualPriceLkr ?? DEFAULT_PLAN_CONFIG.proAnnualPriceLkr,
+      source.proAnnualPriceLkr ?? DEFAULT_PLAN_CONFIG.proAnnualPriceLkr,
     maxMonthlyPriceLkr:
-      fromDisk.maxMonthlyPriceLkr ?? DEFAULT_PLAN_CONFIG.maxMonthlyPriceLkr,
+      source.maxMonthlyPriceLkr ?? DEFAULT_PLAN_CONFIG.maxMonthlyPriceLkr,
     maxAnnualPriceLkr:
-      fromDisk.maxAnnualPriceLkr ?? DEFAULT_PLAN_CONFIG.maxAnnualPriceLkr,
-    starterLaunched: fromDisk.starterLaunched ?? DEFAULT_PLAN_CONFIG.starterLaunched,
-    proLaunched: fromDisk.proLaunched ?? DEFAULT_PLAN_CONFIG.proLaunched,
-    maxLaunched: fromDisk.maxLaunched ?? DEFAULT_PLAN_CONFIG.maxLaunched,
+      source.maxAnnualPriceLkr ?? DEFAULT_PLAN_CONFIG.maxAnnualPriceLkr,
+    starterLaunched: source.starterLaunched ?? DEFAULT_PLAN_CONFIG.starterLaunched,
+    proLaunched: source.proLaunched ?? DEFAULT_PLAN_CONFIG.proLaunched,
+    maxLaunched: source.maxLaunched ?? DEFAULT_PLAN_CONFIG.maxLaunched,
     plans: {
       trial: mergeEntitlements(
         DEFAULT_TRIAL_ENTITLEMENTS,
-        fromDisk.plans?.trial
+        source.plans?.trial
       ),
       starter: mergeEntitlements(
         DEFAULT_STARTER_ENTITLEMENTS,
-        fromDisk.plans?.starter
+        source.plans?.starter
       ),
-      pro: mergeEntitlements(DEFAULT_PRO_ENTITLEMENTS, fromDisk.plans?.pro),
-      max: mergeEntitlements(DEFAULT_MAX_ENTITLEMENTS, fromDisk.plans?.max),
+      pro: mergeEntitlements(DEFAULT_PRO_ENTITLEMENTS, source.plans?.pro),
+      max: mergeEntitlements(DEFAULT_MAX_ENTITLEMENTS, source.plans?.max),
       expired: mergeEntitlements(
         DEFAULT_EXPIRED_ENTITLEMENTS,
-        fromDisk.plans?.expired
+        source.plans?.expired
       ),
     },
-    updatedAt: fromDisk.updatedAt,
-    updatedBy: fromDisk.updatedBy,
+    updatedAt: source.updatedAt,
+    updatedBy: source.updatedBy,
   };
 }
 

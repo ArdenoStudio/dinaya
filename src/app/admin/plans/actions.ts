@@ -109,6 +109,7 @@ export async function savePlans(formData: FormData): Promise<void> {
 
   revalidatePath("/admin/plans");
   revalidatePath("/admin");
+  revalidatePath("/pricing");
   revalidatePath("/dashboard/billing");
 }
 
@@ -126,4 +127,6 @@ export async function resetPlansToDefaults(): Promise<void> {
     action: "plans.reset_to_defaults",
   });
   revalidatePath("/admin/plans");
+  revalidatePath("/pricing");
+  revalidatePath("/dashboard/billing");
 }
