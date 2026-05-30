@@ -831,6 +831,51 @@ textarea:focus-visible,
   margin: 0;
 }
 
+.plan-gate-notice {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border: 1px solid #cdddfb;
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, #f3f8ff 0%, #eaf2ff 100%);
+  padding: 14px 16px;
+}
+
+.plan-gate-spark {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--cobalt);
+  color: #fff;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.plan-gate-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.plan-gate-copy strong {
+  display: block;
+  color: var(--cobalt-deep);
+  font-size: 14px;
+}
+
+.plan-gate-copy p {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.plan-gate-notice button {
+  flex: none;
+}
+
 .fatal-error-shell {
   min-height: 100vh;
   display: grid;

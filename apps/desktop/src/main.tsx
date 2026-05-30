@@ -1843,6 +1843,20 @@ function isAuthFailureMessage(message: string): boolean {
   return lowered.includes("unauthorized") || lowered.includes("desktop key not configured");
 }
 
+// The Rust desktop bridge surfaces upstream HTTP failures as "<message> (HTTP <code>)".
+// A 402 means the workspace is gated behind a higher Dinaya plan, so we render an
+// upgrade prompt instead of a red error banner.
+function isPlanGateMessage(message: string): boolean {
+  return /\(HTTP 402\)/.test(message);
+}
+
+function planGateMessage(message: string): string {
+  return (
+    message.replace(/\s*\(HTTP \d{3}\)\s*$/, "").trim() ||
+    "This workspace is on a higher plan."
+  );
+}
+
 function commandMatches(item: CommandPaletteItem, query: string): boolean {
   const normalized = query.trim().toLowerCase();
   if (!normalized) return true;
@@ -2459,6 +2473,11 @@ function App() {
     setLocalError: (message: string) => void,
   ): boolean {
     const message = String(loadError);
+    if (isPlanGateMessage(message)) {
+      // Don't fall back to a cached (higher-plan) copy — surface the upgrade prompt.
+      setLocalError(message);
+      return false;
+    }
     if (isAuthFailureMessage(message)) {
       setLocalError(message);
       return false;
@@ -8845,6 +8864,42 @@ function ReviewDetailPanel({
   );
 }
 
+function PlanGateNotice({
+  message,
+  onUpgrade,
+}: {
+  message: string;
+  onUpgrade: () => void;
+}) {
+  return (
+    <div className="plan-gate-notice">
+      <div className="plan-gate-spark" aria-hidden="true">★</div>
+      <div className="plan-gate-copy">
+        <strong>{message || "This workspace is on a higher plan."}</strong>
+        <p>Upgrade your Dinaya plan to unlock this workspace. Your existing data stays safe.</p>
+      </div>
+      <button className="primary small" type="button" onClick={onUpgrade}>
+        View upgrade options
+      </button>
+    </div>
+  );
+}
+
+// Gated workspaces (Pro/Growth) return HTTP 402 when the current plan can't access
+// them. Show a friendly upgrade prompt instead of the generic red error banner.
+function renderModuleError(error: string, onOpenWeb: (path: string) => void) {
+  if (!error) return null;
+  if (isPlanGateMessage(error)) {
+    return (
+      <PlanGateNotice
+        message={planGateMessage(error)}
+        onUpgrade={() => onOpenWeb("/dashboard/billing")}
+      />
+    );
+  }
+  return <div className="error-banner inline">{error}</div>;
+}
+
 function DealsWorkspace({
   data,
   detail,
@@ -8908,7 +8963,7 @@ function DealsWorkspace({
             </div>
           </div>
 
-          {error && <div className="error-banner inline">{error}</div>}
+          {renderModuleError(error, onOpenWeb)}
 
           <div className="metric-grid module-metrics">
             <MetricCard label="Deals" tone="cobalt" value={summary?.totalDeals ?? 0} />
@@ -9182,7 +9237,7 @@ function BroadcastsWorkspace({
             </div>
           </div>
 
-          {error && <div className="error-banner inline">{error}</div>}
+          {renderModuleError(error, onOpenWeb)}
 
           <div className="metric-grid module-metrics">
             <MetricCard label="Broadcasts" tone="cobalt" value={summary?.totalBroadcasts ?? 0} />
@@ -9911,7 +9966,7 @@ function AiHubWorkspace({
             </div>
           </div>
 
-          {error && <div className="error-banner inline">{error}</div>}
+          {renderModuleError(error, onOpenWeb)}
 
           <div className="metric-grid module-metrics">
             <MetricCard label="Runs" tone="cobalt" value={summary?.totalRuns ?? 0} />
@@ -10175,7 +10230,7 @@ function AutomationsWorkspace({
             </div>
           </div>
 
-          {error && <div className="error-banner inline">{error}</div>}
+          {renderModuleError(error, onOpenWeb)}
 
           <div className="metric-grid module-metrics">
             <MetricCard label="Rules" tone="cobalt" value={summary?.totalRules ?? 0} />
