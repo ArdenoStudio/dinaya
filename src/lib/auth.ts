@@ -12,6 +12,7 @@ export type BusinessContext = {
     id: string;
     name: string;
     plan: Plan;
+    planExpiresAt: Date | null;
     slug: string;
     language: string;
   };
@@ -83,6 +84,7 @@ export async function getBusinessContext(): Promise<BusinessContext | null> {
       id: business.id,
       name: business.name,
       plan: effectivePlan,
+      planExpiresAt: business.planExpiresAt ?? null,
       slug: business.slug,
       language: business.language,
     },

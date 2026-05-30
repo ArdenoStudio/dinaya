@@ -130,6 +130,17 @@ fn log_startup(message: &str) {
     }
 }
 
+fn should_skip_tray_for_smoke() -> bool {
+    let startup_logging_enabled =
+        std::env::var("DINAYA_DESKTOP_STARTUP_LOG").ok().as_deref() == Some("1");
+    let skip_tray_for_smoke = std::env::var("DINAYA_DESKTOP_SKIP_TRAY_FOR_SMOKE")
+        .ok()
+        .as_deref()
+        == Some("1");
+
+    startup_logging_enabled && skip_tray_for_smoke
+}
+
 fn main() {
     std::panic::set_hook(Box::new(|info| {
         log_startup(&format!("panic: {}", info));
@@ -173,8 +184,13 @@ fn main() {
         ])
         .setup(|app| {
             log_startup("setup entered");
-            tray::setup_tray(app)?;
-            log_startup("tray setup complete");
+            if should_skip_tray_for_smoke() {
+                log_startup("tray setup skipped for smoke");
+            } else {
+                log_startup("tray setup started");
+                tray::setup_tray(app)?;
+                log_startup("tray setup complete");
+            }
             if let Some(window) = app.get_webview_window("main") {
                 log_startup("main webview found");
                 tray::configure_main_window(&window);

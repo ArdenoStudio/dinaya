@@ -8,7 +8,7 @@ import {
   createGoogleCalendarEvent,
   refreshGoogleAccessToken,
 } from "@/lib/google-calendar";
-import { canUseFeature, type Plan } from "@/lib/plan";
+import { canUseFeature, resolveEffectivePlan } from "@/lib/plan";
 
 type ConnectionMeta = {
   refreshTokenEncrypted?: string;
@@ -25,11 +25,14 @@ export async function syncGoogleCalendarBookings(limit = 30): Promise<number> {
 
   for (const connection of connections) {
     const [business] = await db
-      .select({ plan: businesses.plan, name: businesses.name })
+      .select({ plan: businesses.plan, planExpiresAt: businesses.planExpiresAt, name: businesses.name })
       .from(businesses)
       .where(eq(businesses.id, connection.businessId))
       .limit(1);
-    if (!business || !canUseFeature(business.plan as Plan, "googleCalendarSync")) continue;
+    if (!business) continue;
+    // Effective plan: stop syncing once a trial/paid plan has lapsed to expired.
+    const plan = resolveEffectivePlan({ storedPlan: business.plan, planExpiresAt: business.planExpiresAt });
+    if (!canUseFeature(plan, "googleCalendarSync")) continue;
 
     const meta = (connection.meta as ConnectionMeta | null) ?? {};
     const refreshToken = meta.refreshTokenEncrypted

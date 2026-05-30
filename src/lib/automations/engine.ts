@@ -16,7 +16,7 @@ import {
   sendBookingReminderMessage,
 } from "@/lib/messaging/booking-messages";
 import { sendMessage } from "@/lib/messaging";
-import { canUseFeature, type Plan } from "@/lib/plan";
+import { canUseFeature, getBusinessPlan, type Plan } from "@/lib/plan";
 import type { BookingLanguage } from "@/lib/i18n";
 
 type AutomationAction = {
@@ -221,13 +221,10 @@ export async function processBookingAutomationTrigger(
   bookingId: string,
   trigger: string,
 ): Promise<void> {
-  const [business] = await db
-    .select({ plan: businesses.plan })
-    .from(businesses)
-    .where(eq(businesses.id, businessId))
-    .limit(1);
-
-  if (!business || !canUseFeature(business.plan as Plan, "automations")) {
+  // Effective plan: a lapsed trial / expired business must not run automations,
+  // even though its stored plan still reads "trial"/"pro"/"max" until billing.
+  const plan = await getBusinessPlan(businessId);
+  if (!canUseFeature(plan, "automations")) {
     return;
   }
 

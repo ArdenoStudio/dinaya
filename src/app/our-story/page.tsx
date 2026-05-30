@@ -65,8 +65,8 @@ const principles = [
   },
   {
     border: "border-l-amber-500",
-    title: "Free to start, forever",
-    desc: "Essentials are always free. Premium features exist; guilt-trips don't. You choose when and if you upgrade.",
+    title: "Free to start",
+    desc: "Every business starts with a 14-day free trial — full access, no credit card. Premium plans exist; guilt-trips don't. You choose when and if you upgrade.",
   },
   {
     border: "border-l-violet-500",

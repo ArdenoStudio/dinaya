@@ -3,7 +3,7 @@ import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader"
 import { db } from "@/db";
 import { businesses } from "@/db/schema";
 import { requireOwner } from "@/lib/auth";
-import { canUseFeature, type Plan } from "@/lib/plan";
+import { canUseFeature, resolveEffectivePlan } from "@/lib/plan";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 
@@ -30,6 +30,7 @@ export default async function SettingsPage() {
       customDomain: businesses.customDomain,
       customDomainVerified: businesses.customDomainVerified,
       plan: businesses.plan,
+      planExpiresAt: businesses.planExpiresAt,
       phone: businesses.phone,
       slug: businesses.slug,
       timezone: businesses.timezone,
@@ -40,6 +41,9 @@ export default async function SettingsPage() {
     .limit(1);
 
   if (!business) notFound();
+
+  // Effective plan so an expired/lapsed business can't see the customization UI.
+  const plan = resolveEffectivePlan({ storedPlan: business.plan, planExpiresAt: business.planExpiresAt });
 
   return (
     <div className="space-y-6">
@@ -54,7 +58,7 @@ export default async function SettingsPage() {
           hideDinayaBranding: business.hideDinayaBranding,
           customDomain: business.customDomain,
           customDomainVerified: Boolean(business.customDomainVerified),
-          canCustomizeBookingPage: canUseFeature(business.plan as Plan, "publicBookingPageCustomization"),
+          canCustomizeBookingPage: canUseFeature(plan, "publicBookingPageCustomization"),
         }}
       />
     </div>

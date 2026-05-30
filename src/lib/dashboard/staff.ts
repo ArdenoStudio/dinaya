@@ -284,7 +284,7 @@ async function getStaffDashboardListStrict(
         availabilityWindowCount: Number(availabilitySummaryByStaff.get(row.id)?.availabilityWindowCount ?? 0),
         createdAt: row.createdAt.toISOString(),
         futureBookingCount: Number(rowBookingSummary?.futureBookingCount ?? 0),
-        lastBookingAt: rowBookingSummary?.lastBookingAt?.toISOString() ?? null,
+        lastBookingAt: rowBookingSummary?.lastBookingAt != null ? new Date(rowBookingSummary.lastBookingAt as Date | string).toISOString() : null,
         locationIds: rowLocationRows.map((location) => location.locationId),
         primaryLocationName: rowLocationRows.find((location) => location.isPrimary)?.locationName ?? rowLocationRows[0]?.locationName ?? null,
         todayBookingCount: Number(rowBookingSummary?.todayBookingCount ?? 0),

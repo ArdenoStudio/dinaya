@@ -20,6 +20,7 @@ type DashboardShellProps = {
   userEmail: string;
   userName: string | null;
   plan: string;
+  trialDaysLeft?: number | null;
   showAdminLink: boolean;
   readOnlyImpersonation: boolean;
   impersonatedBy?: string;
@@ -34,6 +35,7 @@ export function DashboardShell({
   userEmail,
   userName,
   plan,
+  trialDaysLeft,
   showAdminLink,
   readOnlyImpersonation,
   impersonatedBy,
@@ -99,6 +101,27 @@ export function DashboardShell({
           Read-only impersonation session
           {impersonatedBy ? ` (admin: ${impersonatedBy})` : ""}. Mutations are blocked.
         </div>
+      ) : null}
+
+      {plan === "trial" ? (
+        <Link
+          href="/dashboard/billing"
+          className="shrink-0 border-b border-blue-500/30 bg-blue-50 px-4 py-2 text-center text-sm text-blue-900 transition-colors hover:bg-blue-100"
+        >
+          {trialDaysLeft != null && trialDaysLeft > 0
+            ? `${trialDaysLeft} ${trialDaysLeft === 1 ? "day" : "days"} left in your free trial`
+            : "Your free trial ends today"}
+          {" — subscribe to keep your booking page live →"}
+        </Link>
+      ) : null}
+
+      {plan === "expired" ? (
+        <Link
+          href="/dashboard/billing"
+          className="shrink-0 border-b border-red-500/30 bg-red-50 px-4 py-2 text-center text-sm font-medium text-red-900 transition-colors hover:bg-red-100"
+        >
+          Your free trial has ended — your booking page is offline. Reactivate by subscribing →
+        </Link>
       ) : null}
 
       <MacOSSidebar

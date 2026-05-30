@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
-import { businesses, locations } from "@/db/schema";
+import { locations } from "@/db/schema";
 import { getUpsellRecommendation } from "@/lib/ai/upsell";
 import { parseLocationAiConfig } from "@/lib/locations";
-import { canUseFeature, type Plan } from "@/lib/plan";
+import { canUseFeature, getBusinessPlan } from "@/lib/plan";
 import { withRateLimit } from "@/lib/rate-limit";
 
 export async function GET(req: NextRequest) {
@@ -22,13 +22,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ recommendation: null });
   }
 
-  const [business] = await db
-    .select({ plan: businesses.plan })
-    .from(businesses)
-    .where(eq(businesses.id, businessId))
-    .limit(1);
-
-  if (!business || !canUseFeature(business.plan as Plan, "aiUpsellAssistant")) {
+  // Resolve the effective plan so a lapsed trial / expired business loses access
+  // (the raw stored plan would still read "trial"/"max" after expiry).
+  const plan = await getBusinessPlan(businessId);
+  if (!canUseFeature(plan, "aiUpsellAssistant")) {
     return NextResponse.json({ recommendation: null });
   }
 

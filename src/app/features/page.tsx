@@ -173,7 +173,7 @@ export default function FeaturesPage() {
 
           <FadeDiv>
             <p className="text-lg text-muted-foreground max-w-xl mx-auto mb-8">
-              Booking, payments, and client engagement — all connected, all automated, with a 14-day free trial to start.
+              Booking, payments, and client engagement — all connected, all automated, all free to start.
             </p>
           </FadeDiv>
 
@@ -305,23 +305,23 @@ export default function FeaturesPage() {
         </div>
       </section>
 
-      {/* Growth AI */}
+      {/* Max AI growth */}
       <section className="max-w-6xl mx-auto px-6 pb-20" id="max-ai">
         <div className="mb-10">
           <div className="inline-flex items-center gap-2 rounded-xl ring-1 ring-amber-100 bg-amber-50/50 px-3.5 py-2 mb-4">
             <span className="flex h-6 w-6 items-center justify-center rounded-md bg-amber-600 text-white">
               <Icon name="stars" className="text-xs" />
             </span>
-            <span className="text-sm font-semibold text-gray-900">Growth AI</span>
+            <span className="text-sm font-semibold text-gray-900">Max AI growth</span>
             <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-800">
-              Available on Growth
+              Available on Max
             </span>
           </div>
           <h2 className="font-cal text-3xl md:text-4xl tracking-tight mb-3">
             Growth on autopilot.
           </h2>
           <p className="text-muted-foreground max-w-xl">
-            Seven AI-powered Growth tools that fill your calendar, win back clients, and keep your social presence active — without adding hours to your week.
+            Seven AI-powered Max tools that fill your calendar, win back clients, and keep your social presence active — without adding hours to your week.
           </p>
         </div>
 
@@ -346,7 +346,7 @@ export default function FeaturesPage() {
             href="/pricing"
             className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
           >
-            See Growth pricing
+            See Max pricing
             <Icon name="arrow-right" className="text-sm" />
           </Link>
         </div>
@@ -406,7 +406,7 @@ export default function FeaturesPage() {
               <span className="absolute top-0.5 -left-3 h-4 w-[3px] rounded-r-sm bg-primary" />
               Everything included
             </span>
-            <h2 className="font-cal text-3xl mt-3 tracking-tight">All the essentials, ready to trial.</h2>
+            <h2 className="font-cal text-3xl mt-3 tracking-tight">All features, free to start.</h2>
           </div>
 
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3 text-sm">
@@ -428,7 +428,7 @@ export default function FeaturesPage() {
               "Booking history",
               "Rebooking nudges",
               "Multi-staff calendar",
-              "Plan updates included",
+              "Free product updates",
             ].map((f) => (
               <div key={f} className="flex items-center gap-2.5">
                 <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-primary/15">
@@ -458,7 +458,7 @@ export default function FeaturesPage() {
                 href="/register"
                 className="inline-flex items-center gap-2 bg-white text-blue-700 px-7 py-3.5 rounded-xl font-semibold shadow-lg hover:bg-white/95 transition-colors"
               >
-                Start free trial
+                Create your page — it&apos;s free
                 <Icon name="arrow-right" className="text-sm" />
               </Link>
             </div>

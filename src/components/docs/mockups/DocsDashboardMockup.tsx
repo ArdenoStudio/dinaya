@@ -352,7 +352,7 @@ export function DocsDashboardMockup({ variant, highlightNav, highlightTarget }: 
 
         {variant.includes("billing") && (
           <div className="mt-2 rounded-lg border bg-white p-2">
-            <p className="font-medium">Plan: Free</p>
+            <p className="font-medium">Plan: Free trial</p>
             <DocsTargetHighlight active={target("billing-upgrade")} label="Upgrade">
               <button type="button" className="mt-2 w-full rounded-lg bg-primary py-1 text-[9px] font-medium text-white">
                 Upgrade to Pro

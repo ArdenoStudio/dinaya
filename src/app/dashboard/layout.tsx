@@ -18,6 +18,16 @@ export const metadata: Metadata = {
     "Manage your bookings, clients, services, and settings from your Dinaya dashboard.",
 };
 
+// Whole days remaining on the trial. Computed on the server so the client shell
+// receives a stable number (no impure Date.now() during client render).
+function trialDaysLeftFrom(planExpiresAt: Date | null): number | null {
+  if (!planExpiresAt) return null;
+  return Math.max(
+    0,
+    Math.ceil((planExpiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24)),
+  );
+}
+
 async function getPlanUsage(businessId: string, plan: Plan): Promise<PlanUsage> {
   const limits = getEntitlements(plan).limits;
   try {
@@ -51,6 +61,8 @@ export default async function DashboardLayout({
   const language = (business.language ?? "en") as DashboardLanguage;
   const copy = getDashboardCopy(language);
   const planUsage = role === "owner" ? await getPlanUsage(businessId, business.plan as Plan) : undefined;
+  const trialDaysLeft =
+    business.plan === "trial" ? trialDaysLeftFrom(business.planExpiresAt) : null;
 
   let onboardingCompleted = true; // default to completed so existing users aren't blocked
   try {
@@ -72,6 +84,7 @@ export default async function DashboardLayout({
           userEmail={user.email ?? ""}
           userName={user.name ?? null}
           plan={business.plan}
+          trialDaysLeft={trialDaysLeft}
           showAdminLink={showAdminLink}
           readOnlyImpersonation={Boolean(readOnlyImpersonation)}
           impersonatedBy={impersonatedBy}
