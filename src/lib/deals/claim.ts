@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { bookings, deals } from "@/db/schema";
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { and, eq, inArray, isNotNull, sql } from "drizzle-orm";
 import type { DealRow } from "@/lib/deals/validation";
 
 export async function claimDealSlot(dealId: string): Promise<DealRow | null> {
@@ -53,30 +53,29 @@ export async function releaseDealSlotForBooking(
     return false;
   }
 
-  const [booking] = await db
-    .select({
-      dealId: bookings.dealId,
-      dealSlotReleased: bookings.dealSlotReleased,
-    })
-    .from(bookings)
-    .where(eq(bookings.id, bookingId))
-    .limit(1);
-
-  if (!booking?.dealId || booking.dealSlotReleased) {
-    return false;
-  }
-
-  const released = await releaseDealSlot(booking.dealId);
-  if (!released) {
-    return false;
-  }
-
-  await db
+  // Atomically claim the release: a single UPDATE flips deal_slot_released
+  // false -> true and returns the deal id. Only the call that actually flips
+  // the flag proceeds to decrement, so two concurrent cancels of the same
+  // booking can't double-release the slot. The dealId guard also leaves
+  // non-deal bookings untouched (matching the previous behaviour).
+  const [claimed] = await db
     .update(bookings)
     .set({ dealSlotReleased: true })
-    .where(and(eq(bookings.id, bookingId), eq(bookings.dealSlotReleased, false)));
+    .where(
+      and(
+        eq(bookings.id, bookingId),
+        eq(bookings.dealSlotReleased, false),
+        isNotNull(bookings.dealId),
+      ),
+    )
+    .returning({ dealId: bookings.dealId });
 
-  return true;
+  if (!claimed?.dealId) {
+    return false;
+  }
+
+  const released = await releaseDealSlot(claimed.dealId);
+  return Boolean(released);
 }
 
 export async function incrementDealImpressions(dealIds: string[]): Promise<void> {
