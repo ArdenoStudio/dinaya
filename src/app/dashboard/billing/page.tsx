@@ -99,7 +99,10 @@ export default async function BillingPage() {
     .limit(1);
 
   const [activeSub] = await db
-    .select()
+    .select({
+      status: subscriptions.status,
+      billingInterval: subscriptions.billingInterval,
+    })
     .from(subscriptions)
     .where(and(
       eq(subscriptions.businessId, businessId),

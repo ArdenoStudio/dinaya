@@ -30,7 +30,36 @@ function effectiveEntitlements(config: PlanConfig, plan: Plan): Entitlements {
   };
 }
 
-function serializeSubscription(row: typeof subscriptions.$inferSelect) {
+// Billing never reads `lastPaymentId`; select columns explicitly so these
+// queries don't break on a DB where that column hasn't been migrated yet.
+const subscriptionColumns = {
+  amountLkr: subscriptions.amountLkr,
+  billingInterval: subscriptions.billingInterval,
+  cancelledAt: subscriptions.cancelledAt,
+  createdAt: subscriptions.createdAt,
+  currentPeriodEnd: subscriptions.currentPeriodEnd,
+  id: subscriptions.id,
+  payhereOrderId: subscriptions.payhereOrderId,
+  payhereSubscriptionId: subscriptions.payhereSubscriptionId,
+  plan: subscriptions.plan,
+  status: subscriptions.status,
+} as const;
+
+type SubscriptionRow = Pick<
+  typeof subscriptions.$inferSelect,
+  | "amountLkr"
+  | "billingInterval"
+  | "cancelledAt"
+  | "createdAt"
+  | "currentPeriodEnd"
+  | "id"
+  | "payhereOrderId"
+  | "payhereSubscriptionId"
+  | "plan"
+  | "status"
+>;
+
+function serializeSubscription(row: SubscriptionRow) {
   return {
     amountLkr: row.amountLkr,
     billingInterval: row.billingInterval,
@@ -93,7 +122,7 @@ export async function getBillingDashboardOverview(businessId: string, now = new 
     [{ monthlyBookings }],
   ] = await Promise.all([
     db
-      .select()
+      .select(subscriptionColumns)
       .from(subscriptions)
       .where(and(
         eq(subscriptions.businessId, businessId),
@@ -102,7 +131,7 @@ export async function getBillingDashboardOverview(businessId: string, now = new 
       .orderBy(desc(subscriptions.createdAt))
       .limit(1),
     db
-      .select()
+      .select(subscriptionColumns)
       .from(subscriptions)
       .where(eq(subscriptions.businessId, businessId))
       .orderBy(desc(subscriptions.createdAt))

@@ -11,7 +11,10 @@ export async function POST(req: NextRequest) {
   const { businessId } = authResult.context;
 
   const [sub] = await db
-    .select()
+    .select({
+      id: subscriptions.id,
+      payhereSubscriptionId: subscriptions.payhereSubscriptionId,
+    })
     .from(subscriptions)
     .where(and(
       eq(subscriptions.businessId, businessId),
