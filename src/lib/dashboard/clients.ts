@@ -1,6 +1,7 @@
 import { and, count, desc, eq, ilike, inArray, or, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { bookings, clientNotes, clients, services, staff } from "@/db/schema";
+import { normalizeSriLankanPhone } from "@/lib/phone";
 import { z } from "@/lib/validation";
 
 export type DashboardClientDetail = Awaited<ReturnType<typeof getClientDashboardDetail>>;
@@ -10,6 +11,10 @@ export type ClientNoteCreateInput = z.infer<typeof clientNoteCreateSchema>;
 export type ClientNoteCreateResult =
   | { status: "created"; note: typeof clientNotes.$inferSelect }
   | { status: "not_found"; error: string };
+export type ClientDashboardUpdateInput = z.infer<typeof clientDashboardUpdateSchema>;
+export type ClientDashboardUpdateResult =
+  | { status: "not_found"; error: string }
+  | { status: "updated"; client: typeof clients.$inferSelect };
 
 export const dashboardClientStageFilters = ["all", "lead", "prospect", "active", "churned"] as const;
 
@@ -22,6 +27,21 @@ export type DashboardClientsListOptions = {
 export const clientNoteCreateSchema = z.object({
   body: z.string().trim().min(1).max(2000),
 });
+
+export const clientDashboardUpdateSchema = z
+  .object({
+    communicationOptOut: z.boolean().optional(),
+    email: z.union([z.email(), z.literal(""), z.null()]).optional(),
+    internalNotes: z.string().trim().max(5000).optional().nullable(),
+    name: z.string().trim().min(1).max(100).optional(),
+    phone: z.string().trim().min(7).max(30).optional(),
+    source: z.string().trim().max(100).optional().nullable(),
+    stage: z.enum(["lead", "prospect", "active", "churned"]).optional(),
+    tags: z.array(z.string().trim().min(1).max(40)).max(20).optional().nullable(),
+  })
+  .refine((value) => Object.keys(value).length > 0, {
+    message: "At least one field is required.",
+  });
 
 const DEFAULT_CLIENT_LIMIT = 200;
 const MAX_CLIENT_LIMIT = 500;
@@ -226,4 +246,34 @@ export async function createClientDashboardNote(
     .returning();
 
   return { status: "created", note };
+}
+
+export async function updateClientDashboardFields(
+  businessId: string,
+  clientId: string,
+  body: ClientDashboardUpdateInput,
+): Promise<ClientDashboardUpdateResult> {
+  const updateValues: Partial<typeof clients.$inferInsert> = {};
+
+  if (body.communicationOptOut !== undefined) updateValues.communicationOptOut = body.communicationOptOut;
+  if (body.email !== undefined) updateValues.email = body.email ? body.email : null;
+  if (body.internalNotes !== undefined) updateValues.internalNotes = body.internalNotes?.trim() || null;
+  if (body.name !== undefined) updateValues.name = body.name;
+  if (body.phone !== undefined) updateValues.phone = normalizeSriLankanPhone(body.phone);
+  if (body.source !== undefined) updateValues.source = body.source?.trim() || null;
+  if (body.stage !== undefined) updateValues.stage = body.stage;
+  if (body.tags !== undefined) {
+    updateValues.tags = body.tags === null
+      ? null
+      : Array.from(new Set(body.tags.map((tag) => tag.trim()).filter(Boolean)));
+  }
+
+  const [updated] = await db
+    .update(clients)
+    .set(updateValues)
+    .where(and(eq(clients.id, clientId), eq(clients.businessId, businessId)))
+    .returning();
+
+  if (!updated) return { status: "not_found", error: "Not found" };
+  return { status: "updated", client: updated };
 }

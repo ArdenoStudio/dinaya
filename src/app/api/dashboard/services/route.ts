@@ -4,28 +4,40 @@ import { services } from "@/db/schema";
 import { count, eq } from "drizzle-orm";
 import { requireApiBusiness } from "@/lib/api-auth";
 import { PlanLimitError, requirePlanLimit } from "@/lib/plan";
+import {
+  getServicesDashboardList,
+  isDashboardServiceStatusFilter,
+  type DashboardServiceStatusFilter,
+} from "@/lib/dashboard/services";
 import { serviceCreateSchema } from "@/lib/schemas/services";
+
+const DEFAULT_LIMIT = 200;
+const MAX_LIMIT = 500;
+
+function parseLimit(value: string | null): number {
+  const parsed = Number(value ?? DEFAULT_LIMIT);
+  if (!Number.isFinite(parsed)) return DEFAULT_LIMIT;
+  return Math.min(MAX_LIMIT, Math.max(1, Math.round(parsed)));
+}
 
 export async function GET(req: NextRequest) {
   const authResult = await requireApiBusiness({ req });
   if (!authResult.ok) return authResult.response;
   const { businessId } = authResult.context;
 
-  const list = await db
-    .select({
-      id: services.id,
-      name: services.name,
-      durationMinutes: services.durationMinutes,
-      priceLkr: services.priceLkr,
-      depositPercent: services.depositPercent,
-      beforeBuffer: services.beforeBuffer,
-      afterBuffer: services.afterBuffer,
-      minimumNoticeHours: services.minimumNoticeHours,
-    })
-    .from(services)
-    .where(eq(services.businessId, businessId));
+  const params = req.nextUrl.searchParams;
+  const statusParam = params.get("status");
+  if (statusParam && !isDashboardServiceStatusFilter(statusParam)) {
+    return NextResponse.json({ error: "status is invalid." }, { status: 400 });
+  }
 
-  return NextResponse.json(list);
+  const { rows } = await getServicesDashboardList(businessId, {
+    limit: parseLimit(params.get("limit")),
+    q: params.get("q")?.trim() ?? "",
+    status: (statusParam || "all") as DashboardServiceStatusFilter,
+  });
+
+  return NextResponse.json(rows);
 }
 
 export async function POST(req: NextRequest) {

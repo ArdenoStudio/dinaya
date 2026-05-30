@@ -3,7 +3,7 @@ import { NextRequest } from "next/server";
 
 const requireDesktopReadMock = vi.hoisted(() => vi.fn());
 const withRateLimitMock = vi.hoisted(() => vi.fn());
-const getAiWorkflowRunsDashboardListMock = vi.hoisted(() => vi.fn());
+const getAiHubDashboardDataMock = vi.hoisted(() => vi.fn());
 const requireProMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@/app/api/v1/desktop/_shared", () => ({
@@ -15,7 +15,7 @@ vi.mock("@/lib/rate-limit", () => ({
 }));
 
 vi.mock("@/lib/dashboard/ai", () => ({
-  getAiWorkflowRunsDashboardList: getAiWorkflowRunsDashboardListMock,
+  getAiHubDashboardData: getAiHubDashboardDataMock,
   isDashboardAiWorkflowRunStatusFilter: (value: string) => ["all", "queued", "sent", "failed", "skipped", "duplicate", "completed"].includes(value),
 }));
 
@@ -38,8 +38,35 @@ describe("GET /api/v1/desktop/ai", () => {
       context: { businessId: "biz_1", deviceId: "device_1" },
     });
     requireProMock.mockResolvedValue(undefined);
-    getAiWorkflowRunsDashboardListMock.mockResolvedValue({
+    getAiHubDashboardDataMock.mockResolvedValue({
+      content: [
+        {
+          caption: "Book this week",
+          contentDate: "2026-06-01",
+          error: null,
+          id: "content_1",
+          locationId: "loc_1",
+          status: "draft",
+          title: "Monday content",
+        },
+      ],
+      features: [
+        {
+          description: "Win back clients who have not booked in a while.",
+          key: "clientReactivationCampaign",
+          label: "Client Reactivation",
+        },
+      ],
       filters: { limit: 80, q: "", status: "all" },
+      locations: [
+        {
+          address: "Kandy",
+          aiConfig: { clientReactivationCampaign: true },
+          id: "loc_1",
+          isDefault: true,
+          name: "Kandy",
+        },
+      ],
       rows: [
         {
           body: "Hi Kasun, your reminder...",
@@ -83,7 +110,7 @@ describe("GET /api/v1/desktop/ai", () => {
     const res = await GET(req);
 
     expect(res.status).toBe(401);
-    expect(getAiWorkflowRunsDashboardListMock).not.toHaveBeenCalled();
+    expect(getAiHubDashboardDataMock).not.toHaveBeenCalled();
   });
 
   it("returns filtered AI workflow runs with summary metrics", async () => {
@@ -93,13 +120,15 @@ describe("GET /api/v1/desktop/ai", () => {
 
     expect(res.status).toBe(200);
     expect(requireProMock).toHaveBeenCalledWith("biz_1", "aiBookingAutopilot");
-    expect(getAiWorkflowRunsDashboardListMock).toHaveBeenCalledWith("biz_1", {
+    expect(getAiHubDashboardDataMock).toHaveBeenCalledWith("biz_1", {
       limit: 20,
       q: "reminder",
       status: "sent",
     });
     expect(body.webUrl).toBe("/dashboard/ai");
     expect(body.rows).toHaveLength(1);
+    expect(body.locations).toHaveLength(1);
+    expect(body.content).toHaveLength(1);
     expect(body.summary.sentRuns).toBe(1);
     expect(body.serverTime).toEqual(expect.any(String));
   });
@@ -111,6 +140,6 @@ describe("GET /api/v1/desktop/ai", () => {
 
     expect(res.status).toBe(400);
     expect(body.error).toBe("status is invalid.");
-    expect(getAiWorkflowRunsDashboardListMock).not.toHaveBeenCalled();
+    expect(getAiHubDashboardDataMock).not.toHaveBeenCalled();
   });
 });

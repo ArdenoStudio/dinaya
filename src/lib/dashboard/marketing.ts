@@ -1,4 +1,4 @@
-import { and, count, desc, eq } from "drizzle-orm";
+import { and, count, desc, eq, sql } from "drizzle-orm";
 import { db } from "@/db";
 import {
   aiContentCalendar,
@@ -20,6 +20,29 @@ export const marketingToolIds = [
 export type MarketingToolId = (typeof marketingToolIds)[number];
 export type MarketingContentAction = "approve" | "publish";
 export type DashboardMarketingDetail = Awaited<ReturnType<typeof getMarketingDashboardDetail>>;
+export type DashboardMarketingList = Awaited<ReturnType<typeof getMarketingDashboardList>>;
+export type DashboardMarketingStatusFilter =
+  | "all"
+  | "approved"
+  | "draft"
+  | "failed"
+  | "published"
+  | "tools";
+
+export const dashboardMarketingStatusFilters = [
+  "all",
+  "tools",
+  "draft",
+  "approved",
+  "published",
+  "failed",
+] as const;
+
+export type DashboardMarketingListOptions = {
+  limit?: number;
+  q?: string;
+  status?: DashboardMarketingStatusFilter;
+};
 
 const marketingToolMeta: Record<MarketingToolId, { description: string; title: string }> = {
   "tool-booking-link": {
@@ -40,8 +63,20 @@ const marketingToolMeta: Record<MarketingToolId, { description: string; title: s
   },
 };
 
-function isMarketingToolId(value: string): value is MarketingToolId {
+const DEFAULT_MARKETING_LIMIT = 80;
+const MAX_MARKETING_LIMIT = 150;
+
+export function isMarketingToolId(value: string): value is MarketingToolId {
   return marketingToolIds.includes(value as MarketingToolId);
+}
+
+export function isDashboardMarketingStatusFilter(value: string): value is DashboardMarketingStatusFilter {
+  return dashboardMarketingStatusFilters.includes(value as DashboardMarketingStatusFilter);
+}
+
+function normalizeMarketingLimit(limit: number | undefined): number {
+  if (!Number.isFinite(limit)) return DEFAULT_MARKETING_LIMIT;
+  return Math.min(MAX_MARKETING_LIMIT, Math.max(1, Math.round(limit ?? DEFAULT_MARKETING_LIMIT)));
 }
 
 async function getMarketingContext(businessId: string) {
@@ -126,6 +161,113 @@ async function getMarketingContext(businessId: string) {
       isActive: connection.isActive,
       provider: connection.provider,
     })),
+  };
+}
+
+export async function getMarketingDashboardList(
+  businessId: string,
+  options: DashboardMarketingListOptions = {},
+) {
+  const context = await getMarketingContext(businessId);
+  if (!context) return null;
+
+  const query = options.q?.trim().toLowerCase() ?? "";
+  const status = options.status ?? "all";
+  const limit = normalizeMarketingLimit(options.limit);
+  const [summaryRows, contentRows] = await Promise.all([
+    db
+      .select({
+        approvedContent: sql<number>`coalesce(count(*) filter (where ${aiContentCalendar.status} = 'approved'), 0)::int`,
+        draftContent: sql<number>`coalesce(count(*) filter (where ${aiContentCalendar.status} = 'draft'), 0)::int`,
+        failedContent: sql<number>`coalesce(count(*) filter (where ${aiContentCalendar.status} = 'failed'), 0)::int`,
+        publishedContent: sql<number>`coalesce(count(*) filter (where ${aiContentCalendar.status} = 'published'), 0)::int`,
+        totalContent: count(),
+      })
+      .from(aiContentCalendar)
+      .where(eq(aiContentCalendar.businessId, businessId)),
+    db
+      .select({
+        channel: aiContentCalendar.channel,
+        contentDate: aiContentCalendar.contentDate,
+        id: aiContentCalendar.id,
+        locationName: locations.name,
+        status: aiContentCalendar.status,
+        title: aiContentCalendar.title,
+        updatedAt: aiContentCalendar.updatedAt,
+      })
+      .from(aiContentCalendar)
+      .innerJoin(locations, eq(aiContentCalendar.locationId, locations.id))
+      .where(eq(aiContentCalendar.businessId, businessId))
+      .orderBy(desc(aiContentCalendar.contentDate), desc(aiContentCalendar.updatedAt))
+      .limit(MAX_MARKETING_LIMIT),
+  ]);
+
+  const toolRows = marketingToolIds.map((toolId) => {
+    const meta = marketingToolMeta[toolId];
+    return {
+      channel: "tool",
+      contentDate: null,
+      id: toolId,
+      kind: "share_tool" as const,
+      locationName: null,
+      status: "tool",
+      statusLabel: "Tool",
+      subtitle: meta.description,
+      title: meta.title,
+      updatedAt: null,
+    };
+  });
+
+  const content = contentRows.map((row) => ({
+    channel: row.channel,
+    contentDate: row.contentDate,
+    id: row.id,
+    kind: "content" as const,
+    locationName: row.locationName,
+    status: row.status,
+    statusLabel: row.status.replaceAll("_", " "),
+    subtitle: `${row.channel} · ${row.locationName}`,
+    title: row.title,
+    updatedAt: row.updatedAt.toISOString(),
+  }));
+
+  const allRows = [...toolRows, ...content];
+  const filteredRows = allRows.filter((row) => {
+    const statusMatch = status === "all"
+      || (status === "tools" ? row.kind === "share_tool" : row.kind === "content" && row.status === status);
+    const queryMatch = !query || [
+      row.channel,
+      row.contentDate ?? "",
+      row.locationName ?? "",
+      row.status,
+      row.subtitle,
+      row.title,
+    ].some((value) => value.toLowerCase().includes(query));
+    return statusMatch && queryMatch;
+  });
+  const summary = summaryRows[0];
+
+  return {
+    business: context.business,
+    directory: context.directory,
+    filters: {
+      limit,
+      q: query,
+      status,
+    },
+    referral: context.referral,
+    rows: filteredRows.slice(0, limit),
+    share: context.share,
+    socialConnections: context.socialConnections,
+    summary: {
+      approvedContent: Number(summary?.approvedContent ?? 0),
+      draftContent: Number(summary?.draftContent ?? 0),
+      failedContent: Number(summary?.failedContent ?? 0),
+      publishedContent: Number(summary?.publishedContent ?? 0),
+      socialConnections: context.socialConnections.length,
+      tools: marketingToolIds.length,
+      totalContent: Number(summary?.totalContent ?? 0),
+    },
   };
 }
 

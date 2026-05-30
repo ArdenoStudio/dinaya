@@ -14,6 +14,7 @@ export type LocationAiConfig = {
   aiUpsellAssistant?: boolean;
   aiContentMachine?: boolean;
   vipLoyaltySequence?: boolean;
+  aiDealSuggestions?: boolean;
 };
 
 export function slugifyLocationName(name: string): string {

@@ -1,3 +1,5 @@
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
 mod commands;
 mod tray;
 
@@ -147,13 +149,7 @@ fn main() {
     log_startup("state managed");
     let builder = builder.plugin(tauri_plugin_notification::init());
     log_startup("notification plugin configured");
-    let builder = builder.plugin(
-        tauri_plugin_window_state::Builder::default()
-            .with_state_flags(window_state_flags())
-            .skip_initial_state("main")
-            .build(),
-    );
-    log_startup("window state plugin configured");
+    log_startup("window state plugin skipped");
     let builder = builder.plugin(tauri_plugin_single_instance::init(|app, _, _| {
         tray::show_main_window(app);
     }));

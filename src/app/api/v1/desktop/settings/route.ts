@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireDesktopRead, requireDesktopWrite } from "@/app/api/v1/desktop/_shared";
-import { getDesktopSettingsData, revokeCurrentDesktopDevice } from "@/lib/dashboard/settings";
+import {
+  desktopSettingsPatchSchema,
+  getDesktopSettingsData,
+  revokeCurrentDesktopDevice,
+  updateDesktopSettingsBusiness,
+} from "@/lib/dashboard/settings";
 import { withRateLimit } from "@/lib/rate-limit";
-import { z } from "@/lib/validation";
-
-const patchSchema = z.object({
-  revokeCurrentDevice: z.literal(true),
-});
 
 export async function GET(req: NextRequest) {
   const authResult = await requireDesktopRead(req);
@@ -44,19 +44,37 @@ export async function PATCH(req: NextRequest) {
   }, { keySuffix: `${businessId}:${deviceId ?? "unknown"}` });
   if (!limited.ok) return limited.response;
 
-  const parsed = patchSchema.safeParse(await req.json().catch(() => null));
+  const parsed = desktopSettingsPatchSchema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid settings update." }, { status: 400 });
   }
 
-  const revoked = await revokeCurrentDesktopDevice(businessId, keyId);
-  if (!revoked) {
-    return NextResponse.json({ error: "Current device not found." }, { status: 404 });
+  if ("revokeCurrentDevice" in parsed.data) {
+    const revoked = await revokeCurrentDesktopDevice(businessId, keyId);
+    if (!revoked) {
+      return NextResponse.json({ error: "Current device not found." }, { status: 404 });
+    }
+
+    return NextResponse.json({
+      revoked: true,
+      revokedKeyId: revoked.id,
+      serverTime: new Date().toISOString(),
+    });
+  }
+
+  const updated = await updateDesktopSettingsBusiness(businessId, parsed.data.business);
+  if (!updated) {
+    return NextResponse.json({ error: "Not found." }, { status: 404 });
+  }
+
+  const settings = await getDesktopSettingsData(businessId, keyId);
+  if (!settings) {
+    return NextResponse.json({ error: "Not found." }, { status: 404 });
   }
 
   return NextResponse.json({
-    revoked: true,
-    revokedKeyId: revoked.id,
+    ...settings,
     serverTime: new Date().toISOString(),
+    webUrl: "/dashboard/settings",
   });
 }

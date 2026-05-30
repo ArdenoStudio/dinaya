@@ -229,6 +229,58 @@ type ClientDetailPayload = {
   webUrl: string;
 };
 
+type ClientEditDraft = {
+  communicationOptOut: boolean;
+  email: string;
+  internalNotes: string;
+  name: string;
+  phone: string;
+  source: string;
+  stage: ClientStage;
+  tags: string;
+};
+
+type ServiceStatusFilter = "active" | "all" | "inactive";
+
+type ServiceRow = {
+  afterBuffer: number;
+  assignedStaffCount: number;
+  beforeBuffer: number;
+  bookingCount: number;
+  createdAt: string;
+  dailyCapacity: number | null;
+  depositPercent: number;
+  description: string | null;
+  durationMinutes: number;
+  futureBookingCount: number;
+  id: string;
+  isActive: boolean;
+  lastBookingAt: string | null;
+  minimumNoticeHours: number;
+  name: string;
+  priceLkr: number;
+  requiresPayment: boolean;
+};
+
+type DesktopServicesPayload = {
+  filters: {
+    limit: number;
+    q: string;
+    status: ServiceStatusFilter;
+  };
+  rows: ServiceRow[];
+  serverTime: string;
+  summary: {
+    activeServices: number;
+    averageDurationMinutes: number;
+    averagePriceLkr: number;
+    inactiveServices: number;
+    paymentRequiredServices: number;
+    totalServices: number;
+  };
+  webUrl: string;
+};
+
 type ServiceDetailPayload = {
   assignedStaff: Array<{
     id: string;
@@ -274,6 +326,42 @@ type ServiceEditDraft = {
   name: string;
   priceLkr: string;
   requiresPayment: boolean;
+};
+
+type StaffStatusFilter = "active" | "all" | "inactive";
+
+type StaffRow = {
+  assignedLocationsCount: number;
+  assignedServicesCount: number;
+  availabilityWindowCount: number;
+  avatarUrl: string | null;
+  bio: string | null;
+  createdAt: string;
+  futureBookingCount: number;
+  id: string;
+  isActive: boolean;
+  lastBookingAt: string | null;
+  locationIds: string[];
+  name: string;
+  primaryLocationName: string | null;
+  todayBookingCount: number;
+};
+
+type DesktopStaffPayload = {
+  filters: {
+    limit: number;
+    q: string;
+    status: StaffStatusFilter;
+  };
+  rows: StaffRow[];
+  serverTime: string;
+  summary: {
+    activeStaff: number;
+    inactiveStaff: number;
+    totalStaff: number;
+    withBio: number;
+  };
+  webUrl: string;
 };
 
 type StaffDetailPayload = {
@@ -379,6 +467,44 @@ type LocationEditDraft = {
   slug: string;
   sortOrder: string;
   timezone: string;
+};
+
+type LocationStatusFilter = "active" | "all" | "inactive";
+
+type LocationRow = {
+  address: string | null;
+  bookingCount: number;
+  createdAt: string;
+  futureBookingCount: number;
+  id: string;
+  isActive: boolean;
+  isDefault: boolean;
+  lastBookingAt: string | null;
+  name: string;
+  phone: string | null;
+  primaryStaffCount: number;
+  slug: string | null;
+  sortOrder: number;
+  staffCount: number;
+  timezone: string;
+};
+
+type DesktopLocationsPayload = {
+  filters: {
+    limit: number;
+    q: string;
+    status: LocationStatusFilter;
+  };
+  rows: LocationRow[];
+  serverTime: string;
+  summary: {
+    activeLocations: number;
+    defaultLocations: number;
+    inactiveLocations: number;
+    totalLocations: number;
+    withAddress: number;
+  };
+  webUrl: string;
 };
 
 type AvailabilityMember = {
@@ -830,6 +956,41 @@ type MarketingDetailPayload = MarketingShareContext & {
     }
 );
 
+type MarketingStatusFilter = "all" | "approved" | "draft" | "failed" | "published" | "tools";
+
+type MarketingRow = {
+  channel: string;
+  contentDate: string | null;
+  id: string;
+  kind: "content" | "share_tool";
+  locationName: string | null;
+  status: string;
+  statusLabel: string;
+  subtitle: string;
+  title: string;
+  updatedAt: string | null;
+};
+
+type DesktopMarketingPayload = MarketingShareContext & {
+  filters: {
+    limit: number;
+    q: string;
+    status: MarketingStatusFilter;
+  };
+  rows: MarketingRow[];
+  serverTime: string;
+  summary: {
+    approvedContent: number;
+    draftContent: number;
+    failedContent: number;
+    publishedContent: number;
+    socialConnections: number;
+    tools: number;
+    totalContent: number;
+  };
+  webUrl: string;
+};
+
 type AiWorkflowRunDetailPayload = {
   location: {
     id: string;
@@ -858,6 +1019,62 @@ type AiWorkflowRunDetailPayload = {
 };
 
 type AiWorkflowRunStatusFilter = "all" | "completed" | "duplicate" | "failed" | "queued" | "sent" | "skipped";
+type AiFeatureKey =
+  | "aiBookingAutopilot"
+  | "aiContentMachine"
+  | "aiDealSuggestions"
+  | "aiUpsellAssistant"
+  | "clientReactivationCampaign"
+  | "reviewEngine"
+  | "smartReminderSystem"
+  | "vipLoyaltySequence";
+
+type AiFeatureMeta = {
+  description: string;
+  key: AiFeatureKey;
+  label: string;
+};
+
+type AiHubLocation = {
+  address: string | null;
+  aiConfig: Record<AiFeatureKey, boolean>;
+  id: string;
+  isDefault: boolean;
+  name: string;
+};
+
+type AiHubContentItem = {
+  approvedAt?: string | null;
+  caption: string;
+  channel: string;
+  contentDate: string;
+  createdAt: string;
+  error: string | null;
+  id: string;
+  locationId: string;
+  provider?: string | null;
+  publishedAt?: string | null;
+  status: string;
+  title: string;
+  updatedAt: string;
+};
+
+type AiReactivationResult = {
+  previews: Array<{
+    body?: string;
+    clientName: string;
+    error?: string;
+    status: string;
+    subject?: string;
+  }>;
+  stats: {
+    checked: number;
+    duplicate?: number;
+    failed: number;
+    sent: number;
+    skipped: number;
+  };
+};
 
 type AiWorkflowRunRow = {
   body: string | null;
@@ -879,11 +1096,14 @@ type AiWorkflowRunRow = {
 };
 
 type DesktopAiWorkflowRunsPayload = {
+  content: AiHubContentItem[];
+  features: AiFeatureMeta[];
   filters: {
     limit: number;
     q: string;
     status: AiWorkflowRunStatusFilter;
   };
+  locations: AiHubLocation[];
   rows: AiWorkflowRunRow[];
   serverTime: string;
   summary: {
@@ -1066,10 +1286,20 @@ type DesktopIntegrationsPayload = {
 type DesktopSettingsPayload = {
   business: Business & {
     address: string | null;
+    bankTransferInstructions?: string | null;
+    businessType?: string | null;
+    cancellationPolicy?: string | null;
+    customDomainVerified?: boolean | null;
+    depositPolicy?: string | null;
+    description?: string | null;
     directoryListed: boolean;
     email: string | null;
+    facebookUrl?: string | null;
+    instagramUrl?: string | null;
+    language?: "en" | "si" | "ta";
     payhereEnabled: boolean;
     phone: string | null;
+    websiteUrl?: string | null;
   };
   currentKeyId: string;
   devices: Array<{
@@ -1092,6 +1322,23 @@ type DesktopSettingsPayload = {
     totalDevices: number;
   };
   webUrl: string;
+};
+
+type SettingsEditDraft = {
+  address: string;
+  bankTransferInstructions: string;
+  businessType: string;
+  cancellationPolicy: string;
+  depositPolicy: string;
+  description: string;
+  directoryListed: boolean;
+  facebookUrl: string;
+  instagramUrl: string;
+  language: "en" | "si" | "ta";
+  name: string;
+  phone: string;
+  timezone: string;
+  websiteUrl: string;
 };
 
 type BillingSubscription = {
@@ -1636,6 +1883,35 @@ function formatMoneyLkr(value: number | null | undefined): string {
   return `LKR ${Number(value ?? 0).toLocaleString("en-LK")}`;
 }
 
+function clientDraftFromDetail(detail: ClientDetailPayload): ClientEditDraft {
+  return {
+    communicationOptOut: detail.client.communicationOptOut,
+    email: detail.client.email ?? "",
+    internalNotes: detail.client.internalNotes ?? "",
+    name: detail.client.name,
+    phone: detail.client.phone,
+    source: detail.client.source ?? "",
+    stage: detail.client.stage,
+    tags: detail.client.tags?.join(", ") ?? "",
+  };
+}
+
+function clientDraftToPayload(draft: ClientEditDraft) {
+  return {
+    communicationOptOut: draft.communicationOptOut,
+    email: draft.email.trim() || null,
+    internalNotes: draft.internalNotes.trim() || null,
+    name: draft.name.trim(),
+    phone: draft.phone.trim(),
+    source: draft.source.trim() || null,
+    stage: draft.stage,
+    tags: draft.tags
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter(Boolean),
+  };
+}
+
 function serviceDraftFromDetail(detail: ServiceDetailPayload): ServiceEditDraft {
   return {
     afterBuffer: String(detail.service.afterBuffer),
@@ -1777,6 +2053,45 @@ function defaultAvailabilityOverrideDraft(): AvailabilityOverrideDraft {
   };
 }
 
+function settingsDraftFromData(data: DesktopSettingsPayload | null, business: Business | null): SettingsEditDraft {
+  const source = data?.business;
+  return {
+    address: source?.address ?? "",
+    bankTransferInstructions: source?.bankTransferInstructions ?? "",
+    businessType: source?.businessType ?? "",
+    cancellationPolicy: source?.cancellationPolicy ?? "",
+    depositPolicy: source?.depositPolicy ?? "",
+    description: source?.description ?? "",
+    directoryListed: Boolean(source?.directoryListed),
+    facebookUrl: source?.facebookUrl ?? "",
+    instagramUrl: source?.instagramUrl ?? "",
+    language: source?.language ?? "en",
+    name: source?.name ?? business?.name ?? "",
+    phone: source?.phone ?? "",
+    timezone: source?.timezone ?? business?.timezone ?? "Asia/Colombo",
+    websiteUrl: source?.websiteUrl ?? "",
+  };
+}
+
+function settingsDraftToPayload(draft: SettingsEditDraft) {
+  return {
+    address: draft.address.trim() || null,
+    bankTransferInstructions: draft.bankTransferInstructions.trim() || null,
+    businessType: draft.businessType.trim() || null,
+    cancellationPolicy: draft.cancellationPolicy.trim() || null,
+    depositPolicy: draft.depositPolicy.trim() || null,
+    description: draft.description.trim() || null,
+    directoryListed: draft.directoryListed,
+    facebookUrl: draft.facebookUrl.trim() || null,
+    instagramUrl: draft.instagramUrl.trim() || null,
+    language: draft.language,
+    name: draft.name.trim(),
+    phone: draft.phone.trim() || null,
+    timezone: draft.timezone.trim() || "Asia/Colombo",
+    websiteUrl: draft.websiteUrl.trim() || null,
+  };
+}
+
 const calendarStartHour = 6;
 const calendarEndHour = 22;
 const calendarVisibleMinutes = (calendarEndHour - calendarStartHour) * 60;
@@ -1899,9 +2214,16 @@ function App() {
   const [clientDetail, setClientDetail] = useState<ClientDetailPayload | null>(null);
   const [clientDetailError, setClientDetailError] = useState("");
   const [clientDetailLoading, setClientDetailLoading] = useState(false);
+  const [clientEditDraft, setClientEditDraft] = useState<ClientEditDraft | null>(null);
+  const [clientDetailSaving, setClientDetailSaving] = useState(false);
   const [clientNoteDraft, setClientNoteDraft] = useState("");
   const [clientNoteSaving, setClientNoteSaving] = useState(false);
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
+  const [servicesData, setServicesData] = useState<DesktopServicesPayload | null>(null);
+  const [servicesError, setServicesError] = useState("");
+  const [servicesLoading, setServicesLoading] = useState(false);
+  const [servicesQuery, setServicesQuery] = useState("");
+  const [servicesStatusFilter, setServicesStatusFilter] = useState<ServiceStatusFilter>("all");
   const [serviceDetail, setServiceDetail] = useState<ServiceDetailPayload | null>(null);
   const [serviceEditDraft, setServiceEditDraft] = useState<ServiceEditDraft | null>(null);
   const [serviceDetailError, setServiceDetailError] = useState("");
@@ -1909,12 +2231,22 @@ function App() {
   const [serviceDetailSaving, setServiceDetailSaving] = useState(false);
   const [serviceForceDeactivate, setServiceForceDeactivate] = useState(false);
   const [selectedStaffId, setSelectedStaffId] = useState<string | null>(null);
+  const [staffData, setStaffData] = useState<DesktopStaffPayload | null>(null);
+  const [staffError, setStaffError] = useState("");
+  const [staffLoading, setStaffLoading] = useState(false);
+  const [staffQuery, setStaffQuery] = useState("");
+  const [staffStatusFilter, setStaffStatusFilter] = useState<StaffStatusFilter>("all");
   const [staffDetail, setStaffDetail] = useState<StaffDetailPayload | null>(null);
   const [staffEditDraft, setStaffEditDraft] = useState<StaffEditDraft | null>(null);
   const [staffDetailError, setStaffDetailError] = useState("");
   const [staffDetailLoading, setStaffDetailLoading] = useState(false);
   const [staffDetailSaving, setStaffDetailSaving] = useState(false);
   const [selectedLocationId, setSelectedLocationId] = useState<string | null>(null);
+  const [locationsData, setLocationsData] = useState<DesktopLocationsPayload | null>(null);
+  const [locationsError, setLocationsError] = useState("");
+  const [locationsLoading, setLocationsLoading] = useState(false);
+  const [locationsQuery, setLocationsQuery] = useState("");
+  const [locationsStatusFilter, setLocationsStatusFilter] = useState<LocationStatusFilter>("all");
   const [locationDetail, setLocationDetail] = useState<LocationDetailPayload | null>(null);
   const [locationEditDraft, setLocationEditDraft] = useState<LocationEditDraft | null>(null);
   const [locationDetailError, setLocationDetailError] = useState("");
@@ -1968,6 +2300,11 @@ function App() {
   const [broadcastDetailError, setBroadcastDetailError] = useState("");
   const [broadcastDetailLoading, setBroadcastDetailLoading] = useState(false);
   const [selectedMarketingId, setSelectedMarketingId] = useState<string | null>(null);
+  const [marketingData, setMarketingData] = useState<DesktopMarketingPayload | null>(null);
+  const [marketingError, setMarketingError] = useState("");
+  const [marketingLoading, setMarketingLoading] = useState(false);
+  const [marketingQuery, setMarketingQuery] = useState("");
+  const [marketingStatusFilter, setMarketingStatusFilter] = useState<MarketingStatusFilter>("all");
   const [marketingDetail, setMarketingDetail] = useState<MarketingDetailPayload | null>(null);
   const [marketingDetailError, setMarketingDetailError] = useState("");
   const [marketingDetailLoading, setMarketingDetailLoading] = useState(false);
@@ -1981,6 +2318,8 @@ function App() {
   const [aiRunDetail, setAiRunDetail] = useState<AiWorkflowRunDetailPayload | null>(null);
   const [aiRunDetailError, setAiRunDetailError] = useState("");
   const [aiRunDetailLoading, setAiRunDetailLoading] = useState(false);
+  const [aiActionSaving, setAiActionSaving] = useState<string | null>(null);
+  const [aiReactivationResult, setAiReactivationResult] = useState<AiReactivationResult | null>(null);
   const [selectedAutomationId, setSelectedAutomationId] = useState<string | null>(null);
   const [automationsData, setAutomationsData] = useState<DesktopAutomationsPayload | null>(null);
   const [automationsError, setAutomationsError] = useState("");
@@ -2004,6 +2343,7 @@ function App() {
   const [settingsError, setSettingsError] = useState("");
   const [settingsLoading, setSettingsLoading] = useState(false);
   const [settingsSaving, setSettingsSaving] = useState(false);
+  const [settingsDraft, setSettingsDraft] = useState<SettingsEditDraft | null>(null);
   const [billingData, setBillingData] = useState<DesktopBillingPayload | null>(null);
   const [billingError, setBillingError] = useState("");
   const [billingLoading, setBillingLoading] = useState(false);
@@ -2051,6 +2391,18 @@ function App() {
     return offlineCacheKey("clients", nextStage, nextQuery || "all");
   }
 
+  function servicesCacheKey(nextStatus = servicesStatusFilter, nextQuery = servicesQuery) {
+    return offlineCacheKey("services", nextStatus, nextQuery || "all");
+  }
+
+  function staffCacheKey(nextStatus = staffStatusFilter, nextQuery = staffQuery) {
+    return offlineCacheKey("staff", nextStatus, nextQuery || "all");
+  }
+
+  function locationsCacheKey(nextStatus = locationsStatusFilter, nextQuery = locationsQuery) {
+    return offlineCacheKey("locations", nextStatus, nextQuery || "all");
+  }
+
   function reportsCacheKey(nextFrom = reportsFrom, nextTo = reportsTo) {
     return offlineCacheKey("reports", nextFrom, nextTo);
   }
@@ -2077,6 +2429,10 @@ function App() {
     nextQuery = broadcastsQuery,
   ) {
     return offlineCacheKey("broadcasts", nextStatus, nextChannel, nextQuery || "all");
+  }
+
+  function marketingCacheKey(nextStatus = marketingStatusFilter, nextQuery = marketingQuery) {
+    return offlineCacheKey("marketing", nextStatus, nextQuery || "all");
   }
 
   function aiRunsCacheKey(nextStatus = aiRunsStatusFilter, nextQuery = aiRunsQuery) {
@@ -2192,6 +2548,126 @@ function App() {
       );
     } finally {
       setClientsLoading(false);
+    }
+  }
+
+  async function fetchServices(
+    nextStatus = servicesStatusFilter,
+    nextQuery = servicesQuery,
+  ): Promise<DesktopServicesPayload> {
+    const path = buildDesktopApiPath("/api/v1/desktop/services", {
+      limit: 80,
+      q: nextQuery.trim() || undefined,
+      status: nextStatus === "all" ? undefined : nextStatus,
+    });
+    return desktopApiRequest<DesktopServicesPayload>({ method: "GET", path });
+  }
+
+  async function loadServices(
+    nextStatus = servicesStatusFilter,
+    nextQuery = servicesQuery,
+  ) {
+    setServicesLoading(true);
+    setServicesError("");
+    try {
+      const next = await fetchServices(nextStatus, nextQuery);
+      setServicesData(next);
+      setLastSync(next.serverTime);
+      writeOfflineCache(servicesCacheKey(nextStatus, nextQuery), next);
+      setOfflineNotice("");
+    } catch (loadError) {
+      restoreCachedRead<DesktopServicesPayload>(
+        servicesCacheKey(nextStatus, nextQuery),
+        "services",
+        loadError,
+        (cached) => {
+          setServicesData(cached);
+          setLastSync(cached.serverTime);
+        },
+        setServicesError,
+      );
+    } finally {
+      setServicesLoading(false);
+    }
+  }
+
+  async function fetchStaff(
+    nextStatus = staffStatusFilter,
+    nextQuery = staffQuery,
+  ): Promise<DesktopStaffPayload> {
+    const path = buildDesktopApiPath("/api/v1/desktop/staff", {
+      limit: 80,
+      q: nextQuery.trim() || undefined,
+      status: nextStatus === "all" ? undefined : nextStatus,
+    });
+    return desktopApiRequest<DesktopStaffPayload>({ method: "GET", path });
+  }
+
+  async function loadStaff(
+    nextStatus = staffStatusFilter,
+    nextQuery = staffQuery,
+  ) {
+    setStaffLoading(true);
+    setStaffError("");
+    try {
+      const next = await fetchStaff(nextStatus, nextQuery);
+      setStaffData(next);
+      setLastSync(next.serverTime);
+      writeOfflineCache(staffCacheKey(nextStatus, nextQuery), next);
+      setOfflineNotice("");
+    } catch (loadError) {
+      restoreCachedRead<DesktopStaffPayload>(
+        staffCacheKey(nextStatus, nextQuery),
+        "staff",
+        loadError,
+        (cached) => {
+          setStaffData(cached);
+          setLastSync(cached.serverTime);
+        },
+        setStaffError,
+      );
+    } finally {
+      setStaffLoading(false);
+    }
+  }
+
+  async function fetchLocations(
+    nextStatus = locationsStatusFilter,
+    nextQuery = locationsQuery,
+  ): Promise<DesktopLocationsPayload> {
+    const path = buildDesktopApiPath("/api/v1/desktop/locations", {
+      limit: 80,
+      q: nextQuery.trim() || undefined,
+      status: nextStatus === "all" ? undefined : nextStatus,
+    });
+    return desktopApiRequest<DesktopLocationsPayload>({ method: "GET", path });
+  }
+
+  async function loadLocations(
+    nextStatus = locationsStatusFilter,
+    nextQuery = locationsQuery,
+  ) {
+    setLocationsLoading(true);
+    setLocationsError("");
+    try {
+      const next = await fetchLocations(nextStatus, nextQuery);
+      setLocationsData(next);
+      setLastSync(next.serverTime);
+      writeOfflineCache(locationsCacheKey(nextStatus, nextQuery), next);
+      setOfflineNotice("");
+    } catch (loadError) {
+      restoreCachedRead<DesktopLocationsPayload>(
+        locationsCacheKey(nextStatus, nextQuery),
+        "locations",
+        loadError,
+        (cached) => {
+          setLocationsData(cached);
+          setLastSync(cached.serverTime);
+        },
+        setLocationsError,
+      );
+    } finally {
+      setLocationsLoading(false);
     }
   }
 
@@ -2358,6 +2834,46 @@ function App() {
       );
     } finally {
       setBroadcastsLoading(false);
+    }
+  }
+
+  async function fetchMarketing(
+    nextStatus = marketingStatusFilter,
+    nextQuery = marketingQuery,
+  ): Promise<DesktopMarketingPayload> {
+    const path = buildDesktopApiPath("/api/v1/desktop/marketing", {
+      limit: 80,
+      q: nextQuery.trim() || undefined,
+      status: nextStatus === "all" ? undefined : nextStatus,
+    });
+    return desktopApiRequest<DesktopMarketingPayload>({ method: "GET", path });
+  }
+
+  async function loadMarketing(
+    nextStatus = marketingStatusFilter,
+    nextQuery = marketingQuery,
+  ) {
+    setMarketingLoading(true);
+    setMarketingError("");
+    try {
+      const next = await fetchMarketing(nextStatus, nextQuery);
+      setMarketingData(next);
+      setLastSync(next.serverTime);
+      writeOfflineCache(marketingCacheKey(nextStatus, nextQuery), next);
+      setOfflineNotice("");
+    } catch (loadError) {
+      restoreCachedRead<DesktopMarketingPayload>(
+        marketingCacheKey(nextStatus, nextQuery),
+        "marketing",
+        loadError,
+        (cached) => {
+          setMarketingData(cached);
+          setLastSync(cached.serverTime);
+        },
+        setMarketingError,
+      );
+    } finally {
+      setMarketingLoading(false);
     }
   }
 
@@ -2797,6 +3313,7 @@ function App() {
     setSelectedClientId(id);
     setClientDetail(null);
     setClientDetailError("");
+    setClientEditDraft(null);
     setClientNoteDraft("");
     setClientDetailLoading(true);
     try {
@@ -2805,6 +3322,7 @@ function App() {
         path: `/api/v1/desktop/clients/${id}`,
       });
       setClientDetail(next);
+      setClientEditDraft(clientDraftFromDetail(next));
       setLastSync(next.serverTime);
     } catch (loadError) {
       setClientDetailError(String(loadError));
@@ -2829,12 +3347,38 @@ function App() {
         path: `/api/v1/desktop/clients/${id}/notes`,
       });
       setClientDetail(next);
+      setClientEditDraft(clientDraftFromDetail(next));
       setClientNoteDraft("");
       setLastSync(next.serverTime);
     } catch (loadError) {
       setClientDetailError(String(loadError));
     } finally {
       setClientNoteSaving(false);
+    }
+  }
+
+  async function updateClientDetail(id: string) {
+    if (!clientEditDraft) return;
+    setClientDetailSaving(true);
+    setClientDetailError("");
+    try {
+      const next = await desktopApiRequest<ClientDetailPayload>({
+        body: clientDraftToPayload(clientEditDraft),
+        method: "PATCH",
+        path: `/api/v1/desktop/clients/${id}`,
+      });
+      setClientDetail(next);
+      setClientEditDraft(clientDraftFromDetail(next));
+      setLastSync(next.serverTime);
+      if (view === "clients") {
+        await loadClients();
+      } else {
+        await loadModule(route);
+      }
+    } catch (loadError) {
+      setClientDetailError(String(loadError));
+    } finally {
+      setClientDetailSaving(false);
     }
   }
 
@@ -2873,7 +3417,11 @@ function App() {
       setServiceEditDraft(serviceDraftFromDetail(next));
       setServiceForceDeactivate(false);
       setLastSync(next.serverTime);
-      await loadModule(route);
+      if (view === "services") {
+        await loadServices();
+      } else {
+        await loadModule(route);
+      }
     } catch (loadError) {
       setServiceDetailError(String(loadError));
     } finally {
@@ -2922,7 +3470,11 @@ function App() {
       setStaffDetail(next);
       setStaffEditDraft(staffDraftFromDetail(next));
       setLastSync(next.serverTime);
-      await loadModule(route);
+      if (view === "staff") {
+        await loadStaff();
+      } else {
+        await loadModule(route);
+      }
     } catch (loadError) {
       setStaffDetailError(String(loadError));
     } finally {
@@ -2964,7 +3516,11 @@ function App() {
       setLocationDetail(next);
       setLocationEditDraft(locationDraftFromDetail(next));
       setLastSync(next.serverTime);
-      await loadModule(route);
+      if (view === "locations") {
+        await loadLocations();
+      } else {
+        await loadModule(route);
+      }
     } catch (loadError) {
       setLocationDetailError(String(loadError));
     } finally {
@@ -3079,7 +3635,11 @@ function App() {
       });
       setMarketingDetail(next);
       setLastSync(next.serverTime);
-      await loadModule(route);
+      if (view === "marketing") {
+        await loadMarketing();
+      } else {
+        await loadModule(route);
+      }
     } catch (loadError) {
       setMarketingDetailError(String(loadError));
     } finally {
@@ -3103,6 +3663,108 @@ function App() {
       setAiRunDetailError(String(loadError));
     } finally {
       setAiRunDetailLoading(false);
+    }
+  }
+
+  async function updateAiLocationFeature(locationId: string, feature: AiFeatureKey, enabled: boolean) {
+    setAiActionSaving(`location:${locationId}:${feature}`);
+    setAiRunsError("");
+    try {
+      const next = await desktopApiRequest<{
+        aiConfig: Record<AiFeatureKey, boolean>;
+        locationId: string;
+        serverTime: string;
+      }>({
+        body: { [feature]: enabled },
+        method: "PATCH",
+        path: `/api/v1/desktop/ai/locations/${locationId}`,
+      });
+      setAiRunsData((current) => current
+        ? {
+            ...current,
+            locations: current.locations.map((location) =>
+              location.id === next.locationId ? { ...location, aiConfig: next.aiConfig } : location
+            ),
+            serverTime: next.serverTime,
+          }
+        : current);
+      setLastSync(next.serverTime);
+    } catch (loadError) {
+      setAiRunsError(String(loadError));
+    } finally {
+      setAiActionSaving(null);
+    }
+  }
+
+  async function generateAiContent(locationId?: string) {
+    setAiActionSaving("content:generate");
+    setAiRunsError("");
+    try {
+      const next = await desktopApiRequest<{
+        items: AiHubContentItem[];
+        serverTime: string;
+      }>({
+        body: locationId ? { locationId } : {},
+        method: "POST",
+        path: "/api/v1/desktop/ai/content",
+      });
+      setAiRunsData((current) => current ? { ...current, content: next.items, serverTime: next.serverTime } : current);
+      setLastSync(next.serverTime);
+      await loadAiRuns();
+    } catch (loadError) {
+      setAiRunsError(String(loadError));
+    } finally {
+      setAiActionSaving(null);
+    }
+  }
+
+  async function updateAiContent(id: string, action: "approve" | "publish") {
+    setAiActionSaving(`content:${id}:${action}`);
+    setAiRunsError("");
+    try {
+      const next = await desktopApiRequest<{
+        item: AiHubContentItem;
+        serverTime: string;
+      }>({
+        body: { action },
+        method: "PATCH",
+        path: `/api/v1/desktop/ai/content/${id}`,
+      });
+      setAiRunsData((current) => current
+        ? {
+            ...current,
+            content: current.content.map((item) => item.id === next.item.id ? next.item : item),
+            serverTime: next.serverTime,
+          }
+        : current);
+      setLastSync(next.serverTime);
+      if (marketingData?.rows.some((row) => row.id === id)) {
+        await loadMarketing();
+      }
+    } catch (loadError) {
+      setAiRunsError(String(loadError));
+    } finally {
+      setAiActionSaving(null);
+    }
+  }
+
+  async function runAiReactivation() {
+    setAiActionSaving("reactivation:run");
+    setAiRunsError("");
+    setAiReactivationResult(null);
+    try {
+      const next = await desktopApiRequest<AiReactivationResult & { serverTime: string }>({
+        body: {},
+        method: "POST",
+        path: "/api/v1/desktop/ai/reactivate",
+      });
+      setAiReactivationResult(next);
+      setLastSync(next.serverTime);
+      await loadAiRuns();
+    } catch (loadError) {
+      setAiRunsError(String(loadError));
+    } finally {
+      setAiActionSaving(null);
     }
   }
 
@@ -3176,6 +3838,7 @@ function App() {
         path: "/api/v1/desktop/settings",
       });
       setSettingsData(next);
+      setSettingsDraft(settingsDraftFromData(next, business));
       setLastSync(next.serverTime);
       writeOfflineCache(offlineCacheKey("settings"), next);
       setOfflineNotice("");
@@ -3186,6 +3849,7 @@ function App() {
         loadError,
         (cached) => {
           setSettingsData(cached);
+          setSettingsDraft(settingsDraftFromData(cached, business));
           setLastSync(cached.serverTime);
         },
         setSettingsError,
@@ -3259,6 +3923,28 @@ function App() {
     }
   }
 
+  async function saveSettingsDraft() {
+    if (!settingsDraft) return;
+    setSettingsSaving(true);
+    setSettingsError("");
+    try {
+      const next = await desktopApiRequest<DesktopSettingsPayload>({
+        body: { business: settingsDraftToPayload(settingsDraft) },
+        method: "PATCH",
+        path: "/api/v1/desktop/settings",
+      });
+      setSettingsData(next);
+      setSettingsDraft(settingsDraftFromData(next, business));
+      setLastSync(next.serverTime);
+      writeOfflineCache(offlineCacheKey("settings"), next);
+      setOfflineNotice("");
+    } catch (loadError) {
+      setSettingsError(String(loadError));
+    } finally {
+      setSettingsSaving(false);
+    }
+  }
+
   async function revokeCurrentDevice() {
     setSettingsSaving(true);
     setSettingsError("");
@@ -3326,15 +4012,30 @@ function App() {
     setClientsStageFilter("all");
     setClientDetail(null);
     setClientDetailError("");
+    setClientEditDraft(null);
+    setClientDetailSaving(false);
     setClientNoteDraft("");
     setSelectedClientId(null);
+    setServicesData(null);
+    setServicesError("");
+    setServicesQuery("");
+    setServicesStatusFilter("all");
     setServiceDetail(null);
+    setServiceEditDraft(null);
     setServiceDetailError("");
     setSelectedServiceId(null);
+    setStaffData(null);
+    setStaffError("");
+    setStaffQuery("");
+    setStaffStatusFilter("all");
     setStaffDetail(null);
     setStaffEditDraft(null);
     setStaffDetailError("");
     setSelectedStaffId(null);
+    setLocationsData(null);
+    setLocationsError("");
+    setLocationsQuery("");
+    setLocationsStatusFilter("all");
     setLocationDetail(null);
     setLocationEditDraft(null);
     setLocationDetailError("");
@@ -3373,6 +4074,13 @@ function App() {
     setBroadcastDetail(null);
     setBroadcastDetailError("");
     setSelectedBroadcastId(null);
+    setMarketingData(null);
+    setMarketingError("");
+    setMarketingQuery("");
+    setMarketingStatusFilter("all");
+    setMarketingDetail(null);
+    setMarketingDetailError("");
+    setSelectedMarketingId(null);
     setAiRunsData(null);
     setAiRunsError("");
     setAiRunsQuery("");
@@ -3380,6 +4088,8 @@ function App() {
     setAiRunDetail(null);
     setAiRunDetailError("");
     setSelectedAiRunId(null);
+    setAiActionSaving(null);
+    setAiReactivationResult(null);
     setAutomationsData(null);
     setAutomationsError("");
     setAutomationsQuery("");
@@ -3396,6 +4106,7 @@ function App() {
     setSelectedIntegrationId(null);
     setSettingsData(null);
     setSettingsError("");
+    setSettingsDraft(null);
     setBillingData(null);
     setBillingError("");
     setReportsData(null);
@@ -3409,21 +4120,27 @@ function App() {
       setClientsError("");
       setClientDetail(null);
       setClientDetailError("");
+      setClientEditDraft(null);
+      setClientDetailSaving(false);
       setClientNoteDraft("");
       setSelectedClientId(null);
     }
     if (nextRoute.id !== "services") {
+      setServicesError("");
       setServiceDetail(null);
+      setServiceEditDraft(null);
       setServiceDetailError("");
       setSelectedServiceId(null);
     }
     if (nextRoute.id !== "staff") {
+      setStaffError("");
       setStaffDetail(null);
       setStaffEditDraft(null);
       setStaffDetailError("");
       setSelectedStaffId(null);
     }
     if (nextRoute.id !== "locations") {
+      setLocationsError("");
       setLocationDetail(null);
       setLocationEditDraft(null);
       setLocationDetailError("");
@@ -3458,11 +4175,18 @@ function App() {
       setBroadcastDetailError("");
       setSelectedBroadcastId(null);
     }
+    if (nextRoute.id !== "marketing") {
+      setMarketingError("");
+      setMarketingDetail(null);
+      setMarketingDetailError("");
+      setSelectedMarketingId(null);
+    }
     if (nextRoute.id !== "aiHub") {
       setAiRunsError("");
       setAiRunDetail(null);
       setAiRunDetailError("");
       setSelectedAiRunId(null);
+      setAiActionSaving(null);
     }
     if (nextRoute.id !== "automations") {
       setAutomationsError("");
@@ -3485,6 +4209,12 @@ function App() {
       void runSync(tab);
     } else if (nextRoute.id === "clients") {
       void loadClients();
+    } else if (nextRoute.id === "services") {
+      void loadServices();
+    } else if (nextRoute.id === "staff") {
+      void loadStaff();
+    } else if (nextRoute.id === "locations") {
+      void loadLocations();
     } else if (nextRoute.id === "availability") {
       void loadAvailability();
     } else if (nextRoute.id === "billing") {
@@ -3501,6 +4231,8 @@ function App() {
       void loadDeals();
     } else if (nextRoute.id === "broadcasts") {
       void loadBroadcasts();
+    } else if (nextRoute.id === "marketing") {
+      void loadMarketing();
     } else if (nextRoute.id === "aiHub") {
       void loadAiRuns();
     } else if (nextRoute.id === "automations") {
@@ -3541,6 +4273,18 @@ function App() {
       void loadClients();
       return;
     }
+    if (view === "services") {
+      void loadServices();
+      return;
+    }
+    if (view === "staff") {
+      void loadStaff();
+      return;
+    }
+    if (view === "locations") {
+      void loadLocations();
+      return;
+    }
     if (view === "reviews") {
       void loadReviews();
       return;
@@ -3551,6 +4295,10 @@ function App() {
     }
     if (view === "broadcasts") {
       void loadBroadcasts();
+      return;
+    }
+    if (view === "marketing") {
+      void loadMarketing();
       return;
     }
     if (view === "aiHub") {
@@ -3791,6 +4539,13 @@ function App() {
   );
 
   useEffect(() => {
+    logDesktopRuntimeEvent("info", "startup", "frontend render ready", {
+      initialView: "overview",
+      routeCount: dashboardRouteGroups.reduce((count, group) => count + group.routes.length, 0),
+    });
+  }, []);
+
+  useEffect(() => {
     setCommandIndex(0);
   }, [commandOpen, commandQuery]);
 
@@ -3856,6 +4611,12 @@ function App() {
         void loadAvailability();
       } else if (authReady && !clientsLoading && view === "clients") {
         void loadClients();
+      } else if (authReady && !servicesLoading && view === "services") {
+        void loadServices();
+      } else if (authReady && !staffLoading && view === "staff") {
+        void loadStaff();
+      } else if (authReady && !locationsLoading && view === "locations") {
+        void loadLocations();
       } else if (authReady && !paymentsLoading && view === "payments") {
         void loadPayments();
       } else if (authReady && !reviewsLoading && view === "reviews") {
@@ -3864,6 +4625,8 @@ function App() {
         void loadDeals();
       } else if (authReady && !broadcastsLoading && view === "broadcasts") {
         void loadBroadcasts();
+      } else if (authReady && !marketingLoading && view === "marketing") {
+        void loadMarketing();
       } else if (authReady && !aiRunsLoading && view === "aiHub") {
         void loadAiRuns();
       } else if (authReady && !automationsLoading && view === "automations") {
@@ -3875,7 +4638,7 @@ function App() {
     return () => window.clearInterval(timer);
     // Recreate the polling timer only when user-controlled sync inputs change.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [aiRunsLoading, aiRunsQuery, aiRunsStatusFilter, authReady, automationsLoading, automationsQuery, automationsStatusFilter, availabilityLoading, broadcastsChannelFilter, broadcastsLoading, broadcastsQuery, broadcastsStatusFilter, calendarDate, calendarLoading, calendarMode, calendarStaffFilter, clientsLoading, clientsQuery, clientsStageFilter, dealsLoading, dealsQuery, dealsStatusFilter, integrationsLoading, integrationsQuery, integrationsStatusFilter, paymentsLoading, paymentsQuery, paymentsStatusFilter, reviewsLoading, reviewsQuery, reviewsRatingFilter, reviewsStatusFilter, syncing, tab, query, staffFilter, statusFilter, view]);
+  }, [aiRunsLoading, aiRunsQuery, aiRunsStatusFilter, authReady, automationsLoading, automationsQuery, automationsStatusFilter, availabilityLoading, broadcastsChannelFilter, broadcastsLoading, broadcastsQuery, broadcastsStatusFilter, calendarDate, calendarLoading, calendarMode, calendarStaffFilter, clientsLoading, clientsQuery, clientsStageFilter, dealsLoading, dealsQuery, dealsStatusFilter, integrationsLoading, integrationsQuery, integrationsStatusFilter, locationsLoading, locationsQuery, locationsStatusFilter, marketingLoading, marketingQuery, marketingStatusFilter, paymentsLoading, paymentsQuery, paymentsStatusFilter, reviewsLoading, reviewsQuery, reviewsRatingFilter, reviewsStatusFilter, servicesLoading, servicesQuery, servicesStatusFilter, staffLoading, staffQuery, staffStatusFilter, syncing, tab, query, staffFilter, statusFilter, view]);
 
   useEffect(() => {
     let unlisten: (() => void) | undefined;
@@ -3927,6 +4690,21 @@ function App() {
       return;
     }
 
+    if (authReady && view === "services" && !servicesData && !servicesLoading) {
+      void loadServices();
+      return;
+    }
+
+    if (authReady && view === "staff" && !staffData && !staffLoading) {
+      void loadStaff();
+      return;
+    }
+
+    if (authReady && view === "locations" && !locationsData && !locationsLoading) {
+      void loadLocations();
+      return;
+    }
+
     if (authReady && view === "reviews" && !reviewsData && !reviewsLoading) {
       void loadReviews();
       return;
@@ -3939,6 +4717,11 @@ function App() {
 
     if (authReady && view === "broadcasts" && !broadcastsData && !broadcastsLoading) {
       void loadBroadcasts();
+      return;
+    }
+
+    if (authReady && view === "marketing" && !marketingData && !marketingLoading) {
+      void loadMarketing();
       return;
     }
 
@@ -3965,10 +4748,14 @@ function App() {
       view !== "bookings" &&
       view !== "billing" &&
       view !== "clients" &&
+      view !== "services" &&
+      view !== "staff" &&
+      view !== "locations" &&
       view !== "payments" &&
       view !== "reviews" &&
       view !== "deals" &&
       view !== "broadcasts" &&
+      view !== "marketing" &&
       view !== "aiHub" &&
       view !== "automations" &&
       view !== "integrations" &&
@@ -4008,7 +4795,7 @@ function App() {
       />
 
       <main id="desktop-main" className="main-pane" tabIndex={-1}>
-        <header className="topbar glass-surface" aria-busy={syncing || moduleLoading || calendarLoading || availabilityLoading || clientsLoading || billingLoading || paymentsLoading || reviewsLoading || dealsLoading || broadcastsLoading || aiRunsLoading || automationsLoading || integrationsLoading || reportsLoading}>
+        <header className="topbar glass-surface" aria-busy={syncing || moduleLoading || calendarLoading || availabilityLoading || clientsLoading || servicesLoading || staffLoading || locationsLoading || billingLoading || paymentsLoading || reviewsLoading || dealsLoading || broadcastsLoading || marketingLoading || aiRunsLoading || automationsLoading || integrationsLoading || reportsLoading}>
           <div className="topbar-title">
             <p className="eyebrow">{business?.name ?? "Dinaya"}</p>
             <h1>{route.label}</h1>
@@ -4027,8 +4814,8 @@ function App() {
             <button className="small" aria-haspopup="dialog" onClick={openCommandPalette}>
               Command
             </button>
-            <button className="primary small" disabled={syncing || moduleLoading || calendarLoading || availabilityLoading || clientsLoading || billingLoading || paymentsLoading || reviewsLoading || dealsLoading || broadcastsLoading || aiRunsLoading || automationsLoading || integrationsLoading || reportsLoading} onClick={refreshCurrentView}>
-              {syncing || moduleLoading || calendarLoading || availabilityLoading || clientsLoading || billingLoading || paymentsLoading || reviewsLoading || dealsLoading || broadcastsLoading || aiRunsLoading || automationsLoading || integrationsLoading || reportsLoading ? "Syncing..." : "Refresh"}
+            <button className="primary small" disabled={syncing || moduleLoading || calendarLoading || availabilityLoading || clientsLoading || servicesLoading || staffLoading || locationsLoading || billingLoading || paymentsLoading || reviewsLoading || dealsLoading || broadcastsLoading || marketingLoading || aiRunsLoading || automationsLoading || integrationsLoading || reportsLoading} onClick={refreshCurrentView}>
+              {syncing || moduleLoading || calendarLoading || availabilityLoading || clientsLoading || servicesLoading || staffLoading || locationsLoading || billingLoading || paymentsLoading || reviewsLoading || dealsLoading || broadcastsLoading || marketingLoading || aiRunsLoading || automationsLoading || integrationsLoading || reportsLoading ? "Syncing..." : "Refresh"}
             </button>
           </div>
         </header>
@@ -4138,14 +4925,18 @@ function App() {
             detail={clientDetail}
             detailError={clientDetailError}
             detailLoading={clientDetailLoading}
+            editDraft={clientEditDraft}
             error={clientsError}
             loading={clientsLoading}
             noteDraft={clientNoteDraft}
+            savingDetail={clientDetailSaving}
             noteSaving={clientNoteSaving}
             query={clientsQuery}
             selectedId={selectedClientId}
             stageFilter={clientsStageFilter}
             onApply={() => void loadClients()}
+            onEditDraft={setClientEditDraft}
+            onEditSave={(id) => void updateClientDetail(id)}
             onNoteDraft={setClientNoteDraft}
             onNoteSave={(id) => void addClientNote(id)}
             onOpenClient={(id) => void openClientDetail(id)}
@@ -4155,6 +4946,83 @@ function App() {
             onStageFilter={(stage) => {
               setClientsStageFilter(stage);
               void loadClients(stage, clientsQuery);
+            }}
+          />
+        ) : view === "services" ? (
+          <ServicesWorkspace
+            data={servicesData}
+            detail={serviceDetail}
+            detailError={serviceDetailError}
+            detailLoading={serviceDetailLoading}
+            draft={serviceEditDraft}
+            error={servicesError}
+            forceDeactivate={serviceForceDeactivate}
+            loading={servicesLoading}
+            query={servicesQuery}
+            saving={serviceDetailSaving}
+            selectedId={selectedServiceId}
+            statusFilter={servicesStatusFilter}
+            onApply={() => void loadServices()}
+            onDraft={setServiceEditDraft}
+            onForceDeactivate={setServiceForceDeactivate}
+            onOpenService={(id) => void openServiceDetail(id)}
+            onOpenWeb={(path) => void invoke("desktop_open_dashboard_path", { path })}
+            onQuery={setServicesQuery}
+            onRefresh={() => void loadServices()}
+            onSave={(id) => void updateServiceDetail(id)}
+            onStatusFilter={(status) => {
+              setServicesStatusFilter(status);
+              void loadServices(status, servicesQuery);
+            }}
+          />
+        ) : view === "staff" ? (
+          <StaffWorkspace
+            data={staffData}
+            detail={staffDetail}
+            detailError={staffDetailError}
+            detailLoading={staffDetailLoading}
+            draft={staffEditDraft}
+            error={staffError}
+            loading={staffLoading}
+            query={staffQuery}
+            saving={staffDetailSaving}
+            selectedId={selectedStaffId}
+            statusFilter={staffStatusFilter}
+            onApply={() => void loadStaff()}
+            onDraft={setStaffEditDraft}
+            onOpenStaff={(id) => void openStaffDetail(id)}
+            onOpenWeb={(path) => void invoke("desktop_open_dashboard_path", { path })}
+            onQuery={setStaffQuery}
+            onRefresh={() => void loadStaff()}
+            onSave={(id) => void updateStaffDetail(id)}
+            onStatusFilter={(status) => {
+              setStaffStatusFilter(status);
+              void loadStaff(status, staffQuery);
+            }}
+          />
+        ) : view === "locations" ? (
+          <LocationsWorkspace
+            data={locationsData}
+            detail={locationDetail}
+            detailError={locationDetailError}
+            detailLoading={locationDetailLoading}
+            draft={locationEditDraft}
+            error={locationsError}
+            loading={locationsLoading}
+            query={locationsQuery}
+            saving={locationDetailSaving}
+            selectedId={selectedLocationId}
+            statusFilter={locationsStatusFilter}
+            onApply={() => void loadLocations()}
+            onDraft={setLocationEditDraft}
+            onOpenLocation={(id) => void openLocationDetail(id)}
+            onOpenWeb={(path) => void invoke("desktop_open_dashboard_path", { path })}
+            onQuery={setLocationsQuery}
+            onRefresh={() => void loadLocations()}
+            onSave={(id) => void updateLocationDetail(id)}
+            onStatusFilter={(status) => {
+              setLocationsStatusFilter(status);
+              void loadLocations(status, locationsQuery);
             }}
           />
         ) : view === "billing" ? (
@@ -4277,6 +5145,29 @@ function App() {
               void loadBroadcasts(status, broadcastsChannelFilter, broadcastsQuery);
             }}
           />
+        ) : view === "marketing" ? (
+          <MarketingWorkspace
+            data={marketingData}
+            detail={marketingDetail}
+            detailError={marketingDetailError}
+            detailLoading={marketingDetailLoading}
+            error={marketingError}
+            loading={marketingLoading}
+            query={marketingQuery}
+            saving={marketingDetailSaving}
+            selectedId={selectedMarketingId}
+            statusFilter={marketingStatusFilter}
+            onApply={() => void loadMarketing()}
+            onContentAction={(id, action) => void updateMarketingContentDetail(id, action)}
+            onOpenMarketing={(id) => void openMarketingDetail(id)}
+            onOpenWeb={(path) => void invoke("desktop_open_dashboard_path", { path })}
+            onQuery={setMarketingQuery}
+            onRefresh={() => void loadMarketing()}
+            onStatusFilter={(status) => {
+              setMarketingStatusFilter(status);
+              void loadMarketing(status, marketingQuery);
+            }}
+          />
         ) : view === "aiHub" ? (
           <AiHubWorkspace
             data={aiRunsData}
@@ -4286,17 +5177,23 @@ function App() {
             error={aiRunsError}
             loading={aiRunsLoading}
             query={aiRunsQuery}
+            reactivationResult={aiReactivationResult}
+            savingAction={aiActionSaving}
             selectedId={selectedAiRunId}
             statusFilter={aiRunsStatusFilter}
             onApply={() => void loadAiRuns()}
+            onContentAction={(id, action) => void updateAiContent(id, action)}
+            onGenerateContent={(locationId) => void generateAiContent(locationId)}
             onOpenRun={(id) => void openAiRunDetail(id)}
             onOpenWeb={(path) => void invoke("desktop_open_dashboard_path", { path })}
             onQuery={setAiRunsQuery}
             onRefresh={() => void loadAiRuns()}
+            onRunReactivation={() => void runAiReactivation()}
             onStatusFilter={(status) => {
               setAiRunsStatusFilter(status);
               void loadAiRuns(status, aiRunsQuery);
             }}
+            onToggleFeature={(locationId, feature, enabled) => void updateAiLocationFeature(locationId, feature, enabled)}
           />
         ) : view === "automations" ? (
           <AutomationsWorkspace
@@ -4346,14 +5243,17 @@ function App() {
           <SettingsView
             business={business}
             data={settingsData}
+            draft={settingsDraft}
             error={settingsError}
             lastSync={lastSync}
             loading={settingsLoading}
             publicUrl={publicBookingUrl(business)}
             saving={settingsSaving}
+            onDraft={setSettingsDraft}
             onLogout={logout}
             onRefresh={() => void loadSettings()}
             onRevokeCurrentDevice={() => void revokeCurrentDevice()}
+            onSave={() => void saveSettingsDraft()}
           />
         ) : (
           <ModuleWorkspace
@@ -4370,6 +5270,8 @@ function App() {
             clientDetail={clientDetail}
             clientDetailError={clientDetailError}
             clientDetailLoading={clientDetailLoading}
+            clientDetailSaving={clientDetailSaving}
+            clientEditDraft={clientEditDraft}
             clientNoteDraft={clientNoteDraft}
             clientNoteSaving={clientNoteSaving}
             data={moduleData[view]}
@@ -4469,6 +5371,8 @@ function App() {
             onRefresh={() => void loadModule(route)}
             onClientNoteDraft={setClientNoteDraft}
             onClientNoteSave={(id) => void addClientNote(id)}
+            onClientDraft={setClientEditDraft}
+            onClientSave={(id) => void updateClientDetail(id)}
             onReviewDraft={setReviewReplyDraft}
             onReviewSave={(id) => void updateReviewDetail(id, { ownerReply: reviewReplyDraft })}
             onReviewTogglePublished={(id, isPublished) => void updateReviewDetail(id, { isPublished })}
@@ -5578,14 +6482,18 @@ function ClientsWorkspace({
   detail,
   detailError,
   detailLoading,
+  editDraft,
   error,
   loading,
   noteDraft,
+  savingDetail,
   noteSaving,
   query,
   selectedId,
   stageFilter,
   onApply,
+  onEditDraft,
+  onEditSave,
   onNoteDraft,
   onNoteSave,
   onOpenClient,
@@ -5598,14 +6506,18 @@ function ClientsWorkspace({
   detail: ClientDetailPayload | null;
   detailError: string;
   detailLoading: boolean;
+  editDraft: ClientEditDraft | null;
   error: string;
   loading: boolean;
   noteDraft: string;
+  savingDetail: boolean;
   noteSaving: boolean;
   query: string;
   selectedId: string | null;
   stageFilter: ClientStageFilter;
   onApply: () => void;
+  onEditDraft: (draft: ClientEditDraft) => void;
+  onEditSave: (id: string) => void;
   onNoteDraft: (value: string) => void;
   onNoteSave: (id: string) => void;
   onOpenClient: (id: string) => void;
@@ -5720,13 +6632,512 @@ function ClientsWorkspace({
 
         <ClientDetailPanel
           detail={detail}
+          draft={editDraft}
           error={detailError}
           loading={detailLoading}
           noteDraft={noteDraft}
+          savingDetail={savingDetail}
           savingNote={noteSaving}
+          onDraft={onEditDraft}
+          onSave={onEditSave}
           onNoteDraft={onNoteDraft}
           onNoteSave={onNoteSave}
           onOpenWeb={onOpenWeb}
+        />
+      </div>
+    </section>
+  );
+}
+
+function ServicesWorkspace({
+  data,
+  detail,
+  detailError,
+  detailLoading,
+  draft,
+  error,
+  forceDeactivate,
+  loading,
+  query,
+  saving,
+  selectedId,
+  statusFilter,
+  onApply,
+  onDraft,
+  onForceDeactivate,
+  onOpenService,
+  onOpenWeb,
+  onQuery,
+  onRefresh,
+  onSave,
+  onStatusFilter,
+}: {
+  data: DesktopServicesPayload | null;
+  detail: ServiceDetailPayload | null;
+  detailError: string;
+  detailLoading: boolean;
+  draft: ServiceEditDraft | null;
+  error: string;
+  forceDeactivate: boolean;
+  loading: boolean;
+  query: string;
+  saving: boolean;
+  selectedId: string | null;
+  statusFilter: ServiceStatusFilter;
+  onApply: () => void;
+  onDraft: (draft: ServiceEditDraft) => void;
+  onForceDeactivate: (value: boolean) => void;
+  onOpenService: (id: string) => void;
+  onOpenWeb: (path: string) => void;
+  onQuery: (value: string) => void;
+  onRefresh: () => void;
+  onSave: (id: string) => void;
+  onStatusFilter: (status: ServiceStatusFilter) => void;
+}) {
+  const summary = data?.summary;
+  const statusOptions: Array<{ count: number; label: string; value: ServiceStatusFilter }> = [
+    { count: summary?.totalServices ?? 0, label: "All", value: "all" },
+    { count: summary?.activeServices ?? 0, label: "Active", value: "active" },
+    { count: summary?.inactiveServices ?? 0, label: "Inactive", value: "inactive" },
+  ];
+
+  return (
+    <section className="module-view has-detail services-workspace">
+      <div className="module-split">
+        <div className="module-panel glass-surface">
+          <div className="module-head">
+            <div>
+              <p className="eyebrow">Native Services</p>
+              <h2>Service catalog</h2>
+              <p>Filter bookable services, inspect demand, and edit price, duration, payment, and status.</p>
+            </div>
+            <div className="module-actions">
+              <button className="primary small" disabled={loading} onClick={onRefresh}>
+                {loading ? "Loading..." : "Refresh"}
+              </button>
+              <button onClick={() => onOpenWeb(data?.webUrl ?? "/dashboard/services")}>
+                Open services in browser
+              </button>
+            </div>
+          </div>
+
+          {error && <div className="error-banner inline">{error}</div>}
+
+          <div className="metric-grid module-metrics">
+            <MetricCard label="Services" tone="cobalt" value={summary?.totalServices ?? 0} />
+            <MetricCard label="Active" tone="emerald" value={summary?.activeServices ?? 0} />
+            <MetricCard label="Deposits" tone="amber" value={summary?.paymentRequiredServices ?? 0} />
+            <MetricCard label="Avg duration" tone="slate" value={`${summary?.averageDurationMinutes ?? 0}m`} />
+          </div>
+
+          <div className="filters service-filter-row">
+            <div className="tabs">
+              {statusOptions.map((option) => (
+                <button
+                  key={option.value}
+                  className={statusFilter === option.value ? "active" : ""}
+                  type="button"
+                  onClick={() => onStatusFilter(option.value)}
+                >
+                  {option.label} ({option.count})
+                </button>
+              ))}
+            </div>
+            <div className="filter-row">
+              <input
+                placeholder="Search service name or description"
+                type="search"
+                value={query}
+                onChange={(event) => onQuery(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") onApply();
+                }}
+              />
+              <button className="primary" disabled={loading} onClick={onApply}>
+                Apply
+              </button>
+            </div>
+          </div>
+
+          <div className="module-meta">
+            <span>{data ? `${data.rows.length} services loaded` : loading ? "Loading live data" : "Ready to load"}</span>
+            <span>{data ? `Synced ${formatTime(data.serverTime)}` : "/api/v1/desktop/services"}</span>
+          </div>
+
+          {loading && !data ? (
+            <div className="empty-state">Loading services...</div>
+          ) : data?.rows.length ? (
+            <ul className="module-list service-list">
+              {data.rows.map((service) => (
+                <li key={service.id}>
+                  <button
+                    className={selectedId === service.id ? "module-list-item selected" : "module-list-item"}
+                    type="button"
+                    onClick={() => onOpenService(service.id)}
+                  >
+                    <div>
+                      <strong>{service.name}</strong>
+                      <span>{service.description ?? `${service.durationMinutes} min service`}</span>
+                    </div>
+                    <div className="module-list-meta">
+                      <span className={`module-status ${service.isActive ? "stage-active" : "stage-churned"}`}>
+                        {service.isActive ? "active" : "inactive"}
+                      </span>
+                      <span>
+                        {formatMoneyLkr(service.priceLkr)} - {service.durationMinutes}m - {service.assignedStaffCount} staff
+                      </span>
+                      <span>
+                        {service.futureBookingCount} upcoming - {service.lastBookingAt ? formatModuleMeta(service.lastBookingAt) : `${service.bookingCount} all-time`}
+                      </span>
+                    </div>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="empty-state">
+              No services match this filter.
+            </div>
+          )}
+        </div>
+
+        <ServiceDetailPanel
+          detail={detail}
+          draft={draft}
+          error={detailError}
+          forceDeactivate={forceDeactivate}
+          loading={detailLoading}
+          saving={saving}
+          onDraft={onDraft}
+          onForceDeactivate={onForceDeactivate}
+          onOpenWeb={onOpenWeb}
+          onSave={onSave}
+        />
+      </div>
+    </section>
+  );
+}
+
+function StaffWorkspace({
+  data,
+  detail,
+  detailError,
+  detailLoading,
+  draft,
+  error,
+  loading,
+  query,
+  saving,
+  selectedId,
+  statusFilter,
+  onApply,
+  onDraft,
+  onOpenStaff,
+  onOpenWeb,
+  onQuery,
+  onRefresh,
+  onSave,
+  onStatusFilter,
+}: {
+  data: DesktopStaffPayload | null;
+  detail: StaffDetailPayload | null;
+  detailError: string;
+  detailLoading: boolean;
+  draft: StaffEditDraft | null;
+  error: string;
+  loading: boolean;
+  query: string;
+  saving: boolean;
+  selectedId: string | null;
+  statusFilter: StaffStatusFilter;
+  onApply: () => void;
+  onDraft: (draft: StaffEditDraft) => void;
+  onOpenStaff: (id: string) => void;
+  onOpenWeb: (path: string) => void;
+  onQuery: (value: string) => void;
+  onRefresh: () => void;
+  onSave: (id: string) => void;
+  onStatusFilter: (status: StaffStatusFilter) => void;
+}) {
+  const summary = data?.summary;
+  const statusOptions: Array<{ count: number; label: string; value: StaffStatusFilter }> = [
+    { count: summary?.totalStaff ?? 0, label: "All", value: "all" },
+    { count: summary?.activeStaff ?? 0, label: "Active", value: "active" },
+    { count: summary?.inactiveStaff ?? 0, label: "Inactive", value: "inactive" },
+  ];
+
+  return (
+    <section className="module-view has-detail staff-workspace">
+      <div className="module-split">
+        <div className="module-panel glass-surface">
+          <div className="module-head">
+            <div>
+              <p className="eyebrow">Native Staff</p>
+              <h2>Team schedule load</h2>
+              <p>Filter team members, inspect assignments, and edit profile, services, locations, and active status.</p>
+            </div>
+            <div className="module-actions">
+              <button className="primary small" disabled={loading} onClick={onRefresh}>
+                {loading ? "Loading..." : "Refresh"}
+              </button>
+              <button onClick={() => onOpenWeb(data?.webUrl ?? "/dashboard/staff")}>
+                Open staff in browser
+              </button>
+            </div>
+          </div>
+
+          {error && <div className="error-banner inline">{error}</div>}
+
+          <div className="metric-grid module-metrics">
+            <MetricCard label="Staff" tone="cobalt" value={summary?.totalStaff ?? 0} />
+            <MetricCard label="Active" tone="emerald" value={summary?.activeStaff ?? 0} />
+            <MetricCard label="Inactive" tone="amber" value={summary?.inactiveStaff ?? 0} />
+            <MetricCard label="Profiles" tone="slate" value={summary?.withBio ?? 0} />
+          </div>
+
+          <div className="filters staff-filter-row">
+            <div className="tabs">
+              {statusOptions.map((option) => (
+                <button
+                  key={option.value}
+                  className={statusFilter === option.value ? "active" : ""}
+                  type="button"
+                  onClick={() => onStatusFilter(option.value)}
+                >
+                  {option.label} ({option.count})
+                </button>
+              ))}
+            </div>
+            <div className="filter-row">
+              <input
+                placeholder="Search staff name or bio"
+                type="search"
+                value={query}
+                onChange={(event) => onQuery(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") onApply();
+                }}
+              />
+              <button className="primary" disabled={loading} onClick={onApply}>
+                Apply
+              </button>
+            </div>
+          </div>
+
+          <div className="module-meta">
+            <span>{data ? `${data.rows.length} staff loaded` : loading ? "Loading live data" : "Ready to load"}</span>
+            <span>{data ? `Synced ${formatTime(data.serverTime)}` : "/api/v1/desktop/staff"}</span>
+          </div>
+
+          {loading && !data ? (
+            <div className="empty-state">Loading staff...</div>
+          ) : data?.rows.length ? (
+            <ul className="module-list staff-list">
+              {data.rows.map((member) => (
+                <li key={member.id}>
+                  <button
+                    className={selectedId === member.id ? "module-list-item selected" : "module-list-item"}
+                    type="button"
+                    onClick={() => onOpenStaff(member.id)}
+                  >
+                    <div>
+                      <strong>{member.name}</strong>
+                      <span>{member.bio ?? member.primaryLocationName ?? "No profile bio yet"}</span>
+                    </div>
+                    <div className="module-list-meta">
+                      <span className={`module-status ${member.isActive ? "stage-active" : "stage-churned"}`}>
+                        {member.isActive ? "active" : "inactive"}
+                      </span>
+                      <span>
+                        {member.assignedServicesCount} services - {member.assignedLocationsCount} locations - {member.availabilityWindowCount} windows
+                      </span>
+                      <span>
+                        {member.todayBookingCount} today - {member.futureBookingCount} upcoming
+                      </span>
+                    </div>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="empty-state">
+              No staff match this filter.
+            </div>
+          )}
+        </div>
+
+        <StaffDetailPanel
+          detail={detail}
+          draft={draft}
+          error={detailError}
+          loading={detailLoading}
+          saving={saving}
+          onDraft={onDraft}
+          onOpenWeb={onOpenWeb}
+          onSave={onSave}
+        />
+      </div>
+    </section>
+  );
+}
+
+function LocationsWorkspace({
+  data,
+  detail,
+  detailError,
+  detailLoading,
+  draft,
+  error,
+  loading,
+  query,
+  saving,
+  selectedId,
+  statusFilter,
+  onApply,
+  onDraft,
+  onOpenLocation,
+  onOpenWeb,
+  onQuery,
+  onRefresh,
+  onSave,
+  onStatusFilter,
+}: {
+  data: DesktopLocationsPayload | null;
+  detail: LocationDetailPayload | null;
+  detailError: string;
+  detailLoading: boolean;
+  draft: LocationEditDraft | null;
+  error: string;
+  loading: boolean;
+  query: string;
+  saving: boolean;
+  selectedId: string | null;
+  statusFilter: LocationStatusFilter;
+  onApply: () => void;
+  onDraft: (draft: LocationEditDraft) => void;
+  onOpenLocation: (id: string) => void;
+  onOpenWeb: (path: string) => void;
+  onQuery: (value: string) => void;
+  onRefresh: () => void;
+  onSave: (id: string) => void;
+  onStatusFilter: (status: LocationStatusFilter) => void;
+}) {
+  const summary = data?.summary;
+  const statusOptions: Array<{ count: number; label: string; value: LocationStatusFilter }> = [
+    { count: summary?.totalLocations ?? 0, label: "All", value: "all" },
+    { count: summary?.activeLocations ?? 0, label: "Active", value: "active" },
+    { count: summary?.inactiveLocations ?? 0, label: "Inactive", value: "inactive" },
+  ];
+
+  return (
+    <section className="module-view has-detail locations-workspace">
+      <div className="module-split">
+        <div className="module-panel glass-surface">
+          <div className="module-head">
+            <div>
+              <p className="eyebrow">Native Locations</p>
+              <h2>Branch coverage</h2>
+              <p>Filter branches, inspect staff coverage and booking load, and edit address, slug, timezone, and default status.</p>
+            </div>
+            <div className="module-actions">
+              <button className="primary small" disabled={loading} onClick={onRefresh}>
+                {loading ? "Loading..." : "Refresh"}
+              </button>
+              <button onClick={() => onOpenWeb(data?.webUrl ?? "/dashboard/locations")}>
+                Open locations in browser
+              </button>
+            </div>
+          </div>
+
+          {error && <div className="error-banner inline">{error}</div>}
+
+          <div className="metric-grid module-metrics">
+            <MetricCard label="Locations" tone="cobalt" value={summary?.totalLocations ?? 0} />
+            <MetricCard label="Active" tone="emerald" value={summary?.activeLocations ?? 0} />
+            <MetricCard label="Default" tone="amber" value={summary?.defaultLocations ?? 0} />
+            <MetricCard label="Addresses" tone="slate" value={summary?.withAddress ?? 0} />
+          </div>
+
+          <div className="filters location-filter-row">
+            <div className="tabs">
+              {statusOptions.map((option) => (
+                <button
+                  key={option.value}
+                  className={statusFilter === option.value ? "active" : ""}
+                  type="button"
+                  onClick={() => onStatusFilter(option.value)}
+                >
+                  {option.label} ({option.count})
+                </button>
+              ))}
+            </div>
+            <div className="filter-row">
+              <input
+                placeholder="Search branch, address, phone, slug, or timezone"
+                type="search"
+                value={query}
+                onChange={(event) => onQuery(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") onApply();
+                }}
+              />
+              <button className="primary" disabled={loading} onClick={onApply}>
+                Apply
+              </button>
+            </div>
+          </div>
+
+          <div className="module-meta">
+            <span>{data ? `${data.rows.length} locations loaded` : loading ? "Loading live data" : "Ready to load"}</span>
+            <span>{data ? `Synced ${formatTime(data.serverTime)}` : "/api/v1/desktop/locations"}</span>
+          </div>
+
+          {loading && !data ? (
+            <div className="empty-state">Loading locations...</div>
+          ) : data?.rows.length ? (
+            <ul className="module-list location-list">
+              {data.rows.map((location) => (
+                <li key={location.id}>
+                  <button
+                    className={selectedId === location.id ? "module-list-item selected" : "module-list-item"}
+                    type="button"
+                    onClick={() => onOpenLocation(location.id)}
+                  >
+                    <div>
+                      <strong>{location.name}</strong>
+                      <span>{location.address ?? location.phone ?? location.slug ?? location.timezone}</span>
+                    </div>
+                    <div className="module-list-meta">
+                      <span className={`module-status ${location.isActive ? "stage-active" : "stage-churned"}`}>
+                        {location.isDefault ? "default" : location.isActive ? "active" : "inactive"}
+                      </span>
+                      <span>
+                        {location.staffCount} staff - {location.futureBookingCount} upcoming - {location.timezone}
+                      </span>
+                      <span>
+                        {location.lastBookingAt ? formatModuleMeta(location.lastBookingAt) : `${location.bookingCount} all-time bookings`}
+                      </span>
+                    </div>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="empty-state">
+              No locations match this filter.
+            </div>
+          )}
+        </div>
+
+        <LocationDetailPanel
+          detail={detail}
+          draft={draft}
+          error={detailError}
+          loading={detailLoading}
+          saving={saving}
+          onDraft={onDraft}
+          onOpenWeb={onOpenWeb}
+          onSave={onSave}
         />
       </div>
     </section>
@@ -5747,6 +7158,8 @@ function ModuleWorkspace({
   clientDetail,
   clientDetailError,
   clientDetailLoading,
+  clientDetailSaving,
+  clientEditDraft,
   clientNoteDraft,
   clientNoteSaving,
   data,
@@ -5789,8 +7202,10 @@ function ModuleWorkspace({
   staffDetailLoading,
   staffDetailSaving,
   onOpenBrowser,
+  onClientDraft,
   onClientNoteDraft,
   onClientNoteSave,
+  onClientSave,
   onOpenItem,
   onOpenItemBrowser,
   onRefresh,
@@ -5820,6 +7235,8 @@ function ModuleWorkspace({
   clientDetail?: ClientDetailPayload | null;
   clientDetailError?: string;
   clientDetailLoading?: boolean;
+  clientDetailSaving?: boolean;
+  clientEditDraft?: ClientEditDraft | null;
   clientNoteDraft?: string;
   clientNoteSaving?: boolean;
   data: DesktopModulePayload | undefined;
@@ -5862,8 +7279,10 @@ function ModuleWorkspace({
   staffDetailLoading?: boolean;
   staffDetailSaving?: boolean;
   onOpenBrowser: () => void;
+  onClientDraft?: (draft: ClientEditDraft) => void;
   onClientNoteDraft?: (value: string) => void;
   onClientNoteSave?: (id: string) => void;
+  onClientSave?: (id: string) => void;
   onOpenItem?: (id: string) => void;
   onOpenItemBrowser: (path: string) => void;
   onRefresh: () => void;
@@ -5965,13 +7384,17 @@ function ModuleWorkspace({
       {isClientModule && (
         <ClientDetailPanel
           detail={clientDetail ?? null}
+          draft={clientEditDraft ?? null}
           error={clientDetailError ?? ""}
           loading={clientDetailLoading ?? false}
           noteDraft={clientNoteDraft ?? ""}
+          savingDetail={clientDetailSaving ?? false}
           savingNote={clientNoteSaving ?? false}
+          onDraft={onClientDraft ?? (() => undefined)}
           onNoteDraft={onClientNoteDraft ?? (() => undefined)}
           onNoteSave={onClientNoteSave ?? (() => undefined)}
           onOpenWeb={(path) => onOpenItemBrowser(path)}
+          onSave={onClientSave ?? (() => undefined)}
         />
       )}
       {isServiceModule && (
@@ -6092,22 +7515,30 @@ function ModuleWorkspace({
 
 function ClientDetailPanel({
   detail,
+  draft,
   error,
   loading,
   noteDraft,
+  savingDetail,
   savingNote,
+  onDraft,
   onNoteDraft,
   onNoteSave,
   onOpenWeb,
+  onSave,
 }: {
   detail: ClientDetailPayload | null;
+  draft: ClientEditDraft | null;
   error: string;
   loading: boolean;
   noteDraft: string;
+  savingDetail: boolean;
   savingNote: boolean;
+  onDraft: (draft: ClientEditDraft) => void;
   onNoteDraft: (value: string) => void;
   onNoteSave: (id: string) => void;
   onOpenWeb: (path: string) => void;
+  onSave: (id: string) => void;
 }) {
   if (loading && !detail) {
     return <aside className="detail-pane empty glass-surface">Loading client...</aside>;
@@ -6122,6 +7553,8 @@ function ClientDetailPanel({
   }
 
   const completedBookings = detail.bookings.filter((booking) => booking.status === "completed").length;
+  const activeDraft = draft ?? clientDraftFromDetail(detail);
+  const updateDraft = (patch: Partial<ClientEditDraft>) => onDraft({ ...activeDraft, ...patch });
 
   return (
     <aside className="detail-pane client-detail glass-surface">
@@ -6159,6 +7592,70 @@ function ClientDetailPanel({
           </button>
         )}
       </div>
+
+      <section className="client-section">
+        <h3>Edit profile</h3>
+        <div className="client-edit-form">
+          <label>
+            <span>Name</span>
+            <input value={activeDraft.name} onChange={(event) => updateDraft({ name: event.target.value })} />
+          </label>
+          <label>
+            <span>Phone</span>
+            <input value={activeDraft.phone} onChange={(event) => updateDraft({ phone: event.target.value })} />
+          </label>
+          <label>
+            <span>Email</span>
+            <input value={activeDraft.email} onChange={(event) => updateDraft({ email: event.target.value })} />
+          </label>
+          <label>
+            <span>Stage</span>
+            <select
+              value={activeDraft.stage}
+              onChange={(event) => updateDraft({ stage: event.target.value as ClientStage })}
+            >
+              <option value="lead">Lead</option>
+              <option value="prospect">Prospect</option>
+              <option value="active">Active</option>
+              <option value="churned">Churned</option>
+            </select>
+          </label>
+          <label>
+            <span>Source</span>
+            <input value={activeDraft.source} onChange={(event) => updateDraft({ source: event.target.value })} />
+          </label>
+          <label>
+            <span>Tags</span>
+            <input value={activeDraft.tags} onChange={(event) => updateDraft({ tags: event.target.value })} />
+          </label>
+          <label className="wide">
+            <span>Internal notes</span>
+            <textarea
+              maxLength={5000}
+              value={activeDraft.internalNotes}
+              onChange={(event) => updateDraft({ internalNotes: event.target.value })}
+            />
+          </label>
+          <label className="checkbox-row wide">
+            <input
+              checked={activeDraft.communicationOptOut}
+              type="checkbox"
+              onChange={(event) => updateDraft({ communicationOptOut: event.target.checked })}
+            />
+            <span>Communication opt-out</span>
+          </label>
+          <div className="actions wide">
+            <button
+              className="primary"
+              disabled={savingDetail || !activeDraft.name.trim() || !activeDraft.phone.trim()}
+              type="button"
+              onClick={() => onSave(detail.client.id)}
+            >
+              {savingDetail ? "Saving..." : "Save profile"}
+            </button>
+          </div>
+        </div>
+      </section>
 
       <section className="client-section">
         <h3>Booking history</h3>
@@ -7886,6 +9383,161 @@ function BroadcastDetailPanel({
   );
 }
 
+function MarketingWorkspace({
+  data,
+  detail,
+  detailError,
+  detailLoading,
+  error,
+  loading,
+  query,
+  saving,
+  selectedId,
+  statusFilter,
+  onApply,
+  onContentAction,
+  onOpenMarketing,
+  onOpenWeb,
+  onQuery,
+  onRefresh,
+  onStatusFilter,
+}: {
+  data: DesktopMarketingPayload | null;
+  detail: MarketingDetailPayload | null;
+  detailError: string;
+  detailLoading: boolean;
+  error: string;
+  loading: boolean;
+  query: string;
+  saving: boolean;
+  selectedId: string | null;
+  statusFilter: MarketingStatusFilter;
+  onApply: () => void;
+  onContentAction: (id: string, action: "approve" | "publish") => void;
+  onOpenMarketing: (id: string) => void;
+  onOpenWeb: (path: string) => void;
+  onQuery: (value: string) => void;
+  onRefresh: () => void;
+  onStatusFilter: (status: MarketingStatusFilter) => void;
+}) {
+  const summary = data?.summary;
+  const statusOptions: Array<{ count: number; label: string; value: MarketingStatusFilter }> = [
+    { count: (summary?.tools ?? 0) + (summary?.totalContent ?? 0), label: "All", value: "all" },
+    { count: summary?.tools ?? 0, label: "Tools", value: "tools" },
+    { count: summary?.draftContent ?? 0, label: "Drafts", value: "draft" },
+    { count: summary?.approvedContent ?? 0, label: "Approved", value: "approved" },
+    { count: summary?.publishedContent ?? 0, label: "Published", value: "published" },
+    { count: summary?.failedContent ?? 0, label: "Failed", value: "failed" },
+  ];
+
+  return (
+    <section className="module-view has-detail marketing-workspace">
+      <div className="module-split">
+        <div className="module-panel glass-surface">
+          <div className="module-head">
+            <div>
+              <p className="eyebrow">Native marketing</p>
+              <h2>Growth tools and content</h2>
+              <p>Share tools, directory state, social connections, and AI content calendar actions.</p>
+            </div>
+            <div className="module-actions">
+              <button className="primary small" disabled={loading} onClick={onRefresh}>
+                {loading ? "Loading..." : "Refresh"}
+              </button>
+              <button onClick={() => onOpenWeb(data?.webUrl ?? "/dashboard/marketing")}>
+                Open full marketing in browser
+              </button>
+            </div>
+          </div>
+
+          {error && <div className="error-banner inline">{error}</div>}
+
+          <div className="metric-grid module-metrics">
+            <MetricCard label="Directory" tone={data?.directory.listed ? "emerald" : "amber"} value={data?.directory.listed ? "Listed" : "Hidden"} />
+            <MetricCard label="Content" tone="cobalt" value={summary?.totalContent ?? 0} />
+            <MetricCard label="Drafts" tone="amber" value={summary?.draftContent ?? 0} />
+            <MetricCard label="Social" tone="slate" value={summary?.socialConnections ?? 0} />
+          </div>
+
+          <div className="filters marketing-filter-row">
+            <div className="tabs">
+              {statusOptions.map((option) => (
+                <button
+                  key={option.value}
+                  className={statusFilter === option.value ? "active" : ""}
+                  type="button"
+                  onClick={() => onStatusFilter(option.value)}
+                >
+                  {option.label} ({option.count})
+                </button>
+              ))}
+            </div>
+            <div className="filter-row">
+              <input
+                placeholder="Search tool, content, channel, branch, or status"
+                type="search"
+                value={query}
+                onChange={(event) => onQuery(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") onApply();
+                }}
+              />
+              <button className="primary" disabled={loading} onClick={onApply}>
+                Apply
+              </button>
+            </div>
+          </div>
+
+          <div className="module-meta">
+            <span>{data ? `${data.rows.length} marketing rows loaded` : loading ? "Loading live data" : "Ready to load"}</span>
+            <span>{data ? `Synced ${formatTime(data.serverTime)}` : "/api/v1/desktop/marketing"}</span>
+          </div>
+
+          {loading && !data ? (
+            <div className="empty-state">Loading marketing...</div>
+          ) : data?.rows.length ? (
+            <ul className="module-list marketing-list">
+              {data.rows.map((row) => (
+                <li key={row.id}>
+                  <button
+                    className={selectedId === row.id ? "module-list-item selected" : "module-list-item"}
+                    type="button"
+                    onClick={() => onOpenMarketing(row.id)}
+                  >
+                    <div>
+                      <strong>{row.title}</strong>
+                      <span>{row.subtitle}</span>
+                    </div>
+                    <div className="module-list-meta">
+                      <span className={`module-status ${row.kind === "share_tool" ? "integration-active" : `content-${row.status}`}`}>
+                        {row.statusLabel}
+                      </span>
+                      <span>{row.contentDate ? formatModuleMeta(row.contentDate) : row.channel}</span>
+                    </div>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="empty-state">
+              No marketing rows match this filter.
+            </div>
+          )}
+        </div>
+
+        <MarketingDetailPanel
+          detail={detail}
+          error={detailError}
+          loading={detailLoading}
+          saving={saving}
+          onContentAction={onContentAction}
+          onOpenWeb={onOpenWeb}
+        />
+      </div>
+    </section>
+  );
+}
+
 function MarketingDetailPanel({
   detail,
   error,
@@ -8186,14 +9838,20 @@ function AiHubWorkspace({
   error,
   loading,
   query,
+  reactivationResult,
+  savingAction,
   selectedId,
   statusFilter,
   onApply,
+  onContentAction,
+  onGenerateContent,
   onOpenRun,
   onOpenWeb,
   onQuery,
   onRefresh,
+  onRunReactivation,
   onStatusFilter,
+  onToggleFeature,
 }: {
   data: DesktopAiWorkflowRunsPayload | null;
   detail: AiWorkflowRunDetailPayload | null;
@@ -8202,16 +9860,23 @@ function AiHubWorkspace({
   error: string;
   loading: boolean;
   query: string;
+  reactivationResult: AiReactivationResult | null;
+  savingAction: string | null;
   selectedId: string | null;
   statusFilter: AiWorkflowRunStatusFilter;
   onApply: () => void;
+  onContentAction: (id: string, action: "approve" | "publish") => void;
+  onGenerateContent: (locationId?: string) => void;
   onOpenRun: (id: string) => void;
   onOpenWeb: (path: string) => void;
   onQuery: (value: string) => void;
   onRefresh: () => void;
+  onRunReactivation: () => void;
   onStatusFilter: (status: AiWorkflowRunStatusFilter) => void;
+  onToggleFeature: (locationId: string, feature: AiFeatureKey, enabled: boolean) => void;
 }) {
   const summary = data?.summary;
+  const defaultLocationId = data?.locations.find((location) => location.isDefault)?.id ?? data?.locations[0]?.id;
   const statusOptions: Array<{ count: number; label: string; value: AiWorkflowRunStatusFilter }> = [
     { count: summary?.totalRuns ?? 0, label: "All", value: "all" },
     { count: summary?.queuedRuns ?? 0, label: "Queued", value: "queued" },
@@ -8250,6 +9915,118 @@ function AiHubWorkspace({
             <MetricCard label="Failed" tone="amber" value={summary?.failedRuns ?? 0} />
             <MetricCard label="Workflows" tone="slate" value={summary?.workflows ?? 0} />
           </div>
+
+          <section className="native-action-panel ai-launcher">
+            <div>
+              <p className="eyebrow">Launcher</p>
+              <h3>Run supported AI workflows</h3>
+              <p>Generate content drafts or run a one-off client reactivation pass from the native app.</p>
+            </div>
+            <div className="actions">
+              <button
+                className="primary"
+                disabled={savingAction === "reactivation:run"}
+                onClick={onRunReactivation}
+              >
+                {savingAction === "reactivation:run" ? "Running..." : "Run reactivation"}
+              </button>
+              <button
+                disabled={!defaultLocationId || savingAction === "content:generate"}
+                onClick={() => onGenerateContent(defaultLocationId)}
+              >
+                {savingAction === "content:generate" ? "Generating..." : "Generate 30 days"}
+              </button>
+            </div>
+            {reactivationResult && (
+              <div className="reactivation-summary">
+                <strong>
+                  Checked {reactivationResult.stats.checked} - Sent {reactivationResult.stats.sent} - Failed {reactivationResult.stats.failed}
+                </strong>
+                {reactivationResult.previews.slice(0, 3).map((preview) => (
+                  <span key={`${preview.clientName}-${preview.status}`}>
+                    {preview.clientName}: {preview.status}
+                  </span>
+                ))}
+              </div>
+            )}
+          </section>
+
+          <section className="native-action-panel">
+            <div>
+              <p className="eyebrow">Branch controls</p>
+              <h3>AI features per branch</h3>
+            </div>
+            {data?.locations.length ? (
+              <ul className="ai-location-list">
+                {data.locations.map((location) => (
+                  <li key={location.id}>
+                    <div>
+                      <strong>{location.name}</strong>
+                      <span>{location.address ?? "No branch address"}{location.isDefault ? " - Default" : ""}</span>
+                    </div>
+                    <div className="ai-toggle-grid">
+                      {data.features.map((feature) => {
+                        const checked = Boolean(location.aiConfig[feature.key]);
+                        const saving = savingAction === `location:${location.id}:${feature.key}`;
+                        return (
+                          <label key={feature.key} title={feature.description}>
+                            <input
+                              checked={checked}
+                              disabled={saving}
+                              type="checkbox"
+                              onChange={(event) => onToggleFeature(location.id, feature.key, event.target.checked)}
+                            />
+                            <span>{feature.label}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="empty-state">Add a branch before enabling AI workflows.</div>
+            )}
+          </section>
+
+          <section className="native-action-panel">
+            <div>
+              <p className="eyebrow">Content machine</p>
+              <h3>Generated copy drafts</h3>
+            </div>
+            {data?.content.length ? (
+              <ul className="ai-content-list">
+                {data.content.slice(0, 6).map((item) => (
+                  <li key={item.id}>
+                    <div>
+                      <strong>{item.title}</strong>
+                      <span>{item.contentDate} - {item.status}</span>
+                      <p>{item.caption}</p>
+                      {item.error && <span className="danger-text">{item.error}</span>}
+                    </div>
+                    <div className="actions">
+                      <button onClick={() => navigator.clipboard?.writeText(item.caption)}>Copy</button>
+                      <button
+                        disabled={item.status === "approved" || item.status === "published" || savingAction === `content:${item.id}:approve`}
+                        onClick={() => onContentAction(item.id, "approve")}
+                      >
+                        {savingAction === `content:${item.id}:approve` ? "Approving..." : "Approve"}
+                      </button>
+                      <button
+                        className="primary"
+                        disabled={item.status !== "approved" || savingAction === `content:${item.id}:publish`}
+                        onClick={() => onContentAction(item.id, "publish")}
+                      >
+                        {savingAction === `content:${item.id}:publish` ? "Publishing..." : "Publish"}
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="empty-state">No content drafts yet.</div>
+            )}
+          </section>
 
           <div className="filters ai-filter-row">
             <div className="tabs">
@@ -9266,27 +11043,35 @@ function formatModuleMeta(value: string): string {
 function SettingsView({
   business,
   data,
+  draft,
   error,
   lastSync,
   loading,
   publicUrl,
   saving,
+  onDraft,
   onLogout,
   onRefresh,
   onRevokeCurrentDevice,
+  onSave,
 }: {
   business: Business | null;
   data: DesktopSettingsPayload | null;
+  draft: SettingsEditDraft | null;
   error: string;
   lastSync: string | null;
   loading: boolean;
   publicUrl: string;
   saving: boolean;
+  onDraft: (draft: SettingsEditDraft) => void;
   onLogout: () => Promise<void>;
   onRefresh: () => void;
   onRevokeCurrentDevice: () => void;
+  onSave: () => void;
 }) {
   const currentDevice = data?.devices.find((device) => device.isCurrent) ?? null;
+  const form = draft ?? settingsDraftFromData(data, business);
+  const updateForm = (patch: Partial<SettingsEditDraft>) => onDraft({ ...form, ...patch });
 
   return (
     <section className="settings-view">
@@ -9319,6 +11104,138 @@ function SettingsView({
           </button>
           <button onClick={() => void invoke("desktop_open_dashboard")}>Open web dashboard in browser</button>
           <button className="danger" onClick={() => void onLogout()}>Log out</button>
+        </div>
+      </div>
+
+      <div className="settings-card glass-surface settings-editor">
+        <div>
+          <p className="eyebrow">Native settings</p>
+          <h2>Business profile</h2>
+          <p>Profile, booking policy, and public page fields synced through the desktop API.</p>
+        </div>
+
+        <div className="settings-form-grid">
+          <label>
+            <span>Business name</span>
+            <input
+              value={form.name}
+              onChange={(event) => updateForm({ name: event.target.value })}
+            />
+          </label>
+          <label>
+            <span>Phone</span>
+            <input
+              value={form.phone}
+              onChange={(event) => updateForm({ phone: event.target.value })}
+            />
+          </label>
+          <label>
+            <span>Timezone</span>
+            <select
+              value={form.timezone}
+              onChange={(event) => updateForm({ timezone: event.target.value })}
+            >
+              <option value="Asia/Colombo">Asia/Colombo</option>
+              <option value="Asia/Kolkata">Asia/Kolkata</option>
+              <option value="Asia/Dubai">Asia/Dubai</option>
+              <option value="UTC">UTC</option>
+            </select>
+          </label>
+          <label>
+            <span>Language</span>
+            <select
+              value={form.language}
+              onChange={(event) => updateForm({ language: event.target.value as SettingsEditDraft["language"] })}
+            >
+              <option value="en">English</option>
+              <option value="si">Sinhala</option>
+              <option value="ta">Tamil</option>
+            </select>
+          </label>
+          <label>
+            <span>Business type</span>
+            <input
+              value={form.businessType}
+              onChange={(event) => updateForm({ businessType: event.target.value })}
+            />
+          </label>
+          <label>
+            <span>Website</span>
+            <input
+              value={form.websiteUrl}
+              onChange={(event) => updateForm({ websiteUrl: event.target.value })}
+            />
+          </label>
+          <label className="settings-wide">
+            <span>Address</span>
+            <input
+              value={form.address}
+              onChange={(event) => updateForm({ address: event.target.value })}
+            />
+          </label>
+          <label className="settings-wide">
+            <span>Description</span>
+            <textarea
+              rows={3}
+              value={form.description}
+              onChange={(event) => updateForm({ description: event.target.value })}
+            />
+          </label>
+          <label className="settings-wide">
+            <span>Cancellation policy</span>
+            <textarea
+              rows={3}
+              value={form.cancellationPolicy}
+              onChange={(event) => updateForm({ cancellationPolicy: event.target.value })}
+            />
+          </label>
+          <label className="settings-wide">
+            <span>Deposit policy</span>
+            <textarea
+              rows={3}
+              value={form.depositPolicy}
+              onChange={(event) => updateForm({ depositPolicy: event.target.value })}
+            />
+          </label>
+          <label>
+            <span>Instagram</span>
+            <input
+              value={form.instagramUrl}
+              onChange={(event) => updateForm({ instagramUrl: event.target.value })}
+            />
+          </label>
+          <label>
+            <span>Facebook</span>
+            <input
+              value={form.facebookUrl}
+              onChange={(event) => updateForm({ facebookUrl: event.target.value })}
+            />
+          </label>
+          <label className="settings-wide">
+            <span>Bank transfer instructions</span>
+            <textarea
+              rows={3}
+              value={form.bankTransferInstructions}
+              onChange={(event) => updateForm({ bankTransferInstructions: event.target.value })}
+            />
+          </label>
+          <label className="settings-check">
+            <input
+              checked={form.directoryListed}
+              type="checkbox"
+              onChange={(event) => updateForm({ directoryListed: event.target.checked })}
+            />
+            <span>Show in Dinaya discover directory</span>
+          </label>
+        </div>
+
+        <div className="actions">
+          <button className="primary" disabled={saving || !form.name.trim()} onClick={onSave}>
+            {saving ? "Saving..." : "Save native settings"}
+          </button>
+          <button onClick={() => void invoke("desktop_open_dashboard_path", { path: "/dashboard/settings" })}>
+            Open full settings
+          </button>
         </div>
       </div>
 

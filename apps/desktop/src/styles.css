@@ -120,7 +120,7 @@ textarea:focus-visible,
 }
 
 .main-pane:focus-visible {
-  border-radius: 14px;
+  border-radius: 8px;
 }
 
 .sr-only {
@@ -738,7 +738,7 @@ textarea:focus-visible,
 .command-search input {
   width: 100%;
   height: 48px;
-  border-radius: 12px;
+  border-radius: 8px;
   font-size: 15px;
 }
 
@@ -1379,7 +1379,10 @@ textarea:focus-visible,
 .ai-filter-row,
 .automation-filter-row,
 .integration-filter-row,
-.client-filter-row {
+.client-filter-row,
+.service-filter-row,
+.staff-filter-row,
+.location-filter-row {
   border: 1px solid var(--line);
   border-radius: 12px;
 }
@@ -1421,7 +1424,13 @@ textarea:focus-visible,
 .integration-filter-row .tabs,
 .integration-filter-row .filter-row,
 .client-filter-row .tabs,
-.client-filter-row .filter-row {
+.client-filter-row .filter-row,
+.service-filter-row .tabs,
+.service-filter-row .filter-row,
+.staff-filter-row .tabs,
+.staff-filter-row .filter-row,
+.location-filter-row .tabs,
+.location-filter-row .filter-row {
   flex-wrap: wrap;
 }
 
@@ -1432,7 +1441,10 @@ textarea:focus-visible,
 .ai-filter-row .filter-row input,
 .automation-filter-row .filter-row input,
 .integration-filter-row .filter-row input,
-.client-filter-row .filter-row input {
+.client-filter-row .filter-row input,
+.service-filter-row .filter-row input,
+.staff-filter-row .filter-row input,
+.location-filter-row .filter-row input {
   min-width: min(320px, 100%);
   flex: 1 1 260px;
 }
@@ -1643,6 +1655,60 @@ dd {
   width: min(720px, 100%);
 }
 
+.settings-editor {
+  width: min(920px, 100%);
+}
+
+.settings-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.settings-form-grid label {
+  display: grid;
+  min-width: 0;
+  gap: 6px;
+}
+
+.settings-form-grid label > span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.settings-form-grid input,
+.settings-form-grid select,
+.settings-form-grid textarea {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid #d9e2f1;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.86);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  padding: 10px 12px;
+}
+
+.settings-form-grid textarea {
+  resize: vertical;
+}
+
+.settings-form-grid .settings-wide {
+  grid-column: 1 / -1;
+}
+
+.settings-form-grid .settings-check {
+  display: flex;
+  align-items: center;
+  grid-column: 1 / -1;
+}
+
+.settings-form-grid .settings-check input {
+  width: 16px;
+}
+
 .billing-view {
   align-content: start;
   grid-template-columns: minmax(0, 1fr);
@@ -1830,9 +1896,78 @@ dd {
   padding: 4px 8px;
 }
 
+.native-action-panel {
+  display: grid;
+  gap: 12px;
+  margin: 14px 0;
+  padding: 14px;
+  border: 1px solid rgba(22, 32, 52, 0.08);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.native-action-panel h3 {
+  margin: 2px 0 4px;
+  font-size: 15px;
+}
+
+.native-action-panel p,
+.native-action-panel span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.reactivation-summary,
+.ai-location-list,
+.ai-content-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.reactivation-summary {
+  border-top: 1px solid rgba(22, 32, 52, 0.08);
+  padding-top: 10px;
+}
+
+.ai-location-list > li,
+.ai-content-list > li {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(248, 250, 252, 0.78);
+}
+
+.ai-toggle-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 8px;
+}
+
+.ai-toggle-grid label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.ai-content-list p {
+  margin: 6px 0 0;
+  white-space: pre-wrap;
+}
+
+.danger-text {
+  color: var(--rose) !important;
+}
+
 .deal-active,
 .deal-upcoming,
 .broadcast-sent,
+.content-approved,
+.content-published,
 .ai-status-sent,
 .ai-status-completed,
 .automation-active,
@@ -1844,6 +1979,7 @@ dd {
 .deal-sold_out,
 .broadcast-draft,
 .broadcast-sending,
+.content-draft,
 .ai-status-queued,
 .ai-status-skipped,
 .ai-status-duplicate,
@@ -1856,6 +1992,7 @@ dd {
 .deal-expired,
 .deal-cancelled,
 .broadcast-failed,
+.content-failed,
 .ai-status-failed,
 .integration-inactive {
   background: #ffe8e6;
@@ -2041,6 +2178,7 @@ dd {
   justify-content: flex-start;
 }
 
+.client-edit-form,
 .service-edit-form,
 .staff-edit-form,
 .location-edit-form {
@@ -2052,6 +2190,7 @@ dd {
   padding: 12px;
 }
 
+.client-edit-form label,
 .service-edit-form label,
 .staff-edit-form label,
 .location-edit-form label {
@@ -2062,6 +2201,9 @@ dd {
   font-weight: 700;
 }
 
+.client-edit-form input,
+.client-edit-form select,
+.client-edit-form textarea,
 .service-edit-form input,
 .service-edit-form textarea,
 .staff-edit-form input,
@@ -2078,12 +2220,29 @@ dd {
   padding: 8px 10px;
 }
 
+.client-edit-form textarea,
 .service-edit-form textarea,
 .staff-edit-form textarea,
 .location-edit-form textarea {
   min-height: 74px;
   resize: vertical;
   line-height: 1.45;
+}
+
+.client-edit-form .wide {
+  grid-column: 1 / -1;
+}
+
+.client-edit-form .checkbox-row {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+}
+
+.client-edit-form .checkbox-row input {
+  height: 16px;
+  width: 16px;
 }
 
 .service-edit-grid,

@@ -1,16 +1,26 @@
-import { and, asc, desc, eq } from "drizzle-orm";
+import { and, asc, count, desc, eq, ilike, inArray, or, sql, type SQL } from "drizzle-orm";
 import { db } from "@/db";
 import { availability, bookings, locations, services, staff, staffLocations, staffServices } from "@/db/schema";
 import { replaceStaffLocations } from "@/lib/locations";
 import { isPublicHttpsUrl } from "@/lib/public-url";
 import { z } from "@/lib/validation";
 
+export type DashboardStaffList = Awaited<ReturnType<typeof getStaffDashboardList>>;
 export type DashboardStaffDetail = Awaited<ReturnType<typeof getStaffDashboardDetail>>;
+export type DashboardStaffStatusFilter = "active" | "all" | "inactive";
 export type DashboardStaffUpdate = z.infer<typeof staffDashboardUpdateSchema>;
 export type DashboardStaffUpdateResult =
   | { status: "invalid"; error: string }
   | { status: "not_found"; error: string }
   | { status: "updated" };
+
+export const dashboardStaffStatusFilters = ["all", "active", "inactive"] as const;
+
+export type DashboardStaffListOptions = {
+  limit?: number;
+  q?: string;
+  status?: DashboardStaffStatusFilter;
+};
 
 export const staffDashboardUpdateSchema = z.object({
   avatarUrl: z
@@ -28,6 +38,154 @@ export const staffDashboardUpdateSchema = z.object({
   name: z.string().trim().min(1, "Name is required.").max(100).optional(),
   serviceIds: z.array(z.uuid()).optional(),
 });
+
+const DEFAULT_STAFF_LIMIT = 200;
+const MAX_STAFF_LIMIT = 500;
+
+function normalizeStaffLimit(limit: number | undefined): number {
+  if (!Number.isFinite(limit)) return DEFAULT_STAFF_LIMIT;
+  return Math.min(MAX_STAFF_LIMIT, Math.max(1, Math.round(limit ?? DEFAULT_STAFF_LIMIT)));
+}
+
+export function isDashboardStaffStatusFilter(value: string): value is DashboardStaffStatusFilter {
+  return dashboardStaffStatusFilters.includes(value as DashboardStaffStatusFilter);
+}
+
+export async function getStaffDashboardList(
+  businessId: string,
+  options: DashboardStaffListOptions = {},
+) {
+  const query = options.q?.trim().toLowerCase() ?? "";
+  const status = options.status ?? "all";
+  const limit = normalizeStaffLimit(options.limit);
+  const conditions: SQL[] = [eq(staff.businessId, businessId)];
+
+  if (status === "active") conditions.push(eq(staff.isActive, true));
+  if (status === "inactive") conditions.push(eq(staff.isActive, false));
+  if (query) {
+    conditions.push(or(
+      ilike(staff.name, `%${query}%`),
+      ilike(staff.bio, `%${query}%`),
+    )!);
+  }
+
+  const [summaryRows, rows] = await Promise.all([
+    db
+      .select({
+        activeStaff: sql<number>`coalesce(count(*) filter (where ${staff.isActive} = true), 0)::int`,
+        inactiveStaff: sql<number>`coalesce(count(*) filter (where ${staff.isActive} = false), 0)::int`,
+        totalStaff: count(),
+        withBio: sql<number>`coalesce(count(*) filter (where ${staff.bio} is not null), 0)::int`,
+      })
+      .from(staff)
+      .where(eq(staff.businessId, businessId)),
+    db
+      .select({
+        avatarUrl: staff.avatarUrl,
+        bio: staff.bio,
+        createdAt: staff.createdAt,
+        id: staff.id,
+        isActive: staff.isActive,
+        name: staff.name,
+      })
+      .from(staff)
+      .where(and(...conditions))
+      .orderBy(asc(staff.name))
+      .limit(limit),
+  ]);
+
+  const staffIds = rows.map((row) => row.id);
+  const now = new Date();
+  const todayStart = new Date(now);
+  todayStart.setHours(0, 0, 0, 0);
+  const todayEnd = new Date(todayStart);
+  todayEnd.setDate(todayEnd.getDate() + 1);
+
+  const [serviceSummary, locationRows, availabilitySummary, bookingSummary] = staffIds.length
+    ? await Promise.all([
+        db
+          .select({
+            assignedServicesCount: count(),
+            staffId: staffServices.staffId,
+          })
+          .from(staffServices)
+          .innerJoin(services, eq(services.id, staffServices.serviceId))
+          .where(and(eq(services.businessId, businessId), inArray(staffServices.staffId, staffIds)))
+          .groupBy(staffServices.staffId),
+        db
+          .select({
+            isActive: locations.isActive,
+            isPrimary: staffLocations.isPrimary,
+            locationId: staffLocations.locationId,
+            locationName: locations.name,
+            staffId: staffLocations.staffId,
+          })
+          .from(staffLocations)
+          .innerJoin(locations, eq(locations.id, staffLocations.locationId))
+          .where(and(eq(locations.businessId, businessId), inArray(staffLocations.staffId, staffIds)))
+          .orderBy(desc(staffLocations.isPrimary), asc(locations.name)),
+        db
+          .select({
+            availabilityWindowCount: count(),
+            staffId: availability.staffId,
+          })
+          .from(availability)
+          .where(inArray(availability.staffId, staffIds))
+          .groupBy(availability.staffId),
+        db
+          .select({
+            futureBookingCount: sql<number>`coalesce(count(*) filter (where ${bookings.startsAt} >= ${now} and ${bookings.status} in ('pending', 'confirmed')), 0)::int`,
+            lastBookingAt: sql<Date | null>`max(${bookings.startsAt})`,
+            staffId: bookings.staffId,
+            todayBookingCount: sql<number>`coalesce(count(*) filter (where ${bookings.startsAt} >= ${todayStart} and ${bookings.startsAt} < ${todayEnd}), 0)::int`,
+          })
+          .from(bookings)
+          .where(and(eq(bookings.businessId, businessId), inArray(bookings.staffId, staffIds)))
+          .groupBy(bookings.staffId),
+      ])
+    : [[], [], [], []];
+
+  const serviceSummaryByStaff = new Map(serviceSummary.map((row) => [row.staffId, row]));
+  const availabilitySummaryByStaff = new Map(availabilitySummary.map((row) => [row.staffId, row]));
+  const bookingSummaryByStaff = new Map(bookingSummary.map((row) => [row.staffId, row]));
+  const locationRowsByStaff = new Map<string, typeof locationRows>();
+  for (const row of locationRows) {
+    const list = locationRowsByStaff.get(row.staffId) ?? [];
+    list.push(row);
+    locationRowsByStaff.set(row.staffId, list);
+  }
+  const summary = summaryRows[0];
+
+  return {
+    filters: {
+      limit,
+      q: query,
+      status,
+    },
+    rows: rows.map((row) => {
+      const rowBookingSummary = bookingSummaryByStaff.get(row.id);
+      const rowLocationRows = locationRowsByStaff.get(row.id) ?? [];
+      return {
+        ...row,
+        assignedLocationsCount: rowLocationRows.length,
+        assignedServicesCount: Number(serviceSummaryByStaff.get(row.id)?.assignedServicesCount ?? 0),
+        availabilityWindowCount: Number(availabilitySummaryByStaff.get(row.id)?.availabilityWindowCount ?? 0),
+        createdAt: row.createdAt.toISOString(),
+        futureBookingCount: Number(rowBookingSummary?.futureBookingCount ?? 0),
+        lastBookingAt: rowBookingSummary?.lastBookingAt?.toISOString() ?? null,
+        locationIds: rowLocationRows.map((location) => location.locationId),
+        primaryLocationName: rowLocationRows.find((location) => location.isPrimary)?.locationName ?? rowLocationRows[0]?.locationName ?? null,
+        todayBookingCount: Number(rowBookingSummary?.todayBookingCount ?? 0),
+      };
+    }),
+    summary: {
+      activeStaff: Number(summary?.activeStaff ?? 0),
+      inactiveStaff: Number(summary?.inactiveStaff ?? 0),
+      totalStaff: Number(summary?.totalStaff ?? 0),
+      withBio: Number(summary?.withBio ?? 0),
+    },
+  };
+}
 
 export async function getStaffDashboardDetail(businessId: string, staffId: string) {
   const [member] = await db

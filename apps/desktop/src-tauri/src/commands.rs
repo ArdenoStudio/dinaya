@@ -4,6 +4,8 @@ use keyring::Entry;
 use reqwest::header::{AUTHORIZATION, CONTENT_TYPE};
 use reqwest::Client;
 use std::collections::HashMap;
+use std::fs::OpenOptions;
+use std::io::Write;
 use std::process::Command;
 use std::sync::atomic::{AtomicBool, AtomicU32, Ordering};
 use std::sync::Mutex;
@@ -15,6 +17,20 @@ const TRAY_ID: &str = "main_tray";
 const DESKTOP_KEY_SERVICE: &str = "DinayaDesktop";
 const DESKTOP_KEY_USERNAME: &str = "desktop_api_key";
 const DEFAULT_API_BASE_URL: &str = "https://dinaya-lk.vercel.app";
+
+fn write_startup_log(message: &str) {
+  if std::env::var("DINAYA_DESKTOP_STARTUP_LOG").ok().as_deref() != Some("1") {
+    return;
+  }
+
+  if let Ok(mut file) = OpenOptions::new()
+    .append(true)
+    .create(true)
+    .open(std::env::temp_dir().join("dinaya-desktop-startup.log"))
+  {
+    let _ = writeln!(file, "{}", message);
+  }
+}
 
 #[derive(Default)]
 pub struct TrayState {
@@ -679,6 +695,10 @@ pub fn desktop_take_pending_booking(
 #[tauri::command]
 pub fn desktop_log_event(payload: DesktopStructuredLogPayload) -> Result<(), String> {
   let meta = payload.meta.unwrap_or(serde_json::json!({}));
+  write_startup_log(&format!(
+    "frontend log [{}][{}] {} | {}",
+    payload.level, payload.category, payload.message, meta
+  ));
   eprintln!(
     "[dinaya-desktop][{}][{}] {} | {}",
     payload.level,

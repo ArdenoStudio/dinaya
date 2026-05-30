@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireDesktopRead } from "@/app/api/v1/desktop/_shared";
 import {
-  getAiHubDashboardData,
-  isDashboardAiWorkflowRunStatusFilter,
-  type DashboardAiWorkflowRunStatusFilter,
-} from "@/lib/dashboard/ai";
-import { PlanRequiredError, requirePro } from "@/lib/plan";
+  getServicesDashboardList,
+  isDashboardServiceStatusFilter,
+  type DashboardServiceStatusFilter,
+} from "@/lib/dashboard/services";
 import { withRateLimit } from "@/lib/rate-limit";
 
 const DEFAULT_LIMIT = 80;
@@ -23,36 +22,27 @@ export async function GET(req: NextRequest) {
   const { businessId, deviceId } = authResult.context;
 
   const limited = await withRateLimit(req, {
-    scope: "desktop-ai-runs",
+    scope: "desktop-services",
     limit: 180,
     windowSeconds: 60,
   }, { keySuffix: `${businessId}:${deviceId ?? "unknown"}` });
   if (!limited.ok) return limited.response;
 
-  try {
-    await requirePro(businessId, "aiBookingAutopilot");
-  } catch (error) {
-    if (error instanceof PlanRequiredError) {
-      return NextResponse.json({ error: error.message }, { status: 402 });
-    }
-    throw error;
-  }
-
   const params = req.nextUrl.searchParams;
   const statusParam = params.get("status");
-  if (statusParam && !isDashboardAiWorkflowRunStatusFilter(statusParam)) {
+  if (statusParam && !isDashboardServiceStatusFilter(statusParam)) {
     return NextResponse.json({ error: "status is invalid." }, { status: 400 });
   }
 
-  const hub = await getAiHubDashboardData(businessId, {
+  const services = await getServicesDashboardList(businessId, {
     limit: parseLimit(params.get("limit")),
     q: params.get("q")?.trim() ?? "",
-    status: (statusParam || "all") as DashboardAiWorkflowRunStatusFilter,
+    status: (statusParam || "all") as DashboardServiceStatusFilter,
   });
 
   return NextResponse.json({
-    ...hub,
+    ...services,
     serverTime: new Date().toISOString(),
-    webUrl: "/dashboard/ai",
+    webUrl: "/dashboard/services",
   });
 }
