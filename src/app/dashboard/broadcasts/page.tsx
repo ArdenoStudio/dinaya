@@ -1,5 +1,5 @@
 import { requireOwner } from "@/lib/auth";
-import { ProGate } from "@/lib/plan";
+import { ProGate } from "@/components/ProGate";
 import { BroadcastsClient } from "@/components/dashboard/BroadcastsClient";
 
 export default async function BroadcastsPage() {

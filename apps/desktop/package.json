@@ -7,6 +7,7 @@
     "dev": "tauri dev",
     "dev:local-api": "set DINAYA_API_BASE_URL=http://localhost:3000&& tauri dev",
     "build": "tauri build",
+    "smoke": "powershell -NoProfile -ExecutionPolicy Bypass -File ..\\..\\scripts\\desktop-smoke.ps1",
     "frontend:dev": "vite --host 127.0.0.1",
     "frontend:build": "vite build"
   },

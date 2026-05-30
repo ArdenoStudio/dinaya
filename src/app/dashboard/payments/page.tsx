@@ -1,9 +1,7 @@
-import { ProGate } from "@/lib/plan";
+import { ProGate } from "@/components/ProGate";
 import { requireOwner } from "@/lib/auth";
-import { db } from "@/db";
-import { bookings, payments, services } from "@/db/schema";
+import { getPaymentsDashboardList } from "@/lib/dashboard/payments";
 import { formatLkr } from "@/lib/utils";
-import { desc, eq } from "drizzle-orm";
 import Link from "next/link";
 import { DataTable } from "@/components/dashboard/DataTable";
 import { EmptyState } from "@/components/dashboard/EmptyState";
@@ -11,24 +9,7 @@ import { CreditCard } from "lucide-react";
 
 export default async function PaymentsPage() {
   const { businessId } = await requireOwner();
-
-  const rows = await db
-    .select({
-      id: payments.id,
-      amountLkr: payments.amountLkr,
-      bookingId: payments.bookingId,
-      clientName: bookings.clientName,
-      createdAt: payments.createdAt,
-      orderId: payments.payhereOrderId,
-      serviceName: services.name,
-      status: payments.status,
-    })
-    .from(payments)
-    .innerJoin(bookings, eq(bookings.id, payments.bookingId))
-    .innerJoin(services, eq(services.id, bookings.serviceId))
-    .where(eq(bookings.businessId, businessId))
-    .orderBy(desc(payments.createdAt))
-    .limit(100);
+  const { rows } = await getPaymentsDashboardList(businessId, { limit: 100 });
 
   return (
     <ProGate businessId={businessId} feature="payments">

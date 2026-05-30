@@ -38,9 +38,16 @@ jobs:
 
       - run: npm --prefix apps/desktop exec tauri info
 
+      - run: npm exec -- tsc -p tsconfig.json --noEmit --pretty false
+        working-directory: apps/desktop
+
       - run: npm --prefix apps/desktop run frontend:build
 
       - run: cargo check --manifest-path apps/desktop/src-tauri/Cargo.toml
+
+      - run: npm --prefix apps/desktop run build
+
+      - run: npm run desktop:smoke
 
   video-verify:
     runs-on: ubuntu-latest

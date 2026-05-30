@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { ProGate } from "@/lib/plan";
+import { ProGate } from "@/components/ProGate";
 import { requireOwner } from "@/lib/auth";
 import { NewDealForm } from "@/components/dashboard/NewDealForm";
 

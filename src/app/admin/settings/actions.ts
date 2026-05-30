@@ -1,12 +1,14 @@
 "use server";
 
+import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
-import { requirePlatformAdmin } from "@/lib/platform-admin";
+import { requirePlatformAdminFromSession } from "@/lib/platform-admin";
 import { clearAnnouncement, saveAnnouncement } from "@/lib/platform-config";
 import { logAdminEvent } from "@/lib/admin-audit";
 
 export async function updateAnnouncement(formData: FormData): Promise<void> {
-  const admin = await requirePlatformAdmin();
+  const session = await auth();
+  const admin = await requirePlatformAdminFromSession(session);
 
   const message = String(formData.get("message") ?? "").trim();
   const toneRaw = String(formData.get("tone") ?? "info");

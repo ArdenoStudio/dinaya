@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
       keyHash,
       keyType: "desktop",
       name: `Desktop - ${deviceName}`,
-      scopes: ["desktop:read", "desktop:bookings"],
+      scopes: ["desktop:read", "desktop:bookings", "desktop:write"],
     })
     .returning({ id: apiKeys.id });
 

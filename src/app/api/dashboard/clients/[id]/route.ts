@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireApiBusiness } from "@/lib/api-auth";
 import { db } from "@/db";
-import { clients, bookings, services, staff, clientNotes } from "@/db/schema";
-import { eq, and, desc } from "drizzle-orm";
+import { clients } from "@/db/schema";
+import { eq, and } from "drizzle-orm";
+import { getClientDashboardDetail } from "@/lib/dashboard/clients";
 import { normalizeSriLankanPhone } from "@/lib/phone";
 import { z } from "@/lib/validation";
 
@@ -24,35 +25,10 @@ export async function GET(req: NextRequest,
   const { businessId } = authResult.context;
   const { id } = await params;
 
-  const [client] = await db
-    .select()
-    .from(clients)
-    .where(and(eq(clients.id, id), eq(clients.businessId, businessId)))
-    .limit(1);
+  const detail = await getClientDashboardDetail(businessId, id);
+  if (!detail) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  if (!client) return NextResponse.json({ error: "Not found" }, { status: 404 });
-
-  const bookingHistory = await db
-    .select({
-      id: bookings.id,
-      startsAt: bookings.startsAt,
-      status: bookings.status,
-      serviceName: services.name,
-      staffName: staff.name,
-    })
-    .from(bookings)
-    .innerJoin(services, eq(bookings.serviceId, services.id))
-    .innerJoin(staff, eq(bookings.staffId, staff.id))
-    .where(eq(bookings.clientId, id))
-    .orderBy(desc(bookings.startsAt));
-
-  const notes = await db
-    .select()
-    .from(clientNotes)
-    .where(eq(clientNotes.clientId, id))
-    .orderBy(desc(clientNotes.createdAt));
-
-  return NextResponse.json({ client, bookings: bookingHistory, notes });
+  return NextResponse.json(detail);
 }
 
 export async function PATCH(

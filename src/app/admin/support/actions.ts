@@ -1,12 +1,13 @@
 "use server";
 
+import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 import crypto from "node:crypto";
 import { db } from "@/db";
 import { payments, users } from "@/db/schema";
-import { requirePlatformAdmin } from "@/lib/platform-admin";
+import { requirePlatformAdminFromSession } from "@/lib/platform-admin";
 import { logAdminEvent } from "@/lib/admin-audit";
 import {
   buildImpersonationUrl,
@@ -27,7 +28,8 @@ export type ResetPasswordResult =
   | { ok: false; error: string };
 
 export async function resetUserPassword(userId: string): Promise<ResetPasswordResult> {
-  const admin = await requirePlatformAdmin();
+  const session = await auth();
+  const admin = await requirePlatformAdminFromSession(session);
 
   const [target] = await db
     .select({ id: users.id, email: users.email })
@@ -59,7 +61,8 @@ export async function resetUserPassword(userId: string): Promise<ResetPasswordRe
 export type ImpersonateResult = { ok: true; url: string } | { ok: false; error: string };
 
 export async function startImpersonation(userId: string): Promise<ImpersonateResult> {
-  const admin = await requirePlatformAdmin();
+  const session = await auth();
+  const admin = await requirePlatformAdminFromSession(session);
   const [target] = await db
     .select({ id: users.id, email: users.email })
     .from(users)
@@ -86,7 +89,8 @@ export async function startImpersonation(userId: string): Promise<ImpersonateRes
 export type RefundResult = { ok: true } | { ok: false; error: string };
 
 export async function refundPayment(paymentId: string): Promise<RefundResult> {
-  const admin = await requirePlatformAdmin();
+  const session = await auth();
+  const admin = await requirePlatformAdminFromSession(session);
   const [payment] = await db
     .select({
       id: payments.id,
@@ -118,7 +122,8 @@ export async function refundPayment(paymentId: string): Promise<RefundResult> {
 export type ReplayWebhookResult = { ok: true } | { ok: false; error: string };
 
 export async function replayWebhookDelivery(deliveryId: string): Promise<ReplayWebhookResult> {
-  const admin = await requirePlatformAdmin();
+  const session = await auth();
+  const admin = await requirePlatformAdminFromSession(session);
   try {
     await replayWebhookDeliveryById(deliveryId);
   } catch (error) {

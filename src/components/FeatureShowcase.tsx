@@ -28,6 +28,26 @@ function Pill({ icon, children }: { icon: string; children: React.ReactNode }) {
   );
 }
 
+function createManagedSleep() {
+  const timeouts = new Set<ReturnType<typeof setTimeout>>();
+
+  return {
+    sleep(ms: number) {
+      return new Promise<void>((resolve) => {
+        const timeout = setTimeout(() => {
+          timeouts.delete(timeout);
+          resolve();
+        }, ms);
+        timeouts.add(timeout);
+      });
+    },
+    clear() {
+      timeouts.forEach((timeout) => clearTimeout(timeout));
+      timeouts.clear();
+    },
+  };
+}
+
 function RollingValue({ value, className }: { value: string; className?: string }) {
   return (
     <span className={`relative inline-flex h-[1.2em] overflow-hidden align-baseline ${className ?? ""}`}>
@@ -72,7 +92,7 @@ function BookingMockup() {
 
   useEffect(() => {
     let alive = true;
-    const sleep = (ms: number) => new Promise<void>(r => setTimeout(r, ms));
+    const { sleep, clear } = createManagedSleep();
 
     const run = async () => {
       await sleep(1000);
@@ -141,7 +161,10 @@ function BookingMockup() {
     };
 
     run();
-    return () => { alive = false; };
+    return () => {
+      alive = false;
+      clear();
+    };
   }, [cOpacity, cScale, cx, cy]);
 
   return (
@@ -514,7 +537,7 @@ function AvailabilityMockup() {
 
   useEffect(() => {
     let alive = true;
-    const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+    const { sleep, clear } = createManagedSleep();
 
     const run = async () => {
       await sleep(1200);
@@ -598,6 +621,7 @@ function AvailabilityMockup() {
     run();
     return () => {
       alive = false;
+      clear();
     };
   }, [cOpacity, cScale, cx, cy]);
 
@@ -772,7 +796,7 @@ function ShareLinkMockup() {
 
   useEffect(() => {
     let alive = true;
-    const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+    const { sleep, clear } = createManagedSleep();
 
     const run = async () => {
       await sleep(1200);
@@ -824,6 +848,7 @@ function ShareLinkMockup() {
     run();
     return () => {
       alive = false;
+      clear();
     };
   }, [cOpacity, cScale, cx, cy]);
 

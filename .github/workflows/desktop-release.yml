@@ -34,6 +34,6 @@ jobs:
           projectPath: apps/desktop
           tagName: ${{ github.ref_name }}
           releaseName: Dinaya Desktop ${{ github.ref_name }}
-          releaseBody: Dinaya Desktop Windows installer build.
+          releaseBody: Dinaya Desktop Windows setup installer build.
           releaseDraft: false
           prerelease: false

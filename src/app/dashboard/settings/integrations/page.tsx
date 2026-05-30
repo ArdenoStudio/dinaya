@@ -1,131 +1,14 @@
 import Link from "next/link";
-import { and, count, eq } from "drizzle-orm";
-import { db } from "@/db";
-import { businesses, socialConnections, webhooks } from "@/db/schema";
 import { requireOwner } from "@/lib/auth";
 import { CustomDomainPanel } from "@/components/dashboard/CustomDomainPanel";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
 import { GoogleCalendarDisconnect } from "@/components/dashboard/GoogleCalendarDisconnect";
-import { GOOGLE_PROVIDER, googleOAuthConfigured } from "@/lib/google-calendar";
-import { canUseFeature, getBusinessPlan, minimumPlanForFeature, planDisplayName } from "@/lib/plan";
+import { getIntegrationsDashboardList } from "@/lib/dashboard/integrations";
 
 export default async function IntegrationsPage() {
   const { businessId } = await requireOwner();
-  const plan = await getBusinessPlan(businessId);
-  const canUseWebhooks = canUseFeature(plan, "webhooks");
-  const canUseGoogleCalendar = canUseFeature(plan, "googleCalendarSync");
-  const canUseApiKeys = canUseWebhooks;
-
-  const [[business], [{ webhookCount }], [{ googleCount }]] = await Promise.all([
-    db
-      .select({
-        payhereEnabled: businesses.payhereEnabled,
-        payhereMerchantId: businesses.payhereMerchantId,
-        customDomain: businesses.customDomain,
-        customDomainVerified: businesses.customDomainVerified,
-        customDomainVerificationToken: businesses.customDomainVerificationToken,
-        customDomainStatus: businesses.customDomainStatus,
-        customDomainError: businesses.customDomainError,
-        customDomainConfig: businesses.customDomainConfig,
-        customDomainVerification: businesses.customDomainVerification,
-      })
-      .from(businesses)
-      .where(eq(businesses.id, businessId))
-      .limit(1),
-    db.select({ webhookCount: count() }).from(webhooks).where(eq(webhooks.businessId, businessId)),
-    db
-      .select({ googleCount: count() })
-      .from(socialConnections)
-      .where(
-        and(
-          eq(socialConnections.businessId, businessId),
-          eq(socialConnections.provider, GOOGLE_PROVIDER),
-          eq(socialConnections.isActive, true),
-        ),
-      ),
-  ]);
-
-  const googleConnected = Number(googleCount) > 0;
-
-  const integrations = [
-    {
-      name: "PayHere",
-      description: "Accept LKR deposits and full payments from clients.",
-      status: business?.payhereEnabled && business.payhereMerchantId ? "Connected" : "Not connected",
-      href: "/dashboard/settings",
-      action: "Configure",
-      gated: false,
-    },
-    {
-      name: "Webhooks",
-      description: "Send booking events to your own systems or Zapier-style workflows.",
-      status: canUseWebhooks
-        ? Number(webhookCount) > 0
-          ? `${webhookCount} endpoint${Number(webhookCount) === 1 ? "" : "s"}`
-          : "Not connected"
-        : `${planDisplayName(minimumPlanForFeature("webhooks"))} required`,
-      href: canUseWebhooks ? "/dashboard/settings/webhooks" : "/dashboard/billing",
-      action: canUseWebhooks ? "Manage" : "Upgrade",
-      gated: !canUseWebhooks,
-    },
-    {
-      name: "Google Calendar",
-      description: "Push confirmed bookings to your Google Calendar.",
-      status: !canUseGoogleCalendar
-        ? `${planDisplayName(minimumPlanForFeature("googleCalendarSync"))} required`
-        : !googleOAuthConfigured()
-          ? "Env required"
-          : googleConnected
-            ? "Connected"
-            : "Not connected",
-      href: canUseGoogleCalendar
-        ? googleConnected
-          ? "/dashboard/settings/integrations"
-          : "/api/dashboard/integrations/google"
-        : "/dashboard/billing",
-      action: canUseGoogleCalendar
-        ? googleConnected
-          ? "Connected"
-          : googleOAuthConfigured()
-            ? "Connect"
-            : "Configure env"
-        : "Upgrade",
-      gated: !canUseGoogleCalendar,
-      googleConnected,
-    },
-    {
-      name: "Resend",
-      description: "Transactional email for confirmations, reminders, and automations.",
-      status: process.env.RESEND_API_KEY ? "Configured" : "Env required",
-      href: "/dashboard/automations",
-      action: "Use in automations",
-      gated: false,
-    },
-    {
-      name: "WhatsApp / SMS",
-      description: "AI reminders and campaigns through Meta WhatsApp or a configured local SMS gateway.",
-      status: process.env.META_WHATSAPP_TOKEN || process.env.SMS_HTTP_ENDPOINT ? "Configured" : "Env required",
-      href: "/dashboard/automations",
-      action: "Use in AI Hub",
-      gated: false,
-    },
-    {
-      name: "AI Voice Receptionist",
-      description: "Let callers ask questions and book appointments through a managed phone agent.",
-      status: "Max add-on",
-      href: "/dashboard/settings/voice-receptionist",
-      action: "Set up",
-      gated: false,
-    },
-    {
-      name: "API keys",
-      description: "Scoped API access for custom integrations and /api/v1 routes.",
-      status: canUseApiKeys ? "Available" : `${planDisplayName(minimumPlanForFeature("webhooks"))} required`,
-      href: canUseApiKeys ? "/dashboard/settings/api-keys" : "/dashboard/billing",
-      action: canUseApiKeys ? "Manage keys" : "Upgrade",
-      gated: !canUseApiKeys,
-    },
-  ];
+  const integrations = await getIntegrationsDashboardList(businessId, { limit: 80 });
+  const domain = integrations.domain;
 
   return (
     <div className="space-y-6">
@@ -135,7 +18,7 @@ export default async function IntegrationsPage() {
       />
 
       <div className="grid gap-4 md:grid-cols-2">
-        {integrations.map((item) => (
+        {integrations.rows.map((item) => (
           <div key={item.name} className="rounded-xl border bg-white p-5">
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -143,14 +26,14 @@ export default async function IntegrationsPage() {
                 <p className="mt-1 text-sm text-muted-foreground">{item.description}</p>
               </div>
               <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                {item.status}
+                {item.statusLabel}
               </span>
             </div>
-            {item.name === "Google Calendar" && item.googleConnected && canUseGoogleCalendar ? (
+            {item.id === "google-calendar" && item.status === "connected" ? (
               <GoogleCalendarDisconnect />
             ) : (
-              <Link href={item.href} className="mt-4 inline-flex text-sm font-medium text-primary hover:underline">
-                {item.action}
+              <Link href={item.setupPath} className="mt-4 inline-flex text-sm font-medium text-primary hover:underline">
+                {item.actionLabel}
               </Link>
             )}
           </div>
@@ -158,31 +41,31 @@ export default async function IntegrationsPage() {
       </div>
 
       <CustomDomainPanel
-        initialDomain={business?.customDomain ?? null}
-        initialVerified={Boolean(business?.customDomainVerified)}
-        initialStatus={business?.customDomainStatus ?? "none"}
-        initialError={business?.customDomainError ?? null}
+        initialDomain={domain.customDomain}
+        initialVerified={domain.customDomainVerified}
+        initialStatus={domain.customDomainStatus}
+        initialError={domain.customDomainError}
         initialVerificationHost={
-          business?.customDomain && business.customDomainVerificationToken
-            ? `_dinaya-verify.${business.customDomain}`
+          domain.customDomain && domain.customDomainVerificationToken
+            ? `_dinaya-verify.${domain.customDomain}`
             : null
         }
         initialVerificationValue={
-          business?.customDomainVerificationToken
-            ? `dinaya-verify=${business.customDomainVerificationToken}`
+          domain.customDomainVerificationToken
+            ? `dinaya-verify=${domain.customDomainVerificationToken}`
             : null
         }
         initialDnsInstructions={
-          typeof business?.customDomainConfig === "object" &&
-          business.customDomainConfig &&
-          "dnsInstructions" in business.customDomainConfig &&
-          Array.isArray(business.customDomainConfig.dnsInstructions)
-            ? business.customDomainConfig.dnsInstructions
+          typeof domain.customDomainConfig === "object" &&
+          domain.customDomainConfig &&
+          "dnsInstructions" in domain.customDomainConfig &&
+          Array.isArray(domain.customDomainConfig.dnsInstructions)
+            ? domain.customDomainConfig.dnsInstructions
             : []
         }
         initialVercelVerification={
-          Array.isArray(business?.customDomainVerification)
-            ? business.customDomainVerification
+          Array.isArray(domain.customDomainVerification)
+            ? domain.customDomainVerification
             : []
         }
       />

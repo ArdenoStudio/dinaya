@@ -23,6 +23,7 @@ import {
   subscriptions,
   voiceIntegrations,
 } from "@/db/schema";
+import { marketingToolIds } from "@/lib/dashboard/marketing";
 
 export type DesktopModuleKey =
   | "overview"
@@ -565,6 +566,19 @@ export async function getDesktopModuleData(
       .orderBy(desc(aiContentCalendar.contentDate))
       .limit(30);
 
+    const toolTitles: Record<(typeof marketingToolIds)[number], string> = {
+      "tool-booking-link": "Booking link",
+      "tool-qr-poster": "QR poster",
+      "tool-website-embed": "Website embeds",
+      "tool-whatsapp-share": "WhatsApp share",
+    };
+    const toolSubtitles: Record<(typeof marketingToolIds)[number], string> = {
+      "tool-booking-link": "Share your public booking page",
+      "tool-qr-poster": "Download counter and poster QR assets",
+      "tool-website-embed": "Embed booking and reviews widgets",
+      "tool-whatsapp-share": "Copy ready-to-send social text",
+    };
+
     return payload(
       module,
       [
@@ -573,13 +587,21 @@ export async function getDesktopModuleData(
         metric("Content", rows.length, "Calendar items", "slate"),
         metric("Website", business?.customDomain ? "Custom" : "Subdomain", "Booking URL", "slate"),
       ],
-      rows.map((row) => item({
-        id: row.id,
-        meta: row.contentDate,
-        status: row.status,
-        subtitle: "AI content calendar",
-        title: row.title,
-      })),
+      [
+        ...marketingToolIds.map((toolId) => item({
+          id: toolId,
+          status: "tool",
+          subtitle: toolSubtitles[toolId],
+          title: toolTitles[toolId],
+        })),
+        ...rows.map((row) => item({
+          id: row.id,
+          meta: row.contentDate,
+          status: row.status,
+          subtitle: "AI content calendar",
+          title: row.title,
+        })),
+      ],
     );
   }
 

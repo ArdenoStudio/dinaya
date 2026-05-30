@@ -1,17 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireApiBusiness } from "@/lib/api-auth";
-import { db } from "@/db";
-import { availabilityOverrides, staff } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
-
-async function verifyStaff(staffId: string, businessId: string) {
-  const [member] = await db
-    .select({ id: staff.id })
-    .from(staff)
-    .where(and(eq(staff.id, staffId), eq(staff.businessId, businessId)))
-    .limit(1);
-  return member ?? null;
-}
+import {
+  availabilityOverrideDeleteSchema,
+  availabilityOverrideUpsertSchema,
+  deleteAvailabilityDashboardOverride,
+  listAvailabilityDashboardOverrides,
+  upsertAvailabilityDashboardOverride,
+} from "@/lib/dashboard/availability";
 
 export async function GET(req: NextRequest) {
   const authResult = await requireApiBusiness({ req });
@@ -20,58 +15,37 @@ export async function GET(req: NextRequest) {
   const staffId = req.nextUrl.searchParams.get("staffId");
   if (!staffId) return NextResponse.json({ error: "staffId required" }, { status: 400 });
 
-  if (!(await verifyStaff(staffId, businessId))) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
-  }
+  const result = await listAvailabilityDashboardOverrides(businessId, staffId);
+  if (result.status === "not_found") return NextResponse.json({ error: result.error }, { status: 404 });
 
-  const rows = await db
-    .select()
-    .from(availabilityOverrides)
-    .where(eq(availabilityOverrides.staffId, staffId))
-    .orderBy(availabilityOverrides.date);
-
-  return NextResponse.json(rows);
+  return NextResponse.json(result.rows);
 }
 
 export async function POST(req: NextRequest) {
   const authResult = await requireApiBusiness({ req });
   if (!authResult.ok) return authResult.response;
   const { businessId } = authResult.context;
-  const { staffId, date, isBlocked, startTime, endTime, reason } = await req.json();
+  const parsed = availabilityOverrideUpsertSchema.safeParse(await req.json().catch(() => null));
+  if (!parsed.success) return NextResponse.json({ error: "staffId and date required" }, { status: 400 });
 
-  if (!staffId || !date) return NextResponse.json({ error: "staffId and date required" }, { status: 400 });
-  if (!(await verifyStaff(staffId, businessId))) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
-  }
-
-  // Upsert: delete existing for this staff+date, then insert
-  await db
-    .delete(availabilityOverrides)
-    .where(and(eq(availabilityOverrides.staffId, staffId), eq(availabilityOverrides.date, date)));
-
-  const [row] = await db
-    .insert(availabilityOverrides)
-    .values({ staffId, date, isBlocked: isBlocked ?? true, startTime: startTime ?? null, endTime: endTime ?? null, reason: reason ?? null })
-    .returning();
-
-  return NextResponse.json(row, { status: 201 });
+  const result = await upsertAvailabilityDashboardOverride(businessId, parsed.data);
+  if (result.status === "not_found") return NextResponse.json({ error: result.error }, { status: 404 });
+  if (result.status === "invalid") return NextResponse.json({ error: result.error }, { status: 400 });
+  return NextResponse.json(result.override, { status: 201 });
 }
 
 export async function DELETE(req: NextRequest) {
   const authResult = await requireApiBusiness({ req });
   if (!authResult.ok) return authResult.response;
   const { businessId } = authResult.context;
-  const id = req.nextUrl.searchParams.get("id");
-  const staffId = req.nextUrl.searchParams.get("staffId");
-  if (!id || !staffId) return NextResponse.json({ error: "id and staffId required" }, { status: 400 });
+  const parsed = availabilityOverrideDeleteSchema.safeParse({
+    id: req.nextUrl.searchParams.get("id"),
+    staffId: req.nextUrl.searchParams.get("staffId"),
+  });
+  if (!parsed.success) return NextResponse.json({ error: "id and staffId required" }, { status: 400 });
 
-  if (!(await verifyStaff(staffId, businessId))) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
-  }
-
-  await db
-    .delete(availabilityOverrides)
-    .where(and(eq(availabilityOverrides.id, id), eq(availabilityOverrides.staffId, staffId)));
+  const result = await deleteAvailabilityDashboardOverride(businessId, parsed.data);
+  if (result.status === "not_found") return NextResponse.json({ error: result.error }, { status: 404 });
 
   return NextResponse.json({ success: true });
 }

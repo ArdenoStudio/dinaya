@@ -6,7 +6,9 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import { LogoIcon } from "@/components/Logo";
 import { useNav } from "@/context/NavContext";
-import { WEBP_DISPLACEMENT_MAP } from "@/components/ui/glass-button";
+import { GlassButton } from "@/components/ui/glass-button";
+
+const WEBP_DISPLACEMENT_MAP = (GlassButton as typeof GlassButton & { displacementMap: string }).displacementMap;
 
 const ENERGY:   [number, number, number, number] = [0.32, 0.72, 0, 1];
 const BACK_OUT: [number, number, number, number] = [0.175, 0.885, 0.32, 1.275];

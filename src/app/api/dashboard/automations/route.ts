@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { automationRules } from "@/db/schema";
 import { requireApiBusiness } from "@/lib/api-auth";
+import { getAutomationsDashboardList } from "@/lib/dashboard/automations";
 import { requirePro } from "@/lib/plan";
 import { z } from "@/lib/validation";
 
@@ -21,13 +21,9 @@ export async function GET(req: NextRequest) {
   const { businessId } = authResult.context;
   await requirePro(businessId, "automations");
 
-  const rules = await db
-    .select()
-    .from(automationRules)
-    .where(eq(automationRules.businessId, businessId))
-    .orderBy(desc(automationRules.createdAt));
+  const rules = await getAutomationsDashboardList(businessId, { limit: 200 });
 
-  return NextResponse.json(rules);
+  return NextResponse.json(rules.rows);
 }
 
 export async function POST(req: NextRequest) {
