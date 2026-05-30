@@ -245,12 +245,12 @@ const DEFAULT_MAX_ENTITLEMENTS: Entitlements = {
 };
 
 export const DEFAULT_PLAN_CONFIG: PlanConfig = {
-  starterMonthlyPriceLkr: Number(process.env.DINAYA_STARTER_MONTHLY_PRICE_LKR ?? 1990),
-  starterAnnualPriceLkr: Number(process.env.DINAYA_STARTER_ANNUAL_PRICE_LKR ?? 19900),
-  proMonthlyPriceLkr: Number(process.env.DINAYA_PRO_MONTHLY_PRICE_LKR ?? 3990),
-  proAnnualPriceLkr: Number(process.env.DINAYA_PRO_ANNUAL_PRICE_LKR ?? 39900),
-  maxMonthlyPriceLkr: Number(process.env.DINAYA_MAX_MONTHLY_PRICE_LKR ?? 6900),
-  maxAnnualPriceLkr: Number(process.env.DINAYA_MAX_ANNUAL_PRICE_LKR ?? 69000),
+  starterMonthlyPriceLkr: 1990,
+  starterAnnualPriceLkr: 19900,
+  proMonthlyPriceLkr: 3990,
+  proAnnualPriceLkr: 39900,
+  maxMonthlyPriceLkr: 6900,
+  maxAnnualPriceLkr: 69000,
   starterLaunched: true,
   proLaunched: true,
   maxLaunched: true,
