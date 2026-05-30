@@ -1,21 +1,39 @@
 import { describe, expect, it } from "vitest";
 import {
   AI_FEATURES,
-  FREE_ENTITLEMENTS,
+  EXPIRED_ENTITLEMENTS,
   MAX_ENTITLEMENTS,
   PRO_ENTITLEMENTS,
+  TRIAL_ENTITLEMENTS,
   canUseFeature,
   minimumPlanForFeature,
 } from "./plan";
 
 describe("plan entitlements", () => {
-  it("keeps free plan limits intentionally constrained", () => {
-    expect(FREE_ENTITLEMENTS.limits).toMatchObject({
+  it("gives the trial Max-level access with a single location", () => {
+    expect(TRIAL_ENTITLEMENTS.limits).toMatchObject({
       bookingsPerMonth: null,
-      staff: 1,
-      services: 5,
+      staff: null,
+      services: null,
       locations: 1,
     });
+  });
+
+  it("caps the cost-exposed AI Voice Receptionist behind a paid plan", () => {
+    expect(TRIAL_ENTITLEMENTS.features.aiVoiceReceptionist).toBe(false);
+    expect(canUseFeature("trial", "aiVoiceReceptionist")).toBe(false);
+  });
+
+  it("locks every feature once the plan expires", () => {
+    expect(EXPIRED_ENTITLEMENTS.limits).toMatchObject({
+      bookingsPerMonth: 0,
+      staff: 0,
+      services: 0,
+      locations: 0,
+    });
+    for (const feature of Object.keys(EXPIRED_ENTITLEMENTS.features) as (keyof typeof EXPIRED_ENTITLEMENTS.features)[]) {
+      expect(EXPIRED_ENTITLEMENTS.features[feature]).toBe(false);
+    }
   });
 
   it("sets branch limits by plan tier", () => {
@@ -23,23 +41,25 @@ describe("plan entitlements", () => {
     expect(MAX_ENTITLEMENTS.limits.locations).toBeNull();
   });
 
-  it("allows payments on all plans and pro-only ops for pro and max", () => {
-    expect(canUseFeature("free", "payments")).toBe(true);
-    expect(canUseFeature("free", "reports")).toBe(false);
-    expect(canUseFeature("free", "whatsappSms")).toBe(false);
+  it("allows payments and reports on trial and paid plans but not when expired", () => {
+    expect(canUseFeature("trial", "payments")).toBe(true);
+    expect(canUseFeature("trial", "reports")).toBe(true);
     expect(canUseFeature("pro", "payments")).toBe(true);
     expect(canUseFeature("pro", "reports")).toBe(true);
     expect(canUseFeature("max", "payments")).toBe(true);
     expect(canUseFeature("max", "reports")).toBe(true);
+    expect(canUseFeature("expired", "payments")).toBe(false);
+    expect(canUseFeature("expired", "reports")).toBe(false);
   });
 
-  it("allows AI growth features on Max but not Free or Pro", () => {
+  it("allows AI growth features on Trial and Max but not Pro or Expired", () => {
     for (const feature of AI_FEATURES) {
       expect(minimumPlanForFeature(feature)).toBe("max");
-      expect(canUseFeature("free", feature)).toBe(false);
+      expect(canUseFeature("trial", feature)).toBe(true);
       expect(canUseFeature("pro", feature)).toBe(false);
       expect(canUseFeature("max", feature)).toBe(true);
-      expect(FREE_ENTITLEMENTS.features[feature]).toBe(false);
+      expect(canUseFeature("expired", feature)).toBe(false);
+      expect(TRIAL_ENTITLEMENTS.features[feature]).toBe(true);
       expect(PRO_ENTITLEMENTS.features[feature]).toBe(false);
       expect(MAX_ENTITLEMENTS.features[feature]).toBe(true);
     }
@@ -47,50 +67,51 @@ describe("plan entitlements", () => {
 
   it("reserves AI voice receptionist for max", () => {
     expect(minimumPlanForFeature("aiVoiceReceptionist")).toBe("max");
-    expect(canUseFeature("free", "aiVoiceReceptionist")).toBe(false);
+    expect(canUseFeature("trial", "aiVoiceReceptionist")).toBe(false);
     expect(canUseFeature("pro", "aiVoiceReceptionist")).toBe(false);
     expect(canUseFeature("max", "aiVoiceReceptionist")).toBe(true);
-    expect(FREE_ENTITLEMENTS.features.aiVoiceReceptionist).toBe(false);
+    expect(TRIAL_ENTITLEMENTS.features.aiVoiceReceptionist).toBe(false);
     expect(PRO_ENTITLEMENTS.features.aiVoiceReceptionist).toBe(false);
     expect(MAX_ENTITLEMENTS.features.aiVoiceReceptionist).toBe(true);
   });
 
-  it("keeps public booking page available on all plans", () => {
-    expect(canUseFeature("free", "publicBookingPage")).toBe(true);
+  it("keeps the public booking page on trial and paid plans, off when expired", () => {
+    expect(canUseFeature("trial", "publicBookingPage")).toBe(true);
     expect(canUseFeature("pro", "publicBookingPage")).toBe(true);
     expect(canUseFeature("max", "publicBookingPage")).toBe(true);
+    expect(canUseFeature("expired", "publicBookingPage")).toBe(false);
   });
 
-  it("reserves booking page customization for pro and max", () => {
-    expect(canUseFeature("free", "publicBookingPageCustomization")).toBe(false);
+  it("offers booking page customization on trial, pro and max", () => {
+    expect(canUseFeature("trial", "publicBookingPageCustomization")).toBe(true);
     expect(canUseFeature("pro", "publicBookingPageCustomization")).toBe(true);
     expect(canUseFeature("max", "publicBookingPageCustomization")).toBe(true);
   });
 
-  it("reserves AI review replies for Max", () => {
+  it("reserves AI review replies for Max (and trial preview)", () => {
     expect(minimumPlanForFeature("reviewReplies")).toBe("max");
-    expect(canUseFeature("free", "reviewReplies")).toBe(false);
+    expect(canUseFeature("trial", "reviewReplies")).toBe(true);
     expect(canUseFeature("pro", "reviewReplies")).toBe(false);
     expect(canUseFeature("max", "reviewReplies")).toBe(true);
   });
 
-  it("reserves broadcasts for pro and max", () => {
+  it("reserves broadcasts for pro and max (and trial preview)", () => {
     expect(minimumPlanForFeature("broadcasts")).toBe("pro");
-    expect(canUseFeature("free", "broadcasts")).toBe(false);
+    expect(canUseFeature("trial", "broadcasts")).toBe(true);
     expect(canUseFeature("pro", "broadcasts")).toBe(true);
     expect(canUseFeature("max", "broadcasts")).toBe(true);
   });
 
-  it("reserves deals for pro and max", () => {
+  it("reserves deals for pro and max (and trial preview)", () => {
     expect(minimumPlanForFeature("deals")).toBe("pro");
-    expect(canUseFeature("free", "deals")).toBe(false);
+    expect(canUseFeature("trial", "deals")).toBe(true);
     expect(canUseFeature("pro", "deals")).toBe(true);
     expect(canUseFeature("max", "deals")).toBe(true);
   });
 
-  it("reserves smart deal suggestions for max", () => {
+  it("reserves smart deal suggestions for max (and trial preview)", () => {
     expect(minimumPlanForFeature("aiDealSuggestions")).toBe("max");
-    expect(canUseFeature("free", "aiDealSuggestions")).toBe(false);
+    expect(canUseFeature("trial", "aiDealSuggestions")).toBe(true);
     expect(canUseFeature("pro", "aiDealSuggestions")).toBe(false);
     expect(canUseFeature("max", "aiDealSuggestions")).toBe(true);
   });
@@ -113,16 +134,17 @@ describe("subscription pricing", () => {
 });
 
 describe("resolveEffectivePlan", () => {
-  it("downgrades expired paid plans to free", async () => {
+  const now = new Date("2026-06-01T00:00:00.000Z");
+
+  it("locks expired paid plans to the expired state", async () => {
     const { resolveEffectivePlan } = await import("./plan");
-    const now = new Date("2026-06-01T00:00:00.000Z");
     expect(
       resolveEffectivePlan({
         storedPlan: "pro",
         planExpiresAt: new Date("2026-05-01T00:00:00.000Z"),
         now,
       }),
-    ).toBe("free");
+    ).toBe("expired");
     expect(
       resolveEffectivePlan({
         storedPlan: "max",
@@ -130,5 +152,30 @@ describe("resolveEffectivePlan", () => {
         now,
       }),
     ).toBe("max");
+  });
+
+  it("keeps an in-window trial but locks a lapsed one", async () => {
+    const { resolveEffectivePlan } = await import("./plan");
+    expect(
+      resolveEffectivePlan({
+        storedPlan: "trial",
+        planExpiresAt: new Date("2026-06-10T00:00:00.000Z"),
+        now,
+      }),
+    ).toBe("trial");
+    expect(
+      resolveEffectivePlan({
+        storedPlan: "trial",
+        planExpiresAt: new Date("2026-05-20T00:00:00.000Z"),
+        now,
+      }),
+    ).toBe("expired");
+  });
+
+  it("collapses legacy free rows and explicit expired to the locked state", async () => {
+    const { resolveEffectivePlan } = await import("./plan");
+    expect(resolveEffectivePlan({ storedPlan: "free", planExpiresAt: null, now })).toBe("expired");
+    expect(resolveEffectivePlan({ storedPlan: "expired", planExpiresAt: null, now })).toBe("expired");
+    expect(resolveEffectivePlan({ storedPlan: null, planExpiresAt: null, now })).toBe("expired");
   });
 });

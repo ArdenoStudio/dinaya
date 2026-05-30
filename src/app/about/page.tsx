@@ -29,7 +29,7 @@ const values = [
     icon: "shield-check",
     color: "bg-violet-500",
     title: "Honest pricing",
-    desc: "Free forever on the essentials. No hidden fees, no commission on your bookings, no USD subscriptions. You keep what you earn.",
+    desc: "Start with a 14-day free trial. No hidden fees, no commission on your bookings, no USD subscriptions. You keep what you earn.",
   },
   {
     icon: "people-fill",

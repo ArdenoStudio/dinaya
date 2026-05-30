@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Business not found." }, { status: 404 });
   }
 
-  const currentPlan = (business.plan ?? "free") as Plan;
+  const currentPlan = (business.plan ?? "expired") as Plan;
   if (planRank(currentPlan) >= planRank(targetPlan)) {
     return NextResponse.json(
       { error: `Already on ${targetPlan === "max" ? "Max" : "Pro"} or a higher plan.` },

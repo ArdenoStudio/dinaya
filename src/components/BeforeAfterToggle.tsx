@@ -5,12 +5,13 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence, type Variants } from "motion/react";
 import { Icon } from "@/components/ui/Icon";
 
-// Each pill scattered in its own direction — no pattern, like cards thrown on a table
+// Each pill scattered in its own direction — no pattern, like cards thrown on a table.
+// Offsets kept small so the tilt/overlap still reads as messy, but no label clips off the card edge.
 const withoutItems = [
-  { num: "01", label: "WhatsApp Messages, All Day",  icon: "chat-dots",          x: 2,  y: -6, rotate: 2.5  },
-  { num: "02", label: "Double Bookings Happen",      icon: "exclamation-circle", x: 30, y: 4,  rotate: -5   },
-  { num: "03", label: "Chase Clients For Payment",  icon: "currency-dollar",    x: 10, y: 2,  rotate: 3.5  },
-  { num: "04", label: "One Angry Client Per Week",  icon: "emoji-frown",        x: 50, y: -2, rotate: -7.5 },
+  { num: "01", label: "WhatsApp Messages, All Day",  icon: "chat-dots",          x: 0,  y: -4, rotate: 2    },
+  { num: "02", label: "Double Bookings Happen",      icon: "exclamation-circle", x: 12, y: 3,  rotate: -3.5 },
+  { num: "03", label: "Chase Clients For Payment",  icon: "currency-dollar",    x: 4,  y: 1,  rotate: 2.5  },
+  { num: "04", label: "One Angry Client Per Week",  icon: "emoji-frown",        x: 18, y: -2, rotate: -4   },
 ];
 
 const withItems = [
@@ -32,10 +33,13 @@ const withoutVariant: Variants = {
   exit:   { opacity: 0, filter: "blur(10px)", scale: 0.97, transition: { duration: 0.22, ease: "easeIn" as const } },
 };
 
-// "With" pills — enter blurred from slightly below, unblur and snap into place
+// "With" pills — assemble out of the scattered position their "without" counterpart held,
+// then settle blur-free into a clean stack (the chaos resolving into order).
 const withVariant: Variants = {
-  hidden: { opacity: 0, y: 18, filter: "blur(8px)" },
-  show:   { opacity: 1, y: 0,  filter: "blur(0px)", transition: { type: "spring" as const, stiffness: 280, damping: 24 } },
+  hidden: (origin: { x: number; y: number; rotate: number }) => ({
+    opacity: 0, x: origin.x, y: origin.y, rotate: origin.rotate, filter: "blur(8px)",
+  }),
+  show:   { opacity: 1, x: 0, y: 0, rotate: 0, filter: "blur(0px)", transition: { type: "spring" as const, stiffness: 280, damping: 24 } },
   exit:   { opacity: 0, filter: "blur(10px)", scale: 0.97, transition: { duration: 0.2, ease: "easeIn" as const } },
 };
 
@@ -66,10 +70,11 @@ function WithoutPill({ item }: { item: typeof withoutItems[number] }) {
   );
 }
 
-function WithPill({ item, i }: { item: typeof withItems[number]; i: number }) {
+function WithPill({ item, i, origin }: { item: typeof withItems[number]; i: number; origin: { x: number; y: number; rotate: number } }) {
   return (
     <motion.div
       variants={withVariant}
+      custom={origin}
       className="relative flex items-center gap-3 overflow-hidden rounded-full bg-primary px-4 py-2.5 shadow-md shadow-primary/20"
     >
       {/* Shine sweep */}
@@ -195,7 +200,12 @@ export function BeforeAfterToggle() {
               className="relative space-y-3"
             >
               {withItems.map((item, i) => (
-                <WithPill key={item.num} item={item} i={i} />
+                <WithPill
+                  key={item.num}
+                  item={item}
+                  i={i}
+                  origin={{ x: withoutItems[i].x, y: withoutItems[i].y, rotate: withoutItems[i].rotate }}
+                />
               ))}
             </motion.div>
           )}

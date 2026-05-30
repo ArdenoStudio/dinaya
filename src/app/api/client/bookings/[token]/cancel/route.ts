@@ -9,7 +9,7 @@ import { processBookingAutomationTrigger } from "@/lib/automations/engine";
 import { dispatchWebhooks } from "@/lib/webhooks";
 import { logActivity } from "@/lib/activity-log";
 import { releaseDealSlotForBooking } from "@/lib/deals/claim";
-import type { Plan } from "@/lib/plan";
+import { resolveEffectivePlan } from "@/lib/plan";
 import { withRateLimit } from "@/lib/rate-limit";
 import { z } from "@/lib/validation";
 
@@ -66,10 +66,14 @@ export async function POST(
   });
 
   const [business] = await db
-    .select({ plan: businesses.plan })
+    .select({ plan: businesses.plan, planExpiresAt: businesses.planExpiresAt })
     .from(businesses)
     .where(eq(businesses.id, booking.businessId))
     .limit(1);
+  const effectivePlan = resolveEffectivePlan({
+    storedPlan: business?.plan,
+    planExpiresAt: business?.planExpiresAt,
+  });
 
   void logActivity({
     action: "cancelled",
@@ -99,7 +103,7 @@ export async function POST(
     businessName: booking.businessName,
     serviceName: booking.serviceName,
     startsAt: booking.startsAt,
-    plan: (business?.plan ?? "free") as Plan,
+    plan: effectivePlan,
   });
 
   void processBookingAutomationTrigger(booking.businessId, booking.id, "booking.cancelled").catch((error) => {

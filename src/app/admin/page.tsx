@@ -7,6 +7,7 @@ import { activityLog, bookings, businesses, payments, subscriptions, users } fro
 import { safeAdminQuery } from "@/lib/admin-db";
 import { formatLkr } from "@/lib/utils";
 import { requirePlatformAdmin } from "@/lib/platform-admin";
+import type { Plan } from "@/lib/plan";
 
 export const dynamic = "force-dynamic";
 
@@ -107,7 +108,7 @@ export default async function AdminOverviewPage() {
         .groupBy(businesses.id)
         .orderBy(desc(count(bookings.id)))
         .limit(6),
-      [] as { id: string; name: string; slug: string; plan: "free" | "pro"; bookingCount: number }[]
+      [] as { id: string; name: string; slug: string; plan: Plan; bookingCount: number }[]
     ),
     safeAdminQuery(
       db
@@ -121,7 +122,7 @@ export default async function AdminOverviewPage() {
         .from(businesses)
         .orderBy(desc(businesses.createdAt))
         .limit(5),
-      [] as { id: string; name: string; slug: string; plan: "free" | "pro"; createdAt: Date }[]
+      [] as { id: string; name: string; slug: string; plan: Plan; createdAt: Date }[]
     ),
     safeAdminQuery(
       db

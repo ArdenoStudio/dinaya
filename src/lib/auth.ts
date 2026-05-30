@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { db } from "@/db";
 import { businesses, users } from "@/db/schema";
-import { resolveEffectivePlan } from "@/lib/plan";
+import { resolveEffectivePlan, type Plan } from "@/lib/plan";
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 
@@ -11,7 +11,7 @@ export type BusinessContext = {
   business: {
     id: string;
     name: string;
-    plan: "free" | "pro" | "max";
+    plan: Plan;
     slug: string;
     language: string;
   };

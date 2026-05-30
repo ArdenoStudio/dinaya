@@ -12,7 +12,7 @@ const perks = [
   "Your own booking page at yourname.dinaya.lk",
   "Online payments with PayHere — no no-shows",
   "Staff scheduling & availability management",
-  "Free forever for small businesses",
+  "14-day free trial — no credit card needed",
 ];
 
 const testimonial = {
@@ -233,7 +233,7 @@ export default function RegisterPage() {
             {step === 1 ? (
               <>
                 <h1 className="font-cal text-2xl mb-1">Create your account</h1>
-                <p className="text-muted-foreground text-sm mb-6">Free forever. No credit card needed.</p>
+                <p className="text-muted-foreground text-sm mb-6">Start your 14-day free trial. No credit card needed.</p>
 
                 <form onSubmit={handleStep1} className="space-y-4" noValidate>
                   <div>
@@ -376,7 +376,7 @@ export default function RegisterPage() {
                   <button type="submit" disabled={loading}
                     className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-b from-primary/90 to-primary text-primary-foreground py-3 rounded-lg text-sm font-medium border-b-2 border-primary/70 shadow-[0_0_0_2px_rgba(0,0,0,0.04),0_0_14px_0_rgba(99,102,241,0.2)] transition-all hover:shadow-primary/30 hover:shadow-md disabled:cursor-not-allowed mt-1">
                     {loading && <Icon name="arrow-repeat" className="text-sm animate-spin" />}
-                    {loading ? "Creating…" : "Create free account"}
+                    {loading ? "Creating…" : "Start free trial"}
                   </button>
                 </form>
               </>

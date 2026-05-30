@@ -131,7 +131,7 @@ export default function LandingPage() {
             </Link>
           </div>
 
-          <p className="text-sm text-muted-foreground mt-4">Free forever. No credit card needed.</p>
+          <p className="text-sm text-muted-foreground mt-4">14-day free trial. No credit card needed.</p>
         </div>
       </section>
 
@@ -187,6 +187,22 @@ export default function LandingPage() {
             <p className="text-muted-foreground mt-3 max-w-md text-pretty">
               Most Sri Lankan businesses still manage bookings over WhatsApp. Dinaya replaces all of that — automatically.
             </p>
+            <ul className="mt-6 flex flex-col gap-2.5">
+              {[
+                "Bookings while you sleep",
+                "Zero double bookings, ever",
+                "Deposits collected upfront",
+                "Reminders on autopilot",
+              ].map((outcome) => (
+                <li key={outcome} className="flex items-center gap-2.5 text-sm text-foreground/80">
+                  <Icon name="check-circle" className="shrink-0 text-base text-primary" />
+                  <span>{outcome}</span>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-7">
+              <CTAPrimaryButton href="/register" size="md">Get started free</CTAPrimaryButton>
+            </div>
           </div>
         </div>
       </section>
@@ -311,7 +327,7 @@ export default function LandingPage() {
             <div className="relative z-10">
               <div className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/20 px-4 py-1.5 text-sm text-white/80 mb-6">
                 <Icon name="lightning-charge" className="text-xs" />
-                Free forever · No credit card needed
+                14-day free trial · No credit card needed
               </div>
               <TextAnimate
                 animation="fadeIn"

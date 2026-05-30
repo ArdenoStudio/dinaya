@@ -154,7 +154,7 @@ export default async function DashboardOverview() {
     { label: "Create first service", done: Number(servicesCount) > 0, href: "/dashboard/services/new", description: "List what clients can book — price, duration, and deposit rules." },
     { label: "Add staff", done: Number(staffCount) > 0, href: "/dashboard/staff/new", description: "Add yourself or your team so bookings can be assigned." },
     { label: "Set availability", done: Number(availabilityCount) > 0, href: "/dashboard/availability", description: "Choose the days and hours clients can book online." },
-    { label: "Connect PayHere", done: Boolean(business.payhereEnabled && business.payhereMerchantId), href: "/dashboard/settings", description: "Accept card payments online, or use bank transfer on the Free plan." },
+    { label: "Connect PayHere", done: Boolean(business.payhereEnabled && business.payhereMerchantId), href: "/dashboard/settings", description: "Accept card payments online via PayHere, or take bank transfers and LankaQR." },
     { label: "Share booking link", done: Number(totalBookings) > 0, href: bookingUrl, description: "Post your link on WhatsApp Status, Instagram bio, or send it directly to clients." },
   ];
   const showOnboarding = onboarding.some((item) => !item.done);

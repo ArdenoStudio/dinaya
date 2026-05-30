@@ -87,9 +87,10 @@ export async function savePlans(formData: FormData): Promise<void> {
     proLaunched,
     maxLaunched,
     plans: {
-      free: buildPlanEntitlements(formData, "free"),
+      trial: buildPlanEntitlements(formData, "trial"),
       pro: buildPlanEntitlements(formData, "pro"),
       max: buildPlanEntitlements(formData, "max"),
+      expired: current.plans.expired,
     },
     updatedAt: new Date().toISOString(),
     updatedBy: admin.email,

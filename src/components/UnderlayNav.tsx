@@ -419,7 +419,7 @@ export function UnderlayNav() {
                     onClick={close}
                     className="block text-center text-sm font-semibold bg-primary text-white py-2.5 rounded-lg hover:bg-primary/90 transition-colors"
                   >
-                    Create free account →
+                    Start free trial →
                   </Link>
                 </motion.div>
 

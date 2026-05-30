@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { PublicNav } from "@/components/PublicNav";
 import { LandingFooter } from "@/components/LandingFooter";
 import { DiscoverCityLinks, DiscoverListings } from "@/components/discover/DiscoverListings";
 import { DiscoverDeals } from "@/components/discover/DiscoverDeals";
 import {
-  DIRECTORY_CATEGORIES,
   categoryLabel,
   isValidDirectoryCategory,
   listDirectoryBusinesses,
@@ -85,26 +83,6 @@ export default async function DiscoverPage({ searchParams }: Props) {
           activeCategory={activeCategory}
           showCityFilters={false}
         />
-
-        <div className="mt-12 rounded-2xl border bg-gray-50/70 p-6">
-          <h2 className="font-cal text-2xl tracking-tight">Browse by category</h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Salons, clinics, tutors, freelancers, and more — all bookable on Dinaya.
-          </p>
-          <div className="mt-4 flex flex-wrap gap-2">
-            {DIRECTORY_CATEGORIES.map((category) => (
-              <Link
-                key={category.value}
-                href={`/discover?category=${category.value}`}
-                className={`rounded-full border bg-white px-3 py-1.5 text-sm hover:border-primary/40 ${
-                  activeCategory === category.value ? "border-primary/40 font-medium text-primary" : ""
-                }`}
-              >
-                {category.label}
-              </Link>
-            ))}
-          </div>
-        </div>
       </section>
 
       <LandingFooter />

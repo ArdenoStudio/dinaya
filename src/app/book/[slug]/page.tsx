@@ -6,7 +6,7 @@ import { listActiveLocations, getStaffLocationMap, ensureBusinessHasDefaultLocat
 import { eq, and, avg, count } from "drizzle-orm";
 import BookingWizard from "@/components/booking/BookingWizard";
 import { getBookingCopy } from "@/lib/i18n";
-import { canUseFeature, resolveEffectivePlan, type Plan } from "@/lib/plan";
+import { canUseFeature, resolveEffectivePlan } from "@/lib/plan";
 import { isOptimizableRemoteImage } from "@/lib/utils";
 import { listActiveDealsForBusiness } from "@/lib/deals/queries";
 import { normalizePublicHttpsUrl } from "@/lib/public-url";
@@ -95,13 +95,29 @@ export default async function BookingPage({ params, searchParams }: Props) {
     );
   }
 
-  await ensureBusinessHasDefaultLocation(business.id);
-
   const effectivePlan = resolveEffectivePlan({
     storedPlan: business.plan,
     planExpiresAt: business.planExpiresAt,
   });
-  const showBranding = effectivePlan === "free";
+
+  // Trial/paid plans keep the public booking page; once it lapses to "expired"
+  // the page goes offline until the owner subscribes.
+  if (!canUseFeature(effectivePlan, "publicBookingPage")) {
+    return (
+      <main className="min-h-screen bg-gray-50 flex items-center justify-center px-6">
+        <div className="max-w-md rounded-2xl border bg-white p-8 text-center shadow-sm">
+          <h1 className="font-cal text-2xl tracking-tight">{business.name}</h1>
+          <p className="mt-3 text-sm text-muted-foreground">
+            Online booking is temporarily unavailable for this business.
+          </p>
+        </div>
+      </main>
+    );
+  }
+
+  await ensureBusinessHasDefaultLocation(business.id);
+
+  const showBranding = effectivePlan === "trial";
 
   const [serviceList, staffList, reviewList, ratingData, locationList, staffLocationMap, activeDeals] = await Promise.all([
     db
@@ -256,7 +272,7 @@ export default async function BookingPage({ params, searchParams }: Props) {
             ...business,
             hideBranding: Boolean(
               business.hideDinayaBranding &&
-              canUseFeature(business.plan as Plan, "publicBookingPageCustomization")
+              canUseFeature(effectivePlan, "publicBookingPageCustomization")
             ),
           }}
           services={serviceList}

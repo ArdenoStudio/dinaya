@@ -3,6 +3,7 @@ import {
   categoryLabel,
   cityToSlug,
   inferDirectoryCategory,
+  isPlaceholderListing,
   slugToCity,
 } from "./directory";
 
@@ -22,5 +23,12 @@ describe("directory helpers", () => {
     expect(inferDirectoryCategory("spa_wellness")).toBe("fitness");
     expect(inferDirectoryCategory("consulting")).toBe("consulting");
     expect(inferDirectoryCategory("tutoring")).toBe("tutoring");
+  });
+
+  it("flags auto-generated seed listings as placeholders", () => {
+    expect(isPlaceholderListing({ name: "Multi Branch mpf0v8fc" })).toBe(true);
+    expect(isPlaceholderListing({ name: "PW Business mpf0ts9v" })).toBe(true);
+    expect(isPlaceholderListing({ name: "Ardeno Studio" })).toBe(false);
+    expect(isPlaceholderListing({ name: "NimalsSalon" })).toBe(false);
   });
 });

@@ -823,7 +823,7 @@ export async function getDesktopModuleData(
     return payload(
       module,
       [
-        metric("Plan", business?.plan ?? "free", "Business tier", "cobalt"),
+        metric("Plan", business?.plan ?? "expired", "Business tier", "cobalt"),
         metric("Subscriptions", rows.length, "Billing records", "slate"),
         metric("Active", rows.filter((row) => row.status === "active").length, "Current", "emerald"),
         metric("Past due", rows.filter((row) => row.status === "past_due").length, "Needs attention", "amber"),
@@ -857,7 +857,7 @@ export async function getDesktopModuleData(
     "settings",
     [
       metric("Business", business?.name ?? "Dinaya", "Profile", "cobalt"),
-      metric("Plan", business?.plan ?? "free", "Current tier", "slate"),
+      metric("Plan", business?.plan ?? "expired", "Current tier", "slate"),
       metric("Desktop keys", keyRows.length, "Devices", "emerald"),
       metric("Revoked", keyRows.filter((row) => row.revokedAt).length, "Desktop keys", "amber"),
     ],

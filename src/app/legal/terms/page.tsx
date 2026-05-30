@@ -20,8 +20,9 @@ export default function TermsPage() {
 
       <h2>3. Plans &amp; Billing</h2>
       <p>
-        Dinaya offers Free, Pro, and Max plans. The Free plan has no time limit and requires no
-        credit card. Pro and Max are paid subscriptions billed monthly or annually through PayHere.
+        Every new account starts with a 14-day free trial that requires no credit card. When the trial
+        ends, your dashboard becomes read-only and your public booking page pauses until you subscribe
+        to Pro or Max. Pro and Max are paid subscriptions billed monthly or annually through PayHere.
       </p>
       <ul>
         <li>Subscription charges renew automatically until you cancel.</li>

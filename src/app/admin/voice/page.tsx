@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { businesses, voiceIntegrations, type VoiceIntegration } from "@/db/schema";
 import { safeAdminQuery } from "@/lib/admin-db";
 import { requirePlatformAdmin } from "@/lib/platform-admin";
+import type { Plan } from "@/lib/plan";
 import {
   VOICE_LANGUAGES,
   VOICE_STATUSES,
@@ -21,7 +22,7 @@ type VoiceAdminRow = {
     id: string;
     name: string;
     slug: string;
-    plan: "free" | "pro" | "max";
+    plan: Plan;
     phone: string | null;
   };
 };

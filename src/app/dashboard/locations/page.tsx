@@ -7,11 +7,11 @@ export default async function LocationsPage() {
   const { business } = await requireOwner();
   await ensureBusinessHasDefaultLocation(business.id);
 
-  const entitlements = getEffectiveEntitlements(business.plan as "free" | "pro" | "max");
+  const entitlements = getEffectiveEntitlements(business.plan);
 
   return (
     <LocationsClient
-      plan={planDisplayName(business.plan as "free" | "pro" | "max")}
+      plan={planDisplayName(business.plan)}
       locationLimit={entitlements.limits.locations}
     />
   );

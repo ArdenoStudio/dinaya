@@ -9,24 +9,22 @@ import { annualSavingsPercent, getPlanConfigAsync } from "@/lib/plan";
 import { Icon } from "@/components/ui/Icon";
 
 export const metadata: Metadata = {
-  title: "Pricing — Free for Every Sri Lankan Business | Dinaya",
+  title: "Pricing — Start with a 14-Day Free Trial | Dinaya",
   description:
-    "Dinaya is free for all Sri Lankan businesses. No credit card, no hidden fees. Create your booking page and start accepting appointments today.",
+    "Try Dinaya free for 14 days — full access, no credit card. Then choose Pro or Max to keep your booking page live. Built for Sri Lankan businesses.",
 };
 
-const freeFeatures = [
+const trialFeatures = [
+  "Full access to every feature for 14 days",
+  "All AI growth tools — Booking Autopilot, smart reminders, review engine & more",
   "Your own booking page at yourname.dinaya.lk",
-  "Unlimited bookings, every month",
-  "Online payments via PayHere when you connect your merchant account",
-  "Automated email appointment reminders",
-  "Custom availability & buffer time",
-  "Simple dashboard for all your bookings",
-  "Shareable link for Instagram, WhatsApp, Facebook",
-  "Free updates forever",
+  "Unlimited bookings and online payments via PayHere",
+  "No credit card needed to start",
+  "Keep all your data — subscribe anytime to stay live",
 ];
 
 const proFeatures = [
-  "Everything in Free",
+  "Your booking page, unlimited bookings & PayHere payments",
   "Multi-staff calendar & permissions",
   "Custom domain (e.g. book.yoursalon.lk)",
   "Remove Dinaya branding",
@@ -66,24 +64,28 @@ function PlanCell({ value }: { value: string }) {
 
 const faqs = [
   {
-    q: "Is Dinaya really free?",
-    a: "Yes. Every Sri Lankan business can use the Free plan with no time limit and no card required. PayHere and WhatsApp/SMS reminders unlock on Pro when you're ready to upgrade.",
+    q: "How does the free trial work?",
+    a: "Every new business starts with a 14-day free trial — full access to every feature, no credit card required. When the trial ends, choose Pro or Max to keep your booking page live. Your data is always safe.",
+  },
+  {
+    q: "What happens when my trial ends?",
+    a: "Your dashboard switches to read-only and your public booking page pauses until you subscribe. Nothing is deleted — your bookings, link, and history are waiting. Subscribe to Pro or Max anytime to go live again instantly.",
+  },
+  {
+    q: "Do I need a credit card to start?",
+    a: "No. You can create your booking page and use the full 14-day trial without entering any card details. You only pay when you choose to subscribe to Pro or Max.",
   },
   {
     q: "Are there transaction fees?",
-    a: "Free includes email confirmations and a 24-hour email reminder. Pro adds SMS and WhatsApp reminders. Max adds AI-timed smart reminders and the full AI growth toolkit. PayHere card fees (typically 3.3% + LKR 30) are charged by PayHere directly — Dinaya does not add a commission.",
-  },
-  {
-    q: "Is Pro available?",
-    a: "Yes — Pro and Max are available now. Start on Free and upgrade anytime from your dashboard billing page when you're ready for multi-staff tools, advanced operations, or Max AI growth features.",
+    a: "Dinaya never takes a commission on your bookings. PayHere card fees (typically 3.3% + LKR 30) are charged by PayHere directly. Pro adds SMS and WhatsApp reminders; Max adds AI-timed smart reminders and the full AI growth toolkit.",
   },
   {
     q: "Can I switch plans later?",
-    a: "Anytime — and you'll never lose your bookings, link, or history. Free works forever for solo businesses; you only need Pro if you want multi-staff, branding control, or a custom domain.",
+    a: "Anytime — and you'll never lose your bookings, link, or history. Move between Pro and Max from your dashboard billing page whenever your needs change.",
   },
   {
     q: "Do you offer refunds?",
-    a: "Free is free, so there's nothing to refund. For paid add-ons, see our refund policy — we issue refunds for any unused billing period within 14 days.",
+    a: "The trial is free, so there's nothing to refund. For paid plans, see our refund policy — we issue refunds for any unused billing period within 14 days.",
     link: { href: "/legal/refund", label: "refund policy" },
   },
 ];
@@ -105,7 +107,7 @@ export default async function PricingPage() {
           <FadeDiv className="mb-6">
             <span className="inline-flex items-center gap-2 rounded-full border bg-white px-3 py-1 text-xs font-medium text-gray-700 shadow-sm">
               <Icon name="stars" className="text-xs text-primary" />
-              Free for every Sri Lankan business
+              14-day free trial · No credit card
             </span>
           </FadeDiv>
 
@@ -116,7 +118,7 @@ export default async function PricingPage() {
 
           <FadeDiv>
             <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-              Start free, keep it free. Upgrade only when you outgrow it — never because we made you.
+              Try everything free for 14 days — no card required. Keep your booking page live with Pro or Max.
             </p>
           </FadeDiv>
         </FadeContainer>
@@ -126,31 +128,31 @@ export default async function PricingPage() {
       <section className="px-6 pb-20">
         <div className="flex justify-center">
           <div className="inline-flex w-full max-w-[96rem] flex-col items-stretch gap-5 sm:gap-6 lg:w-auto lg:flex-row lg:items-stretch">
-          {/* Free plan */}
+          {/* Free trial */}
           <div className="relative flex w-full max-w-[calc((64rem-1.25rem)/2)] shrink-0 flex-col rounded-2xl border bg-white p-8 shadow-sm">
             <div className="flex items-center gap-2 mb-2">
-              <h3 className="font-cal text-2xl tracking-tight">Free</h3>
+              <h3 className="font-cal text-2xl tracking-tight">Free trial</h3>
               <span className="inline-flex items-center gap-1 rounded-full bg-violet-50 text-violet-700 ring-1 ring-violet-200 px-2 py-0.5 text-[11px] font-medium">
                 <Icon name="lightning-charge" />
-                Current
+                14 days
               </span>
             </div>
             <p className="text-sm text-muted-foreground mb-6">
-              Everything a solo business needs to ditch WhatsApp booking.
+              Try everything Dinaya can do — full access, no credit card.
             </p>
 
             <div className="mb-6">
               <div className="flex items-baseline gap-1">
-                <span className="font-cal text-5xl tracking-tight">LKR 0</span>
-                <span className="text-sm text-muted-foreground">/month</span>
+                <span className="font-cal text-5xl tracking-tight">Free</span>
+                <span className="text-sm text-muted-foreground">for 14 days</span>
               </div>
-              <p className="text-xs text-muted-foreground mt-1">Free forever. No credit card.</p>
+              <p className="text-xs text-muted-foreground mt-1">No credit card. Then choose Pro or Max.</p>
             </div>
 
-            <CTAPrimaryButton size="md" className="mb-7">Create your booking page</CTAPrimaryButton>
+            <CTAPrimaryButton size="md" className="mb-7">Start your free trial</CTAPrimaryButton>
 
             <ul className="space-y-3 text-sm">
-              {freeFeatures.map((f) => (
+              {trialFeatures.map((f) => (
                 <li key={f} className="flex items-start gap-2.5">
                   <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-primary/15">
                     <Icon name="check" className="text-primary" style={{ fontSize: '0.625rem' }} />
@@ -289,36 +291,39 @@ export default async function PricingPage() {
           <h2 className="font-cal text-3xl mt-3 tracking-tight">What&apos;s included where</h2>
         </div>
 
+        <div className="mx-auto mb-8 max-w-2xl rounded-xl border border-blue-200 bg-blue-50/60 px-5 py-4 text-center text-sm text-gray-700">
+          Every account starts with a <span className="font-semibold text-primary">14-day free trial</span> with full access — no card required. Here&apos;s what you keep on each plan after that.
+        </div>
+
         <div className="rounded-2xl border overflow-hidden">
           <table className="w-full text-sm">
             <thead className="bg-gray-50/70">
               <tr>
                 <th className="text-left font-medium text-gray-600 px-5 py-3 w-1/2">Feature</th>
-                <th className="text-center font-medium text-gray-600 px-5 py-3">Free</th>
                 <th className="text-center font-medium text-gray-600 px-5 py-3">Pro</th>
                 <th className="text-center font-medium text-gray-600 px-5 py-3">Max</th>
               </tr>
             </thead>
             <tbody className="divide-y">
               {[
-                { f: "Self-booking page", a: "Yes", b: "Yes", icon: "calendar", c: "Yes" },
-                { f: "Online payments (PayHere)", a: "Yes", b: "Yes", icon: "credit-card", c: "Yes" },
-                { f: "SMS + email reminders", a: "Email", b: "Yes", icon: "bell", c: "Yes" },
-                { f: "Booking dashboard", a: "Yes", b: "Yes", icon: "grid", c: "Yes" },
-                { f: "Multi-staff calendar", a: "—", b: "Yes", icon: "people", c: "Yes" },
-                { f: "Branch locations", a: "1", b: "Up to 3", icon: "geo-alt", c: "Unlimited" },
-                { f: "Custom domain", a: "—", b: "Yes", icon: "globe", c: "Yes" },
-                { f: "Remove Dinaya branding", a: "—", b: "Yes", icon: "eye-slash", c: "Yes" },
-                { f: "Advanced reports & exports", a: "—", b: "Yes", icon: "bar-chart", c: "Yes" },
-                { f: "Priority support", a: "Email", b: "WhatsApp", icon: "headset", c: "WhatsApp" },
-                { f: "AI Booking Autopilot", a: "—", b: "—", icon: "robot", c: "Yes" },
-                { f: "Smart reminder system", a: "—", b: "—", icon: "bell-fill", c: "Yes" },
-                { f: "Review engine", a: "—", b: "—", icon: "star", c: "Yes" },
-                { f: "Client Reactivation Campaign", a: "—", b: "—", icon: "arrow-repeat", c: "Yes" },
-                { f: "AI upsell assistant", a: "—", b: "—", icon: "graph-up-arrow", c: "Yes" },
-                { f: "30-Day AI Content Machine", a: "—", b: "—", icon: "calendar3", c: "Yes" },
-                { f: "VIP Loyalty Sequence", a: "—", b: "—", icon: "gem", c: "Yes" },
-                { f: "AI Voice Receptionist setup", a: "—", b: "—", icon: "telephone", c: "Yes" },
+                { f: "Self-booking page", b: "Yes", icon: "calendar", c: "Yes" },
+                { f: "Online payments (PayHere)", b: "Yes", icon: "credit-card", c: "Yes" },
+                { f: "SMS + email reminders", b: "Yes", icon: "bell", c: "Yes" },
+                { f: "Booking dashboard", b: "Yes", icon: "grid", c: "Yes" },
+                { f: "Multi-staff calendar", b: "Yes", icon: "people", c: "Yes" },
+                { f: "Branch locations", b: "Up to 3", icon: "geo-alt", c: "Unlimited" },
+                { f: "Custom domain", b: "Yes", icon: "globe", c: "Yes" },
+                { f: "Remove Dinaya branding", b: "Yes", icon: "eye-slash", c: "Yes" },
+                { f: "Advanced reports & exports", b: "Yes", icon: "bar-chart", c: "Yes" },
+                { f: "Priority support", b: "WhatsApp", icon: "headset", c: "WhatsApp" },
+                { f: "AI Booking Autopilot", b: "—", icon: "robot", c: "Yes" },
+                { f: "Smart reminder system", b: "—", icon: "bell-fill", c: "Yes" },
+                { f: "Review engine", b: "—", icon: "star", c: "Yes" },
+                { f: "Client Reactivation Campaign", b: "—", icon: "arrow-repeat", c: "Yes" },
+                { f: "AI upsell assistant", b: "—", icon: "graph-up-arrow", c: "Yes" },
+                { f: "30-Day AI Content Machine", b: "—", icon: "calendar3", c: "Yes" },
+                { f: "VIP Loyalty Sequence", b: "—", icon: "gem", c: "Yes" },
+                { f: "AI Voice Receptionist setup", b: "—", icon: "telephone", c: "Yes" },
               ].map((row) => (
                 <tr key={row.f} className="hover:bg-gray-50/50 transition-colors">
                   <td className="px-5 py-3.5 text-gray-800">
@@ -327,7 +332,6 @@ export default async function PricingPage() {
                       {row.f}
                     </span>
                   </td>
-                  <PlanCell value={row.a} />
                   <PlanCell value={row.b} />
                   <PlanCell value={row.c} />
                 </tr>
@@ -413,7 +417,7 @@ export default async function PricingPage() {
             </div>
             <div className="relative z-10">
               <h2 className="font-cal text-3xl md:text-4xl tracking-tight text-white mb-3">
-                Start free. Grow at your pace.
+                Try Dinaya free for 14 days.
               </h2>
               <p className="text-white/70 mb-8 max-w-md mx-auto">
                 Your booking page goes live in five minutes. No card, no commitment.

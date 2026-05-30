@@ -58,6 +58,17 @@ export type DirectoryListing = {
   logoUrl: string | null;
 };
 
+/**
+ * Detects seed/test businesses whose names carry an auto-generated handle
+ * (e.g. "Multi Branch mpf0v8fc", "PW Business mpf0ts9v"). These crowd out
+ * real listings in the public directory and should be hidden from Discover.
+ */
+const GENERATED_HANDLE = /\bmpf[0-9a-z]{4,}\b/i;
+
+export function isPlaceholderListing(listing: Pick<DirectoryListing, "name">): boolean {
+  return GENERATED_HANDLE.test(listing.name);
+}
+
 import { unstable_cache } from "next/cache";
 
 export const listDirectoryBusinesses = unstable_cache(
@@ -67,7 +78,7 @@ export const listDirectoryBusinesses = unstable_cache(
       const { businesses } = await import("@/db/schema");
       const { and, eq, isNull } = await import("drizzle-orm");
 
-      return await db
+      const rows = await db
         .select({
           name: businesses.name,
           slug: businesses.slug,
@@ -85,6 +96,8 @@ export const listDirectoryBusinesses = unstable_cache(
           ...(filters?.category ? [eq(businesses.directoryCategory, filters.category)] : []),
         ))
         .orderBy(businesses.name);
+
+      return rows.filter((row) => !isPlaceholderListing(row));
     } catch {
       return [];
     }

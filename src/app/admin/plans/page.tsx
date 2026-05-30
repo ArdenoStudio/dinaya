@@ -77,15 +77,15 @@ export default async function AdminPlansPage() {
   const config = await getPlanConfigAsync();
 
   const [
-    [{ freeCount }],
+    [{ trialCount }],
     [{ proCount }],
     [{ maxCount }],
     [{ activeSubCount }],
     [{ activeMrr }],
   ] = await Promise.all([
     safeAdminQuery(
-      db.select({ freeCount: count() }).from(businesses).where(eq(businesses.plan, "free")),
-      [{ freeCount: 0 }] as { freeCount: number }[],
+      db.select({ trialCount: count() }).from(businesses).where(eq(businesses.plan, "trial")),
+      [{ trialCount: 0 }] as { trialCount: number }[],
     ),
     safeAdminQuery(
       db.select({ proCount: count() }).from(businesses).where(eq(businesses.plan, "pro")),
@@ -108,8 +108,8 @@ export default async function AdminPlansPage() {
     ),
   ]);
 
-  const total = Number(freeCount) + Number(proCount) + Number(maxCount);
-  const freeShare = total > 0 ? Math.round((Number(freeCount) / total) * 100) : 0;
+  const total = Number(trialCount) + Number(proCount) + Number(maxCount);
+  const trialShare = total > 0 ? Math.round((Number(trialCount) / total) * 100) : 0;
   const proShare = total > 0 ? Math.round((Number(proCount) / total) * 100) : 0;
 
   return (
@@ -147,7 +147,7 @@ export default async function AdminPlansPage() {
             <p className="text-xs text-muted-foreground">Total accounts</p>
             <p className="mt-1 text-2xl font-bold tracking-tight">{total}</p>
             <p className="mt-1 text-xs text-muted-foreground">
-              {Number(freeCount)} Free · {Number(proCount)} Pro
+              {Number(trialCount)} Trial · {Number(proCount)} Pro
             </p>
           </div>
         </div>
@@ -179,7 +179,7 @@ export default async function AdminPlansPage() {
           <p className="font-semibold">Heads-up about feature gates</p>
           <p className="mt-1">
             A green &ldquo;Enforced&rdquo; badge means the feature is actually blocked
-            in the code for Free users. Features without that badge can be toggled here
+            in the code for Trial users. Features without that badge can be toggled here
             but won&apos;t actually restrict access until a developer wires up the
             gate. Currently enforced: <strong>{ENFORCED_FEATURES.join(", ")}</strong>.
           </p>
@@ -287,7 +287,7 @@ export default async function AdminPlansPage() {
         </div>
 
         <div className="grid gap-6 lg:grid-cols-3 md:grid-cols-2">
-          {(["free", "pro", "max"] as Plan[]).map((planKey) => {
+          {(["trial", "pro", "max"] as Plan[]).map((planKey) => {
             const entitlements = config.plans[planKey];
             const accent = planKey === "max" ? "border-amber-400/40 ring-1 ring-amber-400/15" : planKey === "pro" ? "border-primary/40 ring-1 ring-primary/15" : "border-muted-foreground/20";
             const tile = planKey === "max" ? "bg-amber-600 text-white" : planKey === "pro" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground";
@@ -295,18 +295,18 @@ export default async function AdminPlansPage() {
               ? (total > 0 ? Math.round((Number(maxCount) / total) * 100) : 0)
               : planKey === "pro"
                 ? proShare
-                : freeShare;
+                : trialShare;
             const countNum = planKey === "max"
               ? Number(maxCount)
               : planKey === "pro"
                 ? Number(proCount)
-                : Number(freeCount);
+                : Number(trialCount);
             return (
               <fieldset key={planKey} className={`overflow-hidden rounded-2xl border bg-white ${accent}`}>
                 <div className="border-b px-6 py-5">
                   <div className="flex items-center justify-between">
                     <legend className={`inline-block rounded-full px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider ${tile}`}>
-                      {planKey === "max" ? "Max" : planKey === "pro" ? "Pro" : "Free"}
+                      {planKey === "max" ? "Max" : planKey === "pro" ? "Pro" : "Free trial"}
                     </legend>
                     <span className="text-xs text-muted-foreground">
                       {countNum} accounts · {share}% of base

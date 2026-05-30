@@ -18,7 +18,7 @@ import { getAvailableSlots } from "@/lib/availability";
 import { recommendDiscountPercent, formatDiscountLearningMessage } from "@/lib/deals/conversion";
 import { assessDemandForGap } from "@/lib/deals/demand";
 import { loadGoogleCalendarBusyWindows, type ExternalBusyResult } from "@/lib/deals/external-demand";
-import { canUseFeature } from "@/lib/plan";
+import { canUseFeature, resolveEffectivePlan } from "@/lib/plan";
 
 const MIN_GAP_MINUTES = 45;
 const SLOT_INTERVAL_MINUTES = 15;
@@ -109,13 +109,22 @@ export async function generateDealSuggestionsForBusiness(businessId: string): Pr
       id: businesses.id,
       name: businesses.name,
       plan: businesses.plan,
+      planExpiresAt: businesses.planExpiresAt,
       timezone: businesses.timezone,
     })
     .from(businesses)
     .where(eq(businesses.id, businessId))
     .limit(1);
 
-  if (!business || !canUseFeature(business.plan, "aiDealSuggestions")) {
+  if (!business) {
+    return 0;
+  }
+
+  const effectivePlan = resolveEffectivePlan({
+    storedPlan: business.plan,
+    planExpiresAt: business.planExpiresAt,
+  });
+  if (!canUseFeature(effectivePlan, "aiDealSuggestions")) {
     return 0;
   }
 

@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 
 type SearchParams = {
   q?: string;
-  plan?: "free" | "pro" | "all";
+  plan?: "trial" | "pro" | "max" | "expired" | "all";
 };
 
 export default async function AdminAccountsPage({
@@ -69,10 +69,12 @@ export default async function AdminAccountsPage({
     [{ totalAccounts: 0 }] as { totalAccounts: number }[],
   );
 
-  const planChips: { value: "all" | "free" | "pro"; label: string }[] = [
+  const planChips: { value: "all" | "trial" | "pro" | "max" | "expired"; label: string }[] = [
     { value: "all", label: "All" },
-    { value: "free", label: "Free" },
+    { value: "trial", label: "Trial" },
     { value: "pro", label: "Pro" },
+    { value: "max", label: "Max" },
+    { value: "expired", label: "Expired" },
   ];
 
   return (

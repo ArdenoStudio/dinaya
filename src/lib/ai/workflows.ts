@@ -22,7 +22,7 @@ import { buildReviewUrl } from "@/lib/ai/review-links";
 import { sendAiMessage, type ProviderSendResult } from "@/lib/ai/providers";
 import { generateThirtyDayContentCalendar } from "@/lib/ai/content";
 import { getUpsellRecommendation } from "@/lib/ai/upsell";
-import { canUseFeature, type Plan, type PlanFeature } from "@/lib/plan";
+import { canUseFeature, resolveEffectivePlan, type Plan, type PlanFeature } from "@/lib/plan";
 import { parseLocationAiConfig, type LocationAiConfig } from "@/lib/locations";
 
 type WorkflowStats = {
@@ -38,7 +38,7 @@ type BusinessRow = {
   name: string;
   slug: string;
   email: string | null;
-  plan: "free" | "pro" | "max";
+  plan: Plan;
   timezone: string;
   customDomain: string | null;
   customDomainVerified: boolean | null;
@@ -684,6 +684,7 @@ export async function runAiWorkflows(): Promise<Record<PlanFeature, WorkflowStat
       slug: businesses.slug,
       email: businesses.email,
       plan: businesses.plan,
+      planExpiresAt: businesses.planExpiresAt,
       timezone: businesses.timezone,
       customDomain: businesses.customDomain,
       customDomainVerified: businesses.customDomainVerified,
@@ -691,9 +692,13 @@ export async function runAiWorkflows(): Promise<Record<PlanFeature, WorkflowStat
     .from(businesses)
     .where(inArray(businesses.plan, ["max"]));
 
-  const eligibleBusinesses = businessRows.filter((business) =>
-    AI_FEATURES.some((feature) => canRunAiWorkflow(business.plan as Plan, feature)),
-  );
+  const eligibleBusinesses = businessRows.filter((business) => {
+    const effectivePlan = resolveEffectivePlan({
+      storedPlan: business.plan,
+      planExpiresAt: business.planExpiresAt,
+    });
+    return AI_FEATURES.some((feature) => canRunAiWorkflow(effectivePlan, feature));
+  });
 
   const businessSummaries = await mapWithConcurrency(eligibleBusinesses, 5, async (business) => {
     const typedBusiness = business as BusinessRow;
@@ -756,6 +761,7 @@ export async function runManualReactivation(
       slug: businesses.slug,
       email: businesses.email,
       plan: businesses.plan,
+      planExpiresAt: businesses.planExpiresAt,
       timezone: businesses.timezone,
       customDomain: businesses.customDomain,
       customDomainVerified: businesses.customDomainVerified,
@@ -769,7 +775,11 @@ export async function runManualReactivation(
   }
 
   const typedBusiness = business as BusinessRow;
-  if (!canRunAiWorkflow(typedBusiness.plan, "clientReactivationCampaign")) {
+  const effectivePlan = resolveEffectivePlan({
+    storedPlan: business.plan,
+    planExpiresAt: business.planExpiresAt,
+  });
+  if (!canRunAiWorkflow(effectivePlan, "clientReactivationCampaign")) {
     return { stats, previews };
   }
 

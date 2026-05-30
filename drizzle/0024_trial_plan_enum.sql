@@ -1,0 +1,2 @@
+ALTER TYPE "plan" ADD VALUE IF NOT EXISTS 'trial';
+ALTER TYPE "plan" ADD VALUE IF NOT EXISTS 'expired';

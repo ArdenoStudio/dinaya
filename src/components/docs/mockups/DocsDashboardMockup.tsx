@@ -247,7 +247,7 @@ export function DocsDashboardMockup({ variant, highlightNav, highlightTarget }: 
               <p className="font-medium">Main branch</p>
               <p className="text-[9px] text-gray-500">Colombo · Default</p>
             </div>
-            <p className="text-[9px] text-amber-700">1 / 1 locations on Free plan</p>
+            <p className="text-[9px] text-amber-700">1 / 1 locations on Free trial</p>
           </div>
         )}
 

@@ -146,7 +146,7 @@ const proAiFeatures = [
 
 const highlights = [
   { stat: "5 min", label: "Average setup time" },
-  { stat: "LKR 0", label: "Monthly cost on Free plan" },
+  { stat: "LKR 0", label: "To start — 14-day free trial" },
   { stat: "0%", label: "Commission on bookings" },
   { stat: "24/7", label: "Booking page availability" },
 ];
