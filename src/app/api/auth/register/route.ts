@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
+import { randomUUID } from "node:crypto";
 import { db } from "@/db";
 import {
   availability,
@@ -12,7 +13,7 @@ import {
   staffServices,
   users,
 } from "@/db/schema";
-import { eq, inArray } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { normalizeReferralCode } from "@/lib/referrals";
 import { withApiHandler } from "@/lib/api-handler";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -59,36 +60,10 @@ const PRESET_SERVICES: Record<
   ],
 };
 
-async function cleanupRegistration(input: {
-  businessId?: string;
-  userId?: string;
-  staffId?: string;
-  serviceIds?: string[];
-  locationId?: string;
-}): Promise<void> {
-  try {
-    if (input.serviceIds?.length) {
-      await db.delete(staffServices).where(inArray(staffServices.serviceId, input.serviceIds));
-      await db.delete(services).where(inArray(services.id, input.serviceIds));
-    }
-    if (input.staffId) {
-      await db.delete(staffLocations).where(eq(staffLocations.staffId, input.staffId));
-      await db.delete(availability).where(eq(availability.staffId, input.staffId));
-      await db.delete(staff).where(eq(staff.id, input.staffId));
-    }
-    if (input.locationId) {
-      await db.delete(locations).where(eq(locations.id, input.locationId));
-    }
-    if (input.businessId) {
-      await db.delete(messageTemplates).where(eq(messageTemplates.businessId, input.businessId));
-      await db.delete(users).where(eq(users.businessId, input.businessId));
-      await db.delete(businesses).where(eq(businesses.id, input.businessId));
-    } else if (input.userId) {
-      await db.delete(users).where(eq(users.id, input.userId));
-    }
-  } catch (cleanupError) {
-    console.error("[register] cleanup failed", cleanupError);
-  }
+function isUniqueViolation(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+  const maybe = error as { code?: string; cause?: { code?: string } };
+  return maybe.code === "23505" || maybe.cause?.code === "23505";
 }
 
 export async function POST(req: NextRequest) {
@@ -144,18 +119,30 @@ export async function POST(req: NextRequest) {
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
-    const cleanupState: {
-      businessId?: string;
-      userId?: string;
-      staffId?: string;
-      serviceIds?: string[];
-      locationId?: string;
-    } = {};
+
+    // Pre-generate ids so every insert is independent. neon-http has no
+    // interactive transactions, but db.batch() runs them atomically in a single
+    // transaction (all-or-nothing) — so a mid-sequence failure can't leave
+    // orphaned rows and no manual compensation is needed. Order matters: parent
+    // rows must precede the rows that reference them via foreign keys.
+    const businessId = randomUUID();
+    const staffId = randomUUID();
+    const locationId = randomUUID();
+    const presetServices = PRESET_SERVICES[selectedBusinessType].map((preset) => ({
+      id: randomUUID(),
+      businessId,
+      ...preset,
+      requiresPayment: false,
+      depositPercent: 0,
+      beforeBuffer: 0,
+      afterBuffer: 0,
+      minimumNoticeHours: 2,
+    }));
 
     try {
-      const [business] = await db
-        .insert(businesses)
-        .values({
+      await db.batch([
+        db.insert(businesses).values({
+          id: businessId,
           slug,
           name: businessName,
           email,
@@ -165,112 +152,80 @@ export async function POST(req: NextRequest) {
           referredByBusinessId,
           cancellationPolicy: "Please contact the business as early as possible if you need to cancel or reschedule.",
           depositPolicy: "Some services may require a deposit to reduce no-shows.",
-        })
-        .returning({ id: businesses.id });
-
-      cleanupState.businessId = business.id;
-
-      const [user] = await db
-        .insert(users)
-        .values({
-          businessId: business.id,
+        }),
+        db.insert(users).values({
+          businessId,
           name,
           email,
           passwordHash,
           role: "owner",
-        })
-        .returning({ id: users.id });
-
-      cleanupState.userId = user.id;
-
-      const [ownerStaff] = await db
-        .insert(staff)
-        .values({
-          businessId: business.id,
+        }),
+        db.insert(staff).values({
+          id: staffId,
+          businessId,
           name,
           bio: "Owner",
           isActive: true,
-        })
-        .returning({ id: staff.id });
-
-      cleanupState.staffId = ownerStaff.id;
-
-      const serviceRows = await db
-        .insert(services)
-        .values(
-          PRESET_SERVICES[selectedBusinessType].map((preset) => ({
-            businessId: business.id,
-            ...preset,
-            requiresPayment: false,
-            depositPercent: 0,
-            beforeBuffer: 0,
-            afterBuffer: 0,
-            minimumNoticeHours: 2,
-          })),
-        )
-        .returning({ id: services.id });
-
-      cleanupState.serviceIds = serviceRows.map((row) => row.id);
-
-      if (serviceRows.length > 0) {
-        await db.insert(staffServices).values(
-          serviceRows.map((service) => ({
-            staffId: ownerStaff.id,
+        }),
+        db.insert(services).values(presetServices),
+        db.insert(staffServices).values(
+          presetServices.map((service) => ({
+            staffId,
             serviceId: service.id,
           })),
-        );
-      }
-
-      await db.insert(availability).values(
-        [1, 2, 3, 4, 5].map((dayOfWeek) => ({
-          staffId: ownerStaff.id,
-          dayOfWeek,
-          startTime: "09:00",
-          endTime: "17:00",
-        })),
-      );
-
-      const [defaultLocation] = await db
-        .insert(locations)
-        .values({
-          businessId: business.id,
+        ),
+        db.insert(availability).values(
+          [1, 2, 3, 4, 5].map((dayOfWeek) => ({
+            staffId,
+            dayOfWeek,
+            startTime: "09:00",
+            endTime: "17:00",
+          })),
+        ),
+        db.insert(locations).values({
+          id: locationId,
+          businessId,
           name: businessName,
           slug: "main",
           timezone: "Asia/Colombo",
           isDefault: true,
           isActive: true,
           sortOrder: 0,
-        })
-        .returning({ id: locations.id });
-
-      cleanupState.locationId = defaultLocation.id;
-
-      await db.insert(staffLocations).values({
-        staffId: ownerStaff.id,
-        locationId: defaultLocation.id,
-        isPrimary: true,
-      });
-
-      await db.insert(messageTemplates).values([
-        {
-          businessId: business.id,
-          channel: "whatsapp",
-          name: "Booking confirmation",
-          body: "Hi {{clientName}}, your {{serviceName}} booking at {{businessName}} is confirmed for {{appointmentTime}}.",
-          variables: ["clientName", "serviceName", "businessName", "appointmentTime"],
-        },
-        {
-          businessId: business.id,
-          channel: "whatsapp",
-          name: "Appointment reminder",
-          body: "Hi {{clientName}}, reminder: your {{serviceName}} booking at {{businessName}} is on {{appointmentTime}}.",
-          variables: ["clientName", "serviceName", "businessName", "appointmentTime"],
-        },
+        }),
+        db.insert(staffLocations).values({
+          staffId,
+          locationId,
+          isPrimary: true,
+        }),
+        db.insert(messageTemplates).values([
+          {
+            businessId,
+            channel: "whatsapp",
+            name: "Booking confirmation",
+            body: "Hi {{clientName}}, your {{serviceName}} booking at {{businessName}} is confirmed for {{appointmentTime}}.",
+            variables: ["clientName", "serviceName", "businessName", "appointmentTime"],
+          },
+          {
+            businessId,
+            channel: "whatsapp",
+            name: "Appointment reminder",
+            body: "Hi {{clientName}}, reminder: your {{serviceName}} booking at {{businessName}} is on {{appointmentTime}}.",
+            variables: ["clientName", "serviceName", "businessName", "appointmentTime"],
+          },
+        ]),
       ]);
 
       return NextResponse.json({ success: true }, { status: 201 });
     } catch (error) {
-      await cleanupRegistration(cleanupState);
+      // The batch is atomic, so a failure leaves no partial rows. A slug/email
+      // unique violation (e.g. a concurrent signup that raced the pre-checks
+      // above) becomes a clean 409 instead of a 500.
+      if (isUniqueViolation(error)) {
+        return NextResponse.json(
+          { error: "That URL or email is already taken. Please try again." },
+          { status: 409 },
+        );
+      }
       throw error;
     }
   }, "Unable to create account.");
