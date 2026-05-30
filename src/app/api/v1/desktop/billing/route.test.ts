@@ -50,6 +50,7 @@ describe("GET /api/v1/desktop/billing", () => {
         managePath: "/dashboard/billing",
         upgradeMaxPath: "/dashboard/billing",
         upgradeProPath: "/dashboard/billing",
+        upgradeStarterPath: "/dashboard/billing",
       },
       business: {
         effectivePlan: "pro",
@@ -61,7 +62,7 @@ describe("GET /api/v1/desktop/billing", () => {
         storedPlan: "pro",
       },
       currentSubscription: {
-        amountLkr: 1490,
+        amountLkr: 3990,
         billingInterval: "monthly",
         cancelledAt: null,
         createdAt: "2026-05-28T09:00:00.000Z",
@@ -84,8 +85,9 @@ describe("GET /api/v1/desktop/billing", () => {
         webhooks: true,
       },
       pricing: {
-        max: { annualLkr: 23900, annualSavingsPercent: 20, available: true, monthlyLkr: 2490 },
-        pro: { annualLkr: 14300, annualSavingsPercent: 20, available: true, monthlyLkr: 1490 },
+        max: { annualLkr: 69000, annualSavingsPercent: 17, available: true, monthlyLkr: 6900 },
+        pro: { annualLkr: 39900, annualSavingsPercent: 17, available: true, monthlyLkr: 3990 },
+        starter: { annualLkr: 19900, annualSavingsPercent: 17, available: true, monthlyLkr: 1990 },
       },
       subscriptions: [],
       usage: [
@@ -101,7 +103,7 @@ describe("GET /api/v1/desktop/billing", () => {
     expect(body.webUrl).toBe("/dashboard/billing");
     expect(body.business).toMatchObject({ effectivePlan: "pro", planLabel: "Pro" });
     expect(body.currentSubscription).toMatchObject({ id: "sub_1", status: "active" });
-    expect(body.pricing.pro.monthlyLkr).toBe(1490);
+    expect(body.pricing.pro.monthlyLkr).toBe(3990);
     expect(body.serverTime).toEqual(expect.any(String));
     expect(getBillingDashboardOverviewMock).toHaveBeenCalledWith("biz_1");
   });

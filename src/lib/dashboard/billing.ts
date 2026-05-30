@@ -75,7 +75,7 @@ export async function getBillingDashboardOverview(businessId: string, now = new 
     .where(eq(businesses.id, businessId))
     .limit(1);
 
-  const storedPlan = (business?.plan ?? "free") as Plan;
+  const storedPlan = (business?.plan ?? "expired") as Plan | "free";
   const effectivePlan = resolveEffectivePlan({
     storedPlan,
     planExpiresAt: business?.planExpiresAt,
@@ -132,6 +132,7 @@ export async function getBillingDashboardOverview(businessId: string, now = new 
       managePath: "/dashboard/billing",
       upgradeMaxPath: "/dashboard/billing",
       upgradeProPath: "/dashboard/billing",
+      upgradeStarterPath: "/dashboard/billing",
     },
     business: {
       effectivePlan,
@@ -166,6 +167,12 @@ export async function getBillingDashboardOverview(businessId: string, now = new 
         annualSavingsPercent: annualSavingsPercent(config.proMonthlyPriceLkr, config.proAnnualPriceLkr),
         available: isPaidPlanAvailable("pro", config),
         monthlyLkr: config.proMonthlyPriceLkr,
+      },
+      starter: {
+        annualLkr: config.starterAnnualPriceLkr,
+        annualSavingsPercent: annualSavingsPercent(config.starterMonthlyPriceLkr, config.starterAnnualPriceLkr),
+        available: isPaidPlanAvailable("starter", config),
+        monthlyLkr: config.starterMonthlyPriceLkr,
       },
     },
     subscriptions: subscriptionRows.map(serializeSubscription),

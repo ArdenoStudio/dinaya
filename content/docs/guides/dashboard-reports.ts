@@ -11,7 +11,7 @@ export const dashboardReportsGuide: DocsGuide = {
   steps: [
     {
       title: "Open Reports",
-      body: "Pro and Max plans include Dashboard → Reports with charts for revenue, bookings, and top services.",
+      body: "Pro, Growth, and Managed Max include Dashboard → Reports with charts for revenue, bookings, and top services.",
       visual: { type: "mockup", mockupId: "dashboard-reports" },
       highlightNav: "Reports",
     },

@@ -11,6 +11,7 @@ import {
   getSubscriptionPrice,
   isPaidPlanAvailable,
   payhereRecurrence,
+  planDisplayName,
   planRank,
   subscriptionItemName,
   type BillingInterval,
@@ -51,7 +52,7 @@ export async function POST(req: NextRequest) {
   const currentPlan = (business.plan ?? "expired") as Plan;
   if (planRank(currentPlan) >= planRank(targetPlan)) {
     return NextResponse.json(
-      { error: `Already on ${targetPlan === "max" ? "Max" : "Pro"} or a higher plan.` },
+      { error: `Already on ${planDisplayName(targetPlan)} or a higher plan.` },
       { status: 409 }
     );
   }
@@ -75,7 +76,7 @@ export async function POST(req: NextRequest) {
   const config = await getPlanConfigAsync();
   if (!isPaidPlanAvailable(targetPlan, config)) {
     return NextResponse.json(
-      { error: `${targetPlan === "max" ? "Max" : "Pro"} is not available for purchase yet.` },
+      { error: `${planDisplayName(targetPlan)} is not available for purchase yet.` },
       { status: 403 },
     );
   }

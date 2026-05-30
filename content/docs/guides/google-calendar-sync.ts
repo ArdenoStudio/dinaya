@@ -11,7 +11,7 @@ export const googleCalendarSyncGuide: DocsGuide = {
   steps: [
     {
       title: "Open Integrations",
-      body: "Go to Dashboard → Settings → Integrations. Google Calendar is available on Pro and Max.",
+      body: "Go to Dashboard → Settings → Integrations. Google Calendar is available on Pro, Growth, and Managed Max.",
       visual: { type: "mockup", mockupId: "dashboard-integrations" },
       highlightNav: "Integrations",
     },

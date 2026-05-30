@@ -54,7 +54,7 @@ const releases = [
         type: "feature" as const,
         icon: "broadcast-pin",
         title: "Plan gating & broadcast messages",
-        desc: "Plan limits are now enforced across the dashboard. Max plan users can send broadcast messages to clients from a new status panel.",
+        desc: "Plan limits are now enforced across the dashboard. Growth plan users can send broadcast messages to clients from a new status panel.",
       },
       {
         type: "improvement" as const,

@@ -22,7 +22,7 @@ export default function TermsPage() {
       <p>
         Every new account starts with a 14-day free trial that requires no credit card. When the trial
         ends, your dashboard becomes read-only and your public booking page pauses until you subscribe
-        to Pro or Max. Pro and Max are paid subscriptions billed monthly or annually through PayHere.
+        to Starter, Pro, or Growth. These paid subscriptions are billed monthly or annually through PayHere.
       </p>
       <ul>
         <li>Subscription charges renew automatically until you cancel.</li>

@@ -26,7 +26,7 @@ export const faqCategories: FaqCategory[] = [
       {
         id: "is-free",
         q: "Is Dinaya really free?",
-        a: "Yes, completely free for every Sri Lankan business. No credit card, no time limit, no hidden fees. We make money from optional Pro features — never from your bookings.",
+        a: "Every new business gets a 14-day free trial with no credit card. After that, choose Starter, Pro, Growth, or Managed Max. Dinaya never takes commission from your bookings.",
         guideSlug: "upgrade-plan",
       },
       {
@@ -199,7 +199,7 @@ export const faqCategories: FaqCategory[] = [
       {
         id: "multi-staff-locations",
         q: "Can I have multiple staff or locations?",
-        a: "Yes. Free includes 1 location, Pro supports up to 3 branches, and Max offers unlimited locations with per-branch AI tools. Staff can be assigned to specific branches, and clients pick a branch when booking online.",
+        a: "Yes. Starter and Pro include 1 branch, Growth supports 3 branches, and Managed Max can be customized. Staff can be assigned to specific branches, and clients pick a branch when booking online.",
         guideSlug: "manage-locations",
       },
       {

@@ -9,7 +9,7 @@ import { Icon } from "@/components/ui/Icon";
 export const metadata: Metadata = {
   title: "About Us — The Booking Tool Sri Lanka Needed | Dinaya",
   description:
-    "Dinaya was built to help Sri Lankan businesses stop losing clients to WhatsApp chaos. Free, simple, and made for how business works here.",
+    "Dinaya was built to help Sri Lankan businesses stop losing clients to WhatsApp chaos. Simple, locally priced, and made for how business works here.",
 };
 
 const values = [
@@ -69,7 +69,7 @@ export default function AboutPage() {
           <FadeDiv>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Dinaya started from a simple frustration: too many great Sri Lankan businesses were
-              losing clients to WhatsApp chaos. We set out to fix that — free, simple, and built
+              losing clients to WhatsApp chaos. We set out to fix that — simple, locally priced, and built
               for how business actually works here.
             </p>
           </FadeDiv>
@@ -108,7 +108,7 @@ export default function AboutPage() {
               <p>
                 We built Dinaya to change that. A booking page your clients can actually use.
                 Payments they can make without a bank transfer. Reminders that go out
-                automatically. No coding, no monthly subscription, no commission on your earnings.
+                automatically. No coding, no USD subscription shock, no commission on your earnings.
               </p>
               <p>
                 We started with Sri Lanka because we know Sri Lanka. The payment gateway, the
@@ -197,14 +197,14 @@ export default function AboutPage() {
                 Ready to go bookable?
               </h2>
               <p className="text-white/70 mb-8 max-w-md mx-auto">
-                Set up your free booking page in five minutes. No card required.
+                Set up your booking page in five minutes. No card required for the trial.
               </p>
               <div className="flex flex-wrap gap-4 justify-center">
                 <Link
                   href="/register"
                   className="inline-flex items-center gap-2 bg-white text-blue-700 px-7 py-3.5 rounded-xl font-semibold shadow-lg hover:bg-white/95 transition-colors"
                 >
-                  Create your page — it&apos;s free
+                  Start free trial
                   <Icon name="arrow-right" className="text-sm" />
                 </Link>
                 <Link

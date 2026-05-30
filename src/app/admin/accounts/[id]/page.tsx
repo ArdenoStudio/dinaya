@@ -30,6 +30,7 @@ import {
   adminSubscriptionHistorySelect,
   safeAdminQuery,
 } from "@/lib/admin-db";
+import { planDisplayName, type Plan } from "@/lib/plan";
 import { formatLkr } from "@/lib/utils";
 import { requirePlatformAdmin } from "@/lib/platform-admin";
 import { AccountModerationPanel } from "./AccountModerationPanel";
@@ -186,12 +187,14 @@ export default async function AdminAccountDetailPage({
                 className={
                   biz.plan === "pro"
                     ? "rounded-full bg-primary/10 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-primary"
+                    : biz.plan === "starter"
+                      ? "rounded-full bg-emerald-500/10 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-emerald-700"
                     : biz.plan === "max"
                       ? "rounded-full bg-amber-500/10 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-amber-700"
                     : "rounded-full bg-muted px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-muted-foreground"
                 }
               >
-                {biz.plan}
+                {planDisplayName(biz.plan as Plan)}
               </span>
               {biz.deletedAt && (
                 <span className="rounded-full bg-rose-500/10 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-rose-700">

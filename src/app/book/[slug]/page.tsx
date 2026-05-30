@@ -100,7 +100,7 @@ export default async function BookingPage({ params, searchParams }: Props) {
     planExpiresAt: business.planExpiresAt,
   });
 
-  // Trial/paid plans keep the public booking page; once it lapses to "expired"
+  // Trial and paid plans keep the public booking page; once it lapses to "expired"
   // the page goes offline until the owner subscribes.
   if (!canUseFeature(effectivePlan, "publicBookingPage")) {
     return (
@@ -117,7 +117,7 @@ export default async function BookingPage({ params, searchParams }: Props) {
 
   await ensureBusinessHasDefaultLocation(business.id);
 
-  const showBranding = effectivePlan === "trial";
+  const showBranding = true;
 
   const [serviceList, staffList, reviewList, ratingData, locationList, staffLocationMap, activeDeals] = await Promise.all([
     db

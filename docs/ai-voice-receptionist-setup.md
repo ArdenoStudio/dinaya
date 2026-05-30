@@ -1,6 +1,6 @@
 # Dinaya AI Voice Receptionist Setup
 
-Dinaya AI Voice Receptionist is a Max-only managed add-on for businesses that want callers to ask questions and book appointments by phone.
+Dinaya AI Voice Receptionist is a Growth-eligible, Managed Max setup add-on for businesses that want callers to ask questions and book appointments by phone.
 
 ## Phone Flow
 
@@ -22,7 +22,7 @@ The first release is a managed setup flow. Dinaya generates the setup pack, then
 
 ## Required Dinaya Setup
 
-1. Upgrade the business to Max.
+1. Upgrade the business to Growth or Managed Max.
 2. Open `Dashboard -> Integrations -> AI Voice Receptionist`.
 3. Save the setup form with:
    - business phone

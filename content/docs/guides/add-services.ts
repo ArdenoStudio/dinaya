@@ -11,7 +11,7 @@ export const addServicesGuide: DocsGuide = {
   steps: [
     {
       title: "Open Services",
-      body: "Go to Dashboard → Services to see your catalog. Free plans include up to 5 services.",
+      body: "Go to Dashboard → Services to see your catalog. Starter includes up to 10 services; Pro and higher are unlimited.",
       visual: { type: "mockup", mockupId: "dashboard-services" },
       highlightNav: "Services",
     },

@@ -7,9 +7,11 @@ import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader"
 import {
   annualSavingsPercent,
   getPlanConfigAsync,
+  isPaidPlan,
   isPaidPlanAvailable,
   planDisplayName,
   resolveEffectivePlan,
+  type PaidPlan,
 } from "@/lib/plan";
 import { UpgradeButton } from "./UpgradeButton";
 import { CancelButton } from "./CancelButton";
@@ -36,10 +38,11 @@ function PlanPricing({
 }: {
   monthlyLkr: number;
   annualLkr: number;
-  targetPlan: "pro" | "max";
+  targetPlan: PaidPlan;
   available: boolean;
 }) {
   const savings = annualSavingsPercent(monthlyLkr, annualLkr);
+  const targetLabel = planDisplayName(targetPlan);
 
   return (
     <>
@@ -67,7 +70,7 @@ function PlanPricing({
         </div>
       ) : (
         <p className="mt-5 text-sm text-neutral-600">
-          {targetPlan === "max" ? "Max" : "Pro"} checkout is not open yet. Contact support for early access.
+          {targetLabel} checkout is not open yet. Contact support for early access.
         </p>
       )}
     </>
@@ -78,6 +81,8 @@ export default async function BillingPage() {
   const { businessId } = await requireOwner();
   const config = await getPlanConfigAsync();
   const {
+    starterMonthlyPriceLkr,
+    starterAnnualPriceLkr,
     proMonthlyPriceLkr,
     proAnnualPriceLkr,
     maxMonthlyPriceLkr,
@@ -107,7 +112,7 @@ export default async function BillingPage() {
     storedPlan: business?.plan,
     planExpiresAt: business?.planExpiresAt,
   });
-  const isPaid = plan === "pro" || plan === "max";
+  const isPaid = isPaidPlan(plan);
 
   const trialDaysLeft =
     plan === "trial" ? trialDaysLeftFrom(business?.planExpiresAt) : null;
@@ -160,8 +165,8 @@ export default async function BillingPage() {
               : "Your free trial ends today"}
           </h2>
           <p className="mt-1 text-sm text-blue-900/80">
-            You have full access during the trial. Subscribe before it ends to keep your booking
-            page online and avoid any interruption for your clients.
+            Your trial includes Starter and Pro tools, with Growth previews kept limited.
+            Subscribe before it ends to keep your booking page online without interruption.
           </p>
         </section>
       )}
@@ -178,10 +183,23 @@ export default async function BillingPage() {
 
       {(plan === "trial" || plan === "expired") && (
         <>
+          <section className="rounded-xl border border-neutral-200 bg-white p-6">
+            <h2 className="text-lg font-semibold">Subscribe to Starter</h2>
+            <p className="mt-1 text-sm text-neutral-700">
+              Public booking page, PayHere payments, unlimited bookings, 1 branch, 2 staff, and 10 services.
+            </p>
+            <PlanPricing
+              monthlyLkr={starterMonthlyPriceLkr}
+              annualLkr={starterAnnualPriceLkr}
+              targetPlan="starter"
+              available={isPaidPlanAvailable("starter", config)}
+            />
+          </section>
+
           <section className="rounded-xl border border-blue-200 bg-blue-50/50 p-6">
             <h2 className="text-lg font-semibold">Upgrade to Pro</h2>
             <p className="mt-1 text-sm text-neutral-700">
-              Up to 3 branches, multi-staff calendar, branding control, advanced reports, and priority WhatsApp support.
+              Main plan for serious small businesses: 1 branch, 5 staff, reviews, reports, Google Calendar, and reminder credits.
             </p>
             <PlanPricing
               monthlyLkr={proMonthlyPriceLkr}
@@ -192,9 +210,9 @@ export default async function BillingPage() {
           </section>
 
           <section className="rounded-xl border border-amber-200 bg-amber-50/50 p-6">
-            <h2 className="text-lg font-semibold">Upgrade to Max</h2>
+            <h2 className="text-lg font-semibold">Upgrade to Growth</h2>
             <p className="mt-1 text-sm text-neutral-700">
-              Everything in Pro, all seven AI growth workflows, unlimited branch locations, and AI Voice Receptionist setup eligibility.
+              Automation and AI growth: 3 branches, 15 staff, custom domain, branding removal, and AI workflows.
             </p>
             <PlanPricing
               monthlyLkr={maxMonthlyPriceLkr}
@@ -209,11 +227,41 @@ export default async function BillingPage() {
         </>
       )}
 
+      {plan === "starter" && (
+        <>
+          <section className="rounded-xl border border-blue-200 bg-blue-50/50 p-6">
+            <h2 className="text-lg font-semibold">Upgrade to Pro</h2>
+            <p className="mt-1 text-sm text-neutral-700">
+              Add reviews, reports, Google Calendar sync, automations, and reminder credits for a growing team.
+            </p>
+            <PlanPricing
+              monthlyLkr={proMonthlyPriceLkr}
+              annualLkr={proAnnualPriceLkr}
+              targetPlan="pro"
+              available={isPaidPlanAvailable("pro", config)}
+            />
+          </section>
+
+          <section className="rounded-xl border border-amber-200 bg-amber-50/50 p-6">
+            <h2 className="text-lg font-semibold">Upgrade to Growth</h2>
+            <p className="mt-1 text-sm text-neutral-700">
+              Add AI workflows, custom domain, branding removal, and 3-branch scale.
+            </p>
+            <PlanPricing
+              monthlyLkr={maxMonthlyPriceLkr}
+              annualLkr={maxAnnualPriceLkr}
+              targetPlan="max"
+              available={isPaidPlanAvailable("max", config)}
+            />
+          </section>
+        </>
+      )}
+
       {plan === "pro" && (
         <section className="rounded-xl border border-amber-200 bg-amber-50/50 p-6">
-          <h2 className="text-lg font-semibold">Upgrade to Max</h2>
+          <h2 className="text-lg font-semibold">Upgrade to Growth</h2>
           <p className="mt-1 text-sm text-neutral-700">
-            Unlock all seven AI growth workflows, remove the 3-branch limit, and add AI Voice Receptionist setup.
+            Unlock AI growth workflows, custom domain, branding removal, 3 branches, and AI Voice Receptionist setup eligibility.
           </p>
           <PlanPricing
             monthlyLkr={maxMonthlyPriceLkr}

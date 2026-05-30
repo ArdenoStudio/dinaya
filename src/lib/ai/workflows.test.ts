@@ -3,9 +3,10 @@ import { AI_FEATURES } from "@/lib/plan";
 import { canRunAiWorkflow, cooldownHasElapsed } from "./workflows";
 
 describe("AI workflow eligibility", () => {
-  it("allows every AI workflow on Trial and Max but not Pro or Expired", () => {
+  it("allows every AI workflow on Growth but not Trial, Starter, Pro, or Expired", () => {
     for (const feature of AI_FEATURES) {
-      expect(canRunAiWorkflow("trial", feature)).toBe(true);
+      expect(canRunAiWorkflow("trial", feature)).toBe(false);
+      expect(canRunAiWorkflow("starter", feature)).toBe(false);
       expect(canRunAiWorkflow("pro", feature)).toBe(false);
       expect(canRunAiWorkflow("max", feature)).toBe(true);
       expect(canRunAiWorkflow("expired", feature)).toBe(false);

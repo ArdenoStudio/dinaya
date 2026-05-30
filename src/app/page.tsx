@@ -86,7 +86,7 @@ export default function LandingPage() {
                 New
               </span>
               <span className="flex items-center gap-1 truncate">
-                Free for Sri Lankan businesses
+                14-day free trial for Sri Lankan businesses
                 <Icon name="arrow-up-right" className="text-xs shrink-0 text-gray-700" />
               </span>
             </a>
@@ -117,7 +117,7 @@ export default function LandingPage() {
             startOnView={false}
             className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto text-pretty"
           >
-            Give your salon, clinic, or tuition class a free booking page. Clients pick a time, pay online, and you get notified.
+            Give your salon, clinic, or tuition class a booking page clients can use immediately. They pick a time, pay online, and you get notified.
           </TextAnimate>
 
           <div className="flex flex-wrap items-center justify-center gap-3">
@@ -201,7 +201,7 @@ export default function LandingPage() {
               ))}
             </ul>
             <div className="mt-7">
-              <CTAPrimaryButton href="/register" size="md">Get started free</CTAPrimaryButton>
+              <CTAPrimaryButton href="/register" size="md">Start free trial</CTAPrimaryButton>
             </div>
           </div>
         </div>

@@ -1350,9 +1350,12 @@ type BillingSubscription = {
   id: string;
   payhereOrderId: string;
   payhereSubscriptionId: string | null;
-  plan: "free" | "pro" | "max";
+  plan: "trial" | "starter" | "pro" | "max" | "expired";
   status: "pending" | "active" | "past_due" | "cancelled" | "ended";
 };
+
+type DesktopPlan = "trial" | "starter" | "pro" | "max" | "expired";
+type DesktopPaidPlan = "starter" | "pro" | "max";
 
 type DesktopBillingPayload = {
   actions: {
@@ -1361,19 +1364,20 @@ type DesktopBillingPayload = {
     managePath: string;
     upgradeMaxPath: string;
     upgradeProPath: string;
+    upgradeStarterPath: string;
   };
   business: {
-    effectivePlan: "free" | "pro" | "max";
+    effectivePlan: DesktopPlan;
     id: string;
     name: string;
     planExpiresAt: string | null;
     planLabel: string;
     slug: string | null;
-    storedPlan: "free" | "pro" | "max";
+    storedPlan: DesktopPlan;
   };
   currentSubscription: BillingSubscription | null;
   features: Record<string, boolean>;
-  pricing: Record<"pro" | "max", {
+  pricing: Record<DesktopPaidPlan, {
     annualLkr: number;
     annualSavingsPercent: number;
     available: boolean;
@@ -10881,8 +10885,19 @@ function BillingView({
   onRefresh: () => void;
 }) {
   const current = data?.currentSubscription ?? null;
-  const currentPlan = data?.business.effectivePlan ?? "free";
-  const recommendedPlan = currentPlan === "free" ? "pro" : currentPlan === "pro" ? "max" : null;
+  const currentPlan = data?.business.effectivePlan ?? "trial";
+  const recommendedPlan: DesktopPaidPlan | null =
+    currentPlan === "pro" ? "max" : currentPlan === "max" ? null : "pro";
+  const planLabels: Record<DesktopPaidPlan, string> = {
+    starter: "Starter",
+    pro: "Pro",
+    max: "Growth",
+  };
+  const planDescriptions: Record<DesktopPaidPlan, string> = {
+    starter: "Public booking page, PayHere payments, 1 branch, 2 staff, and 10 services.",
+    pro: "Reviews, reports, reminders, Google Calendar, automations, and team controls.",
+    max: "AI growth workflows, custom domain, branding removal, and 3-branch scale.",
+  };
 
   return (
     <section className="billing-view">
@@ -10972,7 +10987,7 @@ function BillingView({
       </div>
 
       <div className="billing-grid">
-        {(["pro", "max"] as const).map((planKey) => {
+        {(["starter", "pro", "max"] as const).map((planKey) => {
           const pricing = data?.pricing[planKey];
           const isCurrent = currentPlan === planKey;
           const isRecommended = recommendedPlan === planKey;
@@ -10980,8 +10995,8 @@ function BillingView({
             <section key={planKey} className={isRecommended ? "billing-card plan-card recommended glass-surface" : "billing-card plan-card glass-surface"}>
               <div>
                 <p className="eyebrow">{isCurrent ? "Current plan" : isRecommended ? "Recommended" : "Available plan"}</p>
-                <h2>{planKey === "pro" ? "Pro" : "Max"}</h2>
-                <p>{planKey === "pro" ? "Reports, automations, broadcasts, deals, and branch controls." : "All AI growth workflows, voice receptionist eligibility, and unlimited locations."}</p>
+                <h2>{planLabels[planKey]}</h2>
+                <p>{planDescriptions[planKey]}</p>
               </div>
               <div className="plan-price">
                 <strong>{pricing ? formatMoneyLkr(pricing.monthlyLkr) : "-"}</strong>
@@ -10994,9 +11009,9 @@ function BillingView({
               <button
                 className={isRecommended ? "primary" : ""}
                 disabled={!pricing?.available}
-                onClick={() => onOpenPath(planKey === "pro" ? data?.actions.upgradeProPath ?? "/dashboard/billing" : data?.actions.upgradeMaxPath ?? "/dashboard/billing")}
+                onClick={() => onOpenPath(planKey === "starter" ? data?.actions.upgradeStarterPath ?? "/dashboard/billing" : planKey === "pro" ? data?.actions.upgradeProPath ?? "/dashboard/billing" : data?.actions.upgradeMaxPath ?? "/dashboard/billing")}
               >
-                {isCurrent ? "Manage current plan" : pricing?.available ? `Open ${planKey === "pro" ? "Pro" : "Max"} checkout` : "Contact support"}
+                {isCurrent ? "Manage current plan" : pricing?.available ? `Open ${planLabels[planKey]} checkout` : "Contact support"}
               </button>
             </section>
           );

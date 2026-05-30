@@ -25,8 +25,8 @@ export const dinayaDealsGuide: DocsGuide = {
       highlightNav: "Reports",
     },
     {
-      title: "Smart suggestions (Max)",
-      body: "Max plans receive demand-aware suggestions when Dinaya finds quiet slots from your bookings, history, and connected Google Calendar busy time. Publish in one click or customize before sending.",
+      title: "Smart suggestions (Growth)",
+      body: "Growth and Managed Max plans receive demand-aware suggestions when Dinaya finds quiet slots from your bookings, history, and connected Google Calendar busy time. Publish in one click or customize before sending.",
     },
   ],
 };

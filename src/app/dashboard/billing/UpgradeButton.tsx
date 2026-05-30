@@ -52,7 +52,8 @@ export function UpgradeButton({
     }
   }
 
-  const tier = targetPlan === "max" ? "Max" : "Pro";
+  const tier =
+    targetPlan === "max" ? "Growth" : targetPlan === "pro" ? "Pro" : "Starter";
   const defaultLabel =
     interval === "annual" ? `${tier} — annual` : `${tier} — monthly`;
 

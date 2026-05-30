@@ -105,7 +105,7 @@ export async function PATCH(req: NextRequest) {
     } catch (error) {
       if (error instanceof PlanRequiredError) {
         return NextResponse.json(
-          { error: "Remove Dinaya branding is available on Pro." },
+          { error: "Remove Dinaya branding is available on Growth." },
           { status: 402 },
         );
       }

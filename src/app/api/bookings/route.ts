@@ -125,7 +125,7 @@ export async function POST(req: NextRequest) {
   if (isApiBooking && requestedSource === "voice_agent") {
     const plan = await getBusinessPlan(businessId);
     if (!canUseFeature(plan, "aiVoiceReceptionist")) {
-      return NextResponse.json({ error: "AI Voice Receptionist requires the Max plan." }, { status: 402 });
+      return NextResponse.json({ error: "AI Voice Receptionist requires Growth or Managed Max." }, { status: 402 });
     }
   }
   const attribution = isOwnerBooking || isApiBooking

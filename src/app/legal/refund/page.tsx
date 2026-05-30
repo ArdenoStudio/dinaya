@@ -8,7 +8,7 @@ export default function RefundPage() {
       <h2>1. Overview</h2>
       <p>
         This policy covers two types of payments on Dinaya: booking payments between clients and
-        service businesses, and subscription payments for Dinaya Pro and Max plans between
+        service businesses, and subscription payments for Dinaya Starter, Pro, and Growth plans between
         businesses and Ardeno Studio.
       </p>
 
@@ -42,15 +42,15 @@ export default function RefundPage() {
         via PayHere. Processing time is typically 5–10 business days depending on your bank.
       </p>
 
-      <h2>5. Dinaya Pro &amp; Max Subscriptions</h2>
+      <h2>5. Dinaya Subscriptions</h2>
       <p>
-        Pro and Max are paid subscriptions billed through PayHere on a monthly or annual basis.
+        Starter, Pro, and Growth are paid subscriptions billed through PayHere on a monthly or annual basis.
         These charges are between your business and Ardeno Studio, separate from booking payments
         you collect from your clients.
       </p>
       <ul>
         <li>
-          <strong>14-day refund window:</strong> If you are charged for a Pro or Max plan and have
+          <strong>14-day refund window:</strong> If you are charged for a paid Dinaya plan and have
           not used the paid features meaningfully, you may request a refund of the unused portion
           within 14 days of the charge.
         </li>

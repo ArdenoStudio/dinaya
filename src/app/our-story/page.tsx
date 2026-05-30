@@ -104,7 +104,7 @@ export default function OurStoryPage() {
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               We watched salon owners, clinic managers, and tuition teachers spend hours every
               day just coordinating bookings over DMs. So we built the tool Sri Lanka was missing
-              — simple, local, and free to start.
+              — simple, local, and free to try.
             </p>
           </FadeDiv>
         </FadeContainer>
@@ -297,14 +297,14 @@ export default function OurStoryPage() {
                 Part of the story starts with you.
               </h2>
               <p className="text-white/70 mb-8 max-w-md mx-auto">
-                Create your free booking page in five minutes.
+                Create your booking page in five minutes. No card required for the trial.
               </p>
               <div className="flex flex-wrap gap-4 justify-center">
                 <Link
                   href="/register"
                   className="inline-flex items-center gap-2 bg-white text-blue-700 px-7 py-3.5 rounded-xl font-semibold shadow-lg hover:bg-white/95 transition-colors"
                 >
-                  Create your page — it&apos;s free
+                  Start free trial
                   <Icon name="arrow-right" className="text-sm" />
                 </Link>
                 <Link

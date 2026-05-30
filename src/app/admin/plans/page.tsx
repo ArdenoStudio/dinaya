@@ -6,6 +6,7 @@ import { businesses, subscriptions } from "@/db/schema";
 import {
   ENFORCED_FEATURES,
   getPlanConfigAsync,
+  planDisplayName,
   type Plan,
   type PlanFeature,
 } from "@/lib/plan";
@@ -55,6 +56,7 @@ export default async function AdminPlansPage() {
 
   const [
     [{ trialCount }],
+    [{ starterCount }],
     [{ proCount }],
     [{ maxCount }],
     [{ activeSubCount }],
@@ -63,6 +65,10 @@ export default async function AdminPlansPage() {
     safeAdminQuery(
       db.select({ trialCount: count() }).from(businesses).where(eq(businesses.plan, "trial")),
       [{ trialCount: 0 }] as { trialCount: number }[],
+    ),
+    safeAdminQuery(
+      db.select({ starterCount: count() }).from(businesses).where(eq(businesses.plan, "starter")),
+      [{ starterCount: 0 }] as { starterCount: number }[],
     ),
     safeAdminQuery(
       db.select({ proCount: count() }).from(businesses).where(eq(businesses.plan, "pro")),
@@ -85,8 +91,9 @@ export default async function AdminPlansPage() {
     ),
   ]);
 
-  const total = Number(trialCount) + Number(proCount) + Number(maxCount);
+  const total = Number(trialCount) + Number(starterCount) + Number(proCount) + Number(maxCount);
   const trialShare = total > 0 ? Math.round((Number(trialCount) / total) * 100) : 0;
+  const starterShare = total > 0 ? Math.round((Number(starterCount) / total) * 100) : 0;
   const proShare = total > 0 ? Math.round((Number(proCount) / total) * 100) : 0;
 
   return (
@@ -124,7 +131,7 @@ export default async function AdminPlansPage() {
             <p className="text-xs text-muted-foreground">Total accounts</p>
             <p className="mt-1 text-2xl font-bold tracking-tight">{total}</p>
             <p className="mt-1 text-xs text-muted-foreground">
-              {Number(trialCount)} Trial · {Number(proCount)} Pro
+              {Number(trialCount)} Trial · {Number(starterCount)} Starter · {Number(proCount)} Pro
             </p>
           </div>
         </div>
@@ -134,7 +141,7 @@ export default async function AdminPlansPage() {
             <p className="text-xs text-muted-foreground">Active subscriptions</p>
             <p className="mt-1 text-2xl font-bold tracking-tight">{Number(activeSubCount)}</p>
             <p className="mt-1 text-xs text-muted-foreground">
-              Pro & Max · monthly or annual
+              Starter, Pro & Growth · monthly or annual
             </p>
           </div>
         </div>
@@ -164,6 +171,54 @@ export default async function AdminPlansPage() {
       </div>
 
       <form action={savePlans} className="space-y-6">
+        <div className="rounded-xl border bg-white p-5">
+          <h2 className="mb-4 font-semibold">Starter plan billing</h2>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div>
+              <label htmlFor="starterMonthlyPriceLkr" className="block text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                Monthly price (LKR)
+              </label>
+              <input
+                id="starterMonthlyPriceLkr"
+                name="starterMonthlyPriceLkr"
+                type="number"
+                min={0}
+                step={10}
+                defaultValue={config.starterMonthlyPriceLkr}
+                className="mt-1 h-10 w-full rounded-md border bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
+              />
+            </div>
+            <div>
+              <label htmlFor="starterAnnualPriceLkr" className="block text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                Annual price (LKR)
+              </label>
+              <input
+                id="starterAnnualPriceLkr"
+                name="starterAnnualPriceLkr"
+                type="number"
+                min={0}
+                step={10}
+                defaultValue={config.starterAnnualPriceLkr}
+                className="mt-1 h-10 w-full rounded-md border bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <span className="block text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                Launch status
+              </span>
+              <label className="mt-1 flex h-10 items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  name="starterLaunched"
+                  defaultChecked={config.starterLaunched}
+                  className="size-4 rounded border-muted-foreground/30 text-primary focus:ring-primary"
+                />
+                Starter is live (billed at the price above)
+              </label>
+            </div>
+          </div>
+        </div>
+
         <div className="rounded-xl border bg-white p-5">
           <h2 className="mb-4 font-semibold">Pro plan billing</h2>
           <div className="grid gap-4 sm:grid-cols-3">
@@ -216,7 +271,7 @@ export default async function AdminPlansPage() {
         </div>
 
         <div className="rounded-xl border bg-white p-5">
-          <h2 className="mb-4 font-semibold">Max plan billing</h2>
+          <h2 className="mb-4 font-semibold">Growth plan billing</h2>
           <div className="grid gap-4 sm:grid-cols-3">
             <div>
               <label htmlFor="maxMonthlyPriceLkr" className="block text-xs font-medium uppercase tracking-wider text-muted-foreground">
@@ -257,33 +312,37 @@ export default async function AdminPlansPage() {
                   defaultChecked={config.maxLaunched}
                   className="size-4 rounded border-muted-foreground/30 text-primary focus:ring-primary"
                 />
-                Max is live (billed at the price above)
+                Growth is live (billed at the price above)
               </label>
             </div>
           </div>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-3 md:grid-cols-2">
-          {(["trial", "pro", "max"] as Plan[]).map((planKey) => {
+          {(["trial", "starter", "pro", "max"] as Plan[]).map((planKey) => {
             const entitlements = config.plans[planKey];
-            const accent = planKey === "max" ? "border-amber-400/40 ring-1 ring-amber-400/15" : planKey === "pro" ? "border-primary/40 ring-1 ring-primary/15" : "border-muted-foreground/20";
-            const tile = planKey === "max" ? "bg-amber-600 text-white" : planKey === "pro" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground";
+            const accent = planKey === "max" ? "border-amber-400/40 ring-1 ring-amber-400/15" : planKey === "pro" ? "border-primary/40 ring-1 ring-primary/15" : planKey === "starter" ? "border-emerald-400/40 ring-1 ring-emerald-400/15" : "border-muted-foreground/20";
+            const tile = planKey === "max" ? "bg-amber-600 text-white" : planKey === "pro" ? "bg-primary text-primary-foreground" : planKey === "starter" ? "bg-emerald-600 text-white" : "bg-muted text-muted-foreground";
             const share = planKey === "max"
               ? (total > 0 ? Math.round((Number(maxCount) / total) * 100) : 0)
               : planKey === "pro"
                 ? proShare
+                : planKey === "starter"
+                ? starterShare
                 : trialShare;
             const countNum = planKey === "max"
               ? Number(maxCount)
               : planKey === "pro"
                 ? Number(proCount)
+                : planKey === "starter"
+                ? Number(starterCount)
                 : Number(trialCount);
             return (
               <fieldset key={planKey} className={`overflow-hidden rounded-2xl border bg-white ${accent}`}>
                 <div className="border-b px-6 py-5">
                   <div className="flex items-center justify-between">
                     <legend className={`inline-block rounded-full px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider ${tile}`}>
-                      {planKey === "max" ? "Max" : planKey === "pro" ? "Pro" : "Free trial"}
+                      {planDisplayName(planKey)}
                     </legend>
                     <span className="text-xs text-muted-foreground">
                       {countNum} accounts · {share}% of base

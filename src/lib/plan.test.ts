@@ -4,16 +4,17 @@ import {
   EXPIRED_ENTITLEMENTS,
   MAX_ENTITLEMENTS,
   PRO_ENTITLEMENTS,
+  STARTER_ENTITLEMENTS,
   TRIAL_ENTITLEMENTS,
   canUseFeature,
   minimumPlanForFeature,
 } from "./plan";
 
 describe("plan entitlements", () => {
-  it("gives the trial Max-level access with a single location", () => {
+  it("gives the trial Pro-level access with a single location", () => {
     expect(TRIAL_ENTITLEMENTS.limits).toMatchObject({
       bookingsPerMonth: null,
-      staff: null,
+      staff: 5,
       services: null,
       locations: 1,
     });
@@ -36,14 +37,17 @@ describe("plan entitlements", () => {
     }
   });
 
-  it("sets branch limits by plan tier", () => {
-    expect(PRO_ENTITLEMENTS.limits.locations).toBe(3);
-    expect(MAX_ENTITLEMENTS.limits.locations).toBeNull();
+  it("sets limits by plan tier", () => {
+    expect(STARTER_ENTITLEMENTS.limits).toMatchObject({ staff: 2, services: 10, locations: 1 });
+    expect(PRO_ENTITLEMENTS.limits).toMatchObject({ staff: 5, services: null, locations: 1 });
+    expect(MAX_ENTITLEMENTS.limits).toMatchObject({ staff: 15, services: null, locations: 3 });
   });
 
-  it("allows payments and reports on trial and paid plans but not when expired", () => {
+  it("allows payments on Starter and reports on Pro or higher", () => {
     expect(canUseFeature("trial", "payments")).toBe(true);
     expect(canUseFeature("trial", "reports")).toBe(true);
+    expect(canUseFeature("starter", "payments")).toBe(true);
+    expect(canUseFeature("starter", "reports")).toBe(false);
     expect(canUseFeature("pro", "payments")).toBe(true);
     expect(canUseFeature("pro", "reports")).toBe(true);
     expect(canUseFeature("max", "payments")).toBe(true);
@@ -52,14 +56,16 @@ describe("plan entitlements", () => {
     expect(canUseFeature("expired", "reports")).toBe(false);
   });
 
-  it("allows AI growth features on Trial and Max but not Pro or Expired", () => {
+  it("allows AI growth features on Growth but not Trial, Starter, Pro, or Expired", () => {
     for (const feature of AI_FEATURES) {
       expect(minimumPlanForFeature(feature)).toBe("max");
-      expect(canUseFeature("trial", feature)).toBe(true);
+      expect(canUseFeature("trial", feature)).toBe(false);
+      expect(canUseFeature("starter", feature)).toBe(false);
       expect(canUseFeature("pro", feature)).toBe(false);
       expect(canUseFeature("max", feature)).toBe(true);
       expect(canUseFeature("expired", feature)).toBe(false);
-      expect(TRIAL_ENTITLEMENTS.features[feature]).toBe(true);
+      expect(TRIAL_ENTITLEMENTS.features[feature]).toBe(false);
+      expect(STARTER_ENTITLEMENTS.features[feature]).toBe(false);
       expect(PRO_ENTITLEMENTS.features[feature]).toBe(false);
       expect(MAX_ENTITLEMENTS.features[feature]).toBe(true);
     }
@@ -68,6 +74,7 @@ describe("plan entitlements", () => {
   it("reserves AI voice receptionist for max", () => {
     expect(minimumPlanForFeature("aiVoiceReceptionist")).toBe("max");
     expect(canUseFeature("trial", "aiVoiceReceptionist")).toBe(false);
+    expect(canUseFeature("starter", "aiVoiceReceptionist")).toBe(false);
     expect(canUseFeature("pro", "aiVoiceReceptionist")).toBe(false);
     expect(canUseFeature("max", "aiVoiceReceptionist")).toBe(true);
     expect(TRIAL_ENTITLEMENTS.features.aiVoiceReceptionist).toBe(false);
@@ -77,20 +84,24 @@ describe("plan entitlements", () => {
 
   it("keeps the public booking page on trial and paid plans, off when expired", () => {
     expect(canUseFeature("trial", "publicBookingPage")).toBe(true);
+    expect(canUseFeature("starter", "publicBookingPage")).toBe(true);
     expect(canUseFeature("pro", "publicBookingPage")).toBe(true);
     expect(canUseFeature("max", "publicBookingPage")).toBe(true);
     expect(canUseFeature("expired", "publicBookingPage")).toBe(false);
   });
 
-  it("offers booking page customization on trial, pro and max", () => {
-    expect(canUseFeature("trial", "publicBookingPageCustomization")).toBe(true);
-    expect(canUseFeature("pro", "publicBookingPageCustomization")).toBe(true);
+  it("reserves booking page customization for Growth", () => {
+    expect(minimumPlanForFeature("publicBookingPageCustomization")).toBe("max");
+    expect(canUseFeature("trial", "publicBookingPageCustomization")).toBe(false);
+    expect(canUseFeature("starter", "publicBookingPageCustomization")).toBe(false);
+    expect(canUseFeature("pro", "publicBookingPageCustomization")).toBe(false);
     expect(canUseFeature("max", "publicBookingPageCustomization")).toBe(true);
   });
 
-  it("reserves AI review replies for Max (and trial preview)", () => {
+  it("reserves AI review replies for Growth", () => {
     expect(minimumPlanForFeature("reviewReplies")).toBe("max");
-    expect(canUseFeature("trial", "reviewReplies")).toBe(true);
+    expect(canUseFeature("trial", "reviewReplies")).toBe(false);
+    expect(canUseFeature("starter", "reviewReplies")).toBe(false);
     expect(canUseFeature("pro", "reviewReplies")).toBe(false);
     expect(canUseFeature("max", "reviewReplies")).toBe(true);
   });
@@ -98,6 +109,7 @@ describe("plan entitlements", () => {
   it("reserves broadcasts for pro and max (and trial preview)", () => {
     expect(minimumPlanForFeature("broadcasts")).toBe("pro");
     expect(canUseFeature("trial", "broadcasts")).toBe(true);
+    expect(canUseFeature("starter", "broadcasts")).toBe(false);
     expect(canUseFeature("pro", "broadcasts")).toBe(true);
     expect(canUseFeature("max", "broadcasts")).toBe(true);
   });
@@ -105,13 +117,15 @@ describe("plan entitlements", () => {
   it("reserves deals for pro and max (and trial preview)", () => {
     expect(minimumPlanForFeature("deals")).toBe("pro");
     expect(canUseFeature("trial", "deals")).toBe(true);
+    expect(canUseFeature("starter", "deals")).toBe(false);
     expect(canUseFeature("pro", "deals")).toBe(true);
     expect(canUseFeature("max", "deals")).toBe(true);
   });
 
-  it("reserves smart deal suggestions for max (and trial preview)", () => {
+  it("reserves smart deal suggestions for Growth", () => {
     expect(minimumPlanForFeature("aiDealSuggestions")).toBe("max");
-    expect(canUseFeature("trial", "aiDealSuggestions")).toBe(true);
+    expect(canUseFeature("trial", "aiDealSuggestions")).toBe(false);
+    expect(canUseFeature("starter", "aiDealSuggestions")).toBe(false);
     expect(canUseFeature("pro", "aiDealSuggestions")).toBe(false);
     expect(canUseFeature("max", "aiDealSuggestions")).toBe(true);
   });
@@ -120,16 +134,19 @@ describe("plan entitlements", () => {
 describe("subscription pricing", () => {
   it("returns monthly and annual prices from config", async () => {
     const { getSubscriptionPrice, DEFAULT_PLAN_CONFIG } = await import("./plan");
-    expect(getSubscriptionPrice("pro", "monthly", DEFAULT_PLAN_CONFIG)).toBe(1490);
-    expect(getSubscriptionPrice("pro", "annual", DEFAULT_PLAN_CONFIG)).toBe(14300);
-    expect(getSubscriptionPrice("max", "monthly", DEFAULT_PLAN_CONFIG)).toBe(2490);
-    expect(getSubscriptionPrice("max", "annual", DEFAULT_PLAN_CONFIG)).toBe(23900);
+    expect(getSubscriptionPrice("starter", "monthly", DEFAULT_PLAN_CONFIG)).toBe(1990);
+    expect(getSubscriptionPrice("starter", "annual", DEFAULT_PLAN_CONFIG)).toBe(19900);
+    expect(getSubscriptionPrice("pro", "monthly", DEFAULT_PLAN_CONFIG)).toBe(3990);
+    expect(getSubscriptionPrice("pro", "annual", DEFAULT_PLAN_CONFIG)).toBe(39900);
+    expect(getSubscriptionPrice("max", "monthly", DEFAULT_PLAN_CONFIG)).toBe(6900);
+    expect(getSubscriptionPrice("max", "annual", DEFAULT_PLAN_CONFIG)).toBe(69000);
   });
 
   it("calculates annual savings percent", async () => {
     const { annualSavingsPercent } = await import("./plan");
-    expect(annualSavingsPercent(1490, 14300)).toBe(20);
-    expect(annualSavingsPercent(2490, 23900)).toBe(20);
+    expect(annualSavingsPercent(1990, 19900)).toBe(17);
+    expect(annualSavingsPercent(3990, 39900)).toBe(17);
+    expect(annualSavingsPercent(6900, 69000)).toBe(17);
   });
 });
 

@@ -11,7 +11,7 @@ export const manageLocationsGuide: DocsGuide = {
   steps: [
     {
       title: "Open Locations",
-      body: "Free includes 1 location. Pro supports 3; Max is unlimited. Go to Dashboard → Locations.",
+      body: "Starter and Pro include 1 branch. Growth supports 3 branches; Managed Max can be customized. Go to Dashboard → Locations.",
       visual: { type: "mockup", mockupId: "dashboard-locations" },
       highlightNav: "Locations",
     },
@@ -26,8 +26,8 @@ export const manageLocationsGuide: DocsGuide = {
       visual: { type: "mockup", mockupId: "booking-service" },
     },
     {
-      title: "Per-branch AI (Max)",
-      body: "On Max, configure AI Hub settings separately per branch.",
+      title: "Per-branch AI (Growth)",
+      body: "On Growth and Managed Max, configure AI Hub settings separately per branch.",
       visual: { type: "mockup", mockupId: "dashboard-locations" },
     },
   ],

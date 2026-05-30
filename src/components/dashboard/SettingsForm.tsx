@@ -412,7 +412,7 @@ export default function SettingsForm({ business }: Props) {
             <div className="rounded-lg border border-violet-200 bg-violet-50/70 p-4 text-sm">
               <p className="font-medium text-violet-950">Remove Dinaya branding</p>
               <p className="mt-1 text-violet-900/75">
-                Upgrade to Pro to hide the Dinaya footer and use a custom domain on your booking page.
+                Upgrade to Growth to hide the Dinaya footer and use a custom domain on your booking page.
               </p>
               <Link
                 href="/dashboard/billing"

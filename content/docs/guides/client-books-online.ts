@@ -11,7 +11,7 @@ export const clientBooksOnlineGuide: DocsGuide = {
   steps: [
     {
       title: "Open your booking page",
-      body: "Clients visit yourname.dinaya.lk (or your custom domain on Pro). No account or app download is required.",
+      body: "Clients visit yourname.dinaya.lk (or your custom domain on Growth). No account or app download is required.",
       visual: { type: "mockup", mockupId: "booking-service" },
     },
     {

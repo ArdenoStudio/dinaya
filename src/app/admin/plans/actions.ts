@@ -40,6 +40,14 @@ export async function savePlans(formData: FormData): Promise<void> {
   const admin = await requirePlatformAdminFromSession(session);
   const current = await getPlanConfigAsync();
 
+  const starterMonthlyPriceLkr = Math.max(
+    0,
+    Math.floor(Number(formData.get("starterMonthlyPriceLkr") ?? current.starterMonthlyPriceLkr))
+  );
+  const starterAnnualPriceLkr = Math.max(
+    0,
+    Math.floor(Number(formData.get("starterAnnualPriceLkr") ?? current.starterAnnualPriceLkr))
+  );
   const proMonthlyPriceLkr = Math.max(
     0,
     Math.floor(Number(formData.get("proMonthlyPriceLkr") ?? current.proMonthlyPriceLkr))
@@ -56,18 +64,23 @@ export async function savePlans(formData: FormData): Promise<void> {
     0,
     Math.floor(Number(formData.get("maxAnnualPriceLkr") ?? current.maxAnnualPriceLkr))
   );
+  const starterLaunched = formData.get("starterLaunched") === "on";
   const proLaunched = formData.get("proLaunched") === "on";
   const maxLaunched = formData.get("maxLaunched") === "on";
 
   const next: PlanConfig = {
+    starterMonthlyPriceLkr,
+    starterAnnualPriceLkr,
     proMonthlyPriceLkr,
     proAnnualPriceLkr,
     maxMonthlyPriceLkr,
     maxAnnualPriceLkr,
+    starterLaunched,
     proLaunched,
     maxLaunched,
     plans: {
       trial: buildPlanEntitlements(formData, "trial"),
+      starter: buildPlanEntitlements(formData, "starter"),
       pro: buildPlanEntitlements(formData, "pro"),
       max: buildPlanEntitlements(formData, "max"),
       expired: current.plans.expired,
@@ -82,10 +95,13 @@ export async function savePlans(formData: FormData): Promise<void> {
     actorEmail: admin.email,
     action: "plans.updated",
     meta: {
+      starterMonthlyPriceLkr,
+      starterAnnualPriceLkr,
       proMonthlyPriceLkr,
       proAnnualPriceLkr,
       maxMonthlyPriceLkr,
       maxAnnualPriceLkr,
+      starterLaunched,
       proLaunched,
       maxLaunched,
     },

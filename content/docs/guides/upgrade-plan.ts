@@ -3,7 +3,7 @@ import type { DocsGuide } from "../types";
 export const upgradePlanGuide: DocsGuide = {
   slug: "upgrade-plan",
   title: "Upgrade your plan",
-  description: "Move from Free to Pro or Max for advanced features.",
+  description: "Move from trial or Starter to Pro, Growth, or Managed Max.",
   category: "team",
   estimatedMinutes: 3,
   relatedGuides: ["ai-hub-overview", "manage-locations"],
@@ -11,12 +11,12 @@ export const upgradePlanGuide: DocsGuide = {
   steps: [
     {
       title: "Compare plans",
-      body: "Visit dinaya.lk/pricing to see what is included in Free, Pro, and Max — AI, multi-location, custom domain, and more.",
+      body: "Visit dinaya.lk/pricing to compare Starter, Pro, Growth, and Managed Max — reminders, AI, branches, custom domain, and setup help.",
       visual: { type: "mockup", mockupId: "dashboard-billing" },
     },
     {
       title: "Open Billing",
-      body: "In your dashboard, go to Settings → Billing. Choose monthly or annual billing for Pro or Max.",
+      body: "In your dashboard, go to Settings → Billing. Choose monthly or annual billing for Starter, Pro, or Growth.",
       visual: { type: "mockup", mockupId: "dashboard-billing" },
       highlightNav: "Settings",
     },

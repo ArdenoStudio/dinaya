@@ -3,9 +3,9 @@ import path from "node:path";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export type Plan = "trial" | "pro" | "max" | "expired";
+export type Plan = "trial" | "starter" | "pro" | "max" | "expired";
 export type BillingInterval = "monthly" | "annual";
-export type PaidPlan = "pro" | "max";
+export type PaidPlan = "starter" | "pro" | "max";
 
 /** Length of the free trial granted to every new business. */
 export const TRIAL_LENGTH_DAYS = 14;
@@ -56,10 +56,13 @@ export type Entitlements = {
 export type PlanLimit = keyof Entitlements["limits"];
 
 export type PlanConfig = {
+  starterMonthlyPriceLkr: number;
+  starterAnnualPriceLkr: number;
   proMonthlyPriceLkr: number;
   proAnnualPriceLkr: number;
   maxMonthlyPriceLkr: number;
   maxAnnualPriceLkr: number;
+  starterLaunched: boolean;
   proLaunched: boolean;
   maxLaunched: boolean;
   plans: Record<Plan, Entitlements>;
@@ -70,41 +73,42 @@ export type PlanConfig = {
 const PLAN_RANK: Record<Plan, number> = {
   expired: 0,
   trial: 0,
-  pro: 1,
-  max: 2,
+  starter: 1,
+  pro: 2,
+  max: 3,
 };
 
 // ─── Defaults ─────────────────────────────────────────────────────────────────
 
-// 14-day trial: Max-level access, minus the cost-exposed extras (AI voice,
-// multi-location) which unlock on a paid plan. Tune caps here.
+// 14-day trial: Starter + Pro features, without Growth-only brand/domain,
+// always-on AI, or managed voice setup.
 const DEFAULT_TRIAL_ENTITLEMENTS: Entitlements = {
   limits: {
     bookingsPerMonth: null,
-    staff: null,
+    staff: 5,
     services: null,
     locations: 1,
   },
   features: {
-    aiBookingAutopilot: true,
-    aiContentMachine: true,
-    aiDealSuggestions: true,
-    aiUpsellAssistant: true,
+    aiBookingAutopilot: false,
+    aiContentMachine: false,
+    aiDealSuggestions: false,
+    aiUpsellAssistant: false,
     aiVoiceReceptionist: false,
     automations: true,
     broadcasts: true,
-    clientReactivationCampaign: true,
+    clientReactivationCampaign: false,
     deals: true,
     googleCalendarSync: true,
     payments: true,
     publicBookingPage: true,
-    publicBookingPageCustomization: true,
+    publicBookingPageCustomization: false,
     reports: true,
-    reviewEngine: true,
+    reviewEngine: false,
     reviews: true,
-    reviewReplies: true,
-    smartReminderSystem: true,
-    vipLoyaltySequence: true,
+    reviewReplies: false,
+    smartReminderSystem: false,
+    vipLoyaltySequence: false,
     webhooks: true,
     whatsappSms: true,
   },
@@ -144,12 +148,44 @@ const DEFAULT_EXPIRED_ENTITLEMENTS: Entitlements = {
   },
 };
 
+const DEFAULT_STARTER_ENTITLEMENTS: Entitlements = {
+  limits: {
+    bookingsPerMonth: null,
+    staff: 2,
+    services: 10,
+    locations: 1,
+  },
+  features: {
+    aiBookingAutopilot: false,
+    aiContentMachine: false,
+    aiDealSuggestions: false,
+    aiUpsellAssistant: false,
+    aiVoiceReceptionist: false,
+    automations: false,
+    broadcasts: false,
+    clientReactivationCampaign: false,
+    deals: false,
+    googleCalendarSync: false,
+    payments: true,
+    publicBookingPage: true,
+    publicBookingPageCustomization: false,
+    reports: false,
+    reviewEngine: false,
+    reviews: false,
+    reviewReplies: false,
+    smartReminderSystem: false,
+    vipLoyaltySequence: false,
+    webhooks: false,
+    whatsappSms: false,
+  },
+};
+
 const DEFAULT_PRO_ENTITLEMENTS: Entitlements = {
   limits: {
     bookingsPerMonth: null,
-    staff: null,
+    staff: 5,
     services: null,
-    locations: 3,
+    locations: 1,
   },
   features: {
     aiBookingAutopilot: false,
@@ -164,7 +200,7 @@ const DEFAULT_PRO_ENTITLEMENTS: Entitlements = {
     googleCalendarSync: true,
     payments: true,
     publicBookingPage: true,
-    publicBookingPageCustomization: true,
+    publicBookingPageCustomization: false,
     reports: true,
     reviewEngine: false,
     reviews: true,
@@ -179,9 +215,9 @@ const DEFAULT_PRO_ENTITLEMENTS: Entitlements = {
 const DEFAULT_MAX_ENTITLEMENTS: Entitlements = {
   limits: {
     bookingsPerMonth: null,
-    staff: null,
+    staff: 15,
     services: null,
-    locations: null,
+    locations: 3,
   },
   features: {
     aiBookingAutopilot: true,
@@ -209,14 +245,18 @@ const DEFAULT_MAX_ENTITLEMENTS: Entitlements = {
 };
 
 export const DEFAULT_PLAN_CONFIG: PlanConfig = {
-  proMonthlyPriceLkr: Number(process.env.DINAYA_PRO_MONTHLY_PRICE_LKR ?? 1490),
-  proAnnualPriceLkr: Number(process.env.DINAYA_PRO_ANNUAL_PRICE_LKR ?? 14300),
-  maxMonthlyPriceLkr: Number(process.env.DINAYA_MAX_MONTHLY_PRICE_LKR ?? 2490),
-  maxAnnualPriceLkr: Number(process.env.DINAYA_MAX_ANNUAL_PRICE_LKR ?? 23900),
+  starterMonthlyPriceLkr: Number(process.env.DINAYA_STARTER_MONTHLY_PRICE_LKR ?? 1990),
+  starterAnnualPriceLkr: Number(process.env.DINAYA_STARTER_ANNUAL_PRICE_LKR ?? 19900),
+  proMonthlyPriceLkr: Number(process.env.DINAYA_PRO_MONTHLY_PRICE_LKR ?? 3990),
+  proAnnualPriceLkr: Number(process.env.DINAYA_PRO_ANNUAL_PRICE_LKR ?? 39900),
+  maxMonthlyPriceLkr: Number(process.env.DINAYA_MAX_MONTHLY_PRICE_LKR ?? 6900),
+  maxAnnualPriceLkr: Number(process.env.DINAYA_MAX_ANNUAL_PRICE_LKR ?? 69000),
+  starterLaunched: true,
   proLaunched: true,
   maxLaunched: true,
   plans: {
     trial: DEFAULT_TRIAL_ENTITLEMENTS,
+    starter: DEFAULT_STARTER_ENTITLEMENTS,
     pro: DEFAULT_PRO_ENTITLEMENTS,
     max: DEFAULT_MAX_ENTITLEMENTS,
     expired: DEFAULT_EXPIRED_ENTITLEMENTS,
@@ -229,6 +269,7 @@ export const ENFORCED_FEATURES: readonly PlanFeature[] = [
   "automations",
   "googleCalendarSync",
   "payments",
+  "publicBookingPageCustomization",
   "webhooks",
 ] as const;
 
@@ -273,6 +314,10 @@ function mergeEntitlements(
 
 function mergePlanConfig(fromDisk: Partial<PlanConfig>): PlanConfig {
   return {
+    starterMonthlyPriceLkr:
+      fromDisk.starterMonthlyPriceLkr ?? DEFAULT_PLAN_CONFIG.starterMonthlyPriceLkr,
+    starterAnnualPriceLkr:
+      fromDisk.starterAnnualPriceLkr ?? DEFAULT_PLAN_CONFIG.starterAnnualPriceLkr,
     proMonthlyPriceLkr:
       fromDisk.proMonthlyPriceLkr ?? DEFAULT_PLAN_CONFIG.proMonthlyPriceLkr,
     proAnnualPriceLkr:
@@ -281,12 +326,17 @@ function mergePlanConfig(fromDisk: Partial<PlanConfig>): PlanConfig {
       fromDisk.maxMonthlyPriceLkr ?? DEFAULT_PLAN_CONFIG.maxMonthlyPriceLkr,
     maxAnnualPriceLkr:
       fromDisk.maxAnnualPriceLkr ?? DEFAULT_PLAN_CONFIG.maxAnnualPriceLkr,
+    starterLaunched: fromDisk.starterLaunched ?? DEFAULT_PLAN_CONFIG.starterLaunched,
     proLaunched: fromDisk.proLaunched ?? DEFAULT_PLAN_CONFIG.proLaunched,
     maxLaunched: fromDisk.maxLaunched ?? DEFAULT_PLAN_CONFIG.maxLaunched,
     plans: {
       trial: mergeEntitlements(
         DEFAULT_TRIAL_ENTITLEMENTS,
         fromDisk.plans?.trial
+      ),
+      starter: mergeEntitlements(
+        DEFAULT_STARTER_ENTITLEMENTS,
+        fromDisk.plans?.starter
       ),
       pro: mergeEntitlements(DEFAULT_PRO_ENTITLEMENTS, fromDisk.plans?.pro),
       max: mergeEntitlements(DEFAULT_MAX_ENTITLEMENTS, fromDisk.plans?.max),
@@ -367,8 +417,10 @@ export function getSubscriptionPrice(
   config: PlanConfig = getPlanConfig()
 ): number {
   if (interval === "annual") {
+    if (plan === "starter") return config.starterAnnualPriceLkr;
     return plan === "pro" ? config.proAnnualPriceLkr : config.maxAnnualPriceLkr;
   }
+  if (plan === "starter") return config.starterMonthlyPriceLkr;
   return plan === "pro" ? config.proMonthlyPriceLkr : config.maxMonthlyPriceLkr;
 }
 
@@ -377,7 +429,7 @@ export function payhereRecurrence(interval: BillingInterval): string {
 }
 
 export function subscriptionItemName(plan: PaidPlan, interval: BillingInterval): string {
-  const tier = plan === "max" ? "Max" : "Pro";
+  const tier = plan === "max" ? "Growth" : plan === "pro" ? "Pro" : "Starter";
   const cadence = interval === "annual" ? "annual" : "monthly";
   return `Dinaya ${tier} — ${cadence} subscription`;
 }
@@ -389,17 +441,19 @@ export function annualSavingsPercent(monthlyLkr: number, annualLkr: number): num
 }
 
 export function planDisplayName(plan: Plan): string {
-  if (plan === "max") return "Max";
+  if (plan === "max") return "Growth";
   if (plan === "pro") return "Pro";
+  if (plan === "starter") return "Starter";
   if (plan === "trial") return "Free trial";
   return "Expired";
 }
 
 export function isPaidPlan(plan: Plan): boolean {
-  return plan === "pro" || plan === "max";
+  return plan === "starter" || plan === "pro" || plan === "max";
 }
 
 export function isPaidPlanAvailable(plan: PaidPlan, config: PlanConfig = getPlanConfig()): boolean {
+  if (plan === "starter") return config.starterLaunched;
   return plan === "pro" ? config.proLaunched : config.maxLaunched;
 }
 
@@ -422,11 +476,18 @@ const MAX_ONLY_FEATURES: readonly PlanFeature[] = [
   ...AI_FEATURES,
   "aiDealSuggestions",
   "aiVoiceReceptionist",
+  "publicBookingPageCustomization",
   "reviewReplies",
+];
+
+const STARTER_FEATURES: readonly PlanFeature[] = [
+  "payments",
+  "publicBookingPage",
 ];
 
 export function minimumPlanForFeature(feature: PlanFeature): Plan {
   if (MAX_ONLY_FEATURES.includes(feature)) return "max";
+  if (STARTER_FEATURES.includes(feature)) return "starter";
   return "pro";
 }
 
@@ -454,11 +515,13 @@ export function canUseFeature(plan: Plan, feature: PlanFeature): boolean {
 }
 
 export const TRIAL_ENTITLEMENTS = DEFAULT_TRIAL_ENTITLEMENTS;
+export const STARTER_ENTITLEMENTS = DEFAULT_STARTER_ENTITLEMENTS;
 export const EXPIRED_ENTITLEMENTS = DEFAULT_EXPIRED_ENTITLEMENTS;
 export const PRO_ENTITLEMENTS = DEFAULT_PRO_ENTITLEMENTS;
 export const MAX_ENTITLEMENTS = DEFAULT_MAX_ENTITLEMENTS;
 export const PLAN_ENTITLEMENTS: Record<Plan, Entitlements> = {
   trial: DEFAULT_TRIAL_ENTITLEMENTS,
+  starter: DEFAULT_STARTER_ENTITLEMENTS,
   pro: DEFAULT_PRO_ENTITLEMENTS,
   max: DEFAULT_MAX_ENTITLEMENTS,
   expired: DEFAULT_EXPIRED_ENTITLEMENTS,

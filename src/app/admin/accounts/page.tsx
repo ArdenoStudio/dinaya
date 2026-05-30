@@ -5,6 +5,7 @@ import { ChevronRight, Search } from "lucide-react";
 import { db } from "@/db";
 import { bookings, businesses, subscriptions, users } from "@/db/schema";
 import { safeAdminQuery } from "@/lib/admin-db";
+import { planDisplayName, type Plan } from "@/lib/plan";
 import { formatLkr } from "@/lib/utils";
 import { requirePlatformAdmin } from "@/lib/platform-admin";
 
@@ -12,7 +13,7 @@ export const dynamic = "force-dynamic";
 
 type SearchParams = {
   q?: string;
-  plan?: "trial" | "pro" | "max" | "expired" | "all";
+  plan?: "trial" | "starter" | "pro" | "max" | "expired" | "all";
 };
 
 export default async function AdminAccountsPage({
@@ -69,11 +70,12 @@ export default async function AdminAccountsPage({
     [{ totalAccounts: 0 }] as { totalAccounts: number }[],
   );
 
-  const planChips: { value: "all" | "trial" | "pro" | "max" | "expired"; label: string }[] = [
+  const planChips: { value: "all" | Plan; label: string }[] = [
     { value: "all", label: "All" },
     { value: "trial", label: "Trial" },
+    { value: "starter", label: "Starter" },
     { value: "pro", label: "Pro" },
-    { value: "max", label: "Max" },
+    { value: "max", label: "Growth" },
     { value: "expired", label: "Expired" },
   ];
 
@@ -185,10 +187,14 @@ export default async function AdminAccountsPage({
                         className={
                           r.plan === "pro"
                             ? "rounded-full bg-primary/10 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-primary"
+                            : r.plan === "starter"
+                              ? "rounded-full bg-emerald-500/10 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-emerald-700"
+                            : r.plan === "max"
+                              ? "rounded-full bg-amber-500/10 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-amber-700"
                             : "rounded-full bg-muted px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-muted-foreground"
                         }
                       >
-                        {r.plan}
+                        {planDisplayName(r.plan as Plan)}
                       </span>
                     </td>
                     <td className="px-4 py-3">

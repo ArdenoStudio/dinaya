@@ -11,7 +11,7 @@ export const aiHubOverviewGuide: DocsGuide = {
   steps: [
     {
       title: "Open AI Hub",
-      body: "Max plans include AI Hub under Dashboard → AI. Each workflow runs on a schedule in the background.",
+      body: "Growth and Managed Max plans include AI Hub under Dashboard → AI. Each workflow runs on a schedule in the background.",
       visual: { type: "mockup", mockupId: "dashboard-ai" },
       highlightNav: "AI Hub",
     },

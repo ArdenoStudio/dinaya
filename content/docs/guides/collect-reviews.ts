@@ -27,7 +27,7 @@ export const collectReviewsGuide: DocsGuide = {
     },
     {
       title: "AI reply suggestions",
-      body: "On Max plans, use AI-suggested replies to respond faster while keeping your voice.",
+      body: "On Growth and Managed Max, use AI-suggested replies to respond faster while keeping your voice.",
       visual: { type: "mockup", mockupId: "dashboard-reviews" },
     },
   ],

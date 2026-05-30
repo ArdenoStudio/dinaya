@@ -37,8 +37,8 @@ export default function PrivacyPage() {
         <li>To create and manage your account and staff access</li>
         <li>To process and confirm bookings</li>
         <li>To send booking confirmation and reminder emails</li>
-        <li>To send SMS and WhatsApp reminders on Pro and Max plans, when enabled</li>
-        <li>To process booking payments and Pro/Max subscription billing via PayHere</li>
+        <li>To send SMS and WhatsApp reminders on Pro, Growth, and Managed Max plans, when enabled</li>
+        <li>To process booking payments and Dinaya subscription billing via PayHere</li>
         <li>To generate AI-assisted copy and workflow suggestions when you use those features</li>
         <li>To sync availability with connected services such as Google Calendar</li>
         <li>To protect the platform through rate limiting and security monitoring</li>

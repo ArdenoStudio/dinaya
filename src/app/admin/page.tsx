@@ -1,13 +1,13 @@
 import Link from "next/link";
-import { and, count, desc, eq, gte, sql } from "drizzle-orm";
+import { and, count, desc, eq, gte, inArray, sql } from "drizzle-orm";
 import { format, subDays } from "date-fns";
 import { ArrowUpRight, Building2, CalendarCheck, CreditCard, TrendingUp, UserPlus, Users } from "lucide-react";
 import { db } from "@/db";
 import { activityLog, bookings, businesses, payments, subscriptions, users } from "@/db/schema";
 import { safeAdminQuery } from "@/lib/admin-db";
+import { planDisplayName, type Plan } from "@/lib/plan";
 import { formatLkr } from "@/lib/utils";
 import { requirePlatformAdmin } from "@/lib/platform-admin";
-import type { Plan } from "@/lib/plan";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +20,7 @@ export default async function AdminOverviewPage() {
 
   const [
     [{ totalAccounts }],
-    [{ proAccounts }],
+    [{ paidAccounts }],
     [{ newAccounts30 }],
     [{ newAccounts60to30 }],
     [{ activeSubs }],
@@ -37,8 +37,8 @@ export default async function AdminOverviewPage() {
   ] = await Promise.all([
     safeAdminQuery(db.select({ totalAccounts: count() }).from(businesses), [{ totalAccounts: 0 }] as { totalAccounts: number }[]),
     safeAdminQuery(
-      db.select({ proAccounts: count() }).from(businesses).where(eq(businesses.plan, "pro")),
-      [{ proAccounts: 0 }] as { proAccounts: number }[]
+      db.select({ paidAccounts: count() }).from(businesses).where(inArray(businesses.plan, ["starter", "pro", "max"])),
+      [{ paidAccounts: 0 }] as { paidAccounts: number }[]
     ),
     safeAdminQuery(
       db.select({ newAccounts30: count() }).from(businesses).where(gte(businesses.createdAt, last30)),
@@ -148,9 +148,9 @@ export default async function AdminOverviewPage() {
   ]);
 
   const total = Number(totalAccounts ?? 0);
-  const pro = Number(proAccounts ?? 0);
-  const free = Math.max(total - pro, 0);
-  const proShare = total > 0 ? Math.round((pro / total) * 100) : 0;
+  const paid = Number(paidAccounts ?? 0);
+  const notPaid = Math.max(total - paid, 0);
+  const paidShare = total > 0 ? Math.round((paid / total) * 100) : 0;
 
   const signupsCurr = Number(newAccounts30 ?? 0);
   const signupsPrev = Number(newAccounts60to30 ?? 0);
@@ -181,7 +181,7 @@ export default async function AdminOverviewPage() {
     {
       label: "Total accounts",
       value: total.toLocaleString(),
-      sub: `${pro} on Pro · ${free} on Free`,
+      sub: `${paid} paid · ${notPaid} trial or expired`,
       delta: null as null | { value: number; label: string },
       accent: "bg-primary",
       icon: Building2,
@@ -281,13 +281,13 @@ export default async function AdminOverviewPage() {
           </p>
         </div>
         <div className="rounded-xl border bg-white p-5">
-          <p className="text-xs text-muted-foreground">Pro adoption</p>
-          <p className="mt-1 text-2xl font-bold tracking-tight">{proShare}%</p>
+          <p className="text-xs text-muted-foreground">Paid adoption</p>
+          <p className="mt-1 text-2xl font-bold tracking-tight">{paidShare}%</p>
           <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-muted">
-            <div className="h-full bg-primary" style={{ width: `${proShare}%` }} />
+            <div className="h-full bg-primary" style={{ width: `${paidShare}%` }} />
           </div>
           <p className="mt-2 text-xs text-muted-foreground">
-            {pro} of {total} accounts
+            {paid} of {total} accounts
           </p>
         </div>
         <div className="rounded-xl border bg-white p-5">
@@ -333,10 +333,14 @@ export default async function AdminOverviewPage() {
                           className={
                             a.plan === "pro"
                               ? "rounded-full bg-primary/10 px-1.5 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-primary"
+                              : a.plan === "starter"
+                                ? "rounded-full bg-emerald-500/10 px-1.5 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-emerald-700"
+                              : a.plan === "max"
+                                ? "rounded-full bg-amber-500/10 px-1.5 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-amber-700"
                               : "rounded-full bg-muted px-1.5 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-muted-foreground"
                           }
                         >
-                          {a.plan}
+                          {planDisplayName(a.plan as Plan)}
                         </span>
                       </div>
                       <span className="shrink-0 text-sm tabular-nums text-muted-foreground">

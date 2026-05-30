@@ -365,7 +365,7 @@ export default function SolutionsPage() {
                 href="/register"
                 className="inline-flex items-center gap-2 bg-white text-blue-700 px-7 py-3.5 rounded-xl font-semibold shadow-lg hover:bg-white/95 transition-colors"
               >
-                Create your page — it&apos;s free
+                Start free trial
                 <Icon name="arrow-right" className="text-sm" />
               </Link>
             </div>

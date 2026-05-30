@@ -300,14 +300,14 @@ export default function ContactPage() {
                 Ready to go bookable?
               </h2>
               <p className="text-white/70 mb-8 max-w-md mx-auto">
-                Set up your free booking page in five minutes. No card required.
+                Set up your booking page in five minutes. No card required for the trial.
               </p>
               <div className="flex flex-wrap gap-4 justify-center">
                 <Link
                   href="/register"
                   className="inline-flex items-center gap-2 bg-white text-blue-700 px-7 py-3.5 rounded-xl font-semibold shadow-lg hover:bg-white/95 transition-colors"
                 >
-                  Create your page — it&apos;s free
+                  Start free trial
                   <Icon name="arrow-right" className="text-sm" />
                 </Link>
                 <Link
