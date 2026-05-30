@@ -202,6 +202,9 @@ export const subscriptions = pgTable("subscriptions", {
   // PayHere identifiers
   payhereOrderId: varchar("payhere_order_id", { length: 100 }).notNull().unique(),
   payhereSubscriptionId: varchar("payhere_subscription_id", { length: 100 }).unique(),
+  // Last processed PayHere recurring charge id. Recurring charges reuse the same
+  // order_id, so renewal webhooks are deduped by per-charge payment_id.
+  lastPaymentId: varchar("last_payment_id", { length: 100 }),
   // Plan being subscribed to (forward-compat: more tiers later)
   plan: planEnum("plan").default("pro").notNull(),
   billingInterval: billingIntervalEnum("billing_interval").default("monthly").notNull(),
