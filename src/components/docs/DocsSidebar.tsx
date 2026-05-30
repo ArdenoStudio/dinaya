@@ -11,8 +11,8 @@ export function DocsSidebar() {
 
   return (
     <aside className="hidden lg:block w-64 shrink-0">
-      <nav className="sticky top-24 space-y-6 text-sm" aria-label="Documentation">
-        <div>
+      <nav className="sticky top-24 space-y-6 rounded-2xl border border-gray-200 bg-white/80 p-4 text-sm shadow-sm shadow-gray-900/5 backdrop-blur" aria-label="Documentation">
+        <div className="border-b border-gray-100 pb-3">
           <Link
             href="/docs"
             className={cn(
@@ -60,7 +60,13 @@ export function DocsSidebar() {
           );
         })}
 
-        <div className="border-t pt-4 space-y-2">
+        <div className="border-t border-gray-100 pt-4 space-y-2">
+          <Link href="/docs.md" className="block text-gray-600 hover:text-gray-900">
+            View Markdown docs
+          </Link>
+          <Link href="/llms.txt" className="block text-gray-600 hover:text-gray-900">
+            LLM docs index
+          </Link>
           <Link href="/help" className="block text-gray-600 hover:text-gray-900">
             FAQ / Help center
           </Link>

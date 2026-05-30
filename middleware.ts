@@ -3,6 +3,10 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { authConfig } from "@/auth.config";
 import { lookupCustomDomainSlug } from "@/lib/custom-domain";
+import {
+  getDocsMarkdownPathForPage,
+  getInternalDocsMarkdownPath,
+} from "@/lib/docs/paths";
 
 const { auth } = NextAuth(authConfig);
 
@@ -20,9 +24,15 @@ function rewriteUrl(req: NextRequest, path: string): URL {
   return url;
 }
 
+function wantsMarkdownResponse(req: NextRequest): boolean {
+  if (req.method !== "GET" && req.method !== "HEAD") return false;
+  const acceptHeader = req.headers.get("accept")?.toLowerCase() ?? "";
+  return acceptHeader.includes("text/markdown");
+}
+
 export default auth(async (req) => {
   const { pathname } = req.nextUrl;
-  const hostname = req.headers.get("host") ?? "";
+  const hostname = req.headers.get("host") ?? req.nextUrl.host ?? "";
 
   const hostWithoutPort = hostname.split(":")[0];
   const rootDomain = APP_DOMAIN.split(":")[0];
@@ -42,6 +52,21 @@ export default auth(async (req) => {
     const customSlug = await lookupCustomDomainSlug(hostWithoutPort);
     if (customSlug) {
       return NextResponse.rewrite(rewriteUrl(req, `/book/${customSlug}${pathname}`));
+    }
+  }
+
+  const markdownAliasPath = getInternalDocsMarkdownPath(pathname);
+  if (markdownAliasPath) {
+    return NextResponse.rewrite(rewriteUrl(req, markdownAliasPath));
+  }
+
+  if (wantsMarkdownResponse(req)) {
+    const markdownPath = getDocsMarkdownPathForPage(pathname);
+    if (markdownPath) {
+      const internalMarkdownPath = getInternalDocsMarkdownPath(markdownPath);
+      if (internalMarkdownPath) {
+        return NextResponse.rewrite(rewriteUrl(req, internalMarkdownPath));
+      }
     }
   }
 

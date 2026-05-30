@@ -14,7 +14,7 @@ export function DocsMobileNav() {
       </label>
       <select
         id="docs-mobile-nav"
-        className="w-full rounded-lg border bg-white px-3 py-2 text-sm"
+        className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm shadow-sm shadow-gray-900/5"
         defaultValue=""
         onChange={(e) => {
           if (e.target.value) router.push(e.target.value);
@@ -30,6 +30,10 @@ export function DocsMobileNav() {
       <p className="mt-2 text-center text-xs">
         <Link href="/docs" className="text-primary hover:underline">
           Documentation home
+        </Link>
+        {" · "}
+        <Link href="/docs.md" className="text-primary hover:underline">
+          Markdown
         </Link>
       </p>
     </div>
