@@ -4,7 +4,6 @@ mod commands;
 mod tray;
 
 use tauri::{Emitter, Manager};
-use tauri_plugin_window_state::StateFlags;
 
 use std::fs::OpenOptions;
 use std::io::Write;
@@ -12,10 +11,6 @@ use std::io::Write;
 use std::ptr::null_mut;
 use std::time::Duration;
 use tauri::RunEvent;
-
-fn window_state_flags() -> StateFlags {
-    StateFlags::all() & !StateFlags::VISIBLE
-}
 
 fn show_main_window_after_startup(app: tauri::AppHandle) {
     std::thread::spawn(move || {
