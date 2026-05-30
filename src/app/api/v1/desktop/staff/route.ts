@@ -34,15 +34,23 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "status is invalid." }, { status: 400 });
   }
 
-  const staff = await getStaffDashboardList(businessId, {
-    limit: parseLimit(params.get("limit")),
-    q: params.get("q")?.trim() ?? "",
-    status: (statusParam || "all") as DashboardStaffStatusFilter,
-  });
+  try {
+    const staff = await getStaffDashboardList(businessId, {
+      limit: parseLimit(params.get("limit")),
+      q: params.get("q")?.trim() ?? "",
+      status: (statusParam || "all") as DashboardStaffStatusFilter,
+    });
 
-  return NextResponse.json({
-    ...staff,
-    serverTime: new Date().toISOString(),
-    webUrl: "/dashboard/staff",
-  });
+    return NextResponse.json({
+      ...staff,
+      serverTime: new Date().toISOString(),
+      webUrl: "/dashboard/staff",
+    });
+  } catch (error) {
+    console.error("[desktop-staff] Failed to load staff list.", { businessId, error });
+    return NextResponse.json(
+      { error: "Staff could not be loaded right now. Please refresh or open the web dashboard." },
+      { status: 500 },
+    );
+  }
 }

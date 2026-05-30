@@ -96,4 +96,15 @@ describe("GET /api/v1/desktop/staff", () => {
     expect(body.error).toBe("status is invalid.");
     expect(getStaffDashboardListMock).not.toHaveBeenCalled();
   });
+
+  it("returns a JSON error if staff loading fails unexpectedly", async () => {
+    getStaffDashboardListMock.mockRejectedValue(new Error("database unavailable"));
+
+    const req = new NextRequest("http://localhost/api/v1/desktop/staff");
+    const res = await GET(req);
+    const body = await res.json();
+
+    expect(res.status).toBe(500);
+    expect(body.error).toBe("Staff could not be loaded right now. Please refresh or open the web dashboard.");
+  });
 });

@@ -41,10 +41,45 @@ export const staffDashboardUpdateSchema = z.object({
 
 const DEFAULT_STAFF_LIMIT = 200;
 const MAX_STAFF_LIMIT = 500;
+const SCHEMA_DRIFT_ERROR_CODES = new Set(["42703", "42P01", "42704"]);
+
+type NormalizedStaffListOptions = {
+  limit: number;
+  query: string;
+  status: DashboardStaffStatusFilter;
+};
 
 function normalizeStaffLimit(limit: number | undefined): number {
   if (!Number.isFinite(limit)) return DEFAULT_STAFF_LIMIT;
   return Math.min(MAX_STAFF_LIMIT, Math.max(1, Math.round(limit ?? DEFAULT_STAFF_LIMIT)));
+}
+
+function normalizeStaffListOptions(options: DashboardStaffListOptions): NormalizedStaffListOptions {
+  return {
+    limit: normalizeStaffLimit(options.limit),
+    query: options.q?.trim().toLowerCase() ?? "",
+    status: options.status ?? "all",
+  };
+}
+
+function isSchemaDriftError(error: unknown): boolean {
+  if (typeof error !== "object" || error === null) return false;
+  const candidate = error as { cause?: unknown; code?: unknown; message?: unknown };
+  if (typeof candidate.code === "string" && SCHEMA_DRIFT_ERROR_CODES.has(candidate.code)) {
+    return true;
+  }
+  if (typeof candidate.message === "string") {
+    const message = candidate.message.toLowerCase();
+    if (
+      (message.includes("column") && message.includes("does not exist")) ||
+      (message.includes("relation") && message.includes("does not exist")) ||
+      message.includes("undefined column") ||
+      message.includes("undefined table")
+    ) {
+      return true;
+    }
+  }
+  return isSchemaDriftError(candidate.cause);
 }
 
 export function isDashboardStaffStatusFilter(value: string): value is DashboardStaffStatusFilter {
@@ -55,9 +90,86 @@ export async function getStaffDashboardList(
   businessId: string,
   options: DashboardStaffListOptions = {},
 ) {
-  const query = options.q?.trim().toLowerCase() ?? "";
-  const status = options.status ?? "all";
-  const limit = normalizeStaffLimit(options.limit);
+  const normalizedOptions = normalizeStaffListOptions(options);
+
+  try {
+    return await getStaffDashboardListStrict(businessId, normalizedOptions);
+  } catch (error) {
+    if (!isSchemaDriftError(error)) throw error;
+    console.error("[dashboard-staff] Falling back to basic staff list because the database schema is behind.", {
+      businessId,
+      error,
+    });
+    return getStaffDashboardListBasic(businessId, normalizedOptions);
+  }
+}
+
+async function getStaffDashboardListBasic(
+  businessId: string,
+  { limit, query, status }: NormalizedStaffListOptions,
+) {
+  const conditions: SQL[] = [eq(staff.businessId, businessId)];
+
+  if (status === "active") conditions.push(eq(staff.isActive, true));
+  if (status === "inactive") conditions.push(eq(staff.isActive, false));
+  if (query) conditions.push(ilike(staff.name, `%${query}%`));
+
+  const [summaryRows, rows] = await Promise.all([
+    db
+      .select({
+        activeStaff: sql<number>`coalesce(count(*) filter (where ${staff.isActive} = true), 0)::int`,
+        inactiveStaff: sql<number>`coalesce(count(*) filter (where ${staff.isActive} = false), 0)::int`,
+        totalStaff: count(),
+      })
+      .from(staff)
+      .where(eq(staff.businessId, businessId)),
+    db
+      .select({
+        createdAt: staff.createdAt,
+        id: staff.id,
+        isActive: staff.isActive,
+        name: staff.name,
+      })
+      .from(staff)
+      .where(and(...conditions))
+      .orderBy(asc(staff.name))
+      .limit(limit),
+  ]);
+  const summary = summaryRows[0];
+
+  return {
+    filters: {
+      limit,
+      q: query,
+      status,
+    },
+    rows: rows.map((row) => ({
+      avatarUrl: null,
+      bio: null,
+      ...row,
+      assignedLocationsCount: 0,
+      assignedServicesCount: 0,
+      availabilityWindowCount: 0,
+      createdAt: row.createdAt.toISOString(),
+      futureBookingCount: 0,
+      lastBookingAt: null,
+      locationIds: [],
+      primaryLocationName: null,
+      todayBookingCount: 0,
+    })),
+    summary: {
+      activeStaff: Number(summary?.activeStaff ?? 0),
+      inactiveStaff: Number(summary?.inactiveStaff ?? 0),
+      totalStaff: Number(summary?.totalStaff ?? 0),
+      withBio: 0,
+    },
+  };
+}
+
+async function getStaffDashboardListStrict(
+  businessId: string,
+  { limit, query, status }: NormalizedStaffListOptions,
+) {
   const conditions: SQL[] = [eq(staff.businessId, businessId)];
 
   if (status === "active") conditions.push(eq(staff.isActive, true));
