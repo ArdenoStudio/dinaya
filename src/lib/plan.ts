@@ -198,17 +198,30 @@ const CONFIG_FILE = path.join(CONFIG_DIR, "plans.json");
 
 let cached: PlanConfig | null = null;
 
+// `null` is a meaningful limit value ("unlimited"), so only fall back to the
+// default when the saved value is actually missing (undefined). Using `??`
+// would discard an admin's intentional "unlimited" for any limit whose default
+// is a number and silently revert it.
+function pickLimit(
+  value: number | null | undefined,
+  fallback: number | null
+): number | null {
+  return value !== undefined ? value : fallback;
+}
+
 function mergeEntitlements(
   defaults: Entitlements,
   fromDisk: Partial<Entitlements> | undefined
 ): Entitlements {
   return {
     limits: {
-      bookingsPerMonth:
-        fromDisk?.limits?.bookingsPerMonth ?? defaults.limits.bookingsPerMonth,
-      staff: fromDisk?.limits?.staff ?? defaults.limits.staff,
-      services: fromDisk?.limits?.services ?? defaults.limits.services,
-      locations: fromDisk?.limits?.locations ?? defaults.limits.locations,
+      bookingsPerMonth: pickLimit(
+        fromDisk?.limits?.bookingsPerMonth,
+        defaults.limits.bookingsPerMonth
+      ),
+      staff: pickLimit(fromDisk?.limits?.staff, defaults.limits.staff),
+      services: pickLimit(fromDisk?.limits?.services, defaults.limits.services),
+      locations: pickLimit(fromDisk?.limits?.locations, defaults.limits.locations),
     },
     features: {
       ...defaults.features,
