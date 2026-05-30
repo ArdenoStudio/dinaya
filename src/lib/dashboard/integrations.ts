@@ -2,7 +2,7 @@ import { and, asc, count, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { apiKeys, businesses, socialConnections, voiceIntegrations, webhooks } from "@/db/schema";
 import { GOOGLE_PROVIDER, googleOAuthConfigured } from "@/lib/google-calendar";
-import { canUseFeature, minimumPlanForFeature, planDisplayName, type Plan, type PlanFeature } from "@/lib/plan";
+import { canUseFeature, minimumPlanForFeature, planDisplayName, resolveEffectivePlan, type Plan, type PlanFeature } from "@/lib/plan";
 import { voiceStatusLabel } from "@/lib/voice-receptionist";
 
 export type DashboardIntegrationDetail = Awaited<ReturnType<typeof getIntegrationDashboardDetail>>;
@@ -91,6 +91,7 @@ export async function getIntegrationsDashboardList(
         payhereEnabled: businesses.payhereEnabled,
         payhereMerchantId: businesses.payhereMerchantId,
         plan: businesses.plan,
+        planExpiresAt: businesses.planExpiresAt,
       })
       .from(businesses)
       .where(eq(businesses.id, businessId))
@@ -124,7 +125,10 @@ export async function getIntegrationsDashboardList(
       .where(and(eq(apiKeys.businessId, businessId), eq(apiKeys.keyType, "generic"))),
   ]);
 
-  const plan = business?.plan ?? "free";
+  const plan = resolveEffectivePlan({
+    storedPlan: business?.plan,
+    planExpiresAt: business?.planExpiresAt,
+  });
   const google = socialRows.find((row) => row.provider === GOOGLE_PROVIDER);
   const voice = voiceRows[0];
   const canUseWebhooks = canUseFeature(plan, "webhooks");
