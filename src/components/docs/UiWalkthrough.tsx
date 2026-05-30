@@ -165,10 +165,10 @@ export function UiWalkthrough({ steps }: Props) {
               type="button"
               aria-current={i === activeStep ? "step" : undefined}
               onClick={() => goTo(i)}
-              className={`flex h-16 w-40 shrink-0 items-start gap-2 rounded-lg border px-3 py-2 text-left transition-all ${
+              className={`flex h-16 w-40 shrink-0 items-start gap-2 rounded-xl border px-3 py-2 text-left transition-all ${
                 i === activeStep
                   ? "border-primary bg-primary/5 shadow-sm shadow-primary/10"
-                  : "border-gray-200 bg-white hover:border-primary/30 hover:bg-gray-50"
+                  : "border-gray-200 bg-white shadow-sm shadow-gray-900/5 hover:border-primary/30 hover:bg-gray-50"
               }`}
             >
               <span
@@ -188,7 +188,7 @@ export function UiWalkthrough({ steps }: Props) {
         </div>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-2 lg:items-start">
+      <div className="grid gap-8 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm shadow-gray-900/5 lg:grid-cols-2 lg:items-start">
         <div>
           <h2 className="font-cal text-xl tracking-tight">{step.title}</h2>
           <p className="mt-3 text-sm leading-relaxed text-muted-foreground whitespace-pre-line">

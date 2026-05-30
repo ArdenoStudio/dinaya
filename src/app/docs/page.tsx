@@ -11,6 +11,8 @@ import {
   searchGuides,
 } from "@content/docs/guides";
 import { PlanBadge } from "@/components/docs/PlanBadge";
+import { DocsAiActions } from "@/components/docs/DocsAiActions";
+import { DOCS_HUB_MARKDOWN_PATH, DOCS_HUB_PATH } from "@/lib/docs/paths";
 
 export default function DocsHubPage() {
   const [search, setSearch] = useState("");
@@ -37,24 +39,36 @@ export default function DocsHubPage() {
 
   return (
     <div className="pb-16">
-      <div className="mb-10">
-        <span className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50/50 px-3 py-1 text-xs font-medium text-blue-700 mb-4">
-          <Icon name="book" className="text-xs" />
-          Documentation
-        </span>
-        <h1 className="font-cal text-3xl md:text-4xl tracking-tight mb-2">
-          Learn Dinaya
-        </h1>
-        <p className="text-muted-foreground max-w-lg text-sm leading-relaxed">
-          Step-by-step guides with UI walkthroughs — including where to click — for every feature.
-        </p>
+      <div className="relative mb-10 overflow-hidden rounded-3xl border border-gray-200 bg-gradient-to-br from-white via-slate-50 to-blue-50/70 px-6 py-8 shadow-sm shadow-gray-900/5">
+        <div className="pointer-events-none absolute -right-24 -top-24 h-56 w-56 rounded-full bg-blue-200/30 blur-3xl" />
+        <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+          <div>
+            <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50/70 px-3 py-1 text-xs font-semibold text-blue-700">
+              <Icon name="book" className="text-xs" />
+              Documentation
+            </span>
+            <h1 className="font-cal text-3xl tracking-tight text-gray-950 md:text-4xl">
+              Learn Dinaya
+            </h1>
+            <p className="mt-2 max-w-xl text-sm leading-relaxed text-gray-600">
+              Step-by-step guides with UI walkthroughs for setup, operations, growth, and integrations.
+            </p>
+          </div>
+          <DocsAiActions
+            title="Dinaya Documentation"
+            summary="Step-by-step product guides for bookings, payments, growth, and dashboard operations."
+            canonicalPath={DOCS_HUB_PATH}
+            markdownPath={DOCS_HUB_MARKDOWN_PATH}
+            className="md:shrink-0"
+          />
+        </div>
       </div>
 
-      <section className="mb-8 rounded-xl border bg-gray-50/70 p-3" aria-label="How documentation walkthroughs work">
+      <section className="mb-8 rounded-2xl border border-gray-200 bg-white p-3 shadow-sm shadow-gray-900/5" aria-label="How documentation walkthroughs work">
         <div className="grid gap-2 md:grid-cols-3">
           {walkthroughCues.map((cue, index) => (
-            <div key={cue.label} className="flex gap-3 rounded-lg bg-white px-3 py-3 shadow-sm shadow-gray-900/5">
-              <span className="flex size-8 shrink-0 items-center justify-center rounded-lg border bg-white text-primary">
+            <div key={cue.label} className="flex gap-3 rounded-xl border border-gray-100 bg-gradient-to-b from-white to-gray-50/70 px-3 py-3">
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-blue-100 bg-blue-50 text-primary">
                 <Icon name={cue.icon} className="text-sm" />
               </span>
               <div>
@@ -79,7 +93,7 @@ export default function DocsHubPage() {
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search guides…"
           aria-label="Search documentation guides"
-          className="w-full rounded-xl border pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+          className="w-full rounded-2xl border border-gray-200 bg-white pl-10 pr-4 py-3 text-sm shadow-sm shadow-gray-900/5 focus:outline-none focus:ring-2 focus:ring-primary/40"
         />
       </div>
 
@@ -131,8 +145,8 @@ export default function DocsHubPage() {
                   <Link
                     key={slug}
                     href={`/docs/guides/${slug}`}
-                    className="group rounded-xl border bg-gradient-to-br from-blue-50/80 to-white p-4 hover:border-primary/30 hover:shadow-sm transition-all"
-                  >
+                  className="group rounded-2xl border border-gray-200 bg-gradient-to-br from-blue-50/50 to-white p-4 shadow-sm shadow-gray-900/5 transition-all hover:border-primary/30 hover:shadow-md"
+                >
                     <p className="font-cal text-base tracking-tight">{g.title}</p>
                     <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{g.description}</p>
                     <div className="mt-3 flex items-center justify-between gap-3">
@@ -159,7 +173,7 @@ export default function DocsHubPage() {
                 <a
                   key={cat.id}
                   href={`#${cat.id}`}
-                  className="rounded-xl border p-4 hover:border-primary/30 hover:shadow-sm transition-all"
+                  className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm shadow-gray-900/5 transition-all hover:border-primary/30 hover:shadow-md"
                 >
                   <div className="flex items-center gap-2 mb-1">
                     <Icon name={cat.icon} className="text-primary" />
@@ -182,7 +196,7 @@ export default function DocsHubPage() {
                     <li key={g.slug}>
                       <Link
                         href={`/docs/guides/${g.slug}`}
-                        className="flex items-center gap-3 rounded-lg border px-4 py-3 hover:bg-gray-50/80"
+                        className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 shadow-sm shadow-gray-900/5 transition hover:border-primary/30 hover:bg-gray-50/80"
                       >
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
@@ -203,7 +217,7 @@ export default function DocsHubPage() {
             );
           })}
 
-          <section className="rounded-2xl border bg-gray-50 p-6">
+          <section className="rounded-3xl border border-gray-200 bg-gradient-to-br from-gray-50 to-white p-6">
             <h2 className="font-cal text-lg mb-2">Quick answers</h2>
             <p className="text-sm text-muted-foreground mb-4">
               Prefer short FAQ-style answers? Visit the help center.

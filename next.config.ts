@@ -63,6 +63,43 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async rewrites() {
+    return {
+      beforeFiles: [
+      {
+        source: "/docs",
+        has: [{ type: "header", key: "accept", value: ".*text/markdown.*" }],
+        destination: "/docs/markdown",
+      },
+      {
+        source: "/docs/guides/:slug",
+        has: [{ type: "header", key: "accept", value: ".*text/markdown.*" }],
+        destination: "/docs/guides/:slug/markdown",
+      },
+      {
+        source: "/docs/reference/:slug",
+        has: [{ type: "header", key: "accept", value: ".*text/markdown.*" }],
+        destination: "/docs/reference/:slug/markdown",
+      },
+      {
+        source: "/docs.md",
+        destination: "/docs/markdown",
+      },
+      {
+        source: "/docs/guides/:slug.md",
+        destination: "/docs/guides/:slug/markdown",
+      },
+      {
+        source: "/docs/reference/:slug.md",
+        destination: "/docs/reference/:slug/markdown",
+      },
+      {
+        source: "/llms.txt",
+        destination: "/llms",
+      },
+      ],
+    };
+  },
 };
 
 export default nextConfig;
