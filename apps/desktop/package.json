@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "tauri": "tauri",
     "dev": "tauri dev",
     "dev:local-api": "set DINAYA_API_BASE_URL=http://localhost:3000&& tauri dev",
     "build": "tauri build",
