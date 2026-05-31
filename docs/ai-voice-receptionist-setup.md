@@ -1,6 +1,8 @@
 # Dinaya AI Voice Receptionist Setup
 
-Dinaya AI Voice Receptionist is a Growth-eligible, Managed Max setup add-on for businesses that want callers to ask questions and book appointments by phone.
+Status: coming soon. Tenant setup requests, voice API keys, voice profile reads, Twilio relay, and `voice_agent` booking creation are paused until Dinaya explicitly rolls out the feature.
+
+Dinaya AI Voice Receptionist is planned as a Growth/Managed Max add-on for businesses that want callers to ask questions and book appointments by phone.
 
 ## Phone Flow
 
@@ -18,9 +20,11 @@ Dinaya AI Voice Receptionist is a Growth-eligible, Managed Max setup add-on for 
 - Peak Agents for managed Sri Lanka-local setup.
 - Twilio, Vapi, Retell, or another SIP-capable voice AI provider if Dinaya runs the voice layer directly later.
 
-The first release is a managed setup flow. Dinaya generates the setup pack, then platform staff configure the provider.
+The future release is expected to start as a managed setup flow. Dinaya generates the setup pack, then platform staff configure the provider.
 
 ## Required Dinaya Setup
+
+These steps are for the future rollout and are not currently available to tenant users.
 
 1. Upgrade the business to Growth or Managed Max.
 2. Open `Dashboard -> Integrations -> AI Voice Receptionist`.

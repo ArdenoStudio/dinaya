@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { businesses, voiceIntegrations } from "@/db/schema";
+import {
+  VOICE_RECEPTIONIST_ROLLOUT,
+  isVoiceReceptionistRolloutOpen,
+} from "@/lib/voice-receptionist";
 
 /**
  * Twilio inbound voice webhook (Phase 2 foundation).
@@ -9,6 +13,12 @@ import { businesses, voiceIntegrations } from "@/db/schema";
  * Returns ConversationRelay TwiML when TWILIO_CONVERSATION_RELAY_WS_URL is set.
  */
 export async function POST(req: NextRequest) {
+  if (!isVoiceReceptionistRolloutOpen()) {
+    return twimlResponse(
+      `<Response><Say language="en-IN">${escapeXml(VOICE_RECEPTIONIST_ROLLOUT.shortMessage)} Please book online for now.</Say></Response>`,
+    );
+  }
+
   const businessId = req.nextUrl.searchParams.get("businessId");
   if (!businessId) {
     return twimlResponse("<Response><Say language=\"en-IN\">Service unavailable.</Say></Response>", 400);

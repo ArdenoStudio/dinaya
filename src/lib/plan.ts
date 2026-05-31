@@ -81,7 +81,7 @@ const PLAN_RANK: Record<Plan, number> = {
 // ─── Defaults ─────────────────────────────────────────────────────────────────
 
 // 14-day trial: Starter + Pro features, without Growth-only brand/domain,
-// always-on AI, or managed voice setup.
+// always-on AI, or future voice setup.
 const DEFAULT_TRIAL_ENTITLEMENTS: Entitlements = {
   limits: {
     bookingsPerMonth: null,
@@ -224,7 +224,7 @@ const DEFAULT_MAX_ENTITLEMENTS: Entitlements = {
     aiContentMachine: true,
     aiDealSuggestions: true,
     aiUpsellAssistant: true,
-    aiVoiceReceptionist: true,
+    aiVoiceReceptionist: false,
     automations: true,
     broadcasts: true,
     clientReactivationCampaign: true,

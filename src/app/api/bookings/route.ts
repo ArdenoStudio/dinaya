@@ -25,6 +25,10 @@ import {
 import { canUseFeature, getBusinessPlan, PlanLimitError, requirePlanLimit } from "@/lib/plan";
 import { withRateLimit } from "@/lib/rate-limit";
 import { hasApiKeyAuth, requireApiKey } from "@/lib/api-key-auth";
+import {
+  VOICE_RECEPTIONIST_ROLLOUT,
+  isVoiceReceptionistRolloutOpen,
+} from "@/lib/voice-receptionist";
 import { z } from "@/lib/validation";
 import { startOfMonth } from "date-fns";
 import { claimDealSlot } from "@/lib/deals/claim";
@@ -102,6 +106,17 @@ export async function POST(req: NextRequest) {
     attribution: requestedAttribution,
   } = parsed.data;
   const session = await auth();
+
+  if (requestedSource === "voice_agent" && !isVoiceReceptionistRolloutOpen()) {
+    return NextResponse.json(
+      {
+        error: VOICE_RECEPTIONIST_ROLLOUT.message,
+        feature: "aiVoiceReceptionist",
+        rollout: VOICE_RECEPTIONIST_ROLLOUT.status,
+      },
+      { status: 503 },
+    );
+  }
 
   if (apiKeyAuth && apiBusinessId !== businessId) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });

@@ -64,7 +64,7 @@ export default async function AdminVoicePage() {
           <div>
             <h1 className="font-cal text-3xl tracking-tight">AI Voice Receptionist</h1>
             <p className="text-sm text-muted-foreground">
-              Manage provider setup status for Max voice add-on requests.
+              Internal setup tracking for the future voice rollout.
             </p>
           </div>
         </div>
@@ -80,8 +80,7 @@ export default async function AdminVoicePage() {
           POST /api/v1/voice/twilio?businessId=&lt;business-uuid&gt;
         </p>
         <p className="mt-2 text-xs text-muted-foreground">
-          The webhook returns TwiML that streams audio to your ConversationRelay WebSocket handler.
-          Booking still flows through existing <code className="rounded bg-white px-1">/api/v1/bookings</code> with source <code className="rounded bg-white px-1">voice_agent</code>.
+          This is paused for tenant users until rollout. After launch, bookings will flow through <code className="rounded bg-white px-1">/api/v1/bookings</code> with source <code className="rounded bg-white px-1">voice_agent</code>.
         </p>
       </div>
 
@@ -95,8 +94,7 @@ export default async function AdminVoicePage() {
           POST /api/v1/voice/twilio?businessId=&lt;business-uuid&gt;
         </p>
         <p className="mt-2 text-xs text-muted-foreground">
-          The webhook returns TwiML that streams audio to your ConversationRelay WebSocket handler.
-          Booking still flows through existing <code className="rounded bg-white px-1">/api/v1/bookings</code> with source <code className="rounded bg-white px-1">voice_agent</code>.
+          This is paused for tenant users until rollout. After launch, bookings will flow through <code className="rounded bg-white px-1">/api/v1/bookings</code> with source <code className="rounded bg-white px-1">voice_agent</code>.
         </p>
       </div>
 
@@ -104,7 +102,7 @@ export default async function AdminVoicePage() {
         <div className="rounded-xl border border-dashed bg-white p-8 text-center">
           <p className="font-medium">No voice setup requests yet.</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Requests appear here after a Max business saves the voice setup form.
+            Requests will appear here after Dinaya opens the voice setup form.
           </p>
         </div>
       ) : (

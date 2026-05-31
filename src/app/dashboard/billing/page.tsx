@@ -264,7 +264,7 @@ export default async function BillingPage() {
         <section className="rounded-xl border border-amber-200 bg-amber-50/50 p-6">
           <h2 className="text-lg font-semibold">Upgrade to Growth</h2>
           <p className="mt-1 text-sm text-neutral-700">
-            Unlock AI growth workflows, custom domain, branding removal, 3 branches, and AI Voice Receptionist setup eligibility.
+            Unlock AI growth workflows, custom domain, branding removal, and 3-branch scale. AI Voice Receptionist is coming later.
           </p>
           <PlanPricing
             monthlyLkr={maxMonthlyPriceLkr}

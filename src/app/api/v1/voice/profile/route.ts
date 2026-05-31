@@ -12,7 +12,11 @@ import {
 } from "@/db/schema";
 import { requireApiKey } from "@/lib/api-key-auth";
 import { canUseFeature, getBusinessPlan, planDisplayName } from "@/lib/plan";
-import { serializeVoiceIntegration } from "@/lib/voice-receptionist";
+import {
+  VOICE_RECEPTIONIST_ROLLOUT,
+  isVoiceReceptionistRolloutOpen,
+  serializeVoiceIntegration,
+} from "@/lib/voice-receptionist";
 
 function appBaseUrl(req: NextRequest): string {
   return (process.env.NEXT_PUBLIC_APP_URL || req.nextUrl.origin).replace(/\/$/, "");
@@ -47,6 +51,17 @@ export async function GET(req: NextRequest) {
 
   if (!business) {
     return NextResponse.json({ error: "Business not found." }, { status: 404 });
+  }
+
+  if (!isVoiceReceptionistRolloutOpen()) {
+    return NextResponse.json(
+      {
+        error: VOICE_RECEPTIONIST_ROLLOUT.message,
+        feature: "aiVoiceReceptionist",
+        rollout: VOICE_RECEPTIONIST_ROLLOUT.status,
+      },
+      { status: 503 },
+    );
   }
 
   const plan = await getBusinessPlan(businessId);

@@ -72,15 +72,15 @@ describe("plan entitlements", () => {
     }
   });
 
-  it("reserves AI voice receptionist for max", () => {
+  it("keeps AI voice receptionist behind the future max rollout", () => {
     expect(minimumPlanForFeature("aiVoiceReceptionist")).toBe("max");
     expect(canUseFeature("trial", "aiVoiceReceptionist")).toBe(false);
     expect(canUseFeature("starter", "aiVoiceReceptionist")).toBe(false);
     expect(canUseFeature("pro", "aiVoiceReceptionist")).toBe(false);
-    expect(canUseFeature("max", "aiVoiceReceptionist")).toBe(true);
+    expect(canUseFeature("max", "aiVoiceReceptionist")).toBe(false);
     expect(TRIAL_ENTITLEMENTS.features.aiVoiceReceptionist).toBe(false);
     expect(PRO_ENTITLEMENTS.features.aiVoiceReceptionist).toBe(false);
-    expect(MAX_ENTITLEMENTS.features.aiVoiceReceptionist).toBe(true);
+    expect(MAX_ENTITLEMENTS.features.aiVoiceReceptionist).toBe(false);
   });
 
   it("keeps the public booking page on trial and paid plans, off when expired", () => {

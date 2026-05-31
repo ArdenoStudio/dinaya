@@ -24,6 +24,10 @@ import {
   voiceIntegrations,
 } from "@/db/schema";
 import { marketingToolIds } from "@/lib/dashboard/marketing";
+import {
+  VOICE_RECEPTIONIST_ROLLOUT,
+  isVoiceReceptionistRolloutOpen,
+} from "@/lib/voice-receptionist";
 
 export type DesktopModuleKey =
   | "overview"
@@ -747,6 +751,7 @@ export async function getDesktopModuleData(
 
   if (module === "integrations") {
     const business = await getBusiness(businessId);
+    const voiceRolloutOpen = isVoiceReceptionistRolloutOpen();
     const socialRows = await db
       .select({
         id: socialConnections.id,
@@ -758,22 +763,24 @@ export async function getDesktopModuleData(
       .where(eq(socialConnections.businessId, businessId))
       .orderBy(asc(socialConnections.provider))
       .limit(30);
-    const voiceRows = await db
-      .select({
-        id: voiceIntegrations.id,
-        providerName: voiceIntegrations.providerName,
-        status: voiceIntegrations.status,
-      })
-      .from(voiceIntegrations)
-      .where(eq(voiceIntegrations.businessId, businessId))
-      .limit(5);
+    const voiceRows = voiceRolloutOpen
+      ? await db
+          .select({
+            id: voiceIntegrations.id,
+            providerName: voiceIntegrations.providerName,
+            status: voiceIntegrations.status,
+          })
+          .from(voiceIntegrations)
+          .where(eq(voiceIntegrations.businessId, businessId))
+          .limit(5)
+      : [];
 
     return payload(
       module,
       [
         metric("PayHere", business?.payhereEnabled ? "Enabled" : "Off", "Payments", business?.payhereEnabled ? "emerald" : "amber"),
         metric("Social", socialRows.length, "Connections", "cobalt"),
-        metric("Voice AI", voiceRows[0]?.status ?? "not_requested", "Receptionist", "slate"),
+        metric("Voice AI", voiceRolloutOpen ? voiceRows[0]?.status ?? "not_requested" : VOICE_RECEPTIONIST_ROLLOUT.statusLabel, "Receptionist", "slate"),
         metric("Active", socialRows.filter((row) => row.isActive).length, "Social accounts", "emerald"),
       ],
       [

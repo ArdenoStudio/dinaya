@@ -123,7 +123,7 @@ npm run db:migrate
    - `/dashboard/reports` (analytics charts + deal analytics)
    - `/dashboard/deals` (create/cancel/edit deals on Pro+)
    - `/dashboard/ai` (reactivation manual trigger)
-   - `/dashboard/settings/voice-receptionist` (Max voice setup)
+   - `/dashboard/settings/voice-receptionist` (coming-soon state; setup is paused)
    - `/dashboard/broadcasts` (Max broadcast panel, if enabled)
    - one public booking page at `/book/[slug]`
    - signed review page at `/reviews/[token]`

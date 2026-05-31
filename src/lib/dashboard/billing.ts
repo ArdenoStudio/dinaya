@@ -12,6 +12,7 @@ import {
   type Plan,
   type PlanConfig,
 } from "@/lib/plan";
+import { isVoiceReceptionistRolloutOpen } from "@/lib/voice-receptionist";
 
 export type DashboardBillingOverview = Awaited<ReturnType<typeof getBillingDashboardOverview>>;
 
@@ -181,7 +182,7 @@ export async function getBillingDashboardOverview(businessId: string, now = new 
       payments: entitlements.features.payments,
       reports: entitlements.features.reports,
       reviewReplies: entitlements.features.reviewReplies,
-      voiceReceptionist: entitlements.features.aiVoiceReceptionist,
+      voiceReceptionist: isVoiceReceptionistRolloutOpen() && entitlements.features.aiVoiceReceptionist,
       webhooks: entitlements.features.webhooks,
     },
     pricing: {

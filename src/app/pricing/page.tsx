@@ -40,14 +40,14 @@ const growthFeatures = [
   "Remove Dinaya branding",
   "Full automations",
   "AI review replies, reactivation, and content",
-  "AI Voice Receptionist setup eligible",
+  "AI Voice Receptionist coming soon",
 ];
 
 const managedFeatures = [
   "Everything in Growth",
   "Custom branches, staff, and setup",
   "Managed onboarding and migration",
-  "Voice receptionist managed setup",
+  "Voice receptionist rollout waitlist",
   "Priority WhatsApp and setup help",
   "Done-for-you optimization",
 ];
@@ -58,7 +58,7 @@ const addOns = [
   ["SMS/WhatsApp top-up", "Usage-based"],
   ["Custom domain setup help", "LKR 5,000 one-time"],
   ["Data migration", "From LKR 10,000"],
-  ["AI Voice Receptionist setup", "From LKR 25,000 one-time"],
+  ["AI Voice Receptionist", "Coming soon"],
   ["Managed onboarding", "From LKR 15,000 one-time"],
 ] as const;
 
@@ -83,14 +83,14 @@ const comparisonRows = [
   ["AI review replies", "No", "No", "Yes", "Yes"],
   ["AI reactivation", "No", "No", "Yes", "Yes"],
   ["AI content machine", "No", "No", "Yes", "Yes"],
-  ["AI voice receptionist", "No", "No", "Setup eligible", "Managed setup"],
+  ["AI voice receptionist", "Coming soon", "Coming soon", "Coming soon", "Coming soon"],
   ["Support", "Email/WhatsApp basic", "WhatsApp", "Priority WhatsApp", "Priority + setup help"],
 ] as const;
 
 const faqs = [
   {
     q: "How does the free trial work?",
-    a: "Every new business gets 14 days to try Dinaya without a card. The trial includes Starter and Pro tools, plus a limited Growth preview. Custom domains, voice receptionist setup, and unlimited messaging are not included in the trial.",
+    a: "Every new business gets 14 days to try Dinaya without a card. The trial includes Starter and Pro tools, plus a limited Growth preview. Custom domains and unlimited messaging are not included in the trial; voice receptionist is coming in a later rollout.",
   },
   {
     q: "Which plan should most businesses choose?",
@@ -102,7 +102,7 @@ const faqs = [
   },
   {
     q: "Can I switch plans later?",
-    a: "Yes. You can move from Starter to Pro or Growth from billing. Managed Max is handled with the Dinaya team because it usually includes setup, migration, or voice work.",
+    a: "Yes. You can move from Starter to Pro or Growth from billing. Managed Max is handled with the Dinaya team because it usually includes setup or migration work.",
   },
   {
     q: "Do you offer refunds?",
@@ -243,7 +243,7 @@ export default async function PricingPage() {
             <div>
               <p className="font-semibold">Trial includes Starter + Pro features with a limited Growth preview.</p>
               <p className="mt-1 text-blue-950/75">
-                No custom domain, no voice receptionist, and no unlimited messaging during trial.
+                No custom domain and no unlimited messaging during trial. AI Voice Receptionist is coming later.
               </p>
             </div>
             <Link href="/register" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline">

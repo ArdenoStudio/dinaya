@@ -2,6 +2,24 @@ import type { VoiceIntegration } from "@/db/schema";
 
 export const VOICE_RECEPTIONIST_FEATURE = "aiVoiceReceptionist" as const;
 
+export const VOICE_RECEPTIONIST_ROLLOUT = {
+  actionLabel: "Coming soon",
+  available: false,
+  message:
+    "AI Voice Receptionist is coming soon. The Dinaya team is still preparing this rollout, so setup requests, voice API keys, and voice-created bookings are paused for now.",
+  shortMessage: "AI Voice Receptionist is coming soon.",
+  status: "coming_soon",
+  statusLabel: "Coming soon",
+} as const;
+
+export function isVoiceReceptionistRolloutOpen(): boolean {
+  return VOICE_RECEPTIONIST_ROLLOUT.available;
+}
+
+export function isVoiceScope(scope: string): boolean {
+  return scope === "voice:read" || scope === "voice:write";
+}
+
 export const VOICE_STATUSES = [
   "not_requested",
   "requested",

@@ -36,7 +36,7 @@ const releases = [
     version: "v1.5",
     date: "May 2026",
     isLatest: true,
-    highlight: "AI voice receptionist, plan gating & stability fixes",
+    highlight: "Deals, plan gating & stability fixes",
     changes: [
       {
         type: "feature" as const,
@@ -45,10 +45,10 @@ const releases = [
         desc: "Post flash discounts on slow appointment slots. Clients discover deals on Dinaya, book at discounted prices, and you track impressions and conversions in Reports.",
       },
       {
-        type: "feature" as const,
+        type: "improvement" as const,
         icon: "mic-fill",
-        title: "AI voice receptionist",
-        desc: "Set up an AI-powered phone agent that answers calls and books appointments automatically — even outside business hours.",
+        title: "AI voice receptionist coming soon",
+        desc: "Voice bookings are being prepared for a later rollout. Setup requests, voice API keys, and voice-created bookings are paused for now.",
       },
       {
         type: "feature" as const,

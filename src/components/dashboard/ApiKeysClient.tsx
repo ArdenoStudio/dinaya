@@ -2,6 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { API_KEY_SCOPES, type ApiKeyScope } from "@/lib/api-key-scopes";
+import {
+  isVoiceReceptionistRolloutOpen,
+  isVoiceScope,
+} from "@/lib/voice-receptionist";
 
 type ApiKeyRow = {
   id: string;
@@ -14,6 +18,10 @@ type ApiKeyRow = {
   revokedAt: string | null;
   createdAt: string;
 };
+
+const selectableApiKeyScopes = API_KEY_SCOPES.filter(
+  (scope) => isVoiceReceptionistRolloutOpen() || !isVoiceScope(scope),
+);
 
 export function ApiKeysClient() {
   const [keys, setKeys] = useState<ApiKeyRow[]>([]);
@@ -105,7 +113,7 @@ export function ApiKeysClient() {
         <div>
           <p className="mb-2 text-sm font-medium">Scopes</p>
           <div className="flex flex-wrap gap-2">
-            {API_KEY_SCOPES.map((scope) => (
+            {selectableApiKeyScopes.map((scope) => (
               <label key={scope} className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm">
                 <input
                   type="checkbox"

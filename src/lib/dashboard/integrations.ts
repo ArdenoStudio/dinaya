@@ -3,7 +3,11 @@ import { db } from "@/db";
 import { apiKeys, businesses, socialConnections, voiceIntegrations, webhooks } from "@/db/schema";
 import { GOOGLE_PROVIDER, googleOAuthConfigured } from "@/lib/google-calendar";
 import { canUseFeature, minimumPlanForFeature, planDisplayName, resolveEffectivePlan, type Plan, type PlanFeature } from "@/lib/plan";
-import { voiceStatusLabel } from "@/lib/voice-receptionist";
+import {
+  VOICE_RECEPTIONIST_ROLLOUT,
+  isVoiceReceptionistRolloutOpen,
+  voiceStatusLabel,
+} from "@/lib/voice-receptionist";
 
 export type DashboardIntegrationDetail = Awaited<ReturnType<typeof getIntegrationDashboardDetail>>;
 export type DashboardIntegrationsList = Awaited<ReturnType<typeof getIntegrationsDashboardList>>;
@@ -134,15 +138,22 @@ export async function getIntegrationsDashboardList(
   const canUseWebhooks = canUseFeature(plan, "webhooks");
   const canUseGoogleCalendar = canUseFeature(plan, "googleCalendarSync");
   const canUseWhatsappSms = canUseFeature(plan, "whatsappSms");
-  const canUseVoice = canUseFeature(plan, "aiVoiceReceptionist");
+  const voiceRolloutOpen = isVoiceReceptionistRolloutOpen();
+  const canUseVoice = voiceRolloutOpen && canUseFeature(plan, "aiVoiceReceptionist");
   const canUseCustomDomain = canUseFeature(plan, "publicBookingPageCustomization");
   const payhereConnected = Boolean(business?.payhereEnabled && business.payhereMerchantId);
   const googleConfigured = googleOAuthConfigured();
   const messagingConfigured = Boolean(process.env.META_WHATSAPP_TOKEN || process.env.SMS_HTTP_ENDPOINT);
   const resendConfigured = Boolean(process.env.RESEND_API_KEY);
-  const voiceStatus = canUseVoice
-    ? voiceListStatus(voice?.status)
-    : gatedStatus(plan, "aiVoiceReceptionist");
+  const voiceStatus = !voiceRolloutOpen
+    ? {
+        actionLabel: "View status",
+        status: "available" as const,
+        statusLabel: VOICE_RECEPTIONIST_ROLLOUT.statusLabel,
+      }
+    : canUseVoice
+      ? voiceListStatus(voice?.status)
+      : gatedStatus(plan, "aiVoiceReceptionist");
   const voiceSetupPath = "setupPath" in voiceStatus
     ? voiceStatus.setupPath
     : "/dashboard/settings/voice-receptionist";
@@ -244,19 +255,21 @@ export async function getIntegrationsDashboardList(
       updatedAt: null,
     },
     {
-      accountName: voice?.providerName ?? null,
+      accountName: voiceRolloutOpen ? voice?.providerName ?? null : null,
       actionLabel: voiceStatus.actionLabel,
       category: "voice",
-      description: "Managed phone agent for questions and appointment booking.",
-      detailId: voice?.id ?? null,
+      description: voiceRolloutOpen
+        ? "Managed phone agent for questions and appointment booking."
+        : "Phone-agent booking is being prepared for a later rollout.",
+      detailId: voiceRolloutOpen ? voice?.id ?? null : null,
       id: "ai-voice-receptionist",
       kind: "voice",
       name: "AI Voice Receptionist",
-      provider: voice?.providerName ?? "Peak Agents",
+      provider: voiceRolloutOpen ? voice?.providerName ?? "Peak Agents" : "Dinaya",
       setupPath: voiceSetupPath,
       status: voiceStatus.status,
       statusLabel: voiceStatus.statusLabel,
-      updatedAt: voice?.updatedAt.toISOString() ?? null,
+      updatedAt: voiceRolloutOpen ? voice?.updatedAt.toISOString() ?? null : null,
     },
     {
       accountName: null,
@@ -377,6 +390,8 @@ export async function getIntegrationDashboardDetail(businessId: string, integrat
       },
     };
   }
+
+  if (!isVoiceReceptionistRolloutOpen()) return null;
 
   const [voice] = await db
     .select({

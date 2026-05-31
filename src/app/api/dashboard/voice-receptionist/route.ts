@@ -11,6 +11,8 @@ import {
   requirePro,
 } from "@/lib/plan";
 import {
+  VOICE_RECEPTIONIST_ROLLOUT,
+  isVoiceReceptionistRolloutOpen,
   normalizeVoiceLanguages,
   serializeVoiceIntegration,
 } from "@/lib/voice-receptionist";
@@ -57,6 +59,24 @@ export async function GET(req: NextRequest) {
   if (!authResult.ok) return authResult.response;
   const { businessId } = authResult.context;
 
+  if (!isVoiceReceptionistRolloutOpen()) {
+    const [business] = await db
+      .select({
+        phone: businesses.phone,
+      })
+      .from(businesses)
+      .where(eq(businesses.id, businessId))
+      .limit(1);
+
+    return NextResponse.json({
+      available: false,
+      businessPhone: business?.phone ?? null,
+      integration: null,
+      requiredPlan: "max",
+      rollout: VOICE_RECEPTIONIST_ROLLOUT,
+    });
+  }
+
   const [plan, [business], [integration]] = await Promise.all([
     getBusinessPlan(businessId),
     db
@@ -78,6 +98,7 @@ export async function GET(req: NextRequest) {
     requiredPlan: "max",
     businessPhone: business?.phone ?? null,
     integration: serializeVoiceIntegration(integration ?? null),
+    rollout: VOICE_RECEPTIONIST_ROLLOUT,
   });
 }
 
@@ -85,6 +106,17 @@ export async function POST(req: NextRequest) {
   const authResult = await requireApiBusiness({ ownerOnly: true, req });
   if (!authResult.ok) return authResult.response;
   const { businessId } = authResult.context;
+
+  if (!isVoiceReceptionistRolloutOpen()) {
+    return NextResponse.json(
+      {
+        error: VOICE_RECEPTIONIST_ROLLOUT.message,
+        feature: "aiVoiceReceptionist",
+        rollout: VOICE_RECEPTIONIST_ROLLOUT.status,
+      },
+      { status: 503 },
+    );
+  }
 
   const accessError = await requireVoiceAccess(businessId);
   if (accessError) return accessError;

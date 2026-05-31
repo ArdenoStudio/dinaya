@@ -6,6 +6,11 @@ import { requireApiBusiness } from "@/lib/api-auth";
 import { API_KEY_SCOPES, generateApiKey } from "@/lib/api-keys";
 import { PlanRequiredError, requirePro } from "@/lib/plan";
 import { withApiHandler } from "@/lib/api-handler";
+import {
+  VOICE_RECEPTIONIST_ROLLOUT,
+  isVoiceReceptionistRolloutOpen,
+  isVoiceScope,
+} from "@/lib/voice-receptionist";
 import { z } from "@/lib/validation";
 
 const createSchema = z.object({
@@ -52,15 +57,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Please check the API key details." }, { status: 400 });
     }
 
-    const needsVoiceScopes = parsed.data.scopes.some(
-      (scope) => scope === "voice:read" || scope === "voice:write",
-    );
+    const needsVoiceScopes = parsed.data.scopes.some(isVoiceScope);
     const needsDesktopScopes = parsed.data.scopes.some(
       (scope) => scope === "desktop:read" || scope === "desktop:bookings" || scope === "desktop:write",
     );
 
     try {
       if (needsVoiceScopes) {
+        if (!isVoiceReceptionistRolloutOpen()) {
+          return NextResponse.json(
+            { error: VOICE_RECEPTIONIST_ROLLOUT.message },
+            { status: 503 },
+          );
+        }
         await requirePro(businessId, "aiVoiceReceptionist");
       } else if (needsDesktopScopes) {
         await requirePro(businessId, "webhooks");

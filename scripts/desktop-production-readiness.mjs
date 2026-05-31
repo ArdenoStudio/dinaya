@@ -431,8 +431,16 @@ for (const marker of requiredRustMarkers) {
   }
 }
 for (const marker of requiredCiMarkers) requireText(ci, marker, "CI marker");
-for (const marker of ["Capture-WindowBitmap", "Measure-WindowBitmap", "Wait-StartupLogMarker", "FrontendReady", "NonBlankPixelRatio", "UniqueColors"]) {
-  requireText(desktopSmoke, marker, "desktop smoke visual marker");
+for (const marker of [
+  "Get-StartupText",
+  "Get-MissingStartupMarkers",
+  "Format-StartupLog",
+  "main webview found",
+  "global shortcut registered: Ctrl+Shift+K",
+  "MainWindowHandle",
+  "Responding",
+]) {
+  requireText(desktopSmoke, marker, "desktop smoke startup marker");
 }
 
 if (rootPackage.scripts["desktop:smoke"] !== "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/desktop-smoke.ps1") {
@@ -448,7 +456,7 @@ if (desktopPackage.scripts.smoke !== "powershell -NoProfile -ExecutionPolicy Byp
 notes.push(`Checked ${expectedRoutes.length} desktop dashboard routes.`);
 notes.push(`Checked ${requiredDetailRoutes.length} native detail API route/test pairs.`);
 notes.push("Checked desktop shell markers for auth bridge, command palette, offline cache, crash recovery, and print/export.");
-notes.push("Checked desktop smoke markers for visible-window screenshot and nonblank pixel verification.");
+notes.push("Checked desktop smoke markers for startup log, responding process, and main-window verification.");
 notes.push("Checked CI markers for Windows desktop build and smoke verification.");
 
 if (failures.length) {
