@@ -2,7 +2,7 @@ import { db } from "@/db";
 import { bookings, clients, payments, reviews, services, staff } from "@/db/schema";
 import { ProGate } from "@/components/ProGate";
 import { requireBusiness } from "@/lib/auth";
-import { formatLkr } from "@/lib/utils";
+import { cn, formatLkr } from "@/lib/utils";
 import { AnalyticsCharts } from "@/components/dashboard/AnalyticsCharts";
 import { DealAnalyticsPanel } from "@/components/dashboard/DealAnalyticsPanel";
 import { StatCard } from "@/components/dashboard/StatCard";
@@ -135,6 +135,9 @@ export default async function ReportsPage() {
   const total = Number(totalBookings);
   const cancellationRate = total > 0 ? Math.round((Number(cancelledBookings) / total) * 100) : 0;
   const noShowRate = total > 0 ? Math.round((Number(noShows) / total) * 100) : 0;
+  const maxHealthCount = Math.max(Number(completedBookings), Number(cancelledBookings), Number(noShows), 1);
+  const maxSourceCount = Math.max(...bookingsBySource.map((r) => Number(r.value)), 1);
+  const maxStaffCount = Math.max(...bookingsByStaff.map((r) => Number(r.value)), 1);
 
   const thisWeekMap = new Map(dailyRevenueThisWeek.map((row) => [Number(row.dayIndex), Number(row.revenue)]));
   const lastWeekMap = new Map(dailyRevenueLastWeek.map((row) => [Number(row.dayIndex), Number(row.revenue)]));
@@ -200,18 +203,34 @@ export default async function ReportsPage() {
         <div className="grid gap-6 lg:grid-cols-2">
           <div className="rounded-xl border bg-white p-5">
             <h2 className="mb-4 font-semibold">Booking health summary</h2>
-            <div className="grid grid-cols-3 gap-3 text-center">
-              <div className="rounded-lg bg-muted/30 p-4">
-                <p className="text-2xl font-bold">{completedBookings}</p>
-                <p className="text-xs text-muted-foreground">Completed</p>
-              </div>
-              <div className="rounded-lg bg-muted/30 p-4">
-                <p className="text-2xl font-bold">{cancellationRate}%</p>
-                <p className="text-xs text-muted-foreground">Cancelled</p>
-              </div>
-              <div className="rounded-lg bg-muted/30 p-4">
-                <p className="text-2xl font-bold">{noShowRate}%</p>
-                <p className="text-xs text-muted-foreground">No-show</p>
+            <div className="space-y-4">
+              {[
+                { label: "Completed", value: Number(completedBookings), color: "bg-green-500", text: "text-green-700" },
+                { label: "Cancelled", value: Number(cancelledBookings), color: "bg-amber-400", text: "text-amber-700" },
+                { label: "No-show", value: Number(noShows), color: "bg-red-400", text: "text-red-600" },
+              ].map((item) => (
+                <div key={item.label}>
+                  <div className="mb-1.5 flex items-center justify-between text-sm">
+                    <span className="font-medium">{item.label}</span>
+                    <span className={cn("font-semibold", item.text)}>{item.value}</span>
+                  </div>
+                  <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+                    <div
+                      className={cn("h-full rounded-full transition-all", item.color)}
+                      style={{ width: `${Math.round((item.value / maxHealthCount) * 100)}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+              <div className="grid grid-cols-2 gap-3 pt-1">
+                <div className="rounded-lg bg-muted/40 py-3 text-center">
+                  <p className="text-lg font-semibold">{cancellationRate}%</p>
+                  <p className="text-xs text-muted-foreground">Cancellation rate</p>
+                </div>
+                <div className="rounded-lg bg-muted/40 py-3 text-center">
+                  <p className="text-lg font-semibold">{noShowRate}%</p>
+                  <p className="text-xs text-muted-foreground">No-show rate</p>
+                </div>
               </div>
             </div>
           </div>
@@ -221,11 +240,19 @@ export default async function ReportsPage() {
             {bookingsBySource.length === 0 ? (
               <p className="text-sm text-muted-foreground">No bookings yet.</p>
             ) : (
-              <div className="grid gap-3 md:grid-cols-2">
+              <div className="grid gap-4 md:grid-cols-2">
                 {bookingsBySource.map((row) => (
-                  <div key={row.source} className="rounded-lg border px-4 py-3">
-                    <p className="font-medium capitalize">{row.source.replace(/_/g, " ")}</p>
-                    <p className="text-sm text-muted-foreground">{row.value} bookings</p>
+                  <div key={row.source}>
+                    <div className="mb-1.5 flex items-center justify-between text-sm">
+                      <span className="font-medium capitalize">{row.source.replace(/_/g, " ")}</span>
+                      <span className="text-muted-foreground">{row.value} bookings</span>
+                    </div>
+                    <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+                      <div
+                        className="h-full rounded-full bg-primary/60"
+                        style={{ width: `${Math.round((Number(row.value) / maxSourceCount) * 100)}%` }}
+                      />
+                    </div>
                   </div>
                 ))}
               </div>
@@ -237,13 +264,34 @@ export default async function ReportsPage() {
             {bookingsByStaff.length === 0 ? (
               <p className="text-sm text-muted-foreground">No bookings yet.</p>
             ) : (
-              <div className="grid gap-3 md:grid-cols-2">
-                {bookingsByStaff.map((row) => (
-                  <div key={row.staffName} className="rounded-lg border px-4 py-3">
-                    <p className="font-medium">{row.staffName}</p>
-                    <p className="text-sm text-muted-foreground">{row.value} bookings</p>
-                  </div>
-                ))}
+              <div className="grid gap-4 md:grid-cols-2">
+                {bookingsByStaff.map((row) => {
+                  const initials = row.staffName
+                    .split(" ")
+                    .slice(0, 2)
+                    .map((n) => n[0])
+                    .join("")
+                    .toUpperCase();
+                  return (
+                    <div key={row.staffName}>
+                      <div className="mb-1.5 flex items-center justify-between text-sm">
+                        <div className="flex items-center gap-2">
+                          <span className="flex size-6 items-center justify-center rounded-full bg-violet-50 text-xs font-semibold text-violet-600">
+                            {initials}
+                          </span>
+                          <span className="font-medium">{row.staffName}</span>
+                        </div>
+                        <span className="text-muted-foreground">{row.value} bookings</span>
+                      </div>
+                      <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+                        <div
+                          className="h-full rounded-full bg-violet-500/60"
+                          style={{ width: `${Math.round((Number(row.value) / maxStaffCount) * 100)}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>

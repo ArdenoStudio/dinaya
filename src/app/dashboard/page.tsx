@@ -1,16 +1,17 @@
 import { db } from "@/db";
 import { activityLog, availability, bookings, businesses, clients, payments, services, staff } from "@/db/schema";
 import { and, count, desc, eq, gte, lt, sql } from "drizzle-orm";
-import { addDays, endOfWeek, format, startOfDay, startOfWeek, subWeeks } from "date-fns";
+import { addDays, endOfWeek, format, formatDistanceToNow, startOfDay, startOfWeek, subWeeks } from "date-fns";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireBusiness } from "@/lib/auth";
-import { formatLkr } from "@/lib/utils";
+import { cn, formatLkr } from "@/lib/utils";
 import { OnboardingWizard } from "@/components/dashboard/OnboardingWizard";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { buildPublicBookingUrl, buildPublicBookingUrlLabel } from "@/lib/booking-url";
 import { Icon } from "@/components/ui/Icon";
-import { Banknote, CalendarCheck, TrendingUp, UserPlus } from "lucide-react";
+import { Activity, Banknote, CalendarCheck, Scissors, Star, TrendingUp, UserPlus, Users } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 async function safeRecentActivity(businessId: string) {
   try {
@@ -172,6 +173,37 @@ export default async function DashboardOverview() {
     { label: "New clients", value: newClientsThisWeek, icon: UserPlus, tone: "cobalt" as const, delta: "This week" },
   ];
 
+  const statusBorder: Record<string, string> = {
+    confirmed: "border-l-blue-500",
+    pending: "border-l-amber-400",
+    completed: "border-l-green-500",
+    no_show: "border-l-red-400",
+    cancelled: "border-l-slate-300",
+  };
+  const statusBadge: Record<string, string> = {
+    confirmed: "bg-blue-50 text-blue-700",
+    pending: "bg-amber-50 text-amber-700",
+    completed: "bg-green-50 text-green-700",
+    no_show: "bg-red-50 text-red-600",
+    cancelled: "bg-slate-100 text-slate-500",
+  };
+  const entityIconMap: Record<string, LucideIcon> = {
+    booking: CalendarCheck,
+    client: UserPlus,
+    payment: Banknote,
+    staff: Users,
+    service: Scissors,
+    review: Star,
+  };
+  const actionDot: Record<string, string> = {
+    created: "bg-green-500",
+    updated: "bg-blue-400",
+    cancelled: "bg-red-400",
+    completed: "bg-green-500",
+    deleted: "bg-red-400",
+    no_show: "bg-amber-400",
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -224,16 +256,40 @@ export default async function DashboardOverview() {
             </div>
           ) : (
             <div className="space-y-3">
-              {todayRows.map((row) => (
-                <Link key={row.id} href={`/dashboard/bookings/${row.id}`} className="flex items-center gap-4 rounded-lg border px-4 py-3 hover:border-primary/40">
-                  <span className="w-20 text-sm font-semibold tabular-nums text-primary">{format(row.startsAt, "h:mm a")}</span>
-                  <span className="flex-1 text-sm">
-                    <span className="font-medium">{row.clientName}</span>
-                    <span className="text-muted-foreground"> - {row.serviceName} with {row.staffName}</span>
-                  </span>
-                  <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium capitalize text-primary">{row.status.replace("_", " ")}</span>
-                </Link>
-              ))}
+              {todayRows.map((row) => {
+                const initials = row.clientName
+                  .split(" ")
+                  .slice(0, 2)
+                  .map((n) => n[0])
+                  .join("")
+                  .toUpperCase();
+                const border = statusBorder[row.status] ?? "border-l-slate-200";
+                const badge = statusBadge[row.status] ?? "bg-muted text-muted-foreground";
+                return (
+                  <Link
+                    key={row.id}
+                    href={`/dashboard/bookings/${row.id}`}
+                    className={cn(
+                      "flex items-center gap-3 rounded-lg border border-l-4 px-4 py-3 transition-shadow hover:shadow-sm",
+                      border,
+                    )}
+                  >
+                    <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                      {initials}
+                    </span>
+                    <span className="w-16 shrink-0 text-sm font-semibold tabular-nums text-primary">
+                      {format(row.startsAt, "h:mm a")}
+                    </span>
+                    <span className="min-w-0 flex-1 text-sm">
+                      <span className="font-medium">{row.clientName}</span>
+                      <span className="text-muted-foreground"> · {row.serviceName} with {row.staffName}</span>
+                    </span>
+                    <span className={cn("shrink-0 rounded-full px-2 py-0.5 text-xs font-medium capitalize", badge)}>
+                      {row.status.replace("_", " ")}
+                    </span>
+                  </Link>
+                );
+              })}
             </div>
           )}
         </div>
@@ -263,12 +319,32 @@ export default async function DashboardOverview() {
               <p className="text-sm text-muted-foreground">No recent activity yet.</p>
             ) : (
               <div className="space-y-3">
-                {recentActivity.map((item, index) => (
-                  <div key={`${item.entity}-${item.createdAt.toISOString()}-${index}`} className="border-b pb-3 last:border-b-0 last:pb-0">
-                    <p className="text-sm font-medium capitalize">{item.entity} {item.action.replace("_", " ")}</p>
-                    <p className="text-xs text-muted-foreground">{format(item.createdAt, "d MMM, h:mm a")}</p>
-                  </div>
-                ))}
+                {recentActivity.map((item, index) => {
+                  const EntityIcon = entityIconMap[item.entity] ?? Activity;
+                  const dot = actionDot[item.action] ?? "bg-slate-300";
+                  return (
+                    <div
+                      key={`${item.entity}-${item.createdAt.toISOString()}-${index}`}
+                      className="flex items-start gap-3 border-b pb-3 last:border-b-0 last:pb-0"
+                    >
+                      <div className="relative mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full bg-muted">
+                        <EntityIcon className="size-3.5 text-muted-foreground" aria-hidden="true" />
+                        <span className={cn("absolute -right-0.5 -top-0.5 size-2 rounded-full ring-1 ring-white", dot)} />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium capitalize">
+                          {item.entity}{" "}
+                          <span className="font-normal text-muted-foreground">
+                            {item.action.replace(/_/g, " ")}
+                          </span>
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {formatDistanceToNow(item.createdAt, { addSuffix: true })}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
