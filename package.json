@@ -2,6 +2,9 @@
   "name": "dinaya",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "node scripts/next-build.mjs",
@@ -12,7 +15,10 @@
     "desktop:build": "npm --prefix apps/desktop run build",
     "desktop:smoke": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/desktop-smoke.ps1",
     "mcp:dinaya": "npm --prefix apps/mcp-dinaya run start",
+    "mcp:dinaya:audit": "npm --prefix apps/mcp-dinaya audit --audit-level=high",
     "mcp:dinaya:self-test": "npm --prefix apps/mcp-dinaya run self-test",
+    "video:lint": "npm --prefix apps/video run lint",
+    "subapps:verify": "npm run mcp:dinaya:self-test && npm run mcp:dinaya:audit && npm run video:lint",
     "test": "vitest run",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",

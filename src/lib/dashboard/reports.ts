@@ -1,4 +1,4 @@
-import { endOfDay, startOfDay, subDays } from "date-fns";
+import { addDays, endOfDay, startOfDay, startOfWeek, subDays } from "date-fns";
 import { fromZonedTime, toZonedTime } from "date-fns-tz";
 import { and, count, desc, eq, gte, lt, sql } from "drizzle-orm";
 import { db } from "@/db";
@@ -54,6 +54,19 @@ function rangeBounds(range: DashboardReportsRange, timezone: string) {
   };
 }
 
+function weekBounds(now: Date, timezone: string) {
+  const localNow = toZonedTime(now, timezone);
+  const currentStartLocal = startOfWeek(localNow, { weekStartsOn: 1 });
+  const currentEndLocal = addDays(currentStartLocal, 7);
+  const previousStartLocal = subDays(currentStartLocal, 7);
+
+  return {
+    currentEndUtc: fromZonedTime(currentEndLocal, timezone),
+    currentStartUtc: fromZonedTime(currentStartLocal, timezone),
+    previousStartUtc: fromZonedTime(previousStartLocal, timezone),
+  };
+}
+
 function money(value: number): string {
   return `LKR ${value.toLocaleString("en-LK")}`;
 }
@@ -86,6 +99,10 @@ export async function getReportsDashboardOverview(
   const timezone = business?.timezone ?? "Asia/Colombo";
   const range = normalizeReportsRange({ ...rangeInput, now, timezone });
   const { endUtc, startUtc } = rangeBounds(range, timezone);
+  const weeks = weekBounds(now, timezone);
+  const localPaymentDate = sql<string>`to_char(${payments.createdAt} AT TIME ZONE ${timezone}, 'YYYY-MM-DD')`;
+  const localPaymentWeekday = sql<number>`extract(dow from ${payments.createdAt} AT TIME ZONE ${timezone})::int`;
+  const localBookingHour = sql<number>`extract(hour from ${bookings.startsAt} AT TIME ZONE ${timezone})::int`;
   const bookingRange = and(
     eq(bookings.businessId, businessId),
     gte(bookings.startsAt, startUtc),
@@ -104,6 +121,7 @@ export async function getReportsDashboardOverview(
     [{ cancelledBookings }],
     [{ noShows }],
     [{ newClients }],
+    [{ totalClients }],
     [{ totalRevenue }],
     [{ averageRating }],
     bookingsByStatus,
@@ -112,6 +130,9 @@ export async function getReportsDashboardOverview(
     staffLoad,
     topClients,
     revenueByDay,
+    dailyRevenueThisWeek,
+    dailyRevenueLastWeek,
+    busiestHours,
   ] = await Promise.all([
     db.select({ totalBookings: count() }).from(bookings).where(bookingRange),
     db.select({ completedBookings: count() }).from(bookings).where(and(bookingRange, eq(bookings.status, "completed"))),
@@ -121,6 +142,7 @@ export async function getReportsDashboardOverview(
       .select({ newClients: count() })
       .from(clients)
       .where(and(eq(clients.businessId, businessId), gte(clients.createdAt, startUtc), lt(clients.createdAt, endUtc))),
+    db.select({ totalClients: count() }).from(clients).where(eq(clients.businessId, businessId)),
     db
       .select({ totalRevenue: sql<number>`coalesce(sum(${payments.amountLkr}), 0)::int` })
       .from(payments)
@@ -177,14 +199,52 @@ export async function getReportsDashboardOverview(
       .limit(6),
     db
       .select({
-        date: sql<string>`to_char(${payments.createdAt}, 'YYYY-MM-DD')`,
+        date: localPaymentDate,
         value: sql<number>`coalesce(sum(${payments.amountLkr}), 0)::int`,
       })
       .from(payments)
       .innerJoin(bookings, eq(bookings.id, payments.bookingId))
       .where(paymentRange)
-      .groupBy(sql`to_char(${payments.createdAt}, 'YYYY-MM-DD')`)
-      .orderBy(sql`to_char(${payments.createdAt}, 'YYYY-MM-DD')`),
+      .groupBy(localPaymentDate)
+      .orderBy(localPaymentDate),
+    db
+      .select({
+        dayIndex: localPaymentWeekday,
+        revenue: sql<number>`coalesce(sum(${payments.amountLkr}), 0)::int`,
+      })
+      .from(payments)
+      .innerJoin(bookings, eq(bookings.id, payments.bookingId))
+      .where(and(
+        eq(bookings.businessId, businessId),
+        eq(payments.status, "success"),
+        gte(payments.createdAt, weeks.currentStartUtc),
+        lt(payments.createdAt, weeks.currentEndUtc),
+      ))
+      .groupBy(localPaymentWeekday),
+    db
+      .select({
+        dayIndex: localPaymentWeekday,
+        revenue: sql<number>`coalesce(sum(${payments.amountLkr}), 0)::int`,
+      })
+      .from(payments)
+      .innerJoin(bookings, eq(bookings.id, payments.bookingId))
+      .where(and(
+        eq(bookings.businessId, businessId),
+        eq(payments.status, "success"),
+        gte(payments.createdAt, weeks.previousStartUtc),
+        lt(payments.createdAt, weeks.currentStartUtc),
+      ))
+      .groupBy(localPaymentWeekday),
+    db
+      .select({
+        hour: localBookingHour,
+        value: count(bookings.id),
+      })
+      .from(bookings)
+      .where(bookingRange)
+      .groupBy(localBookingHour)
+      .orderBy(desc(count(bookings.id)))
+      .limit(8),
   ]);
 
   const bookingCount = Number(totalBookings ?? 0);
@@ -199,9 +259,14 @@ export async function getReportsDashboardOverview(
     newClients: Number(newClients ?? 0),
     noShowRate: bookingCount > 0 ? Math.round((noShowCount / bookingCount) * 100) : 0,
     noShows: noShowCount,
+    totalClients: Number(totalClients ?? 0),
     totalBookings: bookingCount,
     totalRevenueLkr: revenue,
   };
+
+  const dayLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  const thisWeekMap = new Map(dailyRevenueThisWeek.map((row) => [Number(row.dayIndex), Number(row.revenue)]));
+  const lastWeekMap = new Map(dailyRevenueLastWeek.map((row) => [Number(row.dayIndex), Number(row.revenue)]));
 
   const csv = [
     csvLine(["Dinaya reports export", business?.name ?? businessId]),
@@ -264,5 +329,21 @@ export async function getReportsDashboardOverview(
       totalRevenueLabel: money(revenue),
     },
     range,
+    trends: {
+      busiestHours: [...busiestHours]
+        .sort((a, b) => Number(a.hour) - Number(b.hour))
+        .map((row) => ({
+          hour: Number(row.hour),
+          value: Number(row.value),
+        })),
+      revenueByWeekday: dayLabels.map((day, index) => {
+        const pgDow = index === 6 ? 0 : index + 1;
+        return {
+          day,
+          lastWeek: lastWeekMap.get(pgDow) ?? 0,
+          thisWeek: thisWeekMap.get(pgDow) ?? 0,
+        };
+      }),
+    },
   };
 }

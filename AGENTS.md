@@ -78,13 +78,13 @@ npm run test:e2e  # Requires DATABASE_URL, AUTH_SECRET
 
 Validate request bodies with Zod schemas from `src/lib/schemas/` or colocated schemas.
 
-### Plan gating (Free / Pro / Max)
+### Plan gating (Trial / Starter / Pro / Growth)
 
-- Check features: `canUseFeature(plan, feature)` in `src/lib/plan.tsx`
+- Check features: `canUseFeature(plan, feature)` in `src/lib/plan.ts`
 - Enforce in APIs: `requirePro(businessId, feature)` — throws `PlanRequiredError`
-- UI gates: `<ProGate feature="…">` in `src/lib/plan.tsx`
+- UI gates: `<ProGate feature="…">` in `src/components/ProGate.tsx`
 - Feature metadata: `src/lib/plan-features.ts`
-- **Max-only example:** `aiVoiceReceptionist`
+- Growth is represented as `max` internally; `aiVoiceReceptionist` remains disabled until rollout opens.
 
 ### Sri Lanka / product constraints
 

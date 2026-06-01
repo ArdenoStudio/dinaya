@@ -5,6 +5,9 @@
   "repository": {},
   "license": "UNLICENSED",
   "private": true,
+  "engines": {
+    "node": "22.x"
+  },
   "dependencies": {
     "@remotion/cli": "4.0.468",
     "@remotion/google-fonts": "^4.0.468",

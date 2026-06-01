@@ -50,7 +50,7 @@
 | Area | What you get |
 |------|----------------|
 | **Booking** | Branded public pages at `/book/[slug]` and `{slug}.dinaya.lk` subdomains |
-| **Payments** | PayHere checkout and subscription billing for Pro / Max plans |
+| **Payments** | PayHere checkout and subscription billing for Starter / Pro / Growth plans |
 | **Operations** | Business dashboard — calendar, clients, locations, staff, automations |
 | **Growth** | Reviews, referrals, directory discovery, AI workflow hub |
 | **Integrations** | Google Calendar sync, webhooks, API keys, WhatsApp / SMS messaging |
@@ -61,7 +61,7 @@
 - **Framework** — Next.js 16 (App Router), React 19, TypeScript
 - **Data** — Neon Postgres, Drizzle ORM
 - **Auth** — NextAuth (credentials)
-- **Payments & comms** — PayHere, Resend; optional OpenAI for AI workflows
+- **Payments & comms** — PayHere, Resend; Groq/OpenAI-compatible AI workflows
 
 ## Local setup
 

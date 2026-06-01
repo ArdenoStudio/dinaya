@@ -327,6 +327,7 @@ async function getMigrationMetadata() {
   if (!(await pathExists(DRIZZLE_ROOT))) {
     return {
       directory: toRelative(DRIZZLE_ROOT),
+      duplicateSequences: [],
       migrations: [],
       sequenceGaps: [],
     };
@@ -352,6 +353,17 @@ async function getMigrationMetadata() {
   }
 
   const sequenceGaps = [];
+  const migrationsByNumber = new Map();
+  for (const migration of migrations) {
+    const files = migrationsByNumber.get(migration.number) ?? [];
+    files.push(migration.file);
+    migrationsByNumber.set(migration.number, files);
+  }
+
+  const duplicateSequences = [...migrationsByNumber.entries()]
+    .filter(([, migrationFiles]) => migrationFiles.length > 1)
+    .map(([number, migrationFiles]) => ({ number, files: migrationFiles }));
+
   for (let i = 1; i < migrations.length; i += 1) {
     const prev = migrations[i - 1].number;
     const next = migrations[i].number;
@@ -362,6 +374,7 @@ async function getMigrationMetadata() {
 
   return {
     directory: "drizzle/",
+    duplicateSequences,
     migrations,
     sequenceGaps,
   };
@@ -391,6 +404,7 @@ async function auditSchemaMigrations() {
     migrationCount: migrations.migrations.length,
     tableCount: schema.tableCount,
     unreferencedTables,
+    duplicateSequences: migrations.duplicateSequences,
     sequenceGaps: migrations.sequenceGaps,
   };
 }
@@ -734,6 +748,7 @@ function buildRepoOverviewPayload({ routes, schema, migrations, workflows }) {
     migrations: {
       total: migrations.migrations.length,
       latest: migrations.migrations.at(-1)?.file ?? null,
+      duplicateSequences: migrations.duplicateSequences,
       sequenceGaps: migrations.sequenceGaps,
     },
     workflows: {

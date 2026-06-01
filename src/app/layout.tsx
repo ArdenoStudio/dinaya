@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { Analytics } from "@vercel/analytics/next";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
-import { AuthProvider } from "@/components/AuthProvider";
 import { NavProvider } from "@/context/NavContext";
 import "./globals.css";
 
@@ -18,6 +17,8 @@ export const metadata: Metadata = {
     "Give your business a booking page with a 14-day free trial. No more WhatsApp back-and-forth. Clients self-book, you focus on your work.",
 };
 
+const enableVercelAnalytics = process.env.VERCEL === "1";
+
 export default function RootLayout({
   children,
 }: {
@@ -32,14 +33,12 @@ export default function RootLayout({
         >
           Skip to main content
         </a>
-        <AuthProvider>
-          <NavProvider>
-            <main id="main-content">
-              {children}
-            </main>
-          </NavProvider>
-        </AuthProvider>
-        <Analytics />
+        <NavProvider>
+          <main id="main-content">
+            {children}
+          </main>
+        </NavProvider>
+        {enableVercelAnalytics ? <Analytics /> : null}
         <GoogleAnalytics />
       </body>
     </html>

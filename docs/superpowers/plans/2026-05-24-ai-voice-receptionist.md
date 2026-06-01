@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add the missing Dinaya AI Voice Receptionist foundation so Max businesses can request a managed phone-agent setup, generate voice-scoped API credentials, expose voice-safe business data, and track voice-created bookings.
+**Goal:** Add the missing Dinaya AI Voice Receptionist foundation so Growth (`max` internally) businesses can request a managed phone-agent setup, generate voice-scoped API credentials, expose voice-safe business data, and track voice-created bookings.
 
 **Architecture:** Dinaya remains the booking source of truth. External voice providers call Dinaya API endpoints with scoped API keys; Dinaya enforces plan, tenant, availability, double-booking, payment, notification, and audit rules. The dashboard captures setup requirements while platform admins manage provider status.
 
@@ -24,7 +24,7 @@
 ### Task 2: Add Max-Only Entitlement
 
 **Files:**
-- Modify: `src/lib/plan.tsx`
+- Modify: `src/lib/plan.ts`
 - Modify: `src/app/admin/plans/actions.ts`
 - Modify: `src/app/admin/plans/page.tsx`
 - Modify: `src/lib/plan-features.ts`
@@ -33,7 +33,7 @@
 - [ ] Add `aiVoiceReceptionist` as a plan feature.
 - [ ] Default it to Max-only.
 - [ ] Make `minimumPlanForFeature("aiVoiceReceptionist")` return `max`.
-- [ ] Add plan tests proving Free/Pro are blocked and Max is allowed.
+- [ ] Add plan tests proving Trial/Starter/Pro are blocked and Growth (`max` internally) is allowed.
 
 ### Task 3: Add Dashboard Setup Flow
 

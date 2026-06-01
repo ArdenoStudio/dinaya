@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { count, eq } from "drizzle-orm";
+import { AuthProvider } from "@/components/AuthProvider";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { DashboardLocaleProvider } from "@/components/dashboard/DashboardLocaleProvider";
 import { OnboardingGate } from "@/components/dashboard/OnboardingGate";
@@ -77,24 +78,26 @@ export default async function DashboardLayout({
   }
 
   return (
-    <DashboardLocaleProvider language={language} role={role}>
-      <OnboardingGate completed={onboardingCompleted}>
-        <DashboardShell
-          businessName={business.name}
-          userEmail={user.email ?? ""}
-          userName={user.name ?? null}
-          plan={business.plan}
-          trialDaysLeft={trialDaysLeft}
-          showAdminLink={showAdminLink}
-          readOnlyImpersonation={Boolean(readOnlyImpersonation)}
-          impersonatedBy={impersonatedBy}
-          planUsage={planUsage}
-          copy={copy}
-          minimalChrome={!onboardingCompleted}
-        >
-          {children}
-        </DashboardShell>
-      </OnboardingGate>
-    </DashboardLocaleProvider>
+    <AuthProvider>
+      <DashboardLocaleProvider language={language} role={role}>
+        <OnboardingGate completed={onboardingCompleted}>
+          <DashboardShell
+            businessName={business.name}
+            userEmail={user.email ?? ""}
+            userName={user.name ?? null}
+            plan={business.plan}
+            trialDaysLeft={trialDaysLeft}
+            showAdminLink={showAdminLink}
+            readOnlyImpersonation={Boolean(readOnlyImpersonation)}
+            impersonatedBy={impersonatedBy}
+            planUsage={planUsage}
+            copy={copy}
+            minimalChrome={!onboardingCompleted}
+          >
+            {children}
+          </DashboardShell>
+        </OnboardingGate>
+      </DashboardLocaleProvider>
+    </AuthProvider>
   );
 }

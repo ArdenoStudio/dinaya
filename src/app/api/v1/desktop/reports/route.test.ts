@@ -71,10 +71,15 @@ describe("GET /api/v1/desktop/reports", () => {
         noShowRate: 0,
         noShows: 0,
         totalBookings: 4,
+        totalClients: 8,
         totalRevenueLabel: "LKR 2,500",
         totalRevenueLkr: 2500,
       },
       range: { from: "2026-05-01", to: "2026-05-28" },
+      trends: {
+        busiestHours: [{ hour: 10, value: 2 }],
+        revenueByWeekday: [{ day: "Mon", lastWeek: 1000, thisWeek: 2500 }],
+      },
     });
 
     const req = new NextRequest("http://localhost/api/v1/desktop/reports?from=2026-05-01&to=2026-05-28");
