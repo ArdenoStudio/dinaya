@@ -2,7 +2,8 @@ import { db } from "@/db";
 import { webhookDeliveries, webhooks } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import crypto from "crypto";
-import { isSafeWebhookDestination } from "@/lib/webhook-url";
+import { postSafeWebhook } from "@/lib/webhook-http";
+import { UNSAFE_WEBHOOK_DESTINATION_ERROR } from "@/lib/webhook-url";
 
 export type WebhookEvent =
   | "booking.created"
@@ -23,7 +24,6 @@ function sign(secret: string, body: string): string {
 }
 
 const WEBHOOK_DELIVERY_CONCURRENCY = 5;
-const UNSAFE_WEBHOOK_DESTINATION_ERROR = "Webhook URL must resolve to a public HTTPS endpoint.";
 
 async function forEachWithConcurrency<T>(
   items: T[],
@@ -91,16 +91,12 @@ export async function dispatchWebhooks(
       };
 
       try {
-        if (!(await isSafeWebhookDestination(hook.url))) {
-          throw new Error(UNSAFE_WEBHOOK_DESTINATION_ERROR);
-        }
-
-        const response = await fetch(hook.url, { method: "POST", headers, body, signal: AbortSignal.timeout(10_000) });
+        const response = await postSafeWebhook(hook.url, { headers, body });
         await db.insert(webhookDeliveries).values({
           ...deliveryBase,
           status: response.ok ? "success" : "failed",
           statusCode: response.status,
-          responseBody: await response.text().catch(() => null),
+          responseBody: response.responseBody,
           attempts: 1,
           nextAttemptAt: response.ok ? null : new Date(Date.now() + 15 * 60 * 1000),
           error: response.ok ? null : `HTTP ${response.status}`,

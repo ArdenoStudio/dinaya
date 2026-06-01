@@ -1,6 +1,7 @@
 import { format } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import type { BookingLanguage } from "@/lib/i18n";
+import { escapeHtml, escapeHtmlAttribute } from "@/lib/html";
 
 const COLOMBO_TZ = "Asia/Colombo";
 
@@ -25,18 +26,22 @@ type BookingMessageContext = {
 };
 
 export function confirmationEmailHtml(ctx: BookingMessageContext): string {
+  const clientName = escapeHtml(ctx.clientName);
+  const businessName = escapeHtml(ctx.businessName);
+  const serviceName = escapeHtml(ctx.serviceName);
+  const staffName = escapeHtml(ctx.staffName);
   const manageBlock = ctx.manageUrl
-    ? `<p style="margin:16px 0"><a href="${ctx.manageUrl}" style="color:#6366f1">Manage your booking</a></p>`
+    ? `<p style="margin:16px 0"><a href="${escapeHtmlAttribute(ctx.manageUrl)}" style="color:#6366f1">Manage your booking</a></p>`
     : "";
 
   return `
     <div style="font-family:sans-serif;max-width:500px;margin:0 auto">
       <h2 style="color:#1a1a1a">Your booking is confirmed!</h2>
-      <p>Hi ${ctx.clientName},</p>
-      <p>Your appointment has been confirmed with <strong>${ctx.businessName}</strong>.</p>
+      <p>Hi ${clientName},</p>
+      <p>Your appointment has been confirmed with <strong>${businessName}</strong>.</p>
       <table style="width:100%;border-collapse:collapse;margin:16px 0">
-        <tr><td style="padding:8px 0;color:#666">Service</td><td><strong>${ctx.serviceName}</strong></td></tr>
-        <tr><td style="padding:8px 0;color:#666">With</td><td><strong>${ctx.staffName}</strong></td></tr>
+        <tr><td style="padding:8px 0;color:#666">Service</td><td><strong>${serviceName}</strong></td></tr>
+        <tr><td style="padding:8px 0;color:#666">With</td><td><strong>${staffName}</strong></td></tr>
         <tr><td style="padding:8px 0;color:#666">Date & Time</td><td><strong>${formatBookingDateTime(ctx.startsAt)}</strong></td></tr>
       </table>
       ${manageBlock}
@@ -60,6 +65,10 @@ export function confirmationMessage(ctx: BookingMessageContext): { subject: stri
 export function reminderMessage(ctx: BookingMessageContext): { subject: string; body: string; html: string } {
   const when = formatBookingDateTime(ctx.startsAt);
   const manageLine = ctx.manageUrl ? `\nManage: ${ctx.manageUrl}` : "";
+  const clientName = escapeHtml(ctx.clientName);
+  const businessName = escapeHtml(ctx.businessName);
+  const serviceName = escapeHtml(ctx.serviceName);
+  const staffName = escapeHtml(ctx.staffName);
 
   return {
     subject: `Reminder: your appointment — ${ctx.businessName}`,
@@ -67,14 +76,14 @@ export function reminderMessage(ctx: BookingMessageContext): { subject: string; 
     html: `
       <div style="font-family:sans-serif;max-width:500px;margin:0 auto">
         <h2 style="color:#1a1a1a">Appointment reminder</h2>
-        <p>Hi ${ctx.clientName},</p>
-        <p>This is a reminder about your upcoming appointment with <strong>${ctx.businessName}</strong>.</p>
+        <p>Hi ${clientName},</p>
+        <p>This is a reminder about your upcoming appointment with <strong>${businessName}</strong>.</p>
         <table style="width:100%;border-collapse:collapse;margin:16px 0">
-          <tr><td style="padding:8px 0;color:#666">Service</td><td><strong>${ctx.serviceName}</strong></td></tr>
-          <tr><td style="padding:8px 0;color:#666">With</td><td><strong>${ctx.staffName}</strong></td></tr>
+          <tr><td style="padding:8px 0;color:#666">Service</td><td><strong>${serviceName}</strong></td></tr>
+          <tr><td style="padding:8px 0;color:#666">With</td><td><strong>${staffName}</strong></td></tr>
           <tr><td style="padding:8px 0;color:#666">Date & Time</td><td><strong>${when}</strong></td></tr>
         </table>
-        ${ctx.manageUrl ? `<p><a href="${ctx.manageUrl}" style="color:#6366f1">Manage your booking</a></p>` : ""}
+        ${ctx.manageUrl ? `<p><a href="${escapeHtmlAttribute(ctx.manageUrl)}" style="color:#6366f1">Manage your booking</a></p>` : ""}
       </div>
     `,
   };
@@ -94,6 +103,10 @@ export function cancellationMessage(ctx: Pick<BookingMessageContext, "clientName
 export function rescheduleMessage(ctx: BookingMessageContext): { subject: string; body: string; html: string } {
   const when = formatBookingDateTime(ctx.startsAt);
   const manageLine = ctx.manageUrl ? `\nManage: ${ctx.manageUrl}` : "";
+  const clientName = escapeHtml(ctx.clientName);
+  const businessName = escapeHtml(ctx.businessName);
+  const serviceName = escapeHtml(ctx.serviceName);
+  const staffName = escapeHtml(ctx.staffName);
 
   return {
     subject: `Booking rescheduled — ${ctx.businessName}`,
@@ -101,14 +114,14 @@ export function rescheduleMessage(ctx: BookingMessageContext): { subject: string
     html: `
       <div style="font-family:sans-serif;max-width:500px;margin:0 auto">
         <h2 style="color:#1a1a1a">Your booking was rescheduled</h2>
-        <p>Hi ${ctx.clientName},</p>
-        <p>Your appointment with <strong>${ctx.businessName}</strong> has a new time.</p>
+        <p>Hi ${clientName},</p>
+        <p>Your appointment with <strong>${businessName}</strong> has a new time.</p>
         <table style="width:100%;border-collapse:collapse;margin:16px 0">
-          <tr><td style="padding:8px 0;color:#666">Service</td><td><strong>${ctx.serviceName}</strong></td></tr>
-          <tr><td style="padding:8px 0;color:#666">With</td><td><strong>${ctx.staffName}</strong></td></tr>
+          <tr><td style="padding:8px 0;color:#666">Service</td><td><strong>${serviceName}</strong></td></tr>
+          <tr><td style="padding:8px 0;color:#666">With</td><td><strong>${staffName}</strong></td></tr>
           <tr><td style="padding:8px 0;color:#666">New date & time</td><td><strong>${when}</strong></td></tr>
         </table>
-        ${ctx.manageUrl ? `<p><a href="${ctx.manageUrl}" style="color:#6366f1">Manage your booking</a></p>` : ""}
+        ${ctx.manageUrl ? `<p><a href="${escapeHtmlAttribute(ctx.manageUrl)}" style="color:#6366f1">Manage your booking</a></p>` : ""}
       </div>
     `,
   };

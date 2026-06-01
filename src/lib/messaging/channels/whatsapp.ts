@@ -1,3 +1,5 @@
+import { providerTimeoutSignal } from "@/lib/provider-timeout";
+
 export function isWhatsAppReady(clientPhone?: string | null): boolean {
   if (!clientPhone) return false;
   const metaReady = Boolean(
@@ -34,6 +36,7 @@ export async function sendWhatsApp(input: {
       type: "text",
       text: { body: input.body },
     }),
+    signal: providerTimeoutSignal(),
   });
 
   const data = await response.json().catch(() => ({})) as {

@@ -3,14 +3,14 @@ import { webhookDeliveries, webhooks } from "@/db/schema";
 import { eq, and, lte, lt } from "drizzle-orm";
 import crypto from "crypto";
 import type { WebhookEvent, WebhookPayload } from "@/lib/webhooks";
-import { isSafeWebhookDestination } from "@/lib/webhook-url";
+import { postSafeWebhook } from "@/lib/webhook-http";
+import { UNSAFE_WEBHOOK_DESTINATION_ERROR } from "@/lib/webhook-url";
 
 function sign(secret: string, body: string): string {
   return crypto.createHmac("sha256", secret).update(body).digest("hex");
 }
 
 const MAX_ATTEMPTS = 5;
-const UNSAFE_WEBHOOK_DESTINATION_ERROR = "Webhook URL must resolve to a public HTTPS endpoint.";
 
 async function currentAttempts(deliveryId?: string): Promise<number> {
   if (!deliveryId) return 0;
@@ -44,17 +44,8 @@ async function deliverWebhook(
   const previousAttempts = await currentAttempts(deliveryId);
 
   try {
-    if (!(await isSafeWebhookDestination(hook.url))) {
-      throw new Error(UNSAFE_WEBHOOK_DESTINATION_ERROR);
-    }
-
-    const response = await fetch(hook.url, {
-      method: "POST",
-      headers,
-      body,
-      signal: AbortSignal.timeout(10_000),
-    });
-    const responseBody = await response.text().catch(() => null);
+    const response = await postSafeWebhook(hook.url, { headers, body });
+    const responseBody = response.responseBody;
     const attempts = deliveryId ? previousAttempts + 1 : 1;
     if (deliveryId) {
       await db

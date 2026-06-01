@@ -3,6 +3,7 @@ import {
   isSafeResolvedWebhookAddress,
   isSafeWebhookDestination,
   isSafeWebhookUrl,
+  resolveSafeWebhookTarget,
 } from "./webhook-url";
 
 describe("webhook URL validation", () => {
@@ -11,6 +12,7 @@ describe("webhook URL validation", () => {
     expect(isSafeWebhookUrl("https://127.0.0.1/webhook")).toBe(false);
     expect(isSafeWebhookUrl("https://169.254.169.254/latest/meta-data")).toBe(false);
     expect(isSafeWebhookUrl("https://[::1]/webhook")).toBe(false);
+    expect(isSafeWebhookUrl("https://user:pass@hooks.example.com/webhook")).toBe(false);
   });
 
   it("rejects hostnames that resolve to private addresses", async () => {
@@ -28,6 +30,18 @@ describe("webhook URL validation", () => {
         { address: "2606:2800:220:1:248:1893:25c8:1946", family: 6 },
       ]),
     ).resolves.toBe(true);
+  });
+
+  it("returns the pinned public address used for delivery", async () => {
+    await expect(
+      resolveSafeWebhookTarget("https://hooks.example.com/dinaya", async () => [
+        { address: "93.184.216.34", family: 4 },
+      ]),
+    ).resolves.toMatchObject({
+      hostname: "hooks.example.com",
+      address: "93.184.216.34",
+      family: 4,
+    });
   });
 
   it("rejects unsafe resolved IPv6 addresses", () => {

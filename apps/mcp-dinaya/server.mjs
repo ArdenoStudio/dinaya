@@ -47,6 +47,22 @@ const SEARCHABLE_EXTENSIONS = new Set([
 ]);
 
 const API_PREFIXES = ["/api/cron", "/api/dashboard", "/api/v1"];
+const DOCUMENTED_DUPLICATE_MIGRATION_SEQUENCES = new Map([
+  [
+    9,
+    [
+      "drizzle/0009_ai_growth_workflows.sql",
+      "drizzle/0009_fix_locations.sql",
+    ],
+  ],
+  [
+    26,
+    [
+      "drizzle/0026_starter_plan.sql",
+      "drizzle/0026_subscription_payment_id.sql",
+    ],
+  ],
+]);
 const DEFAULT_SCRIPT_ALLOWLIST = new Set([
   "build",
   "db:migrate",
@@ -323,11 +339,18 @@ function migrationNumber(fileName) {
   return Number(m[1]);
 }
 
+function isDocumentedDuplicateMigrationSequence(number, files) {
+  const expected = DOCUMENTED_DUPLICATE_MIGRATION_SEQUENCES.get(number);
+  if (!expected) return false;
+  return files.toSorted().join("\n") === expected.toSorted().join("\n");
+}
+
 async function getMigrationMetadata() {
   if (!(await pathExists(DRIZZLE_ROOT))) {
     return {
       directory: toRelative(DRIZZLE_ROOT),
       duplicateSequences: [],
+      documentedDuplicateSequences: [],
       migrations: [],
       sequenceGaps: [],
     };
@@ -337,7 +360,7 @@ async function getMigrationMetadata() {
   const files = entries
     .filter((entry) => entry.isFile() && /^\d+_.+\.sql$/.test(entry.name))
     .map((entry) => entry.name)
-    .sort((a, b) => migrationNumber(a) - migrationNumber(b));
+    .sort((a, b) => migrationNumber(a) - migrationNumber(b) || a.localeCompare(b));
 
   const migrations = [];
   for (const fileName of files) {
@@ -360,9 +383,15 @@ async function getMigrationMetadata() {
     migrationsByNumber.set(migration.number, files);
   }
 
-  const duplicateSequences = [...migrationsByNumber.entries()]
+  const duplicateCandidates = [...migrationsByNumber.entries()]
     .filter(([, migrationFiles]) => migrationFiles.length > 1)
     .map(([number, migrationFiles]) => ({ number, files: migrationFiles }));
+  const duplicateSequences = duplicateCandidates.filter(
+    ({ number, files }) => !isDocumentedDuplicateMigrationSequence(number, files),
+  );
+  const documentedDuplicateSequences = duplicateCandidates.filter(
+    ({ number, files }) => isDocumentedDuplicateMigrationSequence(number, files),
+  );
 
   for (let i = 1; i < migrations.length; i += 1) {
     const prev = migrations[i - 1].number;
@@ -375,6 +404,7 @@ async function getMigrationMetadata() {
   return {
     directory: "drizzle/",
     duplicateSequences,
+    documentedDuplicateSequences,
     migrations,
     sequenceGaps,
   };
@@ -749,6 +779,7 @@ function buildRepoOverviewPayload({ routes, schema, migrations, workflows }) {
       total: migrations.migrations.length,
       latest: migrations.migrations.at(-1)?.file ?? null,
       duplicateSequences: migrations.duplicateSequences,
+      documentedDuplicateSequences: migrations.documentedDuplicateSequences,
       sequenceGaps: migrations.sequenceGaps,
     },
     workflows: {

@@ -1,3 +1,5 @@
+import { providerTimeoutSignal } from "@/lib/provider-timeout";
+
 export function isSmsReady(clientPhone?: string | null): boolean {
   return Boolean(clientPhone && process.env.SMS_HTTP_ENDPOINT);
 }
@@ -22,6 +24,7 @@ export async function sendSms(input: {
       message: input.body,
       sender: process.env.SMS_HTTP_SENDER ?? "Dinaya",
     }),
+    signal: providerTimeoutSignal(),
   });
 
   const data = await response.json().catch(() => ({})) as { id?: string; messageId?: string; error?: string };

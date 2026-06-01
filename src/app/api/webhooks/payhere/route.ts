@@ -14,6 +14,7 @@ import { decryptSecret } from "@/lib/secrets";
 import { processBookingAutomationTrigger } from "@/lib/automations/engine";
 import { releaseDealSlotForBooking } from "@/lib/deals/claim";
 import { sendPaymentReceiptEmail } from "@/lib/receipts";
+import { logRejectedSettled, runAfterResponse } from "@/lib/after-response";
 
 const WEBHOOK_REJECTED = NextResponse.json({ error: "Invalid webhook" }, { status: 400 });
 
@@ -143,74 +144,75 @@ export async function POST(req: NextRequest) {
       .limit(1);
     const [staffMember] = await db.select().from(staff).where(eq(staff.id, booking.staffId)).limit(1);
 
-    await Promise.allSettled([
-      sendBookingConfirmationMessage({
-        businessId: booking.businessId,
+    runAfterResponse("PayHere booking notifications", async () => {
+      const manageUrl = buildClientBookingUrl({
         bookingId: booking.id,
-        clientName: booking.clientName,
-        clientEmail: booking.clientEmail,
         clientPhone: booking.clientPhone,
-        businessName: business.name,
-        serviceName: service?.name ?? "Service",
-        staffName: staffMember?.name ?? "Staff",
-        startsAt: booking.startsAt,
-        manageUrl: buildClientBookingUrl({
+      });
+      const results = await Promise.allSettled([
+        sendBookingConfirmationMessage({
+          businessId: booking.businessId,
           bookingId: booking.id,
+          clientName: booking.clientName,
+          clientEmail: booking.clientEmail,
           clientPhone: booking.clientPhone,
+          businessName: business.name,
+          serviceName: service?.name ?? "Service",
+          staffName: staffMember?.name ?? "Staff",
+          startsAt: booking.startsAt,
+          manageUrl,
+          plan: business.plan as Plan,
+          language: business.language as BookingLanguage,
         }),
-        plan: business.plan as Plan,
-        language: business.language as BookingLanguage,
-      }),
-      booking.clientEmail
-        ? sendPaymentReceiptEmail({
-            clientName: booking.clientName,
-            clientEmail: booking.clientEmail,
-            businessName: business.name,
-            serviceName: service?.name ?? "Service",
-            staffName: staffMember?.name ?? "Staff",
-            startsAt: booking.startsAt,
-            amountLkr: payment.amountLkr,
-            orderId,
-            paymentId: payment.id,
-            manageUrl: buildClientBookingUrl({
+        booking.clientEmail
+          ? sendPaymentReceiptEmail({
+              clientName: booking.clientName,
+              clientEmail: booking.clientEmail,
+              businessName: business.name,
+              serviceName: service?.name ?? "Service",
+              staffName: staffMember?.name ?? "Staff",
+              startsAt: booking.startsAt,
+              amountLkr: payment.amountLkr,
+              orderId,
+              paymentId: payment.id,
+              manageUrl,
+            }).then(async (result) => {
+              if (result.status === "sent") {
+                await db
+                  .update(payments)
+                  .set({ receiptSentAt: new Date() })
+                  .where(eq(payments.id, payment.id));
+              }
+            })
+          : Promise.resolve(),
+        business.email
+          ? sendBookingNotificationToBusiness({
+              clientName: booking.clientName,
+              clientEmail: business.email,
+              businessName: business.name,
+              businessSlug: business.slug,
+              serviceName: service?.name ?? "Service",
+              staffName: staffMember?.name ?? "Staff",
+              startsAt: booking.startsAt,
               bookingId: booking.id,
-              clientPhone: booking.clientPhone,
-            }),
-          }).then(async (result) => {
-            if (result.status === "sent") {
-              await db
-                .update(payments)
-                .set({ receiptSentAt: new Date() })
-                .where(eq(payments.id, payment.id));
-            }
-          })
-        : Promise.resolve(),
-      business.email
-        ? sendBookingNotificationToBusiness({
-            clientName: booking.clientName,
-            clientEmail: business.email,
-            businessName: business.name,
-            businessSlug: business.slug,
-            serviceName: service?.name ?? "Service",
-            staffName: staffMember?.name ?? "Staff",
-            startsAt: booking.startsAt,
-            bookingId: booking.id,
-          })
-        : Promise.resolve(),
-      business.phone
-        ? sendBookingNotificationToBusinessMessage({
-            businessId: booking.businessId,
-            bookingId: booking.id,
-            businessPhone: business.phone,
-            businessName: business.name,
-            clientName: booking.clientName,
-            serviceName: service?.name ?? "Service",
-            staffName: staffMember?.name ?? "Staff",
-            startsAt: booking.startsAt,
-            plan: business.plan as Plan,
-          })
-        : Promise.resolve(),
-    ]);
+            })
+          : Promise.resolve(),
+        business.phone
+          ? sendBookingNotificationToBusinessMessage({
+              businessId: booking.businessId,
+              bookingId: booking.id,
+              businessPhone: business.phone,
+              businessName: business.name,
+              clientName: booking.clientName,
+              serviceName: service?.name ?? "Service",
+              staffName: staffMember?.name ?? "Staff",
+              startsAt: booking.startsAt,
+              plan: business.plan as Plan,
+            })
+          : Promise.resolve(),
+      ]);
+      logRejectedSettled("PayHere booking notifications", results);
+    });
   } else if (statusCode === "-1" || statusCode === "-2" || statusCode === "-3") {
     if (payment.status !== "success") {
       await db

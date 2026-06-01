@@ -13,6 +13,7 @@ import { generateOrderId } from "@/lib/utils";
 import { dispatchWebhooks } from "@/lib/webhooks";
 import { logActivity } from "@/lib/activity-log";
 import { processBookingAutomationTrigger } from "@/lib/automations/engine";
+import { logRejectedSettled, runAfterResponse } from "@/lib/after-response";
 import { normalizeSriLankanPhone } from "@/lib/phone";
 import { decryptSecret } from "@/lib/secrets";
 import { resolveBookingLocationId } from "@/lib/locations";
@@ -502,48 +503,51 @@ export async function POST(req: NextRequest) {
       clientPhone,
     });
 
-    await Promise.allSettled([
-      sendBookingConfirmationMessage({
-        businessId,
-        bookingId: booking.id,
-        clientId: client.id,
-        clientName,
-        clientEmail: clientEmail || null,
-        clientPhone,
-        businessName: business.name,
-        serviceName: service.name,
-        staffName: staffMember.name,
-        startsAt: new Date(startsAt),
-        manageUrl,
-        plan: business.plan as Plan,
-        language: business.language as BookingLanguage,
-      }),
-      business.email
-        ? sendBookingNotificationToBusiness({
-            clientName,
-            clientEmail: business.email,
-            businessName: business.name,
-            businessSlug: business.slug,
-            serviceName: service.name,
-            staffName: staffMember.name,
-            startsAt: new Date(startsAt),
-            bookingId: booking.id,
-          })
-        : Promise.resolve(),
-      business.phone
-        ? sendBookingNotificationToBusinessMessage({
-            businessId,
-            bookingId: booking.id,
-            businessPhone: business.phone,
-            businessName: business.name,
-            clientName,
-            serviceName: service.name,
-            staffName: staffMember.name,
-            startsAt: new Date(startsAt),
-            plan: business.plan as Plan,
-          })
-        : Promise.resolve(),
-    ]);
+    runAfterResponse("booking notifications", async () => {
+      const results = await Promise.allSettled([
+        sendBookingConfirmationMessage({
+          businessId,
+          bookingId: booking.id,
+          clientId: client.id,
+          clientName,
+          clientEmail: clientEmail || null,
+          clientPhone,
+          businessName: business.name,
+          serviceName: service.name,
+          staffName: staffMember.name,
+          startsAt: new Date(startsAt),
+          manageUrl,
+          plan: business.plan as Plan,
+          language: business.language as BookingLanguage,
+        }),
+        business.email
+          ? sendBookingNotificationToBusiness({
+              clientName,
+              clientEmail: business.email,
+              businessName: business.name,
+              businessSlug: business.slug,
+              serviceName: service.name,
+              staffName: staffMember.name,
+              startsAt: new Date(startsAt),
+              bookingId: booking.id,
+            })
+          : Promise.resolve(),
+        business.phone
+          ? sendBookingNotificationToBusinessMessage({
+              businessId,
+              bookingId: booking.id,
+              businessPhone: business.phone,
+              businessName: business.name,
+              clientName,
+              serviceName: service.name,
+              staffName: staffMember.name,
+              startsAt: new Date(startsAt),
+              plan: business.plan as Plan,
+            })
+          : Promise.resolve(),
+      ]);
+      logRejectedSettled("booking notifications", results);
+    });
 
     return NextResponse.json({
       bookingId: booking.id,

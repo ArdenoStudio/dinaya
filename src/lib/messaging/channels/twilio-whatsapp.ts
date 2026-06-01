@@ -1,3 +1,5 @@
+import { providerTimeoutSignal } from "@/lib/provider-timeout";
+
 export function isTwilioWhatsAppReady(clientPhone?: string | null): boolean {
   return Boolean(
     clientPhone &&
@@ -37,6 +39,7 @@ export async function sendTwilioWhatsApp(input: {
         To: to,
         Body: input.body,
       }),
+      signal: providerTimeoutSignal(),
     },
   );
 

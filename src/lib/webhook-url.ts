@@ -1,12 +1,21 @@
 import { lookup } from "node:dns/promises";
 import { isIP } from "node:net";
 
+export const UNSAFE_WEBHOOK_DESTINATION_ERROR = "Webhook URL must resolve to a public HTTPS endpoint.";
+
 export type WebhookAddress = {
   address: string;
   family: 4 | 6;
 };
 
 export type WebhookLookup = (hostname: string) => Promise<WebhookAddress[]>;
+
+export type SafeWebhookTarget = {
+  url: URL;
+  hostname: string;
+  address: string;
+  family: 4 | 6;
+};
 
 function ipv4ToNumber(value: string): number | null {
   const parts = value.split(".");
@@ -85,6 +94,8 @@ export function isSafeWebhookUrl(value: string): boolean {
 
     return (
       parsed.protocol === "https:" &&
+      parsed.username === "" &&
+      parsed.password === "" &&
       hostname !== "localhost" &&
       !hostname.endsWith(".local") &&
       !isUnsafeIpv4(hostname) &&
@@ -107,16 +118,38 @@ export async function isSafeWebhookDestination(
   value: string,
   resolver: WebhookLookup = lookupWebhookHostname,
 ): Promise<boolean> {
-  if (!isSafeWebhookUrl(value)) return false;
+  return (await resolveSafeWebhookTarget(value, resolver)) !== null;
+}
+
+export async function resolveSafeWebhookTarget(
+  value: string,
+  resolver: WebhookLookup = lookupWebhookHostname,
+): Promise<SafeWebhookTarget | null> {
+  if (!isSafeWebhookUrl(value)) return null;
 
   try {
     const parsed = new URL(value);
     const hostname = parsed.hostname.toLowerCase().replace(/^\[|\]$/g, "");
-    if (isIP(hostname)) return isSafeResolvedWebhookAddress(hostname);
+    const family = isIP(hostname);
+    if (family) {
+      return isSafeResolvedWebhookAddress(hostname)
+        ? { url: parsed, hostname, address: hostname, family: family as 4 | 6 }
+        : null;
+    }
 
     const addresses = await resolver(hostname);
-    return addresses.length > 0 && addresses.every((row) => isSafeResolvedWebhookAddress(row.address));
+    if (addresses.length === 0 || addresses.some((row) => !isSafeResolvedWebhookAddress(row.address))) {
+      return null;
+    }
+
+    const target = addresses[0];
+    return {
+      url: parsed,
+      hostname,
+      address: target.address,
+      family: target.family,
+    };
   } catch {
-    return false;
+    return null;
   }
 }
