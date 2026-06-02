@@ -6,6 +6,9 @@ import { PublicNav } from "@/components/PublicNav";
 import { FadeContainer, FadeDiv, FadeSpan } from "@/components/Fade";
 import { LandingFooter } from "@/components/LandingFooter";
 import { Icon } from "@/components/ui/Icon";
+import { getPublicSupportWhatsApp } from "@/lib/public-support";
+
+const supportWhatsApp = getPublicSupportWhatsApp();
 
 const channels = [
   {
@@ -16,14 +19,18 @@ const channels = [
     desc: "For general enquiries, partnerships, and feedback.",
     href: "mailto:hello@dinaya.lk",
   },
-  {
-    icon: "whatsapp",
-    color: "bg-amber-500",
-    label: "WhatsApp",
-    value: "+94 77 000 0000",
-    desc: "Quickest way to reach us. Mon–Fri, 9 AM–6 PM.",
-    href: "https://wa.me/94770000000",
-  },
+  ...(supportWhatsApp
+    ? [
+        {
+          icon: "whatsapp",
+          color: "bg-amber-500",
+          label: "WhatsApp",
+          value: supportWhatsApp.label,
+          desc: "Quickest way to reach us. Mon-Fri, 9 AM-6 PM.",
+          href: supportWhatsApp.href,
+        },
+      ]
+    : []),
   {
     icon: "geo-alt-fill",
     color: "bg-violet-500",
@@ -37,7 +44,9 @@ const channels = [
 const faqs = [
   {
     q: "How quickly will you respond?",
-    a: "We aim to reply to all emails within one business day. WhatsApp messages are typically answered within a few hours during working hours.",
+    a: supportWhatsApp
+      ? "We aim to reply to all emails within one business day. WhatsApp messages are typically answered within a few hours during working hours."
+      : "We aim to reply to all support emails within one business day.",
   },
   {
     q: "I found a bug. Who do I tell?",
@@ -60,6 +69,7 @@ export default function ContactPage() {
   const [status, setStatus] = useState<FormState>("idle");
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
+    if (status === "error") setStatus("idle");
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   }
 
@@ -168,7 +178,23 @@ export default function ContactPage() {
                 </button>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-5">
+              <form onSubmit={handleSubmit} className="space-y-5" aria-busy={status === "sending"}>
+                {status === "error" ? (
+                  <div
+                    role="alert"
+                    className="flex items-start gap-2 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700"
+                  >
+                    <Icon name="exclamation-circle" className="mt-0.5 shrink-0 text-sm" />
+                    <span>
+                      We couldn&apos;t send your message. Please try again or email{" "}
+                      <a href="mailto:hello@dinaya.lk" className="font-medium underline underline-offset-2">
+                        hello@dinaya.lk
+                      </a>
+                      .
+                    </span>
+                  </div>
+                ) : null}
+
                 <div className="grid sm:grid-cols-2 gap-5">
                   <div className="flex flex-col gap-1.5">
                     <label htmlFor="name" className="text-sm font-medium text-foreground">Name</label>

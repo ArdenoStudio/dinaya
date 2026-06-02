@@ -35,6 +35,7 @@ Optional but recommended:
 - `VERCEL_TOKEN`, `VERCEL_PROJECT_ID_OR_NAME`, `VERCEL_TEAM_ID` or `VERCEL_TEAM_SLUG` — custom-domain provisioning for tenant-owned domains
 - `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` — Google Calendar OAuth on integrations. Smart deal suggestions use the Calendar free/busy scope, so already-connected tenants may need to reconnect Google Calendar after this change.
 - `CONTACT_INBOX_EMAIL` — contact form destination (defaults to hello@dinaya.lk)
+- `NEXT_PUBLIC_SUPPORT_WHATSAPP_NUMBER` — optional public support WhatsApp number; if unset, public WhatsApp support links are hidden
 - `PLATFORM_ADMIN_EMAILS` — comma-separated allowlist for `/admin`
 - `HEALTH_CHECK_SECRET` — dedicated secret for `/api/health/*` (falls back to `CRON_SECRET`)
 - AI workflows: `AI_PROVIDER=groq`, `GROQ_API_KEY`, `AI_BASE_URL`, `AI_MODEL`, `AI_REACTIVATION_DAYS`

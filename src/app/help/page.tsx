@@ -4,6 +4,9 @@ import { PublicNav } from "@/components/PublicNav";
 import { LandingFooter } from "@/components/LandingFooter";
 import { HelpFaqSections } from "@/components/docs/HelpFaqSections";
 import { Icon } from "@/components/ui/Icon";
+import { getPublicSupportWhatsApp } from "@/lib/public-support";
+
+const supportWhatsApp = getPublicSupportWhatsApp();
 
 export default function HelpPage() {
   return (
@@ -19,7 +22,9 @@ export default function HelpPage() {
                   Talk to a real person.
                 </h2>
                 <p className="text-sm text-white/60 max-w-sm">
-                  Our team replies in Sinhala, Tamil, or English — usually within a few hours on business days.
+                  {supportWhatsApp
+                    ? "Our team replies in Sinhala, Tamil, or English - usually within a few hours on business days."
+                    : "Our team replies in Sinhala, Tamil, or English within one business day."}
                 </p>
               </div>
               <div className="flex flex-col gap-3 shrink-0">
@@ -30,15 +35,17 @@ export default function HelpPage() {
                   <Icon name="envelope" className="text-sm" />
                   Email support
                 </a>
-                <a
-                  href="https://wa.me/94770000000"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-white/10 border border-white/20 text-white px-5 py-3 text-sm font-medium"
-                >
-                  <Icon name="whatsapp" className="text-sm" />
-                  WhatsApp us
-                </a>
+                {supportWhatsApp ? (
+                  <a
+                    href={supportWhatsApp.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-white/10 border border-white/20 text-white px-5 py-3 text-sm font-medium"
+                  >
+                    <Icon name="whatsapp" className="text-sm" />
+                    WhatsApp us
+                  </a>
+                ) : null}
               </div>
             </div>
           </div>

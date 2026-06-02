@@ -1,11 +1,14 @@
 import Link from "next/link";
 import { Icon } from "@/components/ui/Icon";
+import { getPublicSupportWhatsApp } from "@/lib/public-support";
+
+const supportWhatsApp = getPublicSupportWhatsApp();
 
 const SOCIAL_LINKS = [
   { name: "instagram", href: "https://instagram.com/dinaya.lk", label: "Instagram" },
   { name: "facebook",  href: "https://facebook.com/dinaya.lk",  label: "Facebook"  },
-  { name: "whatsapp",  href: "https://wa.me/94700000000",        label: "WhatsApp"  },
-];
+  ...(supportWhatsApp ? [{ name: "whatsapp", href: supportWhatsApp.href, label: "WhatsApp" }] : []),
+] as const;
 
 export function LandingFooter() {
   return (
