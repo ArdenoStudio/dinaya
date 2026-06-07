@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireDesktopRead } from "@/app/api/v1/desktop/_shared";
 import { getReportsDashboardOverview, normalizeReportsRange } from "@/lib/dashboard/reports";
+import { PlanRequiredError, requirePro } from "@/lib/plan";
 import { withRateLimit } from "@/lib/rate-limit";
 
 export async function GET(req: NextRequest) {
@@ -20,6 +21,15 @@ export async function GET(req: NextRequest) {
     windowSeconds: 60,
   }, { keySuffix: `${businessId}:${deviceId ?? "unknown"}` });
   if (!limited.ok) return limited.response;
+
+  try {
+    await requirePro(businessId, "reports");
+  } catch (error) {
+    if (error instanceof PlanRequiredError) {
+      return NextResponse.json({ error: error.message }, { status: 402 });
+    }
+    throw error;
+  }
 
   const reports = await getReportsDashboardOverview(businessId, range);
   return NextResponse.json({

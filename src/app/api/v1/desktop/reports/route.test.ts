@@ -4,6 +4,7 @@ import { NextRequest } from "next/server";
 const requireDesktopReadMock = vi.hoisted(() => vi.fn());
 const withRateLimitMock = vi.hoisted(() => vi.fn());
 const getReportsDashboardOverviewMock = vi.hoisted(() => vi.fn());
+const requireProMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@/app/api/v1/desktop/_shared", () => ({
   requireDesktopRead: requireDesktopReadMock,
@@ -21,6 +22,25 @@ vi.mock("@/lib/dashboard/reports", async (importOriginal) => {
   };
 });
 
+vi.mock("@/lib/plan", async () => {
+  class PlanRequiredError extends Error {
+    constructor(
+      _businessId: string,
+      feature: string = "reports",
+      requiredPlan: string = "pro"
+    ) {
+      const label = feature === "reports" ? "Reports" : feature;
+      const plan = requiredPlan === "pro" ? "Pro" : requiredPlan;
+      super(`${label} requires the ${plan} plan.`);
+      this.name = "PlanRequiredError";
+    }
+  }
+  return {
+    PlanRequiredError,
+    requirePro: requireProMock,
+  };
+});
+
 import { GET } from "./route";
 
 describe("GET /api/v1/desktop/reports", () => {
@@ -31,6 +51,7 @@ describe("GET /api/v1/desktop/reports", () => {
       ok: true,
       context: { businessId: "biz_1", deviceId: "device_1" },
     });
+    requireProMock.mockResolvedValue(undefined);
   });
 
   it("returns auth response when desktop key is missing", async () => {
@@ -43,6 +64,20 @@ describe("GET /api/v1/desktop/reports", () => {
     const res = await GET(req);
 
     expect(res.status).toBe(401);
+    expect(requireProMock).not.toHaveBeenCalled();
+    expect(getReportsDashboardOverviewMock).not.toHaveBeenCalled();
+  });
+
+  it("returns a plan gate response when reports are unavailable", async () => {
+    const { PlanRequiredError } = await import("@/lib/plan");
+    requireProMock.mockRejectedValue(new PlanRequiredError("biz_1", "reports", "pro"));
+
+    const req = new NextRequest("http://localhost/api/v1/desktop/reports");
+    const res = await GET(req);
+    const body = await res.json();
+
+    expect(res.status).toBe(402);
+    expect(body.error).toBe("Reports requires the Pro plan.");
     expect(getReportsDashboardOverviewMock).not.toHaveBeenCalled();
   });
 
@@ -91,6 +126,7 @@ describe("GET /api/v1/desktop/reports", () => {
     expect(body.metrics.totalRevenueLkr).toBe(2500);
     expect(body.export.filename).toBe("dinaya-reports.csv");
     expect(body.serverTime).toEqual(expect.any(String));
+    expect(requireProMock).toHaveBeenCalledWith("biz_1", "reports");
     expect(getReportsDashboardOverviewMock).toHaveBeenCalledWith("biz_1", {
       from: "2026-05-01",
       to: "2026-05-28",
@@ -107,6 +143,7 @@ describe("GET /api/v1/desktop/reports", () => {
     const res = await GET(req);
 
     expect(res.status).toBe(429);
+    expect(requireProMock).not.toHaveBeenCalled();
     expect(getReportsDashboardOverviewMock).not.toHaveBeenCalled();
   });
 });
