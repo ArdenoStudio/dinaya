@@ -1,6 +1,7 @@
 import { and, desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { broadcasts, clients, type Broadcast } from "@/db/schema";
+import { isoDateString, nullableIsoDateString } from "@/lib/dashboard/serialization";
 import { sendMessage } from "@/lib/messaging";
 import type { MessageChannel } from "@/lib/messaging/types";
 
@@ -125,9 +126,9 @@ export function serializeBroadcast(row: Broadcast) {
     sentCount: row.sentCount,
     skippedCount: row.skippedCount,
     failedCount: row.failedCount,
-    sentAt: row.sentAt?.toISOString() ?? null,
-    createdAt: row.createdAt.toISOString(),
-    updatedAt: row.updatedAt.toISOString(),
+    sentAt: nullableIsoDateString(row.sentAt),
+    createdAt: isoDateString(row.createdAt),
+    updatedAt: isoDateString(row.updatedAt),
   };
 }
 

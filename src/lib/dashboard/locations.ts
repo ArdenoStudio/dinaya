@@ -1,6 +1,7 @@
 import { and, asc, count, desc, eq, ilike, inArray, or, sql, type SQL } from "drizzle-orm";
 import { db } from "@/db";
 import { bookings, locations, services, staff, staffLocations } from "@/db/schema";
+import { isoDateString, nullableIsoDateString } from "@/lib/dashboard/serialization";
 import { getLocationForBusiness, slugifyLocationName } from "@/lib/locations";
 import { z } from "@/lib/validation";
 
@@ -144,9 +145,9 @@ export async function getLocationsDashboardList(
       return {
         ...row,
         bookingCount: Number(rowBookingSummary?.bookingCount ?? 0),
-        createdAt: row.createdAt.toISOString(),
+        createdAt: isoDateString(row.createdAt),
         futureBookingCount: Number(rowBookingSummary?.futureBookingCount ?? 0),
-        lastBookingAt: rowBookingSummary?.lastBookingAt?.toISOString() ?? null,
+        lastBookingAt: nullableIsoDateString(rowBookingSummary?.lastBookingAt),
         primaryStaffCount: assignedStaff.filter((assignment) => assignment.isPrimary).length,
         staffCount: assignedStaff.length,
       };
@@ -214,11 +215,11 @@ export async function getLocationDashboardDetail(businessId: string, locationId:
     assignedStaff,
     location: {
       ...location,
-      createdAt: location.createdAt.toISOString(),
+      createdAt: isoDateString(location.createdAt),
     },
     recentBookings: recentBookings.map((booking) => ({
       ...booking,
-      startsAt: booking.startsAt.toISOString(),
+      startsAt: isoDateString(booking.startsAt),
     })),
   };
 }

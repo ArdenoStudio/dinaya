@@ -137,7 +137,12 @@ export async function getReportsDashboardOverview(
     db.select({ totalBookings: count() }).from(bookings).where(bookingRange),
     db.select({ completedBookings: count() }).from(bookings).where(and(bookingRange, eq(bookings.status, "completed"))),
     db.select({ cancelledBookings: count() }).from(bookings).where(and(bookingRange, eq(bookings.status, "cancelled"))),
-    db.select({ noShows: count() }).from(bookings).where(and(bookingRange, eq(bookings.status, "no_show"))),
+    db
+      .select({
+        noShows: sql<number>`coalesce(count(*) filter (where ${bookings.status}::text = 'no_show'), 0)::int`,
+      })
+      .from(bookings)
+      .where(bookingRange),
     db
       .select({ newClients: count() })
       .from(clients)
@@ -290,7 +295,7 @@ export async function getReportsDashboardOverview(
   return {
     breakdowns: {
       bookingsBySource: bookingsBySource.map((row) => ({
-        label: row.source.replace(/_/g, " "),
+        label: (row.source ?? "unknown").replace(/_/g, " "),
         value: Number(row.value),
       })),
       bookingsByStatus: bookingsByStatus.map((row) => ({

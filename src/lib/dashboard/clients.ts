@@ -1,6 +1,7 @@
 import { and, count, desc, eq, ilike, inArray, or, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { bookings, clientNotes, clients, services, staff } from "@/db/schema";
+import { isoDateString, nullableIsoDateString } from "@/lib/dashboard/serialization";
 import { normalizeSriLankanPhone } from "@/lib/phone";
 import { z } from "@/lib/validation";
 
@@ -147,9 +148,9 @@ export async function getClientsDashboardList(
         ...row,
         bookingCount: Number(rowSummary?.bookingCount ?? 0),
         completedBookings: Number(rowSummary?.completedBookings ?? 0),
-        createdAt: row.createdAt.toISOString(),
-        lastAiContactAt: row.lastAiContactAt?.toISOString() ?? null,
-        lastBookingAt: rowSummary?.lastBookingAt?.toISOString() ?? null,
+        createdAt: isoDateString(row.createdAt),
+        lastAiContactAt: nullableIsoDateString(row.lastAiContactAt),
+        lastBookingAt: nullableIsoDateString(rowSummary?.lastBookingAt),
       };
     }),
     summary: {
@@ -215,16 +216,16 @@ export async function getClientDashboardDetail(businessId: string, clientId: str
   return {
     client: {
       ...client,
-      createdAt: client.createdAt.toISOString(),
-      lastAiContactAt: client.lastAiContactAt?.toISOString() ?? null,
+      createdAt: isoDateString(client.createdAt),
+      lastAiContactAt: nullableIsoDateString(client.lastAiContactAt),
     },
     bookings: bookingHistory.map((row) => ({
       ...row,
-      startsAt: row.startsAt.toISOString(),
+      startsAt: isoDateString(row.startsAt),
     })),
     notes: notes.map((row) => ({
       ...row,
-      createdAt: row.createdAt.toISOString(),
+      createdAt: isoDateString(row.createdAt),
     })),
   };
 }

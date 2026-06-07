@@ -2,6 +2,7 @@ import { and, asc, count, desc, eq, gte, ilike, inArray, or, sql, type SQL } fro
 import { db } from "@/db";
 import { bookings, services, staff, staffServices } from "@/db/schema";
 import type { serviceUpdateSchema } from "@/lib/schemas/services";
+import { isoDateString, nullableIsoDateString } from "@/lib/dashboard/serialization";
 import type { z } from "@/lib/validation";
 
 export type DashboardServicesList = Awaited<ReturnType<typeof getServicesDashboardList>>;
@@ -159,9 +160,9 @@ export async function getServicesDashboardList(
         ...row,
         assignedStaffCount: Number(rowStaffSummary?.assignedStaffCount ?? 0),
         bookingCount: Number(rowBookingSummary?.bookingCount ?? 0),
-        createdAt: row.createdAt.toISOString(),
+        createdAt: isoDateString(row.createdAt),
         futureBookingCount: Number(rowBookingSummary?.futureBookingCount ?? 0),
-        lastBookingAt: rowBookingSummary?.lastBookingAt?.toISOString() ?? null,
+        lastBookingAt: nullableIsoDateString(rowBookingSummary?.lastBookingAt),
       };
     }),
     summary: {
@@ -227,12 +228,12 @@ export async function getServiceDashboardDetail(businessId: string, serviceId: s
   return {
     service: {
       ...service,
-      createdAt: service.createdAt.toISOString(),
+      createdAt: isoDateString(service.createdAt),
     },
     assignedStaff,
     recentBookings: recentBookings.map((booking) => ({
       ...booking,
-      startsAt: booking.startsAt.toISOString(),
+      startsAt: isoDateString(booking.startsAt),
     })),
   };
 }
