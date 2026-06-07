@@ -28,6 +28,11 @@ yarn-debug.log*
 yarn-error.log*
 .next-dev*.log
 .npm-cache/
+.codex-temp/
+
+# local desktop smoke/build artifacts
+Dinaya-Desktop-*-setup.exe
+apps/desktop/dist-smoke.png
 
 # env files — never commit real credentials
 .env
