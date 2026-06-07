@@ -3,6 +3,7 @@ import { fromZonedTime, toZonedTime } from "date-fns-tz";
 import { and, count, desc, eq, gte, lt, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { bookings, businesses, clients, payments, reviews, services, staff } from "@/db/schema";
+import { hasPublicColumn } from "@/lib/dashboard/db-compat";
 
 export type DashboardReportsRange = {
   from: string;
@@ -100,6 +101,7 @@ export async function getReportsDashboardOverview(
   const range = normalizeReportsRange({ ...rangeInput, now, timezone });
   const { endUtc, startUtc } = rangeBounds(range, timezone);
   const weeks = weekBounds(now, timezone);
+  const hasBookingSource = await hasPublicColumn("bookings", "source");
   const localPaymentDate = sql<string>`to_char(${payments.createdAt} AT TIME ZONE ${timezone}, 'YYYY-MM-DD')`;
   const localPaymentWeekday = sql<number>`extract(dow from ${payments.createdAt} AT TIME ZONE ${timezone})::int`;
   const localBookingHour = sql<number>`extract(hour from ${bookings.startsAt} AT TIME ZONE ${timezone})::int`;
@@ -125,7 +127,7 @@ export async function getReportsDashboardOverview(
     [{ totalRevenue }],
     [{ averageRating }],
     bookingsByStatus,
-    bookingsBySource,
+    sourceBreakdownRows,
     revenueByService,
     staffLoad,
     topClients,
@@ -163,13 +165,15 @@ export async function getReportsDashboardOverview(
       .where(bookingRange)
       .groupBy(bookings.status)
       .orderBy(desc(count(bookings.id))),
-    db
-      .select({ source: bookings.source, value: count(bookings.id) })
-      .from(bookings)
-      .where(bookingRange)
-      .groupBy(bookings.source)
-      .orderBy(desc(count(bookings.id)))
-      .limit(12),
+    hasBookingSource
+      ? db
+          .select({ source: bookings.source, value: count(bookings.id) })
+          .from(bookings)
+          .where(bookingRange)
+          .groupBy(bookings.source)
+          .orderBy(desc(count(bookings.id)))
+          .limit(12)
+      : Promise.resolve([] as Array<{ source: string | null; value: number }>),
     db
       .select({
         serviceName: services.name,
@@ -291,6 +295,7 @@ export async function getReportsDashboardOverview(
     csvLine(["Bookings by staff", "Value"]),
     ...staffLoad.map((row) => csvLine([row.staffName, Number(row.value)])),
   ].join("\n");
+  const bookingsBySource = sourceBreakdownRows.filter((row) => Number(row.value) > 0);
 
   return {
     breakdowns: {

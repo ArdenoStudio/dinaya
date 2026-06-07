@@ -12,6 +12,7 @@ import {
   type BroadcastChannel,
   type BroadcastStatus,
 } from "@/lib/broadcasts";
+import { hasPublicTable, isMissingSchemaError } from "@/lib/dashboard/db-compat";
 
 export type DashboardBroadcastDetail = Awaited<ReturnType<typeof getBroadcastDashboardDetail>>;
 export type DashboardBroadcastsList = Awaited<ReturnType<typeof getBroadcastsDashboardList>>;
@@ -75,7 +76,7 @@ export async function getBroadcastsDashboardList(
     const serialized = serializeBroadcast(row);
     return {
       ...serialized,
-      audienceLabel: audienceLabel(row.audienceType, row.audienceFilter),
+      audienceLabel: audienceLabel(row.audienceType ?? "all", row.audienceFilter),
       deliveryRatePercent: percent(row.sentCount, row.recipientCount),
       failureRatePercent: percent(row.failedCount, row.recipientCount),
       remainingCount: Math.max(row.recipientCount - row.sentCount - row.skippedCount - row.failedCount, 0),
@@ -92,7 +93,7 @@ export async function getBroadcastsDashboardList(
       row.audienceLabel,
       row.channel,
       row.status,
-    ].some((value) => value.toLowerCase().includes(query));
+    ].some((value) => String(value ?? "").toLowerCase().includes(query));
     return statusMatch && channelMatch && queryMatch;
   });
 
@@ -122,11 +123,35 @@ export async function getBroadcastsDashboardList(
 }
 
 export async function getBroadcastDashboardDetail(businessId: string, broadcastId: string) {
-  const [row] = await db
-    .select()
-    .from(broadcasts)
-    .where(and(eq(broadcasts.id, broadcastId), eq(broadcasts.businessId, businessId)))
-    .limit(1);
+  if (!(await hasPublicTable("broadcasts"))) return null;
+
+  let row: Awaited<ReturnType<typeof listBroadcastsForBusiness>>[number] | undefined;
+  try {
+    [row] = await db
+      .select({
+        audienceFilter: broadcasts.audienceFilter,
+        audienceType: broadcasts.audienceType,
+        body: broadcasts.body,
+        businessId: broadcasts.businessId,
+        channel: broadcasts.channel,
+        createdAt: broadcasts.createdAt,
+        failedCount: broadcasts.failedCount,
+        id: broadcasts.id,
+        name: broadcasts.name,
+        recipientCount: broadcasts.recipientCount,
+        sentAt: broadcasts.sentAt,
+        sentCount: broadcasts.sentCount,
+        skippedCount: broadcasts.skippedCount,
+        status: broadcasts.status,
+        subject: broadcasts.subject,
+      })
+      .from(broadcasts)
+      .where(and(eq(broadcasts.id, broadcastId), eq(broadcasts.businessId, businessId)))
+      .limit(1);
+  } catch (error) {
+    if (isMissingSchemaError(error)) return null;
+    throw error;
+  }
 
   if (!row) return null;
 

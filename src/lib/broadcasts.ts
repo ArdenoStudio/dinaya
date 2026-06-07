@@ -1,6 +1,7 @@
 import { and, desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { broadcasts, clients, type Broadcast } from "@/db/schema";
+import { hasPublicTable, isMissingSchemaError } from "@/lib/dashboard/db-compat";
 import { isoDateString, nullableIsoDateString } from "@/lib/dashboard/serialization";
 import { sendMessage } from "@/lib/messaging";
 import type { MessageChannel } from "@/lib/messaging/types";
@@ -25,6 +26,10 @@ export type BroadcastSendStats = {
   sentCount: number;
   skippedCount: number;
   failedCount: number;
+};
+
+type SerializableBroadcast = Omit<Broadcast, "updatedAt"> & {
+  updatedAt?: Broadcast["updatedAt"] | null;
 };
 
 function channelPreferred(channel: BroadcastChannel): MessageChannel[] {
@@ -112,7 +117,7 @@ export async function sendBroadcast(
   };
 }
 
-export function serializeBroadcast(row: Broadcast) {
+export function serializeBroadcast(row: SerializableBroadcast) {
   return {
     id: row.id,
     name: row.name,
@@ -122,13 +127,13 @@ export function serializeBroadcast(row: Broadcast) {
     audienceType: row.audienceType,
     audienceFilter: row.audienceFilter,
     status: row.status,
-    recipientCount: row.recipientCount,
-    sentCount: row.sentCount,
-    skippedCount: row.skippedCount,
-    failedCount: row.failedCount,
+    recipientCount: Number(row.recipientCount ?? 0),
+    sentCount: Number(row.sentCount ?? 0),
+    skippedCount: Number(row.skippedCount ?? 0),
+    failedCount: Number(row.failedCount ?? 0),
     sentAt: nullableIsoDateString(row.sentAt),
     createdAt: isoDateString(row.createdAt),
-    updatedAt: isoDateString(row.updatedAt),
+    updatedAt: isoDateString(row.updatedAt ?? row.createdAt),
   };
 }
 
@@ -142,9 +147,32 @@ export async function countMatchingRecipients(
 }
 
 export async function listBroadcastsForBusiness(businessId: string) {
-  return db
-    .select()
-    .from(broadcasts)
-    .where(eq(broadcasts.businessId, businessId))
-    .orderBy(desc(broadcasts.createdAt));
+  if (!(await hasPublicTable("broadcasts"))) return [];
+
+  try {
+    return await db
+      .select({
+        audienceFilter: broadcasts.audienceFilter,
+        audienceType: broadcasts.audienceType,
+        body: broadcasts.body,
+        businessId: broadcasts.businessId,
+        channel: broadcasts.channel,
+        createdAt: broadcasts.createdAt,
+        failedCount: broadcasts.failedCount,
+        id: broadcasts.id,
+        name: broadcasts.name,
+        recipientCount: broadcasts.recipientCount,
+        sentAt: broadcasts.sentAt,
+        sentCount: broadcasts.sentCount,
+        skippedCount: broadcasts.skippedCount,
+        status: broadcasts.status,
+        subject: broadcasts.subject,
+      })
+      .from(broadcasts)
+      .where(eq(broadcasts.businessId, businessId))
+      .orderBy(desc(broadcasts.createdAt));
+  } catch (error) {
+    if (isMissingSchemaError(error)) return [];
+    throw error;
+  }
 }
