@@ -8,6 +8,16 @@ import { requireBusiness } from "@/lib/auth";
 import { cn, formatLkr } from "@/lib/utils";
 import { BarChart3, CalendarDays, Star, Users } from "lucide-react";
 
+const emptyDealAnalytics = {
+  bestDeal: null,
+  conversionRatePercent: null,
+  dealAttributedRevenueLkr: 0,
+  dealBookingsCount: 0,
+  dealsPostedThisMonth: 0,
+  redemptionsByDiscount: [],
+  totalRedemptions: 0,
+};
+
 function formatHour(hour: number) {
   const suffix = hour >= 12 ? "pm" : "am";
   const normalized = hour % 12 === 0 ? 12 : hour % 12;
@@ -39,7 +49,7 @@ export default async function ReportsPage() {
 async function ReportsOverview({ businessId }: { businessId: string }) {
   const [reports, dealAnalytics] = await Promise.all([
     getReportsDashboardOverview(businessId),
-    getDealAnalytics(businessId),
+    getDealAnalytics(businessId).catch(() => emptyDealAnalytics),
   ]);
 
   const { breakdowns, metrics, trends } = reports;
