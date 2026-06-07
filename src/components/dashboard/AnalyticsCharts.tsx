@@ -16,6 +16,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { formatLkr } from "@/lib/utils";
 
 const HEALTH_COLORS: Record<string, string> = {
   Completed: "#22c55e",
@@ -42,7 +43,6 @@ type Props = {
   busiestHours: NamedValue[];
   bookingHealth: { name: string; value: number }[];
   topClients: TopClient[];
-  formatCurrency: (value: number) => string;
 };
 
 export function AnalyticsCharts({
@@ -51,7 +51,6 @@ export function AnalyticsCharts({
   busiestHours,
   bookingHealth,
   topClients,
-  formatCurrency,
 }: Props) {
   const healthTotal = bookingHealth.reduce((s, i) => s + i.value, 0);
   const completedCount = bookingHealth.find((i) => i.name === "Completed")?.value ?? 0;
@@ -93,7 +92,7 @@ export function AnalyticsCharts({
                 tickLine={false}
               />
               <Tooltip
-                formatter={(value) => formatCurrency(Number(value))}
+                formatter={(value) => formatLkr(Number(value))}
                 contentStyle={tooltipStyle}
               />
               <Area
@@ -143,7 +142,7 @@ export function AnalyticsCharts({
                 tickLine={false}
               />
               <Tooltip
-                formatter={(value) => formatCurrency(Number(value))}
+                formatter={(value) => formatLkr(Number(value))}
                 contentStyle={tooltipStyle}
               />
               <Bar dataKey="value" fill="#7c3aed" radius={[0, 4, 4, 0]} />
@@ -253,7 +252,7 @@ export function AnalyticsCharts({
                       </span>
                       <span className="text-sm font-medium">{client.name}</span>
                     </div>
-                    <span className="text-sm font-semibold">{formatCurrency(client.spend)}</span>
+                    <span className="text-sm font-semibold">{formatLkr(client.spend)}</span>
                   </div>
                 </li>
               );

@@ -5,7 +5,7 @@ import { StatCard } from "@/components/dashboard/StatCard";
 import { getReportsDashboardOverview } from "@/lib/dashboard/reports";
 import { getDealAnalytics } from "@/lib/deals/analytics";
 import { requireBusiness } from "@/lib/auth";
-import { cn, formatLkr } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { BarChart3, CalendarDays, Star, Users } from "lucide-react";
 
 const emptyDealAnalytics = {
@@ -171,7 +171,6 @@ async function ReportsOverview({ businessId }: { businessId: string }) {
           name: row.label,
           spend: row.value,
         }))}
-        formatCurrency={formatLkr}
       />
 
       <div className="grid gap-6 lg:grid-cols-2">
