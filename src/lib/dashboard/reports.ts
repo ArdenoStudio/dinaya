@@ -82,6 +82,22 @@ function csvLine(values: Array<string | number | null | undefined>): string {
   return values.map(csvEscape).join(",");
 }
 
+function bookingStatusIs(status: string) {
+  return sql`${bookings.status}::text = ${status}`;
+}
+
+function paymentStatusIs(status: string) {
+  return sql`${payments.status}::text = ${status}`;
+}
+
+async function safeReportQuery<T>(query: Promise<T>, fallback: T): Promise<T> {
+  try {
+    return await query;
+  } catch {
+    return fallback;
+  }
+}
+
 export async function getReportsDashboardOverview(
   businessId: string,
   rangeInput: { from?: string | null; to?: string | null } = {},
@@ -101,7 +117,7 @@ export async function getReportsDashboardOverview(
   const range = normalizeReportsRange({ ...rangeInput, now, timezone });
   const { endUtc, startUtc } = rangeBounds(range, timezone);
   const weeks = weekBounds(now, timezone);
-  const hasBookingSource = await hasPublicColumn("bookings", "source");
+  const hasBookingSource = await hasPublicColumn("bookings", "source").catch(() => false);
   const localPaymentDate = sql<string>`to_char(${payments.createdAt} AT TIME ZONE ${timezone}, 'YYYY-MM-DD')`;
   const localPaymentWeekday = sql<number>`extract(dow from ${payments.createdAt} AT TIME ZONE ${timezone})::int`;
   const localBookingHour = sql<number>`extract(hour from ${bookings.startsAt} AT TIME ZONE ${timezone})::int`;
@@ -112,7 +128,7 @@ export async function getReportsDashboardOverview(
   );
   const paymentRange = and(
     eq(bookings.businessId, businessId),
-    eq(payments.status, "success"),
+    paymentStatusIs("success"),
     gte(payments.createdAt, startUtc),
     lt(payments.createdAt, endUtc),
   );
@@ -136,124 +152,164 @@ export async function getReportsDashboardOverview(
     dailyRevenueLastWeek,
     busiestHours,
   ] = await Promise.all([
-    db.select({ totalBookings: count() }).from(bookings).where(bookingRange),
-    db.select({ completedBookings: count() }).from(bookings).where(and(bookingRange, eq(bookings.status, "completed"))),
-    db.select({ cancelledBookings: count() }).from(bookings).where(and(bookingRange, eq(bookings.status, "cancelled"))),
-    db
-      .select({
-        noShows: sql<number>`coalesce(count(*) filter (where ${bookings.status}::text = 'no_show'), 0)::int`,
-      })
-      .from(bookings)
-      .where(bookingRange),
-    db
-      .select({ newClients: count() })
-      .from(clients)
-      .where(and(eq(clients.businessId, businessId), gte(clients.createdAt, startUtc), lt(clients.createdAt, endUtc))),
-    db.select({ totalClients: count() }).from(clients).where(eq(clients.businessId, businessId)),
-    db
-      .select({ totalRevenue: sql<number>`coalesce(sum(${payments.amountLkr}), 0)::int` })
-      .from(payments)
-      .innerJoin(bookings, eq(bookings.id, payments.bookingId))
-      .where(paymentRange),
-    db
-      .select({ averageRating: sql<number>`coalesce(avg(${reviews.rating}), 0)` })
-      .from(reviews)
-      .where(and(eq(reviews.businessId, businessId), gte(reviews.createdAt, startUtc), lt(reviews.createdAt, endUtc))),
-    db
-      .select({ status: bookings.status, value: count(bookings.id) })
-      .from(bookings)
-      .where(bookingRange)
-      .groupBy(bookings.status)
-      .orderBy(desc(count(bookings.id))),
+    safeReportQuery(db.select({ totalBookings: count() }).from(bookings).where(bookingRange), [{ totalBookings: 0 }]),
+    safeReportQuery(
+      db.select({ completedBookings: count() }).from(bookings).where(and(bookingRange, bookingStatusIs("completed"))),
+      [{ completedBookings: 0 }],
+    ),
+    safeReportQuery(
+      db.select({ cancelledBookings: count() }).from(bookings).where(and(bookingRange, bookingStatusIs("cancelled"))),
+      [{ cancelledBookings: 0 }],
+    ),
+    safeReportQuery(
+      db.select({ noShows: count() }).from(bookings).where(and(bookingRange, bookingStatusIs("no_show"))),
+      [{ noShows: 0 }],
+    ),
+    safeReportQuery(
+      db
+        .select({ newClients: count() })
+        .from(clients)
+        .where(and(eq(clients.businessId, businessId), gte(clients.createdAt, startUtc), lt(clients.createdAt, endUtc))),
+      [{ newClients: 0 }],
+    ),
+    safeReportQuery(db.select({ totalClients: count() }).from(clients).where(eq(clients.businessId, businessId)), [{ totalClients: 0 }]),
+    safeReportQuery(
+      db
+        .select({ totalRevenue: sql<number>`coalesce(sum(${payments.amountLkr}), 0)::int` })
+        .from(payments)
+        .innerJoin(bookings, eq(bookings.id, payments.bookingId))
+        .where(paymentRange),
+      [{ totalRevenue: 0 }],
+    ),
+    safeReportQuery(
+      db
+        .select({ averageRating: sql<number>`coalesce(avg(${reviews.rating}), 0)` })
+        .from(reviews)
+        .where(and(eq(reviews.businessId, businessId), gte(reviews.createdAt, startUtc), lt(reviews.createdAt, endUtc))),
+      [{ averageRating: 0 }],
+    ),
+    safeReportQuery(
+      db
+        .select({ status: bookings.status, value: count(bookings.id) })
+        .from(bookings)
+        .where(bookingRange)
+        .groupBy(bookings.status)
+        .orderBy(desc(count(bookings.id))),
+      [] as Array<{ status: string; value: number }>,
+    ),
     hasBookingSource
-      ? db
-          .select({ source: bookings.source, value: count(bookings.id) })
-          .from(bookings)
-          .where(bookingRange)
-          .groupBy(bookings.source)
-          .orderBy(desc(count(bookings.id)))
-          .limit(12)
+      ? safeReportQuery(
+          db
+            .select({ source: bookings.source, value: count(bookings.id) })
+            .from(bookings)
+            .where(bookingRange)
+            .groupBy(bookings.source)
+            .orderBy(desc(count(bookings.id)))
+            .limit(12),
+          [] as Array<{ source: string | null; value: number }>,
+        )
       : Promise.resolve([] as Array<{ source: string | null; value: number }>),
-    db
-      .select({
-        serviceName: services.name,
-        value: sql<number>`coalesce(sum(${payments.amountLkr}), 0)::int`,
-      })
-      .from(payments)
-      .innerJoin(bookings, eq(bookings.id, payments.bookingId))
-      .innerJoin(services, eq(services.id, bookings.serviceId))
-      .where(paymentRange)
-      .groupBy(services.name)
-      .orderBy(desc(sql`coalesce(sum(${payments.amountLkr}), 0)`))
-      .limit(8),
-    db
-      .select({ staffName: staff.name, value: count(bookings.id) })
-      .from(bookings)
-      .innerJoin(staff, eq(staff.id, bookings.staffId))
-      .where(bookingRange)
-      .groupBy(staff.name)
-      .orderBy(desc(count(bookings.id)))
-      .limit(8),
-    db
-      .select({
-        name: clients.name,
-        value: sql<number>`coalesce(sum(${payments.amountLkr}), 0)::int`,
-      })
-      .from(clients)
-      .innerJoin(bookings, eq(bookings.clientId, clients.id))
-      .innerJoin(payments, eq(payments.bookingId, bookings.id))
-      .where(paymentRange)
-      .groupBy(clients.name)
-      .orderBy(desc(sql`coalesce(sum(${payments.amountLkr}), 0)`))
-      .limit(6),
-    db
-      .select({
-        date: localPaymentDate,
-        value: sql<number>`coalesce(sum(${payments.amountLkr}), 0)::int`,
-      })
-      .from(payments)
-      .innerJoin(bookings, eq(bookings.id, payments.bookingId))
-      .where(paymentRange)
-      .groupBy(localPaymentDate)
-      .orderBy(localPaymentDate),
-    db
-      .select({
-        dayIndex: localPaymentWeekday,
-        revenue: sql<number>`coalesce(sum(${payments.amountLkr}), 0)::int`,
-      })
-      .from(payments)
-      .innerJoin(bookings, eq(bookings.id, payments.bookingId))
-      .where(and(
-        eq(bookings.businessId, businessId),
-        eq(payments.status, "success"),
-        gte(payments.createdAt, weeks.currentStartUtc),
-        lt(payments.createdAt, weeks.currentEndUtc),
-      ))
-      .groupBy(localPaymentWeekday),
-    db
-      .select({
-        dayIndex: localPaymentWeekday,
-        revenue: sql<number>`coalesce(sum(${payments.amountLkr}), 0)::int`,
-      })
-      .from(payments)
-      .innerJoin(bookings, eq(bookings.id, payments.bookingId))
-      .where(and(
-        eq(bookings.businessId, businessId),
-        eq(payments.status, "success"),
-        gte(payments.createdAt, weeks.previousStartUtc),
-        lt(payments.createdAt, weeks.currentStartUtc),
-      ))
-      .groupBy(localPaymentWeekday),
-    db
-      .select({
-        hour: localBookingHour,
-        value: count(bookings.id),
-      })
-      .from(bookings)
-      .where(bookingRange)
-      .groupBy(localBookingHour)
-      .orderBy(desc(count(bookings.id)))
-      .limit(8),
+    safeReportQuery(
+      db
+        .select({
+          serviceName: services.name,
+          value: sql<number>`coalesce(sum(${payments.amountLkr}), 0)::int`,
+        })
+        .from(payments)
+        .innerJoin(bookings, eq(bookings.id, payments.bookingId))
+        .innerJoin(services, eq(services.id, bookings.serviceId))
+        .where(paymentRange)
+        .groupBy(services.name)
+        .orderBy(desc(sql`coalesce(sum(${payments.amountLkr}), 0)`))
+        .limit(8),
+      [] as Array<{ serviceName: string; value: number }>,
+    ),
+    safeReportQuery(
+      db
+        .select({ staffName: staff.name, value: count(bookings.id) })
+        .from(bookings)
+        .innerJoin(staff, eq(staff.id, bookings.staffId))
+        .where(bookingRange)
+        .groupBy(staff.name)
+        .orderBy(desc(count(bookings.id)))
+        .limit(8),
+      [] as Array<{ staffName: string; value: number }>,
+    ),
+    safeReportQuery(
+      db
+        .select({
+          name: clients.name,
+          value: sql<number>`coalesce(sum(${payments.amountLkr}), 0)::int`,
+        })
+        .from(clients)
+        .innerJoin(bookings, eq(bookings.clientId, clients.id))
+        .innerJoin(payments, eq(payments.bookingId, bookings.id))
+        .where(paymentRange)
+        .groupBy(clients.name)
+        .orderBy(desc(sql`coalesce(sum(${payments.amountLkr}), 0)`))
+        .limit(6),
+      [] as Array<{ name: string; value: number }>,
+    ),
+    safeReportQuery(
+      db
+        .select({
+          date: localPaymentDate,
+          value: sql<number>`coalesce(sum(${payments.amountLkr}), 0)::int`,
+        })
+        .from(payments)
+        .innerJoin(bookings, eq(bookings.id, payments.bookingId))
+        .where(paymentRange)
+        .groupBy(localPaymentDate)
+        .orderBy(localPaymentDate),
+      [] as Array<{ date: string; value: number }>,
+    ),
+    safeReportQuery(
+      db
+        .select({
+          dayIndex: localPaymentWeekday,
+          revenue: sql<number>`coalesce(sum(${payments.amountLkr}), 0)::int`,
+        })
+        .from(payments)
+        .innerJoin(bookings, eq(bookings.id, payments.bookingId))
+        .where(and(
+          eq(bookings.businessId, businessId),
+          paymentStatusIs("success"),
+          gte(payments.createdAt, weeks.currentStartUtc),
+          lt(payments.createdAt, weeks.currentEndUtc),
+        ))
+        .groupBy(localPaymentWeekday),
+      [] as Array<{ dayIndex: number; revenue: number }>,
+    ),
+    safeReportQuery(
+      db
+        .select({
+          dayIndex: localPaymentWeekday,
+          revenue: sql<number>`coalesce(sum(${payments.amountLkr}), 0)::int`,
+        })
+        .from(payments)
+        .innerJoin(bookings, eq(bookings.id, payments.bookingId))
+        .where(and(
+          eq(bookings.businessId, businessId),
+          paymentStatusIs("success"),
+          gte(payments.createdAt, weeks.previousStartUtc),
+          lt(payments.createdAt, weeks.currentStartUtc),
+        ))
+        .groupBy(localPaymentWeekday),
+      [] as Array<{ dayIndex: number; revenue: number }>,
+    ),
+    safeReportQuery(
+      db
+        .select({
+          hour: localBookingHour,
+          value: count(bookings.id),
+        })
+        .from(bookings)
+        .where(bookingRange)
+        .groupBy(localBookingHour)
+        .orderBy(desc(count(bookings.id)))
+        .limit(8),
+      [] as Array<{ hour: number; value: number }>,
+    ),
   ]);
 
   const bookingCount = Number(totalBookings ?? 0);
