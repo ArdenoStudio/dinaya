@@ -1,22 +1,39 @@
 import type { DocsGuide, GuideStep } from "@content/docs/types";
 
-/** Maps dashboard mockup IDs to captured screenshot paths (when available). */
-export const DOCS_SCREENSHOT_MANIFEST: Record<string, string> = {
-  "dashboard-overview": "/docs/screenshots/dashboard-overview.png",
-  "dashboard-bookings": "/docs/screenshots/dashboard-bookings.png",
-  "dashboard-services": "/docs/screenshots/dashboard-services.png",
-  "dashboard-staff": "/docs/screenshots/dashboard-staff.png",
-  "dashboard-locations": "/docs/screenshots/dashboard-locations.png",
-  "dashboard-availability": "/docs/screenshots/dashboard-availability.png",
-  "dashboard-calendar": "/docs/screenshots/dashboard-calendar.png",
-  "dashboard-clients": "/docs/screenshots/dashboard-clients.png",
-  "dashboard-reviews": "/docs/screenshots/dashboard-reviews.png",
-  "dashboard-payments": "/docs/screenshots/dashboard-payments.png",
-  "dashboard-marketing": "/docs/screenshots/dashboard-marketing.png",
-  "dashboard-settings": "/docs/screenshots/dashboard-settings.png",
-  "dashboard-integrations": "/docs/screenshots/dashboard-integrations.png",
-  "dashboard-payhere": "/docs/screenshots/dashboard-settings.png",
-};
+/** All mockup IDs used across documentation guides. */
+export const DOCS_PREVIEW_MOCKUP_IDS = [
+  "dashboard-overview",
+  "dashboard-onboarding",
+  "dashboard-bookings",
+  "dashboard-services",
+  "dashboard-staff",
+  "dashboard-locations",
+  "dashboard-availability",
+  "dashboard-calendar",
+  "dashboard-clients",
+  "dashboard-reviews",
+  "dashboard-payments",
+  "dashboard-marketing",
+  "dashboard-settings",
+  "dashboard-integrations",
+  "dashboard-payhere",
+  "dashboard-billing",
+  "dashboard-reports",
+  "dashboard-ai",
+  "dashboard-automations",
+  "booking-service",
+  "booking-time",
+  "booking-confirm",
+  "booking-manage",
+  "booking-review",
+] as const;
+
+export type DocsPreviewMockupId = (typeof DOCS_PREVIEW_MOCKUP_IDS)[number];
+
+/** Maps mockup IDs to captured screenshot paths in public/docs/screenshots/. */
+export const DOCS_SCREENSHOT_MANIFEST: Record<string, string> = Object.fromEntries(
+  DOCS_PREVIEW_MOCKUP_IDS.map((id) => [id, `/docs/screenshots/${id}.png`]),
+);
 
 export function getScreenshotForMockup(mockupId: string): string | undefined {
   return DOCS_SCREENSHOT_MANIFEST[mockupId];

@@ -19,7 +19,11 @@
 Run with the dev server up:
 
 ```bash
-PLAYWRIGHT_BASE_URL=http://localhost:3000 npx tsx scripts/capture-docs-screenshots.ts
+# Real dashboard (requires DATABASE_URL)
+PLAYWRIGHT_BASE_URL=http://localhost:3000 DOCS_CAPTURE_MODE=live npx tsx scripts/capture-docs-screenshots.ts
+
+# Mockup previews (no database)
+PLAYWRIGHT_BASE_URL=http://localhost:3000 DOCS_CAPTURE_MODE=preview npx tsx scripts/capture-docs-screenshots.ts
 ```
 
 Outputs to `public/docs/screenshots/`. Then switch a guide step to:

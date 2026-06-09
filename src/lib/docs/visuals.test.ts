@@ -7,6 +7,9 @@ describe("docs visuals", () => {
     expect(getScreenshotForMockup("dashboard-bookings")).toBe(
       "/docs/screenshots/dashboard-bookings.png",
     );
+    expect(getScreenshotForMockup("booking-service")).toBe(
+      "/docs/screenshots/booking-service.png",
+    );
   });
 
   it("prefers explicit thumbnail mockup id", () => {

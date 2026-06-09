@@ -1,5 +1,6 @@
 "use client";
 
+import { getScreenshotForMockup } from "@/lib/docs/visuals";
 import { cn } from "@/lib/utils";
 import { DocsPhoneFrame } from "./DocsPhoneFrame";
 import { DocsProductFrame } from "./DocsProductFrame";
@@ -12,8 +13,9 @@ type Props = {
 
 export function DocsGuideThumbnail({ mockupId, screenshotSrc, className }: Props) {
   const isBooking = mockupId?.startsWith("booking-");
+  const screenshot = screenshotSrc ?? (mockupId ? getScreenshotForMockup(mockupId) : undefined);
 
-  if (screenshotSrc && !isBooking) {
+  if (screenshot && !isBooking) {
     return (
       <div
         className={cn(
@@ -21,7 +23,7 @@ export function DocsGuideThumbnail({ mockupId, screenshotSrc, className }: Props
           className,
         )}
       >
-        <DocsProductFrame src={screenshotSrc} compact className="pointer-events-none h-full border-0 shadow-none" />
+        <DocsProductFrame src={screenshot} compact className="pointer-events-none h-full border-0 shadow-none" />
       </div>
     );
   }

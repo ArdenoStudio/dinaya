@@ -2,17 +2,30 @@ name: Docs screenshots
 
 on:
   workflow_dispatch:
+    inputs:
+      mode:
+        description: "Capture mode"
+        required: true
+        default: live
+        type: choice
+        options:
+          - live
+          - preview
   push:
     branches: [master, main]
     paths:
       - "src/app/dashboard/**"
       - "src/components/dashboard/**"
+      - "src/app/docs/preview/**"
       - "scripts/capture-docs-screenshots.ts"
+      - ".github/workflows/docs-screenshots.yml"
+
+permissions:
+  contents: write
 
 jobs:
   capture:
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/checkout@v4
 
@@ -23,7 +36,25 @@ jobs:
 
       - run: npm ci
 
+      - run: npx playwright install --with-deps chromium
+
+      - name: Resolve capture mode
+        id: mode
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+          INPUT_MODE: ${{ github.event.inputs.mode }}
+        run: |
+          if [ -n "$INPUT_MODE" ]; then
+            echo "value=$INPUT_MODE" >> "$GITHUB_OUTPUT"
+          elif [ -n "$DATABASE_URL" ] && [ -n "$AUTH_SECRET" ]; then
+            echo "value=live" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=preview" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Apply database migrations
+        if: steps.mode.outputs.value == 'live'
         run: npm run db:migrate
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
@@ -35,21 +66,34 @@ jobs:
           AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
 
       - name: Start server
-        run: npm run start -- --port 3000 &
+        run: |
+          npm run start -- --port 3000 > /tmp/next-start.log 2>&1 &
+          echo $! > /tmp/next-start.pid
+          npx --yes wait-on@8.0.1 -t 120000 http://127.0.0.1:3000
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
 
-      - name: Wait for server
-        run: npx wait-on http://127.0.0.1:3000 --timeout 120000
-
       - name: Capture docs screenshots
-        run: PLAYWRIGHT_BASE_URL=http://127.0.0.1:3000 npx tsx scripts/capture-docs-screenshots.ts
+        run: PLAYWRIGHT_BASE_URL=http://127.0.0.1:3000 DOCS_CAPTURE_MODE=${{ steps.mode.outputs.value }} npx tsx scripts/capture-docs-screenshots.ts
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
-      - name: Upload screenshot artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: docs-screenshots
-          path: public/docs/screenshots/
+      - name: Stop server
+        if: always()
+        run: |
+          if [ -f /tmp/next-start.pid ]; then
+            kill "$(cat /tmp/next-start.pid)" 2>/dev/null || true
+          fi
+
+      - name: Commit screenshots
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/docs/screenshots/
+          if git diff --staged --quiet; then
+            echo "No screenshot changes to commit."
+          else
+            git commit -m "chore(docs): update screenshots"
+            git push
+          fi
