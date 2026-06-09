@@ -2,10 +2,12 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { AnimatePresence, motion } from "motion/react";
 import type { GuideStep } from "@content/docs/types";
 import { DocsPhoneFrame } from "./DocsPhoneFrame";
 import { DocsScreenshotFrame } from "./DocsScreenshotFrame";
 import { Icon } from "@/components/ui/Icon";
+import { DEMO_EASE, stepVisualMotion } from "./mockups/demo-theme";
 
 type Props = {
   steps: GuideStep[];
@@ -190,17 +192,27 @@ export function UiWalkthrough({ steps }: Props) {
 
       <div className="grid gap-8 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm shadow-gray-900/5 lg:grid-cols-2 lg:items-start">
         <div>
-          <h2 className="font-cal text-xl tracking-tight">{step.title}</h2>
-          <p className="mt-3 text-sm leading-relaxed text-muted-foreground whitespace-pre-line">
-            {step.body}
-          </p>
-          <div className="mt-4 rounded-lg border border-blue-100 bg-blue-50/60 p-3">
-            <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-widest text-blue-700">
-              <Icon name="cursor-fill" className="text-xs" />
-              Where to click
-            </p>
-            <p className="mt-1 text-sm leading-relaxed text-blue-950">{actionHint}</p>
-          </div>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeStep}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={DEMO_EASE}
+            >
+              <h2 className="font-cal text-xl tracking-tight">{step.title}</h2>
+              <p className="mt-3 text-sm leading-relaxed text-muted-foreground whitespace-pre-line">
+                {step.body}
+              </p>
+              <div className="mt-4 rounded-lg border border-blue-100 bg-blue-50/60 p-3">
+                <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-widest text-blue-700">
+                  <Icon name="cursor-fill" className="text-xs" />
+                  Where to click
+                </p>
+                <p className="mt-1 text-sm leading-relaxed text-blue-950">{actionHint}</p>
+              </div>
+            </motion.div>
+          </AnimatePresence>
           <div className="mt-6 flex flex-wrap gap-2">
             <button
               type="button"
@@ -231,7 +243,23 @@ export function UiWalkthrough({ steps }: Props) {
           </div>
         </div>
         <div className="lg:sticky lg:top-28">
-          <StepVisual step={step} />
+          <div className="relative">
+            <div
+              aria-hidden
+              className="pointer-events-none absolute -inset-6 -z-10 rounded-[2rem] bg-[radial-gradient(60%_60%_at_50%_30%,hsl(var(--primary)/0.12),transparent_70%)]"
+            />
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeStep}
+                initial={stepVisualMotion.initial}
+                animate={stepVisualMotion.animate}
+                exit={stepVisualMotion.exit}
+                transition={stepVisualMotion.transition}
+              >
+                <StepVisual step={step} />
+              </motion.div>
+            </AnimatePresence>
+          </div>
         </div>
       </div>
     </div>

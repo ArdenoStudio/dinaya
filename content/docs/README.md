@@ -31,3 +31,10 @@ visual: { type: "screenshot", src: "/docs/screenshots/dashboard-bookings.png" }
 ## Maintenance
 
 When dashboard UI changes, update mockups in `src/components/docs/mockups/` or re-run the screenshot script.
+
+## Design system
+
+The premium look-and-feel of the in-docs demos (motion curves, shadows, mockup
+fidelity rules, and the roadmap) is documented in
+[`docs/docs-demos-design.md`](../../docs/docs-demos-design.md). Read it before
+changing anything under `src/components/docs/`.
