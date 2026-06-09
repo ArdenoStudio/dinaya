@@ -6,17 +6,18 @@ export const connectPayhereGuide: DocsGuide = {
   description: "Accept card payments and deposits through Sri Lanka's trusted gateway.",
   category: "growth",
   estimatedMinutes: 5,
+  thumbnailMockupId: "dashboard-payhere",
   relatedGuides: ["add-services", "dashboard-payments"],
   faqIds: ["online-payments", "deposit", "payment-fees"],
   steps: [
     {
       title: "Get PayHere credentials",
-      body: "Sign up at payhere.lk if you do not have a merchant account. You will need your Merchant ID and Merchant Secret from the PayHere dashboard.",
+      body: "Sign up at [payhere.lk](https://www.payhere.lk) if you do not have a merchant account. You will need your `Merchant ID` and `Merchant Secret` from the PayHere dashboard.",
       visual: { type: "mockup", mockupId: "dashboard-payhere" },
     },
     {
       title: "Open payment settings",
-      body: "In Dinaya, go to Dashboard → Settings and find the PayHere section. Paste your credentials and choose sandbox or live mode.",
+      body: "In Dinaya, go to **Dashboard → Settings** and find the PayHere section. Paste your credentials and choose **sandbox** or **live** mode.",
       visual: { type: "mockup", mockupId: "dashboard-payhere" },
       highlightNav: "Settings",
     },

@@ -6,6 +6,7 @@ export const setupBookingPageGuide: DocsGuide = {
   description: "Go from sign-up to a live booking link in about five minutes.",
   category: "getting-started",
   estimatedMinutes: 5,
+  thumbnailMockupId: "dashboard-onboarding",
   relatedGuides: ["add-services", "manage-availability", "share-booking-link"],
   faqIds: ["create-booking-page", "customise-page"],
   steps: [

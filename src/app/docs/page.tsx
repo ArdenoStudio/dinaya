@@ -12,7 +12,10 @@ import {
 } from "@content/docs/guides";
 import { PlanBadge } from "@/components/docs/PlanBadge";
 import { DocsAiActions } from "@/components/docs/DocsAiActions";
+import { DocsGuideThumbnail } from "@/components/docs/DocsGuideThumbnail";
+import { DocsHeroPreview } from "@/components/docs/DocsHeroPreview";
 import { DOCS_HUB_MARKDOWN_PATH, DOCS_HUB_PATH } from "@/lib/docs/paths";
+import { getGuidePreviewMockupId } from "@/lib/docs/visuals";
 
 export default function DocsHubPage() {
   const [search, setSearch] = useState("");
@@ -62,6 +65,7 @@ export default function DocsHubPage() {
             className="md:shrink-0"
           />
         </div>
+        <DocsHeroPreview />
       </div>
 
       <section className="mb-8 rounded-2xl border border-gray-200 bg-white p-3 shadow-sm shadow-gray-900/5" aria-label="How documentation walkthroughs work">
@@ -110,7 +114,11 @@ export default function DocsHubPage() {
                     href={`/docs/guides/${g.slug}`}
                     className="flex items-center justify-between gap-4 rounded-xl border p-4 hover:border-primary/30 hover:shadow-sm"
                   >
-                    <div>
+                    <DocsGuideThumbnail
+                      mockupId={getGuidePreviewMockupId(g)}
+                      className="hidden h-16 w-24 shrink-0 sm:block"
+                    />
+                    <div className="min-w-0 flex-1">
                       <p className="font-cal text-base">{g.title}</p>
                       <p className="text-xs text-muted-foreground mt-0.5">{g.description}</p>
                     </div>
@@ -145,8 +153,10 @@ export default function DocsHubPage() {
                   <Link
                     key={slug}
                     href={`/docs/guides/${slug}`}
-                  className="group rounded-2xl border border-gray-200 bg-gradient-to-br from-blue-50/50 to-white p-4 shadow-sm shadow-gray-900/5 transition-all hover:border-primary/30 hover:shadow-md"
-                >
+                    className="group overflow-hidden rounded-2xl border border-gray-200 bg-gradient-to-br from-blue-50/50 to-white shadow-sm shadow-gray-900/5 transition-all hover:border-primary/30 hover:shadow-md"
+                  >
+                    <DocsGuideThumbnail mockupId={getGuidePreviewMockupId(g)} className="rounded-none border-0 border-b" />
+                    <div className="p-4">
                     <p className="font-cal text-base tracking-tight">{g.title}</p>
                     <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{g.description}</p>
                     <div className="mt-3 flex items-center justify-between gap-3">
@@ -157,6 +167,7 @@ export default function DocsHubPage() {
                         Open guide
                         <Icon name="arrow-right" className="text-[10px]" />
                       </span>
+                    </div>
                     </div>
                   </Link>
                 );

@@ -6,6 +6,7 @@ export const clientBooksOnlineGuide: DocsGuide = {
   description: "What your customers see and do on your public booking page.",
   category: "clients",
   estimatedMinutes: 5,
+  thumbnailMockupId: "booking-service",
   relatedGuides: ["connect-payhere", "client-manage-booking"],
   faqIds: ["client-account", "double-booked"],
   steps: [

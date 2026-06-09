@@ -2,9 +2,13 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { AnimatePresence, motion } from "motion/react";
 import type { GuideStep } from "@content/docs/types";
+import { docsSpring } from "@/lib/docs/design-tokens";
+import { DocsRichText } from "@/lib/docs/rich-text";
 import { DocsPhoneFrame } from "./DocsPhoneFrame";
-import { DocsScreenshotFrame } from "./DocsScreenshotFrame";
+import { DocsProductFrame } from "./DocsProductFrame";
+import { DocsCallout } from "./DocsCallout";
 import { Icon } from "@/components/ui/Icon";
 
 type Props = {
@@ -44,7 +48,7 @@ const CLICK_TARGET_LABELS = {
 function StepVisual({ step }: { step: GuideStep }) {
   if (!step.visual) {
     return (
-      <div className="flex aspect-[16/10] items-center justify-center rounded-xl border bg-gray-50 text-sm text-muted-foreground">
+      <div className="flex aspect-[16/10] items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-gradient-to-b from-gray-50 to-white text-sm text-muted-foreground">
         Follow the steps on the left
       </div>
     );
@@ -60,7 +64,7 @@ function StepVisual({ step }: { step: GuideStep }) {
       );
     }
     return (
-      <DocsScreenshotFrame
+      <DocsProductFrame
         mockupId={step.visual.mockupId}
         highlightNav={step.highlightNav}
         highlightTarget={step.highlightTarget}
@@ -70,7 +74,7 @@ function StepVisual({ step }: { step: GuideStep }) {
 
   if (step.visual.type === "screenshot") {
     return (
-      <DocsScreenshotFrame
+      <DocsProductFrame
         src={step.visual.src}
         alt={step.visual.alt}
         hotspots={step.hotspots}
@@ -135,25 +139,35 @@ export function UiWalkthrough({ steps }: Props) {
 
   const step = steps[activeStep];
   const actionHint = getStepActionHint(step);
+  const progress = ((activeStep + 1) / steps.length) * 100;
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
-        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-          Step {activeStep + 1} of {steps.length}
-        </p>
-        <div className="flex gap-1">
-          {steps.map((_, i) => (
-            <button
-              key={i}
-              type="button"
-              aria-label={`Go to step ${i + 1}`}
-              onClick={() => goTo(i)}
-              className={`h-1.5 rounded-full transition-all ${
-                i === activeStep ? "w-6 bg-primary" : "w-1.5 bg-gray-300 hover:bg-gray-400"
-              }`}
-            />
-          ))}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between gap-4">
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+            Step {activeStep + 1} of {steps.length}
+          </p>
+          <div className="flex gap-1">
+            {steps.map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                aria-label={`Go to step ${i + 1}`}
+                onClick={() => goTo(i)}
+                className={`h-1.5 rounded-full transition-all ${
+                  i === activeStep ? "w-6 bg-primary" : "w-1.5 bg-gray-300 hover:bg-gray-400"
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+        <div className="h-1 overflow-hidden rounded-full bg-gray-100">
+          <motion.div
+            className="h-full rounded-full bg-primary"
+            animate={{ width: `${progress}%` }}
+            transition={docsSpring}
+          />
         </div>
       </div>
 
@@ -188,19 +202,27 @@ export function UiWalkthrough({ steps }: Props) {
         </div>
       </div>
 
-      <div className="grid gap-8 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm shadow-gray-900/5 lg:grid-cols-2 lg:items-start">
-        <div>
-          <h2 className="font-cal text-xl tracking-tight">{step.title}</h2>
-          <p className="mt-3 text-sm leading-relaxed text-muted-foreground whitespace-pre-line">
-            {step.body}
-          </p>
-          <div className="mt-4 rounded-lg border border-blue-100 bg-blue-50/60 p-3">
-            <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-widest text-blue-700">
-              <Icon name="cursor-fill" className="text-xs" />
-              Where to click
-            </p>
-            <p className="mt-1 text-sm leading-relaxed text-blue-950">{actionHint}</p>
-          </div>
+      <div className="grid gap-8 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm shadow-gray-900/5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:items-start">
+        <div className="order-2 lg:order-1">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeStep}
+              initial={{ opacity: 0, x: -8 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 8 }}
+              transition={{ duration: 0.22, ease: "easeOut" }}
+            >
+              <h2 className="font-cal text-xl tracking-tight text-gray-950">{step.title}</h2>
+              <DocsRichText
+                text={step.body}
+                className="mt-3 text-sm leading-relaxed text-muted-foreground"
+              />
+              <DocsCallout variant="tip" className="mt-4">
+                {actionHint}
+              </DocsCallout>
+            </motion.div>
+          </AnimatePresence>
+
           <div className="mt-6 flex flex-wrap gap-2">
             <button
               type="button"
@@ -230,8 +252,19 @@ export function UiWalkthrough({ steps }: Props) {
             )}
           </div>
         </div>
-        <div className="lg:sticky lg:top-28">
-          <StepVisual step={step} />
+
+        <div className="order-1 lg:order-2 lg:sticky lg:top-28">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={`visual-${activeStep}`}
+              initial={{ opacity: 0, y: 10, scale: 0.99 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -6, scale: 0.99 }}
+              transition={docsSpring}
+            >
+              <StepVisual step={step} />
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
     </div>

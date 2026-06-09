@@ -6,6 +6,7 @@ export const manageAvailabilityGuide: DocsGuide = {
   description: "Set working hours, block time off, and prevent double bookings.",
   category: "catalog",
   estimatedMinutes: 4,
+  thumbnailMockupId: "dashboard-availability",
   relatedGuides: ["add-services", "add-staff-availability"],
   faqIds: ["manage-availability", "block-holidays"],
   steps: [

@@ -28,6 +28,30 @@ Outputs to `public/docs/screenshots/`. Then switch a guide step to:
 visual: { type: "screenshot", src: "/docs/screenshots/dashboard-bookings.png" }
 ```
 
+## Rich text in step bodies
+
+Step `body` strings support lightweight inline markdown:
+
+- `**bold**`
+- `` `inline code` ``
+- `[link label](https://example.com)`
+
+Rendered by `DocsRichText` in the walkthrough.
+
+## Visual components
+
+| Component | Purpose |
+|-----------|---------|
+| `DocsProductFrame` | Branded browser chrome + dashboard mockup or screenshot |
+| `DocsPhoneFrame` | iPhone frame for booking flow mockups |
+| `DocsSpotlight` | Dims non-highlighted areas during walkthrough steps |
+| `DocsGuideThumbnail` | Scaled preview for docs hub and related-guide cards |
+| `DocsHeroPreview` | Rotating hero mockup on `/docs` |
+
+Optional `thumbnailMockupId` on `DocsGuide` overrides the hub card preview.
+
 ## Maintenance
 
 When dashboard UI changes, update mockups in `src/components/docs/mockups/` or re-run the screenshot script.
+
+CI: trigger the **Docs screenshots** workflow manually after dashboard UI changes (requires `DATABASE_URL` and `AUTH_SECRET` secrets).

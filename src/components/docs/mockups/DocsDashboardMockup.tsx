@@ -20,7 +20,7 @@ function NavHotspot({ label }: { label: string }) {
   return (
     <span className="pointer-events-none absolute -right-1 top-1/2 z-20 flex -translate-y-1/2 translate-x-1 items-center">
       <DocsCursor className="relative shrink-0" />
-      <span className="ml-1 whitespace-nowrap rounded-md bg-gray-900 px-2 py-0.5 text-[9px] font-medium text-white shadow-md">
+      <span className="ml-1 whitespace-nowrap rounded-md bg-gray-950 px-2 py-0.5 font-cal text-[9px] font-medium text-white shadow-lg">
         {label}
       </span>
     </span>

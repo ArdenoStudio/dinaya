@@ -6,6 +6,7 @@ export const manageBookingsGuide: DocsGuide = {
   description: "View, create, cancel, reschedule, and refund appointments.",
   category: "workspace",
   estimatedMinutes: 6,
+  thumbnailMockupId: "dashboard-bookings",
   relatedGuides: ["dashboard-calendar", "client-manage-booking"],
   faqIds: ["client-books", "cancel-reschedule", "refund"],
   steps: [

@@ -87,6 +87,8 @@ export type DocsGuide = {
   category: DocsCategoryId;
   estimatedMinutes: number;
   planRequired?: PlanTier;
+  /** Override preview mockup on docs hub cards (defaults to first step visual). */
+  thumbnailMockupId?: string;
   steps: GuideStep[];
   relatedGuides?: string[];
   faqIds?: string[];

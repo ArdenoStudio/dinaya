@@ -8,8 +8,10 @@ import { getCategoryLabel } from "@content/docs/categories";
 import { UiWalkthrough } from "@/components/docs/UiWalkthrough";
 import { PlanBadge } from "@/components/docs/PlanBadge";
 import { DocsAiActions } from "@/components/docs/DocsAiActions";
+import { DocsGuideThumbnail } from "@/components/docs/DocsGuideThumbnail";
 import { getGuideMarkdownPath, getGuidePagePath } from "@/lib/docs/paths";
 import { buildAbsoluteAppUrl } from "@/lib/docs/site-url";
+import { getGuidePreviewMockupId } from "@/lib/docs/visuals";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -101,10 +103,16 @@ export default async function GuidePage({ params }: Props) {
               <li key={r.slug}>
                 <Link
                   href={`/docs/guides/${r.slug}`}
-                  className="block rounded-xl border border-gray-200 bg-white p-4 text-sm shadow-sm shadow-gray-900/5 transition hover:border-primary/30 hover:shadow-md"
+                  className="block overflow-hidden rounded-xl border border-gray-200 bg-white text-sm shadow-sm shadow-gray-900/5 transition hover:border-primary/30 hover:shadow-md"
                 >
-                  <p className="font-medium">{r.title}</p>
-                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{r.description}</p>
+                  <DocsGuideThumbnail
+                    mockupId={getGuidePreviewMockupId(r)}
+                    className="rounded-none border-0 border-b"
+                  />
+                  <div className="p-4">
+                    <p className="font-medium">{r.title}</p>
+                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{r.description}</p>
+                  </div>
                 </Link>
               </li>
             ))}

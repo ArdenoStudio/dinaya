@@ -19,16 +19,16 @@ export function DocsCursor({ className }: Props) {
         transition={{ duration: 0.6, delay: 0.2, repeat: Infinity, repeatDelay: 2.5 }}
       >
         <svg
-          width="28"
-          height="28"
+          width="30"
+          height="30"
           viewBox="0 0 24 24"
           fill="none"
-          className="drop-shadow-md"
+          className="drop-shadow-lg"
           aria-hidden
         >
           <path
             d="M5 3L19 12L11 13.5L9 21L5 3Z"
-            fill="#111827"
+            fill="hsl(var(--primary))"
             stroke="white"
             strokeWidth="1.5"
             strokeLinejoin="round"
@@ -36,7 +36,7 @@ export function DocsCursor({ className }: Props) {
         </svg>
       </motion.div>
       <motion.span
-        className="absolute left-6 top-5 size-3 rounded-full bg-primary/40"
+        className="absolute left-6 top-5 size-3.5 rounded-full bg-primary/50"
         initial={{ scale: 0, opacity: 0.8 }}
         animate={{ scale: [0, 2.2], opacity: [0.8, 0] }}
         transition={{ duration: 0.5, delay: 0.45, repeat: Infinity, repeatDelay: 2.5 }}

@@ -6,6 +6,7 @@ export const shareBookingLinkGuide: DocsGuide = {
   description: "Put your Dinaya link everywhere clients find you.",
   category: "growth",
   estimatedMinutes: 4,
+  thumbnailMockupId: "dashboard-marketing",
   relatedGuides: ["setup-booking-page", "collect-reviews"],
   faqIds: ["share-link"],
   steps: [

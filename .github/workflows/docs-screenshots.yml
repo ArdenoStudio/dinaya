@@ -1,0 +1,55 @@
+name: Docs screenshots
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master, main]
+    paths:
+      - "src/app/dashboard/**"
+      - "src/components/dashboard/**"
+      - "scripts/capture-docs-screenshots.ts"
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - run: npm ci
+
+      - name: Apply database migrations
+        run: npm run db:migrate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Build application
+        run: npm run build
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+
+      - name: Start server
+        run: npm run start -- --port 3000 &
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+
+      - name: Wait for server
+        run: npx wait-on http://127.0.0.1:3000 --timeout 120000
+
+      - name: Capture docs screenshots
+        run: PLAYWRIGHT_BASE_URL=http://127.0.0.1:3000 npx tsx scripts/capture-docs-screenshots.ts
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Upload screenshot artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-screenshots
+          path: public/docs/screenshots/
