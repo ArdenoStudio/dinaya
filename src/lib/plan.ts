@@ -50,6 +50,8 @@ export type Entitlements = {
     staff: number | null;
     services: number | null;
     locations: number | null;
+    /** Included WhatsApp messages per month. 0 = channel off; null = unlimited. */
+    whatsappMessagesPerMonth: number | null;
   };
   features: Record<PlanFeature, boolean>;
 };
@@ -88,6 +90,7 @@ const DEFAULT_TRIAL_ENTITLEMENTS: Entitlements = {
     staff: 5,
     services: null,
     locations: 1,
+    whatsappMessagesPerMonth: 200,
   },
   features: {
     aiBookingAutopilot: false,
@@ -122,6 +125,7 @@ const DEFAULT_EXPIRED_ENTITLEMENTS: Entitlements = {
     staff: 0,
     services: 0,
     locations: 0,
+    whatsappMessagesPerMonth: 0,
   },
   features: {
     aiBookingAutopilot: false,
@@ -154,6 +158,7 @@ const DEFAULT_STARTER_ENTITLEMENTS: Entitlements = {
     staff: 2,
     services: 10,
     locations: 1,
+    whatsappMessagesPerMonth: 0,
   },
   features: {
     aiBookingAutopilot: false,
@@ -186,6 +191,7 @@ const DEFAULT_PRO_ENTITLEMENTS: Entitlements = {
     staff: 5,
     services: null,
     locations: 1,
+    whatsappMessagesPerMonth: 500,
   },
   features: {
     aiBookingAutopilot: false,
@@ -218,6 +224,7 @@ const DEFAULT_MAX_ENTITLEMENTS: Entitlements = {
     staff: 15,
     services: null,
     locations: 3,
+    whatsappMessagesPerMonth: 2000,
   },
   features: {
     aiBookingAutopilot: true,
@@ -304,6 +311,10 @@ function mergeEntitlements(
       staff: pickLimit(fromDisk?.limits?.staff, defaults.limits.staff),
       services: pickLimit(fromDisk?.limits?.services, defaults.limits.services),
       locations: pickLimit(fromDisk?.limits?.locations, defaults.limits.locations),
+      whatsappMessagesPerMonth: pickLimit(
+        fromDisk?.limits?.whatsappMessagesPerMonth,
+        defaults.limits.whatsappMessagesPerMonth
+      ),
     },
     features: {
       ...defaults.features,
@@ -585,6 +596,7 @@ const LIMIT_LABELS: Record<PlanLimit, string> = {
   staff: "staff members",
   services: "services",
   locations: "locations",
+  whatsappMessagesPerMonth: "monthly WhatsApp messages",
 };
 
 export class PlanLimitError extends Error {

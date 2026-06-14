@@ -353,10 +353,10 @@ export default async function AdminPlansPage() {
                     Limits <span className="ml-1 font-normal normal-case text-muted-foreground/70">(blank = unlimited)</span>
                   </p>
                   <div className="mt-2 grid grid-cols-3 gap-2">
-                    {(["bookingsPerMonth", "staff", "services", "locations"] as const).map((limitKey) => (
+                    {(["bookingsPerMonth", "staff", "services", "locations", "whatsappMessagesPerMonth"] as const).map((limitKey) => (
                       <label key={limitKey} className="block">
                         <span className="block text-[0.65rem] uppercase tracking-wider text-muted-foreground">
-                          {limitKey === "bookingsPerMonth" ? "Bookings/mo" : limitKey === "locations" ? "Locations" : limitKey}
+                          {limitKey === "bookingsPerMonth" ? "Bookings/mo" : limitKey === "locations" ? "Locations" : limitKey === "whatsappMessagesPerMonth" ? "WhatsApp/mo" : limitKey}
                         </span>
                         <input
                           type="text"

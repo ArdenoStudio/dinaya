@@ -1,4 +1,5 @@
 import type { PlanFeature } from "@/lib/plan";
+import type { WhatsAppTemplate } from "@/lib/messaging/whatsapp-templates";
 
 export type MessageChannel = "email" | "whatsapp" | "sms";
 
@@ -31,4 +32,6 @@ export type SendMessageInput = {
   preferredChannels?: MessageChannel[];
   notificationType?: BookingNotificationType;
   meta?: Record<string, unknown>;
+  /** Business-initiated WhatsApp sends must use a pre-approved template. */
+  whatsappTemplate?: WhatsAppTemplate;
 };

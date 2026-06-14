@@ -44,6 +44,13 @@ describe("plan entitlements", () => {
     expect(MAX_ENTITLEMENTS.limits).toMatchObject({ staff: 15, services: null, locations: 3 });
   });
 
+  it("sets WhatsApp allowances that protect margin (Starter off, Pro 500, Growth 2000)", () => {
+    expect(STARTER_ENTITLEMENTS.limits.whatsappMessagesPerMonth).toBe(0);
+    expect(PRO_ENTITLEMENTS.limits.whatsappMessagesPerMonth).toBe(500);
+    expect(MAX_ENTITLEMENTS.limits.whatsappMessagesPerMonth).toBe(2000);
+    expect(TRIAL_ENTITLEMENTS.limits.whatsappMessagesPerMonth).toBe(200);
+  });
+
   it("allows payments on Starter and reports on Pro or higher", () => {
     expect(canUseFeature("trial", "payments")).toBe(true);
     expect(canUseFeature("trial", "reports")).toBe(true);

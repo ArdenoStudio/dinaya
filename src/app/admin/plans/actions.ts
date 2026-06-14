@@ -28,6 +28,7 @@ function buildPlanEntitlements(formData: FormData, planKey: Plan) {
       staff: parseLimit(formData.get(`${planKey}.staff`)),
       services: parseLimit(formData.get(`${planKey}.services`)),
       locations: parseLimit(formData.get(`${planKey}.locations`)),
+      whatsappMessagesPerMonth: parseLimit(formData.get(`${planKey}.whatsappMessagesPerMonth`)),
     },
     features: Object.fromEntries(
       PLAN_FEATURE_ORDER.map((f) => [f, formData.get(`${planKey}.feature.${f}`) === "on"])

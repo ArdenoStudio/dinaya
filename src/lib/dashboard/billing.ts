@@ -13,6 +13,7 @@ import {
   type PlanConfig,
 } from "@/lib/plan";
 import { isVoiceReceptionistRolloutOpen } from "@/lib/voice-receptionist";
+import { getWhatsAppUsageThisMonth } from "@/lib/messaging/usage";
 
 export type DashboardBillingOverview = Awaited<ReturnType<typeof getBillingDashboardOverview>>;
 
@@ -121,6 +122,7 @@ export async function getBillingDashboardOverview(businessId: string, now = new 
     [{ activeStaff }],
     [{ activeServices }],
     [{ monthlyBookings }],
+    whatsappUsed,
   ] = await Promise.all([
     db
       .select(subscriptionColumns)
@@ -153,6 +155,7 @@ export async function getBillingDashboardOverview(businessId: string, now = new 
       .select({ monthlyBookings: count() })
       .from(bookings)
       .where(and(eq(bookings.businessId, businessId), gte(bookings.createdAt, monthStart))),
+    getWhatsAppUsageThisMonth(businessId, now),
   ]);
 
   return {
@@ -211,6 +214,9 @@ export async function getBillingDashboardOverview(businessId: string, now = new 
       usageItem("staff", "Staff", Number(activeStaff), entitlements.limits.staff),
       usageItem("services", "Services", Number(activeServices), entitlements.limits.services),
       usageItem("bookingsPerMonth", "Bookings this month", Number(monthlyBookings), entitlements.limits.bookingsPerMonth),
+      ...(entitlements.features.whatsappSms
+        ? [usageItem("whatsappMessagesPerMonth", "WhatsApp messages", whatsappUsed, entitlements.limits.whatsappMessagesPerMonth)]
+        : []),
     ],
   };
 }
