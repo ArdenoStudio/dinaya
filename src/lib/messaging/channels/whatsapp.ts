@@ -1,4 +1,5 @@
 import { providerTimeoutSignal } from "@/lib/provider-timeout";
+import type { WhatsAppTemplate } from "@/lib/messaging/whatsapp-templates";
 
 export function isWhatsAppReady(clientPhone?: string | null): boolean {
   if (!clientPhone) return false;
@@ -17,6 +18,8 @@ export function isWhatsAppReady(clientPhone?: string | null): boolean {
 export async function sendWhatsApp(input: {
   clientPhone: string;
   body: string;
+  /** When set, send as an approved template (required for business-initiated messages). */
+  template?: WhatsAppTemplate;
 }): Promise<{ provider: string; status: "sent" | "skipped" | "failed"; providerMessageId?: string | null; error?: string }> {
   const token = process.env.META_WHATSAPP_TOKEN;
   const phoneNumberId = process.env.META_WHATSAPP_PHONE_NUMBER_ID;
@@ -24,18 +27,39 @@ export async function sendWhatsApp(input: {
     return { provider: "meta-whatsapp", status: "skipped", error: "Meta WhatsApp env is not configured." };
   }
 
+  const to = input.clientPhone.replace(/^\+/, "");
+  const payload = input.template
+    ? {
+        messaging_product: "whatsapp",
+        to,
+        type: "template",
+        template: {
+          name: input.template.name,
+          language: { code: input.template.languageCode },
+          components: input.template.bodyParams.length
+            ? [
+                {
+                  type: "body",
+                  parameters: input.template.bodyParams.map((text) => ({ type: "text", text })),
+                },
+              ]
+            : [],
+        },
+      }
+    : {
+        messaging_product: "whatsapp",
+        to,
+        type: "text",
+        text: { body: input.body },
+      };
+
   const response = await fetch(`https://graph.facebook.com/v20.0/${phoneNumberId}/messages`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      messaging_product: "whatsapp",
-      to: input.clientPhone.replace(/^\+/, ""),
-      type: "text",
-      text: { body: input.body },
-    }),
+    body: JSON.stringify(payload),
     signal: providerTimeoutSignal(),
   });
 

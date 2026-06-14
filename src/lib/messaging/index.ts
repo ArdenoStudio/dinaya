@@ -6,6 +6,8 @@ import { sendSms, isSmsReady } from "@/lib/messaging/channels/sms";
 import { sendWhatsApp, isWhatsAppReady } from "@/lib/messaging/channels/whatsapp";
 import { sendTwilioWhatsApp, isTwilioWhatsAppReady } from "@/lib/messaging/channels/twilio-whatsapp";
 import { hasBookingNotification, logBookingNotification } from "@/lib/messaging/notification-log";
+import { getWhatsAppUsageThisMonth, whatsappAllowanceState } from "@/lib/messaging/usage";
+import { getBusinessPlan, getEffectiveEntitlements } from "@/lib/plan";
 import type {
   MessageChannel,
   ProviderSendResult,
@@ -18,9 +20,32 @@ function channelReady(channel: MessageChannel, input: SendMessageInput): boolean
   return isSmsReady(input.clientPhone);
 }
 
-function selectChannel(input: SendMessageInput): MessageChannel | null {
+/**
+ * WhatsApp is the dominant variable cost, so when a business has used up its
+ * plan's monthly WhatsApp allowance we skip WhatsApp and let the next ready
+ * channel (SMS or email) carry the message — a soft cap, never a hard stop.
+ * Gated behind MESSAGING_ENFORCE_ALLOWANCE so launch runs observe-only (metering
+ * on, behavior unchanged) until real usage data says to turn it on.
+ */
+async function isOverWhatsAppAllowance(businessId: string): Promise<boolean> {
+  const plan = await getBusinessPlan(businessId);
+  const included = getEffectiveEntitlements(plan).limits.whatsappMessagesPerMonth;
+  if (included === null) return false; // unlimited
+  const used = await getWhatsAppUsageThisMonth(businessId);
+  return whatsappAllowanceState(used, included).isOver;
+}
+
+async function selectChannel(input: SendMessageInput): Promise<MessageChannel | null> {
+  const enforce = process.env.MESSAGING_ENFORCE_ALLOWANCE === "true";
   const preferred = input.preferredChannels ?? ["email"];
-  return preferred.find((channel) => channelReady(channel, input)) ?? null;
+  for (const channel of preferred) {
+    if (!channelReady(channel, input)) continue;
+    if (channel === "whatsapp" && enforce && (await isOverWhatsAppAllowance(input.businessId))) {
+      continue;
+    }
+    return channel;
+  }
+  return null;
 }
 
 async function sendViaChannel(
@@ -38,7 +63,7 @@ async function sendViaChannel(
   }
 
   if (channel === "whatsapp" && input.clientPhone) {
-    const metaResult = await sendWhatsApp({ clientPhone: input.clientPhone, body: input.body });
+    const metaResult = await sendWhatsApp({ clientPhone: input.clientPhone, body: input.body, template: input.whatsappTemplate });
     if (metaResult.status === "sent") return metaResult;
     if (isTwilioWhatsAppReady(input.clientPhone)) {
       return sendTwilioWhatsApp({ clientPhone: input.clientPhone, body: input.body });
@@ -79,7 +104,7 @@ async function logCommunication(input: SendMessageInput, result: ProviderSendRes
 
 export async function sendMessage(input: SendMessageInput): Promise<ProviderSendResult> {
   if (input.bookingId && input.notificationType) {
-    const channel = selectChannel(input);
+    const channel = await selectChannel(input);
     if (channel && await hasBookingNotification(input.bookingId, input.notificationType, channel)) {
       return { channel, provider: null, status: "duplicate" };
     }
@@ -98,7 +123,7 @@ export async function sendMessage(input: SendMessageInput): Promise<ProviderSend
     return { channel: "none", provider: null, status: "duplicate" };
   }
 
-  const channel = selectChannel(input);
+  const channel = await selectChannel(input);
   if (!channel) {
     const result: ProviderSendResult = {
       channel: "none",

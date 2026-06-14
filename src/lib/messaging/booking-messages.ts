@@ -8,6 +8,7 @@ import {
   rescheduleMessage,
 } from "@/lib/messaging/templates";
 import { localizedSmsBody } from "@/lib/messaging/locale";
+import { buildWhatsAppTemplate, WHATSAPP_TEMPLATES } from "@/lib/messaging/whatsapp-templates";
 import type { BookingLanguage } from "@/lib/i18n";
 import type { MessageChannel } from "@/lib/messaging/types";
 
@@ -73,6 +74,13 @@ export async function sendBookingConfirmationMessage(data: BookingMessageData) {
     subject: content.subject,
     body: smsBody,
     preferredChannels: channelsForPlan(data.plan, "confirmation"),
+    whatsappTemplate: buildWhatsAppTemplate(WHATSAPP_TEMPLATES.confirmation, data.language, [
+      data.clientName,
+      data.businessName,
+      data.serviceName,
+      whenShort,
+      data.manageUrl,
+    ]),
     meta: { html: content.html, emailText: content.body },
   });
 }
@@ -108,6 +116,13 @@ export async function sendBookingReminderMessage(data: BookingMessageData) {
     subject: content.subject,
     body: smsBody,
     preferredChannels: channelsForPlan(data.plan, "reminder"),
+    whatsappTemplate: buildWhatsAppTemplate(WHATSAPP_TEMPLATES.reminder, data.language, [
+      data.clientName,
+      data.businessName,
+      data.serviceName,
+      whenShort,
+      data.manageUrl,
+    ]),
     meta: { html: content.html, emailText: content.body },
   });
 }
@@ -139,6 +154,12 @@ export async function sendBookingCancellationMessage(data: Omit<BookingMessageDa
     subject: content.subject,
     body: smsBody,
     preferredChannels: channelsForPlan(data.plan, "confirmation"),
+    whatsappTemplate: buildWhatsAppTemplate(WHATSAPP_TEMPLATES.cancellation, data.language, [
+      data.clientName,
+      data.businessName,
+      data.serviceName,
+      whenShort,
+    ]),
     meta: { emailText: content.body },
   });
 }
@@ -173,6 +194,13 @@ export async function sendBookingRescheduleMessage(data: BookingMessageData) {
     subject: content.subject,
     body: smsBody,
     preferredChannels: channelsForPlan(data.plan, "confirmation"),
+    whatsappTemplate: buildWhatsAppTemplate(WHATSAPP_TEMPLATES.reschedule, data.language, [
+      data.clientName,
+      data.businessName,
+      data.serviceName,
+      whenShort,
+      data.manageUrl,
+    ]),
     meta: { html: content.html, emailText: content.body },
   });
 }
@@ -208,5 +236,13 @@ export async function sendBookingNotificationToBusinessMessage(data: BusinessNot
     subject: `New booking — ${data.clientName}`,
     body,
     preferredChannels: channels,
+    whatsappTemplate: buildWhatsAppTemplate(WHATSAPP_TEMPLATES.ownerNewBooking, undefined, [
+      data.businessName,
+      data.clientName,
+      data.serviceName,
+      data.staffName,
+      whenShort,
+      dashboardUrl,
+    ]),
   });
 }

@@ -27,6 +27,7 @@ export function planLimitLabel(limit: PlanLimit): string {
     staff: "staff",
     services: "services",
     locations: "locations",
+    whatsappMessagesPerMonth: "WhatsApp/mo",
   };
   return labels[limit];
 }
