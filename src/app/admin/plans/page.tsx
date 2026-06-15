@@ -29,7 +29,7 @@ const FEATURE_LABELS: Record<PlanFeature, string> = {
   deals: "Dinaya Deals",
   clientReactivationCampaign: "Client Reactivation Campaign",
   googleCalendarSync: "Google Calendar sync",
-  intakeForms: "Intake forms",
+  intakeForms: "Intake & routing forms",
   payments: "PayHere payments",
   publicBookingPage: "Public booking page",
   publicBookingPageCustomization: "Booking page customization",

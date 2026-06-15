@@ -118,6 +118,9 @@ export const businesses = pgTable("businesses", {
   websiteUrl: text("website_url"),
   // Portfolio gallery — array of image URLs shown on the booking page
   galleryImages: text("gallery_images").array(),
+  // Service router: a first-step booking question that maps each answer to a
+  // service. Pro+ feature. null/disabled = normal service list.
+  bookingRouter: jsonb("booking_router").$type<import("@/lib/booking-router").BookingRouter>(),
   plan: planEnum("plan").default("trial").notNull(),
   planExpiresAt: timestamp("plan_expires_at"),
   customDomain: varchar("custom_domain", { length: 255 }),

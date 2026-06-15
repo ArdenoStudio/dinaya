@@ -7,6 +7,7 @@ import { eq, and, avg, count } from "drizzle-orm";
 import BookingWizard from "@/components/booking/BookingWizard";
 import { getBookingCopy } from "@/lib/i18n";
 import { canUseFeature, resolveEffectivePlan } from "@/lib/plan";
+import { resolveActiveRouter } from "@/lib/booking-router";
 import { isOptimizableRemoteImage } from "@/lib/utils";
 import { listActiveDealsForBusiness } from "@/lib/deals/queries";
 import { normalizePublicHttpsUrl } from "@/lib/public-url";
@@ -68,6 +69,7 @@ export default async function BookingPage({ params, searchParams }: Props) {
       lankaqrImageUrl: businesses.lankaqrImageUrl,
       logoUrl: businesses.logoUrl,
       name: businesses.name,
+      bookingRouter: businesses.bookingRouter,
       plan: businesses.plan,
       planExpiresAt: businesses.planExpiresAt,
       payhereEnabled: businesses.payhereEnabled,
@@ -164,6 +166,10 @@ export default async function BookingPage({ params, searchParams }: Props) {
     .where(eq(staff.businessId, business.id));
 
   const avgRating = ratingData[0]?.avg ? parseFloat(ratingData[0].avg) : null;
+
+  const bookingRouter = intakeEnabled
+    ? resolveActiveRouter(business.bookingRouter, serviceList.map((s) => s.id))
+    : null;
   const reviewCount = ratingData[0]?.count ?? 0;
   const gallery = business.galleryImages ?? [];
   const staffWithBio = staffList.filter((s) => s.bio || s.avatarUrl);
@@ -281,6 +287,7 @@ export default async function BookingPage({ params, searchParams }: Props) {
             ...s,
             intakeQuestions: intakeEnabled ? s.intakeQuestions ?? [] : [],
           }))}
+          bookingRouter={bookingRouter}
           staff={staffList}
           staffServiceMap={assignments}
           staffLocationMap={staffLocationMap}

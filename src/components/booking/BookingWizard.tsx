@@ -7,6 +7,7 @@ import { toZonedTime } from "date-fns-tz";
 import { Icon } from "@/components/ui/Icon";
 import type { Location, Staff } from "@/db/schema";
 import type { IntakeQuestion } from "@/lib/intake";
+import type { BookingRouter } from "@/lib/booking-router";
 import StepService from "./StepService";
 import StepLocation from "./StepLocation";
 import StepDateTime from "./StepDateTime";
@@ -36,6 +37,7 @@ interface Props {
   showBranding?: boolean;
   activeDeals?: DealListItem[];
   initialDealId?: string | null;
+  bookingRouter?: BookingRouter | null;
 }
 
 export type BookingBusiness = {
@@ -99,6 +101,7 @@ export default function BookingWizard({
   showBranding = true,
   activeDeals = [],
   initialDealId = null,
+  bookingRouter = null,
 }: Props) {
   const copy = getBookingCopy(business.language);
   const needsLocationPicker = locations.length > 1;
@@ -366,6 +369,7 @@ export default function BookingWizard({
                   services={services}
                   selected={state.service}
                   copy={copy}
+                  bookingRouter={bookingRouter}
                   onSelect={selectService}
                 />
                 {state.service && needsStaffPicker && (
