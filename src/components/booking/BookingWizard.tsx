@@ -62,6 +62,7 @@ export type BookingService = {
   durationMinutes: number;
   isActive: boolean;
   minimumNoticeHours: number;
+  maximumAdvanceDays: number | null;
   name: string;
   priceLkr: number;
   requiresPayment: boolean;

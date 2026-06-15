@@ -135,6 +135,7 @@ export default async function BookingPage({ params, searchParams }: Props) {
         afterBuffer: services.afterBuffer,
         minimumNoticeHours: services.minimumNoticeHours,
         dailyCapacity: services.dailyCapacity,
+        maximumAdvanceDays: services.maximumAdvanceDays,
         createdAt: services.createdAt,
       })
       .from(services)
