@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { Analytics } from "@vercel/analytics/next";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
+import { ChunkLoadRecovery } from "@/components/ChunkLoadRecovery";
 import { NavProvider } from "@/context/NavContext";
 import "./globals.css";
 
@@ -38,6 +39,7 @@ export default function RootLayout({
             {children}
           </main>
         </NavProvider>
+        <ChunkLoadRecovery />
         {enableVercelAnalytics ? <Analytics /> : null}
         <GoogleAnalytics />
       </body>
