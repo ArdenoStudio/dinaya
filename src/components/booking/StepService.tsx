@@ -1,15 +1,18 @@
 import { formatLkr } from "@/lib/utils";
+import { Icon } from "@/components/ui/Icon";
 import type { BookingService } from "./BookingWizard";
 import type { BookingCopy } from "@/lib/i18n";
+import type { BookingRouter } from "@/lib/booking-router";
 
 interface Props {
   services: BookingService[];
   selected: BookingService | null;
   copy: BookingCopy;
+  bookingRouter?: BookingRouter | null;
   onSelect: (service: BookingService) => void;
 }
 
-export default function StepService({ services, selected, copy, onSelect }: Props) {
+export default function StepService({ services, selected, copy, bookingRouter, onSelect }: Props) {
   if (services.length === 0) {
     return (
       <div className="py-12 text-center text-sm text-muted-foreground">
@@ -20,8 +23,40 @@ export default function StepService({ services, selected, copy, onSelect }: Prop
 
   return (
     <div>
+      {bookingRouter && (
+        <div className="mb-5">
+          <p className="mb-3 text-[10px] font-bold uppercase tracking-widest text-gray-400">
+            {bookingRouter.question}
+          </p>
+          <div className="space-y-2">
+            {bookingRouter.options.map((o) => {
+              const target = services.find((s) => s.id === o.serviceId);
+              if (!target) return null;
+              const isSelected = selected?.id === target.id;
+              return (
+                <button
+                  key={o.id}
+                  type="button"
+                  onClick={() => onSelect(target)}
+                  className={`flex w-full cursor-pointer items-center justify-between rounded-xl border p-3.5 text-left transition-all ${
+                    isSelected
+                      ? "border-blue-500 bg-blue-50/60 shadow-sm ring-2 ring-blue-500/10"
+                      : "border-gray-100 hover:border-gray-200"
+                  }`}
+                >
+                  <span className={`text-sm font-medium ${isSelected ? "text-blue-900" : "text-gray-800"}`}>
+                    {o.label}
+                  </span>
+                  <Icon name="chevron-right" className="text-xs text-gray-300" />
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       <p className="mb-3 text-[10px] font-bold uppercase tracking-widest text-gray-400">
-        {copy.chooseService}
+        {bookingRouter ? "Or choose a service" : copy.chooseService}
       </p>
       <div className="space-y-2">
         {services.map((s) => {

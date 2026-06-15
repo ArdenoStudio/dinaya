@@ -6,6 +6,8 @@ import { format, parseISO } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import { Icon } from "@/components/ui/Icon";
 import type { Location, Staff } from "@/db/schema";
+import type { IntakeQuestion } from "@/lib/intake";
+import type { BookingRouter } from "@/lib/booking-router";
 import StepService from "./StepService";
 import StepLocation from "./StepLocation";
 import StepDateTime from "./StepDateTime";
@@ -35,6 +37,7 @@ interface Props {
   showBranding?: boolean;
   activeDeals?: DealListItem[];
   initialDealId?: string | null;
+  bookingRouter?: BookingRouter | null;
 }
 
 export type BookingBusiness = {
@@ -62,10 +65,12 @@ export type BookingService = {
   durationMinutes: number;
   isActive: boolean;
   minimumNoticeHours: number;
+  maximumAdvanceDays: number | null;
   name: string;
   priceLkr: number;
   requiresPayment: boolean;
   depositPercent: number;
+  intakeQuestions: IntakeQuestion[];
 };
 
 export type BookingState = {
@@ -80,6 +85,7 @@ export type BookingState = {
   clientPhone: string;
   clientEmail: string;
   notes: string;
+  intakeAnswers: Record<string, string>;
 };
 
 type SlotData = { startUtc: string; endUtc: string; label: string };
@@ -96,6 +102,7 @@ export default function BookingWizard({
   showBranding = true,
   activeDeals = [],
   initialDealId = null,
+  bookingRouter = null,
 }: Props) {
   const copy = getBookingCopy(business.language);
   const needsLocationPicker = locations.length > 1;
@@ -116,6 +123,7 @@ export default function BookingWizard({
     clientPhone: "",
     clientEmail: "",
     notes: "",
+    intakeAnswers: {},
   });
   const [selectedSlot, setSelectedSlot] = useState<SlotData | null>(null);
   const [selectedDealId, setSelectedDealId] = useState<string | null>(initialDealId);
@@ -362,6 +370,7 @@ export default function BookingWizard({
                   services={services}
                   selected={state.service}
                   copy={copy}
+                  bookingRouter={bookingRouter}
                   onSelect={selectService}
                 />
                 {state.service && needsStaffPicker && (

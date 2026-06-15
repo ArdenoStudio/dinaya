@@ -24,6 +24,7 @@ import {
   type BookingAttribution,
 } from "@/lib/booking-attribution";
 import { canUseFeature, getBusinessPlan, PlanLimitError, requirePlanLimit } from "@/lib/plan";
+import { validateIntakeAnswers, intakeAnswersInputSchema, type IntakeAnswer } from "@/lib/intake";
 import { withRateLimit } from "@/lib/rate-limit";
 import { hasApiKeyAuth, requireApiKey } from "@/lib/api-key-auth";
 import {
@@ -48,6 +49,7 @@ const bookingSchema = z.object({
   clientPhone: z.string().trim().min(7).max(30),
   clientEmail: z.email().optional().nullable().or(z.literal("")),
   notes: z.string().trim().max(2000).optional().nullable(),
+  intakeAnswers: intakeAnswersInputSchema.optional().nullable(),
   dealId: z.uuid().optional().nullable(),
   source: z.enum(["public", "manual", "api", "import", "voice_agent", "deals"]).optional(),
   attribution: z.object({
@@ -102,6 +104,7 @@ export async function POST(req: NextRequest) {
     clientName,
     clientEmail,
     notes,
+    intakeAnswers,
     dealId: requestedDealId,
     source: requestedSource = "public",
     attribution: requestedAttribution,
@@ -216,6 +219,8 @@ export async function POST(req: NextRequest) {
       beforeBuffer: services.beforeBuffer,
       afterBuffer: services.afterBuffer,
       minimumNoticeHours: services.minimumNoticeHours,
+      maximumAdvanceDays: services.maximumAdvanceDays,
+      intakeQuestions: services.intakeQuestions,
       isActive: services.isActive,
     })
     .from(services)
@@ -320,6 +325,8 @@ export async function POST(req: NextRequest) {
   // (working hours, blocked days, minimum notice, no past times). The UI only
   // shows valid slots, but a direct API caller could submit any time — so
   // enforce it server-side. Owner/manual and API-key bookings may book freely.
+  let storedIntakeAnswers: IntakeAnswer[] | null = null;
+
   if (!isOwnerBooking && !isApiBooking) {
     const slotAvailable = await isRequestedSlotAvailable({
       staffId,
@@ -328,6 +335,7 @@ export async function POST(req: NextRequest) {
       beforeBuffer: service.beforeBuffer,
       afterBuffer: service.afterBuffer,
       minimumNoticeHours: service.minimumNoticeHours,
+      maximumAdvanceDays: service.maximumAdvanceDays ?? undefined,
       timezone: business.timezone,
     });
     if (!slotAvailable) {
@@ -336,6 +344,18 @@ export async function POST(req: NextRequest) {
         { status: 409 }
       );
     }
+
+    // Intake questions are a Pro+ feature; only enforce/store answers when the
+    // business is entitled. Owner/API bookings skip required-question enforcement.
+    const intakePlan = await getBusinessPlan(businessId);
+    const intakeQuestions = canUseFeature(intakePlan, "intakeForms")
+      ? service.intakeQuestions ?? []
+      : [];
+    const intakeResult = validateIntakeAnswers(intakeQuestions, intakeAnswers ?? []);
+    if (!intakeResult.ok) {
+      return NextResponse.json({ error: intakeResult.error }, { status: 400 });
+    }
+    storedIntakeAnswers = intakeResult.answers.length > 0 ? intakeResult.answers : null;
   }
 
   // Fast pre-check. The database exclusion constraint is the final race guard.
@@ -431,6 +451,7 @@ export async function POST(req: NextRequest) {
         discountedPriceLkr,
         attribution: attribution && Object.values(attribution).some(Boolean) ? attribution : null,
         notes: notes || null,
+        intakeAnswers: storedIntakeAnswers,
       })
       .returning({ id: bookings.id });
   } catch (error) {

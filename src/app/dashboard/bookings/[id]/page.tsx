@@ -6,6 +6,7 @@ import { format } from "date-fns";
 import { BookingReschedulePanel } from "@/components/dashboard/BookingReschedulePanel";
 import { bookingReminderText, whatsappUrl } from "@/lib/whatsapp";
 import { Icon } from "@/components/ui/Icon";
+import type { IntakeAnswer } from "@/lib/intake";
 
 type Booking = {
   id: string;
@@ -18,6 +19,7 @@ type Booking = {
   status: "pending" | "confirmed" | "cancelled" | "completed" | "no_show";
   notes: string | null;
   staffNotes: string | null;
+  intakeAnswers: IntakeAnswer[] | null;
   serviceName: string;
   serviceDuration: number;
   staffName: string;
@@ -209,6 +211,25 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
             <div className="bg-white border rounded-xl p-5">
               <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Client note</p>
               <p className="text-sm text-muted-foreground whitespace-pre-wrap">{booking.notes}</p>
+            </div>
+          )}
+
+          {booking.intakeAnswers && booking.intakeAnswers.length > 0 && (
+            <div className="bg-white border rounded-xl p-5">
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Intake answers</p>
+              <dl className="space-y-3">
+                {booking.intakeAnswers.map((a) => (
+                  <div key={a.questionId}>
+                    <dt className="text-xs text-muted-foreground flex items-center gap-1.5">
+                      {a.label}
+                      {a.sensitive && (
+                        <span className="rounded bg-amber-100 text-amber-700 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide">Sensitive</span>
+                      )}
+                    </dt>
+                    <dd className="text-sm text-foreground whitespace-pre-wrap">{a.value}</dd>
+                  </div>
+                ))}
+              </dl>
             </div>
           )}
 

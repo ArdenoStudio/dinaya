@@ -2,6 +2,8 @@
 
 import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
+import { IntakeQuestionsEditor } from "@/components/dashboard/IntakeQuestionsEditor";
+import type { IntakeQuestion } from "@/lib/intake";
 
 interface ServiceForm {
   name: string;
@@ -15,6 +17,8 @@ interface ServiceForm {
   afterBuffer: number;
   minimumNoticeHours: number;
   dailyCapacity: string | number;
+  maximumAdvanceDays: number;
+  intakeQuestions: IntakeQuestion[];
 }
 
 interface StaffMember {
@@ -52,6 +56,8 @@ export default function EditServicePage({ params }: { params: Promise<{ id: stri
         afterBuffer: d.afterBuffer ?? 0,
         minimumNoticeHours: d.minimumNoticeHours ?? 0,
         dailyCapacity: d.dailyCapacity ?? "",
+        maximumAdvanceDays: d.maximumAdvanceDays ?? 0,
+        intakeQuestions: d.intakeQuestions ?? [],
       });
       setAllStaff(Array.isArray(staffList) ? staffList : []);
       setAssignedStaffIds(
@@ -72,6 +78,7 @@ export default function EditServicePage({ params }: { params: Promise<{ id: stri
       body: JSON.stringify({
         ...form,
         dailyCapacity: form.dailyCapacity === "" ? null : Number(form.dailyCapacity),
+        maximumAdvanceDays: form.maximumAdvanceDays || null,
       }),
     });
     if (!res.ok) {
@@ -83,6 +90,7 @@ export default function EditServicePage({ params }: { params: Promise<{ id: stri
           body: JSON.stringify({
             ...form,
             dailyCapacity: form.dailyCapacity === "" ? null : Number(form.dailyCapacity),
+            maximumAdvanceDays: form.maximumAdvanceDays || null,
             forceDeactivate: true,
           }),
         });
@@ -216,6 +224,23 @@ export default function EditServicePage({ params }: { params: Promise<{ id: stri
             onChange={(e) => setForm((f) => f && ({ ...f, dailyCapacity: e.target.value }))}
             placeholder="Unlimited" className={inputCls} />
         </div>
+
+        <div>
+          <label className="text-sm font-medium">Booking window</label>
+          <p className="text-xs text-muted-foreground mb-2">How far ahead can clients book this service?</p>
+          <select value={form.maximumAdvanceDays}
+            onChange={(e) => setForm((f) => f && ({ ...f, maximumAdvanceDays: parseInt(e.target.value) }))}
+            className={selectCls}>
+            {([[0, "No limit"], [7, "1 week"], [14, "2 weeks"], [30, "1 month"], [60, "2 months"], [90, "3 months"], [180, "6 months"], [365, "1 year"]] as [number, string][]).map(([d, labelText]) => (
+              <option key={d} value={d}>{labelText}</option>
+            ))}
+          </select>
+        </div>
+
+        <IntakeQuestionsEditor
+          value={form.intakeQuestions}
+          onChange={(intakeQuestions) => setForm((f) => f && ({ ...f, intakeQuestions }))}
+        />
 
         <div className="flex gap-4">
           <label className="flex items-center gap-2 cursor-pointer">

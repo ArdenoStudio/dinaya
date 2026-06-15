@@ -10,6 +10,7 @@ import {
   minimumPlanForFeature,
   type PlanConfig,
 } from "./plan";
+import { PLAN_FEATURE_ORDER } from "./plan-feature-order";
 
 describe("plan entitlements", () => {
   it("gives the trial Pro-level access with a single location", () => {
@@ -128,6 +129,18 @@ describe("plan entitlements", () => {
     expect(canUseFeature("starter", "deals")).toBe(false);
     expect(canUseFeature("pro", "deals")).toBe(true);
     expect(canUseFeature("max", "deals")).toBe(true);
+  });
+
+  it("reserves intake forms and routing for pro and max (and trial preview)", () => {
+    expect(minimumPlanForFeature("intakeForms")).toBe("pro");
+    expect(canUseFeature("trial", "intakeForms")).toBe(true);
+    expect(canUseFeature("starter", "intakeForms")).toBe(false);
+    expect(canUseFeature("pro", "intakeForms")).toBe(true);
+    expect(canUseFeature("max", "intakeForms")).toBe(true);
+  });
+
+  it("includes every feature in the admin plan editor order", () => {
+    expect(new Set(PLAN_FEATURE_ORDER)).toEqual(new Set(Object.keys(PRO_ENTITLEMENTS.features)));
   });
 
   it("reserves smart deal suggestions for Growth", () => {

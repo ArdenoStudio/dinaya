@@ -1,6 +1,7 @@
 import { and, asc, count, desc, eq, gte, ilike, inArray, or, sql, type SQL } from "drizzle-orm";
 import { db } from "@/db";
 import { bookings, services, staff, staffServices } from "@/db/schema";
+import type { IntakeQuestion } from "@/lib/intake";
 import type { serviceUpdateSchema } from "@/lib/schemas/services";
 import { isoDateString, nullableIsoDateString } from "@/lib/dashboard/serialization";
 import type { z } from "@/lib/validation";
@@ -20,6 +21,8 @@ export type ServiceDashboardUpdatedService = {
   businessId: string;
   createdAt: Date;
   dailyCapacity: number | null;
+  maximumAdvanceDays: number | null;
+  intakeQuestions: IntakeQuestion[] | null;
   depositPercent: number;
   description: string | null;
   durationMinutes: number;
@@ -51,6 +54,8 @@ const serviceUpdateFields = [
   "afterBuffer",
   "minimumNoticeHours",
   "dailyCapacity",
+  "maximumAdvanceDays",
+  "intakeQuestions",
 ] as const;
 
 const DEFAULT_SERVICE_LIMIT = 200;
@@ -101,6 +106,7 @@ export async function getServicesDashboardList(
         beforeBuffer: services.beforeBuffer,
         createdAt: services.createdAt,
         dailyCapacity: services.dailyCapacity,
+        maximumAdvanceDays: services.maximumAdvanceDays,
         depositPercent: services.depositPercent,
         description: services.description,
         durationMinutes: services.durationMinutes,
@@ -183,6 +189,8 @@ export async function getServiceDashboardDetail(businessId: string, serviceId: s
       beforeBuffer: services.beforeBuffer,
       createdAt: services.createdAt,
       dailyCapacity: services.dailyCapacity,
+      maximumAdvanceDays: services.maximumAdvanceDays,
+      intakeQuestions: services.intakeQuestions,
       depositPercent: services.depositPercent,
       description: services.description,
       durationMinutes: services.durationMinutes,
@@ -294,6 +302,8 @@ export async function updateServiceDashboardFields(
       businessId: services.businessId,
       createdAt: services.createdAt,
       dailyCapacity: services.dailyCapacity,
+      maximumAdvanceDays: services.maximumAdvanceDays,
+      intakeQuestions: services.intakeQuestions,
       depositPercent: services.depositPercent,
       description: services.description,
       durationMinutes: services.durationMinutes,

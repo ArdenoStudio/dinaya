@@ -118,6 +118,9 @@ export const businesses = pgTable("businesses", {
   websiteUrl: text("website_url"),
   // Portfolio gallery — array of image URLs shown on the booking page
   galleryImages: text("gallery_images").array(),
+  // Service router: a first-step booking question that maps each answer to a
+  // service. Pro+ feature. null/disabled = normal service list.
+  bookingRouter: jsonb("booking_router").$type<import("@/lib/booking-router").BookingRouter>(),
   plan: planEnum("plan").default("trial").notNull(),
   planExpiresAt: timestamp("plan_expires_at"),
   customDomain: varchar("custom_domain", { length: 255 }),
@@ -296,6 +299,10 @@ export const services = pgTable("services", {
   minimumNoticeHours: integer("minimum_notice_hours").notNull().default(0),
   // Max bookings per staff per day for this service (null = unlimited) — from Cal.diy bookingLimits
   dailyCapacity: integer("daily_capacity"),
+  // Rolling future-booking window: clients can only book this many days ahead (null = no limit) — from Cal.diy bookingLimits
+  maximumAdvanceDays: integer("maximum_advance_days"),
+  // Per-service intake/booking questions (null/[] = none). Configured by Pro+ businesses.
+  intakeQuestions: jsonb("intake_questions").$type<import("@/lib/intake").IntakeQuestion[]>(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -479,6 +486,8 @@ export const bookings = pgTable("bookings", {
   attribution: jsonb("attribution"),
   notes: text("notes"),
   staffNotes: text("staff_notes"),
+  // Answers to the service's intake questions, snapshotted at booking time.
+  intakeAnswers: jsonb("intake_answers").$type<import("@/lib/intake").IntakeAnswer[]>(),
   reminderSentAt: timestamp("reminder_sent_at"),
   cancelledAt: timestamp("cancelled_at"),
   cancellationReason: text("cancellation_reason"),

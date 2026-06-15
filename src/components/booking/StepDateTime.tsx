@@ -12,7 +12,6 @@ import DateQuickStrip from "./DateQuickStrip";
 import TimeSlotGrid, { type SlotOption } from "./TimeSlotGrid";
 
 const COLOMBO_TZ = "Asia/Colombo";
-const MAX_BOOKING_DAYS = 60;
 
 interface Props {
   businessId: string;
@@ -44,7 +43,9 @@ export default function StepDateTime({
   onBack,
 }: Props) {
   const today = toZonedTime(new Date(), COLOMBO_TZ);
-  const maxDate = addDays(today, MAX_BOOKING_DAYS);
+  const maxDate = service?.maximumAdvanceDays
+    ? addDays(today, service.maximumAdvanceDays)
+    : undefined;
   const [slots, setSlots] = useState<SlotOption[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [hasFetched, setHasFetched] = useState(false);
