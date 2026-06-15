@@ -99,6 +99,14 @@ export default function StepConfirm({ state, business, copy, selectedDeal, onUpd
   }, [selectedDeal, business.slug, service?.id]);
 
   async function handleBook() {
+    const questions = service?.intakeQuestions ?? [];
+    for (const q of questions) {
+      if (q.required && !(state.intakeAnswers[q.id] ?? "").trim()) {
+        setError(`Please answer: ${q.label}`);
+        return;
+      }
+    }
+
     setLoading(true);
     setError("");
 
@@ -118,6 +126,9 @@ export default function StepConfirm({ state, business, copy, selectedDeal, onUpd
         clientPhone: state.clientPhone,
         clientEmail: state.clientEmail,
         notes: state.notes,
+        intakeAnswers: Object.entries(state.intakeAnswers)
+          .filter(([, v]) => v != null && v !== "")
+          .map(([questionId, value]) => ({ questionId, value })),
         dealId: selectedDeal?.id ?? null,
         attribution,
       }),
@@ -319,6 +330,52 @@ export default function StepConfirm({ state, business, copy, selectedDeal, onUpd
           }
         />
       </div>
+
+      {(service?.intakeQuestions ?? []).length > 0 && (
+        <div className="space-y-3 border-t border-gray-100 pt-3">
+          {(service?.intakeQuestions ?? []).map((q) => {
+            const value = state.intakeAnswers[q.id] ?? "";
+            const setValue = (v: string) =>
+              onUpdate({ intakeAnswers: { ...state.intakeAnswers, [q.id]: v } });
+            const fieldCls =
+              "mt-1.5 w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm transition-shadow placeholder:text-gray-400 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20";
+            return (
+              <div key={q.id}>
+                <label htmlFor={`intake-${q.id}`} className="text-sm font-medium text-gray-800">
+                  {q.label}{" "}
+                  {q.required ? (
+                    <span className="font-normal text-gray-400">*</span>
+                  ) : (
+                    <span className="text-xs font-normal text-gray-400">(optional)</span>
+                  )}
+                </label>
+                {q.type === "textarea" ? (
+                  <textarea id={`intake-${q.id}`} value={value} rows={2}
+                    onChange={(e) => setValue(e.target.value)} className={`${fieldCls} resize-none`} />
+                ) : q.type === "select" ? (
+                  <select id={`intake-${q.id}`} value={value}
+                    onChange={(e) => setValue(e.target.value)} className={fieldCls}>
+                    <option value="">Select…</option>
+                    {(q.options ?? []).map((opt) => (
+                      <option key={opt} value={opt}>{opt}</option>
+                    ))}
+                  </select>
+                ) : q.type === "boolean" ? (
+                  <select id={`intake-${q.id}`} value={value}
+                    onChange={(e) => setValue(e.target.value)} className={fieldCls}>
+                    <option value="">Select…</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                  </select>
+                ) : (
+                  <input id={`intake-${q.id}`} type="text" value={value}
+                    onChange={(e) => setValue(e.target.value)} className={fieldCls} />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 

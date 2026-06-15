@@ -51,6 +51,7 @@ const serviceUpdateFields = [
   "afterBuffer",
   "minimumNoticeHours",
   "dailyCapacity",
+  "intakeQuestions",
 ] as const;
 
 const DEFAULT_SERVICE_LIMIT = 200;
@@ -192,6 +193,7 @@ export async function getServiceDashboardDetail(businessId: string, serviceId: s
       name: services.name,
       priceLkr: services.priceLkr,
       requiresPayment: services.requiresPayment,
+      intakeQuestions: services.intakeQuestions,
     })
     .from(services)
     .where(and(eq(services.id, serviceId), eq(services.businessId, businessId)))

@@ -21,6 +21,7 @@ export type PlanFeature =
   | "clientReactivationCampaign"
   | "deals"
   | "googleCalendarSync"
+  | "intakeForms"
   | "payments"
   | "publicBookingPage"
   | "publicBookingPageCustomization"
@@ -103,6 +104,7 @@ const DEFAULT_TRIAL_ENTITLEMENTS: Entitlements = {
     clientReactivationCampaign: false,
     deals: true,
     googleCalendarSync: true,
+    intakeForms: true,
     payments: true,
     publicBookingPage: true,
     publicBookingPageCustomization: false,
@@ -138,6 +140,7 @@ const DEFAULT_EXPIRED_ENTITLEMENTS: Entitlements = {
     clientReactivationCampaign: false,
     deals: false,
     googleCalendarSync: false,
+    intakeForms: false,
     payments: false,
     publicBookingPage: false,
     publicBookingPageCustomization: false,
@@ -171,6 +174,7 @@ const DEFAULT_STARTER_ENTITLEMENTS: Entitlements = {
     clientReactivationCampaign: false,
     deals: false,
     googleCalendarSync: false,
+    intakeForms: false,
     payments: true,
     publicBookingPage: true,
     publicBookingPageCustomization: false,
@@ -204,6 +208,7 @@ const DEFAULT_PRO_ENTITLEMENTS: Entitlements = {
     clientReactivationCampaign: false,
     deals: true,
     googleCalendarSync: true,
+    intakeForms: true,
     payments: true,
     publicBookingPage: true,
     publicBookingPageCustomization: false,
@@ -237,6 +242,7 @@ const DEFAULT_MAX_ENTITLEMENTS: Entitlements = {
     clientReactivationCampaign: true,
     deals: true,
     googleCalendarSync: true,
+    intakeForms: true,
     payments: true,
     publicBookingPage: true,
     publicBookingPageCustomization: true,
@@ -561,6 +567,7 @@ const FEATURE_LABELS: Record<PlanFeature, string> = {
   deals: "Dinaya Deals",
   clientReactivationCampaign: "Client Reactivation Campaign",
   googleCalendarSync: "Google Calendar sync",
+  intakeForms: "Intake forms",
   payments: "PayHere payments",
   publicBookingPage: "Public booking page",
   publicBookingPageCustomization: "Booking page customization",

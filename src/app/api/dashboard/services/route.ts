@@ -85,6 +85,7 @@ export async function POST(req: NextRequest) {
       afterBuffer: data.afterBuffer ?? 0,
       minimumNoticeHours: data.minimumNoticeHours ?? 0,
       dailyCapacity: data.dailyCapacity ?? null,
+      intakeQuestions: data.intakeQuestions ?? null,
     })
     .returning({ id: services.id });
 

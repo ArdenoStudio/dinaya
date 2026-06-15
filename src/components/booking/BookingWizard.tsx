@@ -6,6 +6,7 @@ import { format, parseISO } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import { Icon } from "@/components/ui/Icon";
 import type { Location, Staff } from "@/db/schema";
+import type { IntakeQuestion } from "@/lib/intake";
 import StepService from "./StepService";
 import StepLocation from "./StepLocation";
 import StepDateTime from "./StepDateTime";
@@ -66,6 +67,7 @@ export type BookingService = {
   priceLkr: number;
   requiresPayment: boolean;
   depositPercent: number;
+  intakeQuestions: IntakeQuestion[];
 };
 
 export type BookingState = {
@@ -80,6 +82,7 @@ export type BookingState = {
   clientPhone: string;
   clientEmail: string;
   notes: string;
+  intakeAnswers: Record<string, string>;
 };
 
 type SlotData = { startUtc: string; endUtc: string; label: string };
@@ -116,6 +119,7 @@ export default function BookingWizard({
     clientPhone: "",
     clientEmail: "",
     notes: "",
+    intakeAnswers: {},
   });
   const [selectedSlot, setSelectedSlot] = useState<SlotData | null>(null);
   const [selectedDealId, setSelectedDealId] = useState<string | null>(initialDealId);

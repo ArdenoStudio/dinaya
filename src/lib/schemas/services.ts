@@ -1,4 +1,5 @@
 import { z } from "@/lib/validation";
+import { intakeQuestionsSchema } from "@/lib/intake";
 
 export const serviceCreateSchema = z.object({
   name: z.string().trim().min(1).max(120),
@@ -11,6 +12,7 @@ export const serviceCreateSchema = z.object({
   afterBuffer: z.coerce.number().int().min(0).max(120).optional(),
   minimumNoticeHours: z.coerce.number().int().min(0).max(168).optional(),
   dailyCapacity: z.coerce.number().int().min(1).max(1000).optional().nullable(),
+  intakeQuestions: intakeQuestionsSchema.optional().nullable(),
 });
 
 export const serviceUpdateSchema = z
@@ -27,6 +29,7 @@ export const serviceUpdateSchema = z
     afterBuffer: z.coerce.number().int().min(0).max(120).optional(),
     minimumNoticeHours: z.coerce.number().int().min(0).max(168).optional(),
     dailyCapacity: z.coerce.number().int().min(1).max(1000).optional().nullable(),
+    intakeQuestions: intakeQuestionsSchema.optional().nullable(),
   })
   .refine((value) => Object.keys(value).length > 0, {
     message: "At least one field is required.",

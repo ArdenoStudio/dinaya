@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { IntakeQuestionsEditor } from "@/components/dashboard/IntakeQuestionsEditor";
+import type { IntakeQuestion } from "@/lib/intake";
 
 export default function NewServicePage() {
   const router = useRouter();
@@ -16,6 +18,7 @@ export default function NewServicePage() {
     afterBuffer: 0,
     minimumNoticeHours: 0,
     dailyCapacity: "" as string | number,
+    intakeQuestions: [] as IntakeQuestion[],
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -28,7 +31,10 @@ export default function NewServicePage() {
     const res = await fetch("/api/dashboard/services", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
+      body: JSON.stringify({
+        ...form,
+        dailyCapacity: form.dailyCapacity === "" ? null : Number(form.dailyCapacity),
+      }),
     });
 
     const data = await res.json();
@@ -121,6 +127,10 @@ export default function NewServicePage() {
             className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
+        <IntakeQuestionsEditor
+          value={form.intakeQuestions}
+          onChange={(intakeQuestions) => setForm((f) => ({ ...f, intakeQuestions }))}
+        />
         <label className="flex items-center gap-2 cursor-pointer">
           <input type="checkbox" checked={form.requiresPayment}
             onChange={(e) => setForm((f) => ({ ...f, requiresPayment: e.target.checked }))}

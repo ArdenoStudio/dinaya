@@ -296,6 +296,8 @@ export const services = pgTable("services", {
   minimumNoticeHours: integer("minimum_notice_hours").notNull().default(0),
   // Max bookings per staff per day for this service (null = unlimited) — from Cal.diy bookingLimits
   dailyCapacity: integer("daily_capacity"),
+  // Per-service intake/booking questions (null/[] = none). Configured by Pro+ businesses.
+  intakeQuestions: jsonb("intake_questions").$type<import("@/lib/intake").IntakeQuestion[]>(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -479,6 +481,8 @@ export const bookings = pgTable("bookings", {
   attribution: jsonb("attribution"),
   notes: text("notes"),
   staffNotes: text("staff_notes"),
+  // Answers to the service's intake questions, snapshotted at booking time.
+  intakeAnswers: jsonb("intake_answers").$type<import("@/lib/intake").IntakeAnswer[]>(),
   reminderSentAt: timestamp("reminder_sent_at"),
   cancelledAt: timestamp("cancelled_at"),
   cancellationReason: text("cancellation_reason"),

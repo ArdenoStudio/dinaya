@@ -2,6 +2,8 @@
 
 import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
+import { IntakeQuestionsEditor } from "@/components/dashboard/IntakeQuestionsEditor";
+import type { IntakeQuestion } from "@/lib/intake";
 
 interface ServiceForm {
   name: string;
@@ -15,6 +17,7 @@ interface ServiceForm {
   afterBuffer: number;
   minimumNoticeHours: number;
   dailyCapacity: string | number;
+  intakeQuestions: IntakeQuestion[];
 }
 
 interface StaffMember {
@@ -52,6 +55,7 @@ export default function EditServicePage({ params }: { params: Promise<{ id: stri
         afterBuffer: d.afterBuffer ?? 0,
         minimumNoticeHours: d.minimumNoticeHours ?? 0,
         dailyCapacity: d.dailyCapacity ?? "",
+        intakeQuestions: d.intakeQuestions ?? [],
       });
       setAllStaff(Array.isArray(staffList) ? staffList : []);
       setAssignedStaffIds(
@@ -216,6 +220,11 @@ export default function EditServicePage({ params }: { params: Promise<{ id: stri
             onChange={(e) => setForm((f) => f && ({ ...f, dailyCapacity: e.target.value }))}
             placeholder="Unlimited" className={inputCls} />
         </div>
+
+        <IntakeQuestionsEditor
+          value={form.intakeQuestions}
+          onChange={(intakeQuestions) => setForm((f) => f && ({ ...f, intakeQuestions }))}
+        />
 
         <div className="flex gap-4">
           <label className="flex items-center gap-2 cursor-pointer">

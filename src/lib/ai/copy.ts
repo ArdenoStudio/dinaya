@@ -81,6 +81,7 @@ const FALLBACKS: Record<PlanFeature, (input: AiCopyInput) => AiCopyResult> = {
     source: "fallback",
   }),
   googleCalendarSync: reminderFallback,
+  intakeForms: reminderFallback,
   payments: reminderFallback,
   publicBookingPage: (input) => ({
     subject: `Book with ${input.businessName}`,

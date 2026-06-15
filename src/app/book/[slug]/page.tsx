@@ -99,6 +99,7 @@ export default async function BookingPage({ params, searchParams }: Props) {
     storedPlan: business.plan,
     planExpiresAt: business.planExpiresAt,
   });
+  const intakeEnabled = canUseFeature(effectivePlan, "intakeForms");
 
   // Trial and paid plans keep the public booking page; once it lapses to "expired"
   // the page goes offline until the owner subscribes.
@@ -135,6 +136,7 @@ export default async function BookingPage({ params, searchParams }: Props) {
         afterBuffer: services.afterBuffer,
         minimumNoticeHours: services.minimumNoticeHours,
         dailyCapacity: services.dailyCapacity,
+        intakeQuestions: services.intakeQuestions,
         createdAt: services.createdAt,
       })
       .from(services)
@@ -275,7 +277,10 @@ export default async function BookingPage({ params, searchParams }: Props) {
               canUseFeature(effectivePlan, "publicBookingPageCustomization")
             ),
           }}
-          services={serviceList}
+          services={serviceList.map((s) => ({
+            ...s,
+            intakeQuestions: intakeEnabled ? s.intakeQuestions ?? [] : [],
+          }))}
           staff={staffList}
           staffServiceMap={assignments}
           staffLocationMap={staffLocationMap}
