@@ -28,6 +28,7 @@ export async function isRequestedSlotAvailable(input: {
   beforeBuffer?: number;
   afterBuffer?: number;
   minimumNoticeHours?: number;
+  maximumAdvanceDays?: number;
   timezone?: string;
   /** Exclude this booking from overlap checks (used when rescheduling). */
   excludeBookingId?: string;
@@ -68,6 +69,7 @@ export async function isRequestedSlotAvailable(input: {
     beforeBuffer: input.beforeBuffer ?? 0,
     afterBuffer: input.afterBuffer ?? 0,
     minimumNoticeHours: input.minimumNoticeHours ?? 0,
+    maximumAdvanceDays: input.maximumAdvanceDays ?? 0,
     staffAvailability,
     overrides,
     existingBookings,

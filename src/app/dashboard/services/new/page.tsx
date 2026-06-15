@@ -16,6 +16,7 @@ export default function NewServicePage() {
     afterBuffer: 0,
     minimumNoticeHours: 0,
     dailyCapacity: "" as string | number,
+    maximumAdvanceDays: 0,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -28,7 +29,11 @@ export default function NewServicePage() {
     const res = await fetch("/api/dashboard/services", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
+      body: JSON.stringify({
+        ...form,
+        dailyCapacity: form.dailyCapacity === "" ? null : Number(form.dailyCapacity),
+        maximumAdvanceDays: form.maximumAdvanceDays || null,
+      }),
     });
 
     const data = await res.json();
@@ -120,6 +125,19 @@ export default function NewServicePage() {
             placeholder="Unlimited"
             className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
           />
+        </div>
+        <div>
+          <label className="text-sm font-medium">Booking window</label>
+          <p className="text-xs text-muted-foreground mb-2">How far ahead can clients book this service?</p>
+          <select
+            value={form.maximumAdvanceDays}
+            onChange={(e) => setForm((f) => ({ ...f, maximumAdvanceDays: parseInt(e.target.value) }))}
+            className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          >
+            {([[0, "No limit"], [7, "1 week"], [14, "2 weeks"], [30, "1 month"], [60, "2 months"], [90, "3 months"], [180, "6 months"], [365, "1 year"]] as [number, string][]).map(([d, labelText]) => (
+              <option key={d} value={d}>{labelText}</option>
+            ))}
+          </select>
         </div>
         <label className="flex items-center gap-2 cursor-pointer">
           <input type="checkbox" checked={form.requiresPayment}

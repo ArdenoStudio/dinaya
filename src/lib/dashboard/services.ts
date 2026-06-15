@@ -20,6 +20,7 @@ export type ServiceDashboardUpdatedService = {
   businessId: string;
   createdAt: Date;
   dailyCapacity: number | null;
+  maximumAdvanceDays: number | null;
   depositPercent: number;
   description: string | null;
   durationMinutes: number;
@@ -51,6 +52,7 @@ const serviceUpdateFields = [
   "afterBuffer",
   "minimumNoticeHours",
   "dailyCapacity",
+  "maximumAdvanceDays",
 ] as const;
 
 const DEFAULT_SERVICE_LIMIT = 200;
@@ -101,6 +103,7 @@ export async function getServicesDashboardList(
         beforeBuffer: services.beforeBuffer,
         createdAt: services.createdAt,
         dailyCapacity: services.dailyCapacity,
+        maximumAdvanceDays: services.maximumAdvanceDays,
         depositPercent: services.depositPercent,
         description: services.description,
         durationMinutes: services.durationMinutes,
@@ -183,6 +186,7 @@ export async function getServiceDashboardDetail(businessId: string, serviceId: s
       beforeBuffer: services.beforeBuffer,
       createdAt: services.createdAt,
       dailyCapacity: services.dailyCapacity,
+      maximumAdvanceDays: services.maximumAdvanceDays,
       depositPercent: services.depositPercent,
       description: services.description,
       durationMinutes: services.durationMinutes,
@@ -294,6 +298,7 @@ export async function updateServiceDashboardFields(
       businessId: services.businessId,
       createdAt: services.createdAt,
       dailyCapacity: services.dailyCapacity,
+      maximumAdvanceDays: services.maximumAdvanceDays,
       depositPercent: services.depositPercent,
       description: services.description,
       durationMinutes: services.durationMinutes,
