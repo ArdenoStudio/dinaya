@@ -29,11 +29,31 @@ export const bookingRouterOptionSchema = z.object({
   serviceId: z.uuid(),
 });
 
-export const bookingRouterSchema = z.object({
-  enabled: z.boolean(),
-  question: z.string().trim().min(1).max(160),
-  options: z.array(bookingRouterOptionSchema).max(MAX_ROUTER_OPTIONS),
-});
+export const bookingRouterSchema = z
+  .object({
+    enabled: z.boolean(),
+    question: z.string().trim().max(160),
+    options: z.array(bookingRouterOptionSchema).max(MAX_ROUTER_OPTIONS),
+  })
+  .superRefine((router, ctx) => {
+    if (!router.enabled) return;
+
+    if (!router.question) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["question"],
+        message: "Add the router question before enabling it.",
+      });
+    }
+
+    if (router.options.length === 0) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["options"],
+        message: "Add at least one answer before enabling the router.",
+      });
+    }
+  });
 
 /**
  * Reduce a stored router to what should actually drive the booking page:

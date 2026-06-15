@@ -11,6 +11,7 @@ export const PLAN_FEATURE_ORDER: readonly PlanFeature[] = [
   "smartReminderSystem",
   "automations",
   "deals",
+  "intakeForms",
   "aiBookingAutopilot",
   "aiDealSuggestions",
   "broadcasts",

@@ -281,6 +281,7 @@ export const ENFORCED_FEATURES: readonly PlanFeature[] = [
   "aiVoiceReceptionist",
   "automations",
   "googleCalendarSync",
+  "intakeForms",
   "payments",
   "publicBookingPageCustomization",
   "webhooks",

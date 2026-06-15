@@ -49,18 +49,28 @@ export async function PUT(req: NextRequest) {
 
   // Every option must point at a service owned by this business.
   if (router.options.length > 0) {
-    const ownedIds = new Set(
-      (await db
-        .select({ id: services.id })
-        .from(services)
-        .where(and(eq(services.businessId, businessId)))).map((s) => s.id),
-    );
+    const ownedServices = await db
+      .select({ id: services.id, isActive: services.isActive })
+      .from(services)
+      .where(and(eq(services.businessId, businessId)));
+    const ownedIds = new Set(ownedServices.map((s) => s.id));
     const stranger = router.options.find((o) => !ownedIds.has(o.serviceId));
     if (stranger) {
       return NextResponse.json(
         { error: "A router option points at a service that doesn't exist." },
         { status: 400 },
       );
+    }
+
+    if (router.enabled) {
+      const activeIds = new Set(ownedServices.filter((s) => s.isActive).map((s) => s.id));
+      const hasActiveTarget = router.options.some((o) => activeIds.has(o.serviceId));
+      if (!hasActiveTarget) {
+        return NextResponse.json(
+          { error: "Add at least one answer that routes to an active service." },
+          { status: 400 },
+        );
+      }
     }
   }
 

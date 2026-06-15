@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { resolveActiveRouter, routerOptionServiceId, type BookingRouter } from "./booking-router";
+import {
+  bookingRouterSchema,
+  resolveActiveRouter,
+  routerOptionServiceId,
+  type BookingRouter,
+} from "./booking-router";
 
 const router = (over: Partial<BookingRouter> = {}): BookingRouter => ({
   enabled: true,
@@ -9,6 +14,18 @@ const router = (over: Partial<BookingRouter> = {}): BookingRouter => ({
     { id: "o2", label: "Emergency", serviceId: "svc-emerg" },
   ],
   ...over,
+});
+
+const schemaRouter = (): BookingRouter => ({
+  enabled: true,
+  question: "What do you need?",
+  options: [
+    {
+      id: "o1",
+      label: "Cleaning",
+      serviceId: "00000000-0000-4000-8000-000000000001",
+    },
+  ],
 });
 
 describe("resolveActiveRouter", () => {
@@ -51,5 +68,19 @@ describe("routerOptionServiceId", () => {
   it("returns null for an unknown option", () => {
     expect(routerOptionServiceId(router(), "nope")).toBeNull();
     expect(routerOptionServiceId(null, "o1")).toBeNull();
+  });
+});
+
+describe("bookingRouterSchema", () => {
+  it("allows an empty disabled router", () => {
+    expect(bookingRouterSchema.safeParse({ enabled: false, question: "", options: [] }).success).toBe(true);
+  });
+
+  it("requires a question and at least one option when enabled", () => {
+    expect(bookingRouterSchema.safeParse({ enabled: true, question: "", options: [] }).success).toBe(false);
+  });
+
+  it("accepts a publishable enabled router", () => {
+    expect(bookingRouterSchema.safeParse(schemaRouter()).success).toBe(true);
   });
 });
