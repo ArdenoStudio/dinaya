@@ -37,6 +37,7 @@ export async function GET(req: NextRequest) {
       afterBuffer: services.afterBuffer,
       minimumNoticeHours: services.minimumNoticeHours,
       dailyCapacity: services.dailyCapacity,
+      maximumAdvanceDays: services.maximumAdvanceDays,
     })
     .from(services)
     .where(eq(services.id, serviceId))
@@ -119,6 +120,7 @@ export async function GET(req: NextRequest) {
     beforeBuffer: service.beforeBuffer ?? 0,
     afterBuffer: service.afterBuffer ?? 0,
     minimumNoticeHours: service.minimumNoticeHours ?? 0,
+    maximumAdvanceDays: service.maximumAdvanceDays ?? 0,
     staffAvailability,
     overrides,
     existingBookings,

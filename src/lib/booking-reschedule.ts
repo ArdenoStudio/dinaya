@@ -70,6 +70,7 @@ export async function getRescheduleSlots(input: {
       beforeBuffer: services.beforeBuffer,
       afterBuffer: services.afterBuffer,
       minimumNoticeHours: services.minimumNoticeHours,
+      maximumAdvanceDays: services.maximumAdvanceDays,
       timezone: businesses.timezone,
     })
     .from(bookings)
@@ -114,6 +115,7 @@ export async function getRescheduleSlots(input: {
     beforeBuffer: booking.beforeBuffer,
     afterBuffer: booking.afterBuffer,
     minimumNoticeHours: booking.minimumNoticeHours,
+    maximumAdvanceDays: booking.maximumAdvanceDays ?? 0,
     staffAvailability,
     overrides,
     existingBookings,
@@ -146,6 +148,7 @@ export async function rescheduleBooking(input: {
       serviceName: services.name,
       durationMinutes: services.durationMinutes,
       minimumNoticeHours: services.minimumNoticeHours,
+      maximumAdvanceDays: services.maximumAdvanceDays,
       beforeBuffer: services.beforeBuffer,
       afterBuffer: services.afterBuffer,
       staffName: staff.name,
@@ -202,6 +205,7 @@ export async function rescheduleBooking(input: {
       beforeBuffer: row.beforeBuffer,
       afterBuffer: row.afterBuffer,
       minimumNoticeHours: row.minimumNoticeHours,
+      maximumAdvanceDays: row.maximumAdvanceDays ?? undefined,
       timezone: row.businessTimezone,
       excludeBookingId: row.id,
     });

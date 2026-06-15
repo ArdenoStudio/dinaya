@@ -219,6 +219,7 @@ export async function POST(req: NextRequest) {
       beforeBuffer: services.beforeBuffer,
       afterBuffer: services.afterBuffer,
       minimumNoticeHours: services.minimumNoticeHours,
+      maximumAdvanceDays: services.maximumAdvanceDays,
       intakeQuestions: services.intakeQuestions,
       isActive: services.isActive,
     })
@@ -334,6 +335,7 @@ export async function POST(req: NextRequest) {
       beforeBuffer: service.beforeBuffer,
       afterBuffer: service.afterBuffer,
       minimumNoticeHours: service.minimumNoticeHours,
+      maximumAdvanceDays: service.maximumAdvanceDays ?? undefined,
       timezone: business.timezone,
     });
     if (!slotAvailable) {

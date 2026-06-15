@@ -1,4 +1,4 @@
-import { addMinutes, format, parseISO, setHours, setMinutes, startOfDay } from "date-fns";
+import { addDays, addMinutes, format, parseISO, setHours, setMinutes, startOfDay } from "date-fns";
 import { toZonedTime, fromZonedTime } from "date-fns-tz";
 import type { Availability, AvailabilityOverride, Booking } from "@/db/schema";
 
@@ -32,6 +32,7 @@ export function getAvailableSlots({
   beforeBuffer = 0,
   afterBuffer = 0,
   minimumNoticeHours = 0,
+  maximumAdvanceDays = 0,
   staffAvailability,
   overrides,
   existingBookings,
@@ -45,6 +46,8 @@ export function getAvailableSlots({
   afterBuffer?: number;
   /** Slots starting sooner than this many hours from now are hidden */
   minimumNoticeHours?: number;
+  /** Slots starting later than this many days from now are hidden. 0 = no limit. */
+  maximumAdvanceDays?: number;
   staffAvailability: Availability[];
   overrides: AvailabilityOverride[];
   existingBookings: Pick<Booking, "startsAt" | "endsAt" | "status">[];
@@ -76,6 +79,11 @@ export function getAvailableSlots({
     ? addMinutes(new Date(), minimumNoticeHours * 60)
     : null;
 
+  // Latest bookable moment based on the rolling future-booking window
+  const latestBookable = maximumAdvanceDays > 0
+    ? addDays(new Date(), maximumAdvanceDays)
+    : null;
+
   const slots: TimeSlot[] = [];
 
   for (const window of workingWindows) {
@@ -90,6 +98,9 @@ export function getAvailableSlots({
     while (cursor < windowEndUtc) {
       const slotEnd = addMinutes(cursor, durationMinutes);
       if (slotEnd > windowEndUtc) break;
+
+      // cursor only increases, so once we pass the window everything after is too far out.
+      if (latestBookable && cursor > latestBookable) break;
 
       if (earliestBookable && cursor < earliestBookable) {
         cursor = addMinutes(cursor, SLOT_INTERVAL_MINUTES);

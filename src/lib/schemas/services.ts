@@ -12,6 +12,7 @@ export const serviceCreateSchema = z.object({
   afterBuffer: z.coerce.number().int().min(0).max(120).optional(),
   minimumNoticeHours: z.coerce.number().int().min(0).max(168).optional(),
   dailyCapacity: z.coerce.number().int().min(1).max(1000).optional().nullable(),
+  maximumAdvanceDays: z.coerce.number().int().min(1).max(365).optional().nullable(),
   intakeQuestions: intakeQuestionsSchema.optional().nullable(),
 });
 
@@ -29,6 +30,7 @@ export const serviceUpdateSchema = z
     afterBuffer: z.coerce.number().int().min(0).max(120).optional(),
     minimumNoticeHours: z.coerce.number().int().min(0).max(168).optional(),
     dailyCapacity: z.coerce.number().int().min(1).max(1000).optional().nullable(),
+    maximumAdvanceDays: z.coerce.number().int().min(1).max(365).optional().nullable(),
     intakeQuestions: intakeQuestionsSchema.optional().nullable(),
   })
   .refine((value) => Object.keys(value).length > 0, {

@@ -299,6 +299,8 @@ export const services = pgTable("services", {
   minimumNoticeHours: integer("minimum_notice_hours").notNull().default(0),
   // Max bookings per staff per day for this service (null = unlimited) — from Cal.diy bookingLimits
   dailyCapacity: integer("daily_capacity"),
+  // Rolling future-booking window: clients can only book this many days ahead (null = no limit) — from Cal.diy bookingLimits
+  maximumAdvanceDays: integer("maximum_advance_days"),
   // Per-service intake/booking questions (null/[] = none). Configured by Pro+ businesses.
   intakeQuestions: jsonb("intake_questions").$type<import("@/lib/intake").IntakeQuestion[]>(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
