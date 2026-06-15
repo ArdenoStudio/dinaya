@@ -3,6 +3,15 @@
 import Link from "next/link";
 import { useEffect } from "react";
 
+const CHUNK_RECOVERY_KEY = "dinaya:chunk-recovery";
+const CHUNK_RECOVERY_WINDOW_MS = 30_000;
+
+function isChunkLoadFailure(error: Error) {
+  return /ChunkLoadError|Loading chunk|failed to fetch dynamically imported module|importing a module script failed/i.test(
+    `${error.name} ${error.message}`,
+  );
+}
+
 export default function GlobalError({
   error,
   reset,
@@ -12,6 +21,11 @@ export default function GlobalError({
 }) {
   useEffect(() => {
     console.error("Global error:", error);
+    const lastRecoveryAt = Number(sessionStorage.getItem(CHUNK_RECOVERY_KEY) ?? 0);
+    if (isChunkLoadFailure(error) && Date.now() - lastRecoveryAt >= CHUNK_RECOVERY_WINDOW_MS) {
+      sessionStorage.setItem(CHUNK_RECOVERY_KEY, String(Date.now()));
+      window.location.reload();
+    }
   }, [error]);
 
   return (
