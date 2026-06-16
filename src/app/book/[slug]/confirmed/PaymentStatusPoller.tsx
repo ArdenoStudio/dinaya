@@ -5,14 +5,24 @@ import { useRouter } from "next/navigation";
 
 type PaymentStatus = "pending" | "success" | "failed" | "refunded" | null;
 
+import type { BookingCopy } from "@/lib/i18n";
+
 interface Props {
   bookingId: string;
   slug: string;
+  copy: Pick<
+    BookingCopy,
+    | "paymentChecking"
+    | "paymentConfirmedRefresh"
+    | "paymentFailed"
+    | "paymentStillPending"
+    | "paymentStatusError"
+  >;
 }
 
-export default function PaymentStatusPoller({ bookingId, slug }: Props) {
+export default function PaymentStatusPoller({ bookingId, slug, copy }: Props) {
   const router = useRouter();
-  const [message, setMessage] = useState("Checking PayHere confirmation...");
+  const [message, setMessage] = useState(copy.paymentChecking);
 
   useEffect(() => {
     let stopped = false;
@@ -34,25 +44,25 @@ export default function PaymentStatusPoller({ bookingId, slug }: Props) {
         };
 
         if (data.confirmed || data.paymentStatus === "success") {
-          setMessage("Payment confirmed. Refreshing booking details...");
+          setMessage(copy.paymentConfirmedRefresh);
           router.refresh();
           stopped = true;
           return;
         }
 
         if (data.paymentStatus === "failed") {
-          setMessage("Payment was not completed. Contact the business or try booking again.");
+          setMessage(copy.paymentFailed);
           stopped = true;
           return;
         }
 
         if (attempts >= 30) {
-          setMessage("Payment is still pending. This page will update after PayHere confirms it.");
+          setMessage(copy.paymentStillPending);
           stopped = true;
         }
       } catch {
         if (attempts >= 30) {
-          setMessage("Payment status could not be refreshed. Check again in a few minutes.");
+          setMessage(copy.paymentStatusError);
           stopped = true;
         }
       }
@@ -72,7 +82,7 @@ export default function PaymentStatusPoller({ bookingId, slug }: Props) {
       stopped = true;
       window.clearInterval(intervalId);
     };
-  }, [bookingId, router, slug]);
+  }, [bookingId, copy, router, slug]);
 
   return (
     <div

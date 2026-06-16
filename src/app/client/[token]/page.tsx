@@ -5,8 +5,9 @@ import { format } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import { canClientRescheduleBooking, getClientBookingByToken } from "@/lib/client-booking";
 import { ClientBookingManage } from "./ClientBookingManage";
-
-const COLOMBO_TZ = "Asia/Colombo";
+import { formatBookingCopy, getBookingCopy } from "@/lib/i18n";
+import type { BookingService } from "@/components/booking/BookingWizard";
+import type { Staff } from "@/db/schema";
 
 export const metadata: Metadata = {
   title: "Manage your booking | Dinaya",
@@ -22,7 +23,9 @@ export default async function ClientBookingPage({ params }: Props) {
   const booking = await getClientBookingByToken(token);
   if (!booking) notFound();
 
-  const localStart = toZonedTime(booking.startsAt, COLOMBO_TZ);
+  const timezone = booking.businessTimezone ?? "Asia/Colombo";
+  const copy = getBookingCopy(booking.businessLanguage);
+  const localStart = toZonedTime(booking.startsAt, timezone);
   const modifyCheck = canClientRescheduleBooking({
     startsAt: booking.startsAt,
     status: booking.status,
@@ -31,42 +34,75 @@ export default async function ClientBookingPage({ params }: Props) {
 
   const statusLabel =
     booking.status === "confirmed"
-      ? "Confirmed"
+      ? copy.clientConfirmed
       : booking.status === "pending"
-        ? "Pending confirmation"
+        ? copy.clientPending
         : booking.status === "cancelled"
-          ? "Cancelled"
+          ? copy.clientCancelled
           : booking.status;
+
+  const service: BookingService = {
+    id: booking.serviceId,
+    slug: booking.serviceSlug ?? undefined,
+    imageUrl: booking.serviceImageUrl,
+    afterBuffer: booking.afterBuffer,
+    beforeBuffer: booking.beforeBuffer,
+    businessId: booking.businessId,
+    createdAt: new Date(),
+    dailyCapacity: booking.dailyCapacity,
+    description: booking.serviceDescription,
+    durationMinutes: booking.durationMinutes,
+    isActive: true,
+    minimumNoticeHours: booking.minimumNoticeHours,
+    maximumAdvanceDays: booking.maximumAdvanceDays,
+    name: booking.serviceName,
+    priceLkr: booking.priceLkr,
+    requiresPayment: booking.requiresPayment,
+    depositPercent: booking.depositPercent,
+    intakeQuestions: [],
+  };
+
+  const staffMember: Staff = {
+    id: booking.staffId,
+    businessId: booking.businessId,
+    name: booking.staffName,
+    bio: booking.staffBio,
+    avatarUrl: booking.staffAvatarUrl,
+    isActive: booking.staffIsActive,
+    createdAt: new Date(),
+  };
 
   return (
     <div className="flex min-h-dvh items-start justify-center bg-[#f2f2f7] px-4 py-12">
       <div className="w-full max-w-md space-y-4">
         <div className="rounded-2xl border border-gray-100 bg-white p-8 shadow-sm">
           <p className="mb-2 text-xs font-medium uppercase tracking-widest text-muted-foreground">
-            Your booking
+            {copy.clientYourBooking}
           </p>
           <h1 className="font-cal text-2xl tracking-tight text-gray-900">{booking.businessName}</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Hi {booking.clientName}, here are your appointment details.</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {formatBookingCopy(copy.clientGreeting, { name: booking.clientName })}
+          </p>
 
           <div className="mt-6 space-y-3 rounded-xl bg-gray-50 p-4 text-sm">
             <div className="flex items-center justify-between gap-4">
-              <span className="text-muted-foreground">Status</span>
+              <span className="text-muted-foreground">{copy.clientStatus}</span>
               <span className="font-medium capitalize">{statusLabel}</span>
             </div>
             <div className="flex items-center justify-between gap-4">
-              <span className="text-muted-foreground">Service</span>
+              <span className="text-muted-foreground">{copy.detailService}</span>
               <span className="font-medium text-right">{booking.serviceName}</span>
             </div>
             <div className="flex items-center justify-between gap-4">
-              <span className="text-muted-foreground">With</span>
+              <span className="text-muted-foreground">{copy.detailWith}</span>
               <span className="font-medium text-right">{booking.staffName}</span>
             </div>
             <div className="flex items-center justify-between gap-4">
-              <span className="text-muted-foreground">Date</span>
+              <span className="text-muted-foreground">{copy.detailDate}</span>
               <span className="font-medium text-right">{format(localStart, "d MMMM yyyy")}</span>
             </div>
             <div className="flex items-center justify-between gap-4">
-              <span className="text-muted-foreground">Time</span>
+              <span className="text-muted-foreground">{copy.detailTime}</span>
               <span className="font-medium text-right">{format(localStart, "h:mm a")}</span>
             </div>
           </div>
@@ -80,6 +116,11 @@ export default async function ClientBookingPage({ params }: Props) {
           <div className="mt-6">
             <ClientBookingManage
               token={token}
+              businessId={booking.businessId}
+              service={service}
+              staff={staffMember}
+              timezone={timezone}
+              copy={copy}
               canModify={modifyCheck.allowed}
               modifyReason={modifyCheck.reason}
               currentStartsAt={booking.startsAt.toISOString()}
@@ -88,7 +129,7 @@ export default async function ClientBookingPage({ params }: Props) {
 
           {booking.businessPhone ? (
             <p className="mt-6 text-sm text-muted-foreground">
-              Need help? Call{" "}
+              {copy.clientNeedHelp}{" "}
               <a href={`tel:${booking.businessPhone}`} className="font-medium text-primary hover:underline">
                 {booking.businessPhone}
               </a>
@@ -97,7 +138,7 @@ export default async function ClientBookingPage({ params }: Props) {
 
           <div className="mt-6 border-t pt-4">
             <Link href={`/book/${booking.businessSlug}`} className="text-sm text-blue-600 hover:underline">
-              Book again with {booking.businessName}
+              {formatBookingCopy(copy.clientBookAgain, { business: booking.businessName })}
             </Link>
           </div>
         </div>

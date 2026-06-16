@@ -1,6 +1,7 @@
 import Image from "next/image";
 import BookingWizard from "@/components/booking/BookingWizard";
 import BookingMobileTrustStrip from "@/components/booking/BookingMobileTrustStrip";
+import EmbedResizeReporter from "@/components/booking/EmbedResizeReporter";
 import BookingServiceHub from "@/components/booking/BookingServiceHub";
 import { BookingTheme } from "@/components/booking/BookingTheme";
 import { getBookingCopy } from "@/lib/i18n";
@@ -29,9 +30,10 @@ type Props = {
   dealId?: string | null;
   mode: "hub" | "service" | "embed";
   serviceSlug?: string;
+  hideGallery?: boolean;
 };
 
-export default function BookingPageContent({ data, dealId, mode, serviceSlug }: Props) {
+export default function BookingPageContent({ data, dealId, mode, serviceSlug, hideGallery }: Props) {
   const {
     business,
     services,
@@ -89,13 +91,15 @@ export default function BookingPageContent({ data, dealId, mode, serviceSlug }: 
         ? services[0]!
         : null;
 
-  const hideGallery = mode === "embed";
+  const hideSidebarSections =
+    mode === "embed" ? hideGallery !== false : Boolean(hideGallery);
 
   return (
     <BookingTheme accentColor={business.accentColor} embed={mode === "embed"}>
-      <div className="min-h-dvh bg-[#f2f2f7] md:bg-[#f7f7f8]">
+      <div className="min-h-dvh bg-[#f2f2f7] md:bg-[#f7f7f8]" data-booking-embed-root={mode === "embed" ? "" : undefined}>
+        {mode === "embed" ? <EmbedResizeReporter /> : null}
         <div className="mx-auto max-w-5xl px-0 md:px-8 md:py-6">
-          {!hideGallery && gallery.length > 0 && (
+          {!hideSidebarSections && gallery.length > 0 && (
             <div className="px-4 pb-4 pt-4 md:px-0 md:pb-6 md:pt-0">
               <div
                 className={`grid gap-2 overflow-hidden rounded-2xl ${
@@ -131,7 +135,7 @@ export default function BookingPageContent({ data, dealId, mode, serviceSlug }: 
             </div>
           )}
 
-          {!hideGallery && hasTrustBlock && (
+          {!hideSidebarSections && hasTrustBlock && (
             <div className="mx-4 mb-4 rounded-xl border border-gray-100 bg-white p-4 md:mx-0 md:mb-6">
               <p className="mb-3 text-[10px] font-bold uppercase tracking-widest text-gray-400">
                 {copy.trustTitle}
@@ -182,6 +186,7 @@ export default function BookingPageContent({ data, dealId, mode, serviceSlug }: 
                 cancellationPolicy: business.cancellationPolicy,
                 depositPolicy: business.depositPolicy,
                 language: business.language,
+                timezone: business.timezone,
                 lankaqrImageUrl: business.lankaqrImageUrl,
                 name: business.name,
                 payhereEnabled: business.payhereEnabled,
@@ -206,7 +211,7 @@ export default function BookingPageContent({ data, dealId, mode, serviceSlug }: 
             </>
           )}
 
-          {!hideGallery && hasAboutSection && (
+          {!hideSidebarSections && hasAboutSection && (
             <section className="mt-6 hidden rounded-2xl border border-gray-100 bg-white p-6 md:block">
               {avgRating !== null && reviewCount > 0 && (
                 <div className="mb-4 flex items-center gap-2">
@@ -223,7 +228,7 @@ export default function BookingPageContent({ data, dealId, mode, serviceSlug }: 
             </section>
           )}
 
-          {!hideGallery && staffWithBio.length > 0 && (
+          {!hideSidebarSections && staffWithBio.length > 0 && (
             <section className="mt-8 px-4 md:px-0">
               <h2 className="mb-4 font-cal text-lg text-gray-900">Meet the team</h2>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -260,7 +265,7 @@ export default function BookingPageContent({ data, dealId, mode, serviceSlug }: 
             </section>
           )}
 
-          {!hideGallery && reviewList.length > 0 && (
+          {!hideSidebarSections && reviewList.length > 0 && (
             <section className="mt-8 px-4 pb-8 md:px-0">
               <div className="mb-4">
                 <h2 className="font-cal text-lg text-gray-900">Reviews</h2>

@@ -1,5 +1,12 @@
 import type { Staff } from "@/db/schema";
 
+/** Query param value for merged availability across eligible staff. */
+export const ANY_STAFF_ID = "__any__";
+
+export function isAnyStaffId(staffId: string | null | undefined): boolean {
+  return staffId === ANY_STAFF_ID;
+}
+
 export function getEligibleStaff(
   allStaff: Staff[],
   staffServiceMap: { staffId: string; serviceId: string }[],

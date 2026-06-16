@@ -12,7 +12,9 @@ import MonthCalendar, { type MonthDayStatus } from "./MonthCalendar";
 import DateQuickStrip from "./DateQuickStrip";
 import TimeSlotGrid, { type SlotEmptyState, type SlotOption } from "./TimeSlotGrid";
 
-const COLOMBO_TZ = "Asia/Colombo";
+import { ANY_STAFF_ID } from "@/lib/booking-staff";
+
+const DEFAULT_TZ = "Asia/Colombo";
 const POLL_MS = 60_000;
 
 type NextSlot = {
@@ -30,6 +32,9 @@ interface Props {
   selectedDate: string;
   selectedSlot: SlotOption | null;
   dealId?: string | null;
+  locationId?: string | null;
+  anyStaff?: boolean;
+  timezone?: string;
   holdLabel?: string | null;
   slotUnavailable?: boolean;
   onDateChange: (date: string) => void;
@@ -47,6 +52,9 @@ export default function StepDateTime({
   selectedDate,
   selectedSlot,
   dealId,
+  locationId,
+  anyStaff,
+  timezone = DEFAULT_TZ,
   holdLabel,
   slotUnavailable,
   onDateChange,
@@ -55,7 +63,7 @@ export default function StepDateTime({
   onContinue,
   onBack,
 }: Props) {
-  const today = toZonedTime(new Date(), COLOMBO_TZ);
+  const today = toZonedTime(new Date(), timezone);
   const maxDate = service?.maximumAdvanceDays
     ? addDays(today, service.maximumAdvanceDays)
     : undefined;
@@ -68,19 +76,20 @@ export default function StepDateTime({
   const [monthDayStatus, setMonthDayStatus] = useState<Record<string, MonthDayStatus>>({});
   const [calendarMonth, setCalendarMonth] = useState(() => format(today, "yyyy-MM"));
 
-  const canLoad = Boolean(service && staff);
+  const canLoad = Boolean(service && (staff || anyStaff));
   const sessionToken = typeof window !== "undefined" ? getBookingSessionToken() : "";
 
   async function loadSlots(date: string) {
-    if (!service || !staff) return;
+    if (!service || (!staff && !anyStaff)) return;
     setLoadingSlots(true);
     setHasFetched(false);
     const query = new URLSearchParams({
       businessId,
-      staffId: staff.id,
+      staffId: anyStaff ? ANY_STAFF_ID : staff!.id,
       serviceId: service.id,
       date,
     });
+    if (locationId) query.set("locationId", locationId);
     if (dealId) query.set("dealId", dealId);
     if (sessionToken) query.set("sessionToken", sessionToken);
     const res = await fetch(`/api/availability?${query.toString()}`);
@@ -101,20 +110,21 @@ export default function StepDateTime({
 
   const loadMonthStatus = useCallback(
     async (month: string) => {
-      if (!service || !staff) return;
+      if (!service || (!staff && !anyStaff)) return;
       const query = new URLSearchParams({
         businessId,
-        staffId: staff.id,
+        staffId: anyStaff ? ANY_STAFF_ID : staff!.id,
         serviceId: service.id,
         month,
       });
+      if (locationId) query.set("locationId", locationId);
       if (dealId) query.set("dealId", dealId);
       if (sessionToken) query.set("sessionToken", sessionToken);
       const res = await fetch(`/api/availability/month?${query.toString()}`);
       const data = await res.json();
       setMonthDayStatus((prev) => ({ ...prev, ...(data.days ?? {}) }));
     },
-    [businessId, dealId, service, sessionToken, staff],
+    [businessId, dealId, locationId, anyStaff, service, sessionToken, staff],
   );
 
   useEffect(() => {
@@ -151,9 +161,10 @@ export default function StepDateTime({
     (async () => {
       const query = new URLSearchParams({
         businessId,
-        staffId: staff!.id,
+        staffId: anyStaff ? ANY_STAFF_ID : staff!.id,
         serviceId: service!.id,
       });
+      if (locationId) query.set("locationId", locationId);
       if (sessionToken) query.set("sessionToken", sessionToken);
       const res = await fetch(`/api/availability/next?${query.toString()}`);
       const data = await res.json();
@@ -182,7 +193,7 @@ export default function StepDateTime({
     ? format(parseISO(selectedDate + "T12:00:00"), "EEEE, d MMMM yyyy")
     : null;
 
-  if (!service || !staff) {
+  if (!service || (!staff && !anyStaff)) {
     return (
       <div className="flex min-h-[280px] items-center justify-center rounded-xl border border-dashed border-gray-200 bg-white px-6 py-12 text-center text-sm text-gray-400 md:min-h-[320px]">
         <div>
@@ -213,7 +224,7 @@ export default function StepDateTime({
           className="mb-4 flex w-full items-center justify-between rounded-xl border border-[var(--booking-accent-soft)] booking-bg-accent-muted px-4 py-3 text-left text-sm transition-colors hover:border-[var(--booking-accent)]"
         >
           <span>
-            <span className="font-semibold booking-text-accent">Next available</span>
+            <span className="font-semibold booking-text-accent">{copy.nextAvailable}</span>
             <span className="ml-2 text-gray-600">
               {format(parseISO(nextAvailable.date + "T12:00:00"), "EEE d MMM")} · {nextAvailable.label}
             </span>
@@ -231,7 +242,7 @@ export default function StepDateTime({
               onClick={() => setShowMobileCalendar((v) => !v)}
               className="text-xs font-medium booking-text-accent md:hidden"
             >
-              {showMobileCalendar ? "Quick dates" : "Full calendar"}
+              {showMobileCalendar ? copy.quickDates : copy.fullCalendar}
             </button>
           </div>
 
@@ -287,7 +298,7 @@ export default function StepDateTime({
 
           {slotUnavailable && (
             <div className="mb-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
-              This slot was just taken. Please pick another time.
+              {copy.slotTaken}
             </div>
           )}
 
@@ -301,6 +312,7 @@ export default function StepDateTime({
               onSelect={onSlotSelect}
               loading={loadingSlots}
               emptyState={slotEmptyState}
+              timezone={timezone}
             />
           )}
         </section>

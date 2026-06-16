@@ -290,6 +290,7 @@ export const services = pgTable("services", {
   name: varchar("name", { length: 100 }).notNull(),
   // URL slug for /book/{business}/{serviceSlug}
   slug: varchar("slug", { length: 80 }),
+  imageUrl: text("image_url"),
   description: text("description"),
   durationMinutes: integer("duration_minutes").notNull(),
   priceLkr: integer("price_lkr").notNull().default(0),

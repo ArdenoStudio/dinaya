@@ -11,9 +11,8 @@ import AddToCalendar from "./AddToCalendar";
 import { buildClientBookingUrl } from "@/lib/client-tokens";
 import { createReviewToken } from "@/lib/ai/review-links";
 import { getBookingCopy } from "@/lib/i18n";
+import { buildBookingShareText, buildWhatsAppShareUrl } from "@/lib/booking-share";
 import { Icon } from "@/components/ui/Icon";
-
-const COLOMBO_TZ = "Asia/Colombo";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -36,6 +35,7 @@ export default async function BookingConfirmedPage({ params, searchParams }: Pro
       status: bookings.status,
       businessName: businesses.name,
       businessLanguage: businesses.language,
+      businessTimezone: businesses.timezone,
       serviceName: services.name,
       staffName: staff.name,
     })
@@ -48,6 +48,7 @@ export default async function BookingConfirmedPage({ params, searchParams }: Pro
   if (!booking) notFound();
 
   const copy = getBookingCopy(booking.businessLanguage);
+  const timezone = booking.businessTimezone ?? "Asia/Colombo";
 
   const [existingReview] = await db
     .select({ id: reviews.id })
@@ -55,7 +56,7 @@ export default async function BookingConfirmedPage({ params, searchParams }: Pro
     .where(eq(reviews.bookingId, booking.id))
     .limit(1);
 
-  const local = toZonedTime(booking.startsAt, COLOMBO_TZ);
+  const local = toZonedTime(booking.startsAt, timezone);
   const isConfirmed = booking.status === "confirmed" || booking.status === "completed";
   const isPending = booking.status === "pending";
   const reviewToken = createReviewToken({
@@ -69,11 +70,20 @@ export default async function BookingConfirmedPage({ params, searchParams }: Pro
     clientPhone: booking.clientPhone,
   });
 
+  const shareText = buildBookingShareText({
+    businessName: booking.businessName,
+    serviceName: booking.serviceName,
+    startsAt: booking.startsAt,
+    timezone,
+    manageUrl,
+  });
+  const whatsappUrl = buildWhatsAppShareUrl(shareText);
+
   const details = [
-    { icon: "tag", label: "Service", value: booking.serviceName },
-    { icon: "person", label: "With", value: booking.staffName },
-    { icon: "calendar", label: "Date", value: format(local, "d MMMM yyyy") },
-    { icon: "clock", label: "Time", value: format(local, "h:mm a") },
+    { icon: "tag", label: copy.detailService, value: booking.serviceName },
+    { icon: "person", label: copy.detailWith, value: booking.staffName },
+    { icon: "calendar", label: copy.detailDate, value: format(local, "d MMMM yyyy") },
+    { icon: "clock", label: copy.detailTime, value: format(local, "h:mm a") },
   ];
 
   return (
@@ -94,16 +104,14 @@ export default async function BookingConfirmedPage({ params, searchParams }: Pro
           </div>
 
           <h1 className="mb-2 font-cal text-2xl text-gray-900">
-            {isConfirmed ? "Booking confirmed!" : "Booking request received"}
+            {isConfirmed ? copy.confirmedTitle : copy.requestReceivedTitle}
           </h1>
           <p className="mb-8 text-sm text-gray-500">
-            {isPending
-              ? "Your slot is being held while payment or business confirmation is completed."
-              : "See you at"}{" "}
+            {isPending ? copy.pendingHoldMessage : copy.seeYouAt}{" "}
             <span className="font-medium text-foreground">{booking.businessName}</span>.
           </p>
 
-          {isPending ? <PaymentStatusPoller bookingId={booking.id} slug={slug} /> : null}
+          {isPending ? <PaymentStatusPoller bookingId={booking.id} slug={slug} copy={copy} /> : null}
 
           <AddToCalendar
             bookingId={booking.id}
@@ -132,20 +140,30 @@ export default async function BookingConfirmedPage({ params, searchParams }: Pro
           </div>
 
           <p className="mb-4 text-xs text-muted-foreground">
-            Ref: <span className="font-mono">{booking.id.slice(0, 8).toUpperCase()}</span>
+            {copy.refLabel}: <span className="font-mono">{booking.id.slice(0, 8).toUpperCase()}</span>
           </p>
 
           {(isConfirmed || isPending) && (
             <Link
               href={manageUrl}
-              className="mb-6 inline-flex w-full items-center justify-center rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white hover:bg-primary/90"
+              className="mb-3 inline-flex w-full items-center justify-center rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white hover:bg-primary/90"
             >
-              Manage your booking
+              {copy.manageBooking}
             </Link>
           )}
 
+          <a
+            href={whatsappUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mb-6 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800 hover:bg-emerald-100"
+          >
+            <Icon name="whatsapp" className="text-base" />
+            {copy.shareOnWhatsApp}
+          </a>
+
           <Link href={`/book/${slug}`} className="text-sm text-blue-600 hover:underline">
-            ← Back to booking page
+            ← {copy.backToBooking}
           </Link>
         </div>
 

@@ -25,6 +25,7 @@ export type ServiceDashboardUpdatedService = {
   intakeQuestions: IntakeQuestion[] | null;
   depositPercent: number;
   description: string | null;
+  imageUrl: string | null;
   durationMinutes: number;
   id: string;
   isActive: boolean;
@@ -45,6 +46,7 @@ export type DashboardServicesListOptions = {
 const serviceUpdateFields = [
   "name",
   "description",
+  "imageUrl",
   "durationMinutes",
   "priceLkr",
   "depositPercent",
@@ -193,6 +195,7 @@ export async function getServiceDashboardDetail(businessId: string, serviceId: s
       intakeQuestions: services.intakeQuestions,
       depositPercent: services.depositPercent,
       description: services.description,
+      imageUrl: services.imageUrl,
       durationMinutes: services.durationMinutes,
       id: services.id,
       isActive: services.isActive,
@@ -306,6 +309,7 @@ export async function updateServiceDashboardFields(
       intakeQuestions: services.intakeQuestions,
       depositPercent: services.depositPercent,
       description: services.description,
+      imageUrl: services.imageUrl,
       durationMinutes: services.durationMinutes,
       id: services.id,
       isActive: services.isActive,

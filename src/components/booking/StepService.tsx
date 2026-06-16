@@ -1,4 +1,5 @@
-import { formatLkr } from "@/lib/utils";
+import Image from "next/image";
+import { formatLkr, isOptimizableRemoteImage } from "@/lib/utils";
 import { Icon } from "@/components/ui/Icon";
 import type { BookingService } from "./BookingWizard";
 import type { BookingCopy } from "@/lib/i18n";
@@ -77,6 +78,16 @@ export default function StepService({ services, selected, copy, bookingRouter, o
               }`}
             >
               <div className="flex min-w-0 flex-1 items-center gap-2.5">
+                {s.imageUrl ? (
+                  <Image
+                    src={s.imageUrl}
+                    alt=""
+                    width={40}
+                    height={40}
+                    className="size-10 shrink-0 rounded-lg object-cover"
+                    unoptimized={!isOptimizableRemoteImage(s.imageUrl)}
+                  />
+                ) : null}
                 <div
                   className={`flex size-4 shrink-0 items-center justify-center rounded-full border-2 ${
                     isSelected ? "booking-border-accent booking-bg-accent-muted0" : "border-gray-300"

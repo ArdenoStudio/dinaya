@@ -8,6 +8,7 @@ import type { IntakeQuestion } from "@/lib/intake";
 interface ServiceForm {
   name: string;
   description: string;
+  imageUrl: string;
   durationMinutes: number;
   priceLkr: number;
   depositPercent: number;
@@ -47,6 +48,7 @@ export default function EditServicePage({ params }: { params: Promise<{ id: stri
       setForm({
         name: d.name ?? "",
         description: d.description ?? "",
+        imageUrl: d.imageUrl ?? "",
         durationMinutes: d.durationMinutes ?? 30,
         priceLkr: d.priceLkr ?? 0,
         depositPercent: d.depositPercent ?? 0,
@@ -161,6 +163,16 @@ export default function EditServicePage({ params }: { params: Promise<{ id: stri
           <textarea value={form.description}
             onChange={(e) => setForm((f) => f && ({ ...f, description: e.target.value }))}
             className={`${inputCls} resize-none`} rows={2} />
+        </div>
+
+        <div>
+          <label className="text-sm font-medium">Cover image URL</label>
+          <input
+            value={form.imageUrl}
+            onChange={(e) => setForm((f) => f && ({ ...f, imageUrl: e.target.value }))}
+            className={inputCls}
+            placeholder="https://..."
+          />
         </div>
 
         <div className="grid grid-cols-2 gap-4">

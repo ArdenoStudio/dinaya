@@ -15,7 +15,8 @@ interface Props {
 
 export default async function EmbedBookingPage({ params, searchParams }: Props) {
   const { slug } = await params;
-  const { dealId, service: serviceSlug } = await searchParams;
+  const { dealId, service: serviceSlug, hideGallery: hideGalleryParam } = await searchParams;
+  const hideGallery = hideGalleryParam === "1" || hideGalleryParam === "true";
   const data = await loadBookingPageData(slug, serviceSlug);
 
   if (data.status !== "ok") {
@@ -32,6 +33,7 @@ export default async function EmbedBookingPage({ params, searchParams }: Props) 
       dealId={dealId}
       mode="embed"
       serviceSlug={serviceSlug}
+      hideGallery={hideGallery}
     />
   );
 }

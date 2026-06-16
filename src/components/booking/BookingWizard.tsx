@@ -50,6 +50,7 @@ interface Props {
 export type BookingBusiness = {
   id: string;
   accentColor?: string | null;
+  timezone?: string | null;
   bankTransferInstructions?: string | null;
   cancellationPolicy?: string | null;
   depositPolicy?: string | null;
@@ -65,6 +66,7 @@ export type BookingBusiness = {
 export type BookingService = {
   id: string;
   slug?: string;
+  imageUrl?: string | null;
   afterBuffer: number;
   beforeBuffer: number;
   businessId: string;
@@ -97,7 +99,7 @@ export type BookingState = {
   intakeAnswers: Record<string, string>;
 };
 
-type SlotData = { startUtc: string; endUtc: string; label: string };
+type SlotData = { startUtc: string; endUtc: string; label: string; staffId?: string };
 
 function BookingWizardInner({
   business,
@@ -118,10 +120,11 @@ function BookingWizardInner({
 }: Props) {
   const copy = getBookingCopy(business.language);
   const router = useRouter();
+  const timezone = business.timezone ?? COLOMBO_TZ;
   const { state: urlState } = useBookingUrlState();
   const needsLocationPicker = locations.length > 1;
   const progressSteps = [copy.service, copy.dateTime, copy.confirm];
-  const todayStr = format(toZonedTime(new Date(), COLOMBO_TZ), "yyyy-MM-dd");
+  const todayStr = format(toZonedTime(new Date(), timezone), "yyyy-MM-dd");
 
   const [step, setStep] = useState(() => (initialService ? 1 : 0));
   const defaultLocation = locations.length === 1 ? locations[0]! : null;
@@ -157,6 +160,8 @@ function BookingWizardInner({
   const [selectedDealId, setSelectedDealId] = useState<string | null>(
     initialDealId ?? urlState.dealId ?? null,
   );
+
+  const [anyStaff, setAnyStaff] = useState(false);
 
   const slotHold = useSlotHold({
     businessId: business.id,
@@ -207,21 +212,26 @@ function BookingWizardInner({
 
   const selectSlot = useCallback(
     async (slot: SlotData) => {
-      const ok = await slotHold.reserveSlot(slot);
+      const holdSlot = { ...slot, staffId: slot.staffId ?? state.staff?.id };
+      const ok = await slotHold.reserveSlot(holdSlot);
       if (!ok) {
         setSelectedSlot(null);
         setState((s) => ({ ...s, timeSlot: "", timeSlotEnd: "", timeLabel: "" }));
         return;
       }
+      const assignedStaff =
+        slot.staffId ? staff.find((member) => member.id === slot.staffId) ?? state.staff : state.staff;
       setSelectedSlot(slot);
+      setAnyStaff(false);
       setState((s) => ({
         ...s,
+        staff: assignedStaff ?? s.staff,
         timeSlot: slot.startUtc,
         timeSlotEnd: slot.endUtc,
         timeLabel: slot.label,
       }));
     },
-    [slotHold],
+    [slotHold, staff, state.staff],
   );
 
   const selectService = useCallback(
@@ -236,6 +246,7 @@ function BookingWizardInner({
         timeLabel: "",
       });
       setSelectedSlot(null);
+      setAnyStaff(false);
       void slotHold.releaseHold();
       setSelectedDealId(null);
       if (typeof window !== "undefined" && window.innerWidth < 768) {
@@ -269,6 +280,7 @@ function BookingWizardInner({
         timeLabel: "",
       });
       setSelectedSlot(null);
+      setAnyStaff(false);
       void slotHold.releaseHold();
       if (typeof window !== "undefined" && window.innerWidth < 768) {
         setStep(1);
@@ -284,7 +296,8 @@ function BookingWizardInner({
   }, [initialDealId, activeDeals, applyDeal]);
 
   function goConfirm() {
-    if (!state.service || !state.staff || !selectedSlot) return;
+    if (!state.service || !selectedSlot || (!state.staff && !anyStaff)) return;
+    if (!state.staff) return;
     if (needsLocationPicker && !state.location) return;
     if (slotHold.slotUnavailable) return;
     setStep(2);
@@ -292,7 +305,12 @@ function BookingWizardInner({
   }
 
   const canProceedDesktop =
-    Boolean(state.service && state.staff && selectedSlot && (!needsLocationPicker || state.location)) &&
+    Boolean(
+      state.service &&
+        selectedSlot &&
+        state.staff &&
+        (!needsLocationPicker || state.location),
+    ) &&
     step < 2 &&
     !slotHold.slotUnavailable;
 
@@ -431,9 +449,17 @@ function BookingWizardInner({
                       locationId={state.location?.id}
                       serviceId={state.service.id}
                       selected={state.staff}
+                      anyStaffSelected={anyStaff}
                       copy={copy}
                       onSelect={(s) => {
+                        setAnyStaff(false);
                         update({ staff: s, timeSlot: "", timeSlotEnd: "", timeLabel: "" });
+                        setSelectedSlot(null);
+                        void slotHold.releaseHold();
+                      }}
+                      onSelectAny={() => {
+                        setAnyStaff(true);
+                        update({ staff: null, timeSlot: "", timeSlotEnd: "", timeLabel: "" });
                         setSelectedSlot(null);
                         void slotHold.releaseHold();
                       }}
@@ -441,7 +467,7 @@ function BookingWizardInner({
                     />
                   )}
 
-                  {state.service && !state.staff && !needsStaffPicker && (
+                  {state.service && !state.staff && !anyStaff && !needsStaffPicker && (
                     <p className="mt-3 text-center text-sm text-amber-600">{copy.noStaff}</p>
                   )}
 
@@ -462,6 +488,9 @@ function BookingWizardInner({
                     copy={copy}
                     service={state.service}
                     staff={state.staff}
+                    anyStaff={anyStaff}
+                    locationId={state.location?.id}
+                    timezone={timezone}
                     selectedDate={state.date}
                     selectedSlot={selectedSlot}
                     dealId={selectedDealId}
