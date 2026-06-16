@@ -123,3 +123,29 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+/* Tenant-branded public booking surfaces */
+@layer components {
+  [data-booking-theme] {
+    --booking-accent: #2563eb;
+    --booking-accent-hover: color-mix(in srgb, var(--booking-accent) 88%, black);
+    --booking-accent-muted: color-mix(in srgb, var(--booking-accent) 10%, white);
+    --booking-accent-soft: color-mix(in srgb, var(--booking-accent) 18%, white);
+    --booking-accent-ring: color-mix(in srgb, var(--booking-accent) 28%, transparent);
+    --booking-accent-shadow: color-mix(in srgb, var(--booking-accent) 35%, transparent);
+    --booking-accent-on-dark: color-mix(in srgb, var(--booking-accent) 55%, white);
+  }
+
+  .booking-bg-accent { background-color: var(--booking-accent); }
+  .booking-bg-accent-hover:hover { background-color: var(--booking-accent-hover); }
+  .booking-text-accent { color: var(--booking-accent); }
+  .booking-text-accent-on-dark { color: var(--booking-accent-on-dark); }
+  .booking-border-accent { border-color: var(--booking-accent); }
+  .booking-ring-accent { --tw-ring-color: var(--booking-accent-ring); }
+  .booking-shadow-accent { box-shadow: 0 10px 25px -5px var(--booking-accent-shadow); }
+  .booking-bg-accent-muted { background-color: var(--booking-accent-muted); }
+  .booking-bg-accent-soft { background-color: var(--booking-accent-soft); }
+  .booking-gradient-accent {
+    background-image: linear-gradient(to right, var(--booking-accent), var(--booking-accent-hover));
+  }
+}

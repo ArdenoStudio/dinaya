@@ -4,6 +4,7 @@ import { availability, availabilityOverrides, bookings, businesses, staff, servi
 import { getDealById } from "@/lib/deals/queries";
 import { eq, and, gte, lt, count } from "drizzle-orm";
 import { getAvailableSlots } from "@/lib/availability";
+import { getActiveReservationsForStaff } from "@/lib/slot-reservations";
 import { withRateLimit } from "@/lib/rate-limit";
 import { parseISO, startOfDay, endOfDay } from "date-fns";
 import { fromZonedTime } from "date-fns-tz";
@@ -24,6 +25,7 @@ export async function GET(req: NextRequest) {
   const businessId = searchParams.get("businessId");
   const date = searchParams.get("date"); // "YYYY-MM-DD" in Colombo time
   const dealId = searchParams.get("dealId");
+  const sessionToken = searchParams.get("sessionToken");
 
   if (!staffId || !serviceId || !date) {
     return NextResponse.json({ error: "Missing params" }, { status: 400 });
@@ -79,7 +81,7 @@ export async function GET(req: NextRequest) {
     lt(bookings.startsAt, dayEndUtc),
   );
 
-  const [staffAvailability, overrides, existingBookings, capacityRow] = await Promise.all([
+  const [staffAvailability, overrides, existingBookings, capacityRow, reservations] = await Promise.all([
     db.select().from(availability).where(eq(availability.staffId, staffId)),
     db
       .select()
@@ -104,6 +106,7 @@ export async function GET(req: NextRequest) {
           )
           .then(([row]) => row)
       : Promise.resolve(null),
+    getActiveReservationsForStaff(staffId, dayStartUtc, dayEndUtc, sessionToken ?? undefined),
   ]);
 
   if (
@@ -114,6 +117,12 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ slots: [], capacityReached: true });
   }
 
+  const blockedReservations = reservations.map((r) => ({
+    startsAt: r.startsAt,
+    endsAt: r.endsAt,
+    status: "confirmed" as const,
+  }));
+
   const slots = getAvailableSlots({
     date,
     durationMinutes: service.durationMinutes,
@@ -123,7 +132,7 @@ export async function GET(req: NextRequest) {
     maximumAdvanceDays: service.maximumAdvanceDays ?? 0,
     staffAvailability,
     overrides,
-    existingBookings,
+    existingBookings: [...existingBookings, ...blockedReservations],
     timezone,
   });
 

@@ -25,6 +25,7 @@ type SettingsBusiness = {
   payhereMerchantId: string | null;
   hasPayhereMerchantSecret: boolean;
   hideDinayaBranding: boolean;
+  accentColor: string | null;
   customDomain: string | null;
   customDomainVerified: boolean;
   canCustomizeBookingPage: boolean;
@@ -63,6 +64,7 @@ export default function SettingsForm({ business }: Props) {
     payhereMerchantId: business.payhereMerchantId ?? "",
     payhereMerchantSecret: "",
     hideDinayaBranding: business.hideDinayaBranding,
+    accentColor: business.accentColor ?? "#2563eb",
   });
 
   const [galleryImages, setGalleryImages] = useState<string[]>(
@@ -394,6 +396,28 @@ export default function SettingsForm({ business }: Props) {
                 />
                 <span className="text-sm font-medium">Remove Dinaya branding</span>
               </label>
+
+              <div>
+                <label className="block text-sm font-medium">Accent color</label>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Used on your public booking page buttons, calendar, and headers.
+                </p>
+                <div className="mt-2 flex items-center gap-3">
+                  <input
+                    type="color"
+                    value={form.accentColor}
+                    onChange={(e) => setForm((f) => ({ ...f, accentColor: e.target.value }))}
+                    className="h-10 w-14 cursor-pointer rounded border bg-white p-1"
+                  />
+                  <input
+                    type="text"
+                    value={form.accentColor}
+                    onChange={(e) => setForm((f) => ({ ...f, accentColor: e.target.value }))}
+                    className={`${inputCls} max-w-[8rem] font-mono`}
+                    pattern="^#[0-9a-fA-F]{6}$"
+                  />
+                </div>
+              </div>
 
               <div className="rounded-lg border bg-muted/30 p-4 text-sm">
                 <p className="font-medium">Custom domain</p>

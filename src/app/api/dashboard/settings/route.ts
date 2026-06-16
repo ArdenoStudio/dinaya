@@ -63,6 +63,12 @@ const settingsSchema = z.object({
   payhereMerchantId: z.string().trim().max(100).optional().nullable(),
   payhereMerchantSecret: z.string().trim().max(1000).optional().nullable(),
   hideDinayaBranding: z.boolean().optional(),
+  accentColor: z
+    .string()
+    .trim()
+    .regex(/^#[0-9a-fA-F]{6}$/, "Accent color must be a hex value like #2563eb.")
+    .optional()
+    .nullable(),
 });
 
 export async function PATCH(req: NextRequest) {
@@ -94,6 +100,7 @@ export async function PATCH(req: NextRequest) {
     payhereMerchantId,
     payhereMerchantSecret,
     hideDinayaBranding,
+    accentColor,
     phone,
     timezone,
     websiteUrl,
@@ -106,6 +113,20 @@ export async function PATCH(req: NextRequest) {
       if (error instanceof PlanRequiredError) {
         return NextResponse.json(
           { error: "Remove Dinaya branding is available on Growth." },
+          { status: 402 },
+        );
+      }
+      throw error;
+    }
+  }
+
+  if (accentColor) {
+    try {
+      await requirePro(context.businessId, "publicBookingPageCustomization");
+    } catch (error) {
+      if (error instanceof PlanRequiredError) {
+        return NextResponse.json(
+          { error: "Custom booking page colors are available on Growth." },
           { status: 402 },
         );
       }
@@ -139,6 +160,7 @@ export async function PATCH(req: NextRequest) {
           : null,
       }),
       ...(hideDinayaBranding !== undefined && { hideDinayaBranding: Boolean(hideDinayaBranding) }),
+      ...(accentColor !== undefined && { accentColor: accentColor || null }),
     })
     .where(eq(businesses.id, context.businessId));
 

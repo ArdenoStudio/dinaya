@@ -40,11 +40,11 @@ export default function StepService({ services, selected, copy, bookingRouter, o
                   onClick={() => onSelect(target)}
                   className={`flex w-full cursor-pointer items-center justify-between rounded-xl border p-3.5 text-left transition-all ${
                     isSelected
-                      ? "border-blue-500 bg-blue-50/60 shadow-sm ring-2 ring-blue-500/10"
+                      ? "booking-border-accent booking-bg-accent-muted/60 shadow-sm ring-2 booking-ring-accent"
                       : "border-gray-100 hover:border-gray-200"
                   }`}
                 >
-                  <span className={`text-sm font-medium ${isSelected ? "text-blue-900" : "text-gray-800"}`}>
+                  <span className={`text-sm font-medium ${isSelected ? "booking-text-accent" : "text-gray-800"}`}>
                     {o.label}
                   </span>
                   <Icon name="chevron-right" className="text-xs text-gray-300" />
@@ -72,20 +72,20 @@ export default function StepService({ services, selected, copy, bookingRouter, o
               onClick={() => onSelect(s)}
               className={`flex w-full cursor-pointer items-center justify-between rounded-xl border p-3.5 text-left transition-all ${
                 isSelected
-                  ? "border-blue-500 bg-blue-50/60 shadow-sm ring-2 ring-blue-500/10"
+                  ? "booking-border-accent booking-bg-accent-muted/60 shadow-sm ring-2 booking-ring-accent"
                   : "border-gray-100 hover:border-gray-200"
               }`}
             >
               <div className="flex min-w-0 flex-1 items-center gap-2.5">
                 <div
                   className={`flex size-4 shrink-0 items-center justify-center rounded-full border-2 ${
-                    isSelected ? "border-blue-500 bg-blue-500" : "border-gray-300"
+                    isSelected ? "booking-border-accent booking-bg-accent-muted0" : "border-gray-300"
                   }`}
                 >
                   {isSelected && <div className="size-1.5 rounded-full bg-white" />}
                 </div>
                 <div className="min-w-0">
-                  <p className={`text-sm font-medium ${isSelected ? "text-blue-900" : "text-gray-800"}`}>
+                  <p className={`text-sm font-medium ${isSelected ? "booking-text-accent" : "text-gray-800"}`}>
                     {s.name}
                   </p>
                   <p className="text-xs text-gray-400">{s.durationMinutes} min</p>
@@ -93,12 +93,12 @@ export default function StepService({ services, selected, copy, bookingRouter, o
               </div>
               <div className="shrink-0 text-right">
                 <span
-                  className={`text-sm font-bold tabular-nums ${isSelected ? "text-blue-600" : "text-gray-600"}`}
+                  className={`text-sm font-bold tabular-nums ${isSelected ? "booking-text-accent" : "text-gray-600"}`}
                 >
                   {s.priceLkr > 0 ? formatLkr(s.priceLkr) : "Free"}
                 </span>
                 {s.requiresPayment && s.priceLkr > 0 && s.depositPercent > 0 && (
-                  <p className="mt-0.5 text-[10px] font-medium text-blue-500">
+                  <p className="mt-0.5 text-[10px] font-medium booking-text-accent">
                     {copy.depositDue}: {formatLkr(depositAmount)}
                   </p>
                 )}

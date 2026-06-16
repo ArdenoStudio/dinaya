@@ -29,13 +29,13 @@ export default function StepLocation({ locations, selected, copy, onSelect, comp
               onClick={() => onSelect(loc)}
               className={`flex w-full items-start gap-3 rounded-xl border px-4 py-3 text-left transition-colors ${
                 active
-                  ? "border-blue-500 bg-blue-50/80 ring-1 ring-blue-500/30"
-                  : "border-gray-200 bg-white hover:border-blue-200 hover:bg-blue-50/30"
+                  ? "booking-border-accent booking-bg-accent-muted/80 ring-1 booking-ring-accent"
+                  : "border-gray-200 bg-white hover:border-blue-200 hover:booking-bg-accent-muted/30"
               }`}
             >
               <span
                 className={`mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border ${
-                  active ? "border-blue-600 bg-blue-600 text-white" : "border-gray-300"
+                  active ? "booking-border-accent booking-bg-accent text-white" : "border-gray-300"
                 }`}
               >
                 {active && <Icon name="check" className="text-[10px]" />}

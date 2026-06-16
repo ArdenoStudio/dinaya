@@ -8,6 +8,11 @@ import { notFound } from "next/navigation";
 import { DirectorySettings } from "@/components/dashboard/DirectorySettings";
 import { ReferralSettings } from "@/components/dashboard/ReferralSettings";
 import { buildPublicBookingUrl, getAppBaseUrl } from "@/lib/booking-url";
+import {
+  buildEmbedIframeSnippet,
+  buildEmbedModalSnippet,
+  buildEmbedScriptSnippet,
+} from "@/lib/booking/embed";
 
 export default async function MarketingPage() {
   const { businessId } = await requireOwner();
@@ -43,7 +48,9 @@ export default async function MarketingPage() {
   const qrSvg = `https://api.qrserver.com/v1/create-qr-code/?size=1024x1024&format=svg&data=${encodedUrl}`;
   const whatsappSnippet = `Book your appointment online with ${business.name}: ${bookingUrl}`;
   const instagramSnippet = `${business.name} bookings are open. Tap the link in bio: ${bookingUrl}`;
-  const embedSnippet = `<iframe src="${bookingUrl}" width="100%" height="720" style="border:0;border-radius:8px"></iframe>`;
+  const embedSnippet = buildEmbedIframeSnippet(business.slug);
+  const embedScriptSnippet = buildEmbedScriptSnippet();
+  const embedModalSnippet = buildEmbedModalSnippet(business.slug);
   const reviewsEmbedUrl = `${getAppBaseUrl().replace(/\/$/, "")}/embed/reviews/${business.slug}`;
   const reviewsEmbedSnippet = `<iframe src="${reviewsEmbedUrl}" width="100%" height="420" style="border:0;border-radius:8px"></iframe>`;
 
@@ -111,8 +118,12 @@ export default async function MarketingPage() {
             <textarea readOnly value={whatsappSnippet} className="mt-1 h-20 w-full resize-none rounded-md border p-2 text-sm" />
             <label className="mt-4 block text-xs font-medium text-muted-foreground">Instagram bio</label>
             <textarea readOnly value={instagramSnippet} className="mt-1 h-20 w-full resize-none rounded-md border p-2 text-sm" />
-            <label className="mt-4 block text-xs font-medium text-muted-foreground">Website embed</label>
+            <label className="mt-4 block text-xs font-medium text-muted-foreground">Website embed (iframe)</label>
             <textarea readOnly value={embedSnippet} className="mt-1 h-24 w-full resize-none rounded-md border p-2 font-mono text-xs" />
+            <label className="mt-4 block text-xs font-medium text-muted-foreground">Embed script (inline widget)</label>
+            <textarea readOnly value={embedScriptSnippet} className="mt-1 h-32 w-full resize-none rounded-md border p-2 font-mono text-xs" />
+            <label className="mt-4 block text-xs font-medium text-muted-foreground">Book now modal button</label>
+            <textarea readOnly value={embedModalSnippet} className="mt-1 h-24 w-full resize-none rounded-md border p-2 font-mono text-xs" />
             <label className="mt-4 block text-xs font-medium text-muted-foreground">Reviews widget embed</label>
             <textarea readOnly value={reviewsEmbedSnippet} className="mt-1 h-24 w-full resize-none rounded-md border p-2 font-mono text-xs" />
           </div>
@@ -126,7 +137,7 @@ export default async function MarketingPage() {
             </a>
           </div>
           <iframe
-            src={`${bookingUrl}?preview=1`}
+            src={`${getAppBaseUrl().replace(/\/$/, "")}/embed/book/${business.slug}?embed=1`}
             title={`${business.name} booking page preview`}
             className="h-[720px] w-full rounded-lg border"
           />

@@ -2,26 +2,26 @@ import BookingPageContent from "@/components/booking/BookingPageContent";
 import { loadBookingPageData } from "@/lib/booking/load-page-data";
 
 interface Props {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ slug: string; serviceSlug: string }>;
   searchParams: Promise<{ dealId?: string }>;
 }
 
 export async function generateMetadata({ params }: Props) {
-  const { slug } = await params;
-  const data = await loadBookingPageData(slug);
-  if (data.status !== "ok") {
-    return { title: data.business.name };
+  const { slug, serviceSlug } = await params;
+  const data = await loadBookingPageData(slug, serviceSlug);
+  if (data.status !== "ok" || !data.initialService) {
+    return {};
   }
   return {
-    title: `Book an appointment — ${data.business.name}`,
-    description: data.business.description ?? `Book online with ${data.business.name}`,
+    title: `Book ${data.initialService.name} — ${data.business.name}`,
+    description: data.initialService.description ?? `Book ${data.initialService.name} with ${data.business.name}`,
   };
 }
 
-export default async function BookingHubPage({ params, searchParams }: Props) {
-  const { slug } = await params;
+export default async function ServiceBookingPage({ params, searchParams }: Props) {
+  const { slug, serviceSlug } = await params;
   const { dealId } = await searchParams;
-  const data = await loadBookingPageData(slug);
+  const data = await loadBookingPageData(slug, serviceSlug);
 
   if (data.status === "suspended" || data.status === "offline") {
     return (
@@ -36,5 +36,12 @@ export default async function BookingHubPage({ params, searchParams }: Props) {
     );
   }
 
-  return <BookingPageContent data={data} dealId={dealId} mode="hub" />;
+  return (
+    <BookingPageContent
+      data={data}
+      dealId={dealId}
+      mode="service"
+      serviceSlug={serviceSlug}
+    />
+  );
 }

@@ -9,6 +9,7 @@ import {
   isDashboardServiceStatusFilter,
   type DashboardServiceStatusFilter,
 } from "@/lib/dashboard/services";
+import { allocateServiceSlug } from "@/lib/service-slug";
 import { serviceCreateSchema } from "@/lib/schemas/services";
 
 const DEFAULT_LIMIT = 200;
@@ -71,10 +72,12 @@ export async function POST(req: NextRequest) {
   }
 
   const data = parsed.data;
+  const slug = await allocateServiceSlug(businessId, data.name);
   const [service] = await db
     .insert(services)
     .values({
       businessId,
+      slug,
       name: data.name,
       description: data.description,
       durationMinutes: data.durationMinutes,

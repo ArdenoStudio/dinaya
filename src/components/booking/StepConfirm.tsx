@@ -7,6 +7,7 @@ import type { BookingBusiness, BookingState } from "./BookingWizard";
 import { formatLkr, isOptimizableRemoteImage } from "@/lib/utils";
 import type { BookingCopy } from "@/lib/i18n";
 import { readStoredAttribution } from "@/lib/booking-attribution";
+import { getBookingSessionToken } from "@/lib/booking-session";
 import { computeAmountDueFromDiscountedPrice, computeDiscountedPrice } from "@/lib/deals/pricing";
 import { trackDealBookingComplete, trackDealBookingStart } from "@/lib/analytics/gtag";
 import type { DealListItem } from "@/lib/deals/queries";
@@ -17,6 +18,7 @@ interface Props {
   business: BookingBusiness;
   copy: BookingCopy;
   selectedDeal?: DealListItem | null;
+  sessionToken?: string;
   onUpdate: (partial: Partial<BookingState>) => void;
   onBack: () => void;
   onConfirmed: (data: {
@@ -28,7 +30,7 @@ interface Props {
   }) => void;
 }
 
-export default function StepConfirm({ state, business, copy, selectedDeal, onUpdate, onBack, onConfirmed }: Props) {
+export default function StepConfirm({ state, business, copy, selectedDeal, sessionToken, onUpdate, onBack, onConfirmed }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [upsell, setUpsell] = useState<{
@@ -130,6 +132,7 @@ export default function StepConfirm({ state, business, copy, selectedDeal, onUpd
           .filter(([, v]) => v != null && v !== "")
           .map(([questionId, value]) => ({ questionId, value })),
         dealId: selectedDeal?.id ?? null,
+        sessionToken: sessionToken || getBookingSessionToken() || undefined,
         attribution,
       }),
     });
@@ -183,7 +186,7 @@ export default function StepConfirm({ state, business, copy, selectedDeal, onUpd
               )}
             </div>
           </div>
-          <p className="shrink-0 text-base font-bold tabular-nums text-blue-600 md:text-lg">
+          <p className="shrink-0 text-base font-bold tabular-nums booking-text-accent md:text-lg">
             {service && service.priceLkr > 0 ? formatLkr(service.priceLkr) : "Free"}
           </p>
         </div>
@@ -194,8 +197,8 @@ export default function StepConfirm({ state, business, copy, selectedDeal, onUpd
           {copy.appointment}
         </p>
         <div className="mb-2 flex items-center gap-[11px]">
-          <div className="flex size-[34px] shrink-0 items-center justify-center rounded-[10px] bg-blue-50">
-            <Icon name="calendar3" className="text-[13px] text-blue-500" />
+          <div className="flex size-[34px] shrink-0 items-center justify-center rounded-[10px] booking-bg-accent-muted">
+            <Icon name="calendar3" className="text-[13px] booking-text-accent" />
           </div>
           <div>
             <p className="text-[13px] font-semibold text-gray-900 md:text-sm">{dateLabel}</p>
@@ -230,7 +233,7 @@ export default function StepConfirm({ state, business, copy, selectedDeal, onUpd
               <p className="text-[11px] text-gray-400">
                 {copy.depositDue} ({service.depositPercent}%)
               </p>
-              <p className="text-[11px] font-semibold tabular-nums text-blue-600">
+              <p className="text-[11px] font-semibold tabular-nums booking-text-accent">
                 {formatLkr(depositAmount)}
               </p>
             </div>
@@ -407,9 +410,9 @@ export default function StepConfirm({ state, business, copy, selectedDeal, onUpd
             </div>
           )}
           {upsell && (
-            <div className="mb-3 rounded-xl border border-blue-100 bg-blue-50/70 p-4 text-sm md:mb-4">
+            <div className="mb-3 rounded-xl border border-blue-100 booking-bg-accent-muted/70 p-4 text-sm md:mb-4">
               <p className="font-medium text-blue-950">Recommended add-on</p>
-              <p className="mt-1 text-blue-900/80">
+              <p className="mt-1 booking-text-accent/80">
                 {upsell.reason} Ask about <span className="font-semibold">{upsell.name}</span>
                 {upsell.priceLkr > 0 ? ` (${formatLkr(upsell.priceLkr)})` : ""} during your visit.
               </p>
@@ -441,7 +444,7 @@ export default function StepConfirm({ state, business, copy, selectedDeal, onUpd
           type="button"
           onClick={handleBook}
           disabled={loading || !state.clientName || !state.clientPhone}
-          className="w-full rounded-[14px] bg-gradient-to-r from-blue-600 to-blue-700 py-[17px] text-[16px] font-bold text-white shadow-lg shadow-blue-500/25 transition-opacity hover:from-blue-700 hover:to-blue-800 disabled:cursor-not-allowed disabled:opacity-50 md:rounded-xl md:py-3.5 md:text-sm md:font-semibold"
+          className="w-full rounded-[14px] bg-gradient-to-r booking-gradient-accent py-[17px] text-[16px] font-bold text-white shadow-lg booking-shadow-accent transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 md:rounded-xl md:py-3.5 md:text-sm md:font-semibold"
         >
           {loading ? "Booking…" : payLabel}
         </button>
