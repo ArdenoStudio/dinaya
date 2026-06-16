@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { bookings, businesses } from "@/db/schema";
+import { bookings, businesses, services } from "@/db/schema";
 import { requireOwner } from "@/lib/auth";
 import { and, count, eq } from "drizzle-orm";
 import Link from "next/link";
@@ -7,6 +7,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { DirectorySettings } from "@/components/dashboard/DirectorySettings";
 import { ReferralSettings } from "@/components/dashboard/ReferralSettings";
+import { ServiceBookingLinks } from "@/components/dashboard/ServiceBookingLinks";
 import { buildPublicBookingUrl, getAppBaseUrl } from "@/lib/booking-url";
 import {
   buildEmbedIframeSnippet,
@@ -30,6 +31,16 @@ export default async function MarketingPage() {
     .limit(1);
 
   if (!business) notFound();
+
+  const serviceList = await db
+    .select({
+      id: services.id,
+      name: services.name,
+      slug: services.slug,
+    })
+    .from(services)
+    .where(and(eq(services.businessId, businessId), eq(services.isActive, true)))
+    .orderBy(services.name);
 
   const [{ referralBookings }] = await db
     .select({ referralBookings: count() })
@@ -64,7 +75,7 @@ export default async function MarketingPage() {
           </p>
         </div>
         <Link
-          href="/dashboard/settings"
+          href="/dashboard/booking-page"
           className="rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
         >
           Edit booking page
@@ -96,6 +107,13 @@ export default async function MarketingPage() {
               <a href={qrSvg} target="_blank" rel="noopener noreferrer" className="rounded-md border px-3 py-2 text-xs font-medium hover:border-primary/40">QR SVG</a>
             </div>
           </div>
+
+          <ServiceBookingLinks
+            slug={business.slug}
+            customDomain={business.customDomain}
+            customDomainVerified={business.customDomainVerified}
+            services={serviceList}
+          />
 
           <div className="rounded-xl border bg-white p-5">
             <h2 className="mb-3 font-semibold">QR poster</h2>

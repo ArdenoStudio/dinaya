@@ -15,7 +15,16 @@
     if (config.email) url.searchParams.set("email", config.email);
     if (config.phone) url.searchParams.set("phone", config.phone);
     if (config.hideGallery) url.searchParams.set("hideGallery", "1");
+    if (config.hideGallery === false) url.searchParams.set("hideGallery", "0");
     return url.toString();
+  }
+
+  function attachResizeListener(iframe) {
+    window.addEventListener("message", function (event) {
+      if (!event.data || event.data.type !== "dinaya:resize") return;
+      if (typeof event.data.height !== "number") return;
+      iframe.style.height = Math.max(480, event.data.height) + "px";
+    });
   }
 
   function skeleton(el) {
@@ -36,6 +45,7 @@
       iframe.src = buildEmbedUrl(opts.slug, opts.config || {});
       iframe.title = "Book appointment";
       iframe.style.cssText = "width:100%;height:" + (opts.height || 720) + "px;border:0;border-radius:16px";
+      attachResizeListener(iframe);
       iframe.onload = function () {
         el.innerHTML = "";
         el.appendChild(iframe);
@@ -51,6 +61,7 @@
       iframe.src = buildEmbedUrl(opts.slug, opts.config || {});
       iframe.title = "Book appointment";
       iframe.style.cssText = "width:100%;height:min(82vh,760px);border:0;display:block";
+      attachResizeListener(iframe);
       panel.appendChild(iframe);
       overlay.appendChild(panel);
       overlay.addEventListener("click", function (e) {

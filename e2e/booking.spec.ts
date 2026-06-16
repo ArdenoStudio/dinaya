@@ -23,6 +23,17 @@ test.describe("Public booking — single location", () => {
     await page.goto(`/book/${account.slug}`);
     await expect(page.getByText("Haircut")).toBeVisible();
   });
+
+  test("completes a free booking through confirm", async ({ page }) => {
+    await page.goto(`/book/${account.slug}`);
+    await page.getByRole("button", { name: /Haircut/i }).click();
+    await page.getByRole("button", { name: /9:00 AM|9:30 AM|10:00 AM/i }).first().click();
+    await page.getByLabel(/Full name/i).fill("Test Client");
+    await page.getByLabel(/Phone number/i).fill("+94771234567");
+    await page.getByRole("button", { name: /Confirm booking/i }).click();
+    await expect(page).toHaveURL(new RegExp(`/book/${account.slug}/confirmed`));
+    await expect(page.getByText(/Booking confirmed|Booking request received/i)).toBeVisible();
+  });
 });
 
 test.describe("Public booking — multi-location (Pro)", () => {

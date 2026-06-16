@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { staff } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import HolidaysEditor from "@/components/dashboard/HolidaysEditor";
 import AvailabilityEditor from "@/components/dashboard/AvailabilityEditor";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
 import { requireBusiness } from "@/lib/auth";
@@ -23,7 +24,10 @@ export default async function AvailabilityPage() {
           Add staff first before setting availability.
         </div>
       ) : (
-        <AvailabilityEditor staffList={staffList} dayNames={DAY_NAMES} />
+        <>
+          <HolidaysEditor />
+          <AvailabilityEditor staffList={staffList} dayNames={DAY_NAMES} />
+        </>
       )}
     </div>
   );

@@ -4,6 +4,7 @@ import { intakeQuestionsSchema } from "@/lib/intake";
 export const serviceCreateSchema = z.object({
   name: z.string().trim().min(1).max(120),
   description: z.string().trim().max(2000).optional().nullable(),
+  imageUrl: z.string().trim().max(2000).optional().nullable(),
   durationMinutes: z.coerce.number().int().min(5).max(480),
   priceLkr: z.coerce.number().int().min(0).optional(),
   requiresPayment: z.boolean().optional(),
@@ -20,6 +21,7 @@ export const serviceUpdateSchema = z
   .object({
     name: z.string().trim().min(1).max(120).optional(),
     description: z.string().trim().max(2000).optional().nullable(),
+  imageUrl: z.string().trim().max(2000).optional().nullable(),
     durationMinutes: z.coerce.number().int().min(5).max(480).optional(),
     priceLkr: z.coerce.number().int().min(0).optional(),
     depositPercent: z.coerce.number().int().min(0).max(100).optional(),

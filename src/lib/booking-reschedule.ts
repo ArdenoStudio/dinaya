@@ -9,6 +9,11 @@ import {
 } from "@/db/schema";
 import { and, eq, gt, inArray, lt, ne } from "drizzle-orm";
 import { getAvailableSlots } from "@/lib/availability";
+import {
+  filterSlotsByBusinessHoliday,
+  getBusinessHolidayForDate,
+  isBusinessHolidayClosed,
+} from "@/lib/business-holidays";
 import { isRequestedSlotAvailable } from "@/lib/booking-availability";
 import { buildClientBookingUrl } from "@/lib/client-tokens";
 import { sendBookingRescheduleMessage } from "@/lib/messaging/booking-messages";
@@ -64,6 +69,7 @@ export async function getRescheduleSlots(input: {
       staffId: bookings.staffId,
       serviceId: bookings.serviceId,
       businessId: bookings.businessId,
+      locationId: bookings.locationId,
       status: bookings.status,
       startsAt: bookings.startsAt,
       durationMinutes: services.durationMinutes,
@@ -91,6 +97,17 @@ export async function getRescheduleSlots(input: {
     return { booking, slots: [], blockedReason: modifyCheck.reason };
   }
 
+  const timezone = booking.timezone ?? "Asia/Colombo";
+  const holiday = await getBusinessHolidayForDate({
+    businessId: booking.businessId,
+    date: input.date,
+    locationId: booking.locationId,
+  });
+
+  if (isBusinessHolidayClosed(holiday)) {
+    return { booking, slots: [], blockedReason: "This day is closed." };
+  }
+
   const [staffAvailability, overrides, existingBookings] = await Promise.all([
     db.select().from(availability).where(eq(availability.staffId, booking.staffId)),
     db.select().from(availabilityOverrides).where(eq(availabilityOverrides.staffId, booking.staffId)),
@@ -109,7 +126,7 @@ export async function getRescheduleSlots(input: {
       )),
   ]);
 
-  const slots = getAvailableSlots({
+  let slots = getAvailableSlots({
     date: input.date,
     durationMinutes: booking.durationMinutes,
     beforeBuffer: booking.beforeBuffer,
@@ -119,8 +136,10 @@ export async function getRescheduleSlots(input: {
     staffAvailability,
     overrides,
     existingBookings,
-    timezone: booking.timezone ?? "Asia/Colombo",
+    timezone,
   });
+
+  slots = filterSlotsByBusinessHoliday(slots, holiday, timezone);
 
   return { booking, slots, blockedReason: undefined };
 }

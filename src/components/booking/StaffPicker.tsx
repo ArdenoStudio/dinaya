@@ -13,8 +13,10 @@ interface Props {
   locationId?: string | null;
   serviceId: string;
   selected: Staff | null;
+  anyStaffSelected?: boolean;
   copy: BookingCopy;
   onSelect: (staff: Staff) => void;
+  onSelectAny?: () => void;
   compact?: boolean;
 }
 
@@ -25,8 +27,10 @@ export default function StaffPicker({
   locationId,
   serviceId,
   selected,
+  anyStaffSelected,
   copy,
   onSelect,
+  onSelectAny,
   compact,
 }: Props) {
   const eligible = getEligibleStaff(allStaff, staffServiceMap, serviceId, staffLocationMap, locationId);
@@ -37,14 +41,29 @@ export default function StaffPicker({
       <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-400">
         {copy.chooseTeam}
       </p>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2" role="group" aria-label={copy.chooseTeam}>
+        {onSelectAny && (
+          <button
+            type="button"
+            onClick={onSelectAny}
+            aria-pressed={anyStaffSelected}
+            className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
+              anyStaffSelected
+                ? "booking-border-accent booking-bg-accent-muted booking-text-accent ring-2 booking-ring-accent"
+                : "border-gray-200 bg-white text-gray-600 hover:border-blue-300"
+            }`}
+          >
+            {copy.anyAvailableStaff}
+          </button>
+        )}
         {eligible.map((s) => {
-          const isSelected = selected?.id === s.id;
+          const isSelected = !anyStaffSelected && selected?.id === s.id;
           return (
             <button
               key={s.id}
               type="button"
               onClick={() => onSelect(s)}
+              aria-pressed={isSelected}
               className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
                 isSelected
                   ? "booking-border-accent booking-bg-accent-muted booking-text-accent ring-2 booking-ring-accent"
@@ -54,7 +73,7 @@ export default function StaffPicker({
               {s.avatarUrl ? (
                 <Image
                   src={s.avatarUrl}
-                  alt=""
+                  alt={s.name}
                   width={20}
                   height={20}
                   className="size-5 rounded-full object-cover"

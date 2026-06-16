@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { formatLkr } from "@/lib/utils";
+import Image from "next/image";
+import { formatLkr, isOptimizableRemoteImage } from "@/lib/utils";
 import { buildServiceBookingPath } from "@/lib/booking-url";
 import { Icon } from "@/components/ui/Icon";
 import type { BookingCopy } from "@/lib/i18n";
@@ -21,7 +22,7 @@ export default function BookingServiceHub({ businessSlug, services, copy }: Prop
       <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-gray-400">
         {copy.chooseService}
       </p>
-      <h2 className="mb-4 font-cal text-lg tracking-tight text-gray-900">What would you like to book?</h2>
+      <h2 className="mb-4 font-cal text-lg tracking-tight text-gray-900">{copy.hubTitle}</h2>
       <div className="grid gap-3 sm:grid-cols-2">
         {services.map((service) => {
           const href = buildServiceBookingPath(businessSlug, service.slug ?? service.id);
@@ -36,6 +37,18 @@ export default function BookingServiceHub({ businessSlug, services, copy }: Prop
               href={href}
               className="group flex flex-col rounded-xl border border-gray-100 p-4 transition-all hover:border-[var(--booking-accent)] hover:shadow-md"
             >
+              {service.imageUrl ? (
+                <div className="relative mb-3 aspect-[16/10] overflow-hidden rounded-lg bg-gray-100">
+                  <Image
+                    src={service.imageUrl}
+                    alt=""
+                    fill
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    className="object-cover transition-transform group-hover:scale-[1.02]"
+                    unoptimized={!isOptimizableRemoteImage(service.imageUrl)}
+                  />
+                </div>
+              ) : null}
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="font-semibold text-gray-900 group-hover:booking-text-accent">{service.name}</p>

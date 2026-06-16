@@ -59,7 +59,9 @@ export function useSlotHold(input: {
 
   const reserveSlot = useCallback(
     async (slot: SlotOption) => {
-      if (!input.enabled || !input.serviceId || !input.staffId) return false;
+      if (!input.enabled || !input.serviceId) return false;
+      const staffId = slot.staffId ?? input.staffId;
+      if (!staffId) return false;
 
       setHolding(true);
       setSlotUnavailable(false);
@@ -72,7 +74,7 @@ export function useSlotHold(input: {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             businessId: input.businessId,
-            staffId: input.staffId,
+            staffId,
             serviceId: input.serviceId,
             startUtc: slot.startUtc,
             endUtc: slot.endUtc,
