@@ -6,6 +6,7 @@ import { format } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import Link from "next/link";
 import ReviewPrompt from "./ReviewPrompt";
+import PaymentStatusPoller from "./PaymentStatusPoller";
 import { buildClientBookingUrl } from "@/lib/client-tokens";
 import { createReviewToken } from "@/lib/ai/review-links";
 import { Icon } from "@/components/ui/Icon";
@@ -95,6 +96,8 @@ export default async function BookingConfirmedPage({ params, searchParams }: Pro
               : "See you at"}{" "}
             <span className="font-medium text-foreground">{booking.businessName}</span>.
           </p>
+
+          {isPending ? <PaymentStatusPoller bookingId={booking.id} slug={slug} /> : null}
 
           <div className="mb-6 space-y-3 rounded-xl bg-gray-50 p-4 text-left text-sm">
             {details.map((d) => (

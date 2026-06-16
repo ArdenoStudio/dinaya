@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { format, parseISO } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
@@ -183,6 +183,7 @@ function BookingWizardInner({
     payhereUrl?: string;
     status?: string;
   } | null>(null);
+  const payhereFormRef = useRef<HTMLFormElement | null>(null);
 
   const needsStaffPicker = useMemo(() => {
     if (!state.service) return false;
@@ -271,6 +272,14 @@ function BookingWizardInner({
     if (deal) applyDeal(deal);
   }, [initialDealId, activeDeals, applyDeal]);
 
+  useEffect(() => {
+    if (!confirmed?.payhereFormData || !confirmed.payhereUrl) return;
+    const timeoutId = window.setTimeout(() => {
+      payhereFormRef.current?.requestSubmit();
+    }, 600);
+    return () => window.clearTimeout(timeoutId);
+  }, [confirmed]);
+
   function goConfirm() {
     if (!state.service || !state.staff || !selectedSlot) return;
     if (needsLocationPicker && !state.location) return;
@@ -305,9 +314,9 @@ function BookingWizardInner({
         <SuccessPanel
           icon="credit-card"
           title="Redirecting to payment..."
-          body="You'll be taken to PayHere to complete your booking."
+          body="PayHere is opening now. Use the button below if it does not continue."
         >
-          <form id="payhere-form" method="POST" action={confirmed.payhereUrl}>
+          <form id="payhere-form" ref={payhereFormRef} method="POST" action={confirmed.payhereUrl}>
             {Object.entries(confirmed.payhereFormData).map(([k, v]) => (
               <input key={k} type="hidden" name={k} value={v} />
             ))}

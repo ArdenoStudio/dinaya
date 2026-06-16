@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import { Analytics } from "@vercel/analytics/next";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { ChunkLoadRecovery } from "@/components/ChunkLoadRecovery";
+import { BookingPwa } from "@/components/booking/BookingPwa";
 import { NavProvider } from "@/context/NavContext";
 import "./globals.css";
 
@@ -35,6 +36,7 @@ export default function RootLayout({
           Skip to main content
         </a>
         <NavProvider>
+          <BookingPwa />
           <main id="main-content">
             {children}
           </main>

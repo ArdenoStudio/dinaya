@@ -43,6 +43,23 @@ Optional but recommended:
 - Twilio WhatsApp fallback: `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_WHATSAPP_FROM`
 - SMS gateway: `SMS_HTTP_ENDPOINT`, `SMS_HTTP_API_KEY`, `SMS_HTTP_METHOD`, `SMS_HTTP_SENDER`
 
+## PayHere production setup
+
+Dinaya uses two separate PayHere models:
+
+- Dinaya subscription billing uses Ardeno Studio/Dinaya's own PayHere merchant account through `DINAYA_PAYHERE_MERCHANT_ID`, `DINAYA_PAYHERE_MERCHANT_SECRET`, `DINAYA_PAYHERE_APP_ID`, and `DINAYA_PAYHERE_APP_SECRET`.
+- Client booking payments use each tenant business's own PayHere Merchant ID and Merchant Secret stored from dashboard settings. Do not route all tenant booking revenue through Dinaya's merchant account unless PayHere has explicitly approved that platform or marketplace model.
+
+Before setting `PAYHERE_SANDBOX=false`:
+
+1. Confirm `NEXT_PUBLIC_APP_URL` and `AUTH_URL` point to the canonical production origin, normally `https://dinaya.lk`.
+2. Confirm the PayHere domain/app approval matches the origin used for checkout return and notification URLs.
+3. Run `npm run payhere:check` against the configured environment. Use `npm run payhere:check -- --skip-network` only for local env checks without HTTP probes.
+4. Run a sandbox booking payment against a public staging URL. Localhost cannot receive PayHere `notify_url` callbacks unless it is tunneled.
+5. Verify `/api/webhooks/payhere` moves a paid booking from `pending` to `confirmed` and sends the expected receipt/notifications.
+6. Verify `/api/webhooks/payhere-subscription` moves a paid plan subscription from `pending` to `active`.
+7. Verify PayHere Subscription Manager API access in production before relying on dashboard cancellation. PayHere live merchant APIs may require allowlisted domains or server IPs, and Vercel serverless outbound IPs may not be stable without a fixed-egress setup.
+
 ## Scheduled jobs
 
 Scheduled jobs are invoked by GitHub Actions, not Vercel Cron. Keep `vercel.json` free of `crons` so Vercel Hobby deployments do not fail on non-daily schedules.

@@ -43,6 +43,8 @@ html.nav-open {
 @layer base {
   :root {
     --font-inter: Inter, "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+    --gradient-color: #2563eb;
+    --sparkles-color: #2563eb;
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
@@ -69,6 +71,8 @@ html.nav-open {
   }
 
   .dark {
+    --gradient-color: #60a5fa;
+    --sparkles-color: #ffffff;
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
     --card: 222.2 84% 4.9%;
