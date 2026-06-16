@@ -130,3 +130,21 @@ export function getAvailableSlots({
 
   return slots.sort((a, b) => a.startUtc.getTime() - b.startUtc.getTime());
 }
+
+/** True when the staff member has no bookable working window on this calendar date. */
+export function isStaffClosedOnDate({
+  date,
+  staffAvailability,
+  overrides,
+}: {
+  date: string;
+  staffAvailability: Availability[];
+  overrides: AvailabilityOverride[];
+}): boolean {
+  const dayOverride = overrides.find((o) => o.date === date);
+  if (dayOverride?.isBlocked && !dayOverride.startTime) return true;
+
+  const dayOfWeek = parseISO(date).getDay();
+  const recurringSlots = staffAvailability.filter((a) => a.dayOfWeek === dayOfWeek);
+  return recurringSlots.length === 0 && !(dayOverride?.startTime && dayOverride.endTime);
+}

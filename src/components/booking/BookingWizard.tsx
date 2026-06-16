@@ -1,7 +1,8 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { format, parseISO } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import { Icon } from "@/components/ui/Icon";
@@ -116,6 +117,7 @@ function BookingWizardInner({
   embedMode = false,
 }: Props) {
   const copy = getBookingCopy(business.language);
+  const router = useRouter();
   const { state: urlState } = useBookingUrlState();
   const needsLocationPicker = locations.length > 1;
   const progressSteps = [copy.service, copy.dateTime, copy.confirm];
@@ -176,14 +178,23 @@ function BookingWizardInner({
     [activeDeals, selectedDealId],
   );
 
-  const [confirmed, setConfirmed] = useState<{
-    bookingId: string;
-    manualPayment?: boolean;
-    payhereFormData?: Record<string, string>;
-    payhereUrl?: string;
-    status?: string;
-  } | null>(null);
-  const payhereFormRef = useRef<HTMLFormElement | null>(null);
+  const handleConfirmed = useCallback(
+    (data: {
+      bookingId: string;
+      manualPayment?: boolean;
+      payhereFormData?: Record<string, string>;
+      payhereUrl?: string;
+      status?: string;
+    }) => {
+      void slotHold.releaseHold();
+      if (data.payhereUrl) {
+        router.push(`/book/${business.slug}/pay?bookingId=${data.bookingId}`);
+        return;
+      }
+      router.push(`/book/${business.slug}/confirmed?bookingId=${data.bookingId}`);
+    },
+    [business.slug, router, slotHold],
+  );
 
   const needsStaffPicker = useMemo(() => {
     if (!state.service) return false;
@@ -272,14 +283,6 @@ function BookingWizardInner({
     if (deal) applyDeal(deal);
   }, [initialDealId, activeDeals, applyDeal]);
 
-  useEffect(() => {
-    if (!confirmed?.payhereFormData || !confirmed.payhereUrl) return;
-    const timeoutId = window.setTimeout(() => {
-      payhereFormRef.current?.requestSubmit();
-    }, 600);
-    return () => window.clearTimeout(timeoutId);
-  }, [confirmed]);
-
   function goConfirm() {
     if (!state.service || !state.staff || !selectedSlot) return;
     if (needsLocationPicker && !state.location) return;
@@ -305,45 +308,6 @@ function BookingWizardInner({
     state.service?.requiresPayment && depositPreview > 0
       ? `${copy.confirmAndPay} — ${formatLkr(depositPreview)}`
       : copy.confirmAndPay;
-
-  if (confirmed) {
-    void slotHold.releaseHold();
-
-    if (confirmed.payhereFormData && confirmed.payhereUrl) {
-      return (
-        <SuccessPanel
-          icon="credit-card"
-          title="Redirecting to payment..."
-          body="PayHere is opening now. Use the button below if it does not continue."
-        >
-          <form id="payhere-form" ref={payhereFormRef} method="POST" action={confirmed.payhereUrl}>
-            {Object.entries(confirmed.payhereFormData).map(([k, v]) => (
-              <input key={k} type="hidden" name={k} value={v} />
-            ))}
-            <button
-              type="submit"
-              className="rounded-xl booking-bg-accent booking-bg-accent-hover px-6 py-3 text-sm font-semibold text-white booking-shadow-accent"
-            >
-              Pay now
-            </button>
-          </form>
-        </SuccessPanel>
-      );
-    }
-
-    return (
-      <SuccessPanel
-        icon="check-circle-fill"
-        title={confirmed.manualPayment ? "Booking request received" : "Booking confirmed!"}
-        body={
-          confirmed.manualPayment
-            ? "Your booking is pending until the business confirms your payment proof."
-            : `We've sent a confirmation to ${state.clientEmail || state.clientPhone}.`
-        }
-        refId={confirmed.bookingId}
-      />
-    );
-  }
 
   const desktopSelectionLine = [
     state.service?.name,
@@ -547,7 +511,7 @@ function BookingWizardInner({
             sessionToken={slotHold.sessionToken}
             onUpdate={update}
             onBack={() => setStep(1)}
-            onConfirmed={setConfirmed}
+            onConfirmed={handleConfirmed}
           />
         )}
 
@@ -749,34 +713,6 @@ function BusinessAvatar({
           {name.charAt(0).toUpperCase()}
         </span>
       )}
-    </div>
-  );
-}
-
-function SuccessPanel({
-  icon,
-  title,
-  body,
-  refId,
-  children,
-}: {
-  icon: string;
-  title: string;
-  body: string;
-  refId?: string;
-  children?: React.ReactNode;
-}) {
-  return (
-    <div className="rounded-2xl bg-white p-10 text-center md:border md:border-gray-100 md:shadow-sm">
-      <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-full booking-bg-accent-muted">
-        <Icon name={icon} className="text-2xl booking-text-accent" />
-      </div>
-      <h2 className="mb-2 font-cal text-xl">{title}</h2>
-      <p className="mb-6 text-pretty text-sm text-gray-500">{body}</p>
-      {refId && (
-        <p className="mb-4 text-xs text-gray-400">Ref: {refId.slice(0, 8).toUpperCase()}</p>
-      )}
-      {children}
     </div>
   );
 }

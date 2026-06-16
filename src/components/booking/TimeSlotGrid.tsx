@@ -30,12 +30,15 @@ const PERIOD_LABEL: Record<Period, keyof Pick<BookingCopy, "morning" | "afternoo
   evening: "evening",
 };
 
+export type SlotEmptyState = "none" | "closed" | "full" | "capacity";
+
 interface Props {
   slots: SlotOption[];
   selectedStartUtc: string | null;
   copy: BookingCopy;
   onSelect: (slot: SlotOption) => void;
   loading?: boolean;
+  emptyState?: SlotEmptyState;
 }
 
 export default function TimeSlotGrid({
@@ -44,6 +47,7 @@ export default function TimeSlotGrid({
   copy,
   onSelect,
   loading,
+  emptyState = "none",
 }: Props) {
   if (loading) {
     return (
@@ -56,10 +60,21 @@ export default function TimeSlotGrid({
   }
 
   if (slots.length === 0) {
+    const emptyMessage =
+      emptyState === "closed"
+        ? copy.dayClosed
+        : emptyState === "capacity"
+          ? copy.capacityReached
+          : emptyState === "full"
+            ? copy.dayFull
+            : copy.noSlots;
+    const emptyIcon =
+      emptyState === "closed" ? "calendar-x" : emptyState === "capacity" ? "x-circle" : "calendar-x";
+
     return (
       <div className="rounded-xl border border-dashed border-gray-200 bg-gray-50/50 px-4 py-10 text-center">
-        <Icon name="calendar-x" className="mb-2 block text-2xl text-gray-300" />
-        <p className="text-sm text-gray-500">{copy.noSlots}</p>
+        <Icon name={emptyIcon} className="mb-2 block text-2xl text-gray-300" />
+        <p className="text-sm text-gray-500">{emptyMessage}</p>
       </div>
     );
   }

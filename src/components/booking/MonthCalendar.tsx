@@ -16,11 +16,15 @@ import {
 } from "date-fns";
 import { useEffect, useMemo, useState } from "react";
 
+export type MonthDayStatus = "available" | "full" | "closed";
+
 interface Props {
   selectedDate: string;
   minDate: Date;
   maxDate?: Date;
+  dayStatus?: Record<string, MonthDayStatus>;
   onSelect: (dateStr: string) => void;
+  onMonthChange?: (month: string) => void;
   size?: "compact" | "comfortable";
 }
 
@@ -28,7 +32,9 @@ export default function MonthCalendar({
   selectedDate,
   minDate,
   maxDate,
+  dayStatus,
   onSelect,
+  onMonthChange,
   size = "compact",
 }: Props) {
   const selected = selectedDate ? new Date(selectedDate + "T12:00:00") : null;
@@ -43,6 +49,10 @@ export default function MonthCalendar({
       setViewMonth(startOfMonth(new Date(selectedDate + "T12:00:00")));
     }
   }, [selectedDate]);
+
+  useEffect(() => {
+    onMonthChange?.(format(viewMonth, "yyyy-MM"));
+  }, [viewMonth, onMonthChange]);
 
   const weeks = useMemo(() => {
     const start = startOfWeek(startOfMonth(viewMonth), { weekStartsOn: 1 });
@@ -120,13 +130,14 @@ export default function MonthCalendar({
           const isSelected = selectedDate === dateStr;
           const disabled = !inMonth || isDisabled(day);
           const showToday = isToday(day) && !isSelected && !disabled;
+          const status = dayStatus?.[dateStr];
           return (
             <button
               key={dateStr}
               type="button"
               disabled={disabled}
               onClick={() => !disabled && onSelect(dateStr)}
-              className={`min-w-0 font-medium transition-all ${
+              className={`relative min-w-0 font-medium transition-all ${
                 comfortable
                   ? "mx-auto flex size-10 items-center justify-center rounded-xl text-sm"
                   : "mx-auto flex aspect-square w-full max-w-10 items-center justify-center rounded-lg text-xs"
@@ -143,6 +154,18 @@ export default function MonthCalendar({
               }`}
             >
               {format(day, "d")}
+              {inMonth && status === "available" && !isSelected && (
+                <span
+                  aria-hidden
+                  className="absolute bottom-1 left-1/2 size-1 -translate-x-1/2 rounded-full booking-bg-accent"
+                />
+              )}
+              {inMonth && status === "full" && !isSelected && (
+                <span
+                  aria-hidden
+                  className="absolute bottom-1 left-1/2 size-1 -translate-x-1/2 rounded-full bg-gray-300"
+                />
+              )}
             </button>
           );
         })}

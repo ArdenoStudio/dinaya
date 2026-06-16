@@ -7,8 +7,10 @@ import { toZonedTime } from "date-fns-tz";
 import Link from "next/link";
 import ReviewPrompt from "./ReviewPrompt";
 import PaymentStatusPoller from "./PaymentStatusPoller";
+import AddToCalendar from "./AddToCalendar";
 import { buildClientBookingUrl } from "@/lib/client-tokens";
 import { createReviewToken } from "@/lib/ai/review-links";
+import { getBookingCopy } from "@/lib/i18n";
 import { Icon } from "@/components/ui/Icon";
 
 const COLOMBO_TZ = "Asia/Colombo";
@@ -30,8 +32,10 @@ export default async function BookingConfirmedPage({ params, searchParams }: Pro
       clientName: bookings.clientName,
       clientPhone: bookings.clientPhone,
       startsAt: bookings.startsAt,
+      endsAt: bookings.endsAt,
       status: bookings.status,
       businessName: businesses.name,
+      businessLanguage: businesses.language,
       serviceName: services.name,
       staffName: staff.name,
     })
@@ -42,6 +46,8 @@ export default async function BookingConfirmedPage({ params, searchParams }: Pro
     .where(and(eq(bookings.id, bookingId), eq(businesses.slug, slug)))
     .limit(1);
   if (!booking) notFound();
+
+  const copy = getBookingCopy(booking.businessLanguage);
 
   const [existingReview] = await db
     .select({ id: reviews.id })
@@ -98,6 +104,20 @@ export default async function BookingConfirmedPage({ params, searchParams }: Pro
           </p>
 
           {isPending ? <PaymentStatusPoller bookingId={booking.id} slug={slug} /> : null}
+
+          <AddToCalendar
+            bookingId={booking.id}
+            slug={slug}
+            title={`${booking.serviceName} · ${booking.businessName}`}
+            description={`Booking for ${booking.clientName} with ${booking.staffName}`}
+            startsAt={booking.startsAt}
+            endsAt={booking.endsAt}
+            labels={{
+              addToCalendar: copy.addToCalendar,
+              downloadIcs: copy.downloadIcs,
+              googleCalendar: copy.googleCalendar,
+            }}
+          />
 
           <div className="mb-6 space-y-3 rounded-xl bg-gray-50 p-4 text-left text-sm">
             {details.map((d) => (

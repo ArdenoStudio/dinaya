@@ -1,5 +1,6 @@
 import Image from "next/image";
 import BookingWizard from "@/components/booking/BookingWizard";
+import BookingMobileTrustStrip from "@/components/booking/BookingMobileTrustStrip";
 import BookingServiceHub from "@/components/booking/BookingServiceHub";
 import { BookingTheme } from "@/components/booking/BookingTheme";
 import { getBookingCopy } from "@/lib/i18n";
@@ -165,7 +166,15 @@ export default function BookingPageContent({ data, dealId, mode, serviceSlug }: 
           )}
 
           {showWizard && (
-            <BookingWizard
+            <>
+              <BookingMobileTrustStrip
+                description={business.description}
+                avgRating={avgRating}
+                reviewCount={reviewCount}
+                cancellationPolicy={business.cancellationPolicy}
+                securedLabel={copy.securedByPayHere}
+              />
+              <BookingWizard
               business={{
                 id: business.id,
                 accentColor: business.accentColor,
@@ -194,6 +203,7 @@ export default function BookingPageContent({ data, dealId, mode, serviceSlug }: 
               lockServiceSelection={mode === "service" && Boolean(serviceSlug)}
               embedMode={mode === "embed"}
             />
+            </>
           )}
 
           {!hideGallery && hasAboutSection && (

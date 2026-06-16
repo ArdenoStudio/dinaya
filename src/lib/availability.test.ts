@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { addDays, format } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
-import { getAvailableSlots } from "./availability";
+import { getAvailableSlots, isStaffClosedOnDate } from "./availability";
 
 const TZ = "Asia/Colombo";
 
@@ -106,5 +106,51 @@ describe("getAvailableSlots", () => {
     });
 
     expect(slots.length).toBeGreaterThan(0);
+  });
+});
+
+describe("isStaffClosedOnDate", () => {
+  it("returns true when the day is fully blocked", () => {
+    expect(
+      isStaffClosedOnDate({
+        date: "2026-06-02",
+        staffAvailability: [
+          { id: "1", staffId: "s1", dayOfWeek: 2, startTime: "09:00", endTime: "17:00" },
+        ],
+        overrides: [
+          {
+            id: "o1",
+            staffId: "s1",
+            date: "2026-06-02",
+            isBlocked: true,
+            startTime: null,
+            endTime: null,
+            reason: null,
+          },
+        ],
+      }),
+    ).toBe(true);
+  });
+
+  it("returns true when there is no recurring availability", () => {
+    expect(
+      isStaffClosedOnDate({
+        date: "2026-06-02",
+        staffAvailability: [],
+        overrides: [],
+      }),
+    ).toBe(true);
+  });
+
+  it("returns false when staff has recurring hours", () => {
+    expect(
+      isStaffClosedOnDate({
+        date: "2026-06-02",
+        staffAvailability: [
+          { id: "1", staffId: "s1", dayOfWeek: 2, startTime: "09:00", endTime: "17:00" },
+        ],
+        overrides: [],
+      }),
+    ).toBe(false);
   });
 });

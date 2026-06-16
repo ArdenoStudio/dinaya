@@ -3,7 +3,7 @@ import { db } from "@/db";
 import { availability, availabilityOverrides, bookings, businesses, staff, services } from "@/db/schema";
 import { getDealById } from "@/lib/deals/queries";
 import { eq, and, gte, lt, count } from "drizzle-orm";
-import { getAvailableSlots } from "@/lib/availability";
+import { getAvailableSlots, isStaffClosedOnDate } from "@/lib/availability";
 import { getActiveReservationsForStaff } from "@/lib/slot-reservations";
 import { withRateLimit } from "@/lib/rate-limit";
 import { parseISO, startOfDay, endOfDay } from "date-fns";
@@ -114,7 +114,17 @@ export async function GET(req: NextRequest) {
     capacityRow &&
     Number(capacityRow.value) >= service.dailyCapacity
   ) {
-    return NextResponse.json({ slots: [], capacityReached: true });
+    return NextResponse.json({ slots: [], capacityReached: true, closed: false });
+  }
+
+  const closed = isStaffClosedOnDate({
+    date,
+    staffAvailability,
+    overrides,
+  });
+
+  if (closed) {
+    return NextResponse.json({ slots: [], closed: true, capacityReached: false });
   }
 
   const blockedReservations = reservations.map((r) => ({
@@ -152,5 +162,7 @@ export async function GET(req: NextRequest) {
       endUtc: s.endUtc.toISOString(),
       label: s.label,
     })),
+    closed: false,
+    capacityReached: false,
   });
 }

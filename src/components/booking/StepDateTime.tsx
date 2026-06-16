@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { addDays, format, parseISO } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import { Icon } from "@/components/ui/Icon";
@@ -8,9 +8,9 @@ import type { Staff } from "@/db/schema";
 import { getBookingSessionToken } from "@/lib/booking-session";
 import type { BookingService } from "./BookingWizard";
 import type { BookingCopy } from "@/lib/i18n";
-import MonthCalendar from "./MonthCalendar";
+import MonthCalendar, { type MonthDayStatus } from "./MonthCalendar";
 import DateQuickStrip from "./DateQuickStrip";
-import TimeSlotGrid, { type SlotOption } from "./TimeSlotGrid";
+import TimeSlotGrid, { type SlotEmptyState, type SlotOption } from "./TimeSlotGrid";
 
 const COLOMBO_TZ = "Asia/Colombo";
 const POLL_MS = 60_000;
@@ -62,8 +62,11 @@ export default function StepDateTime({
   const [slots, setSlots] = useState<SlotOption[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [hasFetched, setHasFetched] = useState(false);
+  const [slotEmptyState, setSlotEmptyState] = useState<SlotEmptyState>("none");
   const [nextAvailable, setNextAvailable] = useState<NextSlot | null>(null);
   const [showMobileCalendar, setShowMobileCalendar] = useState(false);
+  const [monthDayStatus, setMonthDayStatus] = useState<Record<string, MonthDayStatus>>({});
+  const [calendarMonth, setCalendarMonth] = useState(() => format(today, "yyyy-MM"));
 
   const canLoad = Boolean(service && staff);
   const sessionToken = typeof window !== "undefined" ? getBookingSessionToken() : "";
@@ -83,9 +86,36 @@ export default function StepDateTime({
     const res = await fetch(`/api/availability?${query.toString()}`);
     const data = await res.json();
     setSlots(data.slots ?? []);
+    if (data.closed) {
+      setSlotEmptyState("closed");
+    } else if (data.capacityReached) {
+      setSlotEmptyState("capacity");
+    } else if ((data.slots ?? []).length === 0) {
+      setSlotEmptyState("full");
+    } else {
+      setSlotEmptyState("none");
+    }
     setLoadingSlots(false);
     setHasFetched(true);
   }
+
+  const loadMonthStatus = useCallback(
+    async (month: string) => {
+      if (!service || !staff) return;
+      const query = new URLSearchParams({
+        businessId,
+        staffId: staff.id,
+        serviceId: service.id,
+        month,
+      });
+      if (dealId) query.set("dealId", dealId);
+      if (sessionToken) query.set("sessionToken", sessionToken);
+      const res = await fetch(`/api/availability/month?${query.toString()}`);
+      const data = await res.json();
+      setMonthDayStatus((prev) => ({ ...prev, ...(data.days ?? {}) }));
+    },
+    [businessId, dealId, service, sessionToken, staff],
+  );
 
   useEffect(() => {
     if (!canLoad || !selectedDate) {
@@ -136,6 +166,18 @@ export default function StepDateTime({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [businessId, staff?.id, service?.id, canLoad]);
 
+  useEffect(() => {
+    if (!canLoad) {
+      setMonthDayStatus({});
+      return;
+    }
+    void loadMonthStatus(calendarMonth);
+  }, [calendarMonth, canLoad, loadMonthStatus]);
+
+  const handleMonthChange = useCallback((month: string) => {
+    setCalendarMonth(month);
+  }, []);
+
   const dateHeading = selectedDate
     ? format(parseISO(selectedDate + "T12:00:00"), "EEEE, d MMMM yyyy")
     : null;
@@ -176,7 +218,7 @@ export default function StepDateTime({
               {format(parseISO(nextAvailable.date + "T12:00:00"), "EEE d MMM")} · {nextAvailable.label}
             </span>
           </span>
-          <Icon name="lightning-fill" className="booking-text-accent" />
+          <Icon name="lightning-charge-fill" className="booking-text-accent" />
         </button>
       )}
 
@@ -198,6 +240,8 @@ export default function StepDateTime({
               selectedDate={selectedDate}
               minDate={today}
               maxDate={maxDate}
+              dayStatus={monthDayStatus}
+              onMonthChange={handleMonthChange}
               onSelect={onDateChange}
               size="comfortable"
             />
@@ -216,6 +260,8 @@ export default function StepDateTime({
               selectedDate={selectedDate}
               minDate={today}
               maxDate={maxDate}
+              dayStatus={monthDayStatus}
+              onMonthChange={handleMonthChange}
               onSelect={onDateChange}
               size="comfortable"
             />
@@ -254,6 +300,7 @@ export default function StepDateTime({
               copy={copy}
               onSelect={onSlotSelect}
               loading={loadingSlots}
+              emptyState={slotEmptyState}
             />
           )}
         </section>
