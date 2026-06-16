@@ -35,15 +35,15 @@ export default function DateQuickStrip({ selectedDate, minDate, maxDate, copy, o
             onClick={() => onSelect(dateStr)}
             className={`flex shrink-0 snap-start flex-col items-center rounded-xl border px-3.5 py-2.5 transition-all ${
               isSelected
-                ? "border-blue-600 bg-blue-600 text-white shadow-md shadow-blue-500/25"
+                ? "booking-border-accent booking-bg-accent text-white shadow-md booking-shadow-accent"
                 : "border-gray-200 bg-white text-gray-600"
             }`}
           >
-            <span className={`text-[10px] font-medium ${isSelected ? "text-blue-100" : "text-gray-400"}`}>
+            <span className={`text-[10px] font-medium ${isSelected ? "text-white/80" : "text-gray-400"}`}>
               {isToday(d) ? copy.today : format(d, "EEE")}
             </span>
             <span className="mt-0.5 text-base font-bold tabular-nums">{format(d, "d")}</span>
-            <span className={`text-[10px] ${isSelected ? "text-blue-100" : "text-gray-400"}`}>
+            <span className={`text-[10px] ${isSelected ? "text-white/80" : "text-gray-400"}`}>
               {format(d, "MMM")}
             </span>
           </button>

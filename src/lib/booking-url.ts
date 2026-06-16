@@ -28,6 +28,25 @@ export function buildPublicBookingUrl(input: PublicBookingUrlInput): string {
   return `${appUrl}/book/${input.slug}`;
 }
 
+export function buildServiceBookingPath(slug: string, serviceSlug: string): string {
+  return `/book/${slug}/${serviceSlug}`;
+}
+
+export function buildServiceBookingUrl(
+  input: PublicBookingUrlInput,
+  serviceSlug: string,
+): string {
+  const base = buildPublicBookingUrl(input).replace(/\/$/, "");
+  const path = buildServiceBookingPath(input.slug, serviceSlug);
+
+  if (base.includes("/book/")) {
+    return `${base.split("/book/")[0]}${path}`;
+  }
+
+  // Subdomain/custom domain: append path only
+  return `${base}${path}`;
+}
+
 export function buildPublicBookingUrlLabel(input: PublicBookingUrlInput): string {
   const url = buildPublicBookingUrl(input);
   try {

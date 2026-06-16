@@ -85,8 +85,8 @@ export default function TimeSlotGrid({
                   onClick={() => onSelect(slot)}
                   className={`w-full rounded-xl px-2 py-2.5 text-sm font-semibold tabular-nums transition-all ${
                     isSelected
-                      ? "bg-blue-600 text-white shadow-md shadow-blue-500/25 ring-2 ring-blue-600/20"
-                      : "border border-gray-200 bg-white text-gray-700 hover:border-blue-400 hover:bg-blue-50/50 hover:text-blue-700"
+                      ? "booking-bg-accent text-white shadow-md booking-shadow-accent ring-2 booking-ring-accent"
+                      : "border border-gray-200 bg-white text-gray-700 hover:booking-border-accent hover:booking-bg-accent-muted/50 hover:booking-text-accent"
                   }`}
                 >
                   {slot.label}

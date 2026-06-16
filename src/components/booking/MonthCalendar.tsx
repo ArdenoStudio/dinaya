@@ -134,12 +134,12 @@ export default function MonthCalendar({
                 !inMonth
                   ? "pointer-events-none opacity-0"
                   : isSelected
-                  ? "bg-blue-600 text-white shadow-md shadow-blue-500/30"
+                  ? "booking-bg-accent text-white shadow-md booking-shadow-accent"
                   : disabled
                   ? "cursor-not-allowed text-gray-300"
                   : showToday
-                  ? "font-semibold text-blue-600 ring-2 ring-blue-200"
-                  : "text-gray-700 hover:bg-blue-50"
+                  ? "font-semibold booking-text-accent ring-2 ring-[var(--booking-accent-soft)]"
+                  : "text-gray-700 hover:booking-bg-accent-muted"
               }`}
             >
               {format(day, "d")}

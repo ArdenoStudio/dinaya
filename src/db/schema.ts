@@ -137,6 +137,8 @@ export const businesses = pgTable("businesses", {
   payhereMerchantId: varchar("payhere_merchant_id", { length: 100 }),
   payhereMerchantSecret: text("payhere_merchant_secret"),
   hideDinayaBranding: boolean("hide_dinaya_branding").default(false).notNull(),
+  // Hex accent for public booking page theming (e.g. #2563eb). Pro+ customization.
+  accentColor: varchar("accent_color", { length: 7 }),
   directoryListed: boolean("directory_listed").default(false).notNull(),
   directoryCity: varchar("directory_city", { length: 80 }),
   directoryDistrict: varchar("directory_district", { length: 80 }),
@@ -286,6 +288,8 @@ export const services = pgTable("services", {
     onDelete: "set null",
   }),
   name: varchar("name", { length: 100 }).notNull(),
+  // URL slug for /book/{business}/{serviceSlug}
+  slug: varchar("slug", { length: 80 }),
   description: text("description"),
   durationMinutes: integer("duration_minutes").notNull(),
   priceLkr: integer("price_lkr").notNull().default(0),
@@ -455,6 +459,33 @@ export const dealSuggestions = pgTable("deal_suggestions", {
     table.status,
   ),
 }));
+
+// ─── Slot reservations (temporary holds during public booking) ────────────────
+
+export const slotReservations = pgTable(
+  "slot_reservations",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    businessId: uuid("business_id")
+      .notNull()
+      .references(() => businesses.id, { onDelete: "cascade" }),
+    staffId: uuid("staff_id")
+      .notNull()
+      .references(() => staff.id, { onDelete: "cascade" }),
+    serviceId: uuid("service_id")
+      .notNull()
+      .references(() => services.id, { onDelete: "cascade" }),
+    startsAt: timestamp("starts_at", { withTimezone: true }).notNull(),
+    endsAt: timestamp("ends_at", { withTimezone: true }).notNull(),
+    sessionToken: varchar("session_token", { length: 64 }).notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    expiresIdx: index("slot_reservations_expires_idx").on(table.expiresAt),
+    staffStartsIdx: index("slot_reservations_staff_starts_idx").on(table.staffId, table.startsAt),
+  }),
+);
 
 // ─── Bookings ─────────────────────────────────────────────────────────────────
 

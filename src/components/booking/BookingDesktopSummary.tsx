@@ -26,8 +26,8 @@ export default function BookingDesktopSummary({
     return (
       <div className="mt-6 rounded-xl border border-dashed border-gray-200 bg-gray-50/80 p-5">
         <div className="flex items-start gap-3">
-          <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-blue-50">
-            <Icon name="calendar2-week" className="text-lg text-blue-500" />
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-xl booking-bg-accent-muted">
+            <Icon name="calendar2-week" className="text-lg booking-text-accent" />
           </div>
           <div>
             <p className="text-sm font-medium text-gray-700">{copy.selectServiceHint}</p>
@@ -51,7 +51,7 @@ export default function BookingDesktopSummary({
       </p>
       <ul className="space-y-3 text-sm">
         <li className="flex items-start gap-3">
-          <Icon name="scissors" className="mt-0.5 text-blue-500" />
+          <Icon name="scissors" className="mt-0.5 booking-text-accent" />
           <div className="min-w-0 flex-1">
             <p className="font-semibold text-gray-900">{service.name}</p>
             <p className="text-xs text-gray-500">
@@ -62,13 +62,13 @@ export default function BookingDesktopSummary({
         </li>
         {staff && (
           <li className="flex items-center gap-3">
-            <Icon name="person" className="text-blue-500" />
+            <Icon name="person" className="booking-text-accent" />
             <span className="text-gray-700">{staff.name}</span>
           </li>
         )}
         {dateLabel && (
           <li className="flex items-center gap-3">
-            <Icon name="calendar3" className="text-blue-500" />
+            <Icon name="calendar3" className="booking-text-accent" />
             <span className="text-gray-700">{dateLabel}</span>
           </li>
         )}

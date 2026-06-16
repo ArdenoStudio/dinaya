@@ -47,7 +47,7 @@ export default function StaffPicker({
               onClick={() => onSelect(s)}
               className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
                 isSelected
-                  ? "border-blue-500 bg-blue-50 text-blue-700 ring-2 ring-blue-500/10"
+                  ? "booking-border-accent booking-bg-accent-muted booking-text-accent ring-2 booking-ring-accent"
                   : "border-gray-200 bg-white text-gray-600 hover:border-blue-300"
               }`}
             >
@@ -61,7 +61,7 @@ export default function StaffPicker({
                   unoptimized={!isOptimizableRemoteImage(s.avatarUrl)}
                 />
               ) : (
-                <span className="flex size-5 items-center justify-center rounded-full bg-blue-100 text-[10px] font-bold text-blue-600">
+                <span className="flex size-5 items-center justify-center rounded-full bg-blue-100 text-[10px] font-bold booking-text-accent">
                   {s.name.charAt(0)}
                 </span>
               )}

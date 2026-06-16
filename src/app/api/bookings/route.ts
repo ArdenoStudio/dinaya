@@ -19,6 +19,10 @@ import { decryptSecret } from "@/lib/secrets";
 import { resolveBookingLocationId } from "@/lib/locations";
 import { isRequestedSlotAvailable } from "@/lib/booking-availability";
 import {
+  isSlotBlockedByReservation,
+  releaseSlotReservation,
+} from "@/lib/slot-reservations";
+import {
   resolveBookingSource,
   resolveClientSource,
   type BookingAttribution,
@@ -51,6 +55,7 @@ const bookingSchema = z.object({
   notes: z.string().trim().max(2000).optional().nullable(),
   intakeAnswers: intakeAnswersInputSchema.optional().nullable(),
   dealId: z.uuid().optional().nullable(),
+  sessionToken: z.string().min(16).max(64).optional().nullable(),
   source: z.enum(["public", "manual", "api", "import", "voice_agent", "deals"]).optional(),
   attribution: z.object({
     utmSource: z.string().trim().max(80).optional().nullable(),
@@ -108,6 +113,7 @@ export async function POST(req: NextRequest) {
     dealId: requestedDealId,
     source: requestedSource = "public",
     attribution: requestedAttribution,
+    sessionToken,
   } = parsed.data;
   const session = await auth();
 
@@ -345,6 +351,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const blockedByHold = await isSlotBlockedByReservation(staffId, start, end, sessionToken ?? undefined);
+    if (blockedByHold) {
+      return NextResponse.json(
+        { error: "This slot was just taken. Please pick another time." },
+        { status: 409 },
+      );
+    }
+
     // Intake questions are a Pro+ feature; only enforce/store answers when the
     // business is entitled. Owner/API bookings skip required-question enforcement.
     const intakePlan = await getBusinessPlan(businessId);
@@ -466,6 +480,10 @@ export async function POST(req: NextRequest) {
 
   if (!booking) {
     return NextResponse.json({ error: "Could not create booking." }, { status: 500 });
+  }
+
+  if (sessionToken) {
+    await releaseSlotReservation(sessionToken);
   }
 
   if (validatedDealId) {

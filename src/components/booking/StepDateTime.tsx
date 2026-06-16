@@ -5,6 +5,7 @@ import { addDays, format, parseISO } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import { Icon } from "@/components/ui/Icon";
 import type { Staff } from "@/db/schema";
+import { getBookingSessionToken } from "@/lib/booking-session";
 import type { BookingService } from "./BookingWizard";
 import type { BookingCopy } from "@/lib/i18n";
 import MonthCalendar from "./MonthCalendar";
@@ -12,6 +13,14 @@ import DateQuickStrip from "./DateQuickStrip";
 import TimeSlotGrid, { type SlotOption } from "./TimeSlotGrid";
 
 const COLOMBO_TZ = "Asia/Colombo";
+const POLL_MS = 60_000;
+
+type NextSlot = {
+  date: string;
+  startUtc: string;
+  endUtc: string;
+  label: string;
+};
 
 interface Props {
   businessId: string;
@@ -21,6 +30,8 @@ interface Props {
   selectedDate: string;
   selectedSlot: SlotOption | null;
   dealId?: string | null;
+  holdLabel?: string | null;
+  slotUnavailable?: boolean;
   onDateChange: (date: string) => void;
   onSlotSelect: (slot: SlotOption) => void;
   showContinue?: boolean;
@@ -36,6 +47,8 @@ export default function StepDateTime({
   selectedDate,
   selectedSlot,
   dealId,
+  holdLabel,
+  slotUnavailable,
   onDateChange,
   onSlotSelect,
   showContinue,
@@ -49,8 +62,30 @@ export default function StepDateTime({
   const [slots, setSlots] = useState<SlotOption[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [hasFetched, setHasFetched] = useState(false);
+  const [nextAvailable, setNextAvailable] = useState<NextSlot | null>(null);
+  const [showMobileCalendar, setShowMobileCalendar] = useState(false);
 
   const canLoad = Boolean(service && staff);
+  const sessionToken = typeof window !== "undefined" ? getBookingSessionToken() : "";
+
+  async function loadSlots(date: string) {
+    if (!service || !staff) return;
+    setLoadingSlots(true);
+    setHasFetched(false);
+    const query = new URLSearchParams({
+      businessId,
+      staffId: staff.id,
+      serviceId: service.id,
+      date,
+    });
+    if (dealId) query.set("dealId", dealId);
+    if (sessionToken) query.set("sessionToken", sessionToken);
+    const res = await fetch(`/api/availability?${query.toString()}`);
+    const data = await res.json();
+    setSlots(data.slots ?? []);
+    setLoadingSlots(false);
+    setHasFetched(true);
+  }
 
   useEffect(() => {
     if (!canLoad || !selectedDate) {
@@ -60,29 +95,46 @@ export default function StepDateTime({
     }
 
     let cancelled = false;
-    async function load() {
-      setLoadingSlots(true);
-      setHasFetched(false);
+    (async () => {
+      await loadSlots(selectedDate);
+      if (cancelled) return;
+    })();
+
+    const interval = setInterval(() => {
+      if (!cancelled) void loadSlots(selectedDate);
+    }, POLL_MS);
+
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [businessId, staff?.id, service?.id, selectedDate, canLoad, dealId]);
+
+  useEffect(() => {
+    if (!canLoad) {
+      setNextAvailable(null);
+      return;
+    }
+
+    let cancelled = false;
+    (async () => {
       const query = new URLSearchParams({
         businessId,
         staffId: staff!.id,
         serviceId: service!.id,
-        date: selectedDate,
       });
-      if (dealId) query.set("dealId", dealId);
-      const res = await fetch(`/api/availability?${query.toString()}`);
+      if (sessionToken) query.set("sessionToken", sessionToken);
+      const res = await fetch(`/api/availability/next?${query.toString()}`);
       const data = await res.json();
-      if (!cancelled) {
-        setSlots(data.slots ?? []);
-        setLoadingSlots(false);
-        setHasFetched(true);
-      }
-    }
-    load();
+      if (!cancelled) setNextAvailable(data.next ?? null);
+    })();
+
     return () => {
       cancelled = true;
     };
-  }, [businessId, staff, service, selectedDate, canLoad, dealId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [businessId, staff?.id, service?.id, canLoad]);
 
   const dateHeading = selectedDate
     ? format(parseISO(selectedDate + "T12:00:00"), "EEEE, d MMMM yyyy")
@@ -105,17 +157,60 @@ export default function StepDateTime({
         {copy.pickDateTime}
       </p>
 
+      {nextAvailable && nextAvailable.date !== selectedDate && (
+        <button
+          type="button"
+          onClick={() => {
+            onDateChange(nextAvailable.date);
+            onSlotSelect({
+              startUtc: nextAvailable.startUtc,
+              endUtc: nextAvailable.endUtc,
+              label: nextAvailable.label,
+            });
+          }}
+          className="mb-4 flex w-full items-center justify-between rounded-xl border border-[var(--booking-accent-soft)] booking-bg-accent-muted px-4 py-3 text-left text-sm transition-colors hover:border-[var(--booking-accent)]"
+        >
+          <span>
+            <span className="font-semibold booking-text-accent">Next available</span>
+            <span className="ml-2 text-gray-600">
+              {format(parseISO(nextAvailable.date + "T12:00:00"), "EEE d MMM")} · {nextAvailable.label}
+            </span>
+          </span>
+          <Icon name="lightning-fill" className="booking-text-accent" />
+        </button>
+      )}
+
       <div className="flex min-w-0 flex-col gap-4 md:gap-5">
-        {/* Date selection — quick strip on mobile, full calendar on desktop */}
         <section className="min-w-0 rounded-xl border border-gray-100 bg-white p-4 md:p-5">
-          <p className="mb-3 text-xs font-semibold text-gray-700">{copy.chooseDate}</p>
-          <DateQuickStrip
-            selectedDate={selectedDate}
-            minDate={today}
-            maxDate={maxDate}
-            copy={copy}
-            onSelect={onDateChange}
-          />
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <p className="text-xs font-semibold text-gray-700">{copy.chooseDate}</p>
+            <button
+              type="button"
+              onClick={() => setShowMobileCalendar((v) => !v)}
+              className="text-xs font-medium booking-text-accent md:hidden"
+            >
+              {showMobileCalendar ? "Quick dates" : "Full calendar"}
+            </button>
+          </div>
+
+          {showMobileCalendar ? (
+            <MonthCalendar
+              selectedDate={selectedDate}
+              minDate={today}
+              maxDate={maxDate}
+              onSelect={onDateChange}
+              size="comfortable"
+            />
+          ) : (
+            <DateQuickStrip
+              selectedDate={selectedDate}
+              minDate={today}
+              maxDate={maxDate}
+              copy={copy}
+              onSelect={onDateChange}
+            />
+          )}
+
           <div className="mt-4 hidden min-w-0 md:block">
             <MonthCalendar
               selectedDate={selectedDate}
@@ -127,7 +222,6 @@ export default function StepDateTime({
           </div>
         </section>
 
-        {/* Time selection */}
         <section className="min-w-0 rounded-xl border border-gray-100 bg-white p-4 md:p-5">
           {dateHeading ? (
             <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2 border-b border-gray-100 pb-3">
@@ -136,6 +230,19 @@ export default function StepDateTime({
             </div>
           ) : (
             <p className="mb-3 text-xs text-gray-400">{copy.selectDate}</p>
+          )}
+
+          {holdLabel && (
+            <p className="mb-3 rounded-lg booking-bg-accent-muted px-3 py-2 text-xs font-medium booking-text-accent">
+              <Icon name="clock" className="mr-1.5" />
+              {holdLabel}
+            </p>
+          )}
+
+          {slotUnavailable && (
+            <div className="mb-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+              This slot was just taken. Please pick another time.
+            </div>
           )}
 
           {!hasFetched && !loadingSlots ? (
@@ -175,7 +282,7 @@ export default function StepDateTime({
             <button
               type="button"
               onClick={onContinue}
-              className="ml-auto rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-blue-500/25 transition-colors hover:bg-blue-700"
+              className="ml-auto rounded-xl booking-bg-accent booking-bg-accent-hover px-5 py-2.5 text-sm font-semibold text-white booking-shadow-accent"
             >
               {copy.continue}
             </button>

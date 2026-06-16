@@ -27,6 +27,7 @@ export default async function SettingsPage() {
       payhereMerchantId: businesses.payhereMerchantId,
       hasPayhereMerchantSecret: businesses.payhereMerchantSecret,
       hideDinayaBranding: businesses.hideDinayaBranding,
+      accentColor: businesses.accentColor,
       customDomain: businesses.customDomain,
       customDomainVerified: businesses.customDomainVerified,
       plan: businesses.plan,
