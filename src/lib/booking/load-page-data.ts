@@ -8,11 +8,14 @@ import { resolveActiveRouter } from "@/lib/booking-router";
 import { listActiveDealsForBusiness } from "@/lib/deals/queries";
 import { backfillServiceSlugsForBusiness } from "@/lib/slot-reservations";
 import { resolveServiceSlug } from "@/lib/service-slug";
+import { hasPublicColumn } from "@/lib/dashboard/db-compat";
 
 export type BookingPageData = NonNullable<Awaited<ReturnType<typeof loadBookingPageData>>>;
 
 export async function loadBookingPageData(slug: string, serviceSlug?: string) {
-  const [business] = await db
+  const includePaypal = await hasPublicColumn("businesses", "paypal_enabled");
+
+  const [businessRow] = await db
     .select({
       id: businesses.id,
       address: businesses.address,
@@ -34,7 +37,7 @@ export async function loadBookingPageData(slug: string, serviceSlug?: string) {
       plan: businesses.plan,
       planExpiresAt: businesses.planExpiresAt,
       payhereEnabled: businesses.payhereEnabled,
-      paypalEnabled: businesses.paypalEnabled,
+      ...(includePaypal ? { paypalEnabled: businesses.paypalEnabled } : {}),
       phone: businesses.phone,
       slug: businesses.slug,
       websiteUrl: businesses.websiteUrl,
@@ -46,6 +49,15 @@ export async function loadBookingPageData(slug: string, serviceSlug?: string) {
     .from(businesses)
     .where(eq(businesses.slug, slug))
     .limit(1);
+
+  const business = businessRow
+    ? {
+        ...businessRow,
+        paypalEnabled: includePaypal
+          ? Boolean((businessRow as { paypalEnabled?: boolean }).paypalEnabled)
+          : false,
+      }
+    : null;
 
   if (!business || business.deletedAt) notFound();
 

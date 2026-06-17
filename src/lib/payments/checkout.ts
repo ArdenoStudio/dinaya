@@ -3,6 +3,7 @@ import { payments } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { generateOrderId } from "@/lib/utils";
 import { decryptSecret } from "@/lib/secrets";
+import { hasPublicColumn } from "@/lib/dashboard/db-compat";
 import { createPayhereCheckout } from "@/lib/payments/providers/payhere";
 import { createPaypalCheckout } from "@/lib/payments/providers/paypal";
 import {
@@ -85,15 +86,25 @@ export async function startBookingCheckout(input: {
     }
 
     const orderId = generateOrderId();
-    await db.insert(payments).values({
-      bookingId: input.bookingId,
-      amountLkr: input.amountLkr,
-      provider: "payhere",
-      currency: "LKR",
-      providerOrderId: orderId,
-      payhereOrderId: orderId,
-      status: "pending",
-    });
+    const hasProviderColumns = await hasPublicColumn("payments", "provider");
+    await db.insert(payments).values(
+      hasProviderColumns
+        ? {
+            bookingId: input.bookingId,
+            amountLkr: input.amountLkr,
+            provider: "payhere",
+            currency: "LKR",
+            providerOrderId: orderId,
+            payhereOrderId: orderId,
+            status: "pending",
+          }
+        : {
+            bookingId: input.bookingId,
+            amountLkr: input.amountLkr,
+            payhereOrderId: orderId,
+            status: "pending",
+          },
+    );
 
     const checkout = createPayhereCheckout({
       ...checkoutContext,
@@ -108,6 +119,11 @@ export async function startBookingCheckout(input: {
       payhereFormData: checkout.payhereFormData,
       payhereUrl: checkout.payhereUrl,
     };
+  }
+
+  const hasProviderColumns = await hasPublicColumn("payments", "provider");
+  if (!hasProviderColumns) {
+    throw new Error("PayPal checkout requires a database migration. PayHere is available.");
   }
 
   const clientId = input.business.paypalClientId;

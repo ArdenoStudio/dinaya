@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { db } from "@/db";
-import { bookings, businesses, services, staff, clients, staffServices, staffLocations } from "@/db/schema";
+import { bookings, services, staff, clients, staffServices, staffLocations } from "@/db/schema";
 import { eq, and, lt, gt, gte, inArray, count } from "drizzle-orm";
 import { sendBookingNotificationToBusiness } from "@/lib/resend";
 import { sendBookingConfirmationMessage, sendBookingNotificationToBusinessMessage } from "@/lib/messaging/booking-messages";
@@ -14,6 +14,7 @@ import { processBookingAutomationTrigger } from "@/lib/automations/engine";
 import { logRejectedSettled, runAfterResponse } from "@/lib/after-response";
 import { normalizeSriLankanPhone } from "@/lib/phone";
 import { decryptSecret } from "@/lib/secrets";
+import { getBusinessPaymentSettings } from "@/lib/payments/business-query";
 import { resolveBookingLocationId } from "@/lib/locations";
 import { isRequestedSlotAvailable } from "@/lib/booking-availability";
 import {
@@ -244,28 +245,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Booking end time must be after start time." }, { status: 400 });
   }
 
-  const [business] = await db
-    .select({
-      id: businesses.id,
-      email: businesses.email,
-      phone: businesses.phone,
-      name: businesses.name,
-      bankTransferInstructions: businesses.bankTransferInstructions,
-      lankaqrImageUrl: businesses.lankaqrImageUrl,
-      payhereEnabled: businesses.payhereEnabled,
-      payhereMerchantId: businesses.payhereMerchantId,
-      payhereMerchantSecret: businesses.payhereMerchantSecret,
-      slug: businesses.slug,
-      plan: businesses.plan,
-      language: businesses.language,
-      timezone: businesses.timezone,
-      paypalEnabled: businesses.paypalEnabled,
-      paypalClientId: businesses.paypalClientId,
-      paypalClientSecret: businesses.paypalClientSecret,
-    })
-    .from(businesses)
-    .where(eq(businesses.id, businessId))
-    .limit(1);
+  const business = await getBusinessPaymentSettings(businessId);
 
   if (!business) {
     return NextResponse.json({ error: "Business not found." }, { status: 404 });
@@ -460,7 +440,7 @@ export async function POST(req: NextRequest) {
       afterBuffer: service.afterBuffer,
       minimumNoticeHours: service.minimumNoticeHours,
       maximumAdvanceDays: service.maximumAdvanceDays ?? undefined,
-      timezone: business.timezone,
+      timezone: business.timezone ?? undefined,
       businessId,
       locationId: resolvedLocationId,
     });

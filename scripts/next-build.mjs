@@ -6,9 +6,24 @@ process.env.VERCEL_PREVIEW_COMMENTS_ENABLED = "0";
 const require = createRequire(import.meta.url);
 const nextCli = require.resolve("next/dist/bin/next");
 
-const result = spawnSync(process.execPath, [nextCli, "build"], {
-  env: process.env,
-  stdio: "inherit",
-});
+function runStep(label, command, args) {
+  console.log(`[build] ${label}...`);
+  const result = spawnSync(command, args, {
+    env: process.env,
+    stdio: "inherit",
+    shell: process.platform === "win32",
+  });
 
-process.exit(result.status ?? 1);
+  if (result.status !== 0) {
+    console.error(`[build] ${label} failed`);
+    process.exit(result.status ?? 1);
+  }
+}
+
+if (process.env.DATABASE_URL) {
+  runStep("Applying database migrations", "npm", ["run", "db:migrate"]);
+} else {
+  console.log("[build] DATABASE_URL not set — skipping db:migrate");
+}
+
+runStep("Building Next.js app", process.execPath, [nextCli, "build"]);
