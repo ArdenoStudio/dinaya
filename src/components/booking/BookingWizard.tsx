@@ -58,6 +58,7 @@ export type BookingBusiness = {
   lankaqrImageUrl?: string | null;
   name: string;
   payhereEnabled?: boolean;
+  paypalEnabled?: boolean;
   slug: string;
   logoUrl?: string | null;
   hideBranding?: boolean;
@@ -189,10 +190,12 @@ function BookingWizardInner({
       manualPayment?: boolean;
       payhereFormData?: Record<string, string>;
       payhereUrl?: string;
+      approvalUrl?: string;
+      provider?: string;
       status?: string;
     }) => {
       void slotHold.releaseHold();
-      if (data.payhereUrl) {
+      if (data.payhereUrl || data.approvalUrl || data.provider === "paypal" || data.provider === "payhere") {
         router.push(`/book/${business.slug}/pay?bookingId=${data.bookingId}`);
         return;
       }

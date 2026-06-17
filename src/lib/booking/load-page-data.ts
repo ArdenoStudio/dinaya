@@ -34,6 +34,7 @@ export async function loadBookingPageData(slug: string, serviceSlug?: string) {
       plan: businesses.plan,
       planExpiresAt: businesses.planExpiresAt,
       payhereEnabled: businesses.payhereEnabled,
+      paypalEnabled: businesses.paypalEnabled,
       phone: businesses.phone,
       slug: businesses.slug,
       websiteUrl: businesses.websiteUrl,

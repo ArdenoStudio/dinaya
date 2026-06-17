@@ -4,13 +4,13 @@ import { db } from "@/db";
 import { businesses } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { getBookingCopy } from "@/lib/i18n";
-import PaymentRedirect from "./PaymentRedirect";
+import PayPalReturnHandler from "./PayPalReturnHandler";
 
 interface Props {
   params: Promise<{ slug: string }>;
 }
 
-export default async function BookingPayPage({ params }: Props) {
+export default async function BookingPayReturnPage({ params }: Props) {
   const { slug } = await params;
 
   const [business] = await db
@@ -34,14 +34,7 @@ export default async function BookingPayPage({ params }: Props) {
             </div>
           }
         >
-          <PaymentRedirect
-            slug={slug}
-            copy={{
-              redirectingToPayment: copy.redirectingToPayment,
-              payNow: copy.payNow,
-              paymentRedirectHint: copy.paymentRedirectHint,
-            }}
-          />
+          <PayPalReturnHandler slug={slug} copy={{ redirectingToPayment: copy.redirectingToPayment }} />
         </Suspense>
       </div>
     </div>

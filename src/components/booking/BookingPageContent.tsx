@@ -192,6 +192,7 @@ export default function BookingPageContent({ data, dealId, mode, serviceSlug, hi
                 lankaqrImageUrl: business.lankaqrImageUrl,
                 name: business.name,
                 payhereEnabled: business.payhereEnabled,
+                paypalEnabled: business.paypalEnabled,
                 slug: business.slug,
                 logoUrl: business.logoUrl,
                 hideBranding,

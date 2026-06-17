@@ -113,7 +113,14 @@ export async function POST(req: NextRequest) {
 
     const [claimedPayment] = await db
       .update(payments)
-      .set({ status: "success", payherePayload: allFields })
+      .set({
+        status: "success",
+        payherePayload: allFields,
+        provider: "payhere",
+        currency: "LKR",
+        providerOrderId: orderId,
+        providerPayload: allFields,
+      })
       .where(and(eq(payments.id, payment.id), eq(payments.status, "pending")))
       .returning({ id: payments.id });
 
