@@ -4,7 +4,7 @@ import { businesses, services, staff, staffServices, reviews } from "@/db/schema
 import { listActiveLocations, getStaffLocationMap, ensureBusinessHasDefaultLocation } from "@/lib/locations";
 import { eq, and, avg, count } from "drizzle-orm";
 import { canUseFeature, resolveEffectivePlan } from "@/lib/plan";
-import { resolveActiveRouter } from "@/lib/booking-router";
+import { resolveActiveRouter, type BookingRouter } from "@/lib/booking-router";
 import { listActiveDealsForBusiness } from "@/lib/deals/queries";
 import { backfillServiceSlugsForBusiness } from "@/lib/slot-reservations";
 import { resolveServiceSlug } from "@/lib/service-slug";
@@ -13,7 +13,14 @@ import { hasPublicColumn } from "@/lib/dashboard/db-compat";
 export type BookingPageData = NonNullable<Awaited<ReturnType<typeof loadBookingPageData>>>;
 
 export async function loadBookingPageData(slug: string, serviceSlug?: string) {
-  const includePaypal = await hasPublicColumn("businesses", "paypal_enabled");
+  const [includePaypal, includeAccentColor, includeBookingRouter, includeServiceSlug, includeServiceImage] =
+    await Promise.all([
+      hasPublicColumn("businesses", "paypal_enabled"),
+      hasPublicColumn("businesses", "accent_color"),
+      hasPublicColumn("businesses", "booking_router"),
+      hasPublicColumn("services", "slug"),
+      hasPublicColumn("services", "image_url"),
+    ]);
 
   const [businessRow] = await db
     .select({
@@ -33,7 +40,7 @@ export async function loadBookingPageData(slug: string, serviceSlug?: string) {
       lankaqrImageUrl: businesses.lankaqrImageUrl,
       logoUrl: businesses.logoUrl,
       name: businesses.name,
-      bookingRouter: businesses.bookingRouter,
+      ...(includeBookingRouter ? { bookingRouter: businesses.bookingRouter } : {}),
       plan: businesses.plan,
       planExpiresAt: businesses.planExpiresAt,
       payhereEnabled: businesses.payhereEnabled,
@@ -42,7 +49,7 @@ export async function loadBookingPageData(slug: string, serviceSlug?: string) {
       slug: businesses.slug,
       websiteUrl: businesses.websiteUrl,
       hideDinayaBranding: businesses.hideDinayaBranding,
-      accentColor: businesses.accentColor,
+      ...(includeAccentColor ? { accentColor: businesses.accentColor } : {}),
       customDomain: businesses.customDomain,
       customDomainVerified: businesses.customDomainVerified,
     })
@@ -53,6 +60,12 @@ export async function loadBookingPageData(slug: string, serviceSlug?: string) {
   const business = businessRow
     ? {
         ...businessRow,
+        bookingRouter: includeBookingRouter
+          ? (businessRow as { bookingRouter?: unknown }).bookingRouter ?? null
+          : null,
+        accentColor: includeAccentColor
+          ? (businessRow as { accentColor?: string | null }).accentColor ?? null
+          : null,
         paypalEnabled: includePaypal
           ? Boolean((businessRow as { paypalEnabled?: boolean }).paypalEnabled)
           : false,
@@ -86,8 +99,8 @@ export async function loadBookingPageData(slug: string, serviceSlug?: string) {
           id: services.id,
           businessId: services.businessId,
           name: services.name,
-          slug: services.slug,
-          imageUrl: services.imageUrl,
+          ...(includeServiceSlug ? { slug: services.slug } : {}),
+          ...(includeServiceImage ? { imageUrl: services.imageUrl } : {}),
           description: services.description,
           durationMinutes: services.durationMinutes,
           priceLkr: services.priceLkr,
@@ -128,7 +141,12 @@ export async function loadBookingPageData(slug: string, serviceSlug?: string) {
 
   const servicesWithSlugs = serviceList.map((s) => ({
     ...s,
-    slug: resolveServiceSlug(s),
+    slug: resolveServiceSlug({
+      slug: includeServiceSlug ? (s as { slug?: string | null }).slug ?? null : null,
+      name: s.name,
+      id: s.id,
+    }),
+    imageUrl: includeServiceImage ? (s as { imageUrl?: string | null }).imageUrl ?? null : null,
     intakeQuestions: intakeEnabled ? s.intakeQuestions ?? [] : [],
   }));
 
@@ -139,7 +157,7 @@ export async function loadBookingPageData(slug: string, serviceSlug?: string) {
   if (serviceSlug && !initialService) notFound();
 
   const bookingRouter = intakeEnabled
-    ? resolveActiveRouter(business.bookingRouter, servicesWithSlugs.map((s) => s.id))
+    ? resolveActiveRouter(business.bookingRouter as BookingRouter | null, servicesWithSlugs.map((s) => s.id))
     : null;
 
   return {
