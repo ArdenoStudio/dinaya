@@ -311,6 +311,8 @@ export const services = pgTable("services", {
   maximumAdvanceDays: integer("maximum_advance_days"),
   // Per-service intake/booking questions (null/[] = none). Configured by Pro+ businesses.
   intakeQuestions: jsonb("intake_questions").$type<import("@/lib/intake").IntakeQuestion[]>(),
+  // Optional post-booking redirect (https URL or same-site path).
+  successRedirectUrl: text("success_redirect_url"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

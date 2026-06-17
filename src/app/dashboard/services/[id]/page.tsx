@@ -20,6 +20,7 @@ interface ServiceForm {
   dailyCapacity: string | number;
   maximumAdvanceDays: number;
   intakeQuestions: IntakeQuestion[];
+  successRedirectUrl: string;
 }
 
 interface StaffMember {
@@ -60,6 +61,7 @@ export default function EditServicePage({ params }: { params: Promise<{ id: stri
         dailyCapacity: d.dailyCapacity ?? "",
         maximumAdvanceDays: d.maximumAdvanceDays ?? 0,
         intakeQuestions: d.intakeQuestions ?? [],
+        successRedirectUrl: d.successRedirectUrl ?? "",
       });
       setAllStaff(Array.isArray(staffList) ? staffList : []);
       setAssignedStaffIds(
@@ -253,6 +255,19 @@ export default function EditServicePage({ params }: { params: Promise<{ id: stri
           value={form.intakeQuestions}
           onChange={(intakeQuestions) => setForm((f) => f && ({ ...f, intakeQuestions }))}
         />
+
+        <div>
+          <label className="text-sm font-medium">Success redirect URL</label>
+          <p className="text-xs text-muted-foreground mb-2">
+            Optional. Send clients here after booking (https:// URL or path like /thank-you).
+          </p>
+          <input
+            value={form.successRedirectUrl}
+            onChange={(e) => setForm((f) => f && ({ ...f, successRedirectUrl: e.target.value }))}
+            placeholder="https://example.com/thank-you or /thank-you"
+            className={inputCls}
+          />
+        </div>
 
         <div className="flex gap-4">
           <label className="flex items-center gap-2 cursor-pointer">

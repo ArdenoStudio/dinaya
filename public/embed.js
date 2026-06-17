@@ -16,14 +16,23 @@
     if (config.phone) url.searchParams.set("phone", config.phone);
     if (config.hideGallery) url.searchParams.set("hideGallery", "1");
     if (config.hideGallery === false) url.searchParams.set("hideGallery", "0");
+    if (config.embedAccent) url.searchParams.set("embedAccent", config.embedAccent);
     return url.toString();
   }
 
-  function attachResizeListener(iframe) {
+  function attachEmbedListener(iframe) {
     window.addEventListener("message", function (event) {
-      if (!event.data || event.data.type !== "dinaya:resize") return;
-      if (typeof event.data.height !== "number") return;
-      iframe.style.height = Math.max(480, event.data.height) + "px";
+      if (!event.data || typeof event.data.type !== "string") return;
+      if (event.data.type === "dinaya:resize") {
+        if (typeof event.data.height !== "number") return;
+        iframe.style.height = Math.max(480, event.data.height) + "px";
+        return;
+      }
+      if (event.data.type.indexOf("dinaya:") === 0) {
+        document.dispatchEvent(
+          new CustomEvent("dinaya-embed", { detail: event.data })
+        );
+      }
     });
   }
 
@@ -45,7 +54,7 @@
       iframe.src = buildEmbedUrl(opts.slug, opts.config || {});
       iframe.title = "Book appointment";
       iframe.style.cssText = "width:100%;height:" + (opts.height || 720) + "px;border:0;border-radius:16px";
-      attachResizeListener(iframe);
+      attachEmbedListener(iframe);
       iframe.onload = function () {
         el.innerHTML = "";
         el.appendChild(iframe);
@@ -61,7 +70,7 @@
       iframe.src = buildEmbedUrl(opts.slug, opts.config || {});
       iframe.title = "Book appointment";
       iframe.style.cssText = "width:100%;height:min(82vh,760px);border:0;display:block";
-      attachResizeListener(iframe);
+      attachEmbedListener(iframe);
       panel.appendChild(iframe);
       overlay.appendChild(panel);
       overlay.addEventListener("click", function (e) {

@@ -15,6 +15,16 @@ export const serviceCreateSchema = z.object({
   dailyCapacity: z.coerce.number().int().min(1).max(1000).optional().nullable(),
   maximumAdvanceDays: z.coerce.number().int().min(1).max(365).optional().nullable(),
   intakeQuestions: intakeQuestionsSchema.optional().nullable(),
+  successRedirectUrl: z
+    .string()
+    .trim()
+    .max(2000)
+    .refine(
+      (value) => !value || /^https:\/\/[^\s/$.?#].[^\s]*$/i.test(value) || /^\/[a-zA-Z0-9/_\-?=&%.]*$/.test(value),
+      { message: "Enter an https:// URL or a same-site path starting with /." },
+    )
+    .optional()
+    .nullable(),
 });
 
 export const serviceUpdateSchema = z
@@ -34,6 +44,16 @@ export const serviceUpdateSchema = z
     dailyCapacity: z.coerce.number().int().min(1).max(1000).optional().nullable(),
     maximumAdvanceDays: z.coerce.number().int().min(1).max(365).optional().nullable(),
     intakeQuestions: intakeQuestionsSchema.optional().nullable(),
+    successRedirectUrl: z
+      .string()
+      .trim()
+      .max(2000)
+      .refine(
+        (value) => !value || /^https:\/\/[^\s/$.?#].[^\s]*$/i.test(value) || /^\/[a-zA-Z0-9/_\-?=&%.]*$/.test(value),
+        { message: "Enter an https:// URL or a same-site path starting with /." },
+      )
+      .optional()
+      .nullable(),
   })
   .refine((value) => Object.keys(value).length > 0, {
     message: "At least one field is required.",

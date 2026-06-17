@@ -98,7 +98,7 @@ export default function BookingPageContent({ data, dealId, mode, serviceSlug, hi
   return (
     <BookingTheme accentColor={business.accentColor} embed={mode === "embed"}>
       <div className="booking-page-bg min-h-dvh bg-[#f2f2f7] md:bg-[#f7f7f8]" data-booking-embed-root={mode === "embed" ? "" : undefined}>
-        {mode === "embed" ? <EmbedResizeReporter /> : null}
+        {mode === "embed" ? <EmbedResizeReporter slug={business.slug} /> : null}
         {mode !== "embed" ? <BookingThemeToggle /> : null}
         <div className="mx-auto max-w-5xl px-0 md:px-8 md:py-6">
           {!hideSidebarSections && gallery.length > 0 && (

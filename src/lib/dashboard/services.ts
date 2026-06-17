@@ -33,6 +33,7 @@ export type ServiceDashboardUpdatedService = {
   name: string;
   priceLkr: number;
   requiresPayment: boolean;
+  successRedirectUrl: string | null;
 };
 
 export const dashboardServiceStatusFilters = ["all", "active", "inactive"] as const;
@@ -58,6 +59,7 @@ const serviceUpdateFields = [
   "dailyCapacity",
   "maximumAdvanceDays",
   "intakeQuestions",
+  "successRedirectUrl",
 ] as const;
 
 const DEFAULT_SERVICE_LIMIT = 200;
@@ -203,6 +205,7 @@ export async function getServiceDashboardDetail(businessId: string, serviceId: s
       name: services.name,
       priceLkr: services.priceLkr,
       requiresPayment: services.requiresPayment,
+      successRedirectUrl: services.successRedirectUrl,
     })
     .from(services)
     .where(and(eq(services.id, serviceId), eq(services.businessId, businessId)))
@@ -317,6 +320,7 @@ export async function updateServiceDashboardFields(
       name: services.name,
       priceLkr: services.priceLkr,
       requiresPayment: services.requiresPayment,
+      successRedirectUrl: services.successRedirectUrl,
     });
 
   if (!updated) return { status: "not_found", error: "Not found" };

@@ -26,6 +26,14 @@ import { BookingAttributionCapture } from "./BookingAttributionCapture";
 import { BookingDealsSection } from "./BookingDealsSection";
 import type { DealListItem } from "@/lib/deals/queries";
 import { computeDiscountedPrice } from "@/lib/deals/pricing";
+import {
+  indexToStep,
+  stepToIndex,
+  type BookingStep,
+} from "./booking-steps";
+import { useBookingContactStorage } from "./useBookingContactStorage";
+import BookingStepTransition from "./BookingStepTransition";
+import { applyEmbedThemeFromQuery, postEmbedEvent } from "./embed-events";
 
 const COLOMBO_TZ = "Asia/Colombo";
 
@@ -125,10 +133,12 @@ function BookingWizardInner({
   const { state: urlState } = useBookingUrlState();
   const needsLocationPicker = locations.length > 1;
   const progressSteps = [copy.service, copy.dateTime, copy.confirm];
-  const todayStr = format(toZonedTime(new Date(), timezone), "yyyy-MM-dd");
 
-  const [step, setStep] = useState(() => (initialService ? 1 : 0));
+  const initialStep: BookingStep = initialService ? "dateTime" : "service";
+  const [step, setStep] = useState<BookingStep>(initialStep);
+  const stepIndex = stepToIndex(step);
   const defaultLocation = locations.length === 1 ? locations[0]! : null;
+  const todayStr = format(toZonedTime(new Date(), timezone), "yyyy-MM-dd");
 
   const [state, setState] = useState<BookingState>(() => {
     const preselected = initialService ?? null;
@@ -179,6 +189,21 @@ function BookingWizardInner({
     enabled: !embedMode,
   });
 
+  useEffect(() => {
+    if (!embedMode) return;
+    applyEmbedThemeFromQuery();
+    postEmbedEvent({ type: "dinaya:ready", slug: business.slug });
+  }, [business.slug, embedMode]);
+
+  useEffect(() => {
+    if (!embedMode || !state.service) return;
+    postEmbedEvent({
+      type: "dinaya:booking_started",
+      slug: business.slug,
+      serviceId: state.service.id,
+    });
+  }, [business.slug, embedMode, state.service]);
+
   const selectedDeal = useMemo(
     () => activeDeals.find((deal) => deal.id === selectedDealId) ?? null,
     [activeDeals, selectedDealId],
@@ -199,9 +224,17 @@ function BookingWizardInner({
         router.push(`/book/${business.slug}/pay?bookingId=${data.bookingId}`);
         return;
       }
+      if (embedMode) {
+        postEmbedEvent({
+          type: "dinaya:booking_completed",
+          slug: business.slug,
+          bookingId: data.bookingId,
+          status: data.status,
+        });
+      }
       router.push(`/book/${business.slug}/confirmed?bookingId=${data.bookingId}`);
     },
-    [business.slug, router, slotHold],
+    [business.slug, router, slotHold, embedMode],
   );
 
   const needsStaffPicker = useMemo(() => {
@@ -212,6 +245,23 @@ function BookingWizardInner({
   function update(partial: Partial<BookingState>) {
     setState((s) => ({ ...s, ...partial }));
   }
+
+  const contactFields = useMemo(
+    () => ({
+      clientName: state.clientName,
+      clientPhone: state.clientPhone,
+      clientEmail: state.clientEmail,
+    }),
+    [state.clientName, state.clientPhone, state.clientEmail],
+  );
+
+  useBookingContactStorage(business.id, contactFields, (restored) => {
+    update({
+      clientName: restored.clientName ?? state.clientName,
+      clientPhone: restored.clientPhone ?? state.clientPhone,
+      clientEmail: restored.clientEmail ?? state.clientEmail,
+    });
+  });
 
   const selectSlot = useCallback(
     async (slot: SlotData) => {
@@ -253,7 +303,7 @@ function BookingWizardInner({
       void slotHold.releaseHold();
       setSelectedDealId(null);
       if (typeof window !== "undefined" && window.innerWidth < 768) {
-        setStep(1);
+        setStep("dateTime");
       }
     },
     [staff, staffServiceMap, staffLocationMap, state.location?.id, todayStr, slotHold],
@@ -286,7 +336,7 @@ function BookingWizardInner({
       setAnyStaff(false);
       void slotHold.releaseHold();
       if (typeof window !== "undefined" && window.innerWidth < 768) {
-        setStep(1);
+        setStep("dateTime");
       }
     },
     [locations, services, staff, staffServiceMap, staffLocationMap, state.location, todayStr, slotHold],
@@ -303,7 +353,7 @@ function BookingWizardInner({
     if (!state.staff) return;
     if (needsLocationPicker && !state.location) return;
     if (slotHold.slotUnavailable) return;
-    setStep(2);
+    setStep("confirm");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -314,7 +364,7 @@ function BookingWizardInner({
         state.staff &&
         (!needsLocationPicker || state.location),
     ) &&
-    step < 2 &&
+    step !== "confirm" &&
     !slotHold.slotUnavailable;
 
   const depositPreview = state.service
@@ -356,7 +406,7 @@ function BookingWizardInner({
             logoUrl={business.logoUrl}
             icon={businessIcon}
           />
-          <ProgressPills steps={progressSteps} current={step} />
+          <ProgressPills steps={progressSteps} current={stepIndex} />
         </div>
 
         <div className="hidden booking-bg-accent md:block">
@@ -388,15 +438,19 @@ function BookingWizardInner({
             <div className="mt-6 border-t border-white/10 pt-5">
               <DesktopProgressBar
                 steps={progressSteps}
-                current={step}
+                current={stepIndex}
                 variant="dark"
-                onStepClick={(i) => i < step && setStep(i)}
+                onStepClick={(i) => {
+                  const target = indexToStep(i);
+                  if (i < stepIndex) setStep(target);
+                }}
               />
             </div>
           </div>
         </div>
 
-        {step < 2 && (
+        <BookingStepTransition step={step}>
+        {step !== "confirm" && (
           <>
             <div className="md:px-8 md:py-7">
               <div className="grid gap-0 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] md:gap-8 lg:gap-10">
@@ -479,8 +533,11 @@ function BookingWizardInner({
                       copy={copy}
                       service={state.service}
                       staff={state.staff}
+                      anyStaff={anyStaff}
                       date={state.date}
                       timeLabel={state.timeLabel}
+                      holdLabel={slotHold.holdLabel}
+                      selectedDeal={selectedDeal}
                     />
                   </div>
                 </div>
@@ -505,9 +562,9 @@ function BookingWizardInner({
                       void slotHold.releaseHold();
                     }}
                     onSlotSelect={selectSlot}
-                    showContinue={step === 1}
+                    showContinue={step === "dateTime"}
                     onContinue={goConfirm}
-                    onBack={() => setStep(lockServiceSelection ? 1 : 0)}
+                    onBack={() => setStep(lockServiceSelection ? "dateTime" : "service")}
                   />
                 </div>
               </div>
@@ -534,7 +591,7 @@ function BookingWizardInner({
           </>
         )}
 
-        {step === 2 && (
+        {step === "confirm" && (
           <StepConfirm
             state={state}
             business={business}
@@ -542,10 +599,11 @@ function BookingWizardInner({
             selectedDeal={selectedDeal}
             sessionToken={slotHold.sessionToken}
             onUpdate={update}
-            onBack={() => setStep(1)}
+            onBack={() => setStep("dateTime")}
             onConfirmed={handleConfirmed}
           />
         )}
+        </BookingStepTransition>
 
         {showBranding && <BookingBranding copy={copy} hideBranding={business.hideBranding} />}
       </div>

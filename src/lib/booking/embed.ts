@@ -1,5 +1,18 @@
 import { getAppBaseUrl } from "@/lib/booking-url";
 
+/**
+ * Embed integration helpers.
+ *
+ * Host pages using `public/embed.js` receive postMessage events:
+ * - `dinaya:resize` `{ height: number }`
+ * - `dinaya:ready` `{ slug: string }`
+ * - `dinaya:booking_started` `{ slug: string, serviceId?: string }`
+ * - `dinaya:booking_completed` `{ slug: string, bookingId: string, status?: string }`
+ *
+ * Non-resize events are re-dispatched as `dinaya-embed` CustomEvents on `document`.
+ * Optional theming: pass `embedAccent` in embed config (e.g. `#2563eb`).
+ */
+
 export function buildEmbedIframeSnippet(slug: string, serviceSlug?: string): string {
   const base = getAppBaseUrl().replace(/\/$/, "");
   const params = new URLSearchParams({ embed: "1" });

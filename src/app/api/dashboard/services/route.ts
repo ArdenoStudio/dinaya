@@ -90,6 +90,7 @@ export async function POST(req: NextRequest) {
       dailyCapacity: data.dailyCapacity ?? null,
       maximumAdvanceDays: data.maximumAdvanceDays ?? null,
       intakeQuestions: data.intakeQuestions ?? null,
+      successRedirectUrl: data.successRedirectUrl ?? null,
     })
     .returning({ id: services.id });
 
