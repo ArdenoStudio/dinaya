@@ -15,6 +15,7 @@ import { processBookingAutomationTrigger } from "@/lib/automations/engine";
 import { releaseDealSlotForBooking } from "@/lib/deals/claim";
 import { sendPaymentReceiptEmail } from "@/lib/receipts";
 import { logRejectedSettled, runAfterResponse } from "@/lib/after-response";
+import { hasPublicColumn } from "@/lib/dashboard/db-compat";
 
 const WEBHOOK_REJECTED = NextResponse.json({ error: "Invalid webhook" }, { status: 400 });
 
@@ -111,16 +112,24 @@ export async function POST(req: NextRequest) {
       return WEBHOOK_REJECTED;
     }
 
+    const includePaymentProvider = await hasPublicColumn("payments", "provider");
     const [claimedPayment] = await db
       .update(payments)
-      .set({
-        status: "success",
-        payherePayload: allFields,
-        provider: "payhere",
-        currency: "LKR",
-        providerOrderId: orderId,
-        providerPayload: allFields,
-      })
+      .set(
+        includePaymentProvider
+          ? {
+              status: "success",
+              payherePayload: allFields,
+              provider: "payhere",
+              currency: "LKR",
+              providerOrderId: orderId,
+              providerPayload: allFields,
+            }
+          : {
+              status: "success",
+              payherePayload: allFields,
+            },
+      )
       .where(and(eq(payments.id, payment.id), eq(payments.status, "pending")))
       .returning({ id: payments.id });
 

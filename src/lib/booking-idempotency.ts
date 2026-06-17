@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { and, eq, gt, lt } from "drizzle-orm";
 import { db } from "@/db";
 import { bookingIdempotencyKeys } from "@/db/schema";
+import { hasPublicTable } from "@/lib/dashboard/db-compat";
 
 const IDEMPOTENCY_TTL_MS = 24 * 60 * 60 * 1000;
 
@@ -30,6 +31,7 @@ export function hashBookingIdempotencyPayload(payload: BookingIdempotencyPayload
 }
 
 export async function purgeExpiredBookingIdempotencyKeys(): Promise<void> {
+  if (!(await hasPublicTable("booking_idempotency_keys"))) return;
   await db
     .delete(bookingIdempotencyKeys)
     .where(lt(bookingIdempotencyKeys.expiresAt, new Date()));
@@ -40,6 +42,7 @@ export async function getBookingIdempotencyResponse(input: {
   idempotencyKey: string;
   requestHash: string;
 }): Promise<{ status: number; body: unknown } | null> {
+  if (!(await hasPublicTable("booking_idempotency_keys"))) return null;
   await purgeExpiredBookingIdempotencyKeys();
 
   const [row] = await db
@@ -74,6 +77,7 @@ export async function storeBookingIdempotencyResponse(input: {
   responseStatus: number;
   responseBody: unknown;
 }): Promise<void> {
+  if (!(await hasPublicTable("booking_idempotency_keys"))) return;
   const expiresAt = new Date(Date.now() + IDEMPOTENCY_TTL_MS);
 
   await db
