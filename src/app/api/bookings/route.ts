@@ -19,6 +19,12 @@ import { decryptSecret } from "@/lib/secrets";
 import { resolveBookingLocationId } from "@/lib/locations";
 import { isRequestedSlotAvailable } from "@/lib/booking-availability";
 import {
+  getBookingIdempotencyResponse,
+  hashBookingIdempotencyPayload,
+  resolveBookingIdempotencyKey,
+  storeBookingIdempotencyResponse,
+} from "@/lib/booking-idempotency";
+import {
   isSlotBlockedByReservation,
   releaseSlotReservation,
 } from "@/lib/slot-reservations";
@@ -70,6 +76,28 @@ function isOverlapConstraintError(error: unknown): boolean {
   if (!error || typeof error !== "object") return false;
   const maybe = error as { code?: string; cause?: { code?: string } };
   return maybe.code === "23P01" || maybe.cause?.code === "23P01";
+}
+
+async function finalizeBookingResponse(
+  input: {
+    idempotencyKey: string | null;
+    businessId: string;
+    requestHash: string | null;
+    body: unknown;
+    status?: number;
+  },
+) {
+  if (input.idempotencyKey && input.requestHash) {
+    await storeBookingIdempotencyResponse({
+      businessId: input.businessId,
+      idempotencyKey: input.idempotencyKey,
+      requestHash: input.requestHash,
+      responseStatus: input.status ?? 200,
+      responseBody: input.body,
+    });
+  }
+
+  return NextResponse.json(input.body, { status: input.status ?? 200 });
 }
 
 export async function POST(req: NextRequest) {
@@ -172,6 +200,40 @@ export async function POST(req: NextRequest) {
   if (!clientPhone) {
     return NextResponse.json({ error: "A valid phone number is required." }, { status: 400 });
   }
+
+  const idempotencyKey = !isOwnerBooking && !isApiBooking
+    ? resolveBookingIdempotencyKey(req.headers.get("Idempotency-Key"), sessionToken)
+    : null;
+
+  if (idempotencyKey) {
+    const requestHash = hashBookingIdempotencyPayload({
+      businessId,
+      serviceId,
+      staffId,
+      startsAt,
+      endsAt,
+      clientPhone,
+    });
+    const cached = await getBookingIdempotencyResponse({
+      businessId,
+      idempotencyKey,
+      requestHash,
+    });
+    if (cached) {
+      return NextResponse.json(cached.body, { status: cached.status });
+    }
+  }
+
+  const idempotencyRequestHash = idempotencyKey
+    ? hashBookingIdempotencyPayload({
+        businessId,
+        serviceId,
+        staffId,
+        startsAt,
+        endsAt,
+        clientPhone,
+      })
+    : null;
 
   if (end <= start) {
     return NextResponse.json({ error: "Booking end time must be after start time." }, { status: 400 });
@@ -343,6 +405,8 @@ export async function POST(req: NextRequest) {
       minimumNoticeHours: service.minimumNoticeHours,
       maximumAdvanceDays: service.maximumAdvanceDays ?? undefined,
       timezone: business.timezone,
+      businessId,
+      locationId: resolvedLocationId,
     });
     if (!slotAvailable) {
       return NextResponse.json(
@@ -588,10 +652,15 @@ export async function POST(req: NextRequest) {
       logRejectedSettled("booking notifications", results);
     });
 
-    return NextResponse.json({
-      bookingId: booking.id,
-      manualPayment: manualPaymentRequired,
-      status: initialStatus,
+    return finalizeBookingResponse({
+      idempotencyKey,
+      businessId,
+      requestHash: idempotencyRequestHash,
+      body: {
+        bookingId: booking.id,
+        manualPayment: manualPaymentRequired,
+        status: initialStatus,
+      },
     });
   }
 
@@ -636,9 +705,14 @@ export async function POST(req: NextRequest) {
     merchantSecret,
   });
 
-  return NextResponse.json({
-    bookingId: booking.id,
-    payhereFormData: formData,
-    payhereUrl: getPayhereUrl(),
+  return finalizeBookingResponse({
+    idempotencyKey,
+    businessId,
+    requestHash: idempotencyRequestHash,
+    body: {
+      bookingId: booking.id,
+      payhereFormData: formData,
+      payhereUrl: getPayhereUrl(),
+    },
   });
 }

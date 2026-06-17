@@ -488,6 +488,29 @@ export const slotReservations = pgTable(
   }),
 );
 
+export const bookingIdempotencyKeys = pgTable(
+  "booking_idempotency_keys",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    businessId: uuid("business_id")
+      .notNull()
+      .references(() => businesses.id, { onDelete: "cascade" }),
+    idempotencyKey: varchar("idempotency_key", { length: 180 }).notNull(),
+    requestHash: varchar("request_hash", { length: 64 }).notNull(),
+    responseStatus: integer("response_status").notNull(),
+    responseBody: jsonb("response_body").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  },
+  (table) => ({
+    businessKeyUnique: uniqueIndex("booking_idempotency_business_key_unique").on(
+      table.businessId,
+      table.idempotencyKey,
+    ),
+    expiresIdx: index("booking_idempotency_expires_idx").on(table.expiresAt),
+  }),
+);
+
 // ─── Bookings ─────────────────────────────────────────────────────────────────
 
 export const bookings = pgTable("bookings", {

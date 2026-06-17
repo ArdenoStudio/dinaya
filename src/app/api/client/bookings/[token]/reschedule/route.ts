@@ -7,6 +7,7 @@ import { z } from "@/lib/validation";
 const rescheduleSchema = z.object({
   startsAt: z.iso.datetime(),
   endsAt: z.iso.datetime(),
+  sessionToken: z.string().min(16).max(64).optional(),
 });
 
 export async function POST(
@@ -39,6 +40,7 @@ export async function POST(
     startsAt: new Date(parsed.data.startsAt),
     endsAt: new Date(parsed.data.endsAt),
     source: "client_portal",
+    sessionToken: parsed.data.sessionToken,
   });
 
   if (!result.ok) {

@@ -4,22 +4,23 @@ import { fromZonedTime, toZonedTime } from "date-fns-tz";
 import { db } from "@/db";
 import { availability, availabilityOverrides, bookings } from "@/db/schema";
 import { getAvailableSlots } from "@/lib/availability";
+import {
+  filterSlotsByBusinessHoliday,
+  getBusinessHolidayForDate,
+  isBusinessHolidayClosed,
+} from "@/lib/business-holidays";
 
 const DEFAULT_TIMEZONE = "Asia/Colombo";
 
 /**
  * Server-side check that a requested appointment start is genuinely an
  * available slot for the given staff member — inside working hours, not on a
- * blocked day, respecting the service's minimum notice, not in the past, and
- * not overlapping another active booking.
+ * blocked day, respecting business holidays, the service's minimum notice, not
+ * in the past, and not overlapping another active booking.
  *
  * Mirrors the slot logic used by the public availability endpoint
  * (`/api/availability`) so untrusted callers can't drive booking creation or
  * client reschedules outside the times the booking UI actually offers.
- *
- * Note: business-wide holidays (`business_holidays`) are intentionally not
- * considered here — they are not factored into slot generation anywhere in the
- * booking path today, so enforcing them is a separate change.
  */
 export async function isRequestedSlotAvailable(input: {
   staffId: string;
@@ -30,6 +31,8 @@ export async function isRequestedSlotAvailable(input: {
   minimumNoticeHours?: number;
   maximumAdvanceDays?: number;
   timezone?: string;
+  businessId?: string;
+  locationId?: string | null;
   /** Exclude this booking from overlap checks (used when rescheduling). */
   excludeBookingId?: string;
 }): Promise<boolean> {
@@ -39,7 +42,16 @@ export async function isRequestedSlotAvailable(input: {
   const dayStartUtc = fromZonedTime(startOfDay(localDate), timezone);
   const dayEndUtc = fromZonedTime(endOfDay(localDate), timezone);
 
-  const [staffAvailability, overrides, existingBookings] = await Promise.all([
+  const holidayPromise =
+    input.businessId
+      ? getBusinessHolidayForDate({
+          businessId: input.businessId,
+          date: dateStr,
+          locationId: input.locationId,
+        })
+      : Promise.resolve(null);
+
+  const [staffAvailability, overrides, existingBookings, holiday] = await Promise.all([
     db.select().from(availability).where(eq(availability.staffId, input.staffId)),
     db
       .select()
@@ -61,9 +73,14 @@ export async function isRequestedSlotAvailable(input: {
           ...(input.excludeBookingId ? [ne(bookings.id, input.excludeBookingId)] : []),
         ),
       ),
+    holidayPromise,
   ]);
 
-  const slots = getAvailableSlots({
+  if (isBusinessHolidayClosed(holiday)) {
+    return false;
+  }
+
+  let slots = getAvailableSlots({
     date: dateStr,
     durationMinutes: input.durationMinutes,
     beforeBuffer: input.beforeBuffer ?? 0,
@@ -75,6 +92,8 @@ export async function isRequestedSlotAvailable(input: {
     existingBookings,
     timezone,
   });
+
+  slots = filterSlotsByBusinessHoliday(slots, holiday, timezone);
 
   return slots.some((slot) => slot.startUtc.getTime() === input.start.getTime());
 }

@@ -12,6 +12,11 @@ import { getDealById } from "@/lib/deals/queries";
 import { eq, and, gte, lt, count, inArray } from "drizzle-orm";
 import { getAvailableSlots, isStaffClosedOnDate } from "@/lib/availability";
 import { getActiveReservationsForStaff } from "@/lib/slot-reservations";
+import {
+  filterSlotsByBusinessHoliday,
+  getBusinessHolidaysForDates,
+  isBusinessHolidayClosed,
+} from "@/lib/business-holidays";
 import { withRateLimit } from "@/lib/rate-limit";
 import {
   addDays,
@@ -40,6 +45,7 @@ export async function GET(req: NextRequest) {
   const staffId = searchParams.get("staffId");
   const serviceId = searchParams.get("serviceId");
   const businessId = searchParams.get("businessId");
+  const locationId = searchParams.get("locationId");
   const month = searchParams.get("month"); // "YYYY-MM"
   const dealId = searchParams.get("dealId");
   const sessionToken = searchParams.get("sessionToken");
@@ -120,9 +126,20 @@ export async function GET(req: NextRequest) {
   ]);
 
   const overridesByDate = new Map(monthOverrides.map((o) => [o.date, o]));
+  const holidaysByDate = await getBusinessHolidaysForDates({
+    businessId: service.businessId,
+    dates: dateStrings,
+    locationId,
+  });
   const days: Record<string, MonthDayStatus> = {};
 
   for (const date of dateStrings) {
+    const holiday = holidaysByDate.get(date) ?? null;
+    if (isBusinessHolidayClosed(holiday)) {
+      days[date] = "closed";
+      continue;
+    }
+
     const overrides = overridesByDate.has(date) ? [overridesByDate.get(date)!] : [];
 
     if (isStaffClosedOnDate({ date, staffAvailability, overrides })) {
@@ -192,6 +209,8 @@ export async function GET(req: NextRequest) {
         (slot) => slot.startUtc >= deal.apptWindowStart && slot.startUtc <= deal.apptWindowEnd,
       );
     }
+
+    slots = filterSlotsByBusinessHoliday(slots, holiday, timezone);
 
     days[date] = slots.length > 0 ? "available" : "full";
   }

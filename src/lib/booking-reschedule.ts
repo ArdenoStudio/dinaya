@@ -22,6 +22,11 @@ import { dispatchWebhooks } from "@/lib/webhooks";
 import type { Plan } from "@/lib/plan";
 import type { BookingLanguage } from "@/lib/i18n";
 import { processBookingAutomationTrigger } from "@/lib/automations/engine";
+import {
+  isSlotBlockedByReservation,
+  releaseSlotReservation,
+} from "@/lib/slot-reservations";
+import { runAfterResponse } from "@/lib/after-response";
 
 export type RescheduleResult =
   | { ok: true; booking: { id: string; startsAt: Date; endsAt: Date; status: string } }
@@ -151,6 +156,7 @@ export async function rescheduleBooking(input: {
   endsAt: Date;
   source: "client_portal" | "dashboard";
   actorUserId?: string;
+  sessionToken?: string;
 }): Promise<RescheduleResult> {
   const [row] = await db
     .select({
@@ -161,6 +167,7 @@ export async function rescheduleBooking(input: {
       clientPhone: bookings.clientPhone,
       clientEmail: bookings.clientEmail,
       staffId: bookings.staffId,
+      locationId: bookings.locationId,
       status: bookings.status,
       startsAt: bookings.startsAt,
       endsAt: bookings.endsAt,
@@ -226,10 +233,22 @@ export async function rescheduleBooking(input: {
       minimumNoticeHours: row.minimumNoticeHours,
       maximumAdvanceDays: row.maximumAdvanceDays ?? undefined,
       timezone: row.businessTimezone,
+      businessId: row.businessId,
+      locationId: row.locationId,
       excludeBookingId: row.id,
     });
     if (!slotAvailable) {
       return { ok: false, error: "That time isn't available. Please pick another slot.", status: 409 };
+    }
+
+    const blockedByHold = await isSlotBlockedByReservation(
+      row.staffId,
+      input.startsAt,
+      input.endsAt,
+      input.sessionToken,
+    );
+    if (blockedByHold) {
+      return { ok: false, error: "This slot was just taken. Please pick another time.", status: 409 };
     }
   }
 
@@ -257,7 +276,10 @@ export async function rescheduleBooking(input: {
         endsAt: input.endsAt,
         reminderSentAt: null,
       })
-      .where(eq(bookings.id, row.id))
+      .where(and(
+        eq(bookings.id, row.id),
+        inArray(bookings.status, ["pending", "confirmed"]),
+      ))
       .returning({
         id: bookings.id,
         startsAt: bookings.startsAt,
@@ -266,7 +288,11 @@ export async function rescheduleBooking(input: {
       });
 
     if (!updated) {
-      return { ok: false, error: "Could not update booking.", status: 500 };
+      return { ok: false, error: "This booking can no longer be changed.", status: 409 };
+    }
+
+    if (input.sessionToken) {
+      await releaseSlotReservation(input.sessionToken);
     }
 
     void logActivity({
@@ -294,23 +320,25 @@ export async function rescheduleBooking(input: {
       endsAt: updated.endsAt.toISOString(),
     });
 
-    await sendBookingRescheduleMessage({
-      businessId: row.businessId,
-      bookingId: row.id,
-      clientId: row.clientId,
-      clientName: row.clientName,
-      clientEmail: row.clientEmail,
-      clientPhone: row.clientPhone,
-      businessName: row.businessName,
-      serviceName: row.serviceName,
-      staffName: row.staffName,
-      startsAt: updated.startsAt,
-      manageUrl: buildClientBookingUrl({
+    runAfterResponse("booking reschedule message", async () => {
+      await sendBookingRescheduleMessage({
+        businessId: row.businessId,
         bookingId: row.id,
+        clientId: row.clientId,
+        clientName: row.clientName,
+        clientEmail: row.clientEmail,
         clientPhone: row.clientPhone,
-      }),
-      plan: row.businessPlan as Plan,
-      language: row.businessLanguage as BookingLanguage,
+        businessName: row.businessName,
+        serviceName: row.serviceName,
+        staffName: row.staffName,
+        startsAt: updated.startsAt,
+        manageUrl: buildClientBookingUrl({
+          bookingId: row.id,
+          clientPhone: row.clientPhone,
+        }),
+        plan: row.businessPlan as Plan,
+        language: row.businessLanguage as BookingLanguage,
+      });
     });
 
     void processBookingAutomationTrigger(row.businessId, row.id, "booking.rescheduled").catch((error) => {
