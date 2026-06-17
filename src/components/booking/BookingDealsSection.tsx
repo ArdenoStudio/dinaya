@@ -59,7 +59,7 @@ function BookingDealRow({
       type="button"
       onClick={() => onSelectDeal(selected ? null : deal)}
       className={`w-full rounded-lg border px-3 py-2 text-left text-sm transition-colors ${
-        selected ? "border-primary bg-white" : "border-transparent bg-white/70 hover:border-primary/30"
+        selected ? "border-primary bg-white dark:bg-neutral-900" : "border-transparent bg-white/70 dark:bg-neutral-900/70 hover:border-primary/30"
       }`}
     >
       <div className="flex items-center justify-between gap-2">

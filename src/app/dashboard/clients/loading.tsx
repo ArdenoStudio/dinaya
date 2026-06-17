@@ -13,7 +13,7 @@ export default function ClientsLoading() {
       </div>
 
       {/* Table */}
-      <div className="bg-white border rounded-xl overflow-hidden">
+      <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 overflow-hidden">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b bg-muted/30">

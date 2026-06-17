@@ -35,7 +35,7 @@ function UptimeUnavailable({
           Could not load uptime data or run platform checks.
         </p>
       </div>
-      <div className="rounded-xl border bg-white p-6 text-sm text-muted-foreground">
+      <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-6 text-sm text-muted-foreground">
         {uptimeError ? (
           <p className="mb-3">
             Last Upptime fetch failed
@@ -126,7 +126,7 @@ function PlatformHealthView({
       label: "Overall status",
       value: overallUp ? "All checks passing" : `${downCount + degradedCount} issue(s)`,
       sub: `${checks.length} live probes`,
-      accent: overallUp ? "bg-emerald-500" : "bg-rose-500",
+      accent: overallUp ? "bg-emerald-50 dark:bg-emerald-950/400" : "bg-rose-50 dark:bg-rose-950/400",
     },
     {
       label: "Checks up",
@@ -144,7 +144,7 @@ function PlatformHealthView({
       label: "Data source",
       value: "Live probes",
       sub: "Upptime history not configured",
-      accent: "bg-amber-500",
+      accent: "bg-amber-50 dark:bg-amber-950/400",
     },
   ];
 
@@ -156,8 +156,8 @@ function PlatformHealthView({
           <span
             className={
               overallUp
-                ? "inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-emerald-700"
-                : "inline-flex items-center gap-1 rounded-full bg-rose-500/10 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-rose-700"
+                ? "inline-flex items-center gap-1 rounded-full bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-emerald-700"
+                : "inline-flex items-center gap-1 rounded-full bg-rose-50 dark:bg-rose-950/30 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-rose-700"
             }
           >
             {overallUp ? (
@@ -178,7 +178,7 @@ function PlatformHealthView({
           <code className="rounded bg-muted px-1 text-xs">dinaya-uptime-monitor</code>.
         </p>
         {uptimeError ? (
-          <p className="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+          <p className="mt-2 rounded-lg border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-950/40 px-3 py-2 text-xs text-amber-900 dark:text-amber-200">
             Upptime history unavailable
             {uptimeError.status != null ? ` (${uptimeError.status})` : ""}: {uptimeError.message}
           </p>
@@ -187,7 +187,7 @@ function PlatformHealthView({
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {tiles.map((t) => (
-          <div key={t.label} className="overflow-hidden rounded-xl border bg-white">
+          <div key={t.label} className="overflow-hidden rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
             <div className={`h-[3px] ${t.accent}`} />
             <div className="p-5">
               <p className="text-xs text-muted-foreground">{t.label}</p>
@@ -198,7 +198,7 @@ function PlatformHealthView({
         ))}
       </div>
 
-      <div className="overflow-hidden rounded-xl border bg-white">
+      <div className="overflow-hidden rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
         <div className="border-b bg-muted/30 px-4 py-3">
           <h2 className="text-sm font-semibold">Platform services</h2>
         </div>
@@ -249,10 +249,10 @@ function StatusIcon({
     <span
       className={
         isUp
-          ? "flex size-8 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-600"
+          ? "flex size-8 shrink-0 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600"
           : isDown
-            ? "flex size-8 shrink-0 items-center justify-center rounded-full bg-rose-500/15 text-rose-600"
-            : "flex size-8 shrink-0 items-center justify-center rounded-full bg-amber-500/15 text-amber-600"
+            ? "flex size-8 shrink-0 items-center justify-center rounded-full bg-rose-50 dark:bg-rose-950/30 text-rose-600"
+            : "flex size-8 shrink-0 items-center justify-center rounded-full bg-amber-50 dark:bg-amber-950/30 text-amber-600"
       }
     >
       {isUp ? (
@@ -279,10 +279,10 @@ function StatusBadge({
     <span
       className={
         isUp
-          ? "rounded-full bg-emerald-500/10 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-emerald-700"
+          ? "rounded-full bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-emerald-700"
           : isDown
-            ? "rounded-full bg-rose-500/10 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-rose-700"
-            : "rounded-full bg-amber-500/10 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-amber-700"
+            ? "rounded-full bg-rose-50 dark:bg-rose-950/30 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-rose-700"
+            : "rounded-full bg-amber-50 dark:bg-amber-950/30 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-amber-700"
       }
     >
       {status}
@@ -343,7 +343,7 @@ function UptimeDashboard({ services }: { services: UptimeService[] }) {
       label: "Overall status",
       value: overallUp ? "All systems up" : `${downCount} down`,
       sub: `${services.length} services monitored`,
-      accent: overallUp ? "bg-emerald-500" : "bg-rose-500",
+      accent: overallUp ? "bg-emerald-50 dark:bg-emerald-950/400" : "bg-rose-50 dark:bg-rose-950/400",
     },
     {
       label: "Services up",
@@ -361,7 +361,7 @@ function UptimeDashboard({ services }: { services: UptimeService[] }) {
       label: "Avg uptime (30d)",
       value: `${avgUptimeMonth}%`,
       sub: "monthly average",
-      accent: "bg-amber-500",
+      accent: "bg-amber-50 dark:bg-amber-950/400",
     },
   ];
 
@@ -373,8 +373,8 @@ function UptimeDashboard({ services }: { services: UptimeService[] }) {
           <span
             className={
               overallUp
-                ? "inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-emerald-700"
-                : "inline-flex items-center gap-1 rounded-full bg-rose-500/10 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-rose-700"
+                ? "inline-flex items-center gap-1 rounded-full bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-emerald-700"
+                : "inline-flex items-center gap-1 rounded-full bg-rose-50 dark:bg-rose-950/30 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-rose-700"
             }
           >
             {overallUp ? (
@@ -397,7 +397,7 @@ function UptimeDashboard({ services }: { services: UptimeService[] }) {
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {tiles.map((t) => (
-          <div key={t.label} className="overflow-hidden rounded-xl border bg-white">
+          <div key={t.label} className="overflow-hidden rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
             <div className={`h-[3px] ${t.accent}`} />
             <div className="p-5">
               <p className="text-xs text-muted-foreground">{t.label}</p>
@@ -408,7 +408,7 @@ function UptimeDashboard({ services }: { services: UptimeService[] }) {
         ))}
       </div>
 
-      <div className="overflow-hidden rounded-xl border bg-white">
+      <div className="overflow-hidden rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
         <div className="border-b bg-muted/30 px-4 py-3">
           <h2 className="text-sm font-semibold">Services</h2>
         </div>
@@ -423,7 +423,7 @@ function UptimeDashboard({ services }: { services: UptimeService[] }) {
         </div>
       </div>
 
-      <div className="rounded-xl border bg-white p-5">
+      <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
         <h2 className="mb-4 flex items-center gap-2 font-semibold">
           <Gauge className="size-4 text-muted-foreground" aria-hidden="true" />
           Recent downtime
@@ -445,7 +445,7 @@ function UptimeDashboard({ services }: { services: UptimeService[] }) {
                     {format(new Date(i.date), "d MMM yyyy")}
                   </p>
                 </div>
-                <span className="rounded-full bg-rose-500/10 px-2 py-0.5 text-xs font-semibold text-rose-700">
+                <span className="rounded-full bg-rose-50 dark:bg-rose-950/30 px-2 py-0.5 text-xs font-semibold text-rose-700">
                   {i.minutesDown} min down
                 </span>
               </div>

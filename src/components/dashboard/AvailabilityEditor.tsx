@@ -162,7 +162,7 @@ export default function AvailabilityEditor({ staffList, dayNames }: Props) {
   return (
     <div className="space-y-6">
       {/* Staff picker */}
-      <div className="bg-white border rounded-xl p-6">
+      <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-6">
         <label className="text-sm font-medium">Team member</label>
         <select
           value={selectedStaffId}
@@ -174,7 +174,7 @@ export default function AvailabilityEditor({ staffList, dayNames }: Props) {
       </div>
 
       {/* Weekly schedule */}
-      <div className="bg-white border rounded-xl p-6">
+      <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-6">
         <h2 className="font-medium mb-4">Weekly schedule</h2>
         {loading ? (
           <p className="text-muted-foreground text-sm">Loading…</p>
@@ -237,7 +237,7 @@ export default function AvailabilityEditor({ staffList, dayNames }: Props) {
       </div>
 
       {/* Date overrides */}
-      <div className="bg-white border rounded-xl p-6">
+      <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-6">
         <h2 className="font-medium mb-1">Date overrides</h2>
         <p className="text-xs text-muted-foreground mb-4">Block a holiday or set custom hours for a specific date.</p>
 
@@ -316,7 +316,7 @@ export default function AvailabilityEditor({ staffList, dayNames }: Props) {
                 <div>
                   <span className="text-sm font-medium">{o.date}</span>
                   {o.isBlocked ? (
-                    <span className="ml-2 text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full">Day off</span>
+                    <span className="ml-2 text-xs bg-red-100 text-red-700 dark:text-red-300 px-2 py-0.5 rounded-full">Day off</span>
                   ) : (
                     <span className="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
                       {o.startTime?.slice(0, 5)} – {o.endTime?.slice(0, 5)}

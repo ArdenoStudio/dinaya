@@ -338,7 +338,7 @@ function BookingWizardInner({
 
   return (
     <BookingTheme accentColor={business.accentColor} embed={embedMode}>
-      <div className="min-w-0 md:overflow-hidden md:rounded-2xl md:border md:border-gray-100/80 md:bg-white md:shadow-[0_24px_64px_-12px_var(--booking-accent-shadow),0_8px_24px_-8px_rgba(0,0,0,0.08)]">
+      <div className="min-w-0 md:overflow-hidden md:rounded-2xl md:border md:border-gray-100 dark:border-neutral-800/80 md:bg-white dark:md:bg-neutral-900 md:shadow-[0_24px_64px_-12px_var(--booking-accent-shadow),0_8px_24px_-8px_rgba(0,0,0,0.08)]">
         <BookingAttributionCapture businessId={business.id} />
         <BookingDealsSection
           deals={activeDeals}
@@ -397,7 +397,7 @@ function BookingWizardInner({
           <>
             <div className="md:px-8 md:py-7">
               <div className="grid gap-0 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] md:gap-8 lg:gap-10">
-                <div className="border-b border-gray-100 p-[14px] md:flex md:flex-col md:border-0 md:p-0">
+                <div className="border-b border-gray-100 dark:border-neutral-800 p-[14px] md:flex md:flex-col md:border-0 md:p-0">
                   {needsLocationPicker && (
                     <StepLocation
                       locations={locations}
@@ -429,12 +429,12 @@ function BookingWizardInner({
                   )}
 
                   {lockServiceSelection && state.service && (
-                    <div className="mb-5 rounded-xl border border-gray-100 bg-gray-50/80 p-4">
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                    <div className="mb-5 rounded-xl border border-gray-100 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-900/60 p-4">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
                         {copy.service}
                       </p>
-                      <p className="mt-1 text-base font-semibold text-gray-900">{state.service.name}</p>
-                      <p className="mt-0.5 text-sm text-gray-500">
+                      <p className="mt-1 text-base font-semibold text-gray-900 dark:text-gray-100">{state.service.name}</p>
+                      <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">
                         {state.service.durationMinutes} min
                         {state.service.priceLkr > 0 ? ` · ${formatLkr(state.service.priceLkr)}` : ""}
                       </p>
@@ -482,7 +482,7 @@ function BookingWizardInner({
                   </div>
                 </div>
 
-                <div className="min-w-0 bg-[#f2f2f7] p-[14px] md:flex md:flex-col md:rounded-2xl md:border md:border-gray-100 md:bg-gray-50/40 md:p-5">
+                <div className="min-w-0 booking-panel-bg p-[14px] md:flex md:flex-col md:rounded-2xl md:border md:border-gray-100 dark:border-neutral-800 md:bg-gray-50 dark:md:bg-neutral-900/60 md:p-5">
                   <StepDateTime
                     businessId={business.id}
                     copy={copy}
@@ -510,14 +510,14 @@ function BookingWizardInner({
               </div>
             </div>
 
-            <div className="hidden border-t border-gray-100 bg-gray-50/30 px-8 py-5 md:flex md:items-center md:gap-6">
+            <div className="hidden border-t border-gray-100 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-900/60 px-8 py-5 md:flex md:items-center md:gap-6">
               <div className="min-w-0 flex-1">
                 {desktopSelectionLine ? (
-                  <p className="truncate text-sm font-medium text-gray-700">{desktopSelectionLine}</p>
+                  <p className="truncate text-sm font-medium text-gray-700 dark:text-gray-300">{desktopSelectionLine}</p>
                 ) : (
-                  <p className="text-sm text-gray-400">{copy.selectServiceHint}</p>
+                  <p className="text-sm text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">{copy.selectServiceHint}</p>
                 )}
-                <p className="mt-0.5 text-xs text-gray-400">{copy.securedByPayHere}</p>
+                <p className="mt-0.5 text-xs text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">{copy.securedByPayHere}</p>
               </div>
               <button
                 type="button"
@@ -552,7 +552,7 @@ function BookingWizardInner({
 
 export default function BookingWizard(props: Props) {
   return (
-    <Suspense fallback={<div className="min-h-[320px] animate-pulse rounded-2xl bg-gray-100" />}>
+    <Suspense fallback={<div className="min-h-[320px] animate-pulse rounded-2xl bg-gray-100 dark:bg-neutral-800" />}>
       <BookingWizardInner {...props} />
     </Suspense>
   );
@@ -592,7 +592,7 @@ function DesktopProgressBar({
                     ? "booking-bg-accent text-white booking-shadow-accent"
                     : done
                       ? "booking-bg-accent text-white"
-                      : "bg-white text-gray-400 ring-1 ring-gray-200"
+                      : "bg-white dark:bg-neutral-900 text-gray-400 dark:text-gray-500 ring-1 ring-gray-200 dark:ring-neutral-700"
               }`}
             >
               {done ? <Icon name="check-lg" className="text-xs" /> : i + 1}
@@ -606,10 +606,10 @@ function DesktopProgressBar({
                       ? "text-white/90"
                       : "text-white/45"
                   : active
-                    ? "text-gray-900"
+                    ? "text-gray-900 dark:text-gray-100"
                     : done
                       ? "booking-text-accent"
-                      : "text-gray-400"
+                      : "text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500"
               }`}
             >
               {label}
@@ -633,7 +633,7 @@ function DesktopProgressBar({
             {i < steps.length - 1 && (
               <div
                 className={`mx-4 h-0.5 min-w-[2rem] flex-1 rounded-full ${
-                  dark ? (done ? "bg-white/50" : "bg-white/20") : done ? "booking-bg-accent" : "bg-gray-200"
+                  dark ? (done ? "bg-white/50" : "bg-white/20") : done ? "booking-bg-accent" : "bg-gray-200 dark:bg-neutral-700"
                 }`}
               />
             )}

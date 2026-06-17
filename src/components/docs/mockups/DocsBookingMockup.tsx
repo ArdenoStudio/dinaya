@@ -19,7 +19,7 @@ export function DocsBookingMockup({ variant, highlightTarget }: Props) {
   const target = (id: string) => highlightTarget === id;
 
   return (
-    <div className="flex h-full flex-col bg-[#f2f2f7] text-[11px]">
+    <div className="flex h-full flex-col bg-[#f2f2f7] dark:bg-neutral-950 text-[11px]">
       <div className="bg-gradient-to-b from-blue-700 to-blue-600 px-3 pb-3 pt-10">
         <div className="flex items-center gap-2">
           <div className="flex size-8 items-center justify-center rounded-lg bg-white/20">
@@ -35,7 +35,7 @@ export function DocsBookingMockup({ variant, highlightTarget }: Props) {
       <div className="flex-1 space-y-2 p-2.5">
         {step === "service" && (
           <div className="space-y-1.5">
-            <p className="text-[9px] font-bold uppercase tracking-wide text-gray-400">Choose service</p>
+            <p className="text-[9px] font-bold uppercase tracking-wide text-gray-400 dark:text-gray-500">Choose service</p>
             {services.map((s) => (
               <DocsTargetHighlight
                 key={s.name}
@@ -44,15 +44,15 @@ export function DocsBookingMockup({ variant, highlightTarget }: Props) {
               >
                 <div
                   className={cn(
-                    "rounded-xl border bg-white p-2.5",
+                    "rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-2.5",
                     s.selected ? "border-primary ring-1 ring-primary/30" : "border-transparent",
                   )}
                 >
                   <div className="flex justify-between">
-                    <p className="font-semibold text-gray-900">{s.name}</p>
+                    <p className="font-semibold text-gray-900 dark:text-gray-100">{s.name}</p>
                     <p className="font-bold text-primary">{s.price}</p>
                   </div>
-                  <p className="text-gray-400">{s.duration}</p>
+                  <p className="text-gray-400 dark:text-gray-500">{s.duration}</p>
                 </div>
               </DocsTargetHighlight>
             ))}
@@ -60,8 +60,8 @@ export function DocsBookingMockup({ variant, highlightTarget }: Props) {
         )}
 
         {step === "time" && (
-          <div className="rounded-xl bg-white p-2.5">
-            <p className="mb-2 text-[9px] font-bold uppercase text-gray-400">Pick a time</p>
+          <div className="rounded-xl bg-white dark:bg-neutral-900 dark:border dark:border-neutral-800 p-2.5">
+            <p className="mb-2 text-[9px] font-bold uppercase text-gray-400 dark:text-gray-500">Pick a time</p>
             <div className="grid grid-cols-3 gap-1">
               {["9:00", "10:30", "11:00", "2:00", "3:30"].map((t, i) => (
                 <DocsTargetHighlight
@@ -73,7 +73,7 @@ export function DocsBookingMockup({ variant, highlightTarget }: Props) {
                   <span
                     className={cn(
                       "block rounded-lg py-1.5 text-center",
-                      i === 2 ? "bg-primary font-semibold text-white" : "bg-gray-100 text-gray-700",
+                      i === 2 ? "bg-primary font-semibold text-white" : "bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-gray-300",
                     )}
                   >
                     {t}
@@ -86,9 +86,9 @@ export function DocsBookingMockup({ variant, highlightTarget }: Props) {
 
         {step === "confirm" && (
           <div className="space-y-2">
-            <div className="rounded-xl bg-white p-2.5">
+            <div className="rounded-xl bg-white dark:bg-neutral-900 dark:border dark:border-neutral-800 p-2.5">
               <p className="font-semibold">Haircut & Style</p>
-              <p className="text-gray-500">Thu May 15 · 11:00</p>
+              <p className="text-gray-500 dark:text-gray-400">Thu May 15 · 11:00</p>
             </div>
             <DocsTargetHighlight active={target("booking-confirm-pay")} label="Confirm & Pay">
               <button type="button" className="w-full rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 py-3 font-bold text-white shadow">
@@ -99,9 +99,9 @@ export function DocsBookingMockup({ variant, highlightTarget }: Props) {
         )}
 
         {step === "manage" && (
-          <div className="rounded-xl bg-white p-2.5 space-y-2">
+          <div className="rounded-xl bg-white dark:bg-neutral-900 dark:border dark:border-neutral-800 p-2.5 space-y-2">
             <p className="font-semibold">Your appointment</p>
-            <p className="text-gray-500">Haircut · May 15, 11:00</p>
+            <p className="text-gray-500 dark:text-gray-400">Haircut · May 15, 11:00</p>
             <div className="flex gap-1">
               <DocsTargetHighlight active={target("booking-reschedule")} label="Reschedule" variant="inline" className="flex-1">
                 <span className="block rounded-lg border py-1.5 text-center">Reschedule</span>
@@ -116,7 +116,7 @@ export function DocsBookingMockup({ variant, highlightTarget }: Props) {
         )}
 
         {step === "review" && (
-          <div className="rounded-xl bg-white p-2.5">
+          <div className="rounded-xl bg-white dark:bg-neutral-900 dark:border dark:border-neutral-800 p-2.5">
             <p className="font-semibold">Rate your visit</p>
             <DocsTargetHighlight active={target("booking-stars")} label="Star rating" placement="below">
               <div className="my-2 flex gap-1 text-amber-400">
@@ -125,7 +125,7 @@ export function DocsBookingMockup({ variant, highlightTarget }: Props) {
                 ))}
               </div>
             </DocsTargetHighlight>
-            <div className="h-12 rounded border bg-gray-50" />
+            <div className="h-12 rounded border bg-gray-50 dark:bg-neutral-900/60" />
           </div>
         )}
       </div>

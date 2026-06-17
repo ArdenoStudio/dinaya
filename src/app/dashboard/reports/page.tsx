@@ -174,7 +174,7 @@ async function ReportsOverview({ businessId }: { businessId: string }) {
       />
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <div className="rounded-xl border bg-white p-5">
+        <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
           <h2 className="mb-4 font-semibold">Booking health summary</h2>
           <div className="space-y-4">
             {[
@@ -223,7 +223,7 @@ async function ReportsOverview({ businessId }: { businessId: string }) {
           </div>
         </div>
 
-        <div className="rounded-xl border bg-white p-5 lg:col-span-2">
+        <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5 lg:col-span-2">
           <h2 className="mb-4 font-semibold">Bookings by source</h2>
           {breakdowns.bookingsBySource.length === 0 ? (
             <p className="text-sm text-muted-foreground">No bookings yet.</p>
@@ -247,7 +247,7 @@ async function ReportsOverview({ businessId }: { businessId: string }) {
           )}
         </div>
 
-        <div className="rounded-xl border bg-white p-5 lg:col-span-2">
+        <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5 lg:col-span-2">
           <h2 className="mb-4 font-semibold">Bookings by staff</h2>
           {breakdowns.staffLoad.length === 0 ? (
             <p className="text-sm text-muted-foreground">No bookings yet.</p>

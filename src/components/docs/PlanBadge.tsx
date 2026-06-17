@@ -2,8 +2,8 @@ import type { PlanTier } from "@content/docs/types";
 import { cn } from "@/lib/utils";
 
 const styles: Record<PlanTier, string> = {
-  free: "bg-gray-100 text-gray-700 ring-gray-200",
-  pro: "bg-blue-50 text-blue-700 ring-blue-200",
+  free: "bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-gray-300 ring-gray-200",
+  pro: "bg-blue-50 dark:bg-blue-950/40 text-blue-700 ring-blue-200",
   max: "bg-violet-50 text-violet-700 ring-violet-200",
 };
 

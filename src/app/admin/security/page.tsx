@@ -22,7 +22,7 @@ const ACTION_META: Record<
   "support.reset_password": {
     label: "Password reset",
     icon: KeyRound,
-    tone: "bg-amber-500/15 text-amber-700",
+    tone: "bg-amber-50 dark:bg-amber-950/30 text-amber-700",
   },
   "settings.announcement_updated": {
     label: "Announcement updated",
@@ -42,7 +42,7 @@ const ACTION_META: Record<
   "support.refund_payment": {
     label: "Payment refund",
     icon: KeyRound,
-    tone: "bg-amber-500/15 text-amber-700",
+    tone: "bg-amber-50 dark:bg-amber-950/30 text-amber-700",
   },
   "support.replay_webhook": {
     label: "Webhook replay",
@@ -95,7 +95,7 @@ export default async function AdminSecurityPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <div className="overflow-hidden rounded-xl border bg-white">
+        <div className="overflow-hidden rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
           <div className="h-[3px] bg-primary" />
           <div className="p-5">
             <p className="text-xs text-muted-foreground">Events recorded</p>
@@ -103,7 +103,7 @@ export default async function AdminSecurityPage() {
             <p className="mt-1 text-xs text-muted-foreground">most recent 300</p>
           </div>
         </div>
-        <div className="overflow-hidden rounded-xl border bg-white">
+        <div className="overflow-hidden rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
           <div className="h-[3px] bg-violet-600" />
           <div className="p-5">
             <p className="text-xs text-muted-foreground">Today</p>
@@ -111,8 +111,8 @@ export default async function AdminSecurityPage() {
             <p className="mt-1 text-xs text-muted-foreground">events since midnight</p>
           </div>
         </div>
-        <div className="overflow-hidden rounded-xl border bg-white">
-          <div className="h-[3px] bg-rose-500" />
+        <div className="overflow-hidden rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
+          <div className="h-[3px] bg-rose-50 dark:bg-rose-950/400" />
           <div className="p-5">
             <p className="text-xs text-muted-foreground">Sensitive actions</p>
             <p className="mt-1 text-2xl font-bold tracking-tight">{sensitive.length}</p>
@@ -122,7 +122,7 @@ export default async function AdminSecurityPage() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1.4fr_0.9fr]">
-        <div className="rounded-xl border bg-white">
+        <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
           <div className="border-b bg-muted/30 px-4 py-3">
             <h2 className="flex items-center gap-2 text-sm font-semibold">
               <Activity className="size-4 text-muted-foreground" aria-hidden="true" />
@@ -169,7 +169,7 @@ export default async function AdminSecurityPage() {
         </div>
 
         <div className="space-y-6">
-          <div className="rounded-xl border bg-white p-5">
+          <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
             <h2 className="mb-4 font-semibold">Most active admins</h2>
             {topActors.length === 0 ? (
               <p className="text-sm text-muted-foreground">No activity yet.</p>
@@ -194,7 +194,7 @@ export default async function AdminSecurityPage() {
             )}
           </div>
 
-          <div className="rounded-xl border bg-white p-5">
+          <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
             <h2 className="mb-4 font-semibold">Security posture</h2>
             <ul className="space-y-2 text-sm">
               <li className="flex items-center justify-between gap-3">
@@ -215,7 +215,7 @@ export default async function AdminSecurityPage() {
               </li>
             </ul>
             {alerts.length > 0 && (
-              <div className="mt-4 rounded-md border border-amber-500/30 bg-amber-50 p-3 text-xs text-amber-900">
+              <div className="mt-4 rounded-md border border-amber-500/30 bg-amber-50 dark:bg-amber-950/40 p-3 text-xs text-amber-900 dark:text-amber-200">
                 <p className="font-semibold">Suspicious activity alerts</p>
                 <ul className="mt-2 list-disc pl-4 space-y-1">
                   {alerts.map((alert) => (
@@ -226,11 +226,11 @@ export default async function AdminSecurityPage() {
             )}
           </div>
 
-          <div className="rounded-xl border border-rose-500/20 bg-rose-50/40 p-5">
-            <h2 className="mb-2 text-sm font-semibold text-rose-900">
+          <div className="rounded-xl border border-rose-500/20 bg-rose-50 dark:bg-rose-950/40 p-5">
+            <h2 className="mb-2 text-sm font-semibold text-rose-900 dark:text-rose-200">
               Remaining roadmap
             </h2>
-            <ul className="list-disc pl-5 text-xs text-rose-900/80 space-y-1">
+            <ul className="list-disc pl-5 text-xs text-rose-900 dark:text-rose-200/80 space-y-1">
               <li>Impossible-travel sign-in alerts for tenant accounts</li>
               <li>Automated S3 archival cron for audit exports</li>
             </ul>

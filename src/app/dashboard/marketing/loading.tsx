@@ -15,7 +15,7 @@ export default function MarketingLoading() {
       <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
         <div className="space-y-6">
           {/* Share Tools */}
-          <div className="rounded-xl border bg-white p-5">
+          <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
             <Skeleton className="h-5 w-24 mb-3" />
             <Skeleton className="h-10 w-full rounded-md mb-3" />
             <div className="flex flex-wrap gap-2">
@@ -26,14 +26,14 @@ export default function MarketingLoading() {
           </div>
 
           {/* QR Poster */}
-          <div className="rounded-xl border bg-white p-5">
+          <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
             <Skeleton className="h-5 w-24 mb-3" />
             <Skeleton className="mx-auto size-52 rounded-lg" />
             <Skeleton className="mt-3 mx-auto h-4 w-64" />
           </div>
 
           {/* Snippets */}
-          <div className="rounded-xl border bg-white p-5">
+          <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
             <Skeleton className="h-5 w-20 mb-3" />
             <Skeleton className="h-4 w-32 mb-1" />
             <Skeleton className="h-20 w-full rounded-md mb-4" />
@@ -45,7 +45,7 @@ export default function MarketingLoading() {
         </div>
 
         {/* Live Preview */}
-        <div className="rounded-xl border bg-white p-5">
+        <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
           <div className="mb-3 flex items-center justify-between">
             <Skeleton className="h-5 w-28" />
             <Skeleton className="h-4 w-24" />

@@ -10,7 +10,7 @@ const supportWhatsApp = getPublicSupportWhatsApp();
 
 export default function HelpPage() {
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-white dark:bg-neutral-950">
       <PublicNav />
       <HelpFaqSections />
       <section className="px-6 pb-20">
@@ -30,7 +30,7 @@ export default function HelpPage() {
               <div className="flex flex-col gap-3 shrink-0">
                 <a
                   href="mailto:support@dinaya.lk"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-white text-gray-900 px-5 py-3 text-sm font-semibold"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-white text-gray-900 px-5 py-3 text-sm font-semibold hover:bg-gray-100 transition-colors"
                 >
                   <Icon name="envelope" className="text-sm" />
                   Email support
@@ -40,7 +40,7 @@ export default function HelpPage() {
                     href={supportWhatsApp.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-white/10 border border-white/20 text-white px-5 py-3 text-sm font-medium"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-black/25 border border-white/35 text-white px-5 py-3 text-sm font-medium hover:bg-black/40 backdrop-blur-sm transition-colors"
                   >
                     <Icon name="whatsapp" className="text-sm" />
                     WhatsApp us

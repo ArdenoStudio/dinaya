@@ -21,7 +21,7 @@ export default async function DocsPreviewPage({ params }: Props) {
   if (!isPreviewMockupId(mockupId)) notFound();
 
   return (
-    <div data-docs-capture-root className="inline-block bg-white p-4">
+    <div data-docs-capture-root className="inline-block bg-white dark:bg-neutral-900 p-4">
       {mockupId.startsWith("booking-") ? (
         <DocsPhoneFrame mockupId={mockupId} scale={0.85} />
       ) : (

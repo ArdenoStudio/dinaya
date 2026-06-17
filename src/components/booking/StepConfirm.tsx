@@ -166,16 +166,16 @@ export default function StepConfirm({ state, business, copy, selectedDeal, sessi
 
   const summaryCards = (
     <div className="flex flex-col gap-2 md:gap-3">
-      <div className="rounded-2xl bg-white px-[15px] py-[13px] md:rounded-xl md:border md:border-gray-100 md:p-4">
-        <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.08em] text-gray-400">
+      <div className="rounded-2xl bg-white dark:bg-neutral-900 px-[15px] py-[13px] md:rounded-xl md:border md:border-gray-100 dark:border-neutral-800 md:p-4">
+        <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.08em] text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
           {copy.selectedService}
         </p>
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="text-[15px] font-semibold leading-snug text-gray-900 md:text-base">
+            <p className="text-[15px] font-semibold leading-snug text-gray-900 dark:text-gray-100 md:text-base">
               {service?.name}
             </p>
-            <div className="mt-1 flex items-center gap-1 text-[11px] text-gray-400 md:text-xs">
+            <div className="mt-1 flex items-center gap-1 text-[11px] text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 md:text-xs">
               <Icon name="clock" className="text-[10px] text-gray-300" />
               {service?.durationMinutes} min
               {state.staff && (
@@ -192,8 +192,8 @@ export default function StepConfirm({ state, business, copy, selectedDeal, sessi
         </div>
       </div>
 
-      <div className="rounded-2xl bg-white px-[15px] py-[13px] md:rounded-xl md:border md:border-gray-100 md:p-4">
-        <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.08em] text-gray-400">
+      <div className="rounded-2xl bg-white dark:bg-neutral-900 px-[15px] py-[13px] md:rounded-xl md:border md:border-gray-100 dark:border-neutral-800 md:p-4">
+        <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.08em] text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
           {copy.appointment}
         </p>
         <div className="mb-2 flex items-center gap-[11px]">
@@ -201,36 +201,36 @@ export default function StepConfirm({ state, business, copy, selectedDeal, sessi
             <Icon name="calendar3" className="text-[13px] booking-text-accent" />
           </div>
           <div>
-            <p className="text-[13px] font-semibold text-gray-900 md:text-sm">{dateLabel}</p>
-            <p className="text-[11px] text-gray-400 md:text-xs">{yearLabel}</p>
+            <p className="text-[13px] font-semibold text-gray-900 dark:text-gray-100 md:text-sm">{dateLabel}</p>
+            <p className="text-[11px] text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 md:text-xs">{yearLabel}</p>
           </div>
         </div>
-        <div className="mb-2 h-px bg-gray-100" />
+        <div className="mb-2 h-px bg-gray-100 dark:bg-neutral-800" />
         <div className="flex items-center gap-[11px]">
-          <div className="flex size-[34px] shrink-0 items-center justify-center rounded-[10px] bg-emerald-50">
+          <div className="flex size-[34px] shrink-0 items-center justify-center rounded-[10px] bg-emerald-50 dark:bg-emerald-950/40">
             <Icon name="clock" className="text-[13px] text-emerald-500" />
           </div>
           <div className="flex-1">
-            <p className="text-[13px] font-semibold text-gray-900 md:text-sm">{state.timeLabel}</p>
-            <p className="text-[11px] text-gray-400 md:text-xs">{service?.durationMinutes} min</p>
+            <p className="text-[13px] font-semibold text-gray-900 dark:text-gray-100 md:text-sm">{state.timeLabel}</p>
+            <p className="text-[11px] text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 md:text-xs">{service?.durationMinutes} min</p>
           </div>
-          <span className="shrink-0 rounded-full border border-emerald-100 bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-600">
+          <span className="shrink-0 rounded-full border border-emerald-100 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 text-[11px] font-semibold text-emerald-600">
             {copy.available}
           </span>
         </div>
       </div>
 
       {service && service.priceLkr > 0 && (
-        <div className="rounded-2xl bg-white px-[15px] py-[13px] md:rounded-xl md:border md:border-gray-100 md:p-4">
+        <div className="rounded-2xl bg-white dark:bg-neutral-900 px-[15px] py-[13px] md:rounded-xl md:border md:border-gray-100 dark:border-neutral-800 md:p-4">
           <div className="flex items-center justify-between">
-            <p className="text-[12px] text-gray-500">{service.name}</p>
-            <p className="text-[12px] font-medium tabular-nums text-gray-700">
+            <p className="text-[12px] text-gray-500 dark:text-gray-400">{service.name}</p>
+            <p className="text-[12px] font-medium tabular-nums text-gray-700 dark:text-gray-300">
               {formatLkr(service.priceLkr)}
             </p>
           </div>
           {service.requiresPayment && service.depositPercent > 0 && (
             <div className="mt-1 flex items-center justify-between">
-              <p className="text-[11px] text-gray-400">
+              <p className="text-[11px] text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
                 {copy.depositDue} ({service.depositPercent}%)
               </p>
               <p className="text-[11px] font-semibold tabular-nums booking-text-accent">
@@ -238,7 +238,7 @@ export default function StepConfirm({ state, business, copy, selectedDeal, sessi
               </p>
             </div>
           )}
-          <div className="my-2 h-px bg-gray-100" />
+          <div className="my-2 h-px bg-gray-100 dark:bg-neutral-800" />
           {selectedDeal && (
             <div className="mb-2 flex items-center justify-between text-emerald-700">
               <p className="text-[12px] font-medium">
@@ -250,11 +250,11 @@ export default function StepConfirm({ state, business, copy, selectedDeal, sessi
             </div>
           )}
           <div className="flex items-center justify-between">
-            <p className="text-[13px] font-bold text-gray-900">{copy.fullAmount}</p>
-            <p className="text-[14px] font-bold tabular-nums text-gray-900">
+            <p className="text-[13px] font-bold text-gray-900 dark:text-gray-100">{copy.fullAmount}</p>
+            <p className="text-[14px] font-bold tabular-nums text-gray-900 dark:text-gray-100">
               {selectedDeal ? (
                 <>
-                  <span className="mr-2 text-[12px] font-medium text-gray-400 line-through">
+                  <span className="mr-2 text-[12px] font-medium text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 line-through">
                     {formatLkr(service.priceLkr)}
                   </span>
                   {formatLkr(discountedPrice)}
@@ -270,13 +270,13 @@ export default function StepConfirm({ state, business, copy, selectedDeal, sessi
   );
 
   const contactForm = (
-    <div className="space-y-3 md:rounded-xl md:border md:border-gray-100 md:bg-white md:p-5">
-      <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 md:mb-1">
+    <div className="space-y-3 md:rounded-xl md:border md:border-gray-100 dark:border-neutral-800 md:bg-white dark:md:bg-neutral-900 md:p-5">
+      <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 md:mb-1">
         {copy.details}
       </p>
       <div>
-        <label htmlFor="clientName" className="text-sm font-medium text-gray-800">
-          Full name <span className="font-normal text-gray-400">*</span>
+        <label htmlFor="clientName" className="text-sm font-medium text-gray-800 dark:text-gray-200">
+          Full name <span className="font-normal text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">*</span>
         </label>
         <input
           id="clientName"
@@ -285,13 +285,13 @@ export default function StepConfirm({ state, business, copy, selectedDeal, sessi
           autoComplete="name"
           value={state.clientName}
           onChange={(e) => onUpdate({ clientName: e.target.value })}
-          className="mt-1.5 w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm transition-shadow placeholder:text-gray-400 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+          className="mt-1.5 w-full rounded-xl border border-gray-200 dark:border-neutral-800 px-3 py-2.5 text-sm transition-shadow placeholder:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
           placeholder="Nimal Perera"
         />
       </div>
       <div>
-        <label htmlFor="clientPhone" className="text-sm font-medium text-gray-800">
-          Phone number <span className="font-normal text-gray-400">*</span>
+        <label htmlFor="clientPhone" className="text-sm font-medium text-gray-800 dark:text-gray-200">
+          Phone number <span className="font-normal text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">*</span>
         </label>
         <input
           id="clientPhone"
@@ -300,13 +300,13 @@ export default function StepConfirm({ state, business, copy, selectedDeal, sessi
           autoComplete="tel"
           value={state.clientPhone}
           onChange={(e) => onUpdate({ clientPhone: e.target.value })}
-          className="mt-1.5 w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm transition-shadow placeholder:text-gray-400 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+          className="mt-1.5 w-full rounded-xl border border-gray-200 dark:border-neutral-800 px-3 py-2.5 text-sm transition-shadow placeholder:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
           placeholder="+94 77 123 4567"
         />
       </div>
       <div>
-        <label htmlFor="clientEmail" className="text-sm font-medium text-gray-800">
-          Email <span className="text-xs font-normal text-gray-400">(optional)</span>
+        <label htmlFor="clientEmail" className="text-sm font-medium text-gray-800 dark:text-gray-200">
+          Email <span className="text-xs font-normal text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">(optional)</span>
         </label>
         <input
           id="clientEmail"
@@ -314,19 +314,19 @@ export default function StepConfirm({ state, business, copy, selectedDeal, sessi
           autoComplete="email"
           value={state.clientEmail}
           onChange={(e) => onUpdate({ clientEmail: e.target.value })}
-          className="mt-1.5 w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm transition-shadow placeholder:text-gray-400 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+          className="mt-1.5 w-full rounded-xl border border-gray-200 dark:border-neutral-800 px-3 py-2.5 text-sm transition-shadow placeholder:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
           placeholder="you@email.com"
         />
       </div>
       <div>
-        <label htmlFor="notes" className="text-sm font-medium text-gray-800">
-          Notes <span className="text-xs font-normal text-gray-400">(optional)</span>
+        <label htmlFor="notes" className="text-sm font-medium text-gray-800 dark:text-gray-200">
+          Notes <span className="text-xs font-normal text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">(optional)</span>
         </label>
         <textarea
           id="notes"
           value={state.notes}
           onChange={(e) => onUpdate({ notes: e.target.value })}
-          className="mt-1.5 w-full resize-none rounded-xl border border-gray-200 px-3 py-2.5 text-sm transition-shadow placeholder:text-gray-400 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+          className="mt-1.5 w-full resize-none rounded-xl border border-gray-200 dark:border-neutral-800 px-3 py-2.5 text-sm transition-shadow placeholder:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
           rows={2}
           placeholder={
             hasManualPaymentFallback ? copy.paymentReference : "Anything we should know?"
@@ -335,21 +335,21 @@ export default function StepConfirm({ state, business, copy, selectedDeal, sessi
       </div>
 
       {(service?.intakeQuestions ?? []).length > 0 && (
-        <div className="space-y-3 border-t border-gray-100 pt-3">
+        <div className="space-y-3 border-t border-gray-100 dark:border-neutral-800 pt-3">
           {(service?.intakeQuestions ?? []).map((q) => {
             const value = state.intakeAnswers[q.id] ?? "";
             const setValue = (v: string) =>
               onUpdate({ intakeAnswers: { ...state.intakeAnswers, [q.id]: v } });
             const fieldCls =
-              "mt-1.5 w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm transition-shadow placeholder:text-gray-400 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20";
+              "mt-1.5 w-full rounded-xl border border-gray-200 dark:border-neutral-800 px-3 py-2.5 text-sm transition-shadow placeholder:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20";
             return (
               <div key={q.id}>
-                <label htmlFor={`intake-${q.id}`} className="text-sm font-medium text-gray-800">
+                <label htmlFor={`intake-${q.id}`} className="text-sm font-medium text-gray-800 dark:text-gray-200">
                   {q.label}{" "}
                   {q.required ? (
-                    <span className="font-normal text-gray-400">*</span>
+                    <span className="font-normal text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">*</span>
                   ) : (
-                    <span className="text-xs font-normal text-gray-400">(optional)</span>
+                    <span className="text-xs font-normal text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">(optional)</span>
                   )}
                 </label>
                 {q.type === "textarea" ? (
@@ -384,14 +384,14 @@ export default function StepConfirm({ state, business, copy, selectedDeal, sessi
 
   return (
     <div className="flex flex-col">
-      <div className="flex flex-col gap-3 bg-[#f2f2f7] px-[14px] py-3 md:grid md:grid-cols-2 md:gap-8 md:bg-transparent md:px-8 md:py-7">
+      <div className="flex flex-col gap-3 booking-panel-bg px-[14px] py-3 md:grid md:grid-cols-2 md:gap-8 md:bg-transparent md:px-8 md:py-7">
         <div>{summaryCards}</div>
         <div>
           {hasManualPaymentFallback && (
-            <div className="mb-3 rounded-xl border border-amber-200 bg-amber-50/70 p-4 text-sm md:mb-4">
-              <p className="mb-2 font-medium text-amber-900">{copy.localPayment}</p>
+            <div className="mb-3 rounded-xl border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-950/40 p-4 text-sm md:mb-4">
+              <p className="mb-2 font-medium text-amber-900 dark:text-amber-200">{copy.localPayment}</p>
               {business.bankTransferInstructions && (
-                <p className="whitespace-pre-wrap text-amber-900/80">
+                <p className="whitespace-pre-wrap text-amber-900 dark:text-amber-200/80">
                   {business.bankTransferInstructions}
                 </p>
               )}
@@ -402,7 +402,7 @@ export default function StepConfirm({ state, business, copy, selectedDeal, sessi
                     alt="LankaQR"
                     width={144}
                     height={144}
-                    className="h-36 w-36 rounded-lg border bg-white object-contain p-2"
+                    className="h-36 w-36 rounded-lg border bg-white dark:border-neutral-800 dark:bg-neutral-900 object-contain p-2"
                     unoptimized={!isOptimizableRemoteImage(business.lankaqrImageUrl)}
                   />
                 </div>
@@ -411,7 +411,7 @@ export default function StepConfirm({ state, business, copy, selectedDeal, sessi
           )}
           {upsell && (
             <div className="mb-3 rounded-xl border border-blue-100 booking-bg-accent-muted/70 p-4 text-sm md:mb-4">
-              <p className="font-medium text-blue-950">Recommended add-on</p>
+              <p className="font-medium text-blue-950 dark:text-blue-100">Recommended add-on</p>
               <p className="mt-1 booking-text-accent/80">
                 {upsell.reason} Ask about <span className="font-semibold">{upsell.name}</span>
                 {upsell.priceLkr > 0 ? ` (${formatLkr(upsell.priceLkr)})` : ""} during your visit.
@@ -423,19 +423,19 @@ export default function StepConfirm({ state, business, copy, selectedDeal, sessi
       </div>
 
       {error && (
-        <div className="mx-[14px] mb-2 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-700 md:mx-0">
+        <div className="mx-[14px] mb-2 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 dark:border-red-900/50 dark:bg-red-950/40 px-3 py-2.5 text-sm text-red-700 dark:text-red-300 md:mx-0">
           <Icon name="exclamation-circle" className="mt-0.5 shrink-0 text-sm" />
           <span>{error}</span>
         </div>
       )}
 
       {/* Mobile pinned CTA */}
-      <div className="sticky bottom-0 z-10 border-t border-gray-200/80 bg-[#f2f2f7]/95 px-[14px] pb-[max(1rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-md md:relative md:mt-6 md:border-0 md:bg-transparent md:px-0 md:pb-0 md:pt-0">
+      <div className="sticky bottom-0 z-10 border-t border-gray-200 dark:border-neutral-800/80 booking-sticky-bar px-[14px] pb-[max(1rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-md md:relative md:mt-6 md:border-0 md:bg-transparent md:px-0 md:pb-0 md:pt-0">
         <div className="mb-2 flex md:mb-4">
           <button
             type="button"
             onClick={onBack}
-            className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-800 md:mr-4"
+            className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:text-gray-200 md:mr-4"
           >
             <Icon name="chevron-left" className="text-sm" /> {copy.back}
           </button>
@@ -450,7 +450,7 @@ export default function StepConfirm({ state, business, copy, selectedDeal, sessi
         </button>
         <div className="mt-2 flex items-center justify-center gap-1 md:mt-3">
           <Icon name="shield-check" className="text-[11px] text-gray-300" />
-          <span className="text-[11px] text-gray-400">{copy.securedByPayHere}</span>
+          <span className="text-[11px] text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">{copy.securedByPayHere}</span>
         </div>
       </div>
     </div>

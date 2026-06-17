@@ -28,8 +28,8 @@ type DealRow = {
 const STATUS_STYLES: Record<string, string> = {
   active: "bg-green-100 text-green-700",
   upcoming: "bg-blue-100 text-blue-700",
-  expired: "bg-gray-100 text-gray-600",
-  cancelled: "bg-gray-100 text-gray-500",
+  expired: "bg-gray-100 dark:bg-neutral-800 text-gray-600 dark:text-gray-400",
+  cancelled: "bg-gray-100 dark:bg-neutral-800 text-gray-500 dark:text-gray-400",
   sold_out: "bg-amber-100 text-amber-700",
 };
 
@@ -129,7 +129,7 @@ export function DealsClient({ initialDeals }: { initialDeals: DealRow[] }) {
   }
 
   return (
-    <div className="bg-white border rounded-xl divide-y">
+    <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 divide-y">
       {deals.map((deal) => {
         const discounted = computeDiscountedPrice(deal.servicePriceLkr, deal.discountPercent);
         const canCancel = !["cancelled", "expired", "sold_out"].includes(deal.displayStatus);

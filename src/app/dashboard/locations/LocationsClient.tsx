@@ -118,7 +118,7 @@ export default function LocationsClient({ plan, locationLimit }: Props) {
       </div>
 
       {atLimit && (
-        <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+        <div className="mb-4 rounded-lg border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-950/40 px-4 py-3 text-sm text-amber-900 dark:text-amber-200">
           You&apos;ve reached your plan limit of {locationLimit} location{locationLimit === 1 ? "" : "s"}.{" "}
           <Link href="/dashboard/billing" className="font-medium underline">
             Upgrade
@@ -128,7 +128,7 @@ export default function LocationsClient({ plan, locationLimit }: Props) {
       )}
 
       {showForm && (
-        <form onSubmit={handleCreate} className="mb-6 rounded-xl border bg-white p-6 space-y-4 max-w-lg">
+        <form onSubmit={handleCreate} className="mb-6 rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-6 space-y-4 max-w-lg">
           <h2 className="font-medium">New branch</h2>
           <div>
             <label className="text-sm font-medium">Name *</label>
@@ -175,11 +175,11 @@ export default function LocationsClient({ plan, locationLimit }: Props) {
       {loading ? (
         <p className="text-sm text-muted-foreground">Loading…</p>
       ) : locations.length === 0 ? (
-        <div className="rounded-xl border bg-white p-12 text-center text-muted-foreground">
+        <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-12 text-center text-muted-foreground">
           No locations yet. Add your first branch to get started.
         </div>
       ) : (
-        <div className="divide-y rounded-xl border bg-white">
+        <div className="divide-y rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
           {locations.map((loc) => (
             <div key={loc.id} className="flex flex-wrap items-center gap-4 px-5 py-4 hover:bg-muted/20">
               <div className="min-w-0 flex-1">
@@ -191,7 +191,7 @@ export default function LocationsClient({ plan, locationLimit }: Props) {
                     </span>
                   )}
                   {!loc.isActive && (
-                    <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-semibold uppercase text-gray-500">
+                    <span className="rounded-full bg-gray-100 dark:bg-neutral-800 px-2 py-0.5 text-[10px] font-semibold uppercase text-gray-500 dark:text-gray-400">
                       Inactive
                     </span>
                   )}

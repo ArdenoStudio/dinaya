@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import Image from "next/image";
+import { ArdenoStudioLogo } from "@/components/ArdenoStudioLogo";
 import { PublicNav } from "@/components/PublicNav";
 import { FadeContainer, FadeDiv, FadeSpan } from "@/components/Fade";
 import { LandingFooter } from "@/components/LandingFooter";
@@ -33,7 +33,7 @@ const problems = [
 const timeline = [
   {
     period: "Q1 2024",
-    dot: "bg-amber-500",
+    dot: "bg-amber-50 dark:bg-amber-950/400",
     title: "The idea",
     desc: "Started with a simple question: why doesn't a booking tool exist that actually works for Sri Lankan businesses?",
   },
@@ -82,14 +82,14 @@ const principles = [
 
 export default function OurStoryPage() {
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-white dark:bg-neutral-950">
       <PublicNav />
 
       {/* Hero */}
       <section className="max-w-4xl mx-auto px-6 public-page-offset pb-16 text-center">
         <FadeContainer className="flex flex-col items-center">
           <FadeDiv className="mb-6">
-            <span className="inline-flex items-center gap-2 rounded-full border bg-white px-3 py-1 text-xs font-medium text-gray-700 shadow-sm">
+            <span className="inline-flex items-center gap-2 rounded-full border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 shadow-sm">
               <Icon name="heart-fill" className="text-xs text-primary" />
               Our story
             </span>
@@ -122,11 +122,11 @@ export default function OurStoryPage() {
           </h2>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-px bg-gray-200/70 rounded-2xl overflow-hidden border border-gray-200/70">
+        <div className="grid md:grid-cols-3 gap-px bg-gray-200 dark:bg-neutral-700/70 rounded-2xl overflow-hidden border border-gray-200 dark:border-neutral-800/70">
           {problems.map((p) => (
-            <div key={p.title} className="bg-white p-8 hover:bg-gray-50/60 transition-colors">
+            <div key={p.title} className="bg-white dark:bg-neutral-900 p-8 hover:bg-gray-50 dark:hover:bg-neutral-800/80 transition-colors">
               <div className="mb-5 inline-flex">
-                <div className="flex items-center justify-center size-11 rounded-xl bg-gray-100 text-gray-500">
+                <div className="flex items-center justify-center size-11 rounded-xl bg-gray-100 dark:bg-neutral-800 text-gray-500 dark:text-gray-400">
                   <Icon name={p.icon} className="text-[1.1rem]" />
                 </div>
               </div>
@@ -171,19 +171,19 @@ export default function OurStoryPage() {
             </div>
           </div>
 
-          <div className="rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100/60 p-8 flex flex-col gap-6">
-            <p className="text-xs font-semibold uppercase tracking-widest text-primary/60">2024</p>
-            <blockquote className="font-cal text-xl tracking-tight text-gray-900 leading-snug">
+          <div className="rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/40 border border-blue-100/60 dark:border-blue-900/50 p-8 flex flex-col gap-6">
+            <p className="text-xs font-semibold uppercase tracking-widest text-primary/70 dark:text-primary/80">2024</p>
+            <blockquote className="font-cal text-xl tracking-tight text-gray-900 dark:text-gray-100 leading-snug">
               &ldquo;47 unread booking messages. That was the moment we knew we had to build this.&rdquo;
             </blockquote>
             <p className="text-sm text-muted-foreground italic">
               — The conversation that started Dinaya
             </p>
-            <div className="flex flex-wrap gap-2 pt-2 border-t border-blue-100">
+            <div className="flex flex-wrap gap-2 pt-2 border-t border-blue-100 dark:border-blue-900/50">
               {["Sri Lanka first", "LKR pricing", "Zero commission"].map((pill) => (
                 <span
                   key={pill}
-                  className="inline-flex items-center rounded-full bg-white border border-blue-100 px-3 py-1 text-xs font-medium text-primary"
+                  className="inline-flex items-center rounded-full bg-white dark:bg-neutral-900 border border-blue-100 dark:border-blue-900/50 px-3 py-1 text-xs font-medium text-primary"
                 >
                   {pill}
                 </span>
@@ -205,7 +205,7 @@ export default function OurStoryPage() {
           </h2>
         </div>
 
-        <div className="max-w-2xl relative pl-8 border-l-2 border-gray-200 space-y-10">
+        <div className="max-w-2xl relative pl-8 border-l-2 border-gray-200 dark:border-neutral-800 space-y-10">
           {timeline.map((item) => (
             <div key={item.period} className="relative">
               <span className={`absolute -left-[1.3rem] top-1 size-[14px] rounded-full border-2 border-white ${item.dot} shadow-sm`} />
@@ -235,7 +235,7 @@ export default function OurStoryPage() {
           {principles.map((p) => (
             <div
               key={p.title}
-              className={`rounded-2xl border bg-white p-7 flex gap-5 border-l-4 ${p.border} hover:shadow-md transition-shadow`}
+              className={`rounded-2xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-7 flex gap-5 border-l-4 ${p.border} hover:shadow-md transition-shadow`}
             >
               <div>
                 <h3 className="font-cal text-lg tracking-tight mb-2">{p.title}</h3>
@@ -262,14 +262,8 @@ export default function OurStoryPage() {
           </p>
         </div>
 
-        <div className="max-w-xl mx-auto rounded-2xl border bg-gray-50/50 p-10 text-center">
-          <Image
-            src="/ardeno-studio-logo.svg"
-            alt="Ardeno Studio"
-            width={140}
-            height={35}
-            className="h-7 w-auto brightness-0 opacity-40 mx-auto mb-5"
-          />
+        <div className="max-w-xl mx-auto rounded-2xl border border-gray-200 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-900/50 p-10 text-center">
+          <ArdenoStudioLogo size="xl" className="mx-auto mb-6 w-full max-w-xs" />
           <p className="text-sm text-muted-foreground leading-relaxed mb-6">
             We build software that solves real problems for local businesses.
           </p>
@@ -277,7 +271,7 @@ export default function OurStoryPage() {
             {["Sri Lanka · 2024", "Public product · Dinaya", "Next product · TBA"].map((pill) => (
               <span
                 key={pill}
-                className="inline-flex items-center rounded-full bg-white border px-3 py-1 text-xs font-medium text-gray-600"
+                className="inline-flex items-center rounded-full bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700 px-3 py-1 text-xs font-medium text-gray-600 dark:text-gray-400 dark:text-gray-500"
               >
                 {pill}
               </span>
@@ -302,14 +296,14 @@ export default function OurStoryPage() {
               <div className="flex flex-wrap gap-4 justify-center">
                 <Link
                   href="/register"
-                  className="inline-flex items-center gap-2 bg-white text-blue-700 px-7 py-3.5 rounded-xl font-semibold shadow-lg hover:bg-white/95 transition-colors"
+                  className="inline-flex items-center gap-2 bg-white text-blue-700 px-7 py-3.5 rounded-xl font-semibold shadow-lg hover:bg-blue-50 transition-colors"
                 >
                   Start free trial
                   <Icon name="arrow-right" className="text-sm" />
                 </Link>
                 <Link
                   href="/about"
-                  className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-white px-7 py-3.5 rounded-xl font-medium hover:bg-white/20 transition-colors"
+                  className="inline-flex items-center gap-2 bg-black/25 border border-white/35 text-white px-7 py-3.5 rounded-xl font-medium hover:bg-black/40 backdrop-blur-sm transition-colors"
                 >
                   Meet the team
                 </Link>

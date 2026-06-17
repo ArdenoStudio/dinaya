@@ -90,7 +90,7 @@ export function BookingReschedulePanel({
   if (!canReschedule) return null;
 
   return (
-    <div className="rounded-xl border bg-white p-5">
+    <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Reschedule</p>

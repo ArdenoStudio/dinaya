@@ -15,8 +15,8 @@ export default function StepLocation({ locations, selected, copy, onSelect, comp
   if (locations.length <= 1) return null;
 
   return (
-    <div className={compact ? "mt-4 border-t border-gray-100 pt-4" : ""}>
-      <p className={`font-semibold text-gray-900 ${compact ? "mb-2 text-sm" : "mb-3 text-base"}`}>
+    <div className={compact ? "mt-4 border-t border-gray-100 dark:border-neutral-800 pt-4" : ""}>
+      <p className={`font-semibold text-gray-900 dark:text-gray-100 ${compact ? "mb-2 text-sm" : "mb-3 text-base"}`}>
         {copy.chooseBranch}
       </p>
       <div className="space-y-2">
@@ -30,20 +30,20 @@ export default function StepLocation({ locations, selected, copy, onSelect, comp
               className={`flex w-full items-start gap-3 rounded-xl border px-4 py-3 text-left transition-colors ${
                 active
                   ? "booking-border-accent booking-bg-accent-muted/80 ring-1 booking-ring-accent"
-                  : "border-gray-200 bg-white hover:border-blue-200 hover:booking-bg-accent-muted/30"
+                  : "border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 hover:border-blue-200 hover:booking-bg-accent-muted/30"
               }`}
             >
               <span
                 className={`mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border ${
-                  active ? "booking-border-accent booking-bg-accent text-white" : "border-gray-300"
+                  active ? "booking-border-accent booking-bg-accent text-white" : "border-gray-300 dark:border-neutral-700"
                 }`}
               >
                 {active && <Icon name="check" className="text-[10px]" />}
               </span>
               <span className="min-w-0">
-                <span className="block text-sm font-medium text-gray-900">{loc.name}</span>
+                <span className="block text-sm font-medium text-gray-900 dark:text-gray-100">{loc.name}</span>
                 {loc.address && (
-                  <span className="mt-0.5 block truncate text-xs text-gray-500">{loc.address}</span>
+                  <span className="mt-0.5 block truncate text-xs text-gray-500 dark:text-gray-400">{loc.address}</span>
                 )}
               </span>
             </button>

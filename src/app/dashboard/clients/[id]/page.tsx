@@ -36,7 +36,7 @@ const STAGE_STYLES: Record<string, string> = {
   lead: "bg-blue-100 text-blue-700",
   prospect: "bg-purple-100 text-purple-700",
   active: "bg-green-100 text-green-700",
-  churned: "bg-gray-100 text-gray-500",
+  churned: "bg-gray-100 dark:bg-neutral-800 text-gray-500 dark:text-gray-400",
 };
 
 const BOOKING_STATUS_STYLES: Record<string, string> = {
@@ -44,7 +44,7 @@ const BOOKING_STATUS_STYLES: Record<string, string> = {
   confirmed: "bg-green-100 text-green-800",
   cancelled: "bg-red-100 text-red-800",
   completed: "bg-blue-100 text-blue-800",
-  no_show: "bg-gray-100 text-gray-800",
+  no_show: "bg-gray-100 dark:bg-neutral-800 text-gray-800 dark:text-gray-200",
 };
 
 export default function ClientDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -136,7 +136,7 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
         {/* Left col: profile + stage editor */}
         <div className="col-span-1 space-y-4">
           {/* Contact info */}
-          <div className="bg-white border rounded-xl p-5 space-y-3">
+          <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-5 space-y-3">
             <h2 className="font-medium text-sm">Contact</h2>
             <div>
               <p className="text-xs text-muted-foreground">Phone</p>
@@ -157,7 +157,7 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
           </div>
 
           {/* Stage & internal notes editor */}
-          <div className="bg-white border rounded-xl p-5 space-y-3">
+          <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-5 space-y-3">
             <h2 className="font-medium text-sm">CRM</h2>
             <div>
               <label className="text-xs text-muted-foreground block mb-1">Stage</label>
@@ -195,7 +195,7 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
         {/* Right col: booking history + notes feed */}
         <div className="col-span-2 space-y-5">
           {/* Booking history */}
-          <div className="bg-white border rounded-xl overflow-hidden">
+          <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 overflow-hidden">
             <div className="px-5 py-4 border-b">
               <h2 className="font-medium text-sm">Booking history ({bookings.length})</h2>
             </div>
@@ -230,7 +230,7 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
           </div>
 
           {/* Notes feed */}
-          <div className="bg-white border rounded-xl overflow-hidden">
+          <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 overflow-hidden">
             <div className="px-5 py-4 border-b">
               <h2 className="font-medium text-sm">Notes</h2>
             </div>

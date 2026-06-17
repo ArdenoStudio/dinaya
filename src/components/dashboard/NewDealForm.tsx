@@ -118,7 +118,7 @@ export function NewDealForm() {
   return (
     <div className="max-w-xl">
       <h1 className="font-cal text-2xl mb-6">New deal</h1>
-      <form onSubmit={handleSubmit} className="bg-white border rounded-xl p-6 space-y-4">
+      <form onSubmit={handleSubmit} className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-6 space-y-4">
         <div>
           <label className="text-sm font-medium">Service *</label>
           <select
@@ -236,7 +236,7 @@ export function NewDealForm() {
         </div>
 
         {selectedService && previewPrice !== null && (
-          <div className="rounded-lg bg-gray-50 px-4 py-3 text-sm">
+          <div className="rounded-lg bg-gray-50 dark:bg-neutral-900/60 px-4 py-3 text-sm">
             Clients pay <strong>{formatLkr(previewPrice)}</strong> instead of {formatLkr(selectedService.priceLkr)}.
           </div>
         )}
@@ -257,7 +257,7 @@ export function NewDealForm() {
         </label>
 
         {notifyResult !== null && (
-          <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+          <div className="rounded-lg border border-emerald-200 dark:border-emerald-800/50 bg-emerald-50 dark:bg-emerald-950/40 px-4 py-3 text-sm text-emerald-900 dark:text-emerald-200">
             Deal published. Notified {notifyResult} past client{notifyResult === 1 ? "" : "s"}.
             <button
               type="button"

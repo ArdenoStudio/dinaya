@@ -73,18 +73,18 @@ export default async function ClientBookingPage({ params }: Props) {
   };
 
   return (
-    <div className="flex min-h-dvh items-start justify-center bg-[#f2f2f7] px-4 py-12">
+    <div className="booking-page-bg flex min-h-dvh items-start justify-center px-4 py-12">
       <div className="w-full max-w-md space-y-4">
-        <div className="rounded-2xl border border-gray-100 bg-white p-8 shadow-sm">
+        <div className="rounded-2xl border border-gray-100 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-8 shadow-sm">
           <p className="mb-2 text-xs font-medium uppercase tracking-widest text-muted-foreground">
             {copy.clientYourBooking}
           </p>
-          <h1 className="font-cal text-2xl tracking-tight text-gray-900">{booking.businessName}</h1>
+          <h1 className="font-cal text-2xl tracking-tight text-gray-900 dark:text-gray-100">{booking.businessName}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             {formatBookingCopy(copy.clientGreeting, { name: booking.clientName })}
           </p>
 
-          <div className="mt-6 space-y-3 rounded-xl bg-gray-50 p-4 text-sm">
+          <div className="mt-6 space-y-3 rounded-xl bg-gray-50 dark:bg-neutral-900/60 p-4 text-sm">
             <div className="flex items-center justify-between gap-4">
               <span className="text-muted-foreground">{copy.clientStatus}</span>
               <span className="font-medium capitalize">{statusLabel}</span>

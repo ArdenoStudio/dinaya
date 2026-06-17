@@ -14,7 +14,7 @@ export function DocsMobileNav() {
       </label>
       <select
         id="docs-mobile-nav"
-        className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm shadow-sm shadow-gray-900/5"
+        className="w-full rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-sm shadow-sm shadow-gray-900/5 dark:shadow-black/20"
         defaultValue=""
         onChange={(e) => {
           if (e.target.value) router.push(e.target.value);

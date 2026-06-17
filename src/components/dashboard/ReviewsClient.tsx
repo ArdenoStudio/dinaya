@@ -108,15 +108,15 @@ export function ReviewsClient({ canUseAiReplies }: { canUseAiReplies: boolean })
 
       {reviewList.length > 0 && (
         <div className="mb-6 grid grid-cols-3 gap-3">
-          <div className="rounded-xl border bg-white p-4 text-center">
+          <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-4 text-center">
             <p className="font-cal text-2xl">{reviewList.length}</p>
             <p className="mt-0.5 text-xs text-muted-foreground">{copy.totalReviews}</p>
           </div>
-          <div className="rounded-xl border bg-white p-4 text-center">
+          <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-4 text-center">
             <p className="font-cal text-2xl">{avgRating}</p>
             <p className="mt-0.5 text-xs text-muted-foreground">{copy.averageRating}</p>
           </div>
-          <div className="rounded-xl border bg-white p-4 text-center">
+          <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-4 text-center">
             <p className="font-cal text-2xl">{published}</p>
             <p className="mt-0.5 text-xs text-muted-foreground">{copy.published}</p>
           </div>
@@ -126,7 +126,7 @@ export function ReviewsClient({ canUseAiReplies }: { canUseAiReplies: boolean })
       {loading ? (
         <p className="text-sm text-muted-foreground">{copy.loading}</p>
       ) : reviewList.length === 0 ? (
-        <div className="rounded-xl border bg-white p-12 text-center">
+        <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-12 text-center">
           <Icon name="star" className="mb-3 block text-3xl text-muted-foreground/40" />
           <p className="text-sm font-medium">{copy.emptyTitle}</p>
           <p className="mt-1 text-xs text-muted-foreground">{copy.emptyBody}</p>
@@ -134,7 +134,7 @@ export function ReviewsClient({ canUseAiReplies }: { canUseAiReplies: boolean })
       ) : (
         <div className="space-y-4">
           {reviewList.map((review) => (
-            <div key={review.id} className="rounded-xl border bg-white p-5">
+            <div key={review.id} className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <p className="font-medium">{review.clientName}</p>
@@ -150,7 +150,7 @@ export function ReviewsClient({ canUseAiReplies }: { canUseAiReplies: boolean })
                   <button
                     type="button"
                     onClick={() => togglePublished(review.id, review.isPublished)}
-                    className={`relative inline-flex h-5 w-9 rounded-full transition-colors ${review.isPublished ? "bg-primary" : "bg-gray-200"}`}
+                    className={`relative inline-flex h-5 w-9 rounded-full transition-colors ${review.isPublished ? "bg-primary" : "bg-gray-200 dark:bg-neutral-700"}`}
                     aria-label={copy.visible}
                   >
                     <span className={`absolute top-0.5 size-4 rounded-full bg-white shadow transition-transform ${review.isPublished ? "translate-x-4" : "translate-x-0.5"}`} />

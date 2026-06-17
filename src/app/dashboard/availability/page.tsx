@@ -20,7 +20,7 @@ export default async function AvailabilityPage() {
         description="Set weekly hours and time off for each team member."
       />
       {staffList.length === 0 ? (
-        <div className="bg-white border rounded-xl p-12 text-center text-muted-foreground">
+        <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-12 text-center text-muted-foreground">
           Add staff first before setting availability.
         </div>
       ) : (

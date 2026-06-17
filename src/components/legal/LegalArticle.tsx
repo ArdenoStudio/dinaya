@@ -20,14 +20,14 @@ export function LegalArticle({ title, current, children }: LegalArticleProps) {
   return (
     <article
       className={[
-        "max-w-none text-sm leading-relaxed text-gray-700",
-        "[&_h1]:font-cal [&_h1]:text-3xl [&_h1]:tracking-tight [&_h1]:text-gray-900 [&_h1]:mb-2",
-        "[&_h2]:font-cal [&_h2]:text-lg [&_h2]:tracking-tight [&_h2]:text-gray-900 [&_h2]:mt-10 [&_h2]:mb-3",
+        "max-w-none text-sm leading-relaxed text-gray-700 dark:text-gray-300",
+        "[&_h1]:font-cal [&_h1]:text-3xl [&_h1]:tracking-tight [&_h1]:text-gray-900 dark:text-gray-100 [&_h1]:mb-2",
+        "[&_h2]:font-cal [&_h2]:text-lg [&_h2]:tracking-tight [&_h2]:text-gray-900 dark:text-gray-100 [&_h2]:mt-10 [&_h2]:mb-3",
         "[&_p]:mb-4 [&_p:last-child]:mb-0",
         "[&_ul]:mb-4 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1.5",
-        "[&_li]:text-gray-700",
+        "[&_li]:text-gray-700 dark:text-gray-300",
         "[&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2 hover:[&_a]:text-primary/80",
-        "[&_strong]:font-semibold [&_strong]:text-gray-900",
+        "[&_strong]:font-semibold [&_strong]:text-gray-900 dark:text-gray-100",
       ].join(" ")}
     >
       <h1>{title}</h1>
@@ -35,7 +35,7 @@ export function LegalArticle({ title, current, children }: LegalArticleProps) {
 
       <nav
         aria-label="Other legal pages"
-        className="mb-10 flex flex-wrap gap-x-4 gap-y-2 rounded-xl border bg-gray-50 px-4 py-3 text-xs"
+        className="mb-10 flex flex-wrap gap-x-4 gap-y-2 rounded-xl border bg-gray-50 dark:bg-neutral-900/60 px-4 py-3 text-xs"
       >
         {otherPages.map((page) => (
           <Link key={page.href} href={page.href} className="font-medium no-underline hover:underline">

@@ -56,7 +56,7 @@ export default function TimeSlotGrid({
     return (
       <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
         {Array.from({ length: 10 }).map((_, i) => (
-          <div key={i} className="h-11 animate-pulse rounded-xl bg-gray-100" />
+          <div key={i} className="h-11 animate-pulse rounded-xl bg-gray-100 dark:bg-neutral-800" />
         ))}
       </div>
     );
@@ -75,9 +75,9 @@ export default function TimeSlotGrid({
       emptyState === "closed" ? "calendar-x" : emptyState === "capacity" ? "x-circle" : "calendar-x";
 
     return (
-      <div className="rounded-xl border border-dashed border-gray-200 bg-gray-50/50 px-4 py-10 text-center">
+      <div className="rounded-xl border border-dashed border-gray-200 dark:border-neutral-800 bg-gray-50/50 dark:bg-neutral-900/50 px-4 py-10 text-center">
         <Icon name={emptyIcon} className="mb-2 block text-2xl text-gray-300" />
-        <p className="text-sm text-gray-500">{emptyMessage}</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">{emptyMessage}</p>
       </div>
     );
   }
@@ -92,7 +92,7 @@ export default function TimeSlotGrid({
     <div className="space-y-5">
       {grouped.map(({ period, label, slots: periodSlots }) => (
         <div key={period}>
-          <p className="mb-2.5 text-xs font-semibold text-gray-500">{label}</p>
+          <p className="mb-2.5 text-xs font-semibold text-gray-500 dark:text-gray-400">{label}</p>
           <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
             {periodSlots.map((slot) => {
               const isSelected = selectedStartUtc === slot.startUtc;
@@ -106,7 +106,7 @@ export default function TimeSlotGrid({
                   className={`w-full rounded-xl px-2 py-2.5 text-sm font-semibold tabular-nums transition-all ${
                     isSelected
                       ? "booking-bg-accent text-white shadow-md booking-shadow-accent ring-2 booking-ring-accent"
-                      : "border border-gray-200 bg-white text-gray-700 hover:booking-border-accent hover:booking-bg-accent-muted/50 hover:booking-text-accent"
+                      : "border border-gray-200 dark:border-neutral-800 bg-white dark:border-neutral-800 dark:bg-neutral-900 text-gray-700 dark:text-gray-300 hover:booking-border-accent hover:booking-bg-accent-muted/50 hover:booking-text-accent"
                   }`}
                 >
                   {slot.label}

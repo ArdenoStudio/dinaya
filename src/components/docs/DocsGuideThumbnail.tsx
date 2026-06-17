@@ -19,7 +19,7 @@ export function DocsGuideThumbnail({ mockupId, screenshotSrc, className }: Props
     return (
       <div
         className={cn(
-          "relative h-32 overflow-hidden rounded-xl border border-gray-200/80 bg-gray-50 shadow-inner",
+          "relative h-32 overflow-hidden rounded-xl border border-gray-200 dark:border-neutral-800/80 bg-gray-50 dark:bg-neutral-900/60 shadow-inner",
           className,
         )}
       >
@@ -32,7 +32,7 @@ export function DocsGuideThumbnail({ mockupId, screenshotSrc, className }: Props
     return (
       <div
         className={cn(
-          "relative flex h-32 items-end justify-center overflow-hidden rounded-xl border border-gray-200/80 bg-gradient-to-b from-slate-50 to-white",
+          "relative flex h-32 items-end justify-center overflow-hidden rounded-xl border border-gray-200 dark:border-neutral-800/80 bg-gradient-to-b from-slate-50 to-white",
           className,
         )}
       >
@@ -47,7 +47,7 @@ export function DocsGuideThumbnail({ mockupId, screenshotSrc, className }: Props
     return (
       <div
         className={cn(
-          "relative h-32 overflow-hidden rounded-xl border border-gray-200/80 bg-gray-50",
+          "relative h-32 overflow-hidden rounded-xl border border-gray-200 dark:border-neutral-800/80 bg-gray-50 dark:bg-neutral-900/60",
           className,
         )}
       >
@@ -61,7 +61,7 @@ export function DocsGuideThumbnail({ mockupId, screenshotSrc, className }: Props
   return (
     <div
       className={cn(
-        "flex h-32 items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50/80 text-xs text-muted-foreground",
+        "flex h-32 items-center justify-center rounded-xl border border-dashed border-gray-200 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-900/60 text-xs text-muted-foreground",
         className,
       )}
     >

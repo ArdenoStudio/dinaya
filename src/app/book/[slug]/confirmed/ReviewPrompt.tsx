@@ -21,7 +21,7 @@ export default function ReviewPrompt({ reviewToken, businessName }: Props) {
 
   if (done) {
     return (
-      <div className="rounded-2xl border bg-white p-6 text-center shadow-sm">
+      <div className="rounded-2xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-6 text-center shadow-sm">
         <Icon name="stars" className="mb-2 block text-2xl text-amber-400" />
         <p className="text-sm font-medium">Thanks for your review!</p>
         <p className="mt-1 text-xs text-muted-foreground">It helps others discover {businessName}.</p>
@@ -50,7 +50,7 @@ export default function ReviewPrompt({ reviewToken, businessName }: Props) {
   const displayRating = hovered || rating;
 
   return (
-    <div className="rounded-2xl border bg-white p-6 shadow-sm">
+    <div className="rounded-2xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-6 shadow-sm">
       <div className="mb-3 flex items-start justify-between">
         <div>
           <p className="text-sm font-medium">How was your experience?</p>

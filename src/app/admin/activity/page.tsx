@@ -57,7 +57,7 @@ export default async function AdminActivityPage({
         </p>
       </div>
 
-      <form method="get" className="flex flex-wrap items-center gap-3 rounded-xl border bg-white p-3">
+      <form method="get" className="flex flex-wrap items-center gap-3 rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-3">
         <div className="relative min-w-[16rem] flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
           <input
@@ -65,7 +65,7 @@ export default async function AdminActivityPage({
             name="q"
             defaultValue={q}
             placeholder="Search action or business"
-            className="h-10 w-full rounded-md border bg-white pl-9 pr-3 text-sm outline-none transition-shadow placeholder:text-muted-foreground/60 focus:ring-2 focus:ring-primary/30"
+            className="h-10 w-full rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 pl-9 pr-3 text-sm outline-none transition-shadow placeholder:text-muted-foreground/60 focus:ring-2 focus:ring-primary/30"
           />
         </div>
         <input
@@ -73,14 +73,14 @@ export default async function AdminActivityPage({
           name="entity"
           defaultValue={entity}
           placeholder="entity (e.g. booking)"
-          className="h-10 w-44 rounded-md border bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
+          className="h-10 w-44 rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
         />
         <button type="submit" className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">
           Apply
         </button>
       </form>
 
-      <div className="overflow-hidden rounded-xl border bg-white">
+      <div className="overflow-hidden rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-muted/30 text-left text-xs uppercase tracking-wider text-muted-foreground">

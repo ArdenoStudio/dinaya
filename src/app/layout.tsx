@@ -5,6 +5,7 @@ import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { ChunkLoadRecovery } from "@/components/ChunkLoadRecovery";
 import { BookingPwa } from "@/components/booking/BookingPwa";
 import { NavProvider } from "@/context/NavContext";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import "./globals.css";
 
 const calSans = localFont({
@@ -27,23 +28,25 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="bg-background">
+    <html lang="en" className="bg-background" suppressHydrationWarning>
       <body className={`${calSans.variable} font-sans`}>
-        <a
-          href="#main-content"
-          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground focus:outline-none"
-        >
-          Skip to main content
-        </a>
-        <NavProvider>
-          <BookingPwa />
-          <main id="main-content">
-            {children}
-          </main>
-        </NavProvider>
-        <ChunkLoadRecovery />
-        {enableVercelAnalytics ? <Analytics /> : null}
-        <GoogleAnalytics />
+        <ThemeProvider>
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground focus:outline-none"
+          >
+            Skip to main content
+          </a>
+          <NavProvider>
+            <BookingPwa />
+            <main id="main-content">
+              {children}
+            </main>
+          </NavProvider>
+          <ChunkLoadRecovery />
+          {enableVercelAnalytics ? <Analytics /> : null}
+          <GoogleAnalytics />
+        </ThemeProvider>
       </body>
     </html>
   );

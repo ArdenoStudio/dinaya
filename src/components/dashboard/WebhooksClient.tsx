@@ -112,7 +112,7 @@ export function WebhooksClient() {
       )}
 
       {showForm && (
-        <form onSubmit={handleAdd} className="mb-6 space-y-4 rounded-xl border bg-white p-5">
+        <form onSubmit={handleAdd} className="mb-6 space-y-4 rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
           <div>
             <label className="text-sm font-medium">Endpoint URL *</label>
             <input
@@ -172,7 +172,7 @@ export function WebhooksClient() {
           }
         />
       ) : (
-        <div className="divide-y rounded-xl border bg-white">
+        <div className="divide-y rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
           {hooks.map((hook) => (
             <div key={hook.id} className="p-4">
               <div className="flex items-start justify-between gap-4">
@@ -187,7 +187,7 @@ export function WebhooksClient() {
                 <div className="flex shrink-0 items-center gap-3">
                   <button
                     onClick={() => toggleActive(hook)}
-                    className={`rounded-full border px-2 py-0.5 text-xs ${hook.isActive ? "border-green-300 bg-green-50 text-green-700" : "border-gray-200 text-gray-500"}`}
+                    className={`rounded-full border px-2 py-0.5 text-xs ${hook.isActive ? "border-green-300 bg-green-50 text-green-700" : "border-gray-200 dark:border-neutral-800 text-gray-500 dark:text-gray-400"}`}
                   >
                     {hook.isActive ? "Active" : "Paused"}
                   </button>

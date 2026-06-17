@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
+import { useTheme } from "next-themes";
 import IPhoneMockup from "@/components/ui/iphone-mockup";
 import { Icon } from "@/components/ui/Icon";
 
@@ -88,11 +89,11 @@ function DinayaLogo({ size = 13 }: { size?: number }) {
 
 function DinayaBranding({ compact = false }: { compact?: boolean }) {
   return (
-    <div className={`inline-flex items-center gap-1.5 bg-gray-50 border border-gray-100 rounded-full ${compact ? "px-2.5 py-1" : "px-3 py-1.5"}`}>
-      <span className={`text-gray-500 ${compact ? "text-[11px]" : "text-xs"}`}>Powered by</span>
-      <span className="inline-flex items-center gap-1 text-gray-900">
+    <div className={`inline-flex items-center gap-1.5 bg-gray-50 dark:bg-neutral-900/60 border border-gray-100 dark:border-neutral-800 rounded-full ${compact ? "px-2.5 py-1" : "px-3 py-1.5"}`}>
+      <span className={`text-gray-500 dark:text-gray-400 ${compact ? "text-[11px]" : "text-xs"}`}>Powered by</span>
+      <span className="inline-flex items-center gap-1 text-gray-900 dark:text-gray-100">
         <DinayaLogo size={compact ? 11 : 15} />
-        <span className={`font-cal leading-none text-gray-900 ${compact ? "text-[11px]" : "text-xs"}`}>Dinaya.lk</span>
+        <span className={`font-cal leading-none text-gray-900 dark:text-gray-100 ${compact ? "text-[11px]" : "text-xs"}`}>Dinaya.lk</span>
       </span>
     </div>
   );
@@ -100,7 +101,7 @@ function DinayaBranding({ compact = false }: { compact?: boolean }) {
 
 function TrustLine({ persona, light = false }: { persona: PersonaData; light?: boolean }) {
   return (
-    <p className={`text-xs mt-0.5 ${light ? "text-blue-200/90" : "text-gray-500"}`}>
+    <p className={`text-xs mt-0.5 ${light ? "text-blue-200/90" : "text-gray-500 dark:text-gray-400"}`}>
       {persona.trust.rating} ★ · {persona.trust.bookings} bookings
     </p>
   );
@@ -122,13 +123,13 @@ function CalendarDay({ cell }: { cell: DayCell }) {
           : isBooked
           ? "text-gray-300 line-through cursor-not-allowed"
           : d
-          ? "text-gray-600 hover:bg-white hover:shadow-sm cursor-pointer"
+          ? "text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-neutral-800 hover:shadow-sm cursor-pointer"
           : ""
       }`}
     >
       {d}
       {isAvailable && !isSelected && (
-        <span className="absolute bottom-0.5 size-1 rounded-full bg-emerald-500" />
+        <span className="absolute bottom-0.5 size-1 rounded-full bg-emerald-400 dark:bg-emerald-500" />
       )}
     </div>
   );
@@ -137,24 +138,24 @@ function CalendarDay({ cell }: { cell: DayCell }) {
 function FloatingToasts({ persona }: { persona: PersonaData }) {
   return (
     <>
-      <div className="absolute -top-5 -right-5 flex bg-white/90 backdrop-blur-md rounded-2xl border border-white/70 shadow-2xl shadow-gray-900/12 p-3.5 items-center gap-3 max-w-[230px]">
+      <div className="absolute -top-5 -right-5 flex bg-white/90 backdrop-blur dark:bg-neutral-950/90 rounded-2xl border border-white/70 dark:border-neutral-700/70 shadow-2xl shadow-gray-900/12 dark:shadow-black/40 p-3.5 items-center gap-3 max-w-[230px]">
         <div className="size-10 bg-gradient-to-br from-amber-400 to-amber-500 rounded-full flex items-center justify-center shrink-0 shadow-md shadow-amber-500/30">
           <Icon name="check-lg" className="text-white text-sm" />
         </div>
         <div>
-          <p className="text-xs font-bold text-gray-900">{persona.notif.title}</p>
-          <p className="text-[11px] text-gray-500 mt-0.5">{persona.notif.detail}</p>
+          <p className="text-xs font-bold text-gray-900 dark:text-gray-100">{persona.notif.title}</p>
+          <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">{persona.notif.detail}</p>
           <p className="text-[11px] font-semibold text-amber-600">{persona.notif.amount}</p>
         </div>
       </div>
 
-      <div className="absolute -bottom-5 -left-5 flex bg-white/90 backdrop-blur-md rounded-2xl border border-white/70 shadow-2xl shadow-gray-900/12 p-3.5 items-center gap-3 max-w-[210px]">
+      <div className="absolute -bottom-5 -left-5 flex bg-white/90 backdrop-blur dark:bg-neutral-950/90 rounded-2xl border border-white/70 dark:border-neutral-700/70 shadow-2xl shadow-gray-900/12 dark:shadow-black/40 p-3.5 items-center gap-3 max-w-[210px]">
         <div className="size-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shrink-0 shadow-md shadow-blue-500/30">
           <Icon name="credit-card" className="text-white text-sm" />
         </div>
         <div>
-          <p className="text-xs font-bold text-gray-900">{persona.payment.title}</p>
-          <p className="text-[11px] text-gray-500 mt-0.5">
+          <p className="text-xs font-bold text-gray-900 dark:text-gray-100">{persona.payment.title}</p>
+          <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
             {persona.payment.detail}{" "}
             <span className="font-semibold text-blue-600">{persona.payment.amount}</span>
           </p>
@@ -171,7 +172,7 @@ function PhoneScreen({ persona }: { persona: PersonaData }) {
   const selectedTime = persona.slots[persona.selectedSlot].label;
 
   return (
-    <div className="w-full h-full flex flex-col bg-[#f2f2f7]">
+    <div className="w-full h-full flex flex-col bg-[#f2f2f7] dark:bg-neutral-950">
       <div className="bg-gradient-to-b from-blue-700 via-blue-600 to-blue-600 px-[18px] pt-[66px] pb-[18px]">
         <div className="flex items-center gap-[12px] mb-[14px]">
           <div className="size-[42px] rounded-[13px] bg-white/20 flex items-center justify-center ring-1 ring-white/25 shrink-0">
@@ -213,59 +214,59 @@ function PhoneScreen({ persona }: { persona: PersonaData }) {
       </div>
 
       <div className="flex-1 px-[14px] py-[12px] flex flex-col gap-[8px]">
-        <div className="bg-white rounded-[16px] px-[15px] py-[13px]">
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.08em] mb-[9px]">Selected Service</p>
+        <div className="bg-white dark:bg-neutral-900 rounded-[16px] px-[15px] py-[13px]">
+          <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-[0.08em] mb-[9px]">Selected Service</p>
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-[15px] font-semibold text-gray-900 leading-snug">{selectedService.name}</p>
+              <p className="text-[15px] font-semibold text-gray-900 dark:text-gray-100 leading-snug">{selectedService.name}</p>
               <div className="flex items-center gap-[4px] mt-[3px]">
                 <Icon name="clock" className="text-gray-300 text-[10px]" />
-                <p className="text-[11px] text-gray-400">{selectedService.duration}</p>
+                <p className="text-[11px] text-gray-400 dark:text-gray-500">{selectedService.duration}</p>
               </div>
             </div>
             <p className="text-[16px] font-bold text-blue-600 tabular-nums shrink-0">{selectedService.price}</p>
           </div>
         </div>
 
-        <div className="bg-white rounded-[16px] px-[15px] py-[13px]">
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.08em] mb-[9px]">Appointment</p>
+        <div className="bg-white dark:bg-neutral-900 rounded-[16px] px-[15px] py-[13px]">
+          <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-[0.08em] mb-[9px]">Appointment</p>
           <div className="flex items-center gap-[11px] mb-[9px]">
-            <div className="size-[34px] rounded-[10px] bg-blue-50 flex items-center justify-center shrink-0">
+            <div className="size-[34px] rounded-[10px] bg-blue-50 dark:bg-blue-950/40 flex items-center justify-center shrink-0">
               <Icon name="calendar3" className="text-blue-500 text-[13px]" />
             </div>
             <div>
-              <p className="text-[13px] font-semibold text-gray-900">Thursday, May 15</p>
-              <p className="text-[11px] text-gray-400">2025</p>
+              <p className="text-[13px] font-semibold text-gray-900 dark:text-gray-100">Thursday, May 15</p>
+              <p className="text-[11px] text-gray-400 dark:text-gray-500">2025</p>
             </div>
           </div>
-          <div className="h-px bg-gray-100 mb-[9px]" />
+          <div className="h-px bg-gray-100 dark:bg-neutral-800 mb-[9px]" />
           <div className="flex items-center gap-[11px]">
-            <div className="size-[34px] rounded-[10px] bg-emerald-50 flex items-center justify-center shrink-0">
+            <div className="size-[34px] rounded-[10px] bg-emerald-50 dark:bg-emerald-950/40 flex items-center justify-center shrink-0">
               <Icon name="clock" className="text-emerald-500 text-[13px]" />
             </div>
             <div className="flex-1">
-              <p className="text-[13px] font-semibold text-gray-900">{selectedTime}</p>
-              <p className="text-[11px] text-gray-400">{selectedService.duration}</p>
+              <p className="text-[13px] font-semibold text-gray-900 dark:text-gray-100">{selectedTime}</p>
+              <p className="text-[11px] text-gray-400 dark:text-gray-500">{selectedService.duration}</p>
             </div>
-            <span className="text-[11px] text-emerald-600 font-semibold bg-emerald-50 px-[8px] py-[3px] rounded-full border border-emerald-100 shrink-0">
+            <span className="text-[11px] text-emerald-600 font-semibold bg-emerald-50 dark:bg-emerald-950/40 dark:border-emerald-800 dark:text-emerald-400 px-[8px] py-[3px] rounded-full border border-emerald-100 shrink-0">
               Available
             </span>
           </div>
         </div>
 
-        <div className="bg-white rounded-[16px] px-[15px] py-[13px]">
+        <div className="bg-white dark:bg-neutral-900 rounded-[16px] px-[15px] py-[13px]">
           <div className="flex justify-between items-center">
-            <p className="text-[12px] text-gray-500">{selectedService.name}</p>
-            <p className="text-[12px] text-gray-700 font-medium tabular-nums">{selectedService.price}</p>
+            <p className="text-[12px] text-gray-500 dark:text-gray-400">{selectedService.name}</p>
+            <p className="text-[12px] text-gray-700 dark:text-gray-300 font-medium tabular-nums">{selectedService.price}</p>
           </div>
           <div className="flex justify-between items-center mt-[5px]">
-            <p className="text-[11px] text-gray-400">Due now (50% deposit)</p>
+            <p className="text-[11px] text-gray-400 dark:text-gray-500">Due now (50% deposit)</p>
             <p className="text-[11px] text-blue-600 font-semibold tabular-nums">{depositAmount}</p>
           </div>
-          <div className="h-px bg-gray-100 my-[9px]" />
+          <div className="h-px bg-gray-100 dark:bg-neutral-800 my-[9px]" />
           <div className="flex justify-between items-center">
-            <p className="text-[13px] font-bold text-gray-900">Total</p>
-            <p className="text-[14px] font-bold text-gray-900 tabular-nums">{selectedService.price}</p>
+            <p className="text-[13px] font-bold text-gray-900 dark:text-gray-100">Total</p>
+            <p className="text-[14px] font-bold text-gray-900 dark:text-gray-100 tabular-nums">{selectedService.price}</p>
           </div>
         </div>
       </div>
@@ -276,7 +277,7 @@ function PhoneScreen({ persona }: { persona: PersonaData }) {
         </button>
         <div className="flex items-center justify-center gap-[5px] mt-[9px]">
           <Icon name="shield-check" className="text-gray-300 text-[11px]" />
-          <span className="text-[11px] text-gray-400">Secured by PayHere · SSL encrypted</span>
+          <span className="text-[11px] text-gray-400 dark:text-gray-500">Secured by PayHere · SSL encrypted</span>
         </div>
         <div className="flex justify-center mt-[8px]">
           <DinayaBranding compact />
@@ -302,21 +303,21 @@ function ConfirmationPhoneScreen({ persona }: { persona: PersonaData }) {
       </div>
 
       <div className="flex-1 px-[12px] py-[16px] flex flex-col justify-end gap-[8px]">
-        <div className="self-start max-w-[88%] bg-white rounded-[12px] rounded-tl-[2px] px-[12px] py-[10px] shadow-sm">
-          <p className="text-[13px] text-gray-800 leading-snug">{persona.confirmationMessage}</p>
+        <div className="self-start max-w-[88%] bg-white dark:bg-neutral-800 rounded-[12px] rounded-tl-[2px] px-[12px] py-[10px] shadow-sm">
+          <p className="text-[13px] text-gray-800 dark:text-gray-200 leading-snug">{persona.confirmationMessage}</p>
           <div className="flex items-center justify-end gap-[4px] mt-[4px]">
-            <span className="text-[10px] text-gray-400">11:02 AM</span>
+            <span className="text-[10px] text-gray-400 dark:text-gray-500">11:02 AM</span>
             <Icon name="check-lg" className="text-blue-400 text-[10px]" />
           </div>
         </div>
-        <div className="self-start flex items-center gap-[6px] bg-white/80 rounded-full px-[10px] py-[5px]">
+        <div className="self-start flex items-center gap-[6px] bg-white/80 dark:bg-neutral-800/90 rounded-full px-[10px] py-[5px]">
           <Icon name="check-circle-fill" className="text-emerald-500 text-[12px]" />
-          <span className="text-[11px] text-gray-600 font-medium">Booking confirmed</span>
+          <span className="text-[11px] text-gray-600 dark:text-gray-400 font-medium">Booking confirmed</span>
         </div>
       </div>
 
-      <div className="px-[14px] pb-[26px] pt-[8px] bg-[#f0f0f0]">
-        <p className="text-center text-[11px] text-gray-500 mb-[8px]">
+      <div className="px-[14px] pb-[26px] pt-[8px] bg-[#f0f0f0] dark:bg-neutral-900">
+        <p className="text-center text-[11px] text-gray-500 dark:text-gray-400 mb-[8px]">
           Automated WhatsApp &amp; email — no manual follow-up
         </p>
         <div className="flex justify-center">
@@ -331,47 +332,47 @@ function OwnerDashboardPhoneScreen({ persona }: { persona: PersonaData }) {
   const selectedService = persona.services.find((s) => s.selected)!;
 
   return (
-    <div className="w-full h-full flex flex-col bg-gray-50">
-      <div className="bg-white border-b px-[16px] pt-[66px] pb-[14px]">
-        <p className="font-cal text-[15px] font-semibold text-gray-900">Dinaya</p>
-        <p className="text-[12px] text-gray-500 mt-[2px]">Today&apos;s schedule</p>
+    <div className="w-full h-full flex flex-col bg-gray-50 dark:bg-neutral-900/60">
+      <div className="bg-white dark:bg-neutral-900 border-b border-gray-100 dark:border-neutral-800 px-[16px] pt-[66px] pb-[14px]">
+        <p className="font-cal text-[15px] font-semibold text-gray-900 dark:text-gray-100">Dinaya</p>
+        <p className="text-[12px] text-gray-500 dark:text-gray-400 mt-[2px]">Today&apos;s schedule</p>
       </div>
 
       <div className="flex-1 px-[14px] py-[12px] flex flex-col gap-[8px]">
         <div className="grid grid-cols-2 gap-[8px]">
-          <div className="bg-white rounded-[12px] px-[12px] py-[10px] border border-gray-100">
-            <p className="text-[10px] text-gray-400 uppercase tracking-wide">Revenue</p>
-            <p className="text-[15px] font-bold text-gray-900 mt-[2px]">Rs. 2,500</p>
+          <div className="bg-white dark:bg-neutral-900 rounded-[12px] px-[12px] py-[10px] border border-gray-100 dark:border-neutral-800">
+            <p className="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-wide">Revenue</p>
+            <p className="text-[15px] font-bold text-gray-900 dark:text-gray-100 mt-[2px]">Rs. 2,500</p>
           </div>
-          <div className="bg-white rounded-[12px] px-[12px] py-[10px] border border-gray-100">
-            <p className="text-[10px] text-gray-400 uppercase tracking-wide">Bookings</p>
-            <p className="text-[15px] font-bold text-gray-900 mt-[2px]">3 today</p>
+          <div className="bg-white dark:bg-neutral-900 rounded-[12px] px-[12px] py-[10px] border border-gray-100 dark:border-neutral-800">
+            <p className="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-wide">Bookings</p>
+            <p className="text-[15px] font-bold text-gray-900 dark:text-gray-100 mt-[2px]">3 today</p>
           </div>
         </div>
 
-        <div className="bg-white rounded-[16px] px-[14px] py-[12px] border border-gray-100">
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.08em] mb-[8px]">Up next</p>
+        <div className="bg-white dark:bg-neutral-900 rounded-[16px] px-[14px] py-[12px] border border-gray-100 dark:border-neutral-800">
+          <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-[0.08em] mb-[8px]">Up next</p>
           <div className="flex items-center gap-[10px]">
             <div className="size-[36px] rounded-full bg-blue-100 flex items-center justify-center shrink-0">
               <span className="text-[13px] font-bold text-blue-600">S</span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[13px] font-semibold text-gray-900 truncate">{persona.clientName} Perera</p>
-              <p className="text-[11px] text-gray-500">{selectedService.name} · 11:00 AM</p>
+              <p className="text-[13px] font-semibold text-gray-900 dark:text-gray-100 truncate">{persona.clientName} Perera</p>
+              <p className="text-[11px] text-gray-500 dark:text-gray-400">{selectedService.name} · 11:00 AM</p>
             </div>
-            <span className="text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-[7px] py-[3px] rounded-full shrink-0">
+            <span className="text-[11px] font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 px-[7px] py-[3px] rounded-full shrink-0">
               Paid
             </span>
           </div>
         </div>
 
-        <div className="bg-amber-50 border border-amber-100 rounded-[14px] px-[12px] py-[10px] flex items-center gap-[10px]">
+        <div className="bg-amber-50 dark:bg-amber-950/40 border border-amber-100 rounded-[14px] px-[12px] py-[10px] flex items-center gap-[10px]">
           <div className="size-[32px] bg-amber-400 rounded-full flex items-center justify-center shrink-0">
             <Icon name="check-lg" className="text-white text-[12px]" />
           </div>
           <div>
-            <p className="text-[12px] font-bold text-gray-900">{persona.notif.title}</p>
-            <p className="text-[11px] text-gray-600">{persona.notif.detail}</p>
+            <p className="text-[12px] font-bold text-gray-900 dark:text-gray-100">{persona.notif.title}</p>
+            <p className="text-[11px] text-gray-600 dark:text-gray-400">{persona.notif.detail}</p>
           </div>
         </div>
       </div>
@@ -383,17 +384,17 @@ function CustomerBookingDesktop({ persona }: { persona: PersonaData }) {
   const selectedService = persona.services.find((s) => s.selected);
 
   return (
-    <div className="h-full flex flex-col bg-white p-5 sm:p-6 overflow-hidden">
-      <div className="flex items-center gap-3.5 mb-3.5 pb-3.5 border-b border-gray-100 shrink-0">
+    <div className="h-full flex flex-col bg-white dark:bg-neutral-900 p-5 sm:p-6 overflow-hidden">
+      <div className="flex items-center gap-3.5 mb-3.5 pb-3.5 border-b border-gray-100 dark:border-neutral-800 shrink-0">
         <div className="size-11 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center shrink-0 shadow-lg shadow-blue-500/25">
           <Icon name={persona.icon} className="text-white text-xl" />
         </div>
         <div className="min-w-0">
-          <h3 className="font-semibold text-base text-gray-900 truncate">{persona.business}</h3>
-          <p className="text-xs text-gray-400 mt-0.5 truncate">{persona.location}</p>
+          <h3 className="font-semibold text-base text-gray-900 dark:text-gray-100 truncate">{persona.business}</h3>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 truncate">{persona.location}</p>
           <TrustLine persona={persona} />
         </div>
-        <div className="ml-auto flex items-center gap-1.5 text-xs text-green-600 font-medium bg-green-50 px-2.5 py-1 rounded-full border border-green-100/80 shrink-0">
+        <div className="ml-auto flex items-center gap-1.5 text-xs text-green-600 dark:text-green-400 font-medium bg-green-50 dark:bg-green-950/40 px-2.5 py-1 rounded-full border border-green-100/80 dark:border-green-800/50 shrink-0">
           <span className="size-1.5 rounded-full bg-green-500 animate-pulse" />
           Available today
         </div>
@@ -401,31 +402,31 @@ function CustomerBookingDesktop({ persona }: { persona: PersonaData }) {
 
       <div className="flex-1 min-h-0 grid sm:grid-cols-2 gap-5">
         <div className="min-h-0 flex flex-col">
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 shrink-0">Choose a service</p>
+          <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2 shrink-0">Choose a service</p>
           <div className="space-y-1.5 min-h-0">
             {persona.services.map((s) => (
               <div
                 key={s.name}
                 className={`flex justify-between items-center p-3 rounded-xl cursor-pointer transition-all ${
                   s.selected
-                    ? "border border-blue-500 ring-2 ring-blue-500/10 bg-blue-50/60 shadow-sm"
-                    : "border border-gray-100 hover:border-gray-200"
+                    ? "border border-blue-500 ring-2 ring-blue-500/10 bg-blue-50 dark:bg-blue-950/40 shadow-sm"
+                    : "border border-gray-100 dark:border-neutral-800 hover:border-gray-200 dark:border-neutral-800"
                 }`}
               >
                 <div className="flex items-center gap-2 min-w-0">
                   <div
                     className={`size-3.5 rounded-full border-2 shrink-0 flex items-center justify-center ${
-                      s.selected ? "border-blue-500 bg-blue-500" : "border-gray-300"
+                      s.selected ? "border-blue-500 bg-blue-50 dark:bg-blue-950/40" : "border-gray-300 dark:border-neutral-700"
                     }`}
                   >
-                    {s.selected && <div className="size-1 rounded-full bg-white" />}
+                    {s.selected && <div className="size-1 rounded-full bg-blue-600 dark:bg-blue-400" />}
                   </div>
                   <div className="min-w-0">
-                    <p className={`text-sm font-medium truncate ${s.selected ? "text-blue-900" : "text-gray-800"}`}>{s.name}</p>
-                    <p className="text-xs text-gray-400">{s.duration}</p>
+                    <p className={`text-sm font-medium truncate ${s.selected ? "text-blue-900" : "text-gray-800 dark:text-gray-200"}`}>{s.name}</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500">{s.duration}</p>
                   </div>
                 </div>
-                <span className={`text-sm font-bold shrink-0 tabular-nums ml-2 ${s.selected ? "text-blue-600" : "text-gray-600"}`}>
+                <span className={`text-sm font-bold shrink-0 tabular-nums ml-2 ${s.selected ? "text-blue-600" : "text-gray-600 dark:text-gray-400"}`}>
                   {s.price}
                 </span>
               </div>
@@ -434,22 +435,22 @@ function CustomerBookingDesktop({ persona }: { persona: PersonaData }) {
         </div>
 
         <div className="min-h-0 flex flex-col">
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 shrink-0">Pick a date &amp; time</p>
-          <div className="rounded-xl border border-gray-100 bg-gray-50/60 p-2.5 mb-2 shrink-0">
+          <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2 shrink-0">Pick a date &amp; time</p>
+          <div className="rounded-xl border border-gray-100 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-900/60 p-2.5 mb-2 shrink-0">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-sm font-bold text-gray-800">May 2025</span>
+              <span className="text-sm font-bold text-gray-800 dark:text-gray-200">May 2025</span>
               <div className="flex gap-1">
-                <button className="size-6 rounded-lg flex items-center justify-center hover:bg-white hover:shadow-sm text-gray-400 transition-all" aria-label="Previous month">
+                <button className="size-6 rounded-lg flex items-center justify-center hover:bg-white dark:hover:bg-neutral-800 hover:shadow-sm text-gray-400 dark:text-gray-500 transition-all" aria-label="Previous month">
                   <Icon name="chevron-left" className="text-[10px]" />
                 </button>
-                <button className="size-6 rounded-lg flex items-center justify-center hover:bg-white hover:shadow-sm text-gray-400 transition-all" aria-label="Next month">
+                <button className="size-6 rounded-lg flex items-center justify-center hover:bg-white dark:hover:bg-neutral-800 hover:shadow-sm text-gray-400 dark:text-gray-500 transition-all" aria-label="Next month">
                   <Icon name="chevron-right" className="text-[10px]" />
                 </button>
               </div>
             </div>
             <div className="grid grid-cols-7 text-center gap-y-0.5">
               {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => (
-                <div key={i} className="text-[8px] font-bold text-gray-400 pb-1 tracking-wider">
+                <div key={i} className="text-[8px] font-bold text-gray-400 dark:text-gray-500 pb-1 tracking-wider">
                   {d}
                 </div>
               ))}
@@ -465,7 +466,7 @@ function CustomerBookingDesktop({ persona }: { persona: PersonaData }) {
                 className={`relative flex flex-col items-center justify-center text-xs py-2 rounded-lg font-semibold transition-all min-h-[40px] ${
                   i === persona.selectedSlot
                     ? "bg-blue-600 text-white shadow-md shadow-blue-500/25"
-                    : "border border-gray-200 text-gray-600 hover:border-blue-300 hover:text-blue-600 bg-white"
+                    : "border border-gray-200 dark:border-neutral-800 text-gray-600 dark:text-gray-400 hover:border-blue-300 hover:text-blue-600 bg-white dark:bg-neutral-900"
                 }`}
               >
                 {slot.label}
@@ -484,11 +485,11 @@ function CustomerBookingDesktop({ persona }: { persona: PersonaData }) {
         </div>
       </div>
 
-      <div className="mt-3.5 pt-3.5 border-t border-gray-100 flex items-center gap-3 shrink-0">
+      <div className="mt-3.5 pt-3.5 border-t border-gray-100 dark:border-neutral-800 flex items-center gap-3 shrink-0">
         <button className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 rounded-xl font-semibold text-sm shadow-lg shadow-blue-500/25">
           Confirm & Pay — {selectedService?.price}
         </button>
-        <div className="flex items-center gap-1.5 text-xs text-gray-400 shrink-0">
+        <div className="flex items-center gap-1.5 text-xs text-gray-400 dark:text-gray-500 shrink-0">
           <Icon name="shield-check" className="text-blue-400 text-xs" />
           PayHere
         </div>
@@ -511,19 +512,19 @@ function OwnerDashboardDesktop({ persona }: { persona: PersonaData }) {
   ];
 
   return (
-    <div className="h-full bg-gray-50 p-4 sm:p-5 overflow-hidden">
+    <div className="h-full bg-gray-50 dark:bg-neutral-900/60 p-4 sm:p-5 overflow-hidden">
       <div className="flex h-full gap-3">
-        <aside className="hidden sm:flex w-[26%] shrink-0 flex-col bg-white rounded-xl border border-gray-100 overflow-hidden">
+        <aside className="hidden sm:flex w-[26%] shrink-0 flex-col bg-white dark:bg-neutral-900 rounded-xl border border-gray-100 dark:border-neutral-800 overflow-hidden">
           <div className="border-b px-3 py-2">
-            <p className="font-cal text-xs font-semibold text-gray-900">Dinaya</p>
-            <p className="text-[9px] text-gray-400 truncate">{persona.business}</p>
+            <p className="font-cal text-xs font-semibold text-gray-900 dark:text-gray-100">Dinaya</p>
+            <p className="text-[9px] text-gray-400 dark:text-gray-500 truncate">{persona.business}</p>
           </div>
           <nav className="flex-1 px-1.5 py-1.5 space-y-0.5">
             {["Overview", "Bookings", "Clients", "Payments", "Settings"].map((item) => (
               <div
                 key={item}
                 className={`rounded-lg px-2 py-1 text-[11px] ${
-                  item === "Bookings" ? "bg-blue-50 font-semibold text-blue-700" : "text-gray-600"
+                  item === "Bookings" ? "bg-blue-50 dark:bg-blue-950/40 font-semibold text-blue-700" : "text-gray-600 dark:text-gray-400"
                 }`}
               >
                 {item}
@@ -535,21 +536,21 @@ function OwnerDashboardDesktop({ persona }: { persona: PersonaData }) {
         <div className="flex-1 min-w-0 flex flex-col">
           <div className="flex items-center justify-between mb-2 shrink-0">
             <div>
-              <h3 className="text-sm font-semibold text-gray-900">Today&apos;s schedule</h3>
-              <p className="text-[10px] text-gray-400 mt-0.5">Thursday, May 15, 2025</p>
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Today&apos;s schedule</h3>
+              <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">Thursday, May 15, 2025</p>
             </div>
             <div className="flex gap-1.5">
-              <span className="text-[10px] font-semibold text-gray-700 bg-white border border-gray-200 rounded-full px-2 py-0.5">
+              <span className="text-[10px] font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-800 rounded-full px-2 py-0.5">
                 Rs. 7,100 today
               </span>
-              <span className="text-[10px] font-semibold text-blue-700 bg-blue-50 border border-blue-100 rounded-full px-2 py-0.5">
+              <span className="text-[10px] font-semibold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-800/50 rounded-full px-2 py-0.5">
                 3 bookings
               </span>
             </div>
           </div>
 
-          <div className="flex-1 min-h-0 bg-white rounded-xl border border-gray-100 overflow-hidden">
-            <div className="grid grid-cols-[auto_1fr_auto_auto] gap-x-3 gap-y-0 text-[9px] font-bold text-gray-400 uppercase tracking-wider px-3 py-2 border-b bg-gray-50/80">
+          <div className="flex-1 min-h-0 bg-white dark:bg-neutral-900 rounded-xl border border-gray-100 dark:border-neutral-800 overflow-hidden">
+            <div className="grid grid-cols-[auto_1fr_auto_auto] gap-x-3 gap-y-0 text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider px-3 py-2 border-b bg-gray-50 dark:bg-neutral-900/60">
               <span>Time</span>
               <span>Client</span>
               <span>Status</span>
@@ -558,25 +559,25 @@ function OwnerDashboardDesktop({ persona }: { persona: PersonaData }) {
             {todayBookings.map((b) => (
               <div
                 key={b.time}
-                className="grid grid-cols-[auto_1fr_auto_auto] gap-x-3 items-center px-3 py-2 border-b last:border-b-0 text-xs hover:bg-gray-50/50"
+                className="grid grid-cols-[auto_1fr_auto_auto] gap-x-3 items-center px-3 py-2 border-b last:border-b-0 text-xs hover:bg-gray-50 dark:hover:bg-neutral-800/50"
               >
-                <span className="text-[10px] font-medium text-gray-500 tabular-nums w-14">{b.time}</span>
+                <span className="text-[10px] font-medium text-gray-500 dark:text-gray-400 tabular-nums w-14">{b.time}</span>
                 <div className="min-w-0">
-                  <p className="font-medium text-gray-900 truncate">{b.client}</p>
-                  <p className="text-[10px] text-gray-400 truncate">{b.service}</p>
+                  <p className="font-medium text-gray-900 dark:text-gray-100 truncate">{b.client}</p>
+                  <p className="text-[10px] text-gray-400 dark:text-gray-500 truncate">{b.service}</p>
                 </div>
                 <span
                   className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full whitespace-nowrap ${
                     b.status === "Confirmed"
-                      ? "bg-emerald-50 text-emerald-700"
+                      ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700"
                       : b.status === "Completed"
-                      ? "bg-gray-100 text-gray-600"
-                      : "bg-amber-50 text-amber-700"
+                      ? "bg-gray-100 dark:bg-neutral-800 text-gray-600 dark:text-gray-400"
+                      : "bg-amber-50 dark:bg-amber-950/40 text-amber-700"
                   }`}
                 >
                   {b.status}
                 </span>
-                <span className="text-[10px] font-semibold text-gray-700 tabular-nums text-right">{b.amount}</span>
+                <span className="text-[10px] font-semibold text-gray-700 dark:text-gray-300 tabular-nums text-right">{b.amount}</span>
               </div>
             ))}
           </div>
@@ -588,37 +589,37 @@ function OwnerDashboardDesktop({ persona }: { persona: PersonaData }) {
 
 function ConfirmationDesktop({ persona }: { persona: PersonaData }) {
   return (
-    <div className="h-full bg-gradient-to-br from-gray-50 to-white p-4 sm:p-6 flex flex-col items-center justify-center overflow-hidden">
+    <div className="h-full bg-gradient-to-br from-gray-50 to-white dark:from-neutral-950 dark:to-neutral-900 p-4 sm:p-6 flex flex-col items-center justify-center overflow-hidden">
       <div className="w-full max-w-md">
         <div className="flex items-center gap-2 mb-3">
           <div className="size-8 rounded-full bg-[#25D366] flex items-center justify-center shrink-0">
             <Icon name="whatsapp" className="text-white text-base" />
           </div>
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-gray-900 truncate">{persona.business}</p>
-            <p className="text-[10px] text-gray-400">WhatsApp Business</p>
+            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{persona.business}</p>
+            <p className="text-[10px] text-gray-400 dark:text-gray-500">WhatsApp Business</p>
           </div>
-          <span className="ml-auto text-[9px] font-semibold text-emerald-600 bg-emerald-50 border border-emerald-100 rounded-full px-2 py-0.5 shrink-0">
+          <span className="ml-auto text-[9px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-800/50 rounded-full px-2 py-0.5 shrink-0">
             Sent automatically
           </span>
         </div>
 
         <div className="bg-[#e5ddd5] rounded-xl p-3 shadow-inner">
-          <div className="bg-white rounded-lg rounded-tl-sm px-3 py-2.5 max-w-[90%] shadow-sm">
-            <p className="text-xs text-gray-800 leading-relaxed">{persona.confirmationMessage}</p>
+          <div className="bg-white dark:bg-neutral-800 rounded-lg rounded-tl-sm px-3 py-2.5 max-w-[90%] shadow-sm">
+            <p className="text-xs text-gray-800 dark:text-gray-200 leading-relaxed">{persona.confirmationMessage}</p>
             <div className="flex items-center justify-end gap-1 mt-1">
-              <span className="text-[9px] text-gray-400">11:02 AM</span>
+              <span className="text-[9px] text-gray-400 dark:text-gray-500">11:02 AM</span>
               <Icon name="check-lg" className="text-blue-400 text-[10px]" />
             </div>
           </div>
         </div>
 
-        <div className="mt-2 flex items-center justify-center gap-1.5 text-[10px] text-gray-500">
-          <Icon name="envelope" className="text-gray-400 text-xs" />
+        <div className="mt-2 flex items-center justify-center gap-1.5 text-[10px] text-gray-500 dark:text-gray-400">
+          <Icon name="envelope" className="text-gray-400 dark:text-gray-500 text-xs" />
           <span className="truncate">Email sent to {persona.clientName.toLowerCase()}@email.com</span>
         </div>
 
-        <p className="text-center text-xs text-gray-500 mt-3">
+        <p className="text-center text-xs text-gray-500 dark:text-gray-400 mt-3">
           Automated WhatsApp &amp; email — no manual follow-up
         </p>
       </div>
@@ -632,13 +633,13 @@ function BrowserChrome({ url, children }: { url: string; children: ReactNode }) 
       className="rounded-2xl overflow-hidden aspect-video flex flex-col shadow-[0_32px_80px_-8px_rgba(37,99,235,0.14),0_16px_40px_-8px_rgba(0,0,0,0.10),0_0_0_1px_rgba(0,0,0,0.05)]"
       style={{ transform: "rotateX(1.5deg)" }}
     >
-      <div className="flex shrink-0 items-center gap-3 px-4 py-2.5 bg-gradient-to-b from-gray-100/95 to-gray-50 border-b border-gray-200/80">
+      <div className="flex shrink-0 items-center gap-3 px-4 py-2.5 bg-gradient-to-b from-gray-100/95 to-gray-50 dark:from-neutral-800 dark:to-neutral-900 border-b border-gray-200 dark:border-neutral-800/80">
         <div className="flex gap-1.5 shrink-0">
           <div className="size-3 rounded-full bg-[#ff5f57]" />
           <div className="size-3 rounded-full bg-[#febc2e]" />
           <div className="size-3 rounded-full bg-[#28c840]" />
         </div>
-        <div className="flex-1 max-w-xs mx-auto bg-white rounded-md border border-gray-200/80 px-3 py-1 text-xs text-gray-400 font-mono text-center flex items-center justify-center gap-1.5">
+        <div className="flex-1 max-w-xs mx-auto bg-white dark:bg-neutral-800 rounded-md border border-gray-200 dark:border-neutral-800/80 px-3 py-1 text-xs text-gray-400 dark:text-gray-500 font-mono text-center flex items-center justify-center gap-1.5">
           <Icon name="lock-fill" className="text-blue-400 text-[9px]" />
           {url}
         </div>
@@ -651,12 +652,12 @@ function BrowserChrome({ url, children }: { url: string; children: ReactNode }) 
 function AlsoWorksFor() {
   return (
     <div className="mt-7 text-center">
-      <p className="text-sm text-gray-400 mb-2.5">Also works for</p>
+      <p className="text-sm text-gray-400 dark:text-gray-500 mb-2.5">Also works for</p>
       <div className="flex flex-wrap justify-center gap-3.5">
         {industries.map((item) => (
           <div
             key={item.label}
-            className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-600 shadow-sm"
+            className="inline-flex items-center gap-2 rounded-full border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 shadow-sm"
           >
             <Icon name={item.icon} className="text-blue-500 text-base" />
             {item.label}
@@ -682,7 +683,7 @@ function SlideIndicators({
             key={slide.type}
             onClick={() => onGoTo(i)}
             className={`text-sm font-medium transition-colors ${
-              i === current ? "text-blue-600" : "text-gray-400 hover:text-gray-600"
+              i === current ? "text-blue-600 dark:text-blue-400" : "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
             }`}
           >
             {slide.label}
@@ -697,7 +698,7 @@ function SlideIndicators({
             aria-label={slide.ariaLabel}
             aria-current={i === current ? "true" : undefined}
             className={`h-1.5 rounded-full transition-all duration-300 ${
-              i === current ? "bg-blue-600 w-6" : "bg-gray-300 w-1.5 hover:bg-gray-400"
+              i === current ? "bg-blue-600 w-6" : "bg-gray-300 dark:bg-neutral-700 w-1.5 hover:bg-gray-400 dark:hover:bg-neutral-600"
             }`}
           />
         ))}
@@ -732,6 +733,8 @@ function renderDesktopContent(slideType: (typeof slides)[number]["type"], person
 export default function ProductMockup() {
   const [current, setCurrent] = useState(0);
   const [fading, setFading] = useState(false);
+  const { resolvedTheme } = useTheme();
+  const screenBg = resolvedTheme === "dark" ? "#0a0a0a" : "#f9f9f9";
 
   const persona = primaryPersona;
   const slide = slides[current];
@@ -753,7 +756,7 @@ export default function ProductMockup() {
     <button
       onClick={() => navigate(dir)}
       aria-label={label}
-      className={`z-20 size-12 rounded-full bg-white border border-gray-200 shadow-lg flex items-center justify-center text-gray-400 hover:text-blue-600 hover:border-blue-200 hover:shadow-md transition-all ${extraClass}`}
+      className={`z-20 size-12 rounded-full bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-800 shadow-lg flex items-center justify-center text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-200 dark:hover:border-blue-800 hover:shadow-md transition-all ${extraClass}`}
     >
       <Icon name={`chevron-${dir === -1 ? "left" : "right"}`} className="text-base" />
     </button>
@@ -777,9 +780,9 @@ export default function ProductMockup() {
   return (
     <section className="max-w-[77rem] mx-auto px-6 md:px-12 lg:px-16 pb-16 relative overflow-x-clip">
       <div className="pointer-events-none absolute inset-0 overflow-hidden -z-10">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[680px] h-[480px] rounded-full bg-blue-500/[0.07] blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[680px] h-[480px] rounded-full bg-blue-50 dark:bg-blue-950/30 blur-3xl" />
         <div className="absolute top-1/3 right-1/4 w-[220px] h-[220px] rounded-full bg-violet-500/[0.05] blur-3xl" />
-        <div className="absolute bottom-1/4 left-1/3 w-[180px] h-[180px] rounded-full bg-amber-500/[0.05] blur-3xl" />
+        <div className="absolute bottom-1/4 left-1/3 w-[180px] h-[180px] rounded-full bg-amber-50 dark:bg-amber-950/20 blur-3xl" />
       </div>
 
       {/* Mobile — wrapper matches scaled iPhone size so layout does not overflow */}
@@ -792,7 +795,7 @@ export default function ProductMockup() {
             model="15-pro"
             color="space-black"
             scale={mobileScale}
-            screenBg="#f9f9f9"
+            screenBg={screenBg}
             shadow
             safeArea={false}
             showHomeIndicator={false}
@@ -812,7 +815,7 @@ export default function ProductMockup() {
                 aria-label={s.ariaLabel}
                 aria-current={i === current ? "true" : undefined}
                 className={`h-1.5 rounded-full transition-all duration-300 ${
-                  i === current ? "bg-blue-600 w-6" : "bg-gray-300 w-1.5 hover:bg-gray-400"
+                  i === current ? "bg-blue-600 w-6" : "bg-gray-300 dark:bg-neutral-700 w-1.5 hover:bg-gray-400 dark:hover:bg-neutral-600"
                 }`}
               />
             ))}
@@ -842,7 +845,7 @@ export default function ProductMockup() {
                     model="15-pro"
                     color="space-black"
                     scale={desktopPhoneScale}
-                    screenBg="#f9f9f9"
+                    screenBg={screenBg}
                     shadow={false}
                     safeArea={false}
                     showHomeIndicator={false}

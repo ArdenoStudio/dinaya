@@ -18,7 +18,7 @@ export default function AutomationsLoading() {
       {/* Automations List */}
       <div className="space-y-3">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="rounded-xl border bg-white p-5">
+          <div key={i} className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <Skeleton className="size-10 rounded-lg" />

@@ -19,7 +19,7 @@ export default function AvailabilityLoading() {
       <div className="grid gap-4">
         {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map(
           (day) => (
-            <div key={day} className="rounded-xl border bg-white p-4">
+            <div key={day} className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Skeleton className="h-6 w-6 rounded" />

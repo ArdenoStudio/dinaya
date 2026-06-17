@@ -55,16 +55,16 @@ function WithoutPill({ item }: { item: typeof withoutItems[number] }) {
       className="flex items-center gap-2 origin-left"
     >
       {/* Pill — blue-grey scattered card look */}
-      <div className="flex flex-1 items-center gap-3 rounded-full bg-[#c8d0e0] border border-[#b8c2d6] px-4 py-2.5 shadow-sm">
-        <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-white/50 border border-white/60 text-[11px] font-semibold text-slate-500">
+      <div className="flex flex-1 items-center gap-3 rounded-full bg-[#c8d0e0] dark:bg-neutral-700 border border-[#b8c2d6] dark:border-neutral-600 px-4 py-2.5 shadow-sm">
+        <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-white/50 dark:bg-white/10 border border-white/60 dark:border-white/20 text-[11px] font-semibold text-slate-500 dark:text-slate-300">
           {item.num}
         </span>
-        <span className="text-sm font-medium text-slate-600">{item.label}</span>
+        <span className="text-sm font-medium text-slate-600 dark:text-slate-200">{item.label}</span>
       </div>
 
       {/* Icon badge — floating detached */}
-      <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#c8d0e0] border border-[#b8c2d6] shadow-sm">
-        <Icon name={item.icon} className="text-xs text-slate-500" />
+      <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#c8d0e0] dark:bg-neutral-700 border border-[#b8c2d6] dark:border-neutral-600 shadow-sm">
+        <Icon name={item.icon} className="text-xs text-slate-500 dark:text-slate-300" />
       </span>
     </motion.div>
   );
@@ -118,22 +118,29 @@ export function BeforeAfterToggle() {
   return (
     <div className="flex flex-col items-center gap-5">
       {/* Toggle */}
-      <div className="relative flex items-center gap-1 rounded-full border border-gray-200 bg-gray-100 p-1 shadow-sm">
+      <div className="relative flex items-center gap-1 rounded-full border border-gray-200 dark:border-neutral-800 bg-gray-100 dark:bg-neutral-800 p-1 shadow-sm">
         {(["without", "with"] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => setActive(tab)}
-            className="relative z-10 rounded-full px-5 py-1.5 text-sm font-medium transition-colors"
-            style={{
-              color: active === tab ? (tab === "with" ? "#fff" : "#111827") : "#6b7280",
-            }}
+            className={`relative z-10 rounded-full px-5 py-1.5 text-sm font-medium transition-colors ${
+              active === tab
+                ? tab === "with"
+                  ? "text-white"
+                  : "text-gray-900 dark:text-gray-100"
+                : "text-gray-500 dark:text-gray-400"
+            }`}
           >
             {active === tab && (
               <motion.span
                 layoutId="toggle-bg"
-                className="absolute inset-0 rounded-full"
+                className={
+                  tab === "without"
+                    ? "absolute inset-0 rounded-full bg-white dark:bg-neutral-100"
+                    : "absolute inset-0 rounded-full"
+                }
                 style={{
-                  background: tab === "with" ? "var(--color-primary, #2563eb)" : "#fff",
+                  background: tab === "with" ? "var(--color-primary, #2563eb)" : undefined,
                   boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
                 }}
                 transition={{ type: "spring", stiffness: 400, damping: 32 }}
@@ -148,10 +155,11 @@ export function BeforeAfterToggle() {
 
       {/* Card */}
       <div
-        className="relative w-full max-w-sm rounded-2xl border border-gray-200 bg-[#edf0f5] overflow-hidden p-5 shadow-sm"
+        className="relative w-full max-w-sm rounded-2xl border border-gray-200 dark:border-neutral-700 bg-[#edf0f5] dark:bg-neutral-900 overflow-hidden p-5 shadow-sm dark:[background-image:radial-gradient(circle,rgb(64_64_64)_1px,transparent_1px)]"
         style={{
           minHeight: "290px",
-          backgroundImage: "radial-gradient(circle, #cbd5e1 1px, transparent 1px)",
+          backgroundImage:
+            "radial-gradient(circle, #cbd5e1 1px, transparent 1px)",
           backgroundSize: "18px 18px",
         }}
       >

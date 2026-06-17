@@ -64,11 +64,11 @@ export function DirectorySettings() {
   }
 
   if (loading) {
-    return <div className="rounded-xl border bg-white p-5 text-sm text-muted-foreground">Loading directory settings…</div>;
+    return <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5 text-sm text-muted-foreground">Loading directory settings…</div>;
   }
 
   return (
-    <form onSubmit={handleSave} className="rounded-xl border bg-white p-5">
+    <form onSubmit={handleSave} className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
       <div className="mb-4 flex items-start justify-between gap-4">
         <div>
           <h2 className="font-semibold">Dinaya Directory</h2>

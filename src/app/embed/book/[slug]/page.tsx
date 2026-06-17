@@ -21,7 +21,7 @@ export default async function EmbedBookingPage({ params, searchParams }: Props) 
 
   if (data.status !== "ok") {
     return (
-      <main className="flex min-h-[480px] items-center justify-center bg-gray-50 px-6">
+      <main className="flex min-h-[480px] items-center justify-center bg-gray-50 dark:bg-neutral-900/60 px-6">
         <p className="text-sm text-muted-foreground">Booking unavailable.</p>
       </main>
     );

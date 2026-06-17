@@ -28,8 +28,8 @@ export function ReviewForm({ token, clientName }: { token: string; clientName: s
 
   if (status === "done") {
     return (
-      <div className="rounded-2xl border bg-white p-8 text-center shadow-sm">
-        <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
+      <div className="rounded-2xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-8 text-center shadow-sm">
+        <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600">
           <Icon name="check-lg" aria-hidden="true" />
         </div>
         <h1 className="font-cal text-2xl">Thank you</h1>
@@ -39,7 +39,7 @@ export function ReviewForm({ token, clientName }: { token: string; clientName: s
   }
 
   return (
-    <div className="rounded-2xl border bg-white p-6 shadow-sm">
+    <div className="rounded-2xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-6 shadow-sm">
       <p className="text-sm text-muted-foreground">Hi {clientName},</p>
       <h1 className="mt-1 font-cal text-2xl">How was your visit?</h1>
       <div className="mt-6">
@@ -51,7 +51,7 @@ export function ReviewForm({ token, clientName }: { token: string; clientName: s
               type="button"
               onClick={() => setRating(value)}
               className={`flex size-10 items-center justify-center rounded-full border text-sm font-semibold ${
-                value <= rating ? "border-amber-300 bg-amber-50 text-amber-700" : "text-muted-foreground"
+                value <= rating ? "border-amber-300 bg-amber-50 dark:bg-amber-950/40 text-amber-700" : "text-muted-foreground"
               }`}
             >
               {value}

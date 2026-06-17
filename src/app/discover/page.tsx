@@ -50,12 +50,12 @@ export default async function DiscoverPage({ searchParams }: Props) {
     : allListings;
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-white dark:bg-neutral-950">
       <PublicNav />
 
       <section className="mx-auto max-w-6xl px-6 public-page-offset pb-16">
         <div className="mb-10 max-w-3xl">
-          <span className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium text-gray-700">
+          <span className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium text-gray-700 dark:text-gray-300">
             <Icon name="compass" className="text-primary" />
             Dinaya Directory
           </span>

@@ -26,11 +26,11 @@ export const metadata: Metadata = {
 
 function PlanCell({ value }: { value: string }) {
   return (
-    <td className="px-4 py-3 text-center text-sm text-gray-700">
+    <td className="px-4 py-3 text-center text-sm text-gray-700 dark:text-gray-300">
       {value === "Yes" ? (
         <Icon name="check" className="text-sm text-primary" />
       ) : value === "No" ? (
-        <span className="text-gray-400">-</span>
+        <span className="text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">-</span>
       ) : (
         value
       )}
@@ -100,7 +100,7 @@ export default async function PricingPage() {
   ];
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-white dark:bg-neutral-950">
       <PublicNav />
 
       <PricingPlansShowcase
@@ -110,11 +110,11 @@ export default async function PricingPage() {
       />
 
       <section className="px-6 py-14">
-        <div className="mx-auto max-w-6xl rounded-2xl border border-blue-200 bg-blue-50/70 p-5 text-sm text-blue-950">
+        <div className="mx-auto max-w-6xl rounded-2xl border border-blue-200 dark:border-blue-900/50 bg-blue-50 dark:bg-blue-950/40 p-5 text-sm text-blue-950 dark:text-blue-100">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="font-semibold">Trial includes Starter + Pro features with a limited Growth preview.</p>
-              <p className="mt-1 text-blue-950/75">
+              <p className="mt-1 text-blue-950 dark:text-blue-100/75 dark:text-blue-200/75">
                 No custom domain and no unlimited messaging during trial. AI Voice Receptionist is coming later.
               </p>
             </div>
@@ -138,22 +138,22 @@ export default async function PricingPage() {
           <h2 className="mt-3 font-cal text-3xl tracking-tight">What each plan gets</h2>
         </div>
 
-        <div className="overflow-hidden rounded-2xl border">
+        <div className="overflow-hidden rounded-2xl border border-gray-200 dark:border-neutral-800">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[860px] text-sm">
-              <thead className="bg-gray-50">
+              <thead className="bg-gray-50 dark:bg-neutral-900/60">
                 <tr>
-                  <th className="w-[28%] px-4 py-3 text-left font-medium text-gray-600">Feature</th>
-                  <th className="px-4 py-3 text-center font-medium text-gray-600">Starter</th>
-                  <th className="px-4 py-3 text-center font-medium text-gray-600">Pro</th>
-                  <th className="px-4 py-3 text-center font-medium text-gray-600">Growth</th>
-                  <th className="px-4 py-3 text-center font-medium text-gray-600">Managed Max</th>
+                  <th className="w-[28%] px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-400">Feature</th>
+                  <th className="px-4 py-3 text-center font-medium text-gray-600 dark:text-gray-400">Starter</th>
+                  <th className="px-4 py-3 text-center font-medium text-gray-600 dark:text-gray-400">Pro</th>
+                  <th className="px-4 py-3 text-center font-medium text-gray-600 dark:text-gray-400">Growth</th>
+                  <th className="px-4 py-3 text-center font-medium text-gray-600 dark:text-gray-400">Managed Max</th>
                 </tr>
               </thead>
-              <tbody className="divide-y">
+              <tbody className="divide-y divide-gray-200 dark:divide-neutral-800">
                 {comparisonRows.map(([feature, starter, pro, growth, managed]) => (
-                  <tr key={feature} className="hover:bg-gray-50/70">
-                    <td className="px-4 py-3 font-medium text-gray-800">{feature}</td>
+                  <tr key={feature} className="hover:bg-gray-50 dark:hover:bg-neutral-900/60">
+                    <td className="px-4 py-3 font-medium text-gray-800 dark:text-gray-200">{feature}</td>
                     <PlanCell value={starter} />
                     <PlanCell value={pro} />
                     <PlanCell value={growth} />
@@ -175,13 +175,13 @@ export default async function PricingPage() {
           <h2 className="mt-3 font-cal text-3xl tracking-tight">Keep setup-heavy work outside base plans</h2>
         </div>
 
-        <div className="overflow-hidden rounded-2xl border">
+        <div className="overflow-hidden rounded-2xl border border-gray-200 dark:border-neutral-800">
           <table className="w-full text-sm">
-            <tbody className="divide-y">
+            <tbody className="divide-y divide-gray-200 dark:divide-neutral-800">
               {addOns.map(([name, price]) => (
                 <tr key={name}>
-                  <td className="px-5 py-4 font-medium text-gray-800">{name}</td>
-                  <td className="px-5 py-4 text-right text-gray-700">{price}</td>
+                  <td className="px-5 py-4 font-medium text-gray-800 dark:text-gray-200">{name}</td>
+                  <td className="px-5 py-4 text-right text-gray-700 dark:text-gray-300">{price}</td>
                 </tr>
               ))}
             </tbody>
@@ -198,12 +198,12 @@ export default async function PricingPage() {
           <h2 className="mt-3 font-cal text-3xl tracking-tight">Questions, answered</h2>
         </div>
 
-        <div className="divide-y border-y">
+        <div className="divide-y divide-gray-200 dark:divide-neutral-800 border-y border-gray-200 dark:border-neutral-800">
           {faqs.map((item) => (
             <details key={item.q} className="group py-5">
               <summary className="flex cursor-pointer list-none items-start justify-between gap-4">
-                <span className="font-cal text-base tracking-tight text-gray-900">{item.q}</span>
-                <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-gray-500 transition-colors group-open:border-primary group-open:bg-primary group-open:text-white">
+                <span className="font-cal text-base tracking-tight text-gray-900 dark:text-gray-100">{item.q}</span>
+                <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-gray-500 dark:text-gray-400 transition-colors group-open:border-primary group-open:bg-primary group-open:text-white">
                   <Icon name="plus" className="text-xs transition-transform group-open:rotate-45" />
                 </span>
               </summary>

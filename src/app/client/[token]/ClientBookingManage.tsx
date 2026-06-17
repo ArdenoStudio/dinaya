@@ -65,7 +65,7 @@ export function ClientBookingManage({
 
   if (cancelled) {
     return (
-      <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+      <p className="rounded-xl border border-emerald-200 dark:border-emerald-800/50 bg-emerald-50 dark:bg-emerald-950/40 px-4 py-3 text-sm text-emerald-800 dark:text-emerald-200">
         {copy.clientCancelledSuccess}
       </p>
     );
@@ -73,7 +73,7 @@ export function ClientBookingManage({
 
   if (rescheduled) {
     return (
-      <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+      <p className="rounded-xl border border-emerald-200 dark:border-emerald-800/50 bg-emerald-50 dark:bg-emerald-950/40 px-4 py-3 text-sm text-emerald-800 dark:text-emerald-200">
         {copy.clientRescheduledSuccess}
       </p>
     );
@@ -82,7 +82,7 @@ export function ClientBookingManage({
   return (
     <div className="space-y-4">
       {!canModify && modifyReason ? (
-        <p className="rounded-xl border bg-gray-50 px-4 py-3 text-sm text-muted-foreground">
+        <p className="rounded-xl border bg-gray-50 dark:bg-neutral-900/60 px-4 py-3 text-sm text-muted-foreground">
           {modifyReason}
         </p>
       ) : null}
@@ -101,7 +101,7 @@ export function ClientBookingManage({
             type="button"
             onClick={handleCancel}
             disabled={loading}
-            className="inline-flex items-center justify-center rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 hover:bg-red-100 disabled:opacity-60"
+            className="inline-flex items-center justify-center rounded-xl border border-red-200 bg-red-50 dark:border-red-900/50 dark:bg-red-950/40 px-4 py-3 text-sm font-medium text-red-700 dark:text-red-300 hover:bg-red-100 disabled:opacity-60"
           >
             {loading ? copy.clientWorking : copy.clientCancelAppointment}
           </button>

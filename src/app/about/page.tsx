@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import Image from "next/image";
+import { ArdenoStudioLogo } from "@/components/ArdenoStudioLogo";
 import { PublicNav } from "@/components/PublicNav";
 import { FadeContainer, FadeDiv, FadeSpan } from "@/components/Fade";
 import { LandingFooter } from "@/components/LandingFooter";
@@ -21,7 +21,7 @@ const values = [
   },
   {
     icon: "lightning-charge",
-    color: "bg-amber-500",
+    color: "bg-amber-50 dark:bg-amber-950/400",
     title: "Radically simple",
     desc: "If a salon owner in Kandy can't set it up in five minutes, we haven't done our job. Simplicity isn't a feature — it's the product.",
   },
@@ -48,14 +48,14 @@ const stats = [
 
 export default function AboutPage() {
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-white dark:bg-neutral-950">
       <PublicNav />
 
       {/* Hero */}
       <section className="max-w-4xl mx-auto px-6 public-page-offset pb-16 text-center">
         <FadeContainer className="flex flex-col items-center">
           <FadeDiv className="mb-6">
-            <span className="inline-flex items-center gap-2 rounded-full border bg-white px-3 py-1 text-xs font-medium text-gray-700 shadow-sm">
+            <span className="inline-flex items-center gap-2 rounded-full border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 shadow-sm">
               <Icon name="geo-alt-fill" className="text-xs text-primary" />
               Made in Sri Lanka
             </span>
@@ -78,9 +78,9 @@ export default function AboutPage() {
 
       {/* Stats strip */}
       <section className="max-w-5xl mx-auto px-6 pb-20">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-gray-200/70 rounded-2xl overflow-hidden border border-gray-200/70">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-gray-200 dark:bg-neutral-700/70 rounded-2xl overflow-hidden border border-gray-200 dark:border-neutral-800/70">
           {stats.map((s) => (
-            <div key={s.label} className="bg-white px-6 py-7 text-center">
+            <div key={s.label} className="bg-white dark:bg-neutral-900 px-6 py-7 text-center">
               <div className="font-cal text-3xl tracking-tight text-primary mb-1">{s.value}</div>
               <div className="text-sm text-muted-foreground">{s.label}</div>
             </div>
@@ -120,15 +120,15 @@ export default function AboutPage() {
 
           <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100/60 p-8 flex flex-col gap-5">
             {[
-              { icon: "whatsapp", color: "text-gray-400", label: "Before Dinaya", msg: "Hi are you free Thursday at 3? Actually maybe 3:30? Let me check… never mind I'll call" },
+              { icon: "whatsapp", color: "text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500", label: "Before Dinaya", msg: "Hi are you free Thursday at 3? Actually maybe 3:30? Let me check… never mind I'll call" },
               { icon: "calendar-check", color: "text-primary", label: "After Dinaya", msg: "Booking confirmed — Thursday 3:30 PM · Deposit paid · Reminder set" },
             ].map((item) => (
-              <div key={item.label} className="rounded-xl bg-white border p-5 shadow-sm">
+              <div key={item.label} className="rounded-xl bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-800 p-5 shadow-sm">
                 <div className="flex items-center gap-2 mb-3">
                   <Icon name={item.icon} className={`text-lg ${item.color}`} />
-                  <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{item.label}</span>
+                  <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">{item.label}</span>
                 </div>
-                <p className="text-sm text-gray-700 leading-relaxed">{item.msg}</p>
+                <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{item.msg}</p>
               </div>
             ))}
           </div>
@@ -147,9 +147,9 @@ export default function AboutPage() {
           </h2>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-px bg-gray-200/70 rounded-2xl overflow-hidden border border-gray-200/70">
+        <div className="grid md:grid-cols-2 gap-px bg-gray-200 dark:bg-neutral-700/70 rounded-2xl overflow-hidden border border-gray-200 dark:border-neutral-800/70">
           {values.map((v) => (
-            <div key={v.title} className="group p-8 bg-white hover:bg-gray-50/60 transition-colors">
+            <div key={v.title} className="group p-8 bg-white dark:bg-neutral-900 hover:bg-gray-50 dark:hover:bg-neutral-800/80 transition-colors">
               <div className="mb-5 inline-flex">
                 <div className={`flex items-center justify-center size-11 rounded-xl ${v.color} text-white`}>
                   <Icon name={v.icon} className="text-[1.1rem]" />
@@ -164,16 +164,10 @@ export default function AboutPage() {
 
       {/* Made by Ardeno Studio */}
       <section className="max-w-4xl mx-auto px-6 pb-20">
-        <div className="rounded-2xl border bg-gray-50/50 p-8 md:p-12 text-center">
-          <p className="text-xs font-semibold tracking-widest uppercase text-gray-400 mb-5">The team behind Dinaya</p>
+        <div className="rounded-2xl border border-gray-200 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-900/50 p-8 md:p-12 text-center">
+          <p className="text-xs font-semibold tracking-widest uppercase text-gray-400 dark:text-gray-500 mb-5">The team behind Dinaya</p>
           <div className="flex items-center justify-center mb-6">
-            <Image
-              src="/ardeno-studio-logo.svg"
-              alt="Ardeno Studio"
-              width={140}
-              height={35}
-              className="h-7 w-auto brightness-0 opacity-40"
-            />
+            <ArdenoStudioLogo size="xl" className="w-full max-w-xs" />
           </div>
           <h2 className="font-cal text-2xl md:text-3xl tracking-tight mb-4">
             Dinaya is a product by Ardeno Studio.
@@ -202,14 +196,14 @@ export default function AboutPage() {
               <div className="flex flex-wrap gap-4 justify-center">
                 <Link
                   href="/register"
-                  className="inline-flex items-center gap-2 bg-white text-blue-700 px-7 py-3.5 rounded-xl font-semibold shadow-lg hover:bg-white/95 transition-colors"
+                  className="inline-flex items-center gap-2 bg-white text-blue-700 px-7 py-3.5 rounded-xl font-semibold shadow-lg hover:bg-blue-50 transition-colors"
                 >
                   Create your page — it&apos;s free
                   <Icon name="arrow-right" className="text-sm" />
                 </Link>
                 <Link
                   href="/features"
-                  className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-white px-7 py-3.5 rounded-xl font-medium hover:bg-white/20 transition-colors"
+                  className="inline-flex items-center gap-2 bg-black/25 border border-white/35 text-white px-7 py-3.5 rounded-xl font-medium hover:bg-black/40 backdrop-blur-sm transition-colors"
                 >
                   See all features
                 </Link>

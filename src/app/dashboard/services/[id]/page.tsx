@@ -150,7 +150,7 @@ export default function EditServicePage({ params }: { params: Promise<{ id: stri
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-white border rounded-xl p-6 space-y-4">
+      <form onSubmit={handleSubmit} className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-6 space-y-4">
         <div>
           <label className="text-sm font-medium">Service name *</label>
           <input required value={form.name}
@@ -300,7 +300,7 @@ export default function EditServicePage({ params }: { params: Promise<{ id: stri
       </form>
 
       {/* Staff assignment */}
-      <div className="bg-white border rounded-xl p-6 mt-6">
+      <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-6 mt-6">
         <h2 className="text-base font-semibold mb-1">Team members</h2>
         <p className="text-xs text-muted-foreground mb-4">
           Choose which staff members offer this service.

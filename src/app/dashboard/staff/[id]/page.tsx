@@ -117,7 +117,7 @@ export default function EditStaffPage({ params }: { params: Promise<{ id: string
   if (loading) return <p className="text-sm text-muted-foreground">Loading...</p>;
   if (!form) {
     return (
-      <div className="max-w-xl rounded-lg border bg-white p-6">
+      <div className="max-w-xl rounded-lg border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-6">
         <p className="text-sm text-muted-foreground">Staff member not found.</p>
         <Link href="/dashboard/staff" className="mt-4 inline-flex text-sm text-primary hover:underline">
           Back to staff
@@ -126,7 +126,7 @@ export default function EditStaffPage({ params }: { params: Promise<{ id: string
     );
   }
 
-  const inputClass = "mt-1 w-full rounded-md border bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/30";
+  const inputClass = "mt-1 w-full rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/30";
 
   return (
     <div className="max-w-xl">
@@ -147,7 +147,7 @@ export default function EditStaffPage({ params }: { params: Promise<{ id: string
         </button>
       </div>
 
-      <form onSubmit={handleSave} className="space-y-5 rounded-xl border bg-white p-6">
+      <form onSubmit={handleSave} className="space-y-5 rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-6">
         <div>
           <label className="text-sm font-medium">Name *</label>
           <input

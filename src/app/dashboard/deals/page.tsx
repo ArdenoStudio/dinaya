@@ -44,7 +44,7 @@ export default async function DealsPage() {
         </div>
 
         {!business?.directoryListed && (
-          <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          <div className="rounded-xl border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-950/40 px-4 py-3 text-sm text-amber-900 dark:text-amber-200">
             List your business in the Dinaya directory to appear on the public deals page.{" "}
             <Link href="/dashboard/marketing" className="font-medium underline">
               Update directory settings

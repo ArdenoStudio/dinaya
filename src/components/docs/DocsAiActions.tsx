@@ -133,7 +133,7 @@ export function DocsAiActions({
         onClick={() => setOpen((prev) => !prev)}
         aria-haspopup="menu"
         aria-expanded={open}
-        className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm shadow-gray-900/5 transition hover:border-primary/40 hover:text-primary"
+        className="inline-flex items-center gap-2 rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 shadow-sm shadow-gray-900/5 dark:shadow-black/20 transition hover:border-primary/40 hover:text-primary"
       >
         <Icon name="stars" className="text-[13px]" />
         Ask with AI
@@ -143,9 +143,9 @@ export function DocsAiActions({
       {open ? (
         <div
           role="menu"
-          className="absolute right-0 z-40 mt-2 w-[18.5rem] rounded-2xl border border-gray-200 bg-white/95 p-2 shadow-xl shadow-gray-900/15 backdrop-blur"
+          className="absolute right-0 z-40 mt-2 w-[18.5rem] rounded-2xl border border-gray-200 dark:border-neutral-800 bg-white dark:border-neutral-800 dark:bg-neutral-900/95 p-2 shadow-xl shadow-gray-900/15 backdrop-blur"
         >
-          <p className="px-2 py-1 text-[11px] font-semibold uppercase tracking-widest text-gray-500">
+          <p className="px-2 py-1 text-[11px] font-semibold uppercase tracking-widest text-gray-500 dark:text-gray-400">
             Utilities
           </p>
           <div className="mb-2 space-y-1">
@@ -153,7 +153,7 @@ export function DocsAiActions({
               type="button"
               role="menuitem"
               onClick={copyPage}
-              className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+              className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:bg-neutral-900/60"
             >
               <Icon name="link-45deg" className="text-[13px]" />
               Copy page URL
@@ -162,7 +162,7 @@ export function DocsAiActions({
               type="button"
               role="menuitem"
               onClick={copyPrompt}
-              className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+              className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:bg-neutral-900/60"
             >
               <Icon name="clipboard" className="text-[13px]" />
               Copy AI prompt
@@ -172,7 +172,7 @@ export function DocsAiActions({
               role="menuitem"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 rounded-lg px-2 py-2 text-sm text-gray-700 hover:bg-gray-50"
+              className="flex items-center gap-2 rounded-lg px-2 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:bg-neutral-900/60"
               onClick={() => setOpen(false)}
             >
               <Icon name="book-half" className="text-[13px]" />
@@ -180,7 +180,7 @@ export function DocsAiActions({
             </a>
           </div>
 
-          <p className="px-2 py-1 text-[11px] font-semibold uppercase tracking-widest text-gray-500">
+          <p className="px-2 py-1 text-[11px] font-semibold uppercase tracking-widest text-gray-500 dark:text-gray-400">
             Ask providers
           </p>
           <div className="space-y-1">
@@ -190,13 +190,13 @@ export function DocsAiActions({
                 type="button"
                 role="menuitem"
                 onClick={() => askProvider(provider.id)}
-                className="flex w-full items-center justify-between gap-2 rounded-lg px-2 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+                className="flex w-full items-center justify-between gap-2 rounded-lg px-2 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:bg-neutral-900/60"
               >
                 <span className="inline-flex items-center gap-2">
                   <Icon name="chat-dots" className="text-[13px]" />
                   {provider.label}
                 </span>
-                <Icon name="arrow-up-right" className="text-[12px] text-gray-400" />
+                <Icon name="arrow-up-right" className="text-[12px] text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500" />
               </button>
             ))}
           </div>

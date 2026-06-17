@@ -26,9 +26,9 @@ type Booking = {
 const STATUS_BG: Record<string, string> = {
   pending: "bg-yellow-100 border-yellow-300 text-yellow-900",
   confirmed: "bg-green-100 border-green-300 text-green-900",
-  cancelled: "bg-red-50 border-red-200 text-red-700 opacity-60",
+  cancelled: "bg-red-50 border-red-200 text-red-700 dark:text-red-300 opacity-60",
   completed: "bg-blue-100 border-blue-300 text-blue-900",
-  no_show: "bg-gray-100 border-gray-300 text-gray-600 opacity-60",
+  no_show: "bg-gray-100 dark:bg-neutral-800 border-gray-300 dark:border-neutral-700 text-gray-600 dark:text-gray-400 opacity-60",
 };
 
 const START_HOUR = 7;
@@ -120,7 +120,7 @@ export default function CalendarPage() {
                 value={selectedStaffId}
                 onChange={(e) => setSelectedStaffId(e.target.value)}
                 aria-label="Filter by staff member"
-                className="rounded-md border bg-white px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                className="rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
               >
                 <option value="">All staff</option>
                 {staffMembers.map((member) => (
@@ -146,8 +146,8 @@ export default function CalendarPage() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto rounded-xl border bg-white">
-        <div className="sticky top-0 z-10 grid grid-cols-[48px_repeat(7,1fr)] border-b bg-white">
+      <div className="flex-1 overflow-auto rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
+        <div className="sticky top-0 z-10 grid grid-cols-[48px_repeat(7,1fr)] border-b bg-white dark:border-neutral-800 dark:bg-neutral-900">
           <div className="border-r" />
           {days.map((day) => {
             const isToday = isSameDay(day, today);

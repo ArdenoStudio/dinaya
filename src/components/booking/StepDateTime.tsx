@@ -195,9 +195,9 @@ export default function StepDateTime({
 
   if (!service || (!staff && !anyStaff)) {
     return (
-      <div className="flex min-h-[280px] items-center justify-center rounded-xl border border-dashed border-gray-200 bg-white px-6 py-12 text-center text-sm text-gray-400 md:min-h-[320px]">
+      <div className="flex min-h-[280px] items-center justify-center rounded-xl border border-dashed border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-6 py-12 text-center text-sm text-gray-400 dark:text-gray-500 md:min-h-[320px]">
         <div>
-          <Icon name="calendar2-plus" className="mb-3 block text-3xl text-gray-300" />
+          <Icon name="calendar2-plus" className="mb-3 block text-3xl text-gray-300 dark:text-neutral-600" />
           {copy.selectServiceHint}
         </div>
       </div>
@@ -206,7 +206,7 @@ export default function StepDateTime({
 
   return (
     <div className="flex h-full min-w-0 flex-col">
-      <p className="mb-4 text-[10px] font-bold uppercase tracking-widest text-gray-400">
+      <p className="mb-4 text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
         {copy.pickDateTime}
       </p>
 
@@ -225,7 +225,7 @@ export default function StepDateTime({
         >
           <span>
             <span className="font-semibold booking-text-accent">{copy.nextAvailable}</span>
-            <span className="ml-2 text-gray-600">
+            <span className="ml-2 text-gray-600 dark:text-gray-400">
               {format(parseISO(nextAvailable.date + "T12:00:00"), "EEE d MMM")} · {nextAvailable.label}
             </span>
           </span>
@@ -234,9 +234,9 @@ export default function StepDateTime({
       )}
 
       <div className="flex min-w-0 flex-col gap-4 md:gap-5">
-        <section className="min-w-0 rounded-xl border border-gray-100 bg-white p-4 md:p-5">
+        <section className="min-w-0 rounded-xl border border-gray-100 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-4 md:p-5">
           <div className="mb-3 flex items-center justify-between gap-2">
-            <p className="text-xs font-semibold text-gray-700">{copy.chooseDate}</p>
+            <p className="text-xs font-semibold text-gray-700 dark:text-gray-300">{copy.chooseDate}</p>
             <button
               type="button"
               onClick={() => setShowMobileCalendar((v) => !v)}
@@ -279,14 +279,14 @@ export default function StepDateTime({
           </div>
         </section>
 
-        <section className="min-w-0 rounded-xl border border-gray-100 bg-white p-4 md:p-5">
+        <section className="min-w-0 rounded-xl border border-gray-100 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-4 md:p-5">
           {dateHeading ? (
-            <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2 border-b border-gray-100 pb-3">
-              <h3 className="text-sm font-semibold text-gray-900">{dateHeading}</h3>
-              <span className="text-xs text-gray-400">{copy.availableTimes}</span>
+            <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2 border-b border-gray-100 dark:border-neutral-800 pb-3">
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">{dateHeading}</h3>
+              <span className="text-xs text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">{copy.availableTimes}</span>
             </div>
           ) : (
-            <p className="mb-3 text-xs text-gray-400">{copy.selectDate}</p>
+            <p className="mb-3 text-xs text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">{copy.selectDate}</p>
           )}
 
           {holdLabel && (
@@ -297,13 +297,13 @@ export default function StepDateTime({
           )}
 
           {slotUnavailable && (
-            <div className="mb-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+            <div className="mb-3 rounded-lg border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-950/40 px-3 py-2 text-xs text-amber-800 dark:text-amber-200">
               {copy.slotTaken}
             </div>
           )}
 
           {!hasFetched && !loadingSlots ? (
-            <p className="py-6 text-center text-sm text-gray-400">{copy.selectDate}</p>
+            <p className="py-6 text-center text-sm text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">{copy.selectDate}</p>
           ) : (
             <TimeSlotGrid
               slots={slots}
@@ -319,7 +319,7 @@ export default function StepDateTime({
       </div>
 
       {dateHeading && selectedSlot && (
-        <div className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50/60 px-4 py-2.5 text-sm text-emerald-800 md:hidden">
+        <div className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50 dark:bg-emerald-950/40 px-4 py-2.5 text-sm text-emerald-800 md:hidden">
           <Icon name="check-circle" className="mr-1.5" />
           <span className="font-medium">{selectedSlot.label}</span>
           <span className="text-emerald-600"> · {dateHeading}</span>
@@ -332,7 +332,7 @@ export default function StepDateTime({
             <button
               type="button"
               onClick={onBack}
-              className="flex items-center gap-1 text-sm text-gray-500 transition-colors hover:text-gray-800"
+              className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 transition-colors hover:text-gray-800 dark:text-gray-200"
             >
               <Icon name="chevron-left" className="text-sm" /> {copy.back}
             </button>

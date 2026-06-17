@@ -4,6 +4,7 @@ import BookingMobileTrustStrip from "@/components/booking/BookingMobileTrustStri
 import EmbedResizeReporter from "@/components/booking/EmbedResizeReporter";
 import BookingServiceHub from "@/components/booking/BookingServiceHub";
 import { BookingTheme } from "@/components/booking/BookingTheme";
+import { BookingThemeToggle } from "@/components/booking/BookingThemeToggle";
 import { getBookingCopy } from "@/lib/i18n";
 import { normalizePublicHttpsUrl } from "@/lib/public-url";
 import { isOptimizableRemoteImage } from "@/lib/utils";
@@ -18,7 +19,7 @@ function StarRating({ rating, size = "sm" }: { rating: number; size?: "sm" | "md
         <Icon
           key={n}
           name={n <= Math.round(rating) ? "star-fill" : "star"}
-          className={`${n <= Math.round(rating) ? "text-amber-400" : "text-gray-300"} ${starSize}`}
+          className={`${n <= Math.round(rating) ? "text-amber-400" : "text-gray-300 dark:text-neutral-600"} ${starSize}`}
         />
       ))}
     </span>
@@ -96,8 +97,9 @@ export default function BookingPageContent({ data, dealId, mode, serviceSlug, hi
 
   return (
     <BookingTheme accentColor={business.accentColor} embed={mode === "embed"}>
-      <div className="min-h-dvh bg-[#f2f2f7] md:bg-[#f7f7f8]" data-booking-embed-root={mode === "embed" ? "" : undefined}>
+      <div className="booking-page-bg min-h-dvh bg-[#f2f2f7] md:bg-[#f7f7f8]" data-booking-embed-root={mode === "embed" ? "" : undefined}>
         {mode === "embed" ? <EmbedResizeReporter /> : null}
+        {mode !== "embed" ? <BookingThemeToggle /> : null}
         <div className="mx-auto max-w-5xl px-0 md:px-8 md:py-6">
           {!hideSidebarSections && gallery.length > 0 && (
             <div className="px-4 pb-4 pt-4 md:px-0 md:pb-6 md:pt-0">
@@ -113,7 +115,7 @@ export default function BookingPageContent({ data, dealId, mode, serviceSlug, hi
                 {gallery.slice(0, 6).map((url, i) => (
                   <div
                     key={url}
-                    className={`relative overflow-hidden bg-gray-200 ${
+                    className={`relative overflow-hidden bg-gray-200 dark:bg-neutral-700 ${
                       gallery.length === 3 && i === 0
                         ? "col-span-2 row-span-2 aspect-square"
                         : gallery.length >= 4 && i === 0
@@ -136,26 +138,26 @@ export default function BookingPageContent({ data, dealId, mode, serviceSlug, hi
           )}
 
           {!hideSidebarSections && hasTrustBlock && (
-            <div className="mx-4 mb-4 rounded-xl border border-gray-100 bg-white p-4 md:mx-0 md:mb-6">
-              <p className="mb-3 text-[10px] font-bold uppercase tracking-widest text-gray-400">
+            <div className="mx-4 mb-4 rounded-xl border border-gray-100 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-4 md:mx-0 md:mb-6">
+              <p className="mb-3 text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">
                 {copy.trustTitle}
               </p>
-              <div className="space-y-3 text-sm text-gray-500">
+              <div className="space-y-3 text-sm text-gray-500 dark:text-gray-400">
                 {business.cancellationPolicy && (
                   <div>
-                    <p className="font-medium text-gray-800">{copy.cancellationPolicy}</p>
+                    <p className="font-medium text-gray-800 dark:text-gray-200">{copy.cancellationPolicy}</p>
                     <p className="mt-0.5 whitespace-pre-wrap">{business.cancellationPolicy}</p>
                   </div>
                 )}
                 {business.depositPolicy && (
                   <div>
-                    <p className="font-medium text-gray-800">{copy.depositPolicy}</p>
+                    <p className="font-medium text-gray-800 dark:text-gray-200">{copy.depositPolicy}</p>
                     <p className="mt-0.5 whitespace-pre-wrap">{business.depositPolicy}</p>
                   </div>
                 )}
                 {(business.bankTransferInstructions || business.lankaqrImageUrl) && (
                   <div>
-                    <p className="font-medium text-gray-800">{copy.localPayment}</p>
+                    <p className="font-medium text-gray-800 dark:text-gray-200">{copy.localPayment}</p>
                     {business.bankTransferInstructions && (
                       <p className="mt-0.5 whitespace-pre-wrap">{business.bankTransferInstructions}</p>
                     )}
@@ -212,30 +214,30 @@ export default function BookingPageContent({ data, dealId, mode, serviceSlug, hi
           )}
 
           {!hideSidebarSections && hasAboutSection && (
-            <section className="mt-6 hidden rounded-2xl border border-gray-100 bg-white p-6 md:block">
+            <section className="mt-6 hidden rounded-2xl border border-gray-100 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-6 md:block">
               {avgRating !== null && reviewCount > 0 && (
                 <div className="mb-4 flex items-center gap-2">
                   <StarRating rating={avgRating} size="md" />
-                  <span className="font-semibold text-gray-900">{avgRating.toFixed(1)}</span>
-                  <span className="text-sm text-gray-400">
+                  <span className="font-semibold text-gray-900 dark:text-gray-100">{avgRating.toFixed(1)}</span>
+                  <span className="text-sm text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
                     ({reviewCount} review{reviewCount !== 1 ? "s" : ""})
                   </span>
                 </div>
               )}
               {business.description && (
-                <p className="text-sm leading-relaxed text-gray-600">{business.description}</p>
+                <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-400">{business.description}</p>
               )}
             </section>
           )}
 
           {!hideSidebarSections && staffWithBio.length > 0 && (
             <section className="mt-8 px-4 md:px-0">
-              <h2 className="mb-4 font-cal text-lg text-gray-900">Meet the team</h2>
+              <h2 className="mb-4 font-cal text-lg text-gray-900 dark:text-gray-100">Meet the team</h2>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {staffWithBio.map((member) => (
                   <div
                     key={member.id}
-                    className="flex flex-col items-center gap-2 rounded-xl border border-gray-100 bg-white p-4 text-center"
+                    className="flex flex-col items-center gap-2 rounded-xl border border-gray-100 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-4 text-center"
                   >
                     {member.avatarUrl ? (
                       <Image
@@ -254,7 +256,7 @@ export default function BookingPageContent({ data, dealId, mode, serviceSlug, hi
                     <div>
                       <p className="text-sm font-medium">{member.name}</p>
                       {member.bio && (
-                        <p className="mt-0.5 line-clamp-3 text-xs leading-relaxed text-gray-500">
+                        <p className="mt-0.5 line-clamp-3 text-xs leading-relaxed text-gray-500 dark:text-gray-400">
                           {member.bio}
                         </p>
                       )}
@@ -268,7 +270,7 @@ export default function BookingPageContent({ data, dealId, mode, serviceSlug, hi
           {!hideSidebarSections && reviewList.length > 0 && (
             <section className="mt-8 px-4 pb-8 md:px-0">
               <div className="mb-4">
-                <h2 className="font-cal text-lg text-gray-900">Reviews</h2>
+                <h2 className="font-cal text-lg text-gray-900 dark:text-gray-100">Reviews</h2>
                 {avgRating !== null && (
                   <div className="mt-1 flex items-center gap-2">
                     <StarRating rating={avgRating} size="md" />
@@ -278,7 +280,7 @@ export default function BookingPageContent({ data, dealId, mode, serviceSlug, hi
               </div>
               <div className="space-y-3">
                 {reviewList.map((review) => (
-                  <div key={review.id} className="rounded-xl border border-gray-100 bg-white p-4">
+                  <div key={review.id} className="rounded-xl border border-gray-100 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-4">
                     <div className="mb-2 flex items-start justify-between gap-2">
                       <div>
                         <p className="text-sm font-medium">{review.clientName}</p>
@@ -286,7 +288,7 @@ export default function BookingPageContent({ data, dealId, mode, serviceSlug, hi
                       </div>
                     </div>
                     {review.comment && (
-                      <p className="text-sm leading-relaxed text-gray-500">{review.comment}</p>
+                      <p className="text-sm leading-relaxed text-gray-500 dark:text-gray-400">{review.comment}</p>
                     )}
                   </div>
                 ))}

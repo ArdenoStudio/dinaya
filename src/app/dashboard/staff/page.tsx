@@ -39,7 +39,7 @@ export default async function StaffPage() {
           }
         />
       ) : (
-        <div className="bg-white border rounded-xl divide-y">
+        <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 divide-y">
           {list.map((s) => (
             <div key={s.id} className="flex items-center gap-4 px-5 py-4 hover:bg-muted/20 transition-colors">
               <div className="w-10 h-10 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center flex-shrink-0 text-sm">
@@ -49,7 +49,7 @@ export default async function StaffPage() {
                 <p className="font-medium">{s.name}</p>
                 {s.bio && <p className="text-xs text-muted-foreground truncate mt-0.5">{s.bio}</p>}
               </div>
-              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${s.isActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
+              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${s.isActive ? "bg-green-100 text-green-700" : "bg-gray-100 dark:bg-neutral-800 text-gray-500 dark:text-gray-400"}`}>
                 {s.isActive ? "Active" : "Inactive"}
               </span>
               <Link

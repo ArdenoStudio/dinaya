@@ -13,7 +13,7 @@ type FilterTag = "all" | "feature" | "improvement" | "fix";
 const tagConfig = {
   feature: {
     label: "New",
-    badgeClass: "bg-blue-50 text-blue-700 ring-1 ring-blue-200/80",
+    badgeClass: "bg-blue-50 dark:bg-blue-950/40 text-blue-700 ring-1 ring-blue-200/80",
     iconBgClass: "bg-primary/10 text-primary",
     dotClass: "bg-primary",
   },
@@ -25,9 +25,9 @@ const tagConfig = {
   },
   fix: {
     label: "Fixed",
-    badgeClass: "bg-amber-50 text-amber-700 ring-1 ring-amber-200/80",
-    iconBgClass: "bg-amber-50 text-amber-600",
-    dotClass: "bg-amber-500",
+    badgeClass: "bg-amber-50 dark:bg-amber-950/40 text-amber-700 ring-1 ring-amber-200/80",
+    iconBgClass: "bg-amber-50 dark:bg-amber-950/40 text-amber-600",
+    dotClass: "bg-amber-50 dark:bg-amber-950/400",
   },
 } as const;
 
@@ -239,11 +239,11 @@ export default function WhatsNewPage() {
     .filter((r) => r.changes.length > 0);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-neutral-950">
       <PublicNav />
 
       {/* ── Hero ─────────────────────────────────────────────── */}
-      <div className="relative overflow-hidden border-b border-gray-100 bg-gradient-to-b from-blue-50/40 to-white">
+      <div className="relative overflow-hidden border-b border-gray-100 dark:border-neutral-800 bg-gradient-to-b from-blue-50/40 to-white">
         {/* Subtle dot grid */}
         <div
           className="absolute inset-0 opacity-[0.45]"
@@ -258,7 +258,7 @@ export default function WhatsNewPage() {
         <div className="relative max-w-4xl mx-auto px-6 public-page-offset pb-16">
           <FadeContainer>
             <FadeDiv>
-              <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-white px-3.5 py-1.5 text-xs font-medium text-primary shadow-sm mb-6">
+              <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-white dark:bg-neutral-900 px-3.5 py-1.5 text-xs font-medium text-primary shadow-sm mb-6">
                 <span className="relative flex h-1.5 w-1.5">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-60" />
                   <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-primary" />
@@ -268,14 +268,14 @@ export default function WhatsNewPage() {
             </FadeDiv>
 
             <FadeDiv>
-              <h1 className="font-cal text-5xl md:text-6xl tracking-tight text-gray-900 mb-4 leading-[1.05]">
+              <h1 className="font-cal text-5xl md:text-6xl tracking-tight text-gray-900 dark:text-gray-100 mb-4 leading-[1.05]">
                 What&apos;s new in{" "}
                 <span className="text-primary">Dinaya</span>
               </h1>
             </FadeDiv>
 
             <FadeDiv>
-              <p className="text-lg text-gray-500 max-w-lg leading-relaxed">
+              <p className="text-lg text-gray-500 dark:text-gray-400 max-w-lg leading-relaxed">
                 Every update, improvement, and fix — straight from the team
                 building Dinaya for Sri Lankan businesses.
               </p>
@@ -292,7 +292,7 @@ export default function WhatsNewPage() {
                 </Link>
                 <Link
                   href="/help"
-                  className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-800 transition-colors px-2 py-2.5"
+                  className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:text-gray-200 transition-colors px-2 py-2.5"
                 >
                   Visit Help Centre
                   <Icon name="arrow-up-right" className="text-xs" />
@@ -317,7 +317,7 @@ export default function WhatsNewPage() {
                   className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
                     activeFilter === f.id
                       ? "bg-gray-900 text-white shadow-sm"
-                      : "bg-gray-100/80 text-gray-600 hover:bg-gray-200 hover:text-gray-900"
+                      : "bg-gray-100 dark:bg-neutral-800/80 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:bg-neutral-700 hover:text-gray-900 dark:text-gray-100"
                   }`}
                 >
                   <Icon name={f.icon} className="text-[11px]" />
@@ -326,7 +326,7 @@ export default function WhatsNewPage() {
               ))}
 
               {/* Legend */}
-              <div className="ml-auto hidden sm:flex items-center gap-4 text-xs text-gray-400">
+              <div className="ml-auto hidden sm:flex items-center gap-4 text-xs text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
                 <span className="flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-primary inline-block" />
                   New
@@ -336,7 +336,7 @@ export default function WhatsNewPage() {
                   Improved
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 inline-block" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-50 dark:bg-amber-950/400 inline-block" />
                   Fixed
                 </span>
               </div>
@@ -363,7 +363,7 @@ export default function WhatsNewPage() {
                 {/* ── Date label (left col) ── */}
                 <div className="mb-5 md:mb-0 md:pt-1">
                   <div className="md:text-right">
-                    <div className="font-cal text-sm text-gray-800 tracking-tight leading-snug">
+                    <div className="font-cal text-sm text-gray-800 dark:text-gray-200 tracking-tight leading-snug">
                       {release.date}
                     </div>
                     <div className="flex items-center gap-1.5 mt-1.5 md:justify-end flex-wrap">
@@ -371,7 +371,7 @@ export default function WhatsNewPage() {
                         className={`text-[11px] font-mono font-semibold px-2 py-0.5 rounded-md ${
                           release.isLatest
                             ? "bg-primary text-white"
-                            : "bg-gray-100 text-gray-500"
+                            : "bg-gray-100 dark:bg-neutral-800 text-gray-500 dark:text-gray-400"
                         }`}
                       >
                         {release.version}
@@ -397,7 +397,7 @@ export default function WhatsNewPage() {
                   </div>
 
                   {/* Section title */}
-                  <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 mb-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 mb-4">
                     {release.highlight}
                   </p>
 
@@ -408,7 +408,7 @@ export default function WhatsNewPage() {
                       return (
                         <div
                           key={j}
-                          className="flex gap-3.5 p-4 rounded-xl border border-gray-100 bg-white hover:border-gray-200 hover:shadow-sm transition-all duration-150"
+                          className="flex gap-3.5 p-4 rounded-xl border border-gray-100 dark:border-neutral-800 bg-white dark:bg-neutral-900 hover:border-gray-200 dark:hover:border-neutral-700 hover:shadow-sm transition-all duration-150"
                         >
                           {/* Type indicator stripe */}
                           <div
@@ -430,11 +430,11 @@ export default function WhatsNewPage() {
                               >
                                 {cfg.label}
                               </span>
-                              <span className="text-sm font-semibold text-gray-900">
+                              <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                                 {change.title}
                               </span>
                             </div>
-                            <p className="text-sm text-gray-500 leading-relaxed">
+                            <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
                               {change.desc}
                             </p>
                           </div>
@@ -454,13 +454,13 @@ export default function WhatsNewPage() {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
-                className="py-20 text-center text-gray-400"
+                className="py-20 text-center text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500"
               >
-                <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center mx-auto mb-3">
-                  <Icon name="inbox" className="text-xl text-gray-400" />
+                <div className="w-12 h-12 rounded-xl bg-gray-100 dark:bg-neutral-800 flex items-center justify-center mx-auto mb-3">
+                  <Icon name="inbox" className="text-xl text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500" />
                 </div>
-                <p className="text-sm font-medium text-gray-500">Nothing here yet</p>
-                <p className="text-xs text-gray-400 mt-1">
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Nothing here yet</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-1">
                   Try a different filter to see updates.
                 </p>
               </motion.div>
@@ -469,13 +469,13 @@ export default function WhatsNewPage() {
         </div>
 
         {/* ── Bottom CTA ───────────────────────────────────── */}
-        <div className="mt-16 pt-10 border-t border-gray-100">
-          <div className="rounded-2xl bg-gray-50 border border-gray-100 p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+        <div className="mt-16 pt-10 border-t border-gray-100 dark:border-neutral-800">
+          <div className="rounded-2xl bg-gray-50 dark:bg-neutral-900/60 border border-gray-100 dark:border-neutral-800 p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
             <div>
-              <p className="text-sm font-semibold text-gray-900 mb-1">
+              <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">
                 Have a feature request?
               </p>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 We build Dinaya based on what businesses actually need. Tell us
                 what&apos;s missing.
               </p>
@@ -483,7 +483,7 @@ export default function WhatsNewPage() {
             <div className="flex items-center gap-3 flex-shrink-0">
               <Link
                 href="/help"
-                className="inline-flex items-center gap-2 text-sm font-semibold text-gray-700 border border-gray-200 bg-white px-4 py-2.5 rounded-lg hover:border-gray-300 hover:shadow-sm transition-all"
+                className="inline-flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-neutral-800 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-4 py-2.5 rounded-lg hover:border-gray-300 dark:border-neutral-700 hover:shadow-sm transition-all"
               >
                 <Icon name="chat-dots" className="text-xs" />
                 Contact us

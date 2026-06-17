@@ -4,20 +4,20 @@ import { cn } from "@/lib/utils";
 
 const toneStyles = {
   amber: {
-    bar: "bg-amber-500",
-    icon: "bg-amber-50 text-amber-600",
+    bar: "bg-amber-50 dark:bg-amber-950/40",
+    icon: "bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:bg-amber-950/50 dark:text-amber-300",
   },
   cobalt: {
     bar: "bg-primary",
-    icon: "bg-blue-50 text-primary",
+    icon: "bg-blue-50 dark:bg-blue-950/40 text-primary dark:bg-blue-950/50 dark:text-blue-300",
   },
   slate: {
     bar: "bg-slate-500",
-    icon: "bg-slate-100 text-slate-600",
+    icon: "bg-slate-100 text-slate-600 dark:bg-neutral-800 dark:text-neutral-300",
   },
   violet: {
     bar: "bg-violet-600",
-    icon: "bg-violet-50 text-violet-600",
+    icon: "bg-violet-50 text-violet-600 dark:bg-violet-950/50 dark:text-violet-300",
   },
 };
 
@@ -50,7 +50,7 @@ export function StatCard({
   const { isUp, text: deltaText } = parseDelta(delta);
 
   return (
-    <div className="overflow-hidden rounded-xl border bg-white">
+    <div className="overflow-hidden rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
       <div className={cn("h-1", styles.bar)} />
       <div className="flex items-start justify-between gap-4 p-5">
         <div className="min-w-0 flex-1">

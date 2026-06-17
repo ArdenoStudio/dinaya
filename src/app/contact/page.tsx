@@ -23,7 +23,7 @@ const channels = [
     ? [
         {
           icon: "whatsapp",
-          color: "bg-amber-500",
+          color: "bg-amber-50 dark:bg-amber-950/400",
           label: "WhatsApp",
           value: supportWhatsApp.label,
           desc: "Quickest way to reach us. Mon-Fri, 9 AM-6 PM.",
@@ -93,14 +93,14 @@ export default function ContactPage() {
   }
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-white dark:bg-neutral-950">
       <PublicNav />
 
       {/* Hero */}
       <section className="max-w-4xl mx-auto px-6 public-page-offset pb-16 text-center">
         <FadeContainer className="flex flex-col items-center">
           <FadeDiv className="mb-6">
-            <span className="inline-flex items-center gap-2 rounded-full border bg-white px-3 py-1 text-xs font-medium text-gray-700 shadow-sm">
+            <span className="inline-flex items-center gap-2 rounded-full border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 shadow-sm">
               <Icon name="chat-dots-fill" className="text-xs text-primary" />
               Get in touch
             </span>
@@ -122,13 +122,13 @@ export default function ContactPage() {
 
       {/* Contact channels */}
       <section className="max-w-5xl mx-auto px-6 pb-20">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-gray-200/70 rounded-2xl overflow-hidden border border-gray-200/70">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-gray-200 dark:bg-neutral-700/70 rounded-2xl overflow-hidden border border-gray-200 dark:border-neutral-800/70">
           {channels.map((c) => (
-            <div key={c.label} className="group p-8 bg-white hover:bg-gray-50/60 transition-colors">
+            <div key={c.label} className="group p-8 bg-white dark:bg-neutral-900 hover:bg-gray-50 dark:hover:bg-neutral-800/80 transition-colors">
               <div className={`inline-flex items-center justify-center size-11 rounded-xl ${c.color} text-white mb-5`}>
                 <Icon name={c.icon} className="text-[1.1rem]" />
               </div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-1">{c.label}</p>
+              <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 mb-1">{c.label}</p>
               {c.href ? (
                 <a
                   href={c.href}
@@ -160,7 +160,7 @@ export default function ContactPage() {
             </h2>
 
             {status === "sent" ? (
-              <div className="rounded-2xl border border-blue-100 bg-blue-50/60 p-10 text-center flex flex-col items-center gap-4">
+              <div className="rounded-2xl border border-blue-100 bg-blue-50 dark:bg-blue-950/40 p-10 text-center flex flex-col items-center gap-4">
                 <div className="flex items-center justify-center size-14 rounded-full bg-blue-600 text-white">
                   <Icon name="check-lg" className="text-2xl" />
                 </div>
@@ -182,7 +182,7 @@ export default function ContactPage() {
                 {status === "error" ? (
                   <div
                     role="alert"
-                    className="flex items-start gap-2 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700"
+                    className="flex items-start gap-2 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700 dark:text-red-300"
                   >
                     <Icon name="exclamation-circle" className="mt-0.5 shrink-0 text-sm" />
                     <span>
@@ -205,7 +205,7 @@ export default function ContactPage() {
                       value={form.name}
                       onChange={handleChange}
                       placeholder="Your name"
-                      className="rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                      className="rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-4 py-3 text-sm placeholder:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
@@ -218,7 +218,7 @@ export default function ContactPage() {
                       value={form.email}
                       onChange={handleChange}
                       placeholder="you@example.com"
-                      className="rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                      className="rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-4 py-3 text-sm placeholder:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
                     />
                   </div>
                 </div>
@@ -231,7 +231,7 @@ export default function ContactPage() {
                     required
                     value={form.subject}
                     onChange={handleChange}
-                    className="rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all appearance-none"
+                    className="rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all appearance-none"
                   >
                     <option value="" disabled>Select a topic…</option>
                     <option value="general">General enquiry</option>
@@ -253,7 +253,7 @@ export default function ContactPage() {
                     value={form.message}
                     onChange={handleChange}
                     placeholder="Tell us what's on your mind…"
-                    className="rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all resize-none"
+                    className="rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-4 py-3 text-sm placeholder:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all resize-none"
                   />
                 </div>
 
@@ -288,17 +288,17 @@ export default function ContactPage() {
               Quick answers.
             </h2>
 
-            <div className="space-y-px rounded-2xl overflow-hidden border border-gray-200/70 bg-gray-200/70">
+            <div className="space-y-px rounded-2xl overflow-hidden border border-gray-200 dark:border-neutral-800/70 bg-gray-200 dark:bg-neutral-700/70">
               {faqs.map((f) => (
-                <div key={f.q} className="bg-white px-7 py-6 hover:bg-gray-50/60 transition-colors">
+                <div key={f.q} className="bg-white dark:bg-neutral-900 px-7 py-6 hover:bg-gray-50 dark:hover:bg-neutral-800/80 transition-colors">
                   <p className="font-semibold text-sm text-foreground mb-2">{f.q}</p>
                   <p className="text-sm text-muted-foreground leading-relaxed">{f.a}</p>
                 </div>
               ))}
             </div>
 
-            <div className="mt-6 rounded-xl border border-amber-100 bg-amber-50/50 p-5 flex items-start gap-4">
-              <div className="flex-shrink-0 flex items-center justify-center size-9 rounded-lg bg-amber-500 text-white mt-0.5">
+            <div className="mt-6 rounded-xl border border-amber-100 bg-amber-50 dark:bg-amber-950/40 p-5 flex items-start gap-4">
+              <div className="flex-shrink-0 flex items-center justify-center size-9 rounded-lg bg-amber-50 dark:bg-amber-950/400 text-white mt-0.5">
                 <Icon name="book" className="text-sm" />
               </div>
               <div>
@@ -331,14 +331,14 @@ export default function ContactPage() {
               <div className="flex flex-wrap gap-4 justify-center">
                 <Link
                   href="/register"
-                  className="inline-flex items-center gap-2 bg-white text-blue-700 px-7 py-3.5 rounded-xl font-semibold shadow-lg hover:bg-white/95 transition-colors"
+                  className="inline-flex items-center gap-2 bg-white text-blue-700 px-7 py-3.5 rounded-xl font-semibold shadow-lg hover:bg-blue-50 transition-colors"
                 >
                   Start free trial
                   <Icon name="arrow-right" className="text-sm" />
                 </Link>
                 <Link
                   href="/features"
-                  className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-white px-7 py-3.5 rounded-xl font-medium hover:bg-white/20 transition-colors"
+                  className="inline-flex items-center gap-2 bg-black/25 border border-white/35 text-white px-7 py-3.5 rounded-xl font-medium hover:bg-black/40 backdrop-blur-sm transition-colors"
                 >
                   See all features
                 </Link>

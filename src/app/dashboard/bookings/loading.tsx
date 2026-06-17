@@ -21,7 +21,7 @@ export default function BookingsLoading() {
       </div>
 
       {/* Table */}
-      <div className="bg-white border rounded-xl overflow-hidden">
+      <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 overflow-hidden">
         <table className="w-full">
           <thead>
             <tr className="border-b bg-muted/30">

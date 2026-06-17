@@ -69,7 +69,7 @@ export function Orbit({
     >
       {/* Orbital path */}
       <div
-        className="absolute animate-pulse rounded-full border border-gray-200 bg-gray-500/5"
+        className="absolute animate-pulse rounded-full border border-gray-200 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-900/60"
         style={{ width: `${orbitDiameter}px`, height: `${orbitDiameter}px` }}
       />
       {positionedObjects}

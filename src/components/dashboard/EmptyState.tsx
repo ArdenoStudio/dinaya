@@ -12,7 +12,7 @@ export function EmptyState({
   title: string;
 }) {
   return (
-    <div className="rounded-lg border border-dashed bg-white px-6 py-10 text-center">
+    <div className="rounded-lg border border-dashed bg-white dark:border-neutral-800 dark:bg-neutral-900 px-6 py-10 text-center dark:border-neutral-800 dark:bg-neutral-900">
       {Icon && (
         <div className="mx-auto mb-4 flex size-11 items-center justify-center rounded-md bg-primary/10 text-primary">
           <Icon className="size-5" aria-hidden="true" />

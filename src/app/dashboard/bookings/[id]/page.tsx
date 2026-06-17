@@ -32,7 +32,7 @@ const STATUS_STYLES: Record<string, string> = {
   confirmed: "bg-green-100 text-green-800",
   cancelled: "bg-red-100 text-red-800",
   completed: "bg-blue-100 text-blue-800",
-  no_show: "bg-gray-100 text-gray-600",
+  no_show: "bg-gray-100 dark:bg-neutral-800 text-gray-600 dark:text-gray-400",
 };
 
 const ACTIONS: Record<string, { label: string; next: string; style: string }[]> = {
@@ -122,7 +122,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
       <div className="grid grid-cols-3 gap-6">
         {/* Left: booking info + actions */}
         <div className="col-span-1 space-y-4">
-          <div className="bg-white border rounded-xl p-5 space-y-4">
+          <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-5 space-y-4">
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Appointment</p>
             <div className="flex items-start gap-2.5">
               <Icon name="calendar" className="text-sm text-muted-foreground mt-0.5 shrink-0" />
@@ -148,7 +148,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
             </div>
           </div>
 
-          <div className="bg-white border rounded-xl p-5 space-y-3">
+          <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-5 space-y-3">
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Client</p>
             <div className="flex items-center gap-2 text-sm">
               <Icon name="telephone" className="text-xs text-muted-foreground shrink-0" />
@@ -189,7 +189,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
 
           {/* Status actions */}
           {actions.length > 0 && (
-            <div className="bg-white border rounded-xl p-5 space-y-2">
+            <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-5 space-y-2">
               <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Actions</p>
               {actions.map((a) => (
                 <button
@@ -208,14 +208,14 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
         {/* Right: client note + staff notes */}
         <div className="col-span-2 space-y-5">
           {booking.notes && (
-            <div className="bg-white border rounded-xl p-5">
+            <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-5">
               <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Client note</p>
               <p className="text-sm text-muted-foreground whitespace-pre-wrap">{booking.notes}</p>
             </div>
           )}
 
           {booking.intakeAnswers && booking.intakeAnswers.length > 0 && (
-            <div className="bg-white border rounded-xl p-5">
+            <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-5">
               <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Intake answers</p>
               <dl className="space-y-3">
                 {booking.intakeAnswers.map((a) => (
@@ -233,14 +233,14 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
             </div>
           )}
 
-          <div className="bg-white border rounded-xl p-5">
+          <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-5">
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Staff notes</p>
             <textarea
               rows={6}
               value={staffNotes}
               onChange={(e) => setStaffNotes(e.target.value)}
               placeholder="Add internal notes about this appointment…"
-              className="w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none bg-white"
+              className="w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none bg-white dark:bg-neutral-900 dark:border-neutral-800"
             />
             <div className="flex items-center gap-3 mt-2">
               <button

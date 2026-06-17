@@ -87,14 +87,14 @@ export default async function BookingConfirmedPage({ params, searchParams }: Pro
   ];
 
   return (
-    <div className="flex min-h-dvh items-start justify-center bg-[#f2f2f7] px-4 py-12">
+    <div className="booking-page-bg flex min-h-dvh items-start justify-center px-4 py-12">
       <div className="w-full max-w-md space-y-4">
-        <div className="rounded-2xl border border-gray-100 bg-white p-10 text-center shadow-sm">
+        <div className="rounded-2xl border border-gray-100 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-10 text-center shadow-sm">
           <div
             className={`mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full border ${
               isConfirmed
-                ? "border-emerald-100 bg-emerald-50"
-                : "border-amber-100 bg-amber-50"
+                ? "border-emerald-100 bg-emerald-50 dark:bg-emerald-950/40"
+                : "border-amber-100 bg-amber-50 dark:bg-amber-950/40"
             }`}
           >
             <Icon
@@ -103,10 +103,10 @@ export default async function BookingConfirmedPage({ params, searchParams }: Pro
             />
           </div>
 
-          <h1 className="mb-2 font-cal text-2xl text-gray-900">
+          <h1 className="mb-2 font-cal text-2xl text-gray-900 dark:text-gray-100">
             {isConfirmed ? copy.confirmedTitle : copy.requestReceivedTitle}
           </h1>
-          <p className="mb-8 text-sm text-gray-500">
+          <p className="mb-8 text-sm text-gray-500 dark:text-gray-400">
             {isPending ? copy.pendingHoldMessage : copy.seeYouAt}{" "}
             <span className="font-medium text-foreground">{booking.businessName}</span>.
           </p>
@@ -127,7 +127,7 @@ export default async function BookingConfirmedPage({ params, searchParams }: Pro
             }}
           />
 
-          <div className="mb-6 space-y-3 rounded-xl bg-gray-50 p-4 text-left text-sm">
+          <div className="mb-6 space-y-3 rounded-xl bg-gray-50 dark:bg-neutral-900/60 p-4 text-left text-sm">
             {details.map((d) => (
               <div key={d.label} className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-2 text-muted-foreground">

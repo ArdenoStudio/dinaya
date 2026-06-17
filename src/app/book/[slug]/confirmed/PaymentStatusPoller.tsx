@@ -88,7 +88,7 @@ export default function PaymentStatusPoller({ bookingId, slug, copy }: Props) {
     <div
       role="status"
       aria-live="polite"
-      className="mb-6 rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 text-left text-xs text-amber-900"
+      className="mb-6 rounded-xl border border-amber-100 bg-amber-50 dark:bg-amber-950/40 px-4 py-3 text-left text-xs text-amber-900 dark:text-amber-200"
     >
       {message}
     </div>

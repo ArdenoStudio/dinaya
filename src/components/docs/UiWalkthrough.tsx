@@ -48,7 +48,7 @@ const CLICK_TARGET_LABELS = {
 function StepVisual({ step }: { step: GuideStep }) {
   if (!step.visual) {
     return (
-      <div className="flex aspect-[16/10] items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-gradient-to-b from-gray-50 to-white text-sm text-muted-foreground">
+      <div className="flex aspect-[16/10] items-center justify-center rounded-2xl border border-dashed border-gray-200 dark:border-neutral-800 bg-gradient-to-b from-gray-50 to-white text-sm text-muted-foreground">
         Follow the steps on the left
       </div>
     );
@@ -162,7 +162,7 @@ export function UiWalkthrough({ steps }: Props) {
             ))}
           </div>
         </div>
-        <div className="h-1 overflow-hidden rounded-full bg-gray-100">
+        <div className="h-1 overflow-hidden rounded-full bg-gray-100 dark:bg-neutral-800">
           <motion.div
             className="h-full rounded-full bg-primary"
             animate={{ width: `${progress}%` }}
@@ -182,18 +182,18 @@ export function UiWalkthrough({ steps }: Props) {
               className={`flex h-16 w-40 shrink-0 items-start gap-2 rounded-xl border px-3 py-2 text-left transition-all ${
                 i === activeStep
                   ? "border-primary bg-primary/5 shadow-sm shadow-primary/10"
-                  : "border-gray-200 bg-white shadow-sm shadow-gray-900/5 hover:border-primary/30 hover:bg-gray-50"
+                  : "border-gray-200 dark:border-neutral-800 bg-white shadow-sm shadow-gray-900/5 dark:shadow-black/20 hover:border-primary/30 hover:bg-gray-50 dark:bg-neutral-900/60"
               }`}
             >
               <span
                 className={`flex size-6 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold ${
-                  i === activeStep ? "bg-primary text-white" : "bg-gray-100 text-gray-600"
+                  i === activeStep ? "bg-primary text-white" : "bg-gray-100 dark:bg-neutral-800 text-gray-600 dark:text-gray-400"
                 }`}
               >
                 {i + 1}
               </span>
               <span className="min-w-0">
-                <span className="block text-xs font-semibold leading-snug text-gray-900 line-clamp-2">
+                <span className="block text-xs font-semibold leading-snug text-gray-900 dark:text-gray-100 line-clamp-2">
                   {item.title}
                 </span>
               </span>
@@ -202,7 +202,7 @@ export function UiWalkthrough({ steps }: Props) {
         </div>
       </div>
 
-      <div className="grid gap-8 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm shadow-gray-900/5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:items-start">
+      <div className="grid gap-8 rounded-2xl border border-gray-200 dark:border-neutral-800 bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5 shadow-sm shadow-gray-900/5 dark:shadow-black/20 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:items-start">
         <div className="order-2 lg:order-1">
           <AnimatePresence mode="wait">
             <motion.div
@@ -228,7 +228,7 @@ export function UiWalkthrough({ steps }: Props) {
               type="button"
               disabled={activeStep === 0}
               onClick={() => goTo(activeStep - 1)}
-              className="inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-sm font-medium disabled:opacity-40 hover:bg-gray-50"
+              className="inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-sm font-medium disabled:opacity-40 hover:bg-gray-50 dark:bg-neutral-900/60"
             >
               <Icon name="arrow-left" className="text-xs" />
               Previous

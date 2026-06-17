@@ -50,9 +50,9 @@ export default function NewClientPage() {
         <h1 className="font-cal text-2xl">New client</h1>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-white border rounded-xl p-6 space-y-4">
+      <form onSubmit={handleSubmit} className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-6 space-y-4">
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-md px-4 py-2">
+          <div className="bg-red-50 border border-red-200 text-red-700 dark:text-red-300 text-sm rounded-md px-4 py-2">
             {error}
           </div>
         )}

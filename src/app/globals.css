@@ -68,9 +68,20 @@ html.nav-open {
     --public-nav-top: 0.75rem;
     --public-nav-height: 3.75rem;
     --public-nav-gap: 2rem;
+    --nav-glass-bg: rgba(255, 255, 255, 0.82);
+    --nav-glass-inset-light: rgba(255, 255, 255, 0.9);
+    --nav-glass-inset-mid: rgba(255, 255, 255, 0.8);
+    --nav-glass-inset-soft: rgba(255, 255, 255, 0.6);
+    --nav-glass-shadow-outer: rgba(0, 0, 0, 0.12);
   }
 
   .dark {
+    color-scheme: dark;
+    --nav-glass-bg: rgba(23, 23, 23, 0.82);
+    --nav-glass-inset-light: rgba(255, 255, 255, 0.08);
+    --nav-glass-inset-mid: rgba(255, 255, 255, 0.05);
+    --nav-glass-inset-soft: rgba(255, 255, 255, 0.03);
+    --nav-glass-shadow-outer: rgba(0, 0, 0, 0.35);
     --gradient-color: #60a5fa;
     --sparkles-color: #ffffff;
     --background: 222.2 84% 4.9%;
@@ -80,7 +91,7 @@ html.nav-open {
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
     --primary: 220 82% 53%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
     --muted: 217.2 32.6% 17.5%;
@@ -101,6 +112,30 @@ html.nav-open {
 }
 
 @layer utilities {
+  .surface-page {
+    @apply bg-white dark:bg-neutral-950;
+  }
+
+  .surface-card {
+    @apply bg-white dark:bg-neutral-900;
+  }
+
+  .surface-muted {
+    @apply bg-gray-50 dark:bg-neutral-900/60;
+  }
+
+  .booking-page-bg {
+    @apply bg-[#f2f2f7] md:bg-[#f7f7f8] dark:bg-neutral-950 dark:md:bg-neutral-950;
+  }
+
+  .booking-panel-bg {
+    @apply bg-[#f2f2f7] dark:bg-neutral-950;
+  }
+
+  .booking-sticky-bar {
+    @apply bg-[#f2f2f7]/95 dark:bg-neutral-950/95;
+  }
+
   .public-page-offset {
     padding-top: calc(var(--public-nav-top) + var(--public-nav-height) + var(--public-nav-gap));
   }
@@ -138,6 +173,14 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
     --booking-accent-ring: color-mix(in srgb, var(--booking-accent) 28%, transparent);
     --booking-accent-shadow: color-mix(in srgb, var(--booking-accent) 35%, transparent);
     --booking-accent-on-dark: color-mix(in srgb, var(--booking-accent) 55%, white);
+  }
+
+  .dark [data-booking-theme] {
+    --booking-accent-hover: color-mix(in srgb, var(--booking-accent) 78%, white);
+    --booking-accent-muted: color-mix(in srgb, var(--booking-accent) 14%, black);
+    --booking-accent-soft: color-mix(in srgb, var(--booking-accent) 24%, black);
+    --booking-accent-shadow: color-mix(in srgb, var(--booking-accent) 45%, transparent);
+    --booking-accent-on-dark: color-mix(in srgb, var(--booking-accent) 65%, white);
   }
 
   .booking-bg-accent { background-color: var(--booking-accent); }

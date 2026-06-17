@@ -36,17 +36,17 @@ export default async function AdminReferralsPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <div className="rounded-xl border bg-white p-5">
+        <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
           <p className="text-xs text-muted-foreground">Referred signups</p>
           <p className="mt-1 text-2xl font-bold">{totals.referredBusinesses}</p>
         </div>
-        <div className="rounded-xl border bg-white p-5">
+        <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
           <p className="text-xs text-muted-foreground">Active referrers</p>
           <p className="mt-1 text-2xl font-bold">{totals.activeReferrers}</p>
         </div>
       </div>
 
-      <div className="rounded-xl border bg-white">
+      <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
         <div className="border-b px-4 py-3">
           <h2 className="text-sm font-semibold">Top referrers</h2>
         </div>
@@ -71,7 +71,7 @@ export default async function AdminReferralsPage() {
         )}
       </div>
 
-      <div className="rounded-xl border bg-white">
+      <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
         <div className="border-b px-4 py-3">
           <h2 className="text-sm font-semibold">Recent referred signups</h2>
         </div>

@@ -26,7 +26,7 @@ export default function StepService({ services, selected, copy, bookingRouter, o
     <div>
       {bookingRouter && (
         <div className="mb-5">
-          <p className="mb-3 text-[10px] font-bold uppercase tracking-widest text-gray-400">
+          <p className="mb-3 text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
             {bookingRouter.question}
           </p>
           <div className="space-y-2">
@@ -42,10 +42,10 @@ export default function StepService({ services, selected, copy, bookingRouter, o
                   className={`flex w-full cursor-pointer items-center justify-between rounded-xl border p-3.5 text-left transition-all ${
                     isSelected
                       ? "booking-border-accent booking-bg-accent-muted/60 shadow-sm ring-2 booking-ring-accent"
-                      : "border-gray-100 hover:border-gray-200"
+                      : "border-gray-100 dark:border-neutral-800 hover:border-gray-200 dark:border-neutral-800"
                   }`}
                 >
-                  <span className={`text-sm font-medium ${isSelected ? "booking-text-accent" : "text-gray-800"}`}>
+                  <span className={`text-sm font-medium ${isSelected ? "booking-text-accent" : "text-gray-800 dark:text-gray-200"}`}>
                     {o.label}
                   </span>
                   <Icon name="chevron-right" className="text-xs text-gray-300" />
@@ -56,7 +56,7 @@ export default function StepService({ services, selected, copy, bookingRouter, o
         </div>
       )}
 
-      <p className="mb-3 text-[10px] font-bold uppercase tracking-widest text-gray-400">
+      <p className="mb-3 text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
         {bookingRouter ? "Or choose a service" : copy.chooseService}
       </p>
       <div className="space-y-2">
@@ -74,7 +74,7 @@ export default function StepService({ services, selected, copy, bookingRouter, o
               className={`flex w-full cursor-pointer items-center justify-between rounded-xl border p-3.5 text-left transition-all ${
                 isSelected
                   ? "booking-border-accent booking-bg-accent-muted/60 shadow-sm ring-2 booking-ring-accent"
-                  : "border-gray-100 hover:border-gray-200"
+                  : "border-gray-100 dark:border-neutral-800 hover:border-gray-200 dark:border-neutral-800"
               }`}
             >
               <div className="flex min-w-0 flex-1 items-center gap-2.5">
@@ -90,21 +90,21 @@ export default function StepService({ services, selected, copy, bookingRouter, o
                 ) : null}
                 <div
                   className={`flex size-4 shrink-0 items-center justify-center rounded-full border-2 ${
-                    isSelected ? "booking-border-accent booking-bg-accent-muted0" : "border-gray-300"
+                    isSelected ? "booking-border-accent booking-bg-accent-muted0" : "border-gray-300 dark:border-neutral-700"
                   }`}
                 >
                   {isSelected && <div className="size-1.5 rounded-full bg-white" />}
                 </div>
                 <div className="min-w-0">
-                  <p className={`text-sm font-medium ${isSelected ? "booking-text-accent" : "text-gray-800"}`}>
+                  <p className={`text-sm font-medium ${isSelected ? "booking-text-accent" : "text-gray-800 dark:text-gray-200"}`}>
                     {s.name}
                   </p>
-                  <p className="text-xs text-gray-400">{s.durationMinutes} min</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">{s.durationMinutes} min</p>
                 </div>
               </div>
               <div className="shrink-0 text-right">
                 <span
-                  className={`text-sm font-bold tabular-nums ${isSelected ? "booking-text-accent" : "text-gray-600"}`}
+                  className={`text-sm font-bold tabular-nums ${isSelected ? "booking-text-accent" : "text-gray-600 dark:text-gray-400"}`}
                 >
                   {s.priceLkr > 0 ? formatLkr(s.priceLkr) : "Free"}
                 </span>

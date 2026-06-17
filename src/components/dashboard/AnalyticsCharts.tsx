@@ -1,5 +1,6 @@
 "use client";
 
+import { useTheme } from "next-themes";
 import {
   Area,
   AreaChart,
@@ -26,11 +27,22 @@ const HEALTH_COLORS: Record<string, string> = {
 const FALLBACK_COLORS = ["#2563eb", "#f59e0b", "#7c3aed", "#10b981", "#ef4444"];
 const RANK_COLORS = ["#f59e0b", "#94a3b8", "#b45309"];
 
-const tooltipStyle = {
+const tooltipStyleLight = {
   borderRadius: "8px",
   border: "1px solid #e2e8f0",
   boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.07)",
   fontSize: "12px",
+  backgroundColor: "#ffffff",
+  color: "#0f172a",
+};
+
+const tooltipStyleDark = {
+  borderRadius: "8px",
+  border: "1px solid #404040",
+  boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.35)",
+  fontSize: "12px",
+  backgroundColor: "#171717",
+  color: "#f5f5f5",
 };
 
 type RevenueDay = { day: string; thisWeek: number; lastWeek: number };
@@ -52,6 +64,15 @@ export function AnalyticsCharts({
   bookingHealth,
   topClients,
 }: Props) {
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
+  const tooltipStyle = isDark ? tooltipStyleDark : tooltipStyleLight;
+  const gridStroke = isDark ? "#404040" : "#f1f5f9";
+  const lastWeekStroke = isDark ? "#737373" : "#cbd5e1";
+  const pieStroke = isDark ? "#262626" : "#fff";
+  const labelFill = isDark ? "#f5f5f5" : "#0f172a";
+  const rankFallbackBg = isDark ? "#404040" : "#f1f5f9";
+  const rankFallbackColor = isDark ? "#a3a3a3" : "#64748b";
   const healthTotal = bookingHealth.reduce((s, i) => s + i.value, 0);
   const completedCount = bookingHealth.find((i) => i.name === "Completed")?.value ?? 0;
   const completionRate = healthTotal > 0 ? Math.round((completedCount / healthTotal) * 100) : 0;
@@ -60,7 +81,7 @@ export function AnalyticsCharts({
   return (
     <div className="grid gap-6 lg:grid-cols-2">
       {/* Revenue area chart */}
-      <div className="rounded-xl border bg-white p-5 lg:col-span-2">
+      <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5 lg:col-span-2">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-semibold">Revenue this week vs last week</h2>
           <div className="flex items-center gap-4 text-xs text-muted-foreground">
@@ -69,7 +90,7 @@ export function AnalyticsCharts({
               This week
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="inline-block size-2 rounded-full bg-slate-300" />
+              <span className="inline-block size-2 rounded-full bg-slate-300 dark:bg-neutral-600" />
               Last week
             </span>
           </div>
@@ -83,7 +104,7 @@ export function AnalyticsCharts({
                   <stop offset="95%" stopColor="#2563EB" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} vertical={false} />
               <XAxis dataKey="day" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
               <YAxis
                 tick={{ fontSize: 12 }}
@@ -109,7 +130,7 @@ export function AnalyticsCharts({
                 type="monotone"
                 dataKey="lastWeek"
                 name="Last week"
-                stroke="#cbd5e1"
+                stroke={lastWeekStroke}
                 strokeWidth={1.5}
                 strokeDasharray="4 4"
                 dot={false}
@@ -120,12 +141,12 @@ export function AnalyticsCharts({
       </div>
 
       {/* Services by revenue */}
-      <div className="rounded-xl border bg-white p-5">
+      <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
         <h2 className="mb-4 font-semibold">Bookings by service (revenue)</h2>
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={revenueByService} layout="vertical" margin={{ left: 8, right: 16 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" horizontal={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} horizontal={false} />
               <XAxis
                 type="number"
                 tick={{ fontSize: 12 }}
@@ -152,12 +173,12 @@ export function AnalyticsCharts({
       </div>
 
       {/* Busiest hours */}
-      <div className="rounded-xl border bg-white p-5">
+      <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
         <h2 className="mb-4 font-semibold">Busiest hours</h2>
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={busiestHours}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} vertical={false} />
               <XAxis dataKey="name" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
               <YAxis
                 tick={{ fontSize: 12 }}
@@ -173,7 +194,7 @@ export function AnalyticsCharts({
       </div>
 
       {/* Booking health donut */}
-      <div className="rounded-xl border bg-white p-5">
+      <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
         <h2 className="mb-4 font-semibold">Booking health</h2>
         <div className="h-52">
           <ResponsiveContainer width="100%" height="100%">
@@ -187,7 +208,7 @@ export function AnalyticsCharts({
                 innerRadius={55}
                 outerRadius={80}
                 strokeWidth={2}
-                stroke="#fff"
+                stroke={pieStroke}
               >
                 {bookingHealth.map((entry, index) => (
                   <Cell
@@ -198,7 +219,7 @@ export function AnalyticsCharts({
                 <Label
                   value={`${completionRate}%`}
                   position="center"
-                  style={{ fontSize: "20px", fontWeight: 700, fill: "#0f172a" }}
+                  style={{ fontSize: "20px", fontWeight: 700, fill: labelFill }}
                 />
               </Pie>
               <Tooltip contentStyle={tooltipStyle} />
@@ -223,7 +244,7 @@ export function AnalyticsCharts({
       </div>
 
       {/* Top clients with fill bars */}
-      <div className="rounded-xl border bg-white p-5">
+      <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
         <h2 className="mb-4 font-semibold">Top clients by spend</h2>
         {topClients.length === 0 ? (
           <p className="text-sm text-muted-foreground">No paid bookings yet.</p>
@@ -245,7 +266,7 @@ export function AnalyticsCharts({
                         style={
                           rankColor
                             ? { backgroundColor: rankColor + "22", color: rankColor }
-                            : { backgroundColor: "#f1f5f9", color: "#64748b" }
+                            : { backgroundColor: rankFallbackBg, color: rankFallbackColor }
                         }
                       >
                         {index + 1}

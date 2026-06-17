@@ -122,7 +122,7 @@ export function CustomDomainPanel({
   }
 
   return (
-    <div className="rounded-xl border bg-white p-5 space-y-3">
+    <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5 space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="font-semibold">Custom domain</h2>

@@ -92,7 +92,7 @@ export default async function AdminAccountsPage({
 
       <form
         method="get"
-        className="flex flex-wrap items-center gap-3 rounded-xl border bg-white p-3"
+        className="flex flex-wrap items-center gap-3 rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-3"
       >
         <div className="relative min-w-[16rem] flex-1">
           <Search
@@ -104,7 +104,7 @@ export default async function AdminAccountsPage({
             name="q"
             defaultValue={q}
             placeholder="Search by name, slug, or email"
-            className="h-10 w-full rounded-md border bg-white pl-9 pr-3 text-sm outline-none transition-shadow placeholder:text-muted-foreground/60 focus:ring-2 focus:ring-primary/30"
+            className="h-10 w-full rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 pl-9 pr-3 text-sm outline-none transition-shadow placeholder:text-muted-foreground/60 focus:ring-2 focus:ring-primary/30"
           />
         </div>
         <div className="flex items-center gap-1 rounded-md border bg-muted/30 p-1">
@@ -135,7 +135,7 @@ export default async function AdminAccountsPage({
         </button>
       </form>
 
-      <div className="overflow-hidden rounded-xl border bg-white">
+      <div className="overflow-hidden rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-muted/30 text-left text-xs uppercase tracking-wider text-muted-foreground">
@@ -162,11 +162,11 @@ export default async function AdminAccountsPage({
                 const status = r.subStatus ?? null;
                 const statusStyle =
                   status === "active"
-                    ? "bg-emerald-500/10 text-emerald-700"
+                    ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700"
                     : status === "past_due"
-                    ? "bg-amber-500/10 text-amber-700"
+                    ? "bg-amber-50 dark:bg-amber-950/30 text-amber-700"
                     : status === "cancelled" || status === "ended"
-                    ? "bg-rose-500/10 text-rose-700"
+                    ? "bg-rose-50 dark:bg-rose-950/30 text-rose-700"
                     : "bg-muted text-muted-foreground";
                 return (
                   <tr key={r.id} className="transition-colors hover:bg-muted/30">
@@ -188,9 +188,9 @@ export default async function AdminAccountsPage({
                           r.plan === "pro"
                             ? "rounded-full bg-primary/10 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-primary"
                             : r.plan === "starter"
-                              ? "rounded-full bg-emerald-500/10 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-emerald-700"
+                              ? "rounded-full bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-emerald-700"
                             : r.plan === "max"
-                              ? "rounded-full bg-amber-500/10 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-amber-700"
+                              ? "rounded-full bg-amber-50 dark:bg-amber-950/30 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-amber-700"
                             : "rounded-full bg-muted px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-muted-foreground"
                         }
                       >

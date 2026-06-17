@@ -27,7 +27,7 @@ const STATUS_STYLES: Record<string, string> = {
   confirmed: "bg-green-100 text-green-800",
   cancelled: "bg-red-100 text-red-800",
   completed: "bg-blue-100 text-blue-800",
-  no_show: "bg-gray-100 text-gray-600",
+  no_show: "bg-gray-100 dark:bg-neutral-800 text-gray-600 dark:text-gray-400",
 };
 
 const TABS = [
@@ -45,8 +45,8 @@ const ACTIONS: Record<string, { label: string; next: string; style: string }[]> 
     { label: "Cancel", next: "cancelled", style: "text-red-600 hover:bg-red-50 border-red-200" },
   ],
   confirmed: [
-    { label: "Complete", next: "completed", style: "text-blue-700 hover:bg-blue-50 border-blue-200" },
-    { label: "No-show", next: "no_show", style: "text-gray-600 hover:bg-gray-50 border-gray-200" },
+    { label: "Complete", next: "completed", style: "text-blue-700 hover:bg-blue-50 dark:bg-blue-950/40 border-blue-200" },
+    { label: "No-show", next: "no_show", style: "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:bg-neutral-900/60 border-gray-200 dark:border-neutral-800" },
     { label: "Cancel", next: "cancelled", style: "text-red-600 hover:bg-red-50 border-red-200" },
   ],
 };
@@ -130,7 +130,7 @@ export default function BookingsPage() {
       </div>
 
       {loading ? (
-        <div className="rounded-xl border bg-white p-12 text-center text-sm text-muted-foreground">
+        <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-12 text-center text-sm text-muted-foreground">
           Loading…
         </div>
       ) : (
@@ -228,7 +228,7 @@ export default function BookingsPage() {
                   <div className="flex items-center justify-end gap-1.5">
                     <Link
                       href={`/dashboard/bookings/${row.id}`}
-                      className="rounded border border-gray-200 px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/50"
+                      className="rounded border border-gray-200 dark:border-neutral-800 px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/50"
                     >
                       View
                     </Link>

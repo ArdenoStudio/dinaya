@@ -37,7 +37,7 @@ function OrbitNode({
   return (
     <div className="relative flex items-center justify-center">
       {/* Icon + white circle */}
-      <Icon name={icon} className="z-10 text-[18px] text-gray-800" />
+      <Icon name={icon} className="z-10 text-[18px] text-gray-800 dark:text-gray-200" />
       <div className="absolute size-10 rounded-full bg-white/60 ring-1 shadow-lg ring-black/5" />
 
       {/* Status badge */}
@@ -48,7 +48,7 @@ function OrbitNode({
           >
             <Icon name={badgeIcon} className="text-[9px] text-white" />
           </div>
-          <div className="rounded-r-full bg-white/70 py-0.5 pr-1.5 pl-1 text-[11px] whitespace-nowrap ring-1 ring-gray-200 text-gray-700 font-medium">
+          <div className="rounded-r-full bg-white/70 py-0.5 pr-1.5 pl-1 text-[11px] whitespace-nowrap ring-1 ring-gray-200 text-gray-700 dark:text-gray-300 font-medium">
             {badgeLabel}
           </div>
         </div>
@@ -74,10 +74,10 @@ export function HowItWorks() {
             <span className="absolute top-0.5 -left-3 h-4 w-[3px] rounded-r-sm bg-primary" />
             How it works
           </h2>
-          <p className="font-cal text-3xl md:text-4xl tracking-tight text-balance text-gray-900">
+          <p className="font-cal text-3xl md:text-4xl tracking-tight text-balance text-gray-900 dark:text-gray-100">
             Your entire booking workflow, automated
           </p>
-          <p className="mt-4 text-gray-500 text-balance leading-relaxed">
+          <p className="mt-4 text-gray-500 dark:text-gray-400 text-balance leading-relaxed">
             From the moment a client picks a time to the final review request
             — Dinaya handles every step. No back-and-forth messages,
             no missed bookings, no chasing payments.
@@ -89,10 +89,10 @@ export function HowItWorks() {
               { icon: "phone",        label: "Client books on your page",        color: "bg-blue-600" },
               { icon: "credit-card",  label: "Payment collected automatically",  color: "bg-green-500" },
               { icon: "bell",         label: "You get an instant notification",  color: "bg-blue-600" },
-              { icon: "check-circle", label: "Appointment confirmed",            color: "bg-emerald-500" },
-              { icon: "star",         label: "Review request sent after visit",  color: "bg-amber-500" },
+              { icon: "check-circle", label: "Appointment confirmed",            color: "bg-emerald-50 dark:bg-emerald-950/40" },
+              { icon: "star",         label: "Review request sent after visit",  color: "bg-amber-50 dark:bg-amber-950/40" },
             ].map(({ icon, label, color }, i) => (
-              <li key={i} className="flex items-center gap-3 text-sm text-gray-600">
+              <li key={i} className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
                 <span className={`flex size-6 shrink-0 items-center justify-center rounded-full ${color}`}>
                   <Icon name={icon} className="text-[10px] text-white" />
                 </span>
@@ -142,7 +142,7 @@ export function HowItWorks() {
                 <OrbitNode
                   key="confirmed"
                   icon="bi-check-circle"
-                  badgeBg="bg-emerald-500"
+                  badgeBg="bg-emerald-50 dark:bg-emerald-950/40"
                   badgeIcon="bi-check-lg"
                   badgeLabel="Confirmed"
                   pingDelay="6s"
@@ -151,7 +151,7 @@ export function HowItWorks() {
                 <OrbitNode
                   key="review"
                   icon="bi-star"
-                  badgeBg="bg-amber-500"
+                  badgeBg="bg-amber-50 dark:bg-amber-950/40"
                   badgeIcon="bi-star"
                   badgeLabel="Review sent"
                   pingDelay="1s"

@@ -174,7 +174,7 @@ export default function AiHubClient() {
 
       {error && <p className="text-sm text-destructive">{error}</p>}
 
-      <section className="rounded-xl border bg-white p-5">
+      <section className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <h2 className="font-semibold">Client Reactivation Campaign</h2>
@@ -200,7 +200,7 @@ export default function AiHubClient() {
             {reactivationResult.previews.length > 0 ? (
               <ul className="mt-3 space-y-2">
                 {reactivationResult.previews.map((preview) => (
-                  <li key={preview.clientName} className="rounded border bg-white p-3">
+                  <li key={preview.clientName} className="rounded border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-3">
                     <p className="font-medium">{preview.clientName} — {preview.status}</p>
                     {preview.body ? (
                       <p className="mt-1 text-xs text-muted-foreground">{preview.body}</p>
@@ -214,7 +214,7 @@ export default function AiHubClient() {
       </section>
 
       {locations.length === 0 ? (
-        <div className="rounded-xl border bg-white p-8 text-center text-muted-foreground">
+        <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-8 text-center text-muted-foreground">
           Add a location first to configure branch AI.{" "}
           <Link href="/dashboard/locations" className="text-primary hover:underline">
             Manage locations
@@ -223,7 +223,7 @@ export default function AiHubClient() {
       ) : (
         <div className="grid gap-6">
           {locations.map((loc) => (
-            <section key={loc.id} className="overflow-hidden rounded-xl border bg-white">
+            <section key={loc.id} className="overflow-hidden rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
               <div className="border-b bg-muted/30 px-5 py-4">
                 <div className="flex flex-wrap items-center gap-2">
                   <h2 className="font-semibold">{loc.name}</h2>
@@ -264,7 +264,7 @@ export default function AiHubClient() {
         </div>
       )}
 
-      <section className="rounded-xl border bg-white">
+      <section className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b px-5 py-4">
           <div>
             <h2 className="font-semibold">30-day content machine</h2>
@@ -326,7 +326,7 @@ export default function AiHubClient() {
         )}
       </section>
 
-      <section className="rounded-xl border bg-white">
+      <section className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
         <div className="border-b px-5 py-4">
           <h2 className="font-semibold">Workflow history</h2>
           <p className="mt-0.5 text-xs text-muted-foreground">

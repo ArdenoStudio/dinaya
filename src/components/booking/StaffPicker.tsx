@@ -38,7 +38,7 @@ export default function StaffPicker({
 
   return (
     <div className={compact ? "mt-4" : "mb-5"}>
-      <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-400">
+      <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
         {copy.chooseTeam}
       </p>
       <div className="flex flex-wrap gap-2" role="group" aria-label={copy.chooseTeam}>
@@ -67,7 +67,7 @@ export default function StaffPicker({
               className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
                 isSelected
                   ? "booking-border-accent booking-bg-accent-muted booking-text-accent ring-2 booking-ring-accent"
-                  : "border-gray-200 bg-white text-gray-600 hover:border-blue-300"
+                  : "border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 text-gray-600 dark:text-gray-400 hover:border-blue-300"
               }`}
             >
               {s.avatarUrl ? (

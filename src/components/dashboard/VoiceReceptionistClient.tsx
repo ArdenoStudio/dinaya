@@ -93,10 +93,10 @@ export function VoiceReceptionistClient() {
   const status = data?.integration?.status ?? "not_requested";
   const statusLabel = voiceStatusLabel(status);
   const statusClass = status === "live"
-    ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+    ? "border-emerald-200 dark:border-emerald-800/50 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700"
     : status === "paused"
-      ? "border-amber-200 bg-amber-50 text-amber-700"
-      : "border-blue-200 bg-blue-50 text-blue-700";
+      ? "border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-950/40 text-amber-700"
+      : "border-blue-200 bg-blue-50 dark:bg-blue-950/40 text-blue-700";
 
   const scopeText = useMemo(() => VOICE_API_SCOPES.join(", "), []);
 
@@ -175,7 +175,7 @@ export function VoiceReceptionistClient() {
   return (
     <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
       <form onSubmit={save} className="space-y-5">
-        <div className="rounded-xl border bg-white p-5">
+        <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <h2 className="flex items-center gap-2 font-semibold">
@@ -235,7 +235,7 @@ export function VoiceReceptionistClient() {
           </div>
         </div>
 
-        <div className="rounded-xl border bg-white p-5">
+        <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
           <h2 className="font-semibold">Conversation rules</h2>
           <div className="mt-4 grid gap-4">
             {[
@@ -272,7 +272,7 @@ export function VoiceReceptionistClient() {
       </form>
 
       <aside className="space-y-4">
-        <div className="rounded-xl border bg-white p-5">
+        <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
           <h2 className="flex items-center gap-2 font-semibold">
             <ShieldCheck className="size-4 text-primary" aria-hidden="true" />
             Provider handoff
@@ -311,7 +311,7 @@ export function VoiceReceptionistClient() {
           </dl>
         </div>
 
-        <div className="rounded-xl border bg-white p-5">
+        <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
           <h2 className="flex items-center gap-2 font-semibold">
             <KeyRound className="size-4 text-primary" aria-hidden="true" />
             Voice API key
@@ -320,8 +320,8 @@ export function VoiceReceptionistClient() {
             Generate one key per provider setup and revoke it if the provider changes.
           </p>
           {rawKey ? (
-            <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm">
-              <p className="font-medium text-amber-900">Copy this key now.</p>
+            <div className="mt-4 rounded-lg border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-950/40 p-3 text-sm">
+              <p className="font-medium text-amber-900 dark:text-amber-200">Copy this key now.</p>
               <code className="mt-2 block break-all font-mono text-xs text-amber-950">{rawKey}</code>
             </div>
           ) : null}
@@ -337,7 +337,7 @@ export function VoiceReceptionistClient() {
         </div>
 
         {status === "live" ? (
-          <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
+          <div className="rounded-xl border border-emerald-200 dark:border-emerald-800/50 bg-emerald-50 dark:bg-emerald-950/40 p-4 text-sm text-emerald-800">
             <CheckCircle2 className="mb-2 size-4" aria-hidden="true" />
             Voice receptionist is marked live by platform admin.
           </div>

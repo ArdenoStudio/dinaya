@@ -16,12 +16,12 @@ const industries = [
     id: "salons",
     icon: "scissors",
     color: {
-      bg: "bg-amber-500",
-      light: "bg-amber-50/50",
-      ring: "ring-amber-100",
+      bg: "bg-amber-50 dark:bg-amber-950/400",
+      light: "bg-amber-50 dark:bg-amber-950/40",
+      ring: "ring-amber-100 dark:ring-amber-900/50",
       text: "text-amber-600",
       iconBg: "bg-gradient-to-br from-amber-500/15 to-amber-500/5",
-      glow: "bg-amber-500/20",
+      glow: "bg-amber-50 dark:bg-amber-950/30",
       hover: "hover:from-amber-500/[0.03]",
       line: "via-amber-500/40",
     },
@@ -61,8 +61,8 @@ const industries = [
     icon: "heart-pulse",
     color: {
       bg: "bg-violet-500",
-      light: "bg-violet-50/50",
-      ring: "ring-violet-100",
+      light: "bg-violet-50/50 dark:bg-violet-950/40",
+      ring: "ring-violet-100 dark:ring-violet-900/50",
       text: "text-violet-600",
       iconBg: "bg-gradient-to-br from-violet-500/15 to-violet-500/5",
       glow: "bg-violet-500/20",
@@ -105,8 +105,8 @@ const industries = [
     icon: "mortarboard",
     color: {
       bg: "bg-indigo-500",
-      light: "bg-indigo-50/50",
-      ring: "ring-indigo-100",
+      light: "bg-indigo-50/50 dark:bg-indigo-950/40",
+      ring: "ring-indigo-100 dark:ring-indigo-900/50",
       text: "text-indigo-600",
       iconBg: "bg-gradient-to-br from-indigo-500/15 to-indigo-500/5",
       glow: "bg-indigo-500/20",
@@ -149,8 +149,8 @@ const industries = [
     icon: "briefcase",
     color: {
       bg: "bg-sky-500",
-      light: "bg-sky-50/50",
-      ring: "ring-sky-100",
+      light: "bg-sky-50/50 dark:bg-sky-950/40",
+      ring: "ring-sky-100 dark:ring-sky-900/50",
       text: "text-sky-600",
       iconBg: "bg-gradient-to-br from-sky-500/15 to-sky-500/5",
       glow: "bg-sky-500/20",
@@ -192,14 +192,14 @@ const industries = [
 
 export default function SolutionsPage() {
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-white dark:bg-neutral-950">
       <PublicNav />
 
       {/* Hero */}
       <section className="max-w-4xl mx-auto px-6 public-page-offset pb-16 text-center">
         <FadeContainer className="flex flex-col items-center">
           <FadeDiv className="mb-6">
-            <span className="inline-flex items-center gap-2 rounded-full border bg-white px-3 py-1 text-xs font-medium text-gray-700 shadow-sm">
+            <span className="inline-flex items-center gap-2 rounded-full border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 shadow-sm">
               <span className="size-1.5 rounded-full bg-primary animate-pulse" />
               Built for Sri Lankan businesses
             </span>
@@ -223,7 +223,7 @@ export default function SolutionsPage() {
                 <a
                   key={ind.id}
                   href={`#${ind.id}`}
-                  className="inline-flex items-center gap-2 rounded-full border bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:shadow-md hover:border-gray-300 transition-all"
+                  className="inline-flex items-center gap-2 rounded-full border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm hover:shadow-md hover:border-gray-300 dark:border-neutral-700 transition-all"
                 >
                   <span className={`flex h-5 w-5 items-center justify-center rounded-md ${ind.color.bg} text-white`}>
                     <Icon name={ind.icon} className="text-[10px]" />
@@ -242,7 +242,7 @@ export default function SolutionsPage() {
         <section
           key={ind.id}
           id={ind.id}
-          className={`py-20 px-6 ${i % 2 === 1 ? "bg-gray-50/60" : ""}`}
+          className={`py-20 px-6 ${i % 2 === 1 ? "bg-gray-50 dark:bg-neutral-900/60" : ""}`}
         >
           <div className="max-w-6xl mx-auto">
             {/* Section header */}
@@ -251,7 +251,7 @@ export default function SolutionsPage() {
                 <span className={`flex h-6 w-6 items-center justify-center rounded-md ${ind.color.bg} text-white`}>
                   <Icon name={ind.icon} className="text-xs" />
                 </span>
-                <span className="text-sm font-semibold text-gray-900">{ind.label}</span>
+                <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">{ind.label}</span>
               </div>
 
               <h2 className="font-cal text-3xl md:text-4xl tracking-tight mb-4">
@@ -260,17 +260,17 @@ export default function SolutionsPage() {
               <p className="text-muted-foreground text-lg leading-relaxed mb-4">
                 {ind.sub}
               </p>
-              <p className="text-sm text-muted-foreground leading-relaxed border-l-2 border-gray-200 pl-4">
+              <p className="text-sm text-muted-foreground leading-relaxed border-l-2 border-gray-200 dark:border-neutral-800 pl-4">
                 {ind.pain}
               </p>
             </div>
 
             {/* Feature cards */}
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-px bg-gray-200/70 rounded-2xl overflow-hidden border border-gray-200/70 mb-10">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-px bg-gray-200 dark:bg-neutral-700/70 rounded-2xl overflow-hidden border border-gray-200 dark:border-neutral-800/70 mb-10">
               {ind.features.map((f) => (
                 <div
                   key={f.title}
-                  className={`group relative p-7 bg-white hover:bg-gradient-to-br ${ind.color.hover} hover:to-white transition-colors`}
+                  className={`group relative p-7 bg-white dark:bg-neutral-900 hover:bg-gradient-to-br ${ind.color.hover} hover:to-white dark:hover:to-neutral-900 transition-colors`}
                 >
                   <div className="relative mb-5 inline-flex">
                     <div className={`absolute inset-0 rounded-xl ${ind.color.glow} blur-md opacity-0 group-hover:opacity-100 transition-opacity`} />
@@ -287,8 +287,8 @@ export default function SolutionsPage() {
 
             {/* Testimonial + CTA row */}
             <div className="flex flex-col md:flex-row gap-6">
-              <blockquote className="flex-1 rounded-2xl border bg-white p-6">
-                <p className="text-sm text-gray-700 leading-relaxed mb-4">
+              <blockquote className="flex-1 rounded-2xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-6">
+                <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
                   &ldquo;{ind.quote}&rdquo;
                 </p>
                 <div className="flex items-center gap-3">
@@ -296,15 +296,15 @@ export default function SolutionsPage() {
                     {ind.quoteInitial}
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-gray-900">{ind.quoteName}</p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{ind.quoteName}</p>
                     <p className="text-xs text-muted-foreground">{ind.quoteRole}</p>
                   </div>
                 </div>
               </blockquote>
 
-              <div className="md:w-64 rounded-2xl border bg-white p-6 flex flex-col justify-between">
+              <div className="md:w-64 rounded-2xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-6 flex flex-col justify-between">
                 <div>
-                  <p className="text-sm font-semibold text-gray-900 mb-2">Ready to get started?</p>
+                  <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Ready to get started?</p>
                   <ul className="space-y-1.5 mb-5">
                     {["Free to start", "Live in 5 minutes", "No credit card"].map((item) => (
                       <li key={item} className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -363,7 +363,7 @@ export default function SolutionsPage() {
               </p>
               <Link
                 href="/register"
-                className="inline-flex items-center gap-2 bg-white text-blue-700 px-7 py-3.5 rounded-xl font-semibold shadow-lg hover:bg-white/95 transition-colors"
+                className="inline-flex items-center gap-2 bg-white text-blue-700 px-7 py-3.5 rounded-xl font-semibold shadow-lg hover:bg-blue-50 transition-colors"
               >
                 Start free trial
                 <Icon name="arrow-right" className="text-sm" />

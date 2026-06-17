@@ -19,7 +19,7 @@ export default function CopyButton({ value }: { value: string }) {
       title={`Copy ${value}`}
     >
       <code className="font-mono">{value}</code>
-      <Icon name={copied ? "check" : "clipboard"} className={`${copied ? "text-blue-500" : "text-gray-400 group-hover:text-gray-600"} text-[11px] transition-all`} />
+      <Icon name={copied ? "check" : "clipboard"} className={`${copied ? "text-blue-500" : "text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:text-gray-400"} text-[11px] transition-all`} />
     </button>
   );
 }

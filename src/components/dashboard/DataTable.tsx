@@ -24,7 +24,7 @@ export function DataTable<TRow>({
   }
 
   return (
-    <div className="overflow-hidden rounded-lg border bg-white">
+    <div className="overflow-hidden rounded-lg border bg-white dark:border-neutral-800 dark:bg-neutral-900">
       <div className="overflow-x-auto">
         <table className="w-full min-w-[46rem] text-sm">
           <thead className="bg-muted/60 text-xs uppercase tracking-wide text-muted-foreground">

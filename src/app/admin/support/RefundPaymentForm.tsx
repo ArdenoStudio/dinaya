@@ -18,7 +18,7 @@ export function RefundPaymentForm() {
   }
 
   return (
-    <form onSubmit={submit} className="rounded-xl border bg-white p-5 space-y-3">
+    <form onSubmit={submit} className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5 space-y-3">
       <h2 className="font-semibold">Mark payment refunded</h2>
       <p className="text-sm text-muted-foreground">
         Sets a successful PayHere payment to refunded in Dinaya. Does not call PayHere APIs.

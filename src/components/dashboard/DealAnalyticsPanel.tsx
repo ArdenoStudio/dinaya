@@ -22,7 +22,7 @@ export function DealAnalyticsPanel({ analytics }: { analytics: DealAnalyticsSumm
       </div>
 
       {analytics.bestDeal ? (
-        <div className="rounded-xl border bg-white p-5">
+        <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
           <p className="text-sm font-medium">Best-performing deal</p>
           <p className="mt-1 text-sm text-muted-foreground">
             {analytics.bestDeal.serviceName} · {analytics.bestDeal.discountPercent}% off ·{" "}
@@ -32,7 +32,7 @@ export function DealAnalyticsPanel({ analytics }: { analytics: DealAnalyticsSumm
       ) : null}
 
       {analytics.redemptionsByDiscount.length > 0 ? (
-        <div className="rounded-xl border bg-white p-5">
+        <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
           <p className="text-sm font-medium mb-3">Redemptions by discount depth</p>
           <div className="space-y-2">
             {analytics.redemptionsByDiscount.map((row) => (
@@ -50,7 +50,7 @@ export function DealAnalyticsPanel({ analytics }: { analytics: DealAnalyticsSumm
 
 function MetricCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border bg-white p-4">
+    <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-4">
       <p className="text-xs text-muted-foreground">{label}</p>
       <p className="mt-1 text-2xl font-semibold">{value}</p>
     </div>

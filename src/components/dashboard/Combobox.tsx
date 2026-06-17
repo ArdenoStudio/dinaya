@@ -31,7 +31,7 @@ export function Combobox({
           const selected = options.find((option) => option.label === event.target.value);
           onChange(selected?.value ?? event.target.value);
         }}
-        className="h-10 w-full rounded-md border bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
+        className="h-10 w-full rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
       />
       <datalist id={listId}>
         {options.map((option) => (

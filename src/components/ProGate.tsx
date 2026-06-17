@@ -30,14 +30,14 @@ export async function ProGate({
   const requiredPlan = minimumPlanForFeature(feature);
 
   return (
-    <div className="rounded-lg border border-violet-200 bg-violet-50/70 p-5 text-sm">
-      <div className="mb-2 flex items-center gap-2 font-medium text-violet-950">
+    <div className="rounded-lg border border-violet-200 bg-violet-50/70 p-5 text-sm dark:border-violet-800/50 dark:bg-violet-950/40">
+      <div className="mb-2 flex items-center gap-2 font-medium text-violet-950 dark:text-violet-100">
         <span className="inline-flex size-8 items-center justify-center rounded-md bg-violet-600 text-white">
           <Icon name="stars" className="text-sm" aria-hidden="true" />
         </span>
         Upgrade to {planDisplayName(requiredPlan)}
       </div>
-      <p className="text-violet-900/75">
+      <p className="text-violet-900/75 dark:text-violet-200/80">
         {planFeatureLabel(feature)} is available on Dinaya {planDisplayName(requiredPlan)}.
       </p>
       <a

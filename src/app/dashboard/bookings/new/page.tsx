@@ -101,11 +101,11 @@ export default function NewBookingPage() {
 
       <form onSubmit={handleSubmit} className="space-y-5">
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-md px-4 py-2">{error}</div>
+          <div className="bg-red-50 border border-red-200 text-red-700 dark:text-red-300 text-sm rounded-md px-4 py-2">{error}</div>
         )}
 
         {/* Step 1: Service */}
-        <div className="bg-white border rounded-xl p-5 space-y-4">
+        <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-5 space-y-4">
           <h2 className="font-medium text-sm">1. Service</h2>
           <div className="grid grid-cols-2 gap-3">
             {services.filter((s) => s).map((s) => (
@@ -131,7 +131,7 @@ export default function NewBookingPage() {
 
         {/* Step 2: Staff */}
         {serviceId && (
-          <div className="bg-white border rounded-xl p-5 space-y-4">
+          <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-5 space-y-4">
             <h2 className="font-medium text-sm">2. Staff member</h2>
             <div className="grid grid-cols-2 gap-3">
               {staffList.map((s) => (
@@ -155,7 +155,7 @@ export default function NewBookingPage() {
 
         {/* Step 3: Date + Time */}
         {staffId && (
-          <div className="bg-white border rounded-xl p-5 space-y-4">
+          <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-5 space-y-4">
             <h2 className="font-medium text-sm">3. Date & time</h2>
             <div className="flex gap-3 items-center">
               <input
@@ -194,7 +194,7 @@ export default function NewBookingPage() {
 
         {/* Step 4: Client */}
         {slot && (
-          <div className="bg-white border rounded-xl p-5 space-y-4">
+          <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-5 space-y-4">
             <h2 className="font-medium text-sm">4. Client details</h2>
             <div className="grid grid-cols-2 gap-4">
               <div>

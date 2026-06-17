@@ -114,13 +114,14 @@ export default function SettingsForm({ business }: Props) {
     setGalleryImages((prev) => prev.filter((u) => u !== url));
   }
 
-  const inputCls = "mt-1 w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 bg-white";
+  const inputCls =
+    "mt-1 w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 bg-white dark:border-neutral-700 dark:bg-neutral-900";
 
   return (
     <div className="space-y-5">
       <form onSubmit={handleSave} className="grid gap-5 xl:grid-cols-2">
         {/* Business info */}
-        <div className="bg-white border rounded-xl p-6 space-y-4">
+        <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-6 space-y-4">
           <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Business info</p>
           <div>
             <label className="text-sm font-medium">Business name *</label>
@@ -211,7 +212,7 @@ export default function SettingsForm({ business }: Props) {
         </div>
 
         {/* Booking policies */}
-        <div className="bg-white border rounded-xl p-6 space-y-4">
+        <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-6 space-y-4">
           <div className="flex items-center gap-2">
             <Icon name="shield-check" className="text-sm text-muted-foreground" />
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Booking trust</p>
@@ -242,7 +243,7 @@ export default function SettingsForm({ business }: Props) {
         </div>
 
         {/* Local payment fallback */}
-        <div className="bg-white border rounded-xl p-6 space-y-4">
+        <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-6 space-y-4">
           <div className="flex items-center gap-2">
             <Icon name="bank" className="text-sm text-muted-foreground" />
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Local payment fallback</p>
@@ -272,7 +273,7 @@ export default function SettingsForm({ business }: Props) {
         </div>
 
         {/* Social links */}
-        <div className="bg-white border rounded-xl p-6 space-y-4">
+        <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-6 space-y-4">
           <div className="flex items-center gap-2">
             <Icon name="share" className="text-sm text-muted-foreground" />
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Social links</p>
@@ -304,7 +305,7 @@ export default function SettingsForm({ business }: Props) {
           </div>
           <div>
             <label className="text-sm font-medium flex items-center gap-1.5">
-              <Icon name="globe" className="text-gray-500" /> Website
+              <Icon name="globe" className="text-gray-500 dark:text-gray-400" /> Website
             </label>
             <input
               value={form.websiteUrl}
@@ -316,7 +317,7 @@ export default function SettingsForm({ business }: Props) {
         </div>
 
         {/* Portfolio gallery */}
-        <div className="bg-white border rounded-xl p-6 space-y-4">
+        <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-6 space-y-4">
           <div className="flex items-center gap-2">
             <Icon name="images" className="text-sm text-muted-foreground" />
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Portfolio gallery</p>
@@ -356,7 +357,7 @@ export default function SettingsForm({ business }: Props) {
               value={newImageUrl}
               onChange={(e) => setNewImageUrl(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addGalleryImage())}
-              className="flex-1 border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 bg-white"
+              className="flex-1 border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 bg-white dark:border-neutral-700 dark:bg-neutral-900"
               placeholder="https://example.com/photo.jpg"
             />
             <button
@@ -377,7 +378,7 @@ export default function SettingsForm({ business }: Props) {
         </div>
 
         {/* Pro branding */}
-        <div className="bg-white border rounded-xl p-6 space-y-4">
+        <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-6 space-y-4">
           <div className="flex items-center gap-2">
             <Icon name="palette" className="text-sm text-muted-foreground" />
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Booking page branding</p>
@@ -407,7 +408,7 @@ export default function SettingsForm({ business }: Props) {
                     type="color"
                     value={form.accentColor}
                     onChange={(e) => setForm((f) => ({ ...f, accentColor: e.target.value }))}
-                    className="h-10 w-14 cursor-pointer rounded border bg-white p-1"
+                    className="h-10 w-14 cursor-pointer rounded border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-1"
                   />
                   <input
                     type="text"
@@ -449,7 +450,7 @@ export default function SettingsForm({ business }: Props) {
         </div>
 
         {/* PayHere */}
-        <div className="bg-white border rounded-xl p-6 space-y-4">
+        <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-6 space-y-4">
           <div className="flex items-center gap-2">
             <Icon name="credit-card" className="text-sm text-muted-foreground" />
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">PayHere</p>
@@ -501,7 +502,7 @@ export default function SettingsForm({ business }: Props) {
         </div>
 
         {/* Data controls */}
-        <div className="bg-white border rounded-xl p-6 space-y-3">
+        <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-6 space-y-3">
           <div className="flex items-center gap-2">
             <Icon name="download" className="text-sm text-muted-foreground" />
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Data controls</p>

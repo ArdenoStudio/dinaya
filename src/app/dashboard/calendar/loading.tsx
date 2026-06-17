@@ -21,7 +21,7 @@ export default function CalendarLoading() {
       </div>
 
       {/* Calendar Grid */}
-      <div className="bg-white border rounded-xl overflow-hidden flex-1">
+      <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 overflow-hidden flex-1">
         {/* Day Headers */}
         <div className="grid grid-cols-[48px_repeat(7,1fr)] border-b">
           <div className="border-r" />
