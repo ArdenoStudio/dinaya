@@ -1,4 +1,4 @@
-import { and, eq, isNull, or } from "drizzle-orm";
+import { and, eq, inArray, isNull, or } from "drizzle-orm";
 import { parseISO, setHours, setMinutes, startOfDay } from "date-fns";
 import { fromZonedTime } from "date-fns-tz";
 import { db } from "@/db";
@@ -8,6 +8,57 @@ import type { TimeSlot } from "@/lib/availability";
 function parseTime(timeStr: string): { hours: number; minutes: number } {
   const [hours, minutes] = timeStr.split(":").map(Number);
   return { hours: hours ?? 0, minutes: minutes ?? 0 };
+}
+
+function resolveHolidayForLocation(
+  rows: BusinessHoliday[],
+  locationId?: string | null,
+): BusinessHoliday | null {
+  if (locationId) {
+    const branchHoliday = rows.find((row) => row.locationId === locationId);
+    if (branchHoliday) return branchHoliday;
+  }
+
+  return rows.find((row) => !row.locationId) ?? null;
+}
+
+export async function getBusinessHolidaysForDates(input: {
+  businessId: string;
+  dates: string[];
+  locationId?: string | null;
+}): Promise<Map<string, BusinessHoliday>> {
+  if (input.dates.length === 0) return new Map();
+
+  const rows = await db
+    .select()
+    .from(businessHolidays)
+    .where(
+      and(
+        eq(businessHolidays.businessId, input.businessId),
+        inArray(businessHolidays.date, input.dates),
+        input.locationId
+          ? or(
+              eq(businessHolidays.locationId, input.locationId),
+              isNull(businessHolidays.locationId),
+            )
+          : or(isNull(businessHolidays.locationId)),
+      ),
+    );
+
+  const byDate = new Map<string, BusinessHoliday[]>();
+  for (const row of rows) {
+    const existing = byDate.get(row.date) ?? [];
+    existing.push(row);
+    byDate.set(row.date, existing);
+  }
+
+  const resolved = new Map<string, BusinessHoliday>();
+  for (const date of input.dates) {
+    const holiday = resolveHolidayForLocation(byDate.get(date) ?? [], input.locationId);
+    if (holiday) resolved.set(date, holiday);
+  }
+
+  return resolved;
 }
 
 export async function getBusinessHolidayForDate(input: {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { db } from "@/db";
 import { bookings, businesses } from "@/db/schema";
 import { getClientBookingByToken } from "@/lib/client-booking";
@@ -11,6 +11,7 @@ import { logActivity } from "@/lib/activity-log";
 import { releaseDealSlotForBooking } from "@/lib/deals/claim";
 import { resolveEffectivePlan } from "@/lib/plan";
 import { withRateLimit } from "@/lib/rate-limit";
+import { runAfterResponse } from "@/lib/after-response";
 import { z } from "@/lib/validation";
 
 const cancelSchema = z.object({
@@ -52,14 +53,22 @@ export async function POST(
 
   const priorStatus = booking.status;
 
-  await db
+  const [cancelled] = await db
     .update(bookings)
     .set({
       status: "cancelled",
       cancelledAt: new Date(),
       cancellationReason: parsed.data.reason ?? "Cancelled by client",
     })
-    .where(eq(bookings.id, booking.id));
+    .where(and(
+      eq(bookings.id, booking.id),
+      inArray(bookings.status, ["pending", "confirmed"]),
+    ))
+    .returning({ id: bookings.id });
+
+  if (!cancelled) {
+    return NextResponse.json({ error: "This booking is already cancelled." }, { status: 409 });
+  }
 
   void releaseDealSlotForBooking(booking.id, priorStatus).catch((error) => {
     console.error("Deal slot release failed:", error);
@@ -94,16 +103,18 @@ export async function POST(
     startsAt: booking.startsAt.toISOString(),
   });
 
-  await sendBookingCancellationMessage({
-    businessId: booking.businessId,
-    bookingId: booking.id,
-    clientName: booking.clientName,
-    clientEmail: booking.clientEmail,
-    clientPhone: booking.clientPhone,
-    businessName: booking.businessName,
-    serviceName: booking.serviceName,
-    startsAt: booking.startsAt,
-    plan: effectivePlan,
+  runAfterResponse("booking cancellation message", async () => {
+    await sendBookingCancellationMessage({
+      businessId: booking.businessId,
+      bookingId: booking.id,
+      clientName: booking.clientName,
+      clientEmail: booking.clientEmail,
+      clientPhone: booking.clientPhone,
+      businessName: booking.businessName,
+      serviceName: booking.serviceName,
+      startsAt: booking.startsAt,
+      plan: effectivePlan,
+    });
   });
 
   void processBookingAutomationTrigger(booking.businessId, booking.id, "booking.cancelled").catch((error) => {

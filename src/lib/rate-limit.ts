@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { assertDistributedRateLimitInProduction } from "@/lib/env";
 
 type Bucket = {
   count: number;
@@ -119,7 +120,20 @@ export async function withRateLimit(
     return { ok: false, response: tooManyRequests(upstash.retryAfter) };
   }
 
-  // Upstash unavailable or not configured — fall back to in-memory limiter.
+  try {
+    assertDistributedRateLimitInProduction();
+  } catch (error) {
+    console.error("[rate-limit] production misconfiguration", error);
+    return {
+      ok: false,
+      response: NextResponse.json(
+        { error: "Service temporarily unavailable. Please try again shortly." },
+        { status: 503, headers: { "Cache-Control": "no-store" } },
+      ),
+    };
+  }
+
+  // Non-production or preview — fall back to in-memory limiter.
   const result = checkMemoryLimit(key, config);
 
   if (result.ok) return { ok: true };
