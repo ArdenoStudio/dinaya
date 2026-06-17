@@ -9,7 +9,7 @@ import type { BookingCopy } from "@/lib/i18n";
 import { readStoredAttribution } from "@/lib/booking-attribution";
 import { getBookingSessionToken } from "@/lib/booking-session";
 import { computeAmountDueFromDiscountedPrice, computeDiscountedPrice } from "@/lib/deals/pricing";
-import { trackDealBookingComplete, trackDealBookingStart } from "@/lib/analytics/gtag";
+import { trackBookingComplete, trackDealBookingComplete, trackDealBookingStart } from "@/lib/analytics/gtag";
 import {
   getAvailablePaymentMethods,
   resolveDefaultPaymentMethod,
@@ -355,6 +355,15 @@ export default function StepConfirm({
       setLoading(false);
       return;
     }
+
+    trackBookingComplete({
+      businessSlug: business.slug,
+      serviceId: state.service?.id,
+      bookingId: data.bookingId,
+      amountLkr: discountedPrice,
+      isDeal: Boolean(selectedDeal),
+      requiresPayment: Boolean(service?.requiresPayment),
+    });
 
     if (selectedDeal) {
       trackDealBookingComplete({

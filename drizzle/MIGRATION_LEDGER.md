@@ -13,3 +13,18 @@ canonical order:
 
 New migrations must use the next unused sequence after the current highest
 number.
+
+## Applying migrations
+
+Run `npm run db:migrate` (→ `scripts/db-migrate.mjs`). It applies pending
+`drizzle/*.sql` files in lexicographic order over Neon's HTTP driver and records
+each in a `_sql_migrations` table.
+
+Do **not** use `drizzle-kit migrate` — these migrations have no drizzle journal,
+and drizzle-kit's Neon **websocket** driver cannot connect from Node (it hangs
+and silently no-ops, which is how local DBs drifted).
+
+First run against an already-provisioned DB (where `businesses` exists)
+*baselines* every current migration as already-applied — it never re-runs
+history. A fresh/empty DB gets every migration applied in order. Author new
+migrations to be idempotent (`IF NOT EXISTS`, `ADD VALUE IF NOT EXISTS`, …).

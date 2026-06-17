@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { slugify } from "@/lib/utils";
+import { trackSignup } from "@/lib/analytics/gtag";
 import { Logo } from "@/components/Logo";
 import { AuthThemeToggle } from "@/components/AuthThemeToggle";
 import { Icon } from "@/components/ui/Icon";
@@ -113,6 +114,8 @@ export default function RegisterPage() {
         setLoading(false);
         return;
       }
+
+      trackSignup({ businessType: form.businessType, language: form.language });
 
       const signInResult = await signIn("credentials", {
         email: form.email,

@@ -7,6 +7,7 @@ import { Logo } from "@/components/Logo";
 import { AuthThemeToggle } from "@/components/AuthThemeToggle";
 import { Icon } from "@/components/ui/Icon";
 import { buildPublicBookingUrlLabel } from "@/lib/booking-url";
+import { trackOnboardingComplete } from "@/lib/analytics/gtag";
 
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -209,6 +210,7 @@ export function SetupWizard() {
       setSaving(false);
       return;
     }
+    trackOnboardingComplete();
     router.push("/dashboard?onboarded=1");
     router.refresh();
   }

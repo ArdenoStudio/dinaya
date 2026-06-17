@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { format, parseISO } from "date-fns";
@@ -34,6 +34,7 @@ import {
 import { useBookingContactStorage } from "./useBookingContactStorage";
 import BookingStepTransition from "./BookingStepTransition";
 import { applyEmbedThemeFromQuery, postEmbedEvent } from "./embed-events";
+import { trackBookingStart } from "@/lib/analytics/gtag";
 
 const COLOMBO_TZ = "Asia/Colombo";
 
@@ -237,6 +238,16 @@ function BookingWizardInner({
     [business.slug, router, slotHold, embedMode],
   );
 
+  const bookingStartedRef = useRef(false);
+  const markBookingStart = useCallback(
+    (isDeal: boolean, serviceId?: string) => {
+      if (bookingStartedRef.current) return;
+      bookingStartedRef.current = true;
+      trackBookingStart({ businessSlug: business.slug, serviceId, isDeal });
+    },
+    [business.slug],
+  );
+
   const needsStaffPicker = useMemo(() => {
     if (!state.service) return false;
     return getEligibleStaff(staff, staffServiceMap, state.service.id, staffLocationMap, state.location?.id).length > 1;
@@ -289,6 +300,7 @@ function BookingWizardInner({
 
   const selectService = useCallback(
     (service: BookingService) => {
+      markBookingStart(false, service.id);
       const defaultStaff = pickDefaultStaff(staff, staffServiceMap, service.id, staffLocationMap, state.location?.id);
       update({
         service,
@@ -306,13 +318,14 @@ function BookingWizardInner({
         setStep("dateTime");
       }
     },
-    [staff, staffServiceMap, staffLocationMap, state.location?.id, todayStr, slotHold],
+    [staff, staffServiceMap, staffLocationMap, state.location?.id, todayStr, slotHold, markBookingStart],
   );
 
   const applyDeal = useCallback(
     (deal: DealListItem | null) => {
       setSelectedDealId(deal?.id ?? null);
       if (!deal) return;
+      markBookingStart(true, deal.serviceId);
 
       const service = services.find((item) => item.id === deal.serviceId) ?? null;
       const location = locations.find((item) => item.id === deal.locationId) ?? state.location;
@@ -339,7 +352,7 @@ function BookingWizardInner({
         setStep("dateTime");
       }
     },
-    [locations, services, staff, staffServiceMap, staffLocationMap, state.location, todayStr, slotHold],
+    [locations, services, staff, staffServiceMap, staffLocationMap, state.location, todayStr, slotHold, markBookingStart],
   );
 
   useEffect(() => {

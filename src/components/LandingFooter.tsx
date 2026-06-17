@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Icon } from "@/components/ui/Icon";
+import { FooterColumn } from "@/components/FooterColumn";
 import { getPublicSupportWhatsApp } from "@/lib/public-support";
 
 const supportWhatsApp = getPublicSupportWhatsApp();
@@ -18,10 +19,10 @@ export function LandingFooter() {
       <div className="absolute top-0 inset-x-1/4 h-[2px] bg-gradient-to-r from-transparent via-primary/50 to-transparent blur-sm" />
 
       <div className="max-w-7xl mx-auto px-6 lg:px-10 relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_1fr] gap-16 lg:gap-8 mb-24">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_1fr] gap-x-12 gap-y-0 md:gap-16 lg:gap-8 mb-24">
 
           {/* Brand & CTA */}
-          <div className="flex flex-col">
+          <div className="flex flex-col mb-8 md:mb-0">
             <span className="font-cal text-3xl tracking-tight mb-5">Dinaya.lk</span>
             <p className="text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 max-w-sm mb-8 leading-relaxed text-sm">
               Online booking for Sri Lankan businesses. No WhatsApp chaos, no setup fees, no commissions.
@@ -36,81 +37,49 @@ export function LandingFooter() {
           </div>
 
           {/* Links: Product */}
-          <div>
-            <h3 className="font-cal text-xs tracking-widest uppercase text-gray-500 dark:text-gray-400 mb-6">Product</h3>
-            <ul className="flex flex-col gap-4 text-sm">
-              {[
-                { label: "Features",       href: "/features"  },
-                { label: "Documentation",  href: "/docs"      },
-                { label: "Help center",    href: "/help"      },
-                { label: "Pricing",        href: "/pricing"   },
-                { label: "Solutions",      href: "/solutions" },
-                { label: "Get started",    href: "/register"  },
-                { label: "Sign in",        href: "/auth/signin" },
-              ].map(({ label, href }) => (
-                <li key={href}>
-                  <Link href={href} className="text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 hover:text-white transition-colors">
-                    {label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          <FooterColumn
+            title="Product"
+            links={[
+              { label: "Features", href: "/features" },
+              { label: "Documentation", href: "/docs" },
+              { label: "Help center", href: "/help" },
+              { label: "Pricing", href: "/pricing" },
+              { label: "Solutions", href: "/solutions" },
+              { label: "Get started", href: "/register" },
+              { label: "Sign in", href: "/auth/signin" },
+            ]}
+          />
 
           {/* Links: About */}
-          <div>
-            <h3 className="font-cal text-xs tracking-widest uppercase text-gray-500 dark:text-gray-400 mb-6">About</h3>
-            <ul className="flex flex-col gap-4 text-sm">
-              {[
-                { label: "About Us",   href: "/about"      },
-                { label: "Our Story",  href: "/our-story"  },
-                { label: "Contact",    href: "/contact"    },
-              ].map(({ label, href }) => (
-                <li key={href}>
-                  <Link href={href} className="text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 hover:text-white transition-colors">
-                    {label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          <FooterColumn
+            title="About"
+            links={[
+              { label: "About Us", href: "/about" },
+              { label: "Our Story", href: "/our-story" },
+              { label: "Contact", href: "/contact" },
+            ]}
+          />
 
           {/* Links: Resources */}
-          <div>
-            <h3 className="font-cal text-xs tracking-widest uppercase text-gray-500 dark:text-gray-400 mb-6">Resources</h3>
-            <ul className="flex flex-col gap-4 text-sm">
-              {[
-                { label: "Getting started", href: "/register"   },
-                { label: "Help center",     href: "/help"       },
-                { label: "What's new",      href: "/whats-new"  },
-              ].map(({ label, href }) => (
-                <li key={href}>
-                  <Link href={href} className="text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 hover:text-white transition-colors">
-                    {label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          <FooterColumn
+            title="Resources"
+            links={[
+              { label: "Getting started", href: "/register" },
+              { label: "Help center", href: "/help" },
+              { label: "What's new", href: "/whats-new" },
+            ]}
+          />
 
           {/* Links: Legal */}
-          <div>
-            <h3 className="font-cal text-xs tracking-widest uppercase text-gray-500 dark:text-gray-400 mb-6">Legal</h3>
-            <ul className="flex flex-col gap-4 text-sm">
-              {[
-                { label: "Brand",            href: "/brand"          },
-                { label: "Terms of Service", href: "/legal/terms"    },
-                { label: "Privacy Policy",   href: "/legal/privacy"  },
-                { label: "Refund Policy",    href: "/legal/refund"   },
-              ].map(({ label, href }) => (
-                <li key={href}>
-                  <Link href={href} className="text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 hover:text-white transition-colors">
-                    {label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          <FooterColumn
+            title="Legal"
+            links={[
+              { label: "Brand", href: "/brand" },
+              { label: "Terms of Service", href: "/legal/terms" },
+              { label: "Privacy Policy", href: "/legal/privacy" },
+              { label: "Refund Policy", href: "/legal/refund" },
+            ]}
+          />
         </div>
 
         {/* Bottom Metadata */}

@@ -30,7 +30,7 @@
     "audit:high": "npm audit --audit-level=high",
     "payhere:check": "node scripts/payhere-readiness.mjs",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate",
+    "db:migrate": "node scripts/db-migrate.mjs",
     "db:studio": "drizzle-kit studio",
     "docs:screenshots": "npx tsx scripts/capture-docs-screenshots.ts"
   },

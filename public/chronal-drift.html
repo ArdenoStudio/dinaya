@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chronal Drift -- Generative Art</title>
+    <script src="/p5.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Lora:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --anthropic-dark:       #141413;
+            --anthropic-light:      #faf9f5;
+            --anthropic-mid-gray:   #b0aea5;
+            --anthropic-light-gray: #e8e6dc;
+            --anthropic-orange:     #d97757;
+            --anthropic-blue:       #6a9bcc;
+            --anthropic-green:      #788c5d;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--anthropic-light) 0%, #f5f3ee 100%);
+            min-height: 100vh;
+            color: var(--anthropic-dark);
+        }
+        .container { display: flex; min-height: 100vh; padding: 20px; gap: 20px; }
+        .sidebar {
+            width: 320px; flex-shrink: 0;
+            background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);
+            padding: 24px; border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(20,20,19,0.1);
+            overflow-y: auto; overflow-x: hidden;
+        }
+        .sidebar h1 { font-family: 'Lora', serif; font-size: 24px; font-weight: 500; color: var(--anthropic-dark); margin-bottom: 8px; }
+        .sidebar .subtitle { color: var(--anthropic-mid-gray); font-size: 13px; margin-bottom: 32px; line-height: 1.5; }
+        .control-section { margin-bottom: 28px; }
+        .control-section h3 {
+            font-size: 15px; font-weight: 600; color: var(--anthropic-dark);
+            margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+        }
+        .control-section h3::before { content: '\2022'; color: var(--anthropic-orange); font-weight: bold; }
+        .seed-input {
+            width: 100%; background: var(--anthropic-light); padding: 12px; border-radius: 8px;
+            font-family: 'Courier New', monospace; font-size: 14px; margin-bottom: 12px;
+            border: 1px solid var(--anthropic-light-gray); text-align: center;
+        }
+        .seed-input:focus { outline: none; border-color: var(--anthropic-orange); box-shadow: 0 0 0 2px rgba(217,119,87,0.1); background: white; }
+        .seed-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+        .control-group { margin-bottom: 18px; }
+        .control-group label { display: block; font-size: 13px; font-weight: 500; color: var(--anthropic-dark); margin-bottom: 7px; }
+        .slider-container { display: flex; align-items: center; gap: 10px; }
+        .slider-container input[type="range"] {
+            flex: 1; height: 4px; background: var(--anthropic-light-gray);
+            border-radius: 2px; outline: none; -webkit-appearance: none;
+        }
+        .slider-container input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none; width: 16px; height: 16px;
+            background: var(--anthropic-orange); border-radius: 50%; cursor: pointer; transition: all 0.2s;
+        }
+        .slider-container input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); background: #c86641; }
+        .slider-container input[type="range"]::-moz-range-thumb {
+            width: 16px; height: 16px; background: var(--anthropic-orange);
+            border-radius: 50%; border: none; cursor: pointer;
+        }
+        .value-display { font-family: 'Courier New', monospace; font-size: 11px; color: var(--anthropic-mid-gray); min-width: 44px; text-align: right; }
+        .color-group { margin-bottom: 14px; }
+        .color-group label { display: block; font-size: 12px; color: var(--anthropic-mid-gray); margin-bottom: 4px; }
+        .color-picker-container { display: flex; align-items: center; gap: 8px; }
+        .color-picker-container input[type="color"] { width: 32px; height: 32px; border: none; border-radius: 6px; cursor: pointer; background: none; padding: 0; }
+        .color-value { font-family: 'Courier New', monospace; font-size: 12px; color: var(--anthropic-mid-gray); }
+        .button {
+            background: var(--anthropic-orange); color: white; border: none;
+            padding: 10px 16px; border-radius: 6px; font-size: 13px; font-weight: 500;
+            cursor: pointer; transition: all 0.2s; width: 100%;
+        }
+        .button:hover { background: #c86641; transform: translateY(-1px); }
+        .button:active { transform: translateY(0); }
+        .button.secondary { background: var(--anthropic-blue); }
+        .button.secondary:hover { background: #5a8bb8; }
+        .button.tertiary { background: var(--anthropic-green); }
+        .button.tertiary:hover { background: #6b7b52; }
+        .button-row { display: flex; gap: 8px; margin-bottom: 8px; }
+        .button-row .button { flex: 1; }
+        .canvas-area { flex: 1; display: flex; align-items: center; justify-content: center; min-width: 0; }
+        #canvas-container { width: 100%; max-width: 1000px; border-radius: 12px; overflow: hidden; box-shadow: 0 20px 60px rgba(20,20,19,0.15); }
+        #canvas-container canvas { display: block; width: 100% !important; height: auto !important; }
+        .loading { display: flex; align-items: center; justify-content: center; height: 400px; font-size: 16px; color: var(--anthropic-mid-gray); background: #060C18; border-radius: 12px; }
+        @media (max-width: 700px) { .container { flex-direction: column; } .sidebar { width: 100%; } }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="sidebar">
+        <h1>Chronal Drift</h1>
+        <div class="subtitle">
+            Seekers drift through the temporal void &mdash; drawn by invisible gravity into the orbit of available moments.
+        </div>
+
+        <div class="control-section">
+            <h3>Seed</h3>
+            <input type="number" id="seed-input" class="seed-input" value="2563" onchange="updateSeed()">
+            <div class="seed-controls">
+                <button class="button secondary" onclick="previousSeed()">&larr; Prev</button>
+                <button class="button secondary" onclick="nextSeed()">Next &rarr;</button>
+            </div>
+            <button class="button tertiary" onclick="randomSeedAndUpdate()">&#8635; Random</button>
+        </div>
+
+        <div class="control-section">
+            <h3>Parameters</h3>
+
+            <div class="control-group">
+                <label>Seekers</label>
+                <div class="slider-container">
+                    <input type="range" id="particleCount" min="500" max="5000" step="250" value="2500"
+                        oninput="updateParamHard('particleCount', +this.value)">
+                    <span class="value-display" id="particleCount-value">2500</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>Drift Speed</label>
+                <div class="slider-container">
+                    <input type="range" id="driftSpeed" min="0.2" max="2.0" step="0.1" value="0.7"
+                        oninput="updateParamSoft('driftSpeed', +this.value)">
+                    <span class="value-display" id="driftSpeed-value">0.7</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>Temporal Scale</label>
+                <div class="slider-container">
+                    <input type="range" id="noiseScale" min="0.001" max="0.012" step="0.0005" value="0.0035"
+                        oninput="updateParamSoft('noiseScale', +this.value)">
+                    <span class="value-display" id="noiseScale-value">0.0035</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>Attractor Nodes</label>
+                <div class="slider-container">
+                    <input type="range" id="attractorCount" min="2" max="22" step="1" value="9"
+                        oninput="updateParamHard('attractorCount', +this.value)">
+                    <span class="value-display" id="attractorCount-value">9</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>Gravity Pull</label>
+                <div class="slider-container">
+                    <input type="range" id="attractionStrength" min="0.1" max="1.2" step="0.05" value="0.5"
+                        oninput="updateParamSoft('attractionStrength', +this.value)">
+                    <span class="value-display" id="attractionStrength-value">0.5</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>Trail Persistence</label>
+                <div class="slider-container">
+                    <input type="range" id="trailFade" min="4" max="45" step="1" value="14"
+                        oninput="updateParamSoft('trailFade', +this.value)">
+                    <span class="value-display" id="trailFade-value">14</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="control-section">
+            <h3>Colors</h3>
+            <div class="color-group">
+                <label>Drift Stream</label>
+                <div class="color-picker-container">
+                    <input type="color" id="colorDrift" value="#2563EB" onchange="updateColor('colorDrift', this.value)">
+                    <span class="color-value" id="colorDrift-value">#2563EB</span>
+                </div>
+            </div>
+            <div class="color-group">
+                <label>Orbit Bloom</label>
+                <div class="color-picker-container">
+                    <input type="color" id="colorOrbit" value="#F59E0B" onchange="updateColor('colorOrbit', this.value)">
+                    <span class="color-value" id="colorOrbit-value">#F59E0B</span>
+                </div>
+            </div>
+            <div class="color-group">
+                <label>Temporal Void</label>
+                <div class="color-picker-container">
+                    <input type="color" id="colorBg" value="#060C18" onchange="updateColor('colorBg', this.value)">
+                    <span class="color-value" id="colorBg-value">#060C18</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="control-section">
+            <h3>Actions</h3>
+            <div class="button-row">
+                <button class="button" onclick="initializeSystem()">Regenerate</button>
+                <button class="button secondary" onclick="resetParameters()">Reset</button>
+            </div>
+            <button class="button tertiary" onclick="saveCanvas('chronal-drift-' + params.seed, 'png')">Download PNG</button>
+        </div>
+    </div>
+
+    <div class="canvas-area">
+        <div id="canvas-container">
+            <div class="loading">Initializing temporal field...</div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// ================================================================
+// CHRONAL DRIFT -- Parameters
+// ================================================================
+
+var params = {
+    seed:               2563,
+    particleCount:      2500,
+    driftSpeed:         0.7,
+    noiseScale:         0.0035,
+    attractorCount:     9,
+    attractionStrength: 0.5,
+    trailFade:          14,
+    colorDrift:         '#2563EB',
+    colorOrbit:         '#F59E0B',
+    colorBg:            '#060C18'
+};
+
+var defaultParams = Object.assign({}, params);
+
+// ================================================================
+// CHRONAL DRIFT -- Color utilities
+// ================================================================
+
+function hexToRgb(hex) {
+    var m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return m
+        ? { r: parseInt(m[1], 16), g: parseInt(m[2], 16), b: parseInt(m[3], 16) }
+        : { r: 0, g: 0, b: 0 };
+}
+
+function lerpRgb(a, b, t) {
+    return {
+        r: Math.round(a.r + (b.r - a.r) * t),
+        g: Math.round(a.g + (b.g - a.g) * t),
+        b: Math.round(a.b + (b.b - a.b) * t)
+    };
+}
+
+var bgC, driftC, orbitC, violetC;
+
+function rebuildColors() {
+    bgC    = hexToRgb(params.colorBg);
+    driftC = hexToRgb(params.colorDrift);
+    orbitC = hexToRgb(params.colorOrbit);
+    violetC = {
+        r: Math.round(driftC.r * 0.45 + 210 * 0.55),
+        g: Math.round(driftC.g * 0.30 + 150 * 0.70),
+        b: Math.round(driftC.b * 0.20 + 255 * 0.80)
+    };
+}
+
+// ================================================================
+// CHRONAL DRIFT -- State
+// ================================================================
+
+var particles  = [];
+var attractors = [];
+var tick       = 0;
+
+// ================================================================
+// CHRONAL DRIFT -- Attractor class
+// ================================================================
+
+function Attractor(x, y) {
+    this.pos        = createVector(x, y);
+    this.capacity   = floor(random(4, 11));
+    this.orbiters   = [];
+    this.pulsePhase = random(TWO_PI);
+    this.zoneR      = random(150, 260);
+    this.orbitR     = random(16, 36);
+}
+
+Attractor.prototype.isFull = function() {
+    return this.orbiters.length >= this.capacity;
+};
+
+Attractor.prototype.addOrbiter = function(p) {
+    if (!this.isFull()) this.orbiters.push(p);
+};
+
+Attractor.prototype.removeOrbiter = function(p) {
+    var i = this.orbiters.indexOf(p);
+    if (i !== -1) this.orbiters.splice(i, 1);
+};
+
+Attractor.prototype.getOccupancy = function() {
+    return this.orbiters.length / this.capacity;
+};
+
+Attractor.prototype.display = function() {
+    var occ = this.getOccupancy();
+    var ph  = 0.55 + 0.45 * sin(tick * 0.025 + this.pulsePhase);
+    var gc  = lerpRgb(driftC, orbitC, occ);
+
+    // Faint outer boundary
+    noFill();
+    stroke(driftC.r, driftC.g, driftC.b, 5);
+    strokeWeight(0.5);
+    circle(this.pos.x, this.pos.y, this.zoneR * 2);
+
+    // Concentric aura rings
+    for (var i = 6; i >= 1; i--) {
+        var ringR = this.orbitR * 0.8 + i * 14 * (1 + occ * 0.7);
+        var alpha = floor((3 + i * 4) * ph * (0.15 + occ * 0.85));
+        stroke(gc.r, gc.g, gc.b, alpha);
+        strokeWeight(1.5 - i * 0.15);
+        noFill();
+        circle(this.pos.x, this.pos.y, ringR * 2);
+    }
+
+    // Orbit path ghost ring
+    noFill();
+    stroke(255, 255, 255, 10 + floor(occ * 24));
+    strokeWeight(0.5);
+    circle(this.pos.x, this.pos.y, this.orbitR * 2 + 6);
+
+    // Core dot
+    var coreR = 2.5 + occ * 7;
+    fill(gc.r, gc.g, gc.b, floor(140 + occ * 100));
+    noStroke();
+    circle(this.pos.x, this.pos.y, coreR * 2);
+
+    // Inner hot point
+    fill(255, 255, 255, floor(60 * ph * occ));
+    circle(this.pos.x, this.pos.y, 3);
+};
+
+// ================================================================
+// CHRONAL DRIFT -- Particle class
+// ================================================================
+
+function Particle() {
+    this.spawn();
+}
+
+Particle.prototype.spawn = function() {
+    this.pos    = createVector(random(width), random(height));
+    this.vel    = p5.Vector.random2D().mult(random(0.4, 1.3) * params.driftSpeed);
+    this.age    = floor(random(0, 60));
+    this.maxAge = floor(random(280, 750));
+    this.speed  = random(0.55, 1.45) * params.driftSpeed;
+    this.state  = 'drifting';
+    this.target = null;
+    this.theta  = 0;
+    this.orbitR = 0;
+    this.px     = this.pos.x;
+    this.py     = this.pos.y;
+};
+
+Particle.prototype.isDead = function() {
+    return this.age >= this.maxAge;
+};
+
+Particle.prototype.nearestAttractor = function() {
+    var best  = null;
+    var bestD = Infinity;
+    for (var i = 0; i < attractors.length; i++) {
+        var a = attractors[i];
+        if (a.isFull()) continue;
+        var d = dist(this.pos.x, this.pos.y, a.pos.x, a.pos.y);
+        if (d < a.zoneR && d < bestD) { bestD = d; best = a; }
+    }
+    return best;
+};
+
+Particle.prototype.update = function() {
+    this.age++;
+    this.px = this.pos.x;
+    this.py = this.pos.y;
+
+    if (this.state === 'drifting') {
+        var angle = noise(
+            this.pos.x * params.noiseScale,
+            this.pos.y * params.noiseScale,
+            tick * 0.00035
+        ) * TWO_PI * 2.6;
+
+        var force = p5.Vector.fromAngle(angle).mult(this.speed * 0.9);
+
+        var a = this.nearestAttractor();
+        if (a) {
+            var d    = dist(this.pos.x, this.pos.y, a.pos.x, a.pos.y);
+            var frac = constrain(map(d, a.zoneR, a.orbitR + 18, 0, 1), 0, 1);
+            var pull = p5.Vector.sub(a.pos, this.pos)
+                .normalize()
+                .mult(this.speed * params.attractionStrength * frac * 1.5);
+            force.add(pull);
+
+            if (d < a.orbitR + 18) {
+                this.state  = 'attracted';
+                this.target = a;
+                this.orbitR = a.orbitR + random(-5, 5);
+            }
+        }
+
+        this.vel.lerp(force, 0.10);
+        this.vel.limit(this.speed * 2.4);
+        this.pos.add(this.vel);
+
+        this.pos.x = ((this.pos.x % width)  + width)  % width;
+        this.pos.y = ((this.pos.y % height) + height) % height;
+
+    } else if (this.state === 'attracted') {
+
+        if (!this.target || this.target.isFull()) {
+            this.state  = 'drifting';
+            this.target = null;
+            return;
+        }
+
+        var toT = p5.Vector.sub(this.target.pos, this.pos);
+        var d2  = toT.mag();
+
+        if (d2 < this.orbitR + 2) {
+            this.theta = atan2(
+                this.pos.y - this.target.pos.y,
+                this.pos.x - this.target.pos.x
+            );
+            this.target.addOrbiter(this);
+            this.state = 'orbiting';
+        } else {
+            var fwd  = toT.copy().normalize().mult(this.speed * 1.35);
+            var perp = createVector(-fwd.y, fwd.x).mult(0.32);
+            this.vel.lerp(fwd.add(perp), 0.16);
+            this.pos.add(this.vel);
+        }
+
+    } else { // orbiting
+
+        if (!this.target) { this.state = 'drifting'; return; }
+
+        this.theta += 0.021 + this.speed * 0.009;
+        var nx = this.target.pos.x + cos(this.theta) * this.orbitR;
+        var ny = this.target.pos.y + sin(this.theta) * this.orbitR;
+        this.vel.set(nx - this.pos.x, ny - this.pos.y);
+        this.pos.set(nx, ny);
+
+        if (this.age > this.maxAge * 0.68) {
+            this.target.removeOrbiter(this);
+            this.target = null;
+            this.state  = 'drifting';
+            this.vel    = p5.Vector.random2D().mult(this.speed * 0.7);
+        }
+    }
+};
+
+Particle.prototype.display = function() {
+    var lifeAlpha = map(this.age, 0, this.maxAge, 220, 25);
+    var c, alpha, sw;
+
+    if (this.state === 'drifting') {
+        var spd = constrain(this.vel.mag() / (this.speed * 2.4), 0, 1);
+        var br  = 0.55 + 0.45 * spd;
+        c     = { r: floor(driftC.r * br), g: floor(driftC.g * br), b: floor(driftC.b * br) };
+        alpha = floor(lifeAlpha * 0.80);
+        sw    = 0.8;
+
+    } else if (this.state === 'attracted') {
+        var d3 = this.target
+            ? dist(this.pos.x, this.pos.y, this.target.pos.x, this.target.pos.y)
+            : 999;
+        var t2 = constrain(map(d3, this.orbitR + 80, this.orbitR, 0, 1), 0, 1);
+        c     = lerpRgb(driftC, violetC, t2);
+        alpha = floor(lifeAlpha * 0.92);
+        sw    = 1.0;
+
+    } else {
+        var pulse = 0.65 + 0.35 * sin(this.theta * 5);
+        c     = { r: floor(orbitC.r * pulse), g: floor(orbitC.g * pulse), b: floor(orbitC.b * pulse) };
+        alpha = floor(195 * pulse);
+        sw    = 1.3;
+    }
+
+    stroke(c.r, c.g, c.b, alpha);
+    strokeWeight(sw);
+    noFill();
+
+    var dx = this.pos.x - this.px;
+    var dy = this.pos.y - this.py;
+    if (Math.abs(dx) < 60 && Math.abs(dy) < 60) {
+        line(this.px, this.py, this.pos.x, this.pos.y);
+    }
+};
+
+// ================================================================
+// CHRONAL DRIFT -- System initialization
+// ================================================================
+
+function initializeSystem() {
+    randomSeed(params.seed);
+    noiseSeed(params.seed);
+    rebuildColors();
+    tick = 0;
+
+    for (var k = 0; k < particles.length; k++) {
+        if (particles[k].target) particles[k].target.removeOrbiter(particles[k]);
+        particles[k].target = null;
+    }
+
+    attractors = [];
+    var n    = params.attractorCount;
+    var cols = Math.ceil(Math.sqrt(n * 1.4));
+    var rows = Math.ceil(n / cols);
+    var cw   = width  / (cols + 0.4);
+    var ch   = height / (rows + 0.4);
+    var placed = 0;
+    for (var r = 0; r < rows && placed < n; r++) {
+        for (var c2 = 0; c2 < cols && placed < n; c2++) {
+            var bx = (c2 + 0.7) * cw + random(-cw * 0.28, cw * 0.28);
+            var by = (r  + 0.7) * ch + random(-ch * 0.28, ch * 0.28);
+            attractors.push(new Attractor(
+                constrain(bx, 90, width  - 90),
+                constrain(by, 90, height - 90)
+            ));
+            placed++;
+        }
+    }
+
+    particles = [];
+    for (var i = 0; i < params.particleCount; i++) {
+        particles.push(new Particle());
+    }
+
+    background(bgC.r, bgC.g, bgC.b);
+
+    // Faint temporal grid -- the ghost skeleton of every calendar
+    stroke(driftC.r, driftC.g, driftC.b, 7);
+    strokeWeight(0.4);
+    var gc2 = 12, gr = 7;
+    for (var ci = 1; ci < gc2; ci++) line(ci * width / gc2, 0, ci * width / gc2, height);
+    for (var ri = 1; ri < gr;  ri++) line(0, ri * height / gr, width, ri * height / gr);
+
+    var lEl = document.querySelector('.loading');
+    if (lEl) lEl.style.display = 'none';
+}
+
+// ================================================================
+// CHRONAL DRIFT -- p5.js lifecycle
+// ================================================================
+
+function setup() {
+    var canvas = createCanvas(1200, 1200);
+    canvas.parent('canvas-container');
+    frameRate(60);
+    initializeSystem();
+}
+
+function draw() {
+    tick++;
+
+    noStroke();
+    fill(bgC.r, bgC.g, bgC.b, params.trailFade);
+    rect(0, 0, width, height);
+
+    for (var j = 0; j < attractors.length; j++) attractors[j].display();
+
+    for (var i = 0; i < particles.length; i++) {
+        var p = particles[i];
+        p.update();
+        p.display();
+        if (p.isDead()) {
+            if (p.state === 'orbiting' && p.target) p.target.removeOrbiter(p);
+            particles[i] = new Particle();
+        }
+    }
+}
+
+// ================================================================
+// CHRONAL DRIFT -- UI handlers
+// ================================================================
+
+function updateParamSoft(name, val) {
+    params[name] = val;
+    document.getElementById(name + '-value').textContent = val;
+}
+
+function updateParamHard(name, val) {
+    params[name] = val;
+    document.getElementById(name + '-value').textContent = val;
+    initializeSystem();
+}
+
+function updateColor(id, val) {
+    params[id] = val;
+    document.getElementById(id + '-value').textContent = val;
+    rebuildColors();
+    background(bgC.r, bgC.g, bgC.b);
+}
+
+function updateSeedDisplay() {
+    document.getElementById('seed-input').value = params.seed;
+}
+
+function updateSeed() {
+    var v = parseInt(document.getElementById('seed-input').value);
+    if (v > 0) { params.seed = v; initializeSystem(); }
+    else updateSeedDisplay();
+}
+
+function previousSeed() { params.seed = Math.max(1, params.seed - 1); updateSeedDisplay(); initializeSystem(); }
+function nextSeed()     { params.seed++; updateSeedDisplay(); initializeSystem(); }
+function randomSeedAndUpdate() { params.seed = Math.floor(Math.random() * 999999) + 1; updateSeedDisplay(); initializeSystem(); }
+
+function resetParameters() {
+    Object.assign(params, defaultParams);
+    ['particleCount','driftSpeed','noiseScale','attractorCount','attractionStrength','trailFade'].forEach(function(k) {
+        var el = document.getElementById(k);
+        if (el) { el.value = params[k]; document.getElementById(k + '-value').textContent = params[k]; }
+    });
+    ['colorDrift','colorOrbit','colorBg'].forEach(function(k) {
+        var el = document.getElementById(k);
+        if (el) { el.value = params[k]; document.getElementById(k + '-value').textContent = params[k]; }
+    });
+    updateSeedDisplay();
+    initializeSystem();
+}
+
+window.addEventListener('load', updateSeedDisplay);
+</script>
+</body>
+</html>

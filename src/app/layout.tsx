@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { Analytics } from "@vercel/analytics/next";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
+import { MicrosoftClarity } from "@/components/analytics/MicrosoftClarity";
 import { ChunkLoadRecovery } from "@/components/ChunkLoadRecovery";
 import { BookingPwa } from "@/components/booking/BookingPwa";
 import { NavProvider } from "@/context/NavContext";
@@ -49,6 +50,7 @@ export default function RootLayout({
           <ChunkLoadRecovery />
           {enableVercelAnalytics ? <Analytics /> : null}
           <GoogleAnalytics />
+          <MicrosoftClarity />
         </ThemeProvider>
       </body>
     </html>
