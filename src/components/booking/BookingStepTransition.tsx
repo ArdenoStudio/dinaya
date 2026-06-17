@@ -1,31 +1,30 @@
 "use client";
 
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import type { BookingStep } from "./booking-steps";
+import { AnimatePresence, m, useReducedMotion } from "motion/react";
 
 interface Props {
-  step: BookingStep;
+  uiState: string;
   children: React.ReactNode;
 }
 
-export default function BookingStepTransition({ step, children }: Props) {
+export default function BookingStepTransition({ uiState, children }: Props) {
   const reduceMotion = useReducedMotion();
 
   if (reduceMotion) {
-    return <div key={step}>{children}</div>;
+    return <div key={uiState}>{children}</div>;
   }
 
   return (
     <AnimatePresence mode="wait" initial={false}>
-      <motion.div
-        key={step}
+      <m.div
+        key={uiState}
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -6 }}
         transition={{ duration: 0.18, ease: "easeOut" }}
       >
         {children}
-      </motion.div>
+      </m.div>
     </AnimatePresence>
   );
 }
