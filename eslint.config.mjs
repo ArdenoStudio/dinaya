@@ -17,6 +17,8 @@ export default defineConfig([
     "node_modules/**",
     "next-env.d.ts",
     "tsconfig.tsbuildinfo",
+    // Vendored / static assets — not our source
+    "public/**",
     // Sibling projects with their own toolchains
     "dinaya-uptime-monitor/**",
   ]),
