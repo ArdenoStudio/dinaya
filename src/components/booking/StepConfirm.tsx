@@ -10,6 +10,10 @@ import { readStoredAttribution } from "@/lib/booking-attribution";
 import { getBookingSessionToken } from "@/lib/booking-session";
 import { computeAmountDueFromDiscountedPrice, computeDiscountedPrice } from "@/lib/deals/pricing";
 import { trackDealBookingComplete, trackDealBookingStart } from "@/lib/analytics/gtag";
+import {
+  getAvailablePaymentMethods,
+  resolveDefaultPaymentMethod,
+} from "@/lib/payments/resolve";
 import type { DealListItem } from "@/lib/deals/queries";
 import { Icon } from "@/components/ui/Icon";
 
@@ -26,6 +30,8 @@ interface Props {
     manualPayment?: boolean;
     payhereFormData?: Record<string, string>;
     payhereUrl?: string;
+    approvalUrl?: string;
+    provider?: string;
     status?: string;
   }) => void;
 }
@@ -55,6 +61,34 @@ export default function StepConfirm({ state, business, copy, selectedDeal, sessi
         ? depositAmount
         : discountedPrice
       : 0;
+
+  const onlineMethods = getAvailablePaymentMethods(
+    {
+      payhereEnabled: Boolean(business.payhereEnabled),
+      payhereMerchantId: business.payhereEnabled ? "configured" : null,
+      payhereMerchantSecret: business.payhereEnabled ? "configured" : null,
+      paypalEnabled: Boolean(business.paypalEnabled),
+      paypalClientId: business.paypalEnabled ? "configured" : null,
+      paypalClientSecret: business.paypalEnabled ? "configured" : null,
+      bankTransferInstructions: business.bankTransferInstructions ?? null,
+      lankaqrImageUrl: business.lankaqrImageUrl ?? null,
+    },
+    Boolean(service?.requiresPayment),
+    dueNow,
+    Boolean(business.payhereEnabled),
+    Boolean(business.paypalEnabled),
+  ).filter((method) => method === "payhere" || method === "paypal") as Array<"payhere" | "paypal">;
+
+  const [paymentMethod, setPaymentMethod] = useState<"payhere" | "paypal">(() =>
+    resolveDefaultPaymentMethod(onlineMethods, state.clientPhone) === "paypal" ? "paypal" : "payhere",
+  );
+
+  useEffect(() => {
+    const next = resolveDefaultPaymentMethod(onlineMethods, state.clientPhone);
+    if (next === "payhere" || next === "paypal") {
+      setPaymentMethod(next);
+    }
+  }, [onlineMethods, state.clientPhone]);
 
   const dateLabel = state.date
     ? format(parseISO(state.date + "T12:00:00"), "EEEE, d MMMM")
@@ -133,6 +167,7 @@ export default function StepConfirm({ state, business, copy, selectedDeal, sessi
           .map(([questionId, value]) => ({ questionId, value })),
         dealId: selectedDeal?.id ?? null,
         sessionToken: sessionToken || getBookingSessionToken() || undefined,
+        paymentMethod: onlineMethods.length > 1 ? paymentMethod : onlineMethods[0] ?? undefined,
         attribution,
       }),
     });
@@ -160,6 +195,8 @@ export default function StepConfirm({ state, business, copy, selectedDeal, sessi
       manualPayment: data.manualPayment,
       payhereFormData: data.payhereFormData,
       payhereUrl: data.payhereUrl,
+      approvalUrl: data.approvalUrl,
+      provider: data.provider,
       status: data.status,
     });
   }
@@ -418,6 +455,29 @@ export default function StepConfirm({ state, business, copy, selectedDeal, sessi
               </p>
             </div>
           )}
+          {onlineMethods.length > 1 && service?.requiresPayment && dueNow > 0 && (
+            <div className="mb-3 space-y-2 rounded-xl border border-gray-100 bg-white p-4 md:mb-4">
+              <p className="text-sm font-medium text-gray-900">{copy.paymentMethod}</p>
+              <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  checked={paymentMethod === "payhere"}
+                  onChange={() => setPaymentMethod("payhere")}
+                />
+                {copy.paymentMethodPayhere}
+              </label>
+              <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  checked={paymentMethod === "paypal"}
+                  onChange={() => setPaymentMethod("paypal")}
+                />
+                {copy.paymentMethodPaypal}
+              </label>
+            </div>
+          )}
           {contactForm}
         </div>
       </div>
@@ -450,7 +510,7 @@ export default function StepConfirm({ state, business, copy, selectedDeal, sessi
         </button>
         <div className="mt-2 flex items-center justify-center gap-1 md:mt-3">
           <Icon name="shield-check" className="text-[11px] text-gray-300" />
-          <span className="text-[11px] text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">{copy.securedByPayHere}</span>
+          <span className="text-[11px] text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">{copy.paymentSecure}</span>
         </div>
       </div>
     </div>

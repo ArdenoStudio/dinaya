@@ -27,6 +27,9 @@ export default async function BookingPageEditorRoute() {
       payhereEnabled: businesses.payhereEnabled,
       payhereMerchantId: businesses.payhereMerchantId,
       hasPayhereMerchantSecret: businesses.payhereMerchantSecret,
+      paypalEnabled: businesses.paypalEnabled,
+      paypalClientId: businesses.paypalClientId,
+      hasPaypalClientSecret: businesses.paypalClientSecret,
       hideDinayaBranding: businesses.hideDinayaBranding,
       accentColor: businesses.accentColor,
       customDomain: businesses.customDomain,
@@ -61,6 +64,7 @@ export default async function BookingPageEditorRoute() {
           business={{
             ...business,
             hasPayhereMerchantSecret: Boolean(business.hasPayhereMerchantSecret),
+            hasPaypalClientSecret: Boolean(business.hasPaypalClientSecret),
             customDomainVerified: Boolean(business.customDomainVerified),
             canCustomizeBookingPage: canUseFeature(effectivePlan, "publicBookingPageCustomization"),
           }}

@@ -62,6 +62,9 @@ const settingsSchema = z.object({
   payhereEnabled: z.boolean().optional(),
   payhereMerchantId: z.string().trim().max(100).optional().nullable(),
   payhereMerchantSecret: z.string().trim().max(1000).optional().nullable(),
+  paypalEnabled: z.boolean().optional(),
+  paypalClientId: z.string().trim().max(200).optional().nullable(),
+  paypalClientSecret: z.string().trim().max(1000).optional().nullable(),
   hideDinayaBranding: z.boolean().optional(),
   accentColor: z
     .string()
@@ -99,6 +102,9 @@ export async function PATCH(req: NextRequest) {
     payhereEnabled,
     payhereMerchantId,
     payhereMerchantSecret,
+    paypalEnabled,
+    paypalClientId,
+    paypalClientSecret,
     hideDinayaBranding,
     accentColor,
     phone,
@@ -157,6 +163,13 @@ export async function PATCH(req: NextRequest) {
       ...(payhereMerchantSecret !== undefined && payhereMerchantSecret !== null && {
         payhereMerchantSecret: payhereMerchantSecret.trim()
           ? encryptSecret(payhereMerchantSecret)
+          : null,
+      }),
+      ...(paypalEnabled !== undefined && { paypalEnabled: Boolean(paypalEnabled) }),
+      ...(paypalClientId !== undefined && { paypalClientId: paypalClientId || null }),
+      ...(paypalClientSecret !== undefined && paypalClientSecret !== null && {
+        paypalClientSecret: paypalClientSecret.trim()
+          ? encryptSecret(paypalClientSecret)
           : null,
       }),
       ...(hideDinayaBranding !== undefined && { hideDinayaBranding: Boolean(hideDinayaBranding) }),

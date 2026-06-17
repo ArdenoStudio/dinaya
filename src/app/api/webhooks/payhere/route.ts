@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { payments, bookings, businesses, services, staff } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { payhereAmountMatches, verifyPayhereWebhook } from "@/lib/payhere";
 import { parsePayhereWebhookFields } from "@/lib/payhere-webhook";
 import { sendBookingNotificationToBusiness } from "@/lib/resend";
@@ -104,10 +104,6 @@ export async function POST(req: NextRequest) {
   form.forEach((v, k) => { allFields[k] = v as string; });
 
   if (statusCode === "2") {
-    if (payment.status === "success") {
-      return NextResponse.json({ received: true, duplicate: true });
-    }
-
     if (
       payhereCurrency !== "LKR" ||
       !payhereAmountMatches(payment.amountLkr, payhereAmount)
@@ -115,15 +111,42 @@ export async function POST(req: NextRequest) {
       return WEBHOOK_REJECTED;
     }
 
-    await db
+    const [claimedPayment] = await db
       .update(payments)
-      .set({ status: "success", payherePayload: allFields })
-      .where(eq(payments.id, payment.id));
+      .set({
+        status: "success",
+        payherePayload: allFields,
+        provider: "payhere",
+        currency: "LKR",
+        providerOrderId: orderId,
+        providerPayload: allFields,
+      })
+      .where(and(eq(payments.id, payment.id), eq(payments.status, "pending")))
+      .returning({ id: payments.id });
 
-    await db
+    if (!claimedPayment) {
+      const [currentPayment] = await db
+        .select({ status: payments.status })
+        .from(payments)
+        .where(eq(payments.id, payment.id))
+        .limit(1);
+
+      if (currentPayment?.status === "success") {
+        return NextResponse.json({ received: true, duplicate: true });
+      }
+
+      return WEBHOOK_REJECTED;
+    }
+
+    const [confirmedBooking] = await db
       .update(bookings)
       .set({ status: "confirmed" })
-      .where(eq(bookings.id, booking.id));
+      .where(and(eq(bookings.id, booking.id), eq(bookings.status, "pending")))
+      .returning({ id: bookings.id });
+
+    if (!confirmedBooking) {
+      return NextResponse.json({ received: true, duplicate: true });
+    }
 
     void processBookingAutomationTrigger(booking.businessId, booking.id, "booking.confirmed").catch((error) => {
       console.error("Automation trigger failed:", error);
@@ -214,17 +237,16 @@ export async function POST(req: NextRequest) {
       logRejectedSettled("PayHere booking notifications", results);
     });
   } else if (statusCode === "-1" || statusCode === "-2" || statusCode === "-3") {
-    if (payment.status !== "success") {
-      await db
-        .update(payments)
-        .set({ status: "failed", payherePayload: allFields })
-        .where(eq(payments.id, payment.id));
+    const [failedPayment] = await db
+      .update(payments)
+      .set({ status: "failed", payherePayload: allFields })
+      .where(and(eq(payments.id, payment.id), eq(payments.status, "pending")))
+      .returning({ id: payments.id });
 
-      if (booking.status === "pending") {
-        void releaseDealSlotForBooking(booking.id, "pending").catch((error) => {
-          console.error("Deal slot release failed:", error);
-        });
-      }
+    if (failedPayment && booking.status === "pending") {
+      void releaseDealSlotForBooking(booking.id, "pending").catch((error) => {
+        console.error("Deal slot release failed:", error);
+      });
     }
   }
 

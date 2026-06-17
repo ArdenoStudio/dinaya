@@ -1,15 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { db } from "@/db";
-import { bookings, payments, businesses, services, staff, clients, staffServices, staffLocations } from "@/db/schema";
+import { bookings, businesses, services, staff, clients, staffServices, staffLocations } from "@/db/schema";
 import { eq, and, lt, gt, gte, inArray, count } from "drizzle-orm";
-import { buildPayhereFormData, getPayhereUrl } from "@/lib/payhere";
 import { sendBookingNotificationToBusiness } from "@/lib/resend";
 import { sendBookingConfirmationMessage, sendBookingNotificationToBusinessMessage } from "@/lib/messaging/booking-messages";
 import { buildClientBookingUrl } from "@/lib/client-tokens";
 import type { Plan } from "@/lib/plan";
 import type { BookingLanguage } from "@/lib/i18n";
-import { generateOrderId } from "@/lib/utils";
 import { dispatchWebhooks } from "@/lib/webhooks";
 import { logActivity } from "@/lib/activity-log";
 import { processBookingAutomationTrigger } from "@/lib/automations/engine";
@@ -18,6 +16,12 @@ import { normalizeSriLankanPhone } from "@/lib/phone";
 import { decryptSecret } from "@/lib/secrets";
 import { resolveBookingLocationId } from "@/lib/locations";
 import { isRequestedSlotAvailable } from "@/lib/booking-availability";
+import {
+  getBookingIdempotencyResponse,
+  hashBookingIdempotencyPayload,
+  resolveBookingIdempotencyKey,
+  storeBookingIdempotencyResponse,
+} from "@/lib/booking-idempotency";
 import {
   isSlotBlockedByReservation,
   releaseSlotReservation,
@@ -41,6 +45,11 @@ import { claimDealSlot } from "@/lib/deals/claim";
 import { computeAmountDueFromDiscountedPrice, computeDiscountedPrice } from "@/lib/deals/pricing";
 import { getDealForBooking } from "@/lib/deals/queries";
 import { DealValidationError, validateDealForBooking } from "@/lib/deals/validation";
+import { startBookingCheckout } from "@/lib/payments/checkout";
+import {
+  getAvailablePaymentMethods,
+  resolveOnlinePaymentMethod,
+} from "@/lib/payments/resolve";
 
 const bookingSchema = z.object({
   businessId: z.uuid(),
@@ -56,6 +65,7 @@ const bookingSchema = z.object({
   intakeAnswers: intakeAnswersInputSchema.optional().nullable(),
   dealId: z.uuid().optional().nullable(),
   sessionToken: z.string().min(16).max(64).optional().nullable(),
+  paymentMethod: z.enum(["payhere", "paypal", "manual"]).optional().nullable(),
   source: z.enum(["public", "manual", "api", "import", "voice_agent", "deals"]).optional(),
   attribution: z.object({
     utmSource: z.string().trim().max(80).optional().nullable(),
@@ -70,6 +80,28 @@ function isOverlapConstraintError(error: unknown): boolean {
   if (!error || typeof error !== "object") return false;
   const maybe = error as { code?: string; cause?: { code?: string } };
   return maybe.code === "23P01" || maybe.cause?.code === "23P01";
+}
+
+async function finalizeBookingResponse(
+  input: {
+    idempotencyKey: string | null;
+    businessId: string;
+    requestHash: string | null;
+    body: unknown;
+    status?: number;
+  },
+) {
+  if (input.idempotencyKey && input.requestHash) {
+    await storeBookingIdempotencyResponse({
+      businessId: input.businessId,
+      idempotencyKey: input.idempotencyKey,
+      requestHash: input.requestHash,
+      responseStatus: input.status ?? 200,
+      responseBody: input.body,
+    });
+  }
+
+  return NextResponse.json(input.body, { status: input.status ?? 200 });
 }
 
 export async function POST(req: NextRequest) {
@@ -114,6 +146,7 @@ export async function POST(req: NextRequest) {
     source: requestedSource = "public",
     attribution: requestedAttribution,
     sessionToken,
+    paymentMethod: requestedPaymentMethod,
   } = parsed.data;
   const session = await auth();
 
@@ -173,6 +206,40 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "A valid phone number is required." }, { status: 400 });
   }
 
+  const idempotencyKey = !isOwnerBooking && !isApiBooking
+    ? resolveBookingIdempotencyKey(req.headers.get("Idempotency-Key"), sessionToken)
+    : null;
+
+  if (idempotencyKey) {
+    const requestHash = hashBookingIdempotencyPayload({
+      businessId,
+      serviceId,
+      staffId,
+      startsAt,
+      endsAt,
+      clientPhone,
+    });
+    const cached = await getBookingIdempotencyResponse({
+      businessId,
+      idempotencyKey,
+      requestHash,
+    });
+    if (cached) {
+      return NextResponse.json(cached.body, { status: cached.status });
+    }
+  }
+
+  const idempotencyRequestHash = idempotencyKey
+    ? hashBookingIdempotencyPayload({
+        businessId,
+        serviceId,
+        staffId,
+        startsAt,
+        endsAt,
+        clientPhone,
+      })
+    : null;
+
   if (end <= start) {
     return NextResponse.json({ error: "Booking end time must be after start time." }, { status: 400 });
   }
@@ -192,6 +259,9 @@ export async function POST(req: NextRequest) {
       plan: businesses.plan,
       language: businesses.language,
       timezone: businesses.timezone,
+      paypalEnabled: businesses.paypalEnabled,
+      paypalClientId: businesses.paypalClientId,
+      paypalClientSecret: businesses.paypalClientSecret,
     })
     .from(businesses)
     .where(eq(businesses.id, businessId))
@@ -320,7 +390,55 @@ export async function POST(req: NextRequest) {
     discountedPriceLkr = computeDiscountedPrice(service.priceLkr, deal.discountPercent);
   }
 
-  const effectivePriceLkr = discountedPriceLkr ?? service.priceLkr;
+  const amountDueLkr = discountedPriceLkr !== null
+    ? computeAmountDueFromDiscountedPrice(discountedPriceLkr, service.depositPercent)
+    : service.depositPercent > 0
+      ? Math.ceil((service.priceLkr * service.depositPercent) / 100)
+      : service.priceLkr;
+
+  const hasPayhereSecret = Boolean(decryptSecret(business.payhereMerchantSecret));
+  const hasPaypalSecret = Boolean(decryptSecret(business.paypalClientSecret));
+  const paymentMethods = getAvailablePaymentMethods(
+    business,
+    service.requiresPayment,
+    amountDueLkr,
+    hasPayhereSecret,
+    hasPaypalSecret,
+  );
+
+  const publicPaymentRequired = Boolean(
+    !isOwnerBooking &&
+      !isApiBooking &&
+      service.requiresPayment &&
+      amountDueLkr > 0,
+  );
+
+  const onlinePaymentMethod = publicPaymentRequired
+    ? resolveOnlinePaymentMethod({
+        methods: paymentMethods,
+        requested:
+          requestedPaymentMethod === "payhere" || requestedPaymentMethod === "paypal"
+            ? requestedPaymentMethod
+            : undefined,
+        clientPhone,
+      })
+    : null;
+
+  const manualPaymentRequired = Boolean(
+    publicPaymentRequired &&
+      !onlinePaymentMethod &&
+      paymentMethods.includes("manual"),
+  );
+
+  if (publicPaymentRequired && !onlinePaymentMethod && !manualPaymentRequired) {
+    return NextResponse.json(
+      { error: "This business isn't set up to accept online payments yet." },
+      { status: 400 },
+    );
+  }
+
+  const requiresPendingPayment = Boolean(onlinePaymentMethod || manualPaymentRequired);
+  const initialStatus = requiresPendingPayment ? "pending" : "confirmed";
 
   const expectedEnd = new Date(start.getTime() + service.durationMinutes * 60_000);
   if (Math.abs(expectedEnd.getTime() - end.getTime()) > 60_000) {
@@ -343,6 +461,8 @@ export async function POST(req: NextRequest) {
       minimumNoticeHours: service.minimumNoticeHours,
       maximumAdvanceDays: service.maximumAdvanceDays ?? undefined,
       timezone: business.timezone,
+      businessId,
+      locationId: resolvedLocationId,
     });
     if (!slotAvailable) {
       return NextResponse.json(
@@ -392,34 +512,6 @@ export async function POST(req: NextRequest) {
       { status: 409 }
     );
   }
-
-  // Create booking (pending until payment/proof is confirmed, or immediately confirmed if free)
-  const payhereEnabled = Boolean(
-    service.requiresPayment &&
-    effectivePriceLkr > 0 &&
-    business.payhereEnabled &&
-    business.payhereMerchantId
-  );
-  let merchantSecret: string | null = null;
-
-  if (payhereEnabled) {
-    merchantSecret = decryptSecret(business.payhereMerchantSecret);
-    if (!merchantSecret) {
-      return NextResponse.json(
-        { error: "PayHere is enabled but the merchant secret is missing." },
-        { status: 400 }
-      );
-    }
-  }
-
-  const manualPaymentRequired = Boolean(
-    service.requiresPayment &&
-    effectivePriceLkr > 0 &&
-    !payhereEnabled &&
-    (business.bankTransferInstructions || business.lankaqrImageUrl)
-  );
-  const requiresPayherePayment = Boolean(payhereEnabled);
-  const initialStatus = requiresPayherePayment || manualPaymentRequired ? "pending" : "confirmed";
 
   // Upsert client record — match by phone within this business
   const [client] = await db
@@ -535,8 +627,9 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  // Send emails for confirmed bookings immediately. Manual payment bookings remain pending.
-  if (!requiresPayherePayment) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? req.nextUrl.origin;
+
+  if (initialStatus === "confirmed") {
     const manageUrl = buildClientBookingUrl({
       bookingId: booking.id,
       clientPhone,
@@ -588,57 +681,96 @@ export async function POST(req: NextRequest) {
       logRejectedSettled("booking notifications", results);
     });
 
-    return NextResponse.json({
-      bookingId: booking.id,
-      manualPayment: manualPaymentRequired,
-      status: initialStatus,
+    return finalizeBookingResponse({
+      idempotencyKey,
+      businessId,
+      requestHash: idempotencyRequestHash,
+      body: {
+        bookingId: booking.id,
+        manualPayment: manualPaymentRequired,
+        status: initialStatus,
+      },
     });
   }
 
-  // ── PayHere payment flow ────────────────────────────────────────────────
-  const payhereMerchantId = business.payhereMerchantId;
-  if (!payhereMerchantId || !merchantSecret) {
+  try {
+    const checkout = await startBookingCheckout({
+      bookingId: booking.id,
+      businessId,
+      business,
+      serviceName: service.name,
+      depositPercent: service.depositPercent,
+      clientName,
+      clientPhone,
+      clientEmail: clientEmail || null,
+      amountLkr: amountDueLkr,
+      requiresPayment: service.requiresPayment,
+      appUrl,
+      paymentMethod: onlinePaymentMethod,
+    });
+
+    if (checkout.kind === "manual") {
+      return finalizeBookingResponse({
+        idempotencyKey,
+        businessId,
+        requestHash: idempotencyRequestHash,
+        body: {
+          bookingId: booking.id,
+          manualPayment: true,
+          status: "pending",
+        },
+      });
+    }
+
+    if (checkout.kind === "payhere") {
+      return finalizeBookingResponse({
+        idempotencyKey,
+        businessId,
+        requestHash: idempotencyRequestHash,
+        body: {
+          bookingId: booking.id,
+          provider: "payhere",
+          payhereFormData: checkout.payhereFormData,
+          payhereUrl: checkout.payhereUrl,
+        },
+      });
+    }
+
+    if (checkout.kind === "paypal") {
+      return finalizeBookingResponse({
+        idempotencyKey,
+        businessId,
+        requestHash: idempotencyRequestHash,
+        body: {
+          bookingId: booking.id,
+          provider: "paypal",
+          approvalUrl: checkout.approvalUrl,
+        },
+      });
+    }
+
+    return finalizeBookingResponse({
+      idempotencyKey,
+      businessId,
+      requestHash: idempotencyRequestHash,
+      body: {
+        bookingId: booking.id,
+        status: checkout.status,
+      },
+    });
+  } catch (error) {
+    await db
+      .update(bookings)
+      .set({
+        status: "cancelled",
+        cancelledAt: new Date(),
+        cancellationReason: "Payment setup failed.",
+      })
+      .where(eq(bookings.id, booking.id));
+
     return NextResponse.json(
-      { error: "PayHere is enabled but merchant credentials are incomplete." },
-      { status: 400 }
+      { error: error instanceof Error ? error.message : "Could not start payment checkout." },
+      { status: 400 },
     );
   }
-
-  const orderId = generateOrderId();
-  const amountDueLkr = discountedPriceLkr !== null
-    ? computeAmountDueFromDiscountedPrice(discountedPriceLkr, service.depositPercent)
-    : service.depositPercent > 0
-      ? Math.ceil((service.priceLkr * service.depositPercent) / 100)
-      : service.priceLkr;
-
-  await db.insert(payments).values({
-    bookingId: booking.id,
-    amountLkr: amountDueLkr,
-    payhereOrderId: orderId,
-    status: "pending",
-  });
-
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? req.nextUrl.origin;
-  const nameParts = clientName.split(" ");
-
-  const formData = buildPayhereFormData({
-    orderId,
-    amountLkr: amountDueLkr,
-    itemName: `${service.depositPercent > 0 ? `${service.depositPercent}% deposit for ` : ""}${service.name} - ${business.name}`,
-    firstName: nameParts[0],
-    lastName: nameParts.slice(1).join(" "),
-    email: clientEmail || undefined,
-    phone: clientPhone,
-    notifyUrl: `${appUrl}/api/webhooks/payhere`,
-    returnUrl: `${appUrl}/book/${business.slug}/confirmed?bookingId=${booking.id}`,
-    cancelUrl: `${appUrl}/book/${business.slug}`,
-    merchantId: payhereMerchantId,
-    merchantSecret,
-  });
-
-  return NextResponse.json({
-    bookingId: booking.id,
-    payhereFormData: formData,
-    payhereUrl: getPayhereUrl(),
-  });
 }

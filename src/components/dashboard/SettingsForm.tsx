@@ -24,6 +24,9 @@ type SettingsBusiness = {
   payhereEnabled: boolean;
   payhereMerchantId: string | null;
   hasPayhereMerchantSecret: boolean;
+  paypalEnabled: boolean;
+  paypalClientId: string | null;
+  hasPaypalClientSecret: boolean;
   hideDinayaBranding: boolean;
   accentColor: string | null;
   customDomain: string | null;
@@ -63,6 +66,9 @@ export default function SettingsForm({ business }: Props) {
     payhereEnabled: business.payhereEnabled,
     payhereMerchantId: business.payhereMerchantId ?? "",
     payhereMerchantSecret: "",
+    paypalEnabled: business.paypalEnabled,
+    paypalClientId: business.paypalClientId ?? "",
+    paypalClientSecret: "",
     hideDinayaBranding: business.hideDinayaBranding,
     accentColor: business.accentColor ?? "#2563eb",
   });
@@ -85,6 +91,8 @@ export default function SettingsForm({ business }: Props) {
       ...form,
       galleryImages,
       payhereMerchantSecret: form.payhereMerchantSecret.trim() || undefined,
+      paypalClientId: form.paypalClientId.trim() || null,
+      paypalClientSecret: form.paypalClientSecret.trim() || undefined,
     };
 
     const res = await fetch("/api/dashboard/settings", {
@@ -497,6 +505,54 @@ export default function SettingsForm({ business }: Props) {
 	                  </p>
 	                )}
 	              </div>
+            </div>
+          )}
+        </div>
+
+        {/* PayPal */}
+        <div className="bg-white border rounded-xl p-6 space-y-4">
+          <div className="flex items-center gap-2">
+            <Icon name="globe" className="text-sm text-muted-foreground" />
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">PayPal</p>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Accept international card and PayPal wallet payments in USD. Best for overseas customers booking your
+            Sri Lankan business. Create a REST app in the{" "}
+            <a href="https://developer.paypal.com/dashboard/applications/live" target="_blank" rel="noopener noreferrer" className="underline">
+              PayPal Developer Dashboard
+            </a>
+            .
+          </p>
+          <label className="flex items-center gap-2.5 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={form.paypalEnabled}
+              onChange={(e) => setForm((f) => ({ ...f, paypalEnabled: e.target.checked }))}
+              className="rounded"
+            />
+            <span className="text-sm font-medium">Enable PayPal for international payments</span>
+          </label>
+          {form.paypalEnabled && (
+            <div className="space-y-3 pl-5 border-l-2 border-primary/20">
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">Client ID</label>
+                <input
+                  value={form.paypalClientId}
+                  onChange={(e) => setForm((f) => ({ ...f, paypalClientId: e.target.value }))}
+                  placeholder="Abc123..."
+                  className={inputCls}
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">Client Secret</label>
+                <input
+                  type="password"
+                  value={form.paypalClientSecret}
+                  onChange={(e) => setForm((f) => ({ ...f, paypalClientSecret: e.target.value }))}
+                  placeholder={business.hasPaypalClientSecret ? "Saved - leave blank to keep existing" : "Paste client secret"}
+                  className={inputCls}
+                />
+              </div>
             </div>
           )}
         </div>
