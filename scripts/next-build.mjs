@@ -21,7 +21,16 @@ function runStep(label, command, args) {
 }
 
 if (process.env.DATABASE_URL) {
-  runStep("Applying database migrations", "npm", ["run", "db:migrate"]);
+  const migrateResult = spawnSync("npm", ["run", "db:migrate"], {
+    env: process.env,
+    stdio: "inherit",
+    shell: process.platform === "win32",
+  });
+  if (migrateResult.status !== 0) {
+    console.warn(
+      "[build] db:migrate failed — continuing build. Run migrations manually or via the DB Migrate workflow.",
+    );
+  }
 } else {
   console.log("[build] DATABASE_URL not set — skipping db:migrate");
 }
