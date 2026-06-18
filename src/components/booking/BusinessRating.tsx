@@ -12,8 +12,9 @@ interface BusinessRatingProps {
 }
 
 function reviewLabel(copy: BookingCopy, count: number) {
+  const formatted = count.toLocaleString();
   if (count === 1) return copy.reviewOnDinaya;
-  return copy.reviewsOnDinaya.replace("{count}", String(count));
+  return copy.reviewsOnDinaya.replace("{count}", formatted);
 }
 
 export function BusinessRating({
