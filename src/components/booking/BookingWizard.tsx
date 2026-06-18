@@ -20,6 +20,7 @@ import { trackBookingStart } from "@/lib/analytics/gtag";
 import { ServiceMetaPanel } from "./ServiceMetaPanel";
 import { BookingWizardSkeleton } from "./BookingWizardSkeleton";
 import BookingBranding from "./BookingBranding";
+import { BookingTeamSection } from "./BookingTeamSection";
 import { BookingAttributionCapture } from "./BookingAttributionCapture";
 import { BookingDealsSection } from "./BookingDealsSection";
 import type { DealListItem } from "@/lib/deals/queries";
@@ -52,6 +53,7 @@ interface Props {
   avgRating?: number | null;
   reviewCount?: number;
   businessDescription?: string | null;
+  teamMembers?: Pick<Staff, "id" | "name" | "bio" | "avatarUrl">[];
 }
 
 export type BookingBusiness = {
@@ -125,6 +127,7 @@ function BookingWizardInner({
   lockServiceSelection = false,
   embedMode = false,
   calendarOverlayConfig = null,
+  teamMembers = [],
 }: Props) {
   const copy = getBookingCopy(business.language);
   const router = useRouter();
@@ -521,6 +524,15 @@ function BookingWizardInner({
             </div>
           )}
         </div>
+
+        {state.service && teamMembers.length > 0 && !embedMode && (
+          <BookingTeamSection
+            members={teamMembers}
+            copy={copy}
+            variant="dialog"
+            className="flex justify-center border-t border-border px-4 py-3"
+          />
+        )}
 
         {showBranding && <BookingBranding copy={copy} hideBranding={business.hideBranding} />}
       </div>

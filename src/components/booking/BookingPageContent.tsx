@@ -10,9 +10,8 @@ import { getBookingCopy } from "@/lib/i18n";
 import { normalizePublicHttpsUrl } from "@/lib/public-url";
 import { isOptimizableRemoteImage } from "@/lib/utils";
 import { Icon } from "@/components/ui/Icon";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { Card, CardContent } from "@/components/ui/card";
+import { BookingTeamSection } from "@/components/booking/BookingTeamSection";
 import type { BookingPageData } from "@/lib/booking/load-page-data";
 import { createCalendarOverlayTicket } from "@/lib/calendar-overlay-ticket";
 import type { CalendarOverlayConfig } from "./useGoogleCalendarOverlay";
@@ -270,6 +269,7 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
               avgRating={avgRating}
               reviewCount={reviewCount}
               businessDescription={business.description}
+              teamMembers={staffWithBio}
             />
           )}
 
@@ -323,65 +323,13 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
             </Card>
           )}
 
-          {!hideSidebarSections && staffWithBio.length > 0 && (
-            <section className="md:px-0">
-              <Card
-                className={`mt-0 overflow-hidden rounded-none border-x-0 py-0 shadow-none ${
-                  bookerFocus
-                    ? "mt-6 border-border/60 md:rounded-xl md:border-x md:shadow-none"
-                    : "md:mt-6 md:rounded-xl md:border-x md:shadow-sm"
-                }`}
-              >
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base">Meet the team</CardTitle>
-                </CardHeader>
-                <Separator />
-                {staffWithBio.length === 1 ? (
-                  <CardContent className="flex items-center gap-4 py-4">
-                    <Avatar className="size-16" data-size="lg">
-                      {staffWithBio[0]!.avatarUrl ? (
-                        <AvatarImage src={staffWithBio[0]!.avatarUrl} alt={staffWithBio[0]!.name} />
-                      ) : null}
-                      <AvatarFallback className="bg-[var(--booking-accent-muted)] text-2xl font-bold text-[var(--booking-accent)]">
-                        {staffWithBio[0]!.name.charAt(0).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="min-w-0">
-                      <p className="font-semibold text-foreground">{staffWithBio[0]!.name}</p>
-                      {staffWithBio[0]!.bio && (
-                        <p className="mt-0.5 text-sm leading-relaxed text-muted-foreground">{staffWithBio[0]!.bio}</p>
-                      )}
-                    </div>
-                  </CardContent>
-                ) : (
-                  <CardContent className="grid gap-px bg-border p-0 sm:grid-cols-2 lg:grid-cols-3">
-                    {staffWithBio.map((member) => (
-                      <div
-                        key={member.id}
-                        className="flex flex-col items-center gap-2 bg-card p-4 text-center"
-                      >
-                        <Avatar className="size-14" data-size="lg">
-                          {member.avatarUrl ? (
-                            <AvatarImage src={member.avatarUrl} alt={member.name} />
-                          ) : null}
-                          <AvatarFallback className="bg-[var(--booking-accent-muted)] text-xl font-bold text-[var(--booking-accent)]">
-                            {member.name.charAt(0).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="text-sm font-semibold text-foreground">{member.name}</p>
-                          {member.bio && (
-                            <p className="mt-0.5 line-clamp-3 text-xs leading-relaxed text-muted-foreground">
-                              {member.bio}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </CardContent>
-                )}
-              </Card>
-            </section>
+          {!bookerFocus && !hideSidebarSections && staffWithBio.length > 0 && (
+            <BookingTeamSection
+              members={staffWithBio}
+              copy={copy}
+              variant={staffWithBio.length > 3 ? "dialog" : "card"}
+              className={staffWithBio.length > 3 ? "mt-6 flex justify-center" : "md:px-0"}
+            />
           )}
 
           {!hideSidebarSections && reviewList.length > 0 && (
