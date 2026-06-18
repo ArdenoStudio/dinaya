@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useDashboardCopy } from "@/components/dashboard/DashboardLocaleProvider";
 import { buildPublicBookingUrl } from "@/lib/booking-url";
+import { bookingLogoHasIntrinsicPadding } from "@/lib/booking/logo-avatar";
 import { isOptimizableRemoteImage } from "@/lib/utils";
 import { Icon } from "@/components/ui/Icon";
 
@@ -339,15 +340,28 @@ export default function SettingsForm({ business }: Props) {
 
           {logoUrl.trim() && (
             <div className="flex items-center gap-4">
-              <div className="relative size-16 overflow-hidden rounded-full border bg-white">
-                <Image
-                  src={logoUrl.trim()}
-                  alt="Business logo preview"
-                  fill
-                  sizes="64px"
-                  className="object-contain p-1.5"
-                  unoptimized={!isOptimizableRemoteImage(logoUrl.trim())}
-                />
+              <div className="relative size-16 overflow-hidden rounded-full border bg-[var(--booking-accent-muted)] ring-1 ring-border/60">
+                {bookingLogoHasIntrinsicPadding(logoUrl.trim()) ? (
+                  <Image
+                    src={logoUrl.trim()}
+                    alt="Business logo preview"
+                    fill
+                    sizes="64px"
+                    className="object-cover object-center scale-[1.85]"
+                    unoptimized={!isOptimizableRemoteImage(logoUrl.trim())}
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center p-2">
+                    <Image
+                      src={logoUrl.trim()}
+                      alt="Business logo preview"
+                      width={52}
+                      height={52}
+                      className="max-h-full max-w-full object-contain"
+                      unoptimized={!isOptimizableRemoteImage(logoUrl.trim())}
+                    />
+                  </div>
+                )}
               </div>
               <button
                 type="button"

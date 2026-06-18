@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { cn } from "@/lib/utils";
-import { isOptimizableRemoteImage } from "@/lib/utils";
+import { bookingLogoHasIntrinsicPadding } from "@/lib/booking/logo-avatar";
+import { cn, isOptimizableRemoteImage } from "@/lib/utils";
 
 type AvatarSize = "sm" | "md" | "lg";
 
@@ -29,8 +29,10 @@ export function BookingBusinessAvatar({
   const [imageFailed, setImageFailed] = useState(false);
   const trimmedName = name.trim();
   const initial = trimmedName ? trimmedName.charAt(0).toUpperCase() : "?";
-  const showImage = Boolean(logoUrl?.trim()) && !imageFailed;
+  const resolvedLogo = logoUrl?.trim() ?? "";
+  const showImage = Boolean(resolvedLogo) && !imageFailed;
   const dims = sizeClasses[size];
+  const paddedLogo = bookingLogoHasIntrinsicPadding(resolvedLogo);
 
   if (showImage) {
     return (
@@ -41,15 +43,29 @@ export function BookingBusinessAvatar({
           className,
         )}
       >
-        <Image
-          src={logoUrl!}
-          alt={name}
-          width={dims.pixels}
-          height={dims.pixels}
-          className="size-full object-contain p-1.5"
-          unoptimized={!isOptimizableRemoteImage(logoUrl!)}
-          onError={() => setImageFailed(true)}
-        />
+        {paddedLogo ? (
+          <Image
+            src={resolvedLogo}
+            alt={name}
+            fill
+            sizes={`${dims.pixels}px`}
+            className="object-cover object-center scale-[1.85]"
+            unoptimized={!isOptimizableRemoteImage(resolvedLogo)}
+            onError={() => setImageFailed(true)}
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center p-1.5">
+            <Image
+              src={resolvedLogo}
+              alt={name}
+              width={Math.round(dims.pixels * 0.82)}
+              height={Math.round(dims.pixels * 0.82)}
+              className="max-h-full max-w-full object-contain"
+              unoptimized={!isOptimizableRemoteImage(resolvedLogo)}
+              onError={() => setImageFailed(true)}
+            />
+          </div>
+        )}
       </div>
     );
   }
