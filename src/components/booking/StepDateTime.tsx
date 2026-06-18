@@ -301,28 +301,30 @@ export default function StepDateTime({
             </div>
           )}
 
-          {showMobileCalendar ? (
-            <MonthCalendar
-              selectedDate={selectedDate}
-              minDate={today}
-              maxDate={maxDate}
-              dayStatus={monthDayStatus}
-              personalBusyDates={calendarOverlay?.busyDates}
-              onMonthChange={handleMonthChange}
-              onSelect={onDateChange}
-              size="comfortable"
-            />
-          ) : (
-            <DateQuickStrip
-              selectedDate={selectedDate}
-              minDate={today}
-              maxDate={maxDate}
-              copy={copy}
-              onSelect={onDateChange}
-            />
-          )}
+          <div className="md:hidden">
+            {showMobileCalendar ? (
+              <MonthCalendar
+                selectedDate={selectedDate}
+                minDate={today}
+                maxDate={maxDate}
+                dayStatus={monthDayStatus}
+                personalBusyDates={calendarOverlay?.busyDates}
+                onMonthChange={handleMonthChange}
+                onSelect={onDateChange}
+                size="comfortable"
+              />
+            ) : (
+              <DateQuickStrip
+                selectedDate={selectedDate}
+                minDate={today}
+                maxDate={maxDate}
+                copy={copy}
+                onSelect={onDateChange}
+              />
+            )}
+          </div>
 
-          <div className="mt-4 hidden min-w-0 md:block">
+          <div className="hidden min-w-0 md:block">
             <MonthCalendar
               selectedDate={selectedDate}
               minDate={today}

@@ -112,7 +112,12 @@ export function ServiceMetaPanel({
 
       <AnimatePresence>
         {service && (
-          <m.div key="service-info" {...fadeInUp} className="mt-4 md:mt-5">
+          <m.div
+            key="service-info"
+            {...fadeInUp}
+            initial={lockServiceSelection ? false : fadeInUp.initial}
+            className="mt-4 md:mt-5"
+          >
             {!lockServiceSelection && onChangeService && (
               <button
                 type="button"
