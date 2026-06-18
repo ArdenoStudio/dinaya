@@ -32,7 +32,7 @@ function collectErrorMessages(error: unknown): string {
 
 export function isTransientDbConnectionError(error: unknown): boolean {
   const message = collectErrorMessages(error);
-  return /fetch failed|econnreset|etimedout|socket hang up|network|connection/i.test(message);
+  return /fetch failed|econnreset|etimedout|socket hang up|connection (refused|reset|timed? ?out|terminated|closed)/i.test(message);
 }
 
 export async function withTransientDbRetry<T>(

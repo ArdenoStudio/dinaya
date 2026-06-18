@@ -64,7 +64,7 @@ export async function getPublicReviews(
     ratingFilter != null ? eq(reviews.rating, ratingFilter) : undefined,
   );
 
-  const [reviewList, ratingData, distribution] = await Promise.all([
+  const [reviewList, ratingData] = await Promise.all([
     db
       .select({
         id: reviews.id,
@@ -85,20 +85,13 @@ export async function getPublicReviews(
       .where(
         and(eq(reviews.businessId, business.id), eq(reviews.isPublished, true)),
       ),
-    getReviewDistribution(business.id),
   ]);
-
-  const reviewCount = Number(ratingData[0]?.count ?? 0);
-  const filteredCount = ratingFilter
-    ? distribution[ratingFilter as keyof ReviewDistribution]
-    : reviewCount;
 
   return {
     businessName: business.name,
     avgRating: ratingData[0]?.avg ? parseFloat(String(ratingData[0].avg)) : null,
-    reviewCount,
-    distribution,
+    reviewCount: Number(ratingData[0]?.count ?? 0),
     reviews: reviewList,
-    hasMore: offset + reviewList.length < filteredCount,
+    hasMore: reviewList.length === limit,
   };
 }

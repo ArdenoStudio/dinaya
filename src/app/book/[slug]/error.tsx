@@ -9,7 +9,6 @@ export default function BookingError({
   error,
 }: {
   error: Error & { digest?: string };
-  reset: () => void;
 }) {
   const [isRetrying, setIsRetrying] = useState(false);
   const connectionIssue = isTransientDbConnectionError(error);

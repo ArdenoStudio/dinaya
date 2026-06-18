@@ -48,9 +48,9 @@ export function SlotsEmptyView({
 
   if (variant === "grid") {
     return (
-      <div className="rounded-xl border border-dashed border-gray-200 bg-gray-50/50 px-4 py-10 text-center dark:border-neutral-800 dark:bg-neutral-900/50">
-        <Icon name={emptyIcon(emptyState)} className="mb-2 block text-2xl text-gray-300" />
-        <p className="text-sm text-gray-500 dark:text-gray-400">{message}</p>
+      <div className="rounded-xl border border-dashed border-border bg-muted/30 px-4 py-10 text-center">
+        <Icon name={emptyIcon(emptyState)} className="mb-2 block text-2xl text-muted-foreground/30" />
+        <p className="text-sm text-muted-foreground">{message}</p>
         {showNext && nextLabel && (
           <button
             type="button"

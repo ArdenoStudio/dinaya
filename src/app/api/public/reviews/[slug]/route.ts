@@ -27,7 +27,6 @@ export async function GET(req: Request, { params }: Ctx) {
     businessName: data.businessName,
     avgRating: data.avgRating,
     reviewCount: data.reviewCount,
-    distribution: data.distribution,
     page,
     hasMore: data.hasMore,
     reviews: data.reviews.map((review) => ({
