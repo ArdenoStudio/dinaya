@@ -99,8 +99,8 @@ export default function TimeSlotGrid({
     <div className="space-y-5">
       {grouped.map(({ period, label, slots: periodSlots }) => (
         <div key={period}>
-          <p className="mb-2.5 text-xs font-semibold text-gray-500 dark:text-gray-400">{label}</p>
-          <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+          <p className="mb-2.5 text-xs font-semibold text-muted-foreground">{label}</p>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
             {periodSlots.map((slot) => {
               const isSelected = selectedStartUtc === slot.startUtc;
               const hasCalendarConflict = slotConflictsWithBusyTime(slot, busyTimes);
@@ -114,12 +114,12 @@ export default function TimeSlotGrid({
                   aria-label={`${slot.label}${isSelected ? ", selected" : ""}${
                     hasCalendarConflict ? `, ${copy.calendarConflict}` : ""
                   }`}
-                  className={`w-full rounded-xl px-2 py-2.5 text-sm font-semibold tabular-nums transition-all ${
+                  className={`w-full rounded-lg px-2 py-2.5 text-sm font-semibold tabular-nums transition-all ${
                     hasCalendarConflict
-                      ? "cursor-not-allowed border border-gray-200 bg-gray-100 text-gray-400 line-through decoration-gray-300 dark:border-neutral-800 dark:bg-neutral-800/70 dark:text-gray-500"
+                      ? "cursor-not-allowed border border-border bg-muted text-muted-foreground line-through"
                       : isSelected
-                      ? "booking-bg-accent text-white shadow-md booking-shadow-accent ring-2 booking-ring-accent"
-                      : "border border-gray-200 dark:border-neutral-800 bg-white dark:border-neutral-800 dark:bg-neutral-900 text-gray-700 dark:text-gray-300 hover:booking-border-accent hover:booking-bg-accent-muted/50 hover:booking-text-accent"
+                      ? "bg-[var(--booking-accent)] text-white shadow-sm ring-2 ring-[var(--booking-accent-soft)]"
+                      : "border border-border bg-card text-foreground hover:border-[var(--booking-accent)] hover:bg-[var(--booking-accent-muted)]/40"
                   }`}
                   title={hasCalendarConflict ? copy.calendarConflict : undefined}
                 >
