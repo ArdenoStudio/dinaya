@@ -4,6 +4,10 @@ import { parseISO } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import type { BookingCopy } from "@/lib/i18n";
 import { Icon } from "@/components/ui/Icon";
+import {
+  slotConflictsWithBusyTime,
+  type CalendarBusyTime,
+} from "@/lib/google-calendar-overlay";
 
 const DEFAULT_TZ = "Asia/Colombo";
 
@@ -41,6 +45,7 @@ interface Props {
   loading?: boolean;
   emptyState?: SlotEmptyState;
   timezone?: string;
+  busyTimes?: CalendarBusyTime[];
 }
 
 export default function TimeSlotGrid({
@@ -51,6 +56,7 @@ export default function TimeSlotGrid({
   loading,
   emptyState = "none",
   timezone = DEFAULT_TZ,
+  busyTimes = [],
 }: Props) {
   if (loading) {
     return (
@@ -96,18 +102,25 @@ export default function TimeSlotGrid({
           <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
             {periodSlots.map((slot) => {
               const isSelected = selectedStartUtc === slot.startUtc;
+              const hasCalendarConflict = slotConflictsWithBusyTime(slot, busyTimes);
               return (
                 <button
                   key={slot.startUtc}
                   type="button"
+                  disabled={hasCalendarConflict}
                   onClick={() => onSelect(slot)}
                   aria-pressed={isSelected}
-                  aria-label={`${slot.label}${isSelected ? ", selected" : ""}`}
+                  aria-label={`${slot.label}${isSelected ? ", selected" : ""}${
+                    hasCalendarConflict ? `, ${copy.calendarConflict}` : ""
+                  }`}
                   className={`w-full rounded-xl px-2 py-2.5 text-sm font-semibold tabular-nums transition-all ${
-                    isSelected
+                    hasCalendarConflict
+                      ? "cursor-not-allowed border border-gray-200 bg-gray-100 text-gray-400 line-through decoration-gray-300 dark:border-neutral-800 dark:bg-neutral-800/70 dark:text-gray-500"
+                      : isSelected
                       ? "booking-bg-accent text-white shadow-md booking-shadow-accent ring-2 booking-ring-accent"
                       : "border border-gray-200 dark:border-neutral-800 bg-white dark:border-neutral-800 dark:bg-neutral-900 text-gray-700 dark:text-gray-300 hover:booking-border-accent hover:booking-bg-accent-muted/50 hover:booking-text-accent"
                   }`}
+                  title={hasCalendarConflict ? copy.calendarConflict : undefined}
                 >
                   {slot.label}
                 </button>

@@ -11,6 +11,8 @@ import type { BookingCopy } from "@/lib/i18n";
 import MonthCalendar, { type MonthDayStatus } from "./MonthCalendar";
 import DateQuickStrip from "./DateQuickStrip";
 import TimeSlotGrid, { type SlotEmptyState, type SlotOption } from "./TimeSlotGrid";
+import { CalendarOverlayControl } from "./CalendarOverlayControl";
+import type { GoogleCalendarOverlay } from "./useGoogleCalendarOverlay";
 
 import { ANY_STAFF_ID } from "@/lib/booking-staff";
 
@@ -44,6 +46,7 @@ interface Props {
   onBack?: () => void;
   hideSlots?: boolean;
   onSlotsChange?: (slots: SlotOption[], loading: boolean, emptyState: SlotEmptyState) => void;
+  calendarOverlay?: GoogleCalendarOverlay;
 }
 
 export default function StepDateTime({
@@ -66,6 +69,7 @@ export default function StepDateTime({
   onBack,
   hideSlots = false,
   onSlotsChange,
+  calendarOverlay,
 }: Props) {
   const today = toZonedTime(new Date(), timezone);
   const maxDate = service?.maximumAdvanceDays
@@ -214,7 +218,7 @@ export default function StepDateTime({
         {copy.pickDateTime}
       </p>
 
-      {nextAvailable && nextAvailable.date !== selectedDate && (
+      {nextAvailable && nextAvailable.date !== selectedDate && hasFetched && slotEmptyState !== "none" && (
         <button
           type="button"
           onClick={() => {
@@ -254,12 +258,19 @@ export default function StepDateTime({
             </button>
           </div>
 
+          {calendarOverlay && (
+            <div className="mb-4 hidden md:block">
+              <CalendarOverlayControl copy={copy} overlay={calendarOverlay} />
+            </div>
+          )}
+
           {showMobileCalendar ? (
             <MonthCalendar
               selectedDate={selectedDate}
               minDate={today}
               maxDate={maxDate}
               dayStatus={monthDayStatus}
+              personalBusyDates={calendarOverlay?.busyDates}
               onMonthChange={handleMonthChange}
               onSelect={onDateChange}
               size="comfortable"
@@ -280,6 +291,7 @@ export default function StepDateTime({
               minDate={today}
               maxDate={maxDate}
               dayStatus={monthDayStatus}
+              personalBusyDates={calendarOverlay?.busyDates}
               onMonthChange={handleMonthChange}
               onSelect={onDateChange}
               size="comfortable"
@@ -323,6 +335,7 @@ export default function StepDateTime({
                 loading={loadingSlots}
                 emptyState={slotEmptyState}
                 timezone={timezone}
+                busyTimes={calendarOverlay?.busyTimes}
               />
             )}
           </section>

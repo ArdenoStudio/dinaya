@@ -4,6 +4,10 @@ import { parseISO } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import { Icon } from "@/components/ui/Icon";
 import type { BookingCopy } from "@/lib/i18n";
+import {
+  slotConflictsWithBusyTime,
+  type CalendarBusyTime,
+} from "@/lib/google-calendar-overlay";
 import type { SlotEmptyState, SlotOption } from "./TimeSlotGrid";
 
 const DEFAULT_TZ = "Asia/Colombo";
@@ -32,6 +36,7 @@ interface SlotListPanelProps {
   loading?: boolean;
   emptyState?: SlotEmptyState;
   timezone?: string;
+  busyTimes?: CalendarBusyTime[];
 }
 
 export function SlotListPanel({
@@ -42,6 +47,7 @@ export function SlotListPanel({
   loading = false,
   emptyState = "none",
   timezone = DEFAULT_TZ,
+  busyTimes = [],
 }: SlotListPanelProps) {
   if (loading) {
     return (
@@ -89,22 +95,37 @@ export function SlotListPanel({
             <div className="flex flex-col gap-1.5">
               {periodSlots.map((slot) => {
                 const isSelected = slot.startUtc === selectedStartUtc;
+                const hasCalendarConflict = slotConflictsWithBusyTime(slot, busyTimes);
                 return (
                   <button
                     key={slot.startUtc}
                     type="button"
+                    disabled={hasCalendarConflict}
                     aria-pressed={isSelected}
-                    aria-label={slot.label}
+                    aria-label={`${slot.label}${
+                      hasCalendarConflict ? `, ${copy.calendarConflict}` : ""
+                    }`}
                     onClick={() => onSelect(slot)}
-                    className={`flex h-12 w-full items-center justify-between rounded-xl border px-4 text-sm font-medium transition-colors ${
-                      isSelected
+                    className={`flex min-h-12 w-full items-center justify-between rounded-xl border px-4 py-2.5 text-sm font-medium transition-colors ${
+                      hasCalendarConflict
+                        ? "cursor-not-allowed border-gray-200 bg-gray-100 text-gray-400 dark:border-neutral-800 dark:bg-neutral-800/70 dark:text-gray-500"
+                        : isSelected
                         ? "booking-bg-accent border-transparent text-white booking-shadow-accent"
                         : "border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-gray-800 dark:text-gray-200 hover:border-[var(--booking-accent)] hover:booking-text-accent"
                     }`}
                   >
-                    <span>{slot.label}</span>
+                    <span className="min-w-0 text-left">
+                      <span className={hasCalendarConflict ? "line-through decoration-gray-300" : ""}>
+                        {slot.label}
+                      </span>
+                      {hasCalendarConflict && (
+                        <span className="mt-0.5 block text-[10px] font-normal no-underline">
+                          {copy.calendarConflict}
+                        </span>
+                      )}
+                    </span>
                     <Icon
-                      name={isSelected ? "check" : "chevron-right"}
+                      name={hasCalendarConflict ? "calendar-x" : isSelected ? "check" : "chevron-right"}
                       className="text-xs opacity-60"
                     />
                   </button>
