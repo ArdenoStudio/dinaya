@@ -10,6 +10,9 @@ import { getBookingCopy } from "@/lib/i18n";
 import { normalizePublicHttpsUrl } from "@/lib/public-url";
 import { isOptimizableRemoteImage } from "@/lib/utils";
 import { Icon } from "@/components/ui/Icon";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import type { BookingPageData } from "@/lib/booking/load-page-data";
 import { createCalendarOverlayTicket } from "@/lib/calendar-overlay-ticket";
 import type { CalendarOverlayConfig } from "./useGoogleCalendarOverlay";
@@ -172,28 +175,28 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
           )}
 
           {!hideSidebarSections && hasTrustBlock && (
-            <div className="mx-4 mb-3 flex justify-center md:mx-0 md:mb-4">
-              <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-center text-xs text-gray-400 dark:text-gray-500">
+            <Card className="mx-4 mb-4 border-dashed bg-muted/30 md:mx-0">
+              <CardContent className="grid gap-4 p-4 text-sm sm:grid-cols-2">
                 {business.cancellationPolicy && (
-                  <span title={business.cancellationPolicy}>
-                    <span className="font-medium text-gray-500 dark:text-gray-400">{copy.cancellationPolicy}:</span>{" "}
-                    <span className="line-clamp-1">{business.cancellationPolicy}</span>
-                  </span>
+                  <div className="space-y-1">
+                    <p className="font-medium text-foreground">{copy.cancellationPolicy}</p>
+                    <p className="text-muted-foreground">{business.cancellationPolicy}</p>
+                  </div>
                 )}
                 {business.depositPolicy && (
-                  <span title={business.depositPolicy}>
-                    <span className="font-medium text-gray-500 dark:text-gray-400">{copy.depositPolicy}:</span>{" "}
-                    <span className="line-clamp-1">{business.depositPolicy}</span>
-                  </span>
+                  <div className="space-y-1">
+                    <p className="font-medium text-foreground">{copy.depositPolicy}</p>
+                    <p className="text-muted-foreground">{business.depositPolicy}</p>
+                  </div>
                 )}
                 {business.bankTransferInstructions && (
-                  <span title={business.bankTransferInstructions}>
-                    <span className="font-medium text-gray-500 dark:text-gray-400">{copy.localPayment}:</span>{" "}
-                    <span className="line-clamp-1">{business.bankTransferInstructions}</span>
-                  </span>
+                  <div className="space-y-1 sm:col-span-2">
+                    <p className="font-medium text-foreground">{copy.localPayment}</p>
+                    <p className="text-muted-foreground">{business.bankTransferInstructions}</p>
+                  </div>
                 )}
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           )}
 
           {showHub && (
@@ -245,112 +248,105 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
           )}
 
           {!hideSidebarSections && hasAboutSection && (
-            <section className="mt-6 hidden rounded-2xl border border-gray-100 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-6 md:block">
-              {avgRating !== null && reviewCount > 0 && (
-                <div className="mb-4 flex items-center gap-2">
-                  <StarRating rating={avgRating} size="md" />
-                  <span className="font-semibold text-gray-900 dark:text-gray-100">{avgRating.toFixed(1)}</span>
-                  <span className="text-sm text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
-                    ({reviewCount} review{reviewCount !== 1 ? "s" : ""})
-                  </span>
-                </div>
-              )}
-              {business.description && (
-                <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-400">{business.description}</p>
-              )}
-            </section>
+            <Card className="mt-6 hidden md:block">
+              <CardContent className="p-6">
+                {avgRating !== null && reviewCount > 0 && (
+                  <div className="mb-4 flex items-center gap-2">
+                    <StarRating rating={avgRating} size="md" />
+                    <span className="font-semibold text-foreground">{avgRating.toFixed(1)}</span>
+                    <span className="text-sm text-muted-foreground">
+                      ({reviewCount} review{reviewCount !== 1 ? "s" : ""})
+                    </span>
+                  </div>
+                )}
+                {business.description && (
+                  <p className="text-sm leading-relaxed text-muted-foreground">{business.description}</p>
+                )}
+              </CardContent>
+            </Card>
           )}
 
           {!hideSidebarSections && staffWithBio.length > 0 && (
             <section className="mt-6 px-4 md:px-0">
-              <div className="rounded-2xl border border-gray-100 dark:border-neutral-800 bg-white dark:bg-neutral-900 overflow-hidden">
-                <div className="px-5 py-4 border-b border-gray-100 dark:border-neutral-800">
-                  <h2 className="font-cal text-base font-medium text-gray-900 dark:text-gray-100">Meet the team</h2>
-                </div>
+              <Card className="overflow-hidden py-0">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base">Meet the team</CardTitle>
+                </CardHeader>
+                <Separator />
                 {staffWithBio.length === 1 ? (
-                  <div className="flex items-center gap-4 px-5 py-4">
-                    {staffWithBio[0]!.avatarUrl ? (
-                      <Image
-                        src={staffWithBio[0]!.avatarUrl}
-                        alt={staffWithBio[0]!.name}
-                        width={64}
-                        height={64}
-                        className="size-16 shrink-0 rounded-full border object-cover"
-                        unoptimized={!isOptimizableRemoteImage(staffWithBio[0]!.avatarUrl)}
-                      />
-                    ) : (
-                      <div className="flex size-16 shrink-0 items-center justify-center rounded-full booking-bg-accent-muted text-2xl font-bold booking-text-accent">
-                        {staffWithBio[0]!.name.charAt(0)}
-                      </div>
-                    )}
+                  <CardContent className="flex items-center gap-4 py-4">
+                    <Avatar className="size-16" data-size="lg">
+                      {staffWithBio[0]!.avatarUrl ? (
+                        <AvatarImage src={staffWithBio[0]!.avatarUrl} alt={staffWithBio[0]!.name} />
+                      ) : null}
+                      <AvatarFallback className="bg-[var(--booking-accent-muted)] text-2xl font-bold text-[var(--booking-accent)]">
+                        {staffWithBio[0]!.name.charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
                     <div className="min-w-0">
-                      <p className="font-semibold text-gray-900 dark:text-gray-100">{staffWithBio[0]!.name}</p>
+                      <p className="font-semibold text-foreground">{staffWithBio[0]!.name}</p>
                       {staffWithBio[0]!.bio && (
-                        <p className="mt-0.5 text-sm leading-relaxed text-gray-500 dark:text-gray-400">{staffWithBio[0]!.bio}</p>
+                        <p className="mt-0.5 text-sm leading-relaxed text-muted-foreground">{staffWithBio[0]!.bio}</p>
                       )}
                     </div>
-                  </div>
+                  </CardContent>
                 ) : (
-                  <div className={`grid gap-px bg-gray-100 dark:bg-neutral-800 ${staffWithBio.length === 2 ? "grid-cols-2" : "grid-cols-2 sm:grid-cols-3"}`}>
+                  <CardContent className="grid gap-px bg-border p-0 sm:grid-cols-2 lg:grid-cols-3">
                     {staffWithBio.map((member) => (
                       <div
                         key={member.id}
-                        className="flex flex-col items-center gap-2 bg-white dark:bg-neutral-900 p-4 text-center"
+                        className="flex flex-col items-center gap-2 bg-card p-4 text-center"
                       >
-                        {member.avatarUrl ? (
-                          <Image
-                            src={member.avatarUrl}
-                            alt={member.name}
-                            width={56}
-                            height={56}
-                            className="size-14 rounded-full border object-cover"
-                            unoptimized={!isOptimizableRemoteImage(member.avatarUrl)}
-                          />
-                        ) : (
-                          <div className="flex size-14 items-center justify-center rounded-full booking-bg-accent-muted text-xl font-bold booking-text-accent">
-                            {member.name.charAt(0)}
-                          </div>
-                        )}
+                        <Avatar className="size-14" data-size="lg">
+                          {member.avatarUrl ? (
+                            <AvatarImage src={member.avatarUrl} alt={member.name} />
+                          ) : null}
+                          <AvatarFallback className="bg-[var(--booking-accent-muted)] text-xl font-bold text-[var(--booking-accent)]">
+                            {member.name.charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
                         <div>
-                          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{member.name}</p>
+                          <p className="text-sm font-semibold text-foreground">{member.name}</p>
                           {member.bio && (
-                            <p className="mt-0.5 line-clamp-3 text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+                            <p className="mt-0.5 line-clamp-3 text-xs leading-relaxed text-muted-foreground">
                               {member.bio}
                             </p>
                           )}
                         </div>
                       </div>
                     ))}
-                  </div>
+                  </CardContent>
                 )}
-              </div>
+              </Card>
             </section>
           )}
 
           {!hideSidebarSections && reviewList.length > 0 && (
-            <section className="mt-8 px-4 pb-8 md:px-0">
-              <div className="mb-4">
-                <h2 className="font-cal text-lg text-gray-900 dark:text-gray-100">Reviews</h2>
+            <section className="mt-8 space-y-4 px-4 pb-8 md:px-0">
+              <div>
+                <h2 className="font-cal text-lg text-foreground">Reviews</h2>
                 {avgRating !== null && (
                   <div className="mt-1 flex items-center gap-2">
                     <StarRating rating={avgRating} size="md" />
-                    <span className="font-semibold">{avgRating.toFixed(1)}</span>
+                    <span className="font-semibold text-foreground">{avgRating.toFixed(1)}</span>
                   </div>
                 )}
               </div>
               <div className="space-y-3">
                 {reviewList.map((review) => (
-                  <div key={review.id} className="rounded-xl border border-gray-100 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-4">
-                    <div className="mb-2 flex items-start justify-between gap-2">
-                      <div>
-                        <p className="text-sm font-medium">{review.clientName}</p>
-                        <StarRating rating={review.rating} />
+                  <Card key={review.id}>
+                    <CardContent className="p-4">
+                      <div className="mb-2 flex items-start justify-between gap-2">
+                        <div>
+                          <p className="text-sm font-medium text-foreground">{review.clientName}</p>
+                          <StarRating rating={review.rating} />
+                        </div>
                       </div>
-                    </div>
-                    {review.comment && (
-                      <p className="text-sm leading-relaxed text-gray-500 dark:text-gray-400">{review.comment}</p>
-                    )}
-                  </div>
+                      {review.comment && (
+                        <p className="text-sm leading-relaxed text-muted-foreground">{review.comment}</p>
+                      )}
+                    </CardContent>
+                  </Card>
                 ))}
               </div>
             </section>
