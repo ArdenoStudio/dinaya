@@ -3,13 +3,14 @@
 import { parseISO } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import { Icon } from "@/components/ui/Icon";
-import { Skeleton } from "@/components/ui/skeleton";
 import type { BookingCopy } from "@/lib/i18n";
+import { SlotListPanelSkeleton } from "./SlotListPanelSkeleton";
 import {
   slotConflictsWithBusyTime,
   type CalendarBusyTime,
 } from "@/lib/google-calendar-overlay";
 import type { SlotEmptyState, SlotOption } from "./TimeSlotGrid";
+import { SlotsEmptyView, type NextAvailableSlot } from "./SlotsEmptyView";
 
 const DEFAULT_TZ = "Asia/Colombo";
 
@@ -35,9 +36,12 @@ interface SlotListPanelProps {
   copy: BookingCopy;
   onSelect: (slot: SlotOption) => void;
   loading?: boolean;
+  refreshing?: boolean;
   emptyState?: SlotEmptyState;
   timezone?: string;
   busyTimes?: CalendarBusyTime[];
+  nextAvailable?: NextAvailableSlot | null;
+  onNextAvailable?: (slot: NextAvailableSlot) => void;
 }
 
 export function SlotListPanel({
@@ -46,35 +50,26 @@ export function SlotListPanel({
   copy,
   onSelect,
   loading = false,
+  refreshing = false,
   emptyState = "none",
   timezone = DEFAULT_TZ,
   busyTimes = [],
+  nextAvailable,
+  onNextAvailable,
 }: SlotListPanelProps) {
   if (loading) {
-    return (
-      <div className="flex flex-col gap-2">
-        {Array.from({ length: 8 }).map((_, i) => (
-          <Skeleton key={i} className="h-12 rounded-xl" />
-        ))}
-      </div>
-    );
+    return <SlotListPanelSkeleton label={copy.loadingAvailableTimes} />;
   }
 
   if (slots.length === 0) {
-    const emptyText =
-      emptyState === "closed"
-        ? copy.dayClosed
-        : emptyState === "capacity"
-          ? copy.capacityReached
-          : emptyState === "full"
-            ? copy.dayFull
-            : copy.noSlots;
-
     return (
-      <div className="flex min-h-[12rem] flex-col items-center justify-center gap-2 px-2 py-8 text-center">
-        <Icon name="calendar-x" className="text-xl text-muted-foreground/50" />
-        <p className="text-xs leading-relaxed text-muted-foreground">{emptyText}</p>
-      </div>
+      <SlotsEmptyView
+        copy={copy}
+        emptyState={emptyState}
+        nextAvailable={nextAvailable}
+        onNextAvailable={onNextAvailable}
+        variant="list"
+      />
     );
   }
 
@@ -84,7 +79,10 @@ export function SlotListPanel({
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div
+      className={`flex flex-col gap-4 transition-opacity ${refreshing ? "pointer-events-none opacity-50" : ""}`}
+      aria-busy={refreshing || undefined}
+    >
       {PERIOD_ORDER.map((period) => {
         const periodSlots = byPeriod[period];
         if (periodSlots.length === 0) return null;

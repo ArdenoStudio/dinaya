@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { BookingCopy } from "@/lib/i18n";
 
-function DinayaMark({ size = 13 }: { size?: number }) {
+function DinayaMark({ size = 12 }: { size?: number }) {
   return (
     <svg
       width={size}
@@ -10,7 +10,7 @@ function DinayaMark({ size = 13 }: { size?: number }) {
       fill="currentColor"
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
-      className="text-gray-900 dark:text-gray-100"
+      className="text-foreground"
     >
       <path d="M 819.949219 499.695312 L 563.980469 755.773438 C 513.210938 806.554688 513.210938 889.15625 563.980469 939.941406 C 614.75 990.777344 697.378906 990.726562 748.09375 939.941406 L 966.117188 721.851562 C 982.484375 705.480469 982.484375 678.953125 966.117188 662.582031 C 949.75 646.207031 923.230469 646.207031 906.863281 662.582031 L 688.84375 880.671875 C 670.753906 898.707031 641.375 898.761719 623.234375 880.671875 C 605.144531 862.578125 605.144531 833.132812 623.234375 815.042969 L 879.203125 558.96875 C 931.742188 506.464844 1017.1875 506.464844 1069.671875 558.96875 C 1095.097656 584.425781 1109.117188 618.265625 1109.117188 654.257812 C 1109.117188 690.226562 1095.097656 724.0625 1069.671875 749.523438 L 782.496094 1036.789062 C 740.375 1078.921875 684.367188 1102.117188 624.816406 1102.117188 C 565.261719 1102.117188 509.285156 1078.921875 467.164062 1036.789062 C 380.222656 949.820312 380.222656 808.328125 467.164062 721.359375 L 797.144531 391.253906 C 813.511719 374.878906 813.511719 348.355469 797.144531 331.980469 C 780.773438 315.609375 754.257812 315.609375 737.890625 331.980469 L 407.910156 662.089844 C 288.285156 781.722656 288.285156 976.425781 407.910156 1096.058594 C 465.828125 1154.019531 542.867188 1185.945312 624.816406 1185.945312 C 706.765625 1185.945312 783.804688 1154.019531 841.746094 1096.058594 L 1128.925781 808.792969 C 1214.121094 723.570312 1214.121094 584.917969 1128.925781 499.695312 C 1043.78125 414.558594 905.144531 414.445312 819.949219 499.695312 Z" />
     </svg>
@@ -25,19 +25,17 @@ interface Props {
 export default function BookingBranding({ copy, hideBranding = false }: Props) {
   if (hideBranding) return null;
   return (
-    <div className="flex items-center justify-center border-t border-gray-100 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-4 py-4 md:px-8 md:py-5">
-      <Link
-        href="https://dinaya.lk"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="group inline-flex items-center gap-2 rounded-lg px-2 py-1 transition-colors hover:bg-gray-50 dark:bg-neutral-900/60"
-      >
-        <span className="text-[11px] text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 md:text-xs">{copy.poweredBy}</span>
-        <span className="inline-flex items-center gap-1.5 text-gray-900 dark:text-gray-100">
-          <DinayaMark size={14} />
-          <span className="font-cal text-[11px] leading-none md:text-sm">Dinaya.lk</span>
-        </span>
-      </Link>
-    </div>
+    <Link
+      href="https://dinaya.lk"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/60 px-3.5 py-1.5 text-xs text-muted-foreground shadow-sm backdrop-blur-sm transition-colors hover:border-border hover:bg-card hover:text-foreground"
+    >
+      <span>{copy.poweredBy}</span>
+      <span className="inline-flex items-center gap-1.5 font-medium text-foreground">
+        <DinayaMark />
+        <span className="font-cal leading-none">Dinaya.lk</span>
+      </span>
+    </Link>
   );
 }

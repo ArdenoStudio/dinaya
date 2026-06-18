@@ -22,7 +22,7 @@ export default function DateQuickStrip({ selectedDate, minDate, maxDate, copy, o
   const maxStr = maxDate ? format(maxDate, "yyyy-MM-dd") : null;
 
   return (
-    <div className="-mx-4 flex gap-2 overflow-x-auto scroll-px-4 px-4 pb-1 scrollbar-hide snap-x snap-mandatory md:hidden">
+    <div className="-mx-4 flex gap-2 overflow-x-auto scroll-px-4 px-4 pb-1 scrollbar-hide snap-x snap-mandatory">
       {dates.map((d) => {
         const dateStr = format(d, "yyyy-MM-dd");
         const isSelected = selectedDate === dateStr;

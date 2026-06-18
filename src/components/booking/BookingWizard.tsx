@@ -20,12 +20,17 @@ import { trackBookingStart } from "@/lib/analytics/gtag";
 import { ServiceMetaPanel } from "./ServiceMetaPanel";
 import { BookingWizardSkeleton } from "./BookingWizardSkeleton";
 import BookingBranding from "./BookingBranding";
+import { BookingBackPill } from "./BookingBackPill";
 import { BookingTeamSection } from "./BookingTeamSection";
 import { BookingAttributionCapture } from "./BookingAttributionCapture";
 import { BookingDealsSection } from "./BookingDealsSection";
 import type { DealListItem } from "@/lib/deals/queries";
 import { useBookingContactStorage } from "./useBookingContactStorage";
-import { applyEmbedThemeFromQuery, postEmbedEvent } from "./embed-events";
+import {
+  applyEmbedThemeFromQuery,
+  createBookingCompletedEmbedEvent,
+  postEmbedEvent,
+} from "./embed-events";
 import {
   useGoogleCalendarOverlay,
   type CalendarOverlayConfig,
@@ -40,7 +45,6 @@ interface Props {
   staffServiceMap: { staffId: string; serviceId: string }[];
   staffLocationMap: { staffId: string; locationId: string }[];
   locations: Pick<Location, "id" | "name" | "address">[];
-  bookingUrlLabel: string;
   businessIcon?: string | null;
   showBranding?: boolean;
   activeDeals?: DealListItem[];
@@ -54,6 +58,7 @@ interface Props {
   reviewCount?: number;
   businessDescription?: string | null;
   teamMembers?: Pick<Staff, "id" | "name" | "bio" | "avatarUrl">[];
+  hubHref?: string | null;
 }
 
 export type BookingBusiness = {
@@ -118,7 +123,6 @@ function BookingWizardInner({
   staffServiceMap,
   staffLocationMap,
   locations,
-  bookingUrlLabel,
   showBranding = true,
   activeDeals = [],
   initialDealId = null,
@@ -127,7 +131,10 @@ function BookingWizardInner({
   lockServiceSelection = false,
   embedMode = false,
   calendarOverlayConfig = null,
+  avgRating,
+  reviewCount,
   teamMembers = [],
+  hubHref = null,
 }: Props) {
   const copy = getBookingCopy(business.language);
   const router = useRouter();
@@ -184,6 +191,7 @@ function BookingWizardInner({
     businessId: business.id,
     serviceId: state.service?.id ?? null,
     staffId: state.staff?.id ?? null,
+    locationId: state.location?.id ?? null,
     enabled: true,
   });
 
@@ -233,12 +241,7 @@ function BookingWizardInner({
         return;
       }
       if (embedMode) {
-        postEmbedEvent({
-          type: "dinaya:booking_completed",
-          slug: business.slug,
-          bookingId: data.bookingId,
-          status: data.status,
-        });
+        postEmbedEvent(createBookingCompletedEmbedEvent(business.slug, data.status));
       }
       router.push(`/book/${business.slug}/confirmed?bookingId=${data.bookingId}`);
     },
@@ -396,7 +399,6 @@ function BookingWizardInner({
 
   const metaPanelProps = {
     business,
-    bookingUrlLabel,
     service: state.service,
     staff: state.staff,
     anyStaff,
@@ -414,6 +416,8 @@ function BookingWizardInner({
     selectedDeal,
     copy,
     lockServiceSelection,
+    avgRating,
+    reviewCount,
     onSelectStaff: (s: Staff) => {
       setAnyStaff(false);
       clearSlot();
@@ -428,11 +432,25 @@ function BookingWizardInner({
       clearSlot();
       update({ location, staff: null });
     },
-    onChangeService: !lockServiceSelection ? clearService : undefined,
+    onChangeService: !lockServiceSelection && !hubHref ? clearService : undefined,
   };
+
+  const showBackPill =
+    !embedMode &&
+    Boolean(state.service) &&
+    (Boolean(hubHref) || (!lockServiceSelection && services.length > 1));
 
   return (
     <BookingTheme accentColor={business.accentColor} embed={embedMode}>
+      {showBackPill && (
+        <div className="mb-3 flex justify-start px-4 md:mb-4 md:px-0">
+          <BookingBackPill
+            label={hubHref ? copy.allServices : copy.back}
+            href={hubHref ?? undefined}
+            onClick={!hubHref && !lockServiceSelection ? clearService : undefined}
+          />
+        </div>
+      )}
       <div className="min-w-0 overflow-hidden bg-card md:rounded-xl md:border md:border-border md:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]">
         <BookingAttributionCapture businessId={business.id} />
         <BookingDealsSection
@@ -472,14 +490,29 @@ function BookingWizardInner({
               />
             </div>
           ) : (
-            <div className="grid gap-6 md:grid-cols-[minmax(0,17rem)_1fr] md:gap-0 md:divide-x md:divide-border lg:grid-cols-[minmax(0,19rem)_1fr]">
-              <div className="border-b border-border pb-6 md:border-0 md:px-6 md:pb-0 md:pt-1 lg:px-8">
+            <div className="grid gap-6 md:grid-cols-[minmax(0,17rem)_1fr] md:items-start md:gap-0 md:divide-x md:divide-border lg:grid-cols-[minmax(0,19rem)_1fr]">
+              <div className="border-b border-border pb-6 md:sticky md:top-6 md:self-start md:border-0 md:px-6 md:pb-6 md:pt-6 lg:px-8">
                 <ServiceMetaPanel {...metaPanelProps} />
               </div>
 
-              <div className="min-w-0 md:py-1">
+              <div className="min-w-0 md:py-6">
                 {canPickSlots ? (
-                  <>
+                  showContactForm ? (
+                    <div className="px-4 md:px-6 lg:px-8">
+                      <StepConfirm
+                        variant="inline"
+                        formId="booking-contact-form"
+                        state={state}
+                        business={business}
+                        copy={copy}
+                        selectedDeal={selectedDeal}
+                        sessionToken={slotHold.sessionToken}
+                        onUpdate={update}
+                        onBack={clearSlot}
+                        onConfirmed={handleConfirmed}
+                      />
+                    </div>
+                  ) : (
                     <StepDateTime
                       businessId={business.id}
                       copy={copy}
@@ -501,22 +534,7 @@ function BookingWizardInner({
                       onCalendarMonthChange={setCalendarViewMonth}
                       calendarOverlay={calendarOverlay}
                     />
-                    {showContactForm && (
-                      <div className="mt-6 border-t border-border px-4 pt-6 md:px-6 lg:px-8">
-                        <StepConfirm
-                          variant="inline"
-                          state={state}
-                          business={business}
-                          copy={copy}
-                          selectedDeal={selectedDeal}
-                          sessionToken={slotHold.sessionToken}
-                          onUpdate={update}
-                          onBack={clearSlot}
-                          onConfirmed={handleConfirmed}
-                        />
-                      </div>
-                    )}
-                  </>
+                  )
                 ) : (
                   <p className="py-12 text-center text-sm text-amber-600">{copy.noStaff}</p>
                 )}
@@ -533,9 +551,13 @@ function BookingWizardInner({
             className="flex justify-center border-t border-border px-4 py-3"
           />
         )}
-
-        {showBranding && <BookingBranding copy={copy} hideBranding={business.hideBranding} />}
       </div>
+
+      {showBranding && (
+        <div className="mt-3 flex justify-center px-4 md:mt-4 md:px-0">
+          <BookingBranding copy={copy} hideBranding={business.hideBranding} />
+        </div>
+      )}
     </BookingTheme>
   );
 }

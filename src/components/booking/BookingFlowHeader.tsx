@@ -3,9 +3,11 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Icon } from "@/components/ui/Icon";
+import type { BookingCopy } from "@/lib/i18n";
 import { formatLkr } from "@/lib/utils";
 import type { BookingService } from "./BookingWizard";
 import { BookingStepIndicator } from "./BookingStepIndicator";
+import { BusinessRating, getBusinessRating } from "./BusinessRating";
 
 type Props = {
   businessName: string;
@@ -17,6 +19,7 @@ type Props = {
   bookAppointmentLabel: string;
   avgRating?: number | null;
   reviewCount?: number;
+  copy?: BookingCopy;
   description?: string | null;
   onStepClick?: (index: number) => void;
 };
@@ -31,10 +34,11 @@ export function BookingFlowHeader({
   bookAppointmentLabel,
   avgRating,
   reviewCount,
+  copy,
   description,
   onStepClick,
 }: Props) {
-  const hasRating = avgRating != null && reviewCount != null && reviewCount > 0;
+  const rating = getBusinessRating(avgRating, reviewCount);
 
   return (
     <div className="border-b border-border px-4 py-4 md:hidden">
@@ -74,13 +78,16 @@ export function BookingFlowHeader({
             <Icon name="lock-fill" className="text-[10px]" />
             {bookingUrlLabel}
           </p>
+          {rating && copy ? (
+            <BusinessRating
+              avgRating={rating.avgRating}
+              reviewCount={rating.reviewCount}
+              copy={copy}
+              size="sm"
+              className="mt-2"
+            />
+          ) : null}
         </div>
-        {hasRating && (
-          <Badge variant="secondary" className="shrink-0 gap-1">
-            <Icon name="star-fill" className="text-amber-400" />
-            {avgRating.toFixed(1)}
-          </Badge>
-        )}
       </div>
       <BookingStepIndicator
         steps={steps}

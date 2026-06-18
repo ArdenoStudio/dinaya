@@ -24,6 +24,7 @@ interface Props {
   maxDate?: Date;
   dayStatus?: Record<string, MonthDayStatus>;
   personalBusyDates?: Record<string, number>;
+  nextAvailableDate?: string;
   onSelect: (dateStr: string) => void;
   onMonthChange?: (month: string) => void;
   size?: "compact" | "comfortable";
@@ -35,6 +36,7 @@ export default function MonthCalendar({
   maxDate,
   dayStatus,
   personalBusyDates,
+  nextAvailableDate,
   onSelect,
   onMonthChange,
   size = "compact",
@@ -132,6 +134,8 @@ export default function MonthCalendar({
           const isSelected = selectedDate === dateStr;
           const disabled = !inMonth || isDisabled(day);
           const showToday = isToday(day) && !isSelected && !disabled;
+          const isNextAvailable =
+            nextAvailableDate === dateStr && !isSelected && !disabled && inMonth;
           const status = dayStatus?.[dateStr];
           const personalBusyCount = personalBusyDates?.[dateStr] ?? 0;
           return (
@@ -153,6 +157,8 @@ export default function MonthCalendar({
                   ? "cursor-not-allowed text-gray-300"
                   : showToday
                   ? "font-semibold booking-text-accent ring-2 ring-[var(--booking-accent-soft)]"
+                  : isNextAvailable
+                  ? "font-semibold booking-text-accent ring-2 ring-[var(--booking-accent)] ring-offset-1 ring-offset-background"
                   : "text-gray-700 dark:text-gray-300 hover:booking-bg-accent-muted"
               }`}
             >

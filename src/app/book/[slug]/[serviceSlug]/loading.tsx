@@ -1,5 +1,5 @@
-import { BookingPageSkeleton } from "@/components/booking/BookingPageSkeleton";
+import { BookingBookerSkeleton } from "@/components/booking/BookingBookerSkeleton";
 
 export default function BookingServiceLoading() {
-  return <BookingPageSkeleton />;
+  return <BookingBookerSkeleton />;
 }

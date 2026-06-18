@@ -683,7 +683,7 @@ export default function StepConfirm({
 
   if (variant === "inline") {
     return (
-      <div id={formId} className="mt-6 border-t border-border pt-6">
+      <div id={formId} className="pt-2">
         {paymentExtras}
         {contactForm}
         {error && (

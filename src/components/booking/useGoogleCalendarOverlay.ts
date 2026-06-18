@@ -142,6 +142,7 @@ export function useGoogleCalendarOverlay(input: {
 
     const handleMessage = (event: MessageEvent<CalendarOverlayMessage>) => {
       if (event.origin !== connectorOrigin) return;
+      if (event.source !== popupRef.current) return;
       if (
         event.data?.type !== "dinaya:google-calendar-overlay" ||
         event.data.channel !== input.config?.channel
