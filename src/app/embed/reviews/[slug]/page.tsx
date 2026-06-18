@@ -10,7 +10,7 @@ interface Props {
 
 export default async function EmbedReviewsPage({ params }: Props) {
   const { slug } = await params;
-  const data = await getPublicReviews(slug, 8);
+  const data = await getPublicReviews(slug, { limit: 8 });
 
   if (!data) notFound();
 

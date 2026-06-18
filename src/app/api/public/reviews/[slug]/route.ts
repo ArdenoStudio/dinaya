@@ -5,9 +5,14 @@ interface Ctx {
   params: Promise<{ slug: string }>;
 }
 
-export async function GET(_req: Request, { params }: Ctx) {
+export async function GET(req: Request, { params }: Ctx) {
   const { slug } = await params;
-  const data = await getPublicReviews(slug);
+  const { searchParams } = new URL(req.url);
+  const page = Math.max(Number(searchParams.get("page")) || 1, 1);
+  const limit = Math.min(Math.max(Number(searchParams.get("limit")) || 20, 1), 50);
+  const offset = (page - 1) * limit;
+
+  const data = await getPublicReviews(slug, { limit, offset });
 
   if (!data) {
     return NextResponse.json({ error: "Not found." }, { status: 404 });
@@ -17,6 +22,8 @@ export async function GET(_req: Request, { params }: Ctx) {
     businessName: data.businessName,
     avgRating: data.avgRating,
     reviewCount: data.reviewCount,
+    page,
+    hasMore: data.hasMore,
     reviews: data.reviews.map((review) => ({
       ...review,
       createdAt: review.createdAt.toISOString(),
