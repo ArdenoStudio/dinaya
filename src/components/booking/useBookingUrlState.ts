@@ -50,9 +50,7 @@ export function useBookingUrlState() {
       apply("slot", updates.slot);
       apply("staffId", updates.staffId, "staff");
       apply("dealId", updates.dealId);
-      apply("name", updates.name);
-      apply("email", updates.email);
-      apply("phone", updates.phone);
+      // Contact fields are intentionally not synced to the URL (PII / referrer leakage).
 
       if (updates.embed !== undefined) {
         if (updates.embed) params.set("embed", "1");
@@ -95,4 +93,25 @@ export function useBookingUrlSync(input: {
       { replace: true },
     );
   }, [input.date, input.slotStartUtc, input.staffId, input.dealId, input.enabled, setParams]);
+}
+
+/** Remove contact PII from the URL after embed prefill; sessionStorage handles recovery. */
+export function useStripBookingContactFromUrl() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    let changed = false;
+    for (const key of ["name", "email", "phone"]) {
+      if (params.has(key)) {
+        params.delete(key);
+        changed = true;
+      }
+    }
+    if (!changed) return;
+    const qs = params.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  }, [pathname, router, searchParams]);
 }

@@ -5,7 +5,7 @@ import { z } from "@/lib/validation";
 
 const captureSchema = z.object({
   orderId: z.string().trim().min(4).max(100),
-  slug: z.string().trim().min(1).max(80).optional(),
+  slug: z.string().trim().min(1).max(80),
 });
 
 interface RouteContext {
@@ -29,6 +29,7 @@ export async function POST(req: NextRequest, context: RouteContext) {
   const result = await confirmPaypalPayment({
     bookingId,
     orderId: parsed.data.orderId,
+    businessSlug: parsed.data.slug,
   });
 
   if (!result.ok) {

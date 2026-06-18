@@ -10,6 +10,9 @@
   function buildEmbedUrl(slug, config) {
     var url = new URL(baseUrl + "/embed/book/" + encodeURIComponent(slug));
     url.searchParams.set("embed", "1");
+    if (window.location.origin) {
+      url.searchParams.set("parentOrigin", window.location.origin);
+    }
     if (config.service) url.searchParams.set("service", config.service);
     if (config.name) url.searchParams.set("name", config.name);
     if (config.email) url.searchParams.set("email", config.email);
@@ -21,7 +24,16 @@
   }
 
   function attachEmbedListener(iframe) {
+    var allowedOrigin = "";
+    try {
+      allowedOrigin = new URL(iframe.src).origin;
+    } catch (e) {
+      return;
+    }
+
     window.addEventListener("message", function (event) {
+      if (event.origin !== allowedOrigin) return;
+      if (event.source !== iframe.contentWindow) return;
       if (!event.data || typeof event.data.type !== "string") return;
       if (event.data.type === "dinaya:resize") {
         if (typeof event.data.height !== "number") return;

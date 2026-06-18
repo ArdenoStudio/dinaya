@@ -40,7 +40,14 @@ export async function POST(req: NextRequest) {
   });
 
   if (!result.ok) {
-    return NextResponse.json({ error: "Slot no longer available", code: result.reason }, { status: 409 });
+    const status = result.reason === "invalid_request" ? 400 : 409;
+    return NextResponse.json(
+      {
+        error: result.reason === "invalid_request" ? "Invalid request" : "Slot no longer available",
+        code: result.reason,
+      },
+      { status },
+    );
   }
 
   return NextResponse.json({
@@ -72,6 +79,13 @@ export async function PATCH(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
+  const limited = await withRateLimit(req, {
+    scope: "slot-reservation",
+    limit: 120,
+    windowSeconds: 60,
+  });
+  if (!limited.ok) return limited.response;
+
   const sessionToken = req.nextUrl.searchParams.get("sessionToken");
   if (!sessionToken) {
     return NextResponse.json({ error: "Missing sessionToken" }, { status: 400 });

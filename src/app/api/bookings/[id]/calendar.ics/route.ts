@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { bookings, businesses, locations, services, staff } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { buildBookingIcs } from "@/lib/calendar-ics";
+import { parseRequiredBusinessSlug } from "@/lib/booking/public-booking-access";
 import { withRateLimit } from "@/lib/rate-limit";
 
 interface RouteContext {
@@ -18,7 +19,10 @@ export async function GET(req: NextRequest, context: RouteContext) {
   if (!limited.ok) return limited.response;
 
   const { id: bookingId } = await context.params;
-  const slug = req.nextUrl.searchParams.get("slug");
+  const slug = parseRequiredBusinessSlug(req.nextUrl.searchParams.get("slug"));
+  if (!slug) {
+    return NextResponse.json({ error: "Booking not found" }, { status: 404 });
+  }
 
   const [booking] = await db
     .select({
@@ -41,7 +45,7 @@ export async function GET(req: NextRequest, context: RouteContext) {
     .where(eq(bookings.id, bookingId))
     .limit(1);
 
-  if (!booking || (slug && booking.businessSlug !== slug)) {
+  if (!booking || booking.businessSlug !== slug) {
     return NextResponse.json({ error: "Booking not found" }, { status: 404 });
   }
 

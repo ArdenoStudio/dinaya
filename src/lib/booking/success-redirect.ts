@@ -1,7 +1,8 @@
 import { z } from "@/lib/validation";
 
 const ABSOLUTE_URL_RE = /^https:\/\/[^\s/$.?#].[^\s]*$/i;
-const RELATIVE_PATH_RE = /^\/[a-zA-Z0-9/_\-?=&%.]*$/;
+/** Same-site paths only — reject protocol-relative URLs like //evil.com */
+const RELATIVE_PATH_RE = /^\/(?!\/)[a-zA-Z0-9/_\-?=&%.]*$/;
 
 export const successRedirectUrlSchema = z
   .string()
