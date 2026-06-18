@@ -17,6 +17,7 @@ type SettingsBusiness = {
   depositPolicy: string | null;
   facebookUrl: string | null;
   galleryImages: string[] | null;
+  logoUrl: string | null;
   instagramUrl: string | null;
   language: string;
   lankaqrImageUrl: string | null;
@@ -76,6 +77,7 @@ export default function SettingsForm({ business }: Props) {
   const [galleryImages, setGalleryImages] = useState<string[]>(
     business.galleryImages ?? []
   );
+  const [logoUrl, setLogoUrl] = useState(business.logoUrl ?? "");
   const [newImageUrl, setNewImageUrl] = useState("");
 
   const [saving, setSaving] = useState(false);
@@ -90,6 +92,7 @@ export default function SettingsForm({ business }: Props) {
     const payload = {
       ...form,
       galleryImages,
+      logoUrl: logoUrl.trim() || null,
       payhereMerchantSecret: form.payhereMerchantSecret.trim() || undefined,
       paypalClientId: form.paypalClientId.trim() || null,
       paypalClientSecret: form.paypalClientSecret.trim() || undefined,
@@ -320,6 +323,48 @@ export default function SettingsForm({ business }: Props) {
               onChange={(e) => setForm((f) => ({ ...f, websiteUrl: e.target.value }))}
               className={inputCls}
               placeholder="https://yourbusiness.lk"
+            />
+          </div>
+        </div>
+
+        {/* Business logo */}
+        <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-6 space-y-4">
+          <div className="flex items-center gap-2">
+            <Icon name="image" className="text-sm text-muted-foreground" />
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Business logo</p>
+          </div>
+          <p className="text-xs text-muted-foreground -mt-2">
+            Shown on your booking page next to your business name. Paste a direct image link (square or wide logos work best).
+          </p>
+
+          {logoUrl.trim() && (
+            <div className="flex items-center gap-4">
+              <div className="relative size-16 overflow-hidden rounded-full border bg-white">
+                <Image
+                  src={logoUrl.trim()}
+                  alt="Business logo preview"
+                  fill
+                  sizes="64px"
+                  className="object-contain p-1.5"
+                  unoptimized={!isOptimizableRemoteImage(logoUrl.trim())}
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => setLogoUrl("")}
+                className="text-xs font-medium text-muted-foreground hover:text-foreground"
+              >
+                Remove logo
+              </button>
+            </div>
+          )}
+
+          <div className="flex gap-2">
+            <input
+              value={logoUrl}
+              onChange={(e) => setLogoUrl(e.target.value)}
+              className="flex-1 border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 bg-white dark:border-neutral-700 dark:bg-neutral-900"
+              placeholder="https://example.com/logo.png"
             />
           </div>
         </div>

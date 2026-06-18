@@ -89,7 +89,9 @@ export function ServiceMetaPanel({
     <div className="flex h-full flex-col">
       <div className="flex items-center gap-2">
         <Avatar className="size-7">
-          {business.logoUrl ? <AvatarImage src={business.logoUrl} alt={business.name} /> : null}
+          {business.logoUrl ? (
+            <AvatarImage src={business.logoUrl} alt={business.name} className="object-contain bg-white p-0.5" />
+          ) : null}
           <AvatarFallback className="bg-[var(--booking-accent-muted)] text-xs font-semibold text-[var(--booking-accent)]">
             {business.name.charAt(0).toUpperCase()}
           </AvatarFallback>

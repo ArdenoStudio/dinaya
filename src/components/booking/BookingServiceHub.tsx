@@ -40,7 +40,13 @@ export default function BookingServiceHub({
       <Card className="overflow-hidden rounded-none border-x-0 shadow-none md:rounded-xl md:border-x md:shadow-sm">
         <CardHeader className="flex flex-row items-start gap-4 space-y-0 border-b border-border pb-4">
           <Avatar className="size-14" data-size="lg">
-            {businessLogoUrl ? <AvatarImage src={businessLogoUrl} alt={businessName} /> : null}
+            {businessLogoUrl ? (
+              <AvatarImage
+                src={businessLogoUrl}
+                alt={businessName}
+                className="object-contain bg-white p-1"
+              />
+            ) : null}
             <AvatarFallback className="bg-[var(--booking-accent-muted)] text-lg font-bold text-[var(--booking-accent)]">
               {businessName.charAt(0).toUpperCase()}
             </AvatarFallback>
