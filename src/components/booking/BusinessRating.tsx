@@ -13,6 +13,7 @@ interface BusinessRatingProps {
   reviewCount: number;
   copy: BookingCopy;
   size?: "sm" | "md";
+  variant?: "text" | "pill";
   /** When omitted, counts are hidden for ratings at or above {@link HIGH_RATING_THRESHOLD}. */
   showCount?: boolean;
   scrollToReviews?: boolean;
@@ -50,6 +51,7 @@ export function BusinessRating({
   reviewCount,
   copy,
   size = "sm",
+  variant = "text",
   showCount,
   scrollToReviews = false,
   className,
@@ -65,7 +67,9 @@ export function BusinessRating({
       <span className="text-amber-500" aria-hidden>
         ★
       </span>
-      <span className="tabular-nums">{avgRating.toFixed(1)}</span>
+      <span className={cn("tabular-nums", variant === "pill" && "text-foreground")}>
+        {avgRating.toFixed(1)}
+      </span>
       {showReviewCount ? (
         <>
           <span className="text-muted-foreground/50" aria-hidden>
@@ -78,9 +82,15 @@ export function BusinessRating({
   );
 
   const sharedClass = cn(
-    "inline-flex items-center gap-1 text-muted-foreground",
+    "inline-flex items-center gap-1",
+    variant === "pill"
+      ? "rounded-md bg-muted/70 px-1.5 py-0.5 font-medium text-muted-foreground ring-1 ring-border/40"
+      : "text-muted-foreground",
     textClass,
-    scrollToReviews && "cursor-pointer rounded-sm transition-colors hover:text-foreground",
+    scrollToReviews &&
+      (variant === "pill"
+        ? "cursor-pointer transition-colors hover:bg-muted hover:text-foreground"
+        : "cursor-pointer rounded-sm transition-colors hover:text-foreground"),
     className,
   );
 

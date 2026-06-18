@@ -1,13 +1,12 @@
 "use client";
 
-import { BookingBusinessAvatar } from "./BookingBusinessAvatar";
+import { BookingBusinessIdentity } from "./BookingBusinessIdentity";
 import { Badge } from "@/components/ui/badge";
 import { Icon } from "@/components/ui/Icon";
 import type { BookingCopy } from "@/lib/i18n";
 import { formatLkr } from "@/lib/utils";
 import type { BookingService } from "./BookingWizard";
 import { BookingStepIndicator } from "./BookingStepIndicator";
-import { BusinessRating } from "./BusinessRating";
 import { getBusinessRating } from "@/lib/booking/rating";
 
 type Props = {
@@ -44,9 +43,18 @@ export function BookingFlowHeader({
   return (
     <div className="border-b border-border px-4 py-4 md:hidden">
       <div className="flex items-start gap-3">
-        <BookingBusinessAvatar name={businessName} logoUrl={logoUrl} className="size-10" />
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold text-foreground">{businessName}</p>
+        <div className="min-w-0 flex-1 space-y-2">
+          {copy ? (
+            <BookingBusinessIdentity
+              name={businessName}
+              logoUrl={logoUrl}
+              copy={copy}
+              rating={rating}
+              size="sm"
+            />
+          ) : (
+            <p className="truncate text-sm font-semibold text-foreground">{businessName}</p>
+          )}
           {service ? (
             <>
               <p className="mt-0.5 truncate text-base font-semibold text-foreground">{service.name}</p>
@@ -70,20 +78,10 @@ export function BookingFlowHeader({
               ) : null}
             </>
           )}
-          <p className="mt-1.5 flex items-center gap-1 text-[11px] text-muted-foreground">
+          <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
             <Icon name="lock-fill" className="text-[10px]" />
             {bookingUrlLabel}
           </p>
-          {rating && copy ? (
-            <BusinessRating
-              avgRating={rating.avgRating}
-              reviewCount={rating.reviewCount}
-              copy={copy}
-              size="sm"
-              scrollToReviews
-              className="mt-2"
-            />
-          ) : null}
         </div>
       </div>
       <BookingStepIndicator

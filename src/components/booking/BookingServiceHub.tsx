@@ -5,11 +5,10 @@ import Image from "next/image";
 import { formatLkr, isOptimizableRemoteImage } from "@/lib/utils";
 import { buildServiceBookingPath } from "@/lib/booking-url";
 import { Icon } from "@/components/ui/Icon";
-import { BookingBusinessAvatar } from "./BookingBusinessAvatar";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { BusinessRating } from "./BusinessRating";
+import { BookingBusinessIdentity } from "./BookingBusinessIdentity";
 import { getBusinessRating } from "@/lib/booking/rating";
 import type { BookingCopy } from "@/lib/i18n";
 import type { BookingService } from "./BookingWizard";
@@ -40,33 +39,25 @@ export default function BookingServiceHub({
   const cardClass =
     "overflow-hidden rounded-none border-x-0 shadow-none md:rounded-xl md:border md:border-border md:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]";
 
+  const serviceMeta =
+    services.length === 1 ? copy.selectedService : `${services.length} services`;
+
   return (
     <div className="flex w-full flex-col gap-4 md:gap-5">
       <Card className={cardClass}>
-        <CardHeader className="flex flex-row items-start gap-4 space-y-0 pb-4">
-          <BookingBusinessAvatar
+        <CardHeader className="flex flex-row items-center gap-4 space-y-0 px-4 py-5 md:px-6">
+          <BookingBusinessIdentity
             name={businessName}
             logoUrl={businessLogoUrl}
-            className="size-14"
-            imageClassName="p-1"
-            fallbackClassName="text-lg font-bold"
+            copy={copy}
+            subtitle={copy.chooseServiceAndTime}
+            meta={serviceMeta}
+            rating={rating}
+            size="lg"
+            className="min-w-0 flex-1"
           />
-          <div className="min-w-0 flex-1 space-y-1">
-            <CardTitle className="text-xl">{businessName}</CardTitle>
-            <CardDescription>{copy.chooseServiceAndTime}</CardDescription>
-            {rating && (
-              <BusinessRating
-                avgRating={rating.avgRating}
-                reviewCount={rating.reviewCount}
-                copy={copy}
-                size="sm"
-                scrollToReviews
-                className="pt-1"
-              />
-            )}
-          </div>
           <Badge variant="secondary" className="hidden shrink-0 sm:inline-flex">
-            {services.length} services
+            {serviceMeta}
           </Badge>
         </CardHeader>
       </Card>
