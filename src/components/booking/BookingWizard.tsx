@@ -4,7 +4,6 @@ import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "rea
 import { useRouter } from "next/navigation";
 import { format, parseISO } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
-import { Icon } from "@/components/ui/Icon";
 import type { Location, Staff } from "@/db/schema";
 import type { IntakeQuestion } from "@/lib/intake";
 import type { BookingRouter } from "@/lib/booking-router";
@@ -22,8 +21,10 @@ import { getEligibleStaff, pickDefaultStaff } from "@/lib/booking-staff";
 import { formatLkr } from "@/lib/utils";
 import { trackBookingStart } from "@/lib/analytics/gtag";
 import { BookingFlowHeader } from "./BookingFlowHeader";
-import { BusinessAvatar } from "./BusinessAvatar";
+import { BookingStepIndicator } from "./BookingStepIndicator";
+import { ServiceMetaPanel } from "./ServiceMetaPanel";
 import { BookingWizardSkeleton } from "./BookingWizardSkeleton";
+import { Button } from "@/components/ui/button";
 import BookingBranding from "./BookingBranding";
 import { BookingAttributionCapture } from "./BookingAttributionCapture";
 import { BookingDealsSection } from "./BookingDealsSection";
@@ -129,7 +130,6 @@ function BookingWizardInner({
   staffLocationMap,
   locations,
   bookingUrlLabel,
-  businessIcon,
   showBranding = true,
   activeDeals = [],
   initialDealId = null,
@@ -454,140 +454,194 @@ function BookingWizardInner({
           }}
         />
 
-        <div className="hidden booking-bg-accent md:block">
-          <div className="px-8 pb-6 pt-7">
-            <div className="flex items-center gap-4">
-              <BusinessAvatar
-                name={business.name}
-                logoUrl={business.logoUrl}
-                icon={businessIcon}
-                size="lg"
-                onDark
-              />
-              <div className="min-w-0 flex-1">
-                <p className="text-[11px] font-semibold uppercase tracking-wider booking-text-accent-on-dark/90">
-                  {copy.bookAppointment}
-                </p>
-                <h2 className="mt-0.5 text-xl font-semibold tracking-tight text-white">
-                  {state.service?.name ?? business.name}
-                </h2>
-                {state.service && (
-                  <p className="mt-0.5 text-sm text-white/70">{business.name}</p>
-                )}
-              </div>
-              <span className="flex shrink-0 items-center gap-1.5 font-mono text-xs booking-text-accent-on-dark/80">
-                <Icon name="lock-fill" className="text-[10px] booking-text-accent-on-dark" />
-                {bookingUrlLabel}
-              </span>
-            </div>
-            <div className="mt-6 border-t border-white/10 pt-5">
-              <DesktopProgressBar
-                steps={progressSteps}
-                current={stepIndex}
-                variant="dark"
-                onStepClick={(i) => {
-                  const target = indexToStep(i);
-                  if (i < stepIndex) setStep(target);
-                }}
-              />
-            </div>
-          </div>
+        <div className="hidden border-b border-border px-8 py-4 md:block">
+          <BookingStepIndicator
+            steps={progressSteps}
+            current={stepIndex}
+            onStepClick={(i) => {
+              const target = indexToStep(i);
+              if (i < stepIndex) setStep(target);
+            }}
+          />
         </div>
 
         <BookingStepTransition step={step}>
         {step !== "confirm" && (
           <>
             <div className="px-4 py-4 md:px-8 md:py-7">
-              <div className="grid gap-0 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] md:gap-8 lg:gap-10">
-                <div className="border-b border-border pb-4 md:flex md:flex-col md:border-0 md:pb-0">
-                  {needsLocationPicker && (
-                    <StepLocation
-                      locations={locations}
-                      selected={state.location}
-                      copy={copy}
-                      onSelect={(location) => {
-                        update({
-                          location,
-                          service: lockServiceSelection ? state.service : null,
-                          staff: null,
-                          timeSlot: "",
-                          timeSlotEnd: "",
-                          timeLabel: "",
-                        });
-                        setSelectedSlot(null);
-                        void slotHold.releaseHold();
-                      }}
-                    />
-                  )}
+              <div className="grid gap-0 md:grid-cols-[minmax(0,17rem)_1fr] md:gap-10 lg:grid-cols-[minmax(0,20rem)_1fr] lg:gap-12">
+                <div className="border-b border-border pb-4 md:border-0 md:border-r md:pb-0 md:pr-8 lg:pr-10">
+                  {lockServiceSelection ? (
+                    <>
+                      <div className="hidden md:block">
+                        <ServiceMetaPanel
+                          business={business}
+                          bookingUrlLabel={bookingUrlLabel}
+                          service={state.service}
+                          staff={state.staff}
+                          anyStaff={anyStaff}
+                          allStaff={staff}
+                          staffServiceMap={staffServiceMap}
+                          staffLocationMap={staffLocationMap}
+                          locations={locations}
+                          needsLocationPicker={needsLocationPicker}
+                          selectedLocation={state.location}
+                          needsStaffPicker={needsStaffPicker}
+                          selectedDate={state.date}
+                          timeLabel={state.timeLabel}
+                          holdLabel={slotHold.holdLabel}
+                          slotUnavailable={slotHold.slotUnavailable}
+                          selectedDeal={selectedDeal}
+                          copy={copy}
+                          lockServiceSelection={lockServiceSelection}
+                          onSelectStaff={(s) => {
+                            setAnyStaff(false);
+                            update({ staff: s, timeSlot: "", timeSlotEnd: "", timeLabel: "" });
+                            setSelectedSlot(null);
+                            void slotHold.releaseHold();
+                          }}
+                          onSelectAnyStaff={() => {
+                            setAnyStaff(true);
+                            update({ staff: null, timeSlot: "", timeSlotEnd: "", timeLabel: "" });
+                            setSelectedSlot(null);
+                            void slotHold.releaseHold();
+                          }}
+                          onSelectLocation={(location) => {
+                            update({
+                              location,
+                              staff: null,
+                              timeSlot: "",
+                              timeSlotEnd: "",
+                              timeLabel: "",
+                            });
+                            setSelectedSlot(null);
+                            void slotHold.releaseHold();
+                          }}
+                        />
+                      </div>
+                      <div className="md:hidden">
+                        {needsLocationPicker && (
+                          <StepLocation
+                            locations={locations}
+                            selected={state.location}
+                            copy={copy}
+                            onSelect={(location) => {
+                              update({
+                                location,
+                                staff: null,
+                                timeSlot: "",
+                                timeSlotEnd: "",
+                                timeLabel: "",
+                              });
+                              setSelectedSlot(null);
+                              void slotHold.releaseHold();
+                            }}
+                          />
+                        )}
+                        {state.service && needsStaffPicker && (
+                          <StaffPicker
+                            allStaff={staff}
+                            staffServiceMap={staffServiceMap}
+                            staffLocationMap={staffLocationMap}
+                            locationId={state.location?.id}
+                            serviceId={state.service.id}
+                            selected={state.staff}
+                            anyStaffSelected={anyStaff}
+                            copy={copy}
+                            onSelect={(s) => {
+                              setAnyStaff(false);
+                              update({ staff: s, timeSlot: "", timeSlotEnd: "", timeLabel: "" });
+                              setSelectedSlot(null);
+                              void slotHold.releaseHold();
+                            }}
+                            onSelectAny={() => {
+                              setAnyStaff(true);
+                              update({ staff: null, timeSlot: "", timeSlotEnd: "", timeLabel: "" });
+                              setSelectedSlot(null);
+                              void slotHold.releaseHold();
+                            }}
+                            compact
+                          />
+                        )}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      {needsLocationPicker && (
+                        <StepLocation
+                          locations={locations}
+                          selected={state.location}
+                          copy={copy}
+                          onSelect={(location) => {
+                            update({
+                              location,
+                              service: null,
+                              staff: null,
+                              timeSlot: "",
+                              timeSlotEnd: "",
+                              timeLabel: "",
+                            });
+                            setSelectedSlot(null);
+                            void slotHold.releaseHold();
+                          }}
+                        />
+                      )}
 
-                  {!lockServiceSelection && (
-                    <StepService
-                      services={services}
-                      selected={state.service}
-                      copy={copy}
-                      bookingRouter={bookingRouter}
-                      onSelect={selectService}
-                    />
-                  )}
+                      <StepService
+                        services={services}
+                        selected={state.service}
+                        copy={copy}
+                        bookingRouter={bookingRouter}
+                        onSelect={selectService}
+                      />
 
-                  {lockServiceSelection && state.service && (
-                    <div className="mb-5 rounded-xl border border-gray-100 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-900/60 p-4">
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
-                        {copy.service}
-                      </p>
-                      <p className="mt-1 text-base font-semibold text-gray-900 dark:text-gray-100">{state.service.name}</p>
-                      <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">
-                        {state.service.durationMinutes} min
-                        {state.service.priceLkr > 0 ? ` · ${formatLkr(state.service.priceLkr)}` : ""}
-                      </p>
-                    </div>
-                  )}
+                      {state.service && needsStaffPicker && (
+                        <StaffPicker
+                          allStaff={staff}
+                          staffServiceMap={staffServiceMap}
+                          staffLocationMap={staffLocationMap}
+                          locationId={state.location?.id}
+                          serviceId={state.service.id}
+                          selected={state.staff}
+                          anyStaffSelected={anyStaff}
+                          copy={copy}
+                          onSelect={(s) => {
+                            setAnyStaff(false);
+                            update({ staff: s, timeSlot: "", timeSlotEnd: "", timeLabel: "" });
+                            setSelectedSlot(null);
+                            void slotHold.releaseHold();
+                          }}
+                          onSelectAny={() => {
+                            setAnyStaff(true);
+                            update({ staff: null, timeSlot: "", timeSlotEnd: "", timeLabel: "" });
+                            setSelectedSlot(null);
+                            void slotHold.releaseHold();
+                          }}
+                          compact
+                        />
+                      )}
 
-                  {state.service && needsStaffPicker && (
-                    <StaffPicker
-                      allStaff={staff}
-                      staffServiceMap={staffServiceMap}
-                      staffLocationMap={staffLocationMap}
-                      locationId={state.location?.id}
-                      serviceId={state.service.id}
-                      selected={state.staff}
-                      anyStaffSelected={anyStaff}
-                      copy={copy}
-                      onSelect={(s) => {
-                        setAnyStaff(false);
-                        update({ staff: s, timeSlot: "", timeSlotEnd: "", timeLabel: "" });
-                        setSelectedSlot(null);
-                        void slotHold.releaseHold();
-                      }}
-                      onSelectAny={() => {
-                        setAnyStaff(true);
-                        update({ staff: null, timeSlot: "", timeSlotEnd: "", timeLabel: "" });
-                        setSelectedSlot(null);
-                        void slotHold.releaseHold();
-                      }}
-                      compact
-                    />
-                  )}
+                      {state.service && !state.staff && !anyStaff && !needsStaffPicker && (
+                        <p className="mt-3 text-center text-sm text-amber-600">{copy.noStaff}</p>
+                      )}
 
-                  {state.service && !state.staff && !anyStaff && !needsStaffPicker && (
-                    <p className="mt-3 text-center text-sm text-amber-600">{copy.noStaff}</p>
+                      <div className="hidden md:block">
+                        <BookingDesktopSummary
+                          copy={copy}
+                          service={state.service}
+                          staff={state.staff}
+                          anyStaff={anyStaff}
+                          date={state.date}
+                          timeLabel={state.timeLabel}
+                          holdLabel={slotHold.holdLabel}
+                          selectedDeal={selectedDeal}
+                        />
+                      </div>
+                    </>
                   )}
-
-                  <div className="hidden md:block">
-                    <BookingDesktopSummary
-                      copy={copy}
-                      service={state.service}
-                      staff={state.staff}
-                      anyStaff={anyStaff}
-                      date={state.date}
-                      timeLabel={state.timeLabel}
-                      holdLabel={slotHold.holdLabel}
-                      selectedDeal={selectedDeal}
-                    />
-                  </div>
                 </div>
 
-                <div className="min-w-0 pt-4 md:flex md:flex-col md:rounded-2xl md:border md:border-border md:bg-muted/30 md:p-5 md:pt-5">
+                <div className="min-w-0 pt-4 md:pt-0">
                   <StepDateTime
                     businessId={business.id}
                     copy={copy}
@@ -617,23 +671,23 @@ function BookingWizardInner({
               </div>
             </div>
 
-            <div className="hidden border-t border-gray-100 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-900/60 px-8 py-5 md:flex md:items-center md:gap-6">
+            <div className="hidden border-t border-border bg-muted/20 px-8 py-5 md:flex md:items-center md:gap-6">
               <div className="min-w-0 flex-1">
                 {desktopSelectionLine ? (
-                  <p className="truncate text-sm font-medium text-gray-700 dark:text-gray-300">{desktopSelectionLine}</p>
+                  <p className="truncate text-sm font-medium text-foreground">{desktopSelectionLine}</p>
                 ) : (
-                  <p className="text-sm text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">{copy.selectServiceHint}</p>
+                  <p className="text-sm text-muted-foreground">{copy.selectServiceHint}</p>
                 )}
-                <p className="mt-0.5 text-xs text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">{copy.securedByPayHere}</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">{copy.securedByPayHere}</p>
               </div>
-              <button
+              <Button
                 type="button"
                 onClick={goConfirm}
                 disabled={!canProceedDesktop || slotHold.holding}
-                className="shrink-0 rounded-xl booking-gradient-accent px-8 py-3.5 text-sm font-semibold text-white booking-shadow-accent transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+                className="h-10 shrink-0 bg-[var(--booking-accent)] px-8 text-white hover:bg-[var(--booking-accent)]/90"
               >
                 {desktopPayCta}
-              </button>
+              </Button>
             </div>
           </>
         )}
@@ -663,91 +717,5 @@ export default function BookingWizard(props: Props) {
     <Suspense fallback={<BookingWizardSkeleton />}>
       <BookingWizardInner {...props} />
     </Suspense>
-  );
-}
-
-function DesktopProgressBar({
-  steps,
-  current,
-  variant = "light",
-  onStepClick,
-}: {
-  steps: string[];
-  current: number;
-  variant?: "light" | "dark";
-  onStepClick?: (index: number) => void;
-}) {
-  const dark = variant === "dark";
-
-  return (
-    <ol className="flex w-full items-center">
-      {steps.map((label, i) => {
-        const done = i < current;
-        const active = i === current;
-        const canNavigate = done && onStepClick;
-
-        const stepControl = (
-          <>
-            <span
-              className={`flex size-9 shrink-0 items-center justify-center rounded-full text-sm font-bold transition-colors ${
-                dark
-                  ? active
-                    ? "bg-white booking-text-accent shadow-lg shadow-black/10"
-                    : done
-                      ? "bg-white/25 text-white"
-                      : "bg-white/10 text-white/50 ring-1 ring-white/20"
-                  : active
-                    ? "booking-bg-accent text-white booking-shadow-accent"
-                    : done
-                      ? "booking-bg-accent text-white"
-                      : "bg-white dark:bg-neutral-900 text-gray-400 dark:text-gray-500 ring-1 ring-gray-200 dark:ring-neutral-700"
-              }`}
-            >
-              {done ? <Icon name="check-lg" className="text-xs" /> : i + 1}
-            </span>
-            <span
-              className={`whitespace-nowrap text-sm font-semibold ${
-                dark
-                  ? active
-                    ? "text-white"
-                    : done
-                      ? "text-white/90"
-                      : "text-white/45"
-                  : active
-                    ? "text-gray-900 dark:text-gray-100"
-                    : done
-                      ? "booking-text-accent"
-                      : "text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500"
-              }`}
-            >
-              {label}
-            </span>
-          </>
-        );
-
-        return (
-          <li key={label} className={`flex items-center ${i < steps.length - 1 ? "flex-1" : ""}`}>
-            {canNavigate ? (
-              <button
-                type="button"
-                onClick={() => onStepClick(i)}
-                className="flex items-center gap-3 rounded-lg transition-opacity hover:opacity-90"
-              >
-                {stepControl}
-              </button>
-            ) : (
-              <div className="flex items-center gap-3">{stepControl}</div>
-            )}
-            {i < steps.length - 1 && (
-              <div
-                className={`mx-4 h-0.5 min-w-[2rem] flex-1 rounded-full ${
-                  dark ? (done ? "bg-white/50" : "bg-white/20") : done ? "booking-bg-accent" : "bg-gray-200 dark:bg-neutral-700"
-                }`}
-              />
-            )}
-          </li>
-        );
-      })}
-    </ol>
   );
 }
