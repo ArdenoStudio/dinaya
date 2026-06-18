@@ -23,6 +23,7 @@ interface Props {
   minDate: Date;
   maxDate?: Date;
   dayStatus?: Record<string, MonthDayStatus>;
+  personalBusyDates?: Record<string, number>;
   onSelect: (dateStr: string) => void;
   onMonthChange?: (month: string) => void;
   size?: "compact" | "comfortable";
@@ -33,6 +34,7 @@ export default function MonthCalendar({
   minDate,
   maxDate,
   dayStatus,
+  personalBusyDates,
   onSelect,
   onMonthChange,
   size = "compact",
@@ -131,6 +133,7 @@ export default function MonthCalendar({
           const disabled = !inMonth || isDisabled(day);
           const showToday = isToday(day) && !isSelected && !disabled;
           const status = dayStatus?.[dateStr];
+          const personalBusyCount = personalBusyDates?.[dateStr] ?? 0;
           return (
             <button
               key={dateStr}
@@ -164,6 +167,13 @@ export default function MonthCalendar({
                 <span
                   aria-hidden
                   className="absolute bottom-1 left-1/2 size-1 -translate-x-1/2 rounded-full bg-gray-300"
+                />
+              )}
+              {inMonth && personalBusyCount > 0 && !isSelected && (
+                <span
+                  aria-hidden="true"
+                  title={`${personalBusyCount} busy calendar period${personalBusyCount === 1 ? "" : "s"}`}
+                  className="absolute right-1 top-1 size-1.5 rounded-full bg-gray-500 ring-2 ring-white dark:bg-gray-400 dark:ring-neutral-900"
                 />
               )}
             </button>

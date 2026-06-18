@@ -14,13 +14,8 @@ export function normalizeAccentColor(input: string | null | undefined): string {
 /** CSS custom properties for tenant-branded booking surfaces. */
 export function buildBookingThemeStyle(accentColor?: string | null): CSSProperties {
   const accent = normalizeAccentColor(accentColor);
-  return {
-    "--booking-accent": accent,
-    "--booking-accent-hover": `color-mix(in srgb, ${accent} 88%, black)`,
-    "--booking-accent-muted": `color-mix(in srgb, ${accent} 10%, white)`,
-    "--booking-accent-soft": `color-mix(in srgb, ${accent} 18%, white)`,
-    "--booking-accent-ring": `color-mix(in srgb, ${accent} 28%, transparent)`,
-    "--booking-accent-shadow": `color-mix(in srgb, ${accent} 35%, transparent)`,
-    "--booking-accent-on-dark": `color-mix(in srgb, ${accent} 55%, white)`,
-  } as CSSProperties;
+  // Only set the base accent — all derived variables (muted, soft, shadow, etc.)
+  // are computed by CSS rules in globals.css, which handle dark mode correctly.
+  // Inlining them here would override the .dark [data-booking-theme] rules.
+  return { "--booking-accent": accent } as CSSProperties;
 }

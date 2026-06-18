@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { headers } from "next/headers";
 import BookingWizard from "@/components/booking/BookingWizard";
 import BookingMobileTrustStrip from "@/components/booking/BookingMobileTrustStrip";
 import EmbedResizeReporter from "@/components/booking/EmbedResizeReporter";
@@ -10,6 +11,8 @@ import { normalizePublicHttpsUrl } from "@/lib/public-url";
 import { isOptimizableRemoteImage } from "@/lib/utils";
 import { Icon } from "@/components/ui/Icon";
 import type { BookingPageData } from "@/lib/booking/load-page-data";
+import { createCalendarOverlayTicket } from "@/lib/calendar-overlay-ticket";
+import type { CalendarOverlayConfig } from "./useGoogleCalendarOverlay";
 
 function StarRating({ rating, size = "sm" }: { rating: number; size?: "sm" | "md" }) {
   const starSize = size === "md" ? "text-base" : "text-xs";
@@ -34,7 +37,37 @@ type Props = {
   hideGallery?: boolean;
 };
 
-export default function BookingPageContent({ data, dealId, mode, serviceSlug, hideGallery }: Props) {
+async function buildCalendarOverlayConfig(
+  mode: Props["mode"],
+  language: string,
+): Promise<CalendarOverlayConfig | null> {
+  if (mode === "embed" || !process.env.GOOGLE_CLIENT_ID || !process.env.NEXT_PUBLIC_APP_URL) {
+    return null;
+  }
+
+  try {
+    const requestHeaders = await headers();
+    const forwardedHost = requestHeaders.get("x-forwarded-host")?.split(",")[0]?.trim();
+    const host = forwardedHost || requestHeaders.get("host");
+    if (!host) return null;
+
+    const forwardedProto = requestHeaders.get("x-forwarded-proto")?.split(",")[0]?.trim();
+    const protocol =
+      forwardedProto || (host.startsWith("localhost") || host.startsWith("127.0.0.1") ? "http" : "https");
+    const origin = new URL(`${protocol}://${host}`).origin;
+    const { ticket, channel } = createCalendarOverlayTicket(
+      origin,
+      language === "si" || language === "ta" ? language : "en",
+    );
+    const connectUrl = new URL("/calendar-overlay/connect", process.env.NEXT_PUBLIC_APP_URL);
+    connectUrl.searchParams.set("ticket", ticket);
+    return { connectUrl: connectUrl.toString(), channel };
+  } catch {
+    return null;
+  }
+}
+
+export default async function BookingPageContent({ data, dealId, mode, serviceSlug, hideGallery }: Props) {
   const {
     business,
     services,
@@ -52,6 +85,7 @@ export default function BookingPageContent({ data, dealId, mode, serviceSlug, hi
   } = data;
 
   const copy = getBookingCopy(business.language);
+  const calendarOverlayConfig = await buildCalendarOverlayConfig(mode, business.language);
   const gallery = business.galleryImages ?? [];
   const staffWithBio = staff.filter((s) => s.bio || s.avatarUrl);
   const instagramUrl = normalizePublicHttpsUrl(business.instagramUrl);
@@ -138,37 +172,32 @@ export default function BookingPageContent({ data, dealId, mode, serviceSlug, hi
           )}
 
           {!hideSidebarSections && hasTrustBlock && (
-            <div className="mx-4 mb-4 rounded-xl border border-gray-100 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-4 md:mx-0 md:mb-6">
-              <p className="mb-3 text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">
-                {copy.trustTitle}
-              </p>
-              <div className="space-y-3 text-sm text-gray-500 dark:text-gray-400">
+            <div className="mx-4 mb-3 flex justify-center md:mx-0 md:mb-4">
+              <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-center text-xs text-gray-400 dark:text-gray-500">
                 {business.cancellationPolicy && (
-                  <div>
-                    <p className="font-medium text-gray-800 dark:text-gray-200">{copy.cancellationPolicy}</p>
-                    <p className="mt-0.5 whitespace-pre-wrap">{business.cancellationPolicy}</p>
-                  </div>
+                  <span title={business.cancellationPolicy}>
+                    <span className="font-medium text-gray-500 dark:text-gray-400">{copy.cancellationPolicy}:</span>{" "}
+                    <span className="line-clamp-1">{business.cancellationPolicy}</span>
+                  </span>
                 )}
                 {business.depositPolicy && (
-                  <div>
-                    <p className="font-medium text-gray-800 dark:text-gray-200">{copy.depositPolicy}</p>
-                    <p className="mt-0.5 whitespace-pre-wrap">{business.depositPolicy}</p>
-                  </div>
+                  <span title={business.depositPolicy}>
+                    <span className="font-medium text-gray-500 dark:text-gray-400">{copy.depositPolicy}:</span>{" "}
+                    <span className="line-clamp-1">{business.depositPolicy}</span>
+                  </span>
                 )}
-                {(business.bankTransferInstructions || business.lankaqrImageUrl) && (
-                  <div>
-                    <p className="font-medium text-gray-800 dark:text-gray-200">{copy.localPayment}</p>
-                    {business.bankTransferInstructions && (
-                      <p className="mt-0.5 whitespace-pre-wrap">{business.bankTransferInstructions}</p>
-                    )}
-                  </div>
+                {business.bankTransferInstructions && (
+                  <span title={business.bankTransferInstructions}>
+                    <span className="font-medium text-gray-500 dark:text-gray-400">{copy.localPayment}:</span>{" "}
+                    <span className="line-clamp-1">{business.bankTransferInstructions}</span>
+                  </span>
                 )}
               </div>
             </div>
           )}
 
           {showHub && (
-            <BookingServiceHub businessSlug={business.slug} services={services} copy={copy} />
+            <BookingServiceHub businessSlug={business.slug} businessName={business.name} businessLogoUrl={business.logoUrl} services={services} copy={copy} />
           )}
 
           {showWizard && (
@@ -210,6 +239,7 @@ export default function BookingPageContent({ data, dealId, mode, serviceSlug, hi
               initialService={wizardService}
               lockServiceSelection={mode === "service" && Boolean(serviceSlug)}
               embedMode={mode === "embed"}
+              calendarOverlayConfig={calendarOverlayConfig}
             />
             </>
           )}
@@ -232,38 +262,67 @@ export default function BookingPageContent({ data, dealId, mode, serviceSlug, hi
           )}
 
           {!hideSidebarSections && staffWithBio.length > 0 && (
-            <section className="mt-8 px-4 md:px-0">
-              <h2 className="mb-4 font-cal text-lg text-gray-900 dark:text-gray-100">Meet the team</h2>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                {staffWithBio.map((member) => (
-                  <div
-                    key={member.id}
-                    className="flex flex-col items-center gap-2 rounded-xl border border-gray-100 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-4 text-center"
-                  >
-                    {member.avatarUrl ? (
+            <section className="mt-6 px-4 md:px-0">
+              <div className="rounded-2xl border border-gray-100 dark:border-neutral-800 bg-white dark:bg-neutral-900 overflow-hidden">
+                <div className="px-5 py-4 border-b border-gray-100 dark:border-neutral-800">
+                  <h2 className="font-cal text-base font-medium text-gray-900 dark:text-gray-100">Meet the team</h2>
+                </div>
+                {staffWithBio.length === 1 ? (
+                  <div className="flex items-center gap-4 px-5 py-4">
+                    {staffWithBio[0]!.avatarUrl ? (
                       <Image
-                        src={member.avatarUrl}
-                        alt={member.name}
-                        width={56}
-                        height={56}
-                        className="size-14 rounded-full border object-cover"
-                        unoptimized={!isOptimizableRemoteImage(member.avatarUrl)}
+                        src={staffWithBio[0]!.avatarUrl}
+                        alt={staffWithBio[0]!.name}
+                        width={64}
+                        height={64}
+                        className="size-16 shrink-0 rounded-full border object-cover"
+                        unoptimized={!isOptimizableRemoteImage(staffWithBio[0]!.avatarUrl)}
                       />
                     ) : (
-                      <div className="flex size-14 items-center justify-center rounded-full border booking-bg-accent-muted text-xl font-bold booking-text-accent">
-                        {member.name.charAt(0)}
+                      <div className="flex size-16 shrink-0 items-center justify-center rounded-full booking-bg-accent-muted text-2xl font-bold booking-text-accent">
+                        {staffWithBio[0]!.name.charAt(0)}
                       </div>
                     )}
-                    <div>
-                      <p className="text-sm font-medium">{member.name}</p>
-                      {member.bio && (
-                        <p className="mt-0.5 line-clamp-3 text-xs leading-relaxed text-gray-500 dark:text-gray-400">
-                          {member.bio}
-                        </p>
+                    <div className="min-w-0">
+                      <p className="font-semibold text-gray-900 dark:text-gray-100">{staffWithBio[0]!.name}</p>
+                      {staffWithBio[0]!.bio && (
+                        <p className="mt-0.5 text-sm leading-relaxed text-gray-500 dark:text-gray-400">{staffWithBio[0]!.bio}</p>
                       )}
                     </div>
                   </div>
-                ))}
+                ) : (
+                  <div className={`grid gap-px bg-gray-100 dark:bg-neutral-800 ${staffWithBio.length === 2 ? "grid-cols-2" : "grid-cols-2 sm:grid-cols-3"}`}>
+                    {staffWithBio.map((member) => (
+                      <div
+                        key={member.id}
+                        className="flex flex-col items-center gap-2 bg-white dark:bg-neutral-900 p-4 text-center"
+                      >
+                        {member.avatarUrl ? (
+                          <Image
+                            src={member.avatarUrl}
+                            alt={member.name}
+                            width={56}
+                            height={56}
+                            className="size-14 rounded-full border object-cover"
+                            unoptimized={!isOptimizableRemoteImage(member.avatarUrl)}
+                          />
+                        ) : (
+                          <div className="flex size-14 items-center justify-center rounded-full booking-bg-accent-muted text-xl font-bold booking-text-accent">
+                            {member.name.charAt(0)}
+                          </div>
+                        )}
+                        <div>
+                          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{member.name}</p>
+                          {member.bio && (
+                            <p className="mt-0.5 line-clamp-3 text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+                              {member.bio}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </section>
           )}

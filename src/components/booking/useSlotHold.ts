@@ -19,7 +19,7 @@ export function useSlotHold(input: {
   const [slotUnavailable, setSlotUnavailable] = useState(false);
   const [holding, setHolding] = useState(false);
   const [sessionToken, setSessionToken] = useState("");
-  const [now, setNow] = useState(0);
+  const [now, setNow] = useState(() => Date.now());
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {

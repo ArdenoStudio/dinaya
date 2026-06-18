@@ -32,6 +32,10 @@ import { SlotListPanel } from "./SlotListPanel";
 import { SlotPickerSheet } from "./SlotPickerSheet";
 import { FormPanel } from "./FormPanel";
 import type { SlotEmptyState, SlotOption } from "./TimeSlotGrid";
+import {
+  useGoogleCalendarOverlay,
+  type CalendarOverlayConfig,
+} from "./useGoogleCalendarOverlay";
 
 export type BookingUIState =
   | "selecting_service"
@@ -42,7 +46,7 @@ export type BookingUIState =
 const COLOMBO_TZ = "Asia/Colombo";
 
 const CARD_CLS =
-  "min-w-0 overflow-hidden md:rounded-2xl md:border md:border-gray-100 dark:border-neutral-800 md:bg-white dark:md:bg-neutral-900 md:shadow-[0_24px_64px_-12px_var(--booking-accent-shadow),0_8px_24px_-8px_rgba(0,0,0,0.08)]";
+  "min-w-0 overflow-hidden md:rounded-2xl md:border md:border-gray-100 dark:border-neutral-800 md:bg-white dark:md:bg-neutral-900 md:shadow-[0_8px_24px_-4px_rgba(0,0,0,0.07),0_2px_8px_-2px_rgba(0,0,0,0.04)] dark:md:shadow-[0_8px_32px_-8px_rgba(0,0,0,0.5)]";
 
 interface Props {
   business: BookingBusiness;
@@ -60,6 +64,7 @@ interface Props {
   initialService?: BookingService | null;
   lockServiceSelection?: boolean;
   embedMode?: boolean;
+  calendarOverlayConfig?: CalendarOverlayConfig | null;
 }
 
 export type BookingBusiness = {
@@ -133,6 +138,7 @@ function BookingWizardInner({
   initialService = null,
   lockServiceSelection = false,
   embedMode = false,
+  calendarOverlayConfig = null,
 }: Props) {
   const copy = getBookingCopy(business.language);
   const router = useRouter();
@@ -141,7 +147,7 @@ function BookingWizardInner({
   const needsLocationPicker = locations.length > 1;
 
   const [uiState, setUiState] = useState<BookingUIState>(
-    initialService ? "selecting_date" : "selecting_service",
+    initialService ? "selecting_time" : "selecting_service",
   );
   const defaultLocation = locations.length === 1 ? locations[0]! : null;
   const todayStr = format(toZonedTime(new Date(), timezone), "yyyy-MM-dd");
@@ -181,6 +187,16 @@ function BookingWizardInner({
   const [wizardLoadingSlots, setWizardLoadingSlots] = useState(false);
   const [wizardSlotEmptyState, setWizardSlotEmptyState] = useState<SlotEmptyState>("none");
   const [isMobile, setIsMobile] = useState(false);
+  const [calendarViewMonth, setCalendarViewMonth] = useState(() =>
+    format(toZonedTime(new Date(), timezone), "yyyy-MM"),
+  );
+  const calendarOverlay = useGoogleCalendarOverlay({
+    config: embedMode ? null : calendarOverlayConfig,
+    selectedDate: state.date,
+    viewMonth: calendarViewMonth,
+    timezone,
+  });
+
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
     check();
@@ -299,6 +315,7 @@ function BookingWizardInner({
         timeSlotEnd: slot.endUtc,
         timeLabel: slot.label,
       }));
+      setUiState("booking");
     },
     [slotHold, staff, state.staff],
   );
@@ -504,6 +521,8 @@ function BookingWizardInner({
                         setWizardLoadingSlots(loading);
                         setWizardSlotEmptyState(emptyState);
                       }}
+                      onCalendarMonthChange={setCalendarViewMonth}
+                      calendarOverlay={calendarOverlay}
                     />
                   </BookingPanel>
                 )}
@@ -524,6 +543,7 @@ function BookingWizardInner({
                       loading={wizardLoadingSlots}
                       emptyState={wizardSlotEmptyState}
                       timezone={timezone}
+                      busyTimes={calendarOverlay.busyTimes}
                     />
                   </BookingPanel>
                 )}
@@ -561,6 +581,7 @@ function BookingWizardInner({
             loading={wizardLoadingSlots}
             emptyState={wizardSlotEmptyState}
             timezone={timezone}
+            calendarOverlay={calendarOverlay}
           />
         </div>
       )}

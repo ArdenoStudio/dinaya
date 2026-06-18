@@ -10,21 +10,39 @@ import type { BookingService } from "./BookingWizard";
 
 interface Props {
   businessSlug: string;
+  businessName: string;
+  businessLogoUrl?: string | null;
   services: BookingService[];
   copy: BookingCopy;
 }
 
-export default function BookingServiceHub({ businessSlug, services, copy }: Props) {
+export default function BookingServiceHub({ businessSlug, businessName, businessLogoUrl, services, copy }: Props) {
   if (services.length <= 1) return null;
 
   return (
-    <section className="mx-4 mb-4 rounded-2xl border border-gray-100 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-5 md:mx-0 md:mb-6">
-      <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
-        {copy.chooseService}
-      </p>
-      <h2 className="mb-4 font-cal text-lg tracking-tight text-gray-900 dark:text-gray-100">{copy.hubTitle}</h2>
-      <div className="grid gap-3 sm:grid-cols-2">
-        {services.map((service) => {
+    <div className="mx-4 mb-4 md:mx-auto md:mb-6 md:max-w-2xl space-y-3">
+      {/* Business profile card */}
+      <div className="rounded-2xl border border-gray-100 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-6 py-5">
+        {businessLogoUrl ? (
+          <Image
+            src={businessLogoUrl}
+            alt={businessName}
+            width={56}
+            height={56}
+            className="mb-3 size-14 rounded-full object-cover"
+            unoptimized={!isOptimizableRemoteImage(businessLogoUrl)}
+          />
+        ) : (
+          <div className="mb-3 flex size-14 items-center justify-center rounded-full booking-bg-accent-muted text-xl font-bold booking-text-accent">
+            {businessName.charAt(0)}
+          </div>
+        )}
+        <p className="font-cal text-xl font-medium text-gray-900 dark:text-gray-100">{businessName}</p>
+      </div>
+
+      {/* Service list */}
+      <div className="rounded-2xl border border-gray-100 dark:border-neutral-800 bg-white dark:bg-neutral-900 overflow-hidden">
+        {services.map((service, i) => {
           const href = buildServiceBookingPath(businessSlug, service.slug ?? service.id);
           const depositAmount =
             service.depositPercent > 0
@@ -35,46 +53,50 @@ export default function BookingServiceHub({ businessSlug, services, copy }: Prop
             <Link
               key={service.id}
               href={href}
-              className="group flex flex-col rounded-xl border border-gray-100 dark:border-neutral-800 p-4 transition-all hover:border-[var(--booking-accent)] hover:shadow-md"
+              className={`group block px-5 py-4 transition-colors hover:bg-gray-50 dark:hover:bg-neutral-800/60 ${
+                i > 0 ? "border-t border-gray-100 dark:border-neutral-800" : ""
+              }`}
             >
-              {service.imageUrl ? (
-                <div className="relative mb-3 aspect-[16/10] overflow-hidden rounded-lg bg-gray-100">
-                  <Image
-                    src={service.imageUrl}
-                    alt=""
-                    fill
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                    className="object-cover transition-transform group-hover:scale-[1.02]"
-                    unoptimized={!isOptimizableRemoteImage(service.imageUrl)}
-                  />
-                </div>
-              ) : null}
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="font-semibold text-gray-900 dark:text-gray-100 group-hover:booking-text-accent">{service.name}</p>
-                  {service.description ? (
-                    <p className="mt-1 line-clamp-2 text-sm text-gray-500 dark:text-gray-400">{service.description}</p>
-                  ) : (
-                    <p className="mt-1 text-sm text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">{service.durationMinutes} min</p>
+              <div className="flex items-start justify-between gap-4">
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold text-gray-900 dark:text-gray-100 group-hover:booking-text-accent">
+                    {service.name}
+                  </p>
+                  {service.description && (
+                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 line-clamp-2">
+                      {service.description}
+                    </p>
                   )}
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    <span className="inline-flex items-center gap-1 rounded-md border border-gray-200 dark:border-neutral-700 px-2 py-0.5 text-xs text-gray-500 dark:text-gray-400">
+                      <Icon name="clock" className="text-[10px]" />
+                      {service.durationMinutes}m
+                    </span>
+                    {service.priceLkr > 0 && (
+                      <span className="inline-flex items-center gap-1 rounded-md border border-gray-200 dark:border-neutral-700 px-2 py-0.5 text-xs text-gray-500 dark:text-gray-400">
+                        <Icon name="cash-coin" className="text-[10px]" />
+                        {formatLkr(service.priceLkr)}
+                      </span>
+                    )}
+                    {service.priceLkr === 0 && (
+                      <span className="inline-flex items-center gap-1 rounded-md border border-gray-200 dark:border-neutral-700 px-2 py-0.5 text-xs text-gray-500 dark:text-gray-400">
+                        Free
+                      </span>
+                    )}
+                    {service.requiresPayment && service.depositPercent > 0 && service.priceLkr > 0 && (
+                      <span className="inline-flex items-center gap-1 rounded-md border border-gray-200 dark:border-neutral-700 px-2 py-0.5 text-xs text-gray-500 dark:text-gray-400">
+                        <Icon name="shield-check" className="text-[10px]" />
+                        {copy.depositDue}: {formatLkr(depositAmount)}
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <Icon name="arrow-right" className="mt-1 shrink-0 text-gray-300 group-hover:booking-text-accent" />
+                <Icon name="chevron-right" className="mt-1 shrink-0 text-gray-300 dark:text-neutral-600 group-hover:booking-text-accent" />
               </div>
-              <div className="mt-4 flex items-center justify-between border-t border-gray-50 pt-3 text-sm">
-                <span className="text-gray-500 dark:text-gray-400">{service.durationMinutes} min</span>
-                <span className="font-bold tabular-nums text-gray-800 dark:text-gray-200">
-                  {service.priceLkr > 0 ? formatLkr(service.priceLkr) : "Free"}
-                </span>
-              </div>
-              {service.requiresPayment && service.priceLkr > 0 && service.depositPercent > 0 && (
-                <p className="mt-1 text-right text-[10px] font-medium booking-text-accent">
-                  {copy.depositDue}: {formatLkr(depositAmount)}
-                </p>
-              )}
             </Link>
           );
         })}
       </div>
-    </section>
+    </div>
   );
 }

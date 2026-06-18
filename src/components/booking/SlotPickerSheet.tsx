@@ -4,6 +4,8 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { format, parseISO } from "date-fns";
 import { Icon } from "@/components/ui/Icon";
 import type { BookingCopy } from "@/lib/i18n";
+import type { GoogleCalendarOverlay } from "./useGoogleCalendarOverlay";
+import { CalendarOverlayControl } from "./CalendarOverlayControl";
 import { SlotListPanel } from "./SlotListPanel";
 import type { SlotEmptyState, SlotOption } from "./TimeSlotGrid";
 
@@ -18,6 +20,7 @@ interface SlotPickerSheetProps {
   loading: boolean;
   emptyState: SlotEmptyState;
   timezone: string;
+  calendarOverlay: GoogleCalendarOverlay;
 }
 
 export function SlotPickerSheet({
@@ -31,6 +34,7 @@ export function SlotPickerSheet({
   loading,
   emptyState,
   timezone,
+  calendarOverlay,
 }: SlotPickerSheetProps) {
   const dateLabel = selectedDate
     ? format(parseISO(selectedDate + "T12:00:00"), "EEEE, d MMMM")
@@ -75,6 +79,9 @@ export function SlotPickerSheet({
 
           {/* Slot list */}
           <div className="px-5 py-4">
+            <div className="mb-4">
+              <CalendarOverlayControl copy={copy} overlay={calendarOverlay} compact />
+            </div>
             <SlotListPanel
               slots={slots}
               selectedStartUtc={selectedStartUtc}
@@ -83,6 +90,7 @@ export function SlotPickerSheet({
               loading={loading}
               emptyState={emptyState}
               timezone={timezone}
+              busyTimes={calendarOverlay.busyTimes}
             />
           </div>
         </Dialog.Content>
