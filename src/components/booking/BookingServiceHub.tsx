@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { formatLkr } from "@/lib/utils";
+import Image from "next/image";
+import { formatLkr, isOptimizableRemoteImage } from "@/lib/utils";
 import { buildServiceBookingPath } from "@/lib/booking-url";
 import { Icon } from "@/components/ui/Icon";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -17,34 +18,53 @@ interface Props {
   businessLogoUrl?: string | null;
   services: BookingService[];
   copy: BookingCopy;
+  avgRating?: number | null;
+  reviewCount?: number;
 }
 
-export default function BookingServiceHub({ businessSlug, businessName, businessLogoUrl, services, copy }: Props) {
+export default function BookingServiceHub({
+  businessSlug,
+  businessName,
+  businessLogoUrl,
+  services,
+  copy,
+  avgRating,
+  reviewCount,
+}: Props) {
   if (services.length <= 1) return null;
 
+  const hasRating = avgRating != null && reviewCount != null && reviewCount > 0;
+
   return (
-    <div className="mx-4 mb-4 space-y-4 md:mx-auto md:mb-6 md:max-w-2xl">
-      <Card>
-        <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-4">
+    <div className="md:mx-auto md:mb-6 md:max-w-2xl">
+      <Card className="overflow-hidden rounded-none border-x-0 shadow-none md:rounded-xl md:border-x md:shadow-sm">
+        <CardHeader className="flex flex-row items-start gap-4 space-y-0 border-b border-border pb-4">
           <Avatar className="size-14" data-size="lg">
-            {businessLogoUrl ? (
-              <AvatarImage src={businessLogoUrl} alt={businessName} />
-            ) : null}
+            {businessLogoUrl ? <AvatarImage src={businessLogoUrl} alt={businessName} /> : null}
             <AvatarFallback className="bg-[var(--booking-accent-muted)] text-lg font-bold text-[var(--booking-accent)]">
               {businessName.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
-          <div className="min-w-0 space-y-1">
-            <CardTitle className="truncate text-xl">{businessName}</CardTitle>
-            <CardDescription>{copy.chooseService}</CardDescription>
+          <div className="min-w-0 flex-1 space-y-1">
+            <CardTitle className="text-xl">{businessName}</CardTitle>
+            <CardDescription>{copy.chooseServiceAndTime}</CardDescription>
+            {hasRating && (
+              <div className="flex items-center gap-2 pt-1">
+                <Badge variant="secondary" className="gap-1">
+                  <Icon name="star-fill" className="text-amber-400" />
+                  {avgRating.toFixed(1)}
+                </Badge>
+                <span className="text-xs text-muted-foreground">
+                  {reviewCount} review{reviewCount !== 1 ? "s" : ""}
+                </span>
+              </div>
+            )}
           </div>
-          <Badge variant="secondary" className="ml-auto hidden shrink-0 sm:inline-flex">
-            {services.length} {services.length === 1 ? "service" : "services"}
+          <Badge variant="secondary" className="hidden shrink-0 sm:inline-flex">
+            {services.length} services
           </Badge>
         </CardHeader>
-      </Card>
 
-      <Card className="overflow-hidden py-0">
         <CardContent className="p-0">
           {services.map((service, index) => {
             const href = buildServiceBookingPath(businessSlug, service.slug ?? service.id);
@@ -58,8 +78,22 @@ export default function BookingServiceHub({ businessSlug, businessName, business
                 {index > 0 ? <Separator /> : null}
                 <Link
                   href={href}
-                  className="group flex items-start justify-between gap-4 px-5 py-4 transition-colors hover:bg-muted/50"
+                  className="group flex items-start gap-4 px-4 py-4 transition-colors hover:bg-muted/50 md:px-5"
                 >
+                  {service.imageUrl ? (
+                    <Image
+                      src={service.imageUrl}
+                      alt=""
+                      width={48}
+                      height={48}
+                      className="size-12 shrink-0 rounded-lg object-cover"
+                      unoptimized={!isOptimizableRemoteImage(service.imageUrl)}
+                    />
+                  ) : (
+                    <div className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-[var(--booking-accent-muted)] text-sm font-bold text-[var(--booking-accent)]">
+                      {service.name.charAt(0).toUpperCase()}
+                    </div>
+                  )}
                   <div className="min-w-0 flex-1">
                     <p className="font-semibold text-foreground group-hover:text-[var(--booking-accent)]">
                       {service.name}

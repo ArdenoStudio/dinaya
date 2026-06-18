@@ -125,15 +125,15 @@ html.nav-open {
   }
 
   .booking-page-bg {
-    @apply bg-[#f2f2f7] md:bg-[#f7f7f8] dark:bg-neutral-950 dark:md:bg-neutral-950;
+    @apply bg-muted/30 dark:bg-neutral-950;
   }
 
   .booking-panel-bg {
-    @apply bg-[#f2f2f7] dark:bg-neutral-950;
+    @apply bg-card dark:bg-neutral-950;
   }
 
   .booking-sticky-bar {
-    @apply bg-[#f2f2f7]/95 dark:bg-neutral-950/95;
+    @apply bg-background/95 dark:bg-neutral-950/95;
   }
 
   .public-page-offset {

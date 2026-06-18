@@ -4,6 +4,8 @@ import { useCallback, useEffect, useState } from "react";
 import { addDays, format, parseISO } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import { Icon } from "@/components/ui/Icon";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import type { Staff } from "@/db/schema";
 import { getBookingSessionToken } from "@/lib/booking-session";
 import type { BookingService } from "./BookingWizard";
@@ -220,7 +222,7 @@ export default function StepDateTime({
 
   return (
     <div className="flex h-full min-w-0 flex-col">
-      <p className="mb-4 text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+      <p className="mb-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
         {copy.pickDateTime}
       </p>
 
@@ -251,10 +253,10 @@ export default function StepDateTime({
         </button>
       )}
 
-      <div className="flex min-w-0 flex-col gap-4 md:gap-5">
-        <section className="min-w-0 rounded-xl border border-gray-100 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-4 md:p-5">
+      <div className="flex min-w-0 flex-col md:gap-5">
+        <section className="min-w-0 pb-4 md:rounded-xl md:border md:border-border md:bg-card md:p-5">
           <div className="mb-3 flex items-center justify-between gap-2">
-            <p className="text-xs font-semibold text-gray-700 dark:text-gray-300">{copy.chooseDate}</p>
+            <p className="text-sm font-medium text-foreground">{copy.chooseDate}</p>
             <button
               type="button"
               onClick={() => setShowMobileCalendar((v) => !v)}
@@ -306,14 +308,16 @@ export default function StepDateTime({
         </section>
 
         {!hideSlots && (
-          <section className="min-w-0 rounded-xl border border-gray-100 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-4 md:p-5">
+          <>
+            <Separator className="md:hidden" />
+            <section className="min-w-0 pt-4 md:rounded-xl md:border md:border-border md:bg-card md:p-5 md:pt-5">
             {dateHeading ? (
-              <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2 border-b border-gray-100 dark:border-neutral-800 pb-3">
-                <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">{dateHeading}</h3>
-                <span className="text-xs text-gray-400 dark:text-gray-500">{copy.availableTimes}</span>
+              <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2 border-b border-border pb-3">
+                <h3 className="text-sm font-semibold text-foreground">{dateHeading}</h3>
+                <span className="text-xs text-muted-foreground">{copy.availableTimes}</span>
               </div>
             ) : (
-              <p className="mb-3 text-xs text-gray-400 dark:text-gray-500">{copy.selectDate}</p>
+              <p className="mb-3 text-xs text-muted-foreground">{copy.selectDate}</p>
             )}
 
             {holdLabel && (
@@ -331,7 +335,7 @@ export default function StepDateTime({
             )}
 
             {!hasFetched && !loadingSlots ? (
-              <p className="py-6 text-center text-sm text-gray-400 dark:text-gray-500">{copy.selectDate}</p>
+              <p className="py-6 text-center text-sm text-muted-foreground">{copy.selectDate}</p>
             ) : (
               <TimeSlotGrid
                 slots={slots}
@@ -345,6 +349,7 @@ export default function StepDateTime({
               />
             )}
           </section>
+          </>
         )}
       </div>
 
@@ -357,24 +362,21 @@ export default function StepDateTime({
       )}
 
       {(onBack || showContinue) && (
-        <div className="mt-4 flex items-center gap-3 md:hidden">
+        <div className="mt-4 flex items-center gap-3 border-t border-border pt-4 md:hidden">
           {onBack && (
-            <button
-              type="button"
-              onClick={onBack}
-              className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 transition-colors hover:text-gray-800 dark:text-gray-200"
-            >
-              <Icon name="chevron-left" className="text-sm" /> {copy.back}
-            </button>
+            <Button type="button" variant="ghost" size="sm" onClick={onBack} className="px-0">
+              <Icon name="chevron-left" />
+              {copy.back}
+            </Button>
           )}
           {showContinue && selectedSlot && onContinue && (
-            <button
+            <Button
               type="button"
+              className="ml-auto bg-[var(--booking-accent)] text-white hover:bg-[var(--booking-accent)]/90"
               onClick={onContinue}
-              className="ml-auto rounded-xl booking-bg-accent booking-bg-accent-hover px-5 py-2.5 text-sm font-semibold text-white booking-shadow-accent"
             >
               {copy.continue}
-            </button>
+            </Button>
           )}
         </div>
       )}

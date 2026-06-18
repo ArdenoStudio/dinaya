@@ -21,7 +21,9 @@ import { getBookingCopy } from "@/lib/i18n";
 import { getEligibleStaff, pickDefaultStaff } from "@/lib/booking-staff";
 import { formatLkr } from "@/lib/utils";
 import { trackBookingStart } from "@/lib/analytics/gtag";
+import { BookingFlowHeader } from "./BookingFlowHeader";
 import { BusinessAvatar } from "./BusinessAvatar";
+import { BookingWizardSkeleton } from "./BookingWizardSkeleton";
 import BookingBranding from "./BookingBranding";
 import { BookingAttributionCapture } from "./BookingAttributionCapture";
 import { BookingDealsSection } from "./BookingDealsSection";
@@ -59,6 +61,9 @@ interface Props {
   lockServiceSelection?: boolean;
   embedMode?: boolean;
   calendarOverlayConfig?: CalendarOverlayConfig | null;
+  avgRating?: number | null;
+  reviewCount?: number;
+  businessDescription?: string | null;
 }
 
 export type BookingBusiness = {
@@ -133,6 +138,9 @@ function BookingWizardInner({
   lockServiceSelection = false,
   embedMode = false,
   calendarOverlayConfig = null,
+  avgRating = null,
+  reviewCount = 0,
+  businessDescription = null,
 }: Props) {
   const copy = getBookingCopy(business.language);
   const router = useRouter();
@@ -421,7 +429,7 @@ function BookingWizardInner({
 
   return (
     <BookingTheme accentColor={business.accentColor} embed={embedMode}>
-      <div className="min-w-0 md:overflow-hidden md:rounded-2xl md:border md:border-gray-100 dark:border-neutral-800/80 md:bg-white dark:md:bg-neutral-900 md:shadow-[0_24px_64px_-12px_var(--booking-accent-shadow),0_8px_24px_-8px_rgba(0,0,0,0.08)]">
+      <div className="min-w-0 overflow-hidden bg-card md:rounded-2xl md:border md:border-border md:shadow-[0_24px_64px_-12px_var(--booking-accent-shadow),0_8px_24px_-8px_rgba(0,0,0,0.08)]">
         <BookingAttributionCapture businessId={business.id} />
         <BookingDealsSection
           deals={activeDeals}
@@ -429,15 +437,22 @@ function BookingWizardInner({
           onSelectDeal={applyDeal}
         />
 
-        <div className="booking-bg-accent px-[18px] pt-5 pb-[18px] md:hidden">
-          <BusinessIdentity
-            name={business.name}
-            urlLabel={bookingUrlLabel}
-            logoUrl={business.logoUrl}
-            icon={businessIcon}
-          />
-          <ProgressPills steps={progressSteps} current={stepIndex} />
-        </div>
+        <BookingFlowHeader
+          businessName={business.name}
+          logoUrl={business.logoUrl}
+          bookingUrlLabel={bookingUrlLabel}
+          service={state.service}
+          steps={progressSteps}
+          currentStep={stepIndex}
+          bookAppointmentLabel={copy.bookAppointment}
+          avgRating={avgRating}
+          reviewCount={reviewCount}
+          description={businessDescription}
+          onStepClick={(i) => {
+            const target = indexToStep(i);
+            if (i < stepIndex) setStep(target);
+          }}
+        />
 
         <div className="hidden booking-bg-accent md:block">
           <div className="px-8 pb-6 pt-7">
@@ -482,9 +497,9 @@ function BookingWizardInner({
         <BookingStepTransition step={step}>
         {step !== "confirm" && (
           <>
-            <div className="md:px-8 md:py-7">
+            <div className="px-4 py-4 md:px-8 md:py-7">
               <div className="grid gap-0 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] md:gap-8 lg:gap-10">
-                <div className="border-b border-gray-100 dark:border-neutral-800 p-[14px] md:flex md:flex-col md:border-0 md:p-0">
+                <div className="border-b border-border pb-4 md:flex md:flex-col md:border-0 md:pb-0">
                   {needsLocationPicker && (
                     <StepLocation
                       locations={locations}
@@ -572,7 +587,7 @@ function BookingWizardInner({
                   </div>
                 </div>
 
-                <div className="min-w-0 booking-panel-bg p-[14px] md:flex md:flex-col md:rounded-2xl md:border md:border-gray-100 dark:border-neutral-800 md:bg-gray-50 dark:md:bg-neutral-900/60 md:p-5">
+                <div className="min-w-0 pt-4 md:flex md:flex-col md:rounded-2xl md:border md:border-border md:bg-muted/30 md:p-5 md:pt-5">
                   <StepDateTime
                     businessId={business.id}
                     copy={copy}
@@ -645,7 +660,7 @@ function BookingWizardInner({
 
 export default function BookingWizard(props: Props) {
   return (
-    <Suspense fallback={<div className="min-h-[320px] animate-pulse rounded-2xl bg-gray-100 dark:bg-neutral-800" />}>
+    <Suspense fallback={<BookingWizardSkeleton />}>
       <BookingWizardInner {...props} />
     </Suspense>
   );
@@ -734,61 +749,5 @@ function DesktopProgressBar({
         );
       })}
     </ol>
-  );
-}
-
-function ProgressPills({ steps, current }: { steps: string[]; current: number }) {
-  return (
-    <div className="flex items-center gap-[7px]">
-      {steps.map((label, i) => {
-        const done = i < current;
-        const active = i === current;
-        return (
-          <div key={label} className="flex items-center gap-[7px]">
-            <div
-              className={`flex items-center gap-[5px] rounded-full px-[9px] py-[5px] text-[11px] font-semibold ${
-                active
-                  ? "bg-white booking-text-accent shadow-sm"
-                  : done
-                    ? "bg-white/20 text-white/75"
-                    : "bg-white/10 text-white/50"
-              }`}
-            >
-              {done ? (
-                <Icon name="check-lg" className="text-[9px]" />
-              ) : (
-                <span
-                  className={`inline-block size-[8px] rounded-full ${active ? "bg-white/60" : "bg-white/30"}`}
-                />
-              )}
-              {label}
-            </div>
-            {i < steps.length - 1 && <div className="h-px w-[8px] shrink-0 bg-white/25" />}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-function BusinessIdentity({
-  name,
-  urlLabel,
-  logoUrl,
-  icon,
-}: {
-  name: string;
-  urlLabel: string;
-  logoUrl?: string | null;
-  icon?: string | null;
-}) {
-  return (
-    <div className="mb-[14px] flex items-center gap-[12px]">
-      <BusinessAvatar name={name} logoUrl={logoUrl} icon={icon} size="md" />
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-[16px] font-semibold leading-tight text-white">{name}</p>
-        <p className="mt-[2px] truncate text-[11px] booking-text-accent-on-dark/80">{urlLabel}</p>
-      </div>
-    </div>
   );
 }

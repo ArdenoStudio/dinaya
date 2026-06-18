@@ -1,9 +1,9 @@
 import Image from "next/image";
 import { headers } from "next/headers";
 import BookingWizard from "@/components/booking/BookingWizard";
-import BookingMobileTrustStrip from "@/components/booking/BookingMobileTrustStrip";
 import EmbedResizeReporter from "@/components/booking/EmbedResizeReporter";
 import BookingServiceHub from "@/components/booking/BookingServiceHub";
+import { BookingPolicyAccordion } from "@/components/booking/BookingPolicyAccordion";
 import { BookingTheme } from "@/components/booking/BookingTheme";
 import { BookingThemeToggle } from "@/components/booking/BookingThemeToggle";
 import { getBookingCopy } from "@/lib/i18n";
@@ -134,14 +134,14 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
 
   return (
     <BookingTheme accentColor={business.accentColor} embed={mode === "embed"}>
-      <div className="booking-page-bg min-h-dvh bg-[#f2f2f7] md:bg-[#f7f7f8]" data-booking-embed-root={mode === "embed" ? "" : undefined}>
+      <div className="booking-page-bg min-h-dvh bg-muted/30" data-booking-embed-root={mode === "embed" ? "" : undefined}>
         {mode === "embed" ? <EmbedResizeReporter slug={business.slug} /> : null}
         {mode !== "embed" ? <BookingThemeToggle /> : null}
         <div className="mx-auto max-w-5xl px-0 md:px-8 md:py-6">
           {!hideSidebarSections && gallery.length > 0 && (
-            <div className="px-4 pb-4 pt-4 md:px-0 md:pb-6 md:pt-0">
+            <Card className="overflow-hidden rounded-none border-x-0 border-t-0 shadow-none md:mb-6 md:rounded-xl md:border-x md:shadow-sm">
               <div
-                className={`grid gap-2 overflow-hidden rounded-2xl ${
+                className={`grid gap-0.5 overflow-hidden md:gap-2 ${
                   gallery.length === 1
                     ? "grid-cols-1"
                     : gallery.length === 2
@@ -152,7 +152,7 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
                 {gallery.slice(0, 6).map((url, i) => (
                   <div
                     key={url}
-                    className={`relative overflow-hidden bg-gray-200 dark:bg-neutral-700 ${
+                    className={`relative overflow-hidden bg-muted ${
                       gallery.length === 3 && i === 0
                         ? "col-span-2 row-span-2 aspect-square"
                         : gallery.length >= 4 && i === 0
@@ -171,48 +171,56 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
                   </div>
                 ))}
               </div>
-            </div>
-          )}
-
-          {!hideSidebarSections && hasTrustBlock && (
-            <Card className="mx-4 mb-4 border-dashed bg-muted/30 md:mx-0">
-              <CardContent className="grid gap-4 p-4 text-sm sm:grid-cols-2">
-                {business.cancellationPolicy && (
-                  <div className="space-y-1">
-                    <p className="font-medium text-foreground">{copy.cancellationPolicy}</p>
-                    <p className="text-muted-foreground">{business.cancellationPolicy}</p>
-                  </div>
-                )}
-                {business.depositPolicy && (
-                  <div className="space-y-1">
-                    <p className="font-medium text-foreground">{copy.depositPolicy}</p>
-                    <p className="text-muted-foreground">{business.depositPolicy}</p>
-                  </div>
-                )}
-                {business.bankTransferInstructions && (
-                  <div className="space-y-1 sm:col-span-2">
-                    <p className="font-medium text-foreground">{copy.localPayment}</p>
-                    <p className="text-muted-foreground">{business.bankTransferInstructions}</p>
-                  </div>
-                )}
-              </CardContent>
             </Card>
           )}
 
+          {!hideSidebarSections && hasTrustBlock && (
+            <>
+              <BookingPolicyAccordion
+                copy={copy}
+                cancellationPolicy={business.cancellationPolicy}
+                depositPolicy={business.depositPolicy}
+                bankTransferInstructions={business.bankTransferInstructions}
+              />
+              <Card className="mx-0 mb-4 hidden border-dashed bg-muted/30 md:mx-0 md:block">
+                <CardContent className="grid gap-4 p-4 text-sm sm:grid-cols-2">
+                  {business.cancellationPolicy && (
+                    <div className="space-y-1">
+                      <p className="font-medium text-foreground">{copy.cancellationPolicy}</p>
+                      <p className="text-muted-foreground">{business.cancellationPolicy}</p>
+                    </div>
+                  )}
+                  {business.depositPolicy && (
+                    <div className="space-y-1">
+                      <p className="font-medium text-foreground">{copy.depositPolicy}</p>
+                      <p className="text-muted-foreground">{business.depositPolicy}</p>
+                    </div>
+                  )}
+                  {business.bankTransferInstructions && (
+                    <div className="space-y-1 sm:col-span-2">
+                      <p className="font-medium text-foreground">{copy.localPayment}</p>
+                      <p className="text-muted-foreground">{business.bankTransferInstructions}</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </>
+          )}
+
           {showHub && (
-            <BookingServiceHub businessSlug={business.slug} businessName={business.name} businessLogoUrl={business.logoUrl} services={services} copy={copy} />
+            <BookingServiceHub
+              businessSlug={business.slug}
+              businessName={business.name}
+              businessLogoUrl={business.logoUrl}
+              services={services}
+              copy={copy}
+              avgRating={avgRating}
+              reviewCount={reviewCount}
+            />
           )}
 
           {showWizard && (
-            <>
-              <BookingMobileTrustStrip
-                description={business.description}
-                avgRating={avgRating}
-                reviewCount={reviewCount}
-                cancellationPolicy={business.cancellationPolicy}
-                securedLabel={copy.securedByPayHere}
-              />
-              <BookingWizard
+            <BookingWizard
               business={{
                 id: business.id,
                 accentColor: business.accentColor,
@@ -243,12 +251,14 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
               lockServiceSelection={mode === "service" && Boolean(serviceSlug)}
               embedMode={mode === "embed"}
               calendarOverlayConfig={calendarOverlayConfig}
+              avgRating={avgRating}
+              reviewCount={reviewCount}
+              businessDescription={business.description}
             />
-            </>
           )}
 
           {!hideSidebarSections && hasAboutSection && (
-            <Card className="mt-6 hidden md:block">
+            <Card className="mt-0 overflow-hidden rounded-none border-x-0 shadow-none md:mt-6 md:rounded-xl md:border-x md:shadow-sm">
               <CardContent className="p-6">
                 {avgRating !== null && reviewCount > 0 && (
                   <div className="mb-4 flex items-center gap-2">
@@ -267,8 +277,8 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
           )}
 
           {!hideSidebarSections && staffWithBio.length > 0 && (
-            <section className="mt-6 px-4 md:px-0">
-              <Card className="overflow-hidden py-0">
+            <section className="md:px-0">
+              <Card className="mt-0 overflow-hidden rounded-none border-x-0 py-0 shadow-none md:mt-6 md:rounded-xl md:border-x md:shadow-sm">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base">Meet the team</CardTitle>
                 </CardHeader>
@@ -322,8 +332,8 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
           )}
 
           {!hideSidebarSections && reviewList.length > 0 && (
-            <section className="mt-8 space-y-4 px-4 pb-8 md:px-0">
-              <div>
+            <section className="space-y-4 px-0 pb-8 md:px-0">
+              <div className="border-b border-border bg-card px-4 py-4 md:border-0 md:bg-transparent md:px-0 md:py-0">
                 <h2 className="font-cal text-lg text-foreground">Reviews</h2>
                 {avgRating !== null && (
                   <div className="mt-1 flex items-center gap-2">
@@ -332,9 +342,12 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
                   </div>
                 )}
               </div>
-              <div className="space-y-3">
+              <div className="space-y-0 md:space-y-3">
                 {reviewList.map((review) => (
-                  <Card key={review.id}>
+                  <Card
+                    key={review.id}
+                    className="rounded-none border-x-0 border-t-0 shadow-none md:rounded-xl md:border md:shadow-sm"
+                  >
                     <CardContent className="p-4">
                       <div className="mb-2 flex items-start justify-between gap-2">
                         <div>
