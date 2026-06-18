@@ -53,9 +53,9 @@ export const serviceUpdateSchema = z
       .max(2000)
       .refine(
         (value) =>
-        !value ||
-        /^https:\/\/[^\s/$.?#].[^\s]*$/i.test(value) ||
-        /^\/(?!\/)[a-zA-Z0-9/_\-?=&%.]*$/.test(value),
+          !value ||
+          /^https:\/\/[^\s/$.?#].[^\s]*$/i.test(value) ||
+          /^\/(?!\/)[a-zA-Z0-9/_\-?=&%.]*$/.test(value),
         { message: "Enter an https:// URL or a same-site path starting with /." },
       )
       .optional()

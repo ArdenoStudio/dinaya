@@ -2,9 +2,9 @@
 
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
-import { AnimatePresence, LazyMotion, domAnimation } from "motion/react";
+import { Icon } from "@/components/ui/Icon";
 import type { Location, Staff } from "@/db/schema";
 import type { IntakeQuestion } from "@/lib/intake";
 import type { BookingRouter } from "@/lib/booking-router";
@@ -12,41 +12,35 @@ import StepService from "./StepService";
 import StepLocation from "./StepLocation";
 import StepDateTime from "./StepDateTime";
 import StepConfirm from "./StepConfirm";
-import { BookingPanel } from "./BookingPanel";
+import StaffPicker from "./StaffPicker";
+import BookingDesktopSummary from "./BookingDesktopSummary";
 import { BookingTheme } from "./BookingTheme";
 import { useBookingUrlState, useBookingUrlSync, useStripBookingContactFromUrl } from "./useBookingUrlState";
 import { useSlotHold } from "./useSlotHold";
 import { getBookingCopy } from "@/lib/i18n";
 import { getEligibleStaff, pickDefaultStaff } from "@/lib/booking-staff";
+import { formatLkr } from "@/lib/utils";
+import { trackBookingStart } from "@/lib/analytics/gtag";
+import { BusinessAvatar } from "./BusinessAvatar";
+import BookingBranding from "./BookingBranding";
 import { BookingAttributionCapture } from "./BookingAttributionCapture";
 import { BookingDealsSection } from "./BookingDealsSection";
 import type { DealListItem } from "@/lib/deals/queries";
+import { computeDiscountedPrice } from "@/lib/deals/pricing";
+import {
+  indexToStep,
+  stepToIndex,
+  type BookingStep,
+} from "./booking-steps";
 import { useBookingContactStorage } from "./useBookingContactStorage";
+import BookingStepTransition from "./BookingStepTransition";
 import { applyEmbedThemeFromQuery, postEmbedEvent } from "./embed-events";
-import { trackBookingStart } from "@/lib/analytics/gtag";
-import { fadeInLeft } from "@/lib/booking/booking-animations";
-import { BusinessAvatar } from "./BusinessAvatar";
-import { ServiceMetaPanel } from "./ServiceMetaPanel";
-import BookingBranding from "./BookingBranding";
-import { SlotListPanel } from "./SlotListPanel";
-import { SlotPickerSheet } from "./SlotPickerSheet";
-import { FormPanel } from "./FormPanel";
-import type { SlotEmptyState, SlotOption } from "./TimeSlotGrid";
 import {
   useGoogleCalendarOverlay,
   type CalendarOverlayConfig,
 } from "./useGoogleCalendarOverlay";
 
-export type BookingUIState =
-  | "selecting_service"
-  | "selecting_date"
-  | "selecting_time"
-  | "booking";
-
 const COLOMBO_TZ = "Asia/Colombo";
-
-const CARD_CLS =
-  "min-w-0 overflow-hidden md:rounded-2xl md:border md:border-gray-100 dark:border-neutral-800 md:bg-white dark:md:bg-neutral-900 md:shadow-[0_8px_24px_-4px_rgba(0,0,0,0.07),0_2px_8px_-2px_rgba(0,0,0,0.04)] dark:md:shadow-[0_8px_32px_-8px_rgba(0,0,0,0.5)]";
 
 interface Props {
   business: BookingBusiness;
@@ -145,10 +139,11 @@ function BookingWizardInner({
   const timezone = business.timezone ?? COLOMBO_TZ;
   const { state: urlState } = useBookingUrlState();
   const needsLocationPicker = locations.length > 1;
+  const progressSteps = [copy.service, copy.dateTime, copy.confirm];
 
-  const [uiState, setUiState] = useState<BookingUIState>(
-    initialService ? "selecting_time" : "selecting_service",
-  );
+  const initialStep: BookingStep = initialService ? "dateTime" : "service";
+  const [step, setStep] = useState<BookingStep>(initialStep);
+  const stepIndex = stepToIndex(step);
   const defaultLocation = locations.length === 1 ? locations[0]! : null;
   const todayStr = format(toZonedTime(new Date(), timezone), "yyyy-MM-dd");
 
@@ -160,6 +155,7 @@ function BookingWizardInner({
     const matchedStaff = urlState.staffId
       ? staff.find((s) => s.id === urlState.staffId) ?? preStaff
       : preStaff;
+
     return {
       location: defaultLocation,
       service: preselected,
@@ -182,11 +178,8 @@ function BookingWizardInner({
   const [selectedDealId, setSelectedDealId] = useState<string | null>(
     initialDealId ?? urlState.dealId ?? null,
   );
+
   const [anyStaff, setAnyStaff] = useState(false);
-  const [wizardSlots, setWizardSlots] = useState<SlotOption[]>([]);
-  const [wizardLoadingSlots, setWizardLoadingSlots] = useState(false);
-  const [wizardSlotEmptyState, setWizardSlotEmptyState] = useState<SlotEmptyState>("none");
-  const [isMobile, setIsMobile] = useState(false);
   const [calendarViewMonth, setCalendarViewMonth] = useState(() =>
     format(toZonedTime(new Date(), timezone), "yyyy-MM"),
   );
@@ -196,13 +189,6 @@ function BookingWizardInner({
     viewMonth: calendarViewMonth,
     timezone,
   });
-
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768);
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
-  }, []);
 
   const slotHold = useSlotHold({
     businessId: business.id,
@@ -229,7 +215,11 @@ function BookingWizardInner({
 
   useEffect(() => {
     if (!embedMode || !state.service) return;
-    postEmbedEvent({ type: "dinaya:booking_started", slug: business.slug, serviceId: state.service.id });
+    postEmbedEvent({
+      type: "dinaya:booking_started",
+      slug: business.slug,
+      serviceId: state.service.id,
+    });
   }, [business.slug, embedMode, state.service]);
 
   const selectedDeal = useMemo(
@@ -285,7 +275,11 @@ function BookingWizardInner({
   }
 
   const contactFields = useMemo(
-    () => ({ clientName: state.clientName, clientPhone: state.clientPhone, clientEmail: state.clientEmail }),
+    () => ({
+      clientName: state.clientName,
+      clientPhone: state.clientPhone,
+      clientEmail: state.clientEmail,
+    }),
     [state.clientName, state.clientPhone, state.clientEmail],
   );
 
@@ -317,7 +311,6 @@ function BookingWizardInner({
         timeSlotEnd: slot.endUtc,
         timeLabel: slot.label,
       }));
-      setUiState("booking");
     },
     [slotHold, staff, state.staff],
   );
@@ -326,12 +319,21 @@ function BookingWizardInner({
     (service: BookingService) => {
       markBookingStart(false, service.id);
       const defaultStaff = pickDefaultStaff(staff, staffServiceMap, service.id, staffLocationMap, state.location?.id);
-      update({ service, staff: defaultStaff, date: todayStr, timeSlot: "", timeSlotEnd: "", timeLabel: "" });
+      update({
+        service,
+        staff: defaultStaff,
+        date: todayStr,
+        timeSlot: "",
+        timeSlotEnd: "",
+        timeLabel: "",
+      });
       setSelectedSlot(null);
       setAnyStaff(false);
       void slotHold.releaseHold();
       setSelectedDealId(null);
-      setUiState("selecting_date");
+      if (typeof window !== "undefined" && window.innerWidth < 768) {
+        setStep("dateTime");
+      }
     },
     [staff, staffServiceMap, staffLocationMap, state.location?.id, todayStr, slotHold, markBookingStart],
   );
@@ -351,11 +353,21 @@ function BookingWizardInner({
         ? eligibleStaff.find((member) => member.id === deal.staffId) ?? null
         : pickDefaultStaff(staff, staffServiceMap, deal.serviceId, staffLocationMap, location?.id);
 
-      update({ location: location ?? null, service, staff: dealStaff, date: todayStr, timeSlot: "", timeSlotEnd: "", timeLabel: "" });
+      update({
+        location: location ?? null,
+        service,
+        staff: dealStaff,
+        date: todayStr,
+        timeSlot: "",
+        timeSlotEnd: "",
+        timeLabel: "",
+      });
       setSelectedSlot(null);
       setAnyStaff(false);
       void slotHold.releaseHold();
-      setUiState("selecting_date");
+      if (typeof window !== "undefined" && window.innerWidth < 768) {
+        setStep("dateTime");
+      }
     },
     [locations, services, staff, staffServiceMap, staffLocationMap, state.location, todayStr, slotHold, markBookingStart],
   );
@@ -366,227 +378,267 @@ function BookingWizardInner({
     if (deal) applyDeal(deal);
   }, [initialDealId, activeDeals, applyDeal]);
 
+  function goConfirm() {
+    if (!state.service || !selectedSlot || (!state.staff && !anyStaff)) return;
+    if (!state.staff) return;
+    if (needsLocationPicker && !state.location) return;
+    if (slotHold.slotUnavailable) return;
+    setStep("confirm");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
 
-  const gridStyle = useMemo((): React.CSSProperties => {
-    const vars = {
-      "--booker-meta-width": "280px",
-      "--booker-main-width": "480px",
-      "--booker-timeslots-width": "260px",
-      "--booker-meta-width-booking": "340px",
-      "--booker-main-width-booking": "420px",
-    } as React.CSSProperties;
+  const canProceedDesktop =
+    Boolean(
+      state.service &&
+        selectedSlot &&
+        state.staff &&
+        (!needsLocationPicker || state.location),
+    ) &&
+    step !== "confirm" &&
+    !slotHold.slotUnavailable;
 
-    if (uiState === "selecting_time") return {
-      ...vars,
-      gridTemplateAreas: `"meta main timeslots"`,
-      gridTemplateColumns: `var(--booker-meta-width) 1fr var(--booker-timeslots-width)`,
-    };
-    if (uiState === "booking") return {
-      ...vars,
-      gridTemplateAreas: `"meta main"`,
-      gridTemplateColumns: `var(--booker-meta-width-booking) var(--booker-main-width-booking)`,
-    };
-    return {
-      ...vars,
-      gridTemplateAreas: `"meta main"`,
-      gridTemplateColumns: `var(--booker-meta-width) var(--booker-main-width)`,
-    };
-  }, [uiState]);
+  const depositPreview = state.service
+    ? selectedDeal
+      ? computeDiscountedPrice(state.service.priceLkr, selectedDeal.discountPercent)
+      : state.service.depositPercent > 0
+        ? Math.ceil((state.service.priceLkr * state.service.depositPercent) / 100)
+        : state.service.priceLkr
+    : 0;
+
+  const desktopPayCta =
+    state.service?.requiresPayment && depositPreview > 0
+      ? `${copy.confirmAndPay} — ${formatLkr(depositPreview)}`
+      : copy.confirmAndPay;
+
+  const desktopSelectionLine = [
+    state.service?.name,
+    state.date && state.timeLabel
+      ? `${format(parseISO(state.date + "T12:00:00"), "d MMM")} · ${state.timeLabel}`
+      : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
   return (
     <BookingTheme accentColor={business.accentColor} embed={embedMode}>
-      {/* Service selection — full width, no grid */}
-      {uiState === "selecting_service" && (
-        <div className={CARD_CLS}>
-          <BookingAttributionCapture businessId={business.id} />
-          <BookingDealsSection deals={activeDeals} selectedDealId={selectedDealId} onSelectDeal={applyDeal} />
-          <div className="p-[14px] md:p-8">
-            <div className="mb-5 flex items-center gap-3">
-              <BusinessAvatar name={business.name} logoUrl={business.logoUrl} icon={businessIcon} size="md" />
+      <div className="min-w-0 md:overflow-hidden md:rounded-2xl md:border md:border-gray-100 dark:border-neutral-800/80 md:bg-white dark:md:bg-neutral-900 md:shadow-[0_24px_64px_-12px_var(--booking-accent-shadow),0_8px_24px_-8px_rgba(0,0,0,0.08)]">
+        <BookingAttributionCapture businessId={business.id} />
+        <BookingDealsSection
+          deals={activeDeals}
+          selectedDealId={selectedDealId}
+          onSelectDeal={applyDeal}
+        />
+
+        <div className="booking-bg-accent px-[18px] pt-5 pb-[18px] md:hidden">
+          <BusinessIdentity
+            name={business.name}
+            urlLabel={bookingUrlLabel}
+            logoUrl={business.logoUrl}
+            icon={businessIcon}
+          />
+          <ProgressPills steps={progressSteps} current={stepIndex} />
+        </div>
+
+        <div className="hidden booking-bg-accent md:block">
+          <div className="px-8 pb-6 pt-7">
+            <div className="flex items-center gap-4">
+              <BusinessAvatar
+                name={business.name}
+                logoUrl={business.logoUrl}
+                icon={businessIcon}
+                size="lg"
+                onDark
+              />
               <div className="min-w-0 flex-1">
-                <p className="font-semibold text-gray-900 dark:text-gray-100">{business.name}</p>
-                <p className="mt-0.5 text-xs text-gray-400 dark:text-gray-500">{bookingUrlLabel}</p>
+                <p className="text-[11px] font-semibold uppercase tracking-wider booking-text-accent-on-dark/90">
+                  {copy.bookAppointment}
+                </p>
+                <h2 className="mt-0.5 text-xl font-semibold tracking-tight text-white">
+                  {state.service?.name ?? business.name}
+                </h2>
+                {state.service && (
+                  <p className="mt-0.5 text-sm text-white/70">{business.name}</p>
+                )}
               </div>
+              <span className="flex shrink-0 items-center gap-1.5 font-mono text-xs booking-text-accent-on-dark/80">
+                <Icon name="lock-fill" className="text-[10px] booking-text-accent-on-dark" />
+                {bookingUrlLabel}
+              </span>
             </div>
-            {needsLocationPicker && (
-              <StepLocation
-                locations={locations}
-                selected={state.location}
-                copy={copy}
-                onSelect={(location) => {
-                  update({ location, service: lockServiceSelection ? state.service : null, staff: null, timeSlot: "", timeSlotEnd: "", timeLabel: "" });
-                  setSelectedSlot(null);
-                  void slotHold.releaseHold();
+            <div className="mt-6 border-t border-white/10 pt-5">
+              <DesktopProgressBar
+                steps={progressSteps}
+                current={stepIndex}
+                variant="dark"
+                onStepClick={(i) => {
+                  const target = indexToStep(i);
+                  if (i < stepIndex) setStep(target);
                 }}
               />
-            )}
-            <StepService services={services} selected={state.service} copy={copy} bookingRouter={bookingRouter} onSelect={selectService} />
+            </div>
           </div>
-          {showBranding && <BookingBranding copy={copy} hideBranding={business.hideBranding} />}
         </div>
-      )}
 
-      {/* Grid layout — selecting_date, selecting_time, booking */}
-      {uiState !== "selecting_service" && (
-        <div className={CARD_CLS}>
-          <BookingAttributionCapture businessId={business.id} />
-          <LazyMotion features={domAnimation}>
-            <div
-              className="block md:grid md:items-start md:transition-[width] md:duration-300 md:motion-reduce:transition-none"
-              style={gridStyle}
-            >
-              <AnimatePresence>
-                {/* Meta panel — always shown in grid states */}
-                <BookingPanel
-                  key="meta"
-                  area="meta"
-                  className="border-b border-gray-100 dark:border-neutral-800 p-[14px] md:sticky md:top-0 md:self-start md:border-b-0 md:border-r md:p-6"
-                >
-                  <ServiceMetaPanel
-                    business={business}
-                    bookingUrlLabel={bookingUrlLabel}
-                    businessIcon={businessIcon}
-                    service={state.service}
-                    staff={state.staff}
-                    anyStaff={anyStaff}
-                    allStaff={staff}
-                    staffServiceMap={staffServiceMap}
-                    staffLocationMap={staffLocationMap}
-                    locations={locations}
-                    needsLocationPicker={needsLocationPicker}
-                    selectedLocation={state.location}
-                    needsStaffPicker={needsStaffPicker}
-                    selectedDate={state.date}
-                    timeLabel={state.timeLabel}
-                    holdLabel={slotHold.holdLabel}
-                    slotUnavailable={slotHold.slotUnavailable}
-                    selectedDeal={selectedDeal}
-                    activeDeals={activeDeals}
-                    copy={copy}
-                    showBranding={showBranding}
-                    hideBranding={business.hideBranding}
-                    lockServiceSelection={lockServiceSelection}
-                    onSelectDeal={applyDeal}
-                    onSelectStaff={(s) => {
-                      setAnyStaff(false);
-                      update({ staff: s, timeSlot: "", timeSlotEnd: "", timeLabel: "" });
-                      setSelectedSlot(null);
-                      void slotHold.releaseHold();
-                    }}
-                    onSelectAnyStaff={() => {
-                      setAnyStaff(true);
-                      update({ staff: null, timeSlot: "", timeSlotEnd: "", timeLabel: "" });
-                      setSelectedSlot(null);
-                      void slotHold.releaseHold();
-                    }}
-                    onSelectLocation={(loc) => {
-                      update({ location: loc, service: lockServiceSelection ? state.service : null, staff: null, timeSlot: "", timeSlotEnd: "", timeLabel: "" });
-                      setSelectedSlot(null);
-                      void slotHold.releaseHold();
-                    }}
-                    onChangeService={!lockServiceSelection ? () => setUiState("selecting_service") : undefined}
-                  />
-                </BookingPanel>
+        <BookingStepTransition step={step}>
+        {step !== "confirm" && (
+          <>
+            <div className="md:px-8 md:py-7">
+              <div className="grid gap-0 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] md:gap-8 lg:gap-10">
+                <div className="border-b border-gray-100 dark:border-neutral-800 p-[14px] md:flex md:flex-col md:border-0 md:p-0">
+                  {needsLocationPicker && (
+                    <StepLocation
+                      locations={locations}
+                      selected={state.location}
+                      copy={copy}
+                      onSelect={(location) => {
+                        update({
+                          location,
+                          service: lockServiceSelection ? state.service : null,
+                          staff: null,
+                          timeSlot: "",
+                          timeSlotEnd: "",
+                          timeLabel: "",
+                        });
+                        setSelectedSlot(null);
+                        void slotHold.releaseHold();
+                      }}
+                    />
+                  )}
 
-                {/* Main panel — date selection */}
-                {(uiState === "selecting_date" || uiState === "selecting_time") && (
-                  <BookingPanel
-                    key="main"
-                    area="main"
-                    {...fadeInLeft}
-                    className="min-w-0 p-[14px] md:p-6"
-                  >
-                    <StepDateTime
-                      businessId={business.id}
+                  {!lockServiceSelection && (
+                    <StepService
+                      services={services}
+                      selected={state.service}
+                      copy={copy}
+                      bookingRouter={bookingRouter}
+                      onSelect={selectService}
+                    />
+                  )}
+
+                  {lockServiceSelection && state.service && (
+                    <div className="mb-5 rounded-xl border border-gray-100 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-900/60 p-4">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                        {copy.service}
+                      </p>
+                      <p className="mt-1 text-base font-semibold text-gray-900 dark:text-gray-100">{state.service.name}</p>
+                      <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">
+                        {state.service.durationMinutes} min
+                        {state.service.priceLkr > 0 ? ` · ${formatLkr(state.service.priceLkr)}` : ""}
+                      </p>
+                    </div>
+                  )}
+
+                  {state.service && needsStaffPicker && (
+                    <StaffPicker
+                      allStaff={staff}
+                      staffServiceMap={staffServiceMap}
+                      staffLocationMap={staffLocationMap}
+                      locationId={state.location?.id}
+                      serviceId={state.service.id}
+                      selected={state.staff}
+                      anyStaffSelected={anyStaff}
+                      copy={copy}
+                      onSelect={(s) => {
+                        setAnyStaff(false);
+                        update({ staff: s, timeSlot: "", timeSlotEnd: "", timeLabel: "" });
+                        setSelectedSlot(null);
+                        void slotHold.releaseHold();
+                      }}
+                      onSelectAny={() => {
+                        setAnyStaff(true);
+                        update({ staff: null, timeSlot: "", timeSlotEnd: "", timeLabel: "" });
+                        setSelectedSlot(null);
+                        void slotHold.releaseHold();
+                      }}
+                      compact
+                    />
+                  )}
+
+                  {state.service && !state.staff && !anyStaff && !needsStaffPicker && (
+                    <p className="mt-3 text-center text-sm text-amber-600">{copy.noStaff}</p>
+                  )}
+
+                  <div className="hidden md:block">
+                    <BookingDesktopSummary
                       copy={copy}
                       service={state.service}
                       staff={state.staff}
                       anyStaff={anyStaff}
-                      locationId={state.location?.id}
-                      timezone={timezone}
-                      selectedDate={state.date}
-                      selectedSlot={selectedSlot}
-                      dealId={selectedDealId}
+                      date={state.date}
+                      timeLabel={state.timeLabel}
                       holdLabel={slotHold.holdLabel}
-                      slotUnavailable={slotHold.slotUnavailable}
-                      onDateChange={(date) => {
-                        update({ date, timeSlot: "", timeSlotEnd: "", timeLabel: "" });
-                        setSelectedSlot(null);
-                        void slotHold.releaseHold();
-                        if (uiState === "selecting_date") setUiState("selecting_time");
-                      }}
-                      onSlotSelect={selectSlot}
-                      onBack={!lockServiceSelection ? () => setUiState("selecting_service") : undefined}
-                      hideSlots
-                      onSlotsChange={(s, loading, emptyState) => {
-                        setWizardSlots(s);
-                        setWizardLoadingSlots(loading);
-                        setWizardSlotEmptyState(emptyState);
-                      }}
-                      onCalendarMonthChange={setCalendarViewMonth}
-                      calendarOverlay={calendarOverlay}
+                      selectedDeal={selectedDeal}
                     />
-                  </BookingPanel>
-                )}
+                  </div>
+                </div>
 
-                {/* Timeslots panel — desktop only; mobile uses SlotPickerSheet */}
-                {uiState === "selecting_time" && !isMobile && (
-                  <BookingPanel
-                    key="timeslots"
-                    area="timeslots"
-                    {...fadeInLeft}
-                    className="border-l border-gray-100 dark:border-neutral-800 p-5"
-                  >
-                    <SlotListPanel
-                      slots={wizardSlots}
-                      selectedStartUtc={selectedSlot?.startUtc ?? null}
-                      copy={copy}
-                      onSelect={selectSlot}
-                      loading={wizardLoadingSlots}
-                      emptyState={wizardSlotEmptyState}
-                      timezone={timezone}
-                      busyTimes={calendarOverlay.busyTimes}
-                    />
-                  </BookingPanel>
-                )}
-
-                {/* Form panel — booking state */}
-                {uiState === "booking" && (
-                  <BookingPanel key="main-form" area="main" {...fadeInLeft}>
-                    <FormPanel>
-                      <StepConfirm
-                        state={state}
-                        business={business}
-                        copy={copy}
-                        selectedDeal={selectedDeal}
-                        sessionToken={slotHold.sessionToken}
-                        onUpdate={update}
-                        onBack={() => setUiState("selecting_time")}
-                        onConfirmed={handleConfirmed}
-                      />
-                    </FormPanel>
-                  </BookingPanel>
-                )}
-              </AnimatePresence>
+                <div className="min-w-0 booking-panel-bg p-[14px] md:flex md:flex-col md:rounded-2xl md:border md:border-gray-100 dark:border-neutral-800 md:bg-gray-50 dark:md:bg-neutral-900/60 md:p-5">
+                  <StepDateTime
+                    businessId={business.id}
+                    copy={copy}
+                    service={state.service}
+                    staff={state.staff}
+                    anyStaff={anyStaff}
+                    locationId={state.location?.id}
+                    timezone={timezone}
+                    selectedDate={state.date}
+                    selectedSlot={selectedSlot}
+                    dealId={selectedDealId}
+                    holdLabel={slotHold.holdLabel}
+                    slotUnavailable={slotHold.slotUnavailable}
+                    onDateChange={(date) => {
+                      update({ date, timeSlot: "", timeSlotEnd: "", timeLabel: "" });
+                      setSelectedSlot(null);
+                      void slotHold.releaseHold();
+                    }}
+                    onSlotSelect={selectSlot}
+                    showContinue={step === "dateTime"}
+                    onContinue={goConfirm}
+                    onBack={() => setStep(lockServiceSelection ? "dateTime" : "service")}
+                    onCalendarMonthChange={setCalendarViewMonth}
+                    calendarOverlay={calendarOverlay}
+                  />
+                </div>
+              </div>
             </div>
-          </LazyMotion>
 
-          {/* Mobile slot picker bottom sheet */}
-          <SlotPickerSheet
-            open={isMobile && uiState === "selecting_time"}
-            onClose={() => setUiState("selecting_date")}
-            selectedDate={state.date}
-            slots={wizardSlots}
-            selectedStartUtc={selectedSlot?.startUtc ?? null}
+            <div className="hidden border-t border-gray-100 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-900/60 px-8 py-5 md:flex md:items-center md:gap-6">
+              <div className="min-w-0 flex-1">
+                {desktopSelectionLine ? (
+                  <p className="truncate text-sm font-medium text-gray-700 dark:text-gray-300">{desktopSelectionLine}</p>
+                ) : (
+                  <p className="text-sm text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">{copy.selectServiceHint}</p>
+                )}
+                <p className="mt-0.5 text-xs text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">{copy.securedByPayHere}</p>
+              </div>
+              <button
+                type="button"
+                onClick={goConfirm}
+                disabled={!canProceedDesktop || slotHold.holding}
+                className="shrink-0 rounded-xl booking-gradient-accent px-8 py-3.5 text-sm font-semibold text-white booking-shadow-accent transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                {desktopPayCta}
+              </button>
+            </div>
+          </>
+        )}
+
+        {step === "confirm" && (
+          <StepConfirm
+            state={state}
+            business={business}
             copy={copy}
-            onSelect={selectSlot}
-            loading={wizardLoadingSlots}
-            emptyState={wizardSlotEmptyState}
-            timezone={timezone}
-            calendarOverlay={calendarOverlay}
+            selectedDeal={selectedDeal}
+            sessionToken={slotHold.sessionToken}
+            onUpdate={update}
+            onBack={() => setStep("dateTime")}
+            onConfirmed={handleConfirmed}
           />
-        </div>
-      )}
+        )}
+        </BookingStepTransition>
+
+        {showBranding && <BookingBranding copy={copy} hideBranding={business.hideBranding} />}
+      </div>
     </BookingTheme>
   );
 }
@@ -596,5 +648,147 @@ export default function BookingWizard(props: Props) {
     <Suspense fallback={<div className="min-h-[320px] animate-pulse rounded-2xl bg-gray-100 dark:bg-neutral-800" />}>
       <BookingWizardInner {...props} />
     </Suspense>
+  );
+}
+
+function DesktopProgressBar({
+  steps,
+  current,
+  variant = "light",
+  onStepClick,
+}: {
+  steps: string[];
+  current: number;
+  variant?: "light" | "dark";
+  onStepClick?: (index: number) => void;
+}) {
+  const dark = variant === "dark";
+
+  return (
+    <ol className="flex w-full items-center">
+      {steps.map((label, i) => {
+        const done = i < current;
+        const active = i === current;
+        const canNavigate = done && onStepClick;
+
+        const stepControl = (
+          <>
+            <span
+              className={`flex size-9 shrink-0 items-center justify-center rounded-full text-sm font-bold transition-colors ${
+                dark
+                  ? active
+                    ? "bg-white booking-text-accent shadow-lg shadow-black/10"
+                    : done
+                      ? "bg-white/25 text-white"
+                      : "bg-white/10 text-white/50 ring-1 ring-white/20"
+                  : active
+                    ? "booking-bg-accent text-white booking-shadow-accent"
+                    : done
+                      ? "booking-bg-accent text-white"
+                      : "bg-white dark:bg-neutral-900 text-gray-400 dark:text-gray-500 ring-1 ring-gray-200 dark:ring-neutral-700"
+              }`}
+            >
+              {done ? <Icon name="check-lg" className="text-xs" /> : i + 1}
+            </span>
+            <span
+              className={`whitespace-nowrap text-sm font-semibold ${
+                dark
+                  ? active
+                    ? "text-white"
+                    : done
+                      ? "text-white/90"
+                      : "text-white/45"
+                  : active
+                    ? "text-gray-900 dark:text-gray-100"
+                    : done
+                      ? "booking-text-accent"
+                      : "text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500"
+              }`}
+            >
+              {label}
+            </span>
+          </>
+        );
+
+        return (
+          <li key={label} className={`flex items-center ${i < steps.length - 1 ? "flex-1" : ""}`}>
+            {canNavigate ? (
+              <button
+                type="button"
+                onClick={() => onStepClick(i)}
+                className="flex items-center gap-3 rounded-lg transition-opacity hover:opacity-90"
+              >
+                {stepControl}
+              </button>
+            ) : (
+              <div className="flex items-center gap-3">{stepControl}</div>
+            )}
+            {i < steps.length - 1 && (
+              <div
+                className={`mx-4 h-0.5 min-w-[2rem] flex-1 rounded-full ${
+                  dark ? (done ? "bg-white/50" : "bg-white/20") : done ? "booking-bg-accent" : "bg-gray-200 dark:bg-neutral-700"
+                }`}
+              />
+            )}
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
+function ProgressPills({ steps, current }: { steps: string[]; current: number }) {
+  return (
+    <div className="flex items-center gap-[7px]">
+      {steps.map((label, i) => {
+        const done = i < current;
+        const active = i === current;
+        return (
+          <div key={label} className="flex items-center gap-[7px]">
+            <div
+              className={`flex items-center gap-[5px] rounded-full px-[9px] py-[5px] text-[11px] font-semibold ${
+                active
+                  ? "bg-white booking-text-accent shadow-sm"
+                  : done
+                    ? "bg-white/20 text-white/75"
+                    : "bg-white/10 text-white/50"
+              }`}
+            >
+              {done ? (
+                <Icon name="check-lg" className="text-[9px]" />
+              ) : (
+                <span
+                  className={`inline-block size-[8px] rounded-full ${active ? "bg-white/60" : "bg-white/30"}`}
+                />
+              )}
+              {label}
+            </div>
+            {i < steps.length - 1 && <div className="h-px w-[8px] shrink-0 bg-white/25" />}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function BusinessIdentity({
+  name,
+  urlLabel,
+  logoUrl,
+  icon,
+}: {
+  name: string;
+  urlLabel: string;
+  logoUrl?: string | null;
+  icon?: string | null;
+}) {
+  return (
+    <div className="mb-[14px] flex items-center gap-[12px]">
+      <BusinessAvatar name={name} logoUrl={logoUrl} icon={icon} size="md" />
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-[16px] font-semibold leading-tight text-white">{name}</p>
+        <p className="mt-[2px] truncate text-[11px] booking-text-accent-on-dark/80">{urlLabel}</p>
+      </div>
+    </div>
   );
 }
