@@ -6,6 +6,10 @@ import { formatBookingCopy, type BookingCopy } from "@/lib/i18n";
 export const BOOKING_REVIEWS_SECTION_ID = "booking-reviews";
 export const HIGH_RATING_THRESHOLD = 4.5;
 
+export function shouldShowReviewCount(avgRating: number, showCount?: boolean) {
+  return showCount ?? avgRating < HIGH_RATING_THRESHOLD;
+}
+
 interface BusinessRatingProps {
   avgRating: number;
   reviewCount: number;
@@ -54,8 +58,7 @@ export function BusinessRating({
 }: BusinessRatingProps) {
   if (reviewCount <= 0) return null;
 
-  const isHighRating = avgRating >= HIGH_RATING_THRESHOLD;
-  const showReviewCount = showCount ?? !isHighRating;
+  const showReviewCount = shouldShowReviewCount(avgRating, showCount);
   const textClass = size === "md" ? "text-sm" : "text-xs";
   const ariaLabel = ratingAriaLabel(copy, avgRating, reviewCount, showReviewCount);
 

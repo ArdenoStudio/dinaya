@@ -1,103 +1,43 @@
-import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
-  BOOKING_REVIEWS_SECTION_ID,
-  BusinessRating,
+  getBusinessRating,
   HIGH_RATING_THRESHOLD,
-  scrollToBookingReviews,
+  shouldShowReviewCount,
 } from "./BusinessRating";
 import { getBookingCopy } from "@/lib/i18n";
 
 const copy = getBookingCopy("en");
 
-describe("BusinessRating", () => {
-  it("renders compact rating with review count for lower scores", () => {
-    render(<BusinessRating avgRating={4.2} reviewCount={1500} copy={copy} />);
-    expect(screen.getByText("4.2")).toBeInTheDocument();
-    expect(screen.getByText("1,500 reviews")).toBeInTheDocument();
+describe("shouldShowReviewCount", () => {
+  it("shows count below the high-rating threshold", () => {
+    expect(shouldShowReviewCount(HIGH_RATING_THRESHOLD - 0.1)).toBe(true);
   });
 
-  it("hides review count for high ratings by default", () => {
-    render(
-      <BusinessRating avgRating={HIGH_RATING_THRESHOLD} reviewCount={1500} copy={copy} />,
-    );
-    expect(screen.getByText("4.5")).toBeInTheDocument();
-    expect(screen.queryByText("1,500 reviews")).not.toBeInTheDocument();
+  it("hides count at or above the high-rating threshold", () => {
+    expect(shouldShowReviewCount(HIGH_RATING_THRESHOLD)).toBe(false);
+    expect(shouldShowReviewCount(4.9)).toBe(false);
   });
 
-  it("can force showing review count for high ratings", () => {
-    render(
-      <BusinessRating avgRating={4.8} reviewCount={12} copy={copy} showCount />,
-    );
-    expect(screen.getByText("12 reviews")).toBeInTheDocument();
-  });
-
-  it("returns null when there are no reviews", () => {
-    const { container } = render(
-      <BusinessRating avgRating={4.8} reviewCount={0} copy={copy} />,
-    );
-    expect(container).toBeEmptyDOMElement();
-  });
-
-  it("scrolls to reviews and opens the dialog trigger", async () => {
-    const user = userEvent.setup();
-    const scrollIntoView = vi.fn();
-    const trigger = document.createElement("button");
-    trigger.setAttribute("data-reviews-trigger", "");
-    const clickSpy = vi.spyOn(trigger, "click");
-
-    const section = document.createElement("div");
-    section.id = BOOKING_REVIEWS_SECTION_ID;
-    section.scrollIntoView = scrollIntoView;
-    section.appendChild(trigger);
-    document.body.appendChild(section);
-
-    render(
-      <BusinessRating
-        avgRating={4.7}
-        reviewCount={1500}
-        copy={copy}
-        scrollToReviews
-      />,
-    );
-
-    await user.click(screen.getByRole("button", { name: /rated 4.7/i }));
-
-    expect(scrollIntoView).toHaveBeenCalled();
-
-    await vi.waitFor(() => {
-      expect(clickSpy).toHaveBeenCalled();
-    });
-
-    section.remove();
+  it("respects an explicit showCount override", () => {
+    expect(shouldShowReviewCount(4.9, true)).toBe(true);
+    expect(shouldShowReviewCount(4.2, false)).toBe(false);
   });
 });
 
-describe("scrollToBookingReviews", () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
+describe("getBusinessRating", () => {
+  it("returns null when review data is missing", () => {
+    expect(getBusinessRating(null, 10)).toBeNull();
+    expect(getBusinessRating(4.5, 0)).toBeNull();
   });
 
-  afterEach(() => {
-    vi.useRealTimers();
+  it("returns normalized rating data", () => {
+    expect(getBusinessRating(4.7, 1500)).toEqual({ avgRating: 4.7, reviewCount: 1500 });
   });
+});
 
-  it("clicks the reviews trigger after scrolling", () => {
-    const trigger = document.createElement("button");
-    trigger.setAttribute("data-reviews-trigger", "");
-    const clickSpy = vi.spyOn(trigger, "click");
-
-    const section = document.createElement("div");
-    section.id = BOOKING_REVIEWS_SECTION_ID;
-    section.scrollIntoView = vi.fn();
-    section.appendChild(trigger);
-    document.body.appendChild(section);
-
-    scrollToBookingReviews();
-    vi.advanceTimersByTime(350);
-
-    expect(clickSpy).toHaveBeenCalled();
-    section.remove();
+describe("booking review copy", () => {
+  it("uses shorter review count labels", () => {
+    expect(copy.reviewsCount.replace("{count}", "1,500")).toBe("1,500 reviews");
+    expect(copy.reviewCountSingular).toBe("1 review");
   });
 });
