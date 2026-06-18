@@ -5,7 +5,7 @@ import Image from "next/image";
 import { formatLkr, isOptimizableRemoteImage } from "@/lib/utils";
 import { buildServiceBookingPath } from "@/lib/booking-url";
 import { Icon } from "@/components/ui/Icon";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { BookingBusinessAvatar } from "./BookingBusinessAvatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -43,18 +43,13 @@ export default function BookingServiceHub({
     <div className="flex w-full flex-col gap-4 md:gap-5">
       <Card className={cardClass}>
         <CardHeader className="flex flex-row items-start gap-4 space-y-0 pb-4">
-          <Avatar className="size-14" data-size="lg">
-            {businessLogoUrl ? (
-              <AvatarImage
-                src={businessLogoUrl}
-                alt={businessName}
-                className="object-contain bg-white p-1"
-              />
-            ) : null}
-            <AvatarFallback className="bg-[var(--booking-accent-muted)] text-lg font-bold text-[var(--booking-accent)]">
-              {businessName.charAt(0).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
+          <BookingBusinessAvatar
+            name={businessName}
+            logoUrl={businessLogoUrl}
+            className="size-14"
+            imageClassName="p-1"
+            fallbackClassName="text-lg font-bold"
+          />
           <div className="min-w-0 flex-1 space-y-1">
             <CardTitle className="text-xl">{businessName}</CardTitle>
             <CardDescription>{copy.chooseServiceAndTime}</CardDescription>
@@ -64,6 +59,7 @@ export default function BookingServiceHub({
                 reviewCount={rating.reviewCount}
                 copy={copy}
                 size="sm"
+                scrollToReviews
                 className="pt-1"
               />
             )}

@@ -1,6 +1,6 @@
 "use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { BookingBusinessAvatar } from "./BookingBusinessAvatar";
 import { Badge } from "@/components/ui/badge";
 import { Icon } from "@/components/ui/Icon";
 import type { BookingCopy } from "@/lib/i18n";
@@ -43,12 +43,7 @@ export function BookingFlowHeader({
   return (
     <div className="border-b border-border px-4 py-4 md:hidden">
       <div className="flex items-start gap-3">
-        <Avatar className="size-10" data-size="lg">
-          {logoUrl ? <AvatarImage src={logoUrl} alt={businessName} /> : null}
-          <AvatarFallback className="bg-[var(--booking-accent-muted)] font-semibold text-[var(--booking-accent)]">
-            {businessName.charAt(0).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
+        <BookingBusinessAvatar name={businessName} logoUrl={logoUrl} className="size-10" />
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold text-foreground">{businessName}</p>
           {service ? (
@@ -84,6 +79,7 @@ export function BookingFlowHeader({
               reviewCount={rating.reviewCount}
               copy={copy}
               size="sm"
+              scrollToReviews
               className="mt-2"
             />
           ) : null}

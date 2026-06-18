@@ -7,6 +7,7 @@ import { Icon } from "@/components/ui/Icon";
 import { Button } from "@/components/ui/button";
 import { ReviewRatingSummary, type StarFilter } from "./ReviewRatingSummary";
 import { StarRating } from "./StarRating";
+import { BOOKING_REVIEWS_SECTION_ID } from "./BusinessRating";
 
 const PAGE_SIZE = 20;
 
@@ -102,21 +103,23 @@ export function BookingReviewsSection({
   }
 
   return (
-    <div className={className}>
+    <div id={BOOKING_REVIEWS_SECTION_ID} className={className}>
       <button
         type="button"
+        data-reviews-trigger
         onClick={openDialog}
-        className="group mx-auto flex items-center gap-3 rounded-full border border-border/60 bg-card/60 px-4 py-2 text-sm text-muted-foreground transition-colors hover:border-border hover:bg-card hover:text-foreground"
+        className="group mx-auto flex items-center gap-2 rounded-full border border-border/60 bg-card/60 px-4 py-2 text-xs text-muted-foreground transition-colors hover:border-border hover:bg-card hover:text-foreground"
       >
-        <span className="flex items-center gap-2">
-          <StarRating rating={avgRating} size="sm" />
-          <span className="font-semibold tabular-nums text-foreground">{avgRating.toFixed(1)}</span>
-        </span>
-        <span className="font-medium">
-          {copy.readReviews}
-          <span className="ml-1 font-normal text-muted-foreground">
-            ({reviewCount.toLocaleString()})
+        <span className="inline-flex items-center gap-1">
+          <span className="text-amber-500" aria-hidden>
+            ★
           </span>
+          <span className="tabular-nums text-foreground">{avgRating.toFixed(1)}</span>
+          <span className="text-muted-foreground/50" aria-hidden>
+            ·
+          </span>
+          <span className="font-medium">{copy.readReviews}</span>
+          <span className="tabular-nums">({reviewCount.toLocaleString()})</span>
         </span>
         <Icon name="chevron-right" className="text-xs opacity-50 transition-transform group-hover:translate-x-0.5" />
       </button>

@@ -9,7 +9,7 @@ import type { BookingCopy } from "@/lib/i18n";
 import type { DealListItem } from "@/lib/deals/queries";
 import { formatLkr } from "@/lib/utils";
 import { Icon } from "@/components/ui/Icon";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { BookingBusinessAvatar } from "./BookingBusinessAvatar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { fadeInUp } from "@/lib/booking/booking-animations";
@@ -93,14 +93,7 @@ export function ServiceMetaPanel({
   return (
     <div className="flex flex-col">
       <div className="flex items-start gap-3">
-        <Avatar className="size-10 shrink-0" data-size="lg">
-          {business.logoUrl ? (
-            <AvatarImage src={business.logoUrl} alt={business.name} className="object-contain bg-white p-0.5" />
-          ) : null}
-          <AvatarFallback className="bg-[var(--booking-accent-muted)] text-sm font-semibold text-[var(--booking-accent)]">
-            {business.name.charAt(0).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
+        <BookingBusinessAvatar name={business.name} logoUrl={business.logoUrl} className="size-10 shrink-0" />
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-medium text-foreground">{business.name}</p>
           {rating && (
@@ -109,6 +102,7 @@ export function ServiceMetaPanel({
               reviewCount={rating.reviewCount}
               copy={copy}
               size="sm"
+              scrollToReviews
               className="mt-1.5"
             />
           )}
