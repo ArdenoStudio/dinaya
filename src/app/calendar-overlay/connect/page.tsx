@@ -17,6 +17,7 @@ export default async function CalendarOverlayConnectPage({ searchParams }: Props
       clientId={clientId}
       targetOrigin={payload.origin}
       channel={payload.channel}
+      language={payload.language}
     />
   );
 }

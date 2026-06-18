@@ -18,6 +18,7 @@ Requires `DATABASE_URL` and `AUTH_SECRET` in `.env.local`.
 | Staff / location limits | `e2e/staff.spec.ts`, `e2e/locations.spec.ts` | Automated |
 | AI Hub toggles (Max) | `e2e/ai-hub.spec.ts` | Automated |
 | Public + dashboard booking | `e2e/booking-flow.spec.ts` | Automated |
+| Calendar overlay UI + connect page | `e2e/calendar-overlay.spec.ts` | Automated when `GOOGLE_CLIENT_ID` + ticket secret set |
 | API 402 gates | `e2e/manual-integration.spec.ts` | Automated |
 
 ## Manual only (needs sandbox credentials)
@@ -34,6 +35,7 @@ WHERE id = (SELECT business_id FROM users WHERE email = 'your@test.com' LIMIT 1)
 | PayHere deposit checkout | Smoke | Smoke | Smoke | `DINAYA_PAYHERE_*`, business PayHere in settings |
 | Billing upgrade (PayHere subscription) | N/A | Full flow | Full flow | PayHere sandbox + webhook |
 | Google Calendar OAuth connect | Blocked | Connect | Connect | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` |
+| Public booking calendar overlay | Hidden | Toggle + popup | Toggle + popup | `GOOGLE_CLIENT_ID`, canonical `NEXT_PUBLIC_APP_URL` in Google OAuth origins |
 | Custom domain verify | UI only | Add domain | Add domain | `VERCEL_TOKEN`, `VERCEL_PROJECT_ID_OR_NAME` |
 | WhatsApp / SMS automations send | Blocked | Channel visible | Channel visible | `META_WHATSAPP_*` or `SMS_HTTP_*` |
 | AI content generation (LLM output) | Blocked | Blocked | Generate draft | `GROQ_API_KEY` |

@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { GOOGLE_CALENDAR_FREE_BUSY_SCOPE } from "@/lib/google-calendar-overlay";
+import { getBookingCopy, type BookingLanguage } from "@/lib/i18n";
 
 type TokenResponse = {
   access_token?: string;
@@ -37,11 +38,14 @@ export default function CalendarOverlayConnector({
   clientId,
   targetOrigin,
   channel,
+  language = "en",
 }: {
   clientId: string;
   targetOrigin: string;
   channel: string;
+  language?: BookingLanguage;
 }) {
+  const copy = getBookingCopy(language);
   const [scriptReady, setScriptReady] = useState(false);
   const [connecting, setConnecting] = useState(false);
   const [error, setError] = useState(false);
@@ -122,10 +126,10 @@ export default function CalendarOverlayConnector({
         <CardHeader className="border-b border-gray-100 px-6 py-5 dark:border-neutral-800">
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-gray-400">Dinaya</p>
           <CardTitle className="mt-2 font-cal text-2xl tracking-tight text-gray-950 dark:text-white">
-            Compare your calendar
+            {copy.calendarConnectorTitle}
           </CardTitle>
           <CardDescription className="mt-2 text-sm leading-6">
-            Dinaya will read busy times from your primary Google Calendar for this booking tab.
+            {copy.calendarConnectorDescription}
           </CardDescription>
         </CardHeader>
 
@@ -136,11 +140,10 @@ export default function CalendarOverlayConnector({
             </span>
             <div>
               <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">
-                Read-only availability
+                {copy.calendarConnectorReadOnlyTitle}
               </p>
               <p className="mt-0.5 text-xs leading-5 text-gray-500 dark:text-gray-400">
-                Event names and details are not requested. The access token stays in the booking tab
-                and expires automatically.
+                {copy.calendarConnectorReadOnlyDescription}
               </p>
             </div>
           </div>
@@ -148,7 +151,7 @@ export default function CalendarOverlayConnector({
           {success ? (
             <div className="flex items-center justify-center gap-2 rounded-xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">
               <Icon name="check-circle-fill" aria-hidden="true" />
-              Calendar connected
+              {copy.calendarConnectorConnected}
             </div>
           ) : (
             <button
@@ -158,13 +161,17 @@ export default function CalendarOverlayConnector({
               className="flex w-full items-center justify-center gap-2 rounded-xl bg-gray-950 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-gray-800 disabled:cursor-wait disabled:opacity-60 dark:bg-white dark:text-gray-950 dark:hover:bg-gray-200"
             >
               <Icon name="calendar2-check" aria-hidden="true" />
-              {connecting ? "Opening Google…" : scriptReady ? "Continue with Google" : "Loading Google…"}
+              {connecting
+                ? copy.calendarConnectorOpening
+                : scriptReady
+                  ? copy.calendarConnectorContinue
+                  : copy.calendarConnectorLoading}
             </button>
           )}
 
           {error && !success && (
             <p className="mt-3 text-center text-xs text-amber-700 dark:text-amber-300">
-              Google Calendar could not be connected. You can close this window and try again.
+              {copy.calendarConnectorError}
             </p>
           )}
 
@@ -173,7 +180,7 @@ export default function CalendarOverlayConnector({
             onClick={() => window.close()}
             className="mt-4 w-full text-center text-xs font-medium text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
           >
-            Cancel
+            {copy.calendarConnectorCancel}
           </button>
         </CardContent>
       </Card>

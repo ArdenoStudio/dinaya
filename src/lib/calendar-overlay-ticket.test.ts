@@ -26,6 +26,17 @@ describe("calendar overlay connection tickets", () => {
     expect(verified).toMatchObject({
       origin: "https://salon.example.com",
       channel: created.channel,
+      language: "en",
+    });
+  });
+
+  it("stores the booking language on the ticket", () => {
+    const created = createCalendarOverlayTicket("https://salon.example.com", "si");
+    const verified = verifyCalendarOverlayTicket(created.ticket);
+
+    expect(verified).toMatchObject({
+      origin: "https://salon.example.com",
+      language: "si",
     });
   });
 

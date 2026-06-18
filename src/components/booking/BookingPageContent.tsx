@@ -39,6 +39,7 @@ type Props = {
 
 async function buildCalendarOverlayConfig(
   mode: Props["mode"],
+  language: string,
 ): Promise<CalendarOverlayConfig | null> {
   if (mode === "embed" || !process.env.GOOGLE_CLIENT_ID || !process.env.NEXT_PUBLIC_APP_URL) {
     return null;
@@ -54,7 +55,10 @@ async function buildCalendarOverlayConfig(
     const protocol =
       forwardedProto || (host.startsWith("localhost") || host.startsWith("127.0.0.1") ? "http" : "https");
     const origin = new URL(`${protocol}://${host}`).origin;
-    const { ticket, channel } = createCalendarOverlayTicket(origin);
+    const { ticket, channel } = createCalendarOverlayTicket(
+      origin,
+      language === "si" || language === "ta" ? language : "en",
+    );
     const connectUrl = new URL("/calendar-overlay/connect", process.env.NEXT_PUBLIC_APP_URL);
     connectUrl.searchParams.set("ticket", ticket);
     return { connectUrl: connectUrl.toString(), channel };
@@ -81,7 +85,7 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
   } = data;
 
   const copy = getBookingCopy(business.language);
-  const calendarOverlayConfig = await buildCalendarOverlayConfig(mode);
+  const calendarOverlayConfig = await buildCalendarOverlayConfig(mode, business.language);
   const gallery = business.galleryImages ?? [];
   const staffWithBio = staff.filter((s) => s.bio || s.avatarUrl);
   const instagramUrl = normalizePublicHttpsUrl(business.instagramUrl);

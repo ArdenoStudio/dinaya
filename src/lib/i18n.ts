@@ -134,6 +134,19 @@ export const bookingCopy = {
     calendarPrivacyHint: "Read-only · kept in this tab",
     tryAgain: "Try again",
     disconnect: "Disconnect",
+    calendarConnectorTitle: "Compare your calendar",
+    calendarConnectorDescription:
+      "Dinaya will read busy times from your primary Google Calendar for this booking tab.",
+    calendarConnectorReadOnlyTitle: "Read-only availability",
+    calendarConnectorReadOnlyDescription:
+      "Event names and details are not requested. The access token stays in the booking tab and expires automatically.",
+    calendarConnectorConnected: "Calendar connected",
+    calendarConnectorContinue: "Continue with Google",
+    calendarConnectorOpening: "Opening Google…",
+    calendarConnectorLoading: "Loading Google…",
+    calendarConnectorError:
+      "Google Calendar could not be connected. You can close this window and try again.",
+    calendarConnectorCancel: "Cancel",
     holidayName: "Holiday name",
     addHoliday: "Add holiday",
     businessHolidays: "Business holidays",
@@ -274,6 +287,19 @@ export const bookingCopy = {
     calendarPrivacyHint: "කියවීමට පමණයි · මෙම tab එකේ පමණයි",
     tryAgain: "නැවත උත්සාහ කරන්න",
     disconnect: "විසන්ධි කරන්න",
+    calendarConnectorTitle: "ඔබගේ දින දර්ශනය සංසන්දනය කරන්න",
+    calendarConnectorDescription:
+      "මෙම වෙන්කිරීම් ටැබ් එක සඳහා ඔබගේ ප්‍රාථමික Google දින දර්ශනයෙන් කාර්යබහුල වේලාවන් කියවනු ඇත.",
+    calendarConnectorReadOnlyTitle: "කියවීමට පමණි ලබාගැනීම",
+    calendarConnectorReadOnlyDescription:
+      "සිදුවීම් නම් හෝ විස්තර ඉල්ල නොකෙරේ. ප්‍රවේශ token එක වෙන්කිරීම් ටැබ් එකේ පමණක් තබා ගෙන ස්වයංක්‍රීයව කල් ඉකුත් වේ.",
+    calendarConnectorConnected: "දින දර්ශනය සම්බන්ධ විය",
+    calendarConnectorContinue: "Google සමඟ ඉදිරියට යන්න",
+    calendarConnectorOpening: "Google විවෘත කරමින්…",
+    calendarConnectorLoading: "Google පූරණය වෙමින්…",
+    calendarConnectorError:
+      "Google දින දර්ශනය සම්බන්ධ කළ නොහැකි විය. මෙම කවුළුව වසා නැවත උත්සාහ කරන්න.",
+    calendarConnectorCancel: "අවලංගු කරන්න",
     holidayName: "නිවාඩු දිනයේ නම",
     addHoliday: "නිවාඩු දිනයක් එක් කරන්න",
     businessHolidays: "ව්‍යාපාර නිවාඩු දින",
@@ -414,6 +440,19 @@ export const bookingCopy = {
     calendarPrivacyHint: "வாசிப்பு மட்டும் · இந்த tab-ல் மட்டும்",
     tryAgain: "மீண்டும் முயற்சி",
     disconnect: "துண்டிக்கவும்",
+    calendarConnectorTitle: "உங்கள் காலெண்டரை ஒப்பிடுங்கள்",
+    calendarConnectorDescription:
+      "இந்த முன்பதிவு தாவலுக்காக உங்கள் முதன்மை Google Calendar-ல் இருந்து பிஸியான நேரங்களை Dinaya படிக்கும்.",
+    calendarConnectorReadOnlyTitle: "வாசிப்பு மட்டும் அணுகல்",
+    calendarConnectorReadOnlyDescription:
+      "நிகழ்வு பெயர்கள் அல்லது விவரங்கள் கோரப்படவில்லை. அணுகல் token இந்த தாவலில் மட்டுமே இருக்கும் மற்றும் தானாக காலாவதியாகும்.",
+    calendarConnectorConnected: "காலெண்டர் இணைக்கப்பட்டது",
+    calendarConnectorContinue: "Google உடன் தொடரவும்",
+    calendarConnectorOpening: "Google திறக்கிறது…",
+    calendarConnectorLoading: "Google ஏற்றுகிறது…",
+    calendarConnectorError:
+      "Google Calendar-ஐ இணைக்க முடியவில்லை. இந்த சாளரத்தை மூடி மீண்டும் முயற்சிக்கவும்.",
+    calendarConnectorCancel: "ரத்து செய்",
     holidayName: "விடுமுறை பெயர்",
     addHoliday: "விடுமுறை சேர்",
     businessHolidays: "வணிக விடுமுறை நாட்கள்",

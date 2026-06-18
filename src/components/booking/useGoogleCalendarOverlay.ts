@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { addMonths, format, parseISO } from "date-fns";
 import {
   busyTimesForDate,
   countBusyDates,
@@ -48,10 +49,23 @@ export type GoogleCalendarOverlay = {
   disconnect: () => void;
 };
 
+function adjacentMonths(month: string): string[] {
+  if (!/^\d{4}-\d{2}$/.test(month)) return [];
+  const anchor = parseISO(`${month}-01T12:00:00`);
+  return [
+    format(addMonths(anchor, -1), "yyyy-MM"),
+    month,
+    format(addMonths(anchor, 1), "yyyy-MM"),
+  ];
+}
+
 function monthsToPrefetch(viewMonth: string | undefined, selectedDate: string): string[] {
   const months = new Set<string>();
-  if (viewMonth) months.add(viewMonth);
-  if (selectedDate) months.add(selectedDate.slice(0, 7));
+  for (const month of [viewMonth, selectedDate.slice(0, 7)].filter(Boolean) as string[]) {
+    for (const adjacent of adjacentMonths(month)) {
+      months.add(adjacent);
+    }
+  }
   return [...months];
 }
 
@@ -68,6 +82,7 @@ export function useGoogleCalendarOverlay(input: {
   const [error, setError] = useState<CalendarOverlayError | null>(null);
   const [monthBusyCache, setMonthBusyCache] = useState<Record<string, CalendarBusyTime[]>>({});
   const [refreshKey, setRefreshKey] = useState(0);
+  const fetchedMonthsRef = useRef<Record<string, number>>({});
   const tokenRef = useRef<{ value: string; expiresAt: number } | null>(null);
   const popupRef = useRef<Window | null>(null);
   const popupPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -177,12 +192,20 @@ export function useGoogleCalendarOverlay(input: {
       return;
     }
 
+    const monthsToFetch = prefetchMonths.filter(
+      (month) => fetchedMonthsRef.current[month] !== refreshKey,
+    );
+    if (monthsToFetch.length === 0) {
+      setLoading(false);
+      return;
+    }
+
     const controller = new AbortController();
     setLoading(true);
     setError(null);
 
     void Promise.all(
-      prefetchMonths.map((month) =>
+      monthsToFetch.map((month) =>
         fetchGoogleCalendarBusyMonth({
           accessToken: token.value,
           month,
@@ -197,6 +220,7 @@ export function useGoogleCalendarOverlay(input: {
           const next = { ...current };
           for (const [month, busyTimes] of results) {
             next[month] = busyTimes;
+            fetchedMonthsRef.current[month] = refreshKey;
           }
           return next;
         });
@@ -226,6 +250,7 @@ export function useGoogleCalendarOverlay(input: {
     setConnecting(false);
     setError(null);
     setMonthBusyCache({});
+    fetchedMonthsRef.current = {};
     stopPopupPolling();
     popupRef.current?.close();
     popupRef.current = null;

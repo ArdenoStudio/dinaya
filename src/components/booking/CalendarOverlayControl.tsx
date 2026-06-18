@@ -2,10 +2,29 @@
 
 import { useId } from "react";
 import { Icon } from "@/components/ui/Icon";
+import { Alert, AlertAction, AlertDescription } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import type { BookingCopy } from "@/lib/i18n";
 import type { GoogleCalendarOverlay } from "./useGoogleCalendarOverlay";
+
+function overlayErrorMessage(
+  copy: BookingCopy,
+  error: NonNullable<GoogleCalendarOverlay["error"]>,
+): string {
+  switch (error) {
+    case "popup_blocked":
+      return copy.calendarPopupBlocked;
+    case "popup_closed":
+      return copy.calendarPopupClosed;
+    case "permission_denied":
+      return copy.calendarPermissionDenied;
+    case "token_expired":
+      return copy.calendarTokenExpired;
+    default:
+      return copy.calendarOverlayError;
+  }
+}
 
 export function CalendarOverlayControl({
   copy,
@@ -54,7 +73,7 @@ export function CalendarOverlayControl({
         <Switch
           id={switchId}
           checked={overlay.enabled}
-          disabled={overlay.connecting}
+          disabled={overlay.connecting || overlay.loading}
           onCheckedChange={() => overlay.toggle()}
           aria-label={copy.overlayMyCalendar}
           className="h-6 w-11 shrink-0 data-[size=default]:h-6 data-[size=default]:w-11 data-checked:booking-bg-accent data-unchecked:bg-gray-200 dark:data-unchecked:bg-neutral-700"
@@ -62,26 +81,20 @@ export function CalendarOverlayControl({
       </div>
 
       {overlay.error && (
-        <div className="mt-2.5 flex items-center justify-between gap-3 border-t border-gray-200/70 pt-2.5 text-[11px] dark:border-neutral-800">
-          <span className="text-amber-700 dark:text-amber-300">
-            {overlay.error === "popup_blocked"
-              ? copy.calendarPopupBlocked
-              : overlay.error === "popup_closed"
-                ? copy.calendarPopupClosed
-                : overlay.error === "permission_denied"
-                  ? copy.calendarPermissionDenied
-                  : overlay.error === "token_expired"
-                    ? copy.calendarTokenExpired
-                    : copy.calendarOverlayError}
-          </span>
-          <button
-            type="button"
-            onClick={overlay.retry}
-            className="shrink-0 font-semibold booking-text-accent hover:underline"
-          >
-            {copy.tryAgain}
-          </button>
-        </div>
+        <Alert className="mt-2.5 border-amber-200/80 bg-amber-50/90 px-3 py-2.5 text-amber-800 dark:border-amber-800/50 dark:bg-amber-950/40 dark:text-amber-200">
+          <AlertDescription className="flex items-center justify-between gap-3 text-[11px] text-inherit">
+            <span>{overlayErrorMessage(copy, overlay.error)}</span>
+            <AlertAction className="static shrink-0">
+              <button
+                type="button"
+                onClick={overlay.retry}
+                className="font-semibold booking-text-accent hover:underline"
+              >
+                {copy.tryAgain}
+              </button>
+            </AlertAction>
+          </AlertDescription>
+        </Alert>
       )}
 
       {overlay.connected && !overlay.error && !compact && (

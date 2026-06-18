@@ -1,5 +1,6 @@
 import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import { getAppSecret } from "@/lib/app-secret";
+import type { BookingLanguage } from "@/lib/i18n";
 
 const TICKET_TTL_MS = 30 * 60 * 1000;
 
@@ -7,6 +8,7 @@ type CalendarOverlayTicketPayload = {
   origin: string;
   channel: string;
   exp: number;
+  language?: BookingLanguage;
 };
 
 function encode(input: string): string {
@@ -23,7 +25,10 @@ function sign(payload: string): string {
     .digest("base64url");
 }
 
-export function createCalendarOverlayTicket(origin: string): {
+export function createCalendarOverlayTicket(
+  origin: string,
+  language: BookingLanguage = "en",
+): {
   ticket: string;
   channel: string;
 } {
@@ -33,6 +38,7 @@ export function createCalendarOverlayTicket(origin: string): {
     JSON.stringify({
       origin: normalizedOrigin,
       channel,
+      language,
       exp: Date.now() + TICKET_TTL_MS,
     } satisfies CalendarOverlayTicketPayload),
   );
@@ -64,7 +70,9 @@ export function verifyCalendarOverlayTicket(
     const origin = new URL(parsed.origin);
     if (!["http:", "https:"].includes(origin.protocol)) return null;
     if (!parsed.channel || parsed.exp < Date.now()) return null;
-    return { ...parsed, origin: origin.origin };
+    const language =
+      parsed.language === "si" || parsed.language === "ta" ? parsed.language : "en";
+    return { ...parsed, origin: origin.origin, language };
   } catch {
     return null;
   }
