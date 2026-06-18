@@ -547,9 +547,13 @@ function BookingWizardInner({
             className="flex justify-center border-t border-border px-4 py-3"
           />
         )}
-
-        {showBranding && <BookingBranding copy={copy} hideBranding={business.hideBranding} />}
       </div>
+
+      {showBranding && (
+        <div className="mt-3 flex justify-center px-4 md:mt-4 md:px-0">
+          <BookingBranding copy={copy} hideBranding={business.hideBranding} />
+        </div>
+      )}
     </BookingTheme>
   );
 }

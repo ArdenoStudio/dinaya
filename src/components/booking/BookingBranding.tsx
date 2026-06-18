@@ -25,19 +25,17 @@ interface Props {
 export default function BookingBranding({ copy, hideBranding = false }: Props) {
   if (hideBranding) return null;
   return (
-    <div className="flex justify-center px-4 pb-4 pt-1 md:pb-5">
-      <Link
-        href="https://dinaya.lk"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/60 px-3.5 py-1.5 text-xs text-muted-foreground transition-colors hover:border-border hover:bg-card hover:text-foreground"
-      >
-        <span>{copy.poweredBy}</span>
-        <span className="inline-flex items-center gap-1.5 font-medium text-foreground">
-          <DinayaMark />
-          <span className="font-cal leading-none">Dinaya.lk</span>
-        </span>
-      </Link>
-    </div>
+    <Link
+      href="https://dinaya.lk"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/60 px-3.5 py-1.5 text-xs text-muted-foreground shadow-sm backdrop-blur-sm transition-colors hover:border-border hover:bg-card hover:text-foreground"
+    >
+      <span>{copy.poweredBy}</span>
+      <span className="inline-flex items-center gap-1.5 font-medium text-foreground">
+        <DinayaMark />
+        <span className="font-cal leading-none">Dinaya.lk</span>
+      </span>
+    </Link>
   );
 }
