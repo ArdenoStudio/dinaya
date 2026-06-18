@@ -16,7 +16,6 @@ interface ReviewRatingSummaryProps {
   activeFilter: StarFilter;
   onFilterChange: (filter: StarFilter) => void;
   copy: BookingCopy;
-  expanded?: boolean;
 }
 
 export function ReviewRatingSummary({
@@ -26,81 +25,75 @@ export function ReviewRatingSummary({
   activeFilter,
   onFilterChange,
   copy,
-  expanded = true,
 }: ReviewRatingSummaryProps) {
-  if (!expanded) {
-    return (
-      <div className="flex items-center justify-between gap-3">
-        <StarRating rating={avgRating} size="sm" />
-        <p className="text-sm text-muted-foreground">
-          <span className="font-semibold tabular-nums text-foreground">{avgRating.toFixed(1)}</span>
-          {" · "}
-          {copy.reviewsOnDinaya.replace("{count}", reviewCount.toLocaleString())}
-        </p>
-      </div>
-    );
-  }
-
   return (
-    <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_7.5rem] sm:items-center">
-      <div className="space-y-2" role="radiogroup" aria-label={copy.filterReviewsByRating}>
+    <div>
+      <p className="mb-3 text-xs font-medium text-muted-foreground">{copy.reviewsSummaryTitle}</p>
+      <div className="grid grid-cols-[minmax(0,1fr)_6.5rem] items-center gap-4 sm:grid-cols-[minmax(0,1fr)_7.5rem] sm:gap-6">
+        <div className="space-y-1.5" role="radiogroup" aria-label={copy.filterReviewsByRating}>
+          {STAR_LEVELS.map((stars) => {
+            const starCount = distribution[stars];
+            const percentage = reviewCount > 0 ? (starCount / reviewCount) * 100 : 0;
+            const isActive = activeFilter === stars;
+
+            return (
+              <button
+                key={stars}
+                type="button"
+                role="radio"
+                aria-checked={isActive}
+                aria-label={copy.filterByStars.replace("{stars}", String(stars))}
+                onClick={() => onFilterChange(isActive ? "all" : stars)}
+                className={cn(
+                  "flex w-full items-center gap-2 rounded-md px-1 py-0.5 transition-colors",
+                  isActive && "bg-[var(--booking-accent-muted)]/60",
+                )}
+              >
+                <span className="w-3 shrink-0 text-xs font-medium tabular-nums text-foreground">
+                  {stars}
+                </span>
+                <div className="h-2 min-w-0 flex-1 overflow-hidden rounded-full bg-muted">
+                  <div
+                    className="h-full rounded-full bg-amber-400"
+                    style={{ width: `${percentage}%` }}
+                  />
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
         <button
           type="button"
-          role="radio"
-          aria-checked={activeFilter === "all"}
           onClick={() => onFilterChange("all")}
           className={cn(
-            "mb-1 w-full rounded-lg px-2 py-1.5 text-left text-xs font-medium transition-colors",
-            activeFilter === "all"
-              ? "bg-[var(--booking-accent-muted)] text-[var(--booking-accent)]"
-              : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
+            "flex flex-col items-center justify-center rounded-xl px-2 py-3 text-center transition-colors sm:py-2",
+            activeFilter === "all" ? "bg-muted/40" : "hover:bg-muted/30",
           )}
+          aria-label={copy.allStarRatings}
         >
-          {copy.allStarRatings} ({reviewCount.toLocaleString()})
+          <p className="font-cal text-4xl font-semibold tabular-nums leading-none text-foreground">
+            {avgRating.toFixed(1)}
+          </p>
+          <StarRating rating={avgRating} size="md" className="mt-2" />
+          <p className="mt-2 text-xs tabular-nums text-muted-foreground">
+            ({reviewCount.toLocaleString()})
+          </p>
         </button>
-
-        {STAR_LEVELS.map((stars) => {
-          const starCount = distribution[stars];
-          const percentage = reviewCount > 0 ? Math.round((starCount / reviewCount) * 100) : 0;
-          const isActive = activeFilter === stars;
-
-          return (
-            <button
-              key={stars}
-              type="button"
-              role="radio"
-              aria-checked={isActive}
-              aria-label={copy.filterByStars.replace("{stars}", String(stars))}
-              onClick={() => onFilterChange(stars)}
-              className={cn(
-                "group flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors",
-                isActive ? "bg-[var(--booking-accent-muted)]/80" : "hover:bg-muted/50",
-              )}
-            >
-              <span className="w-3 shrink-0 text-xs font-medium tabular-nums text-muted-foreground">
-                {stars}
-              </span>
-              <div className="h-2 min-w-0 flex-1 overflow-hidden rounded-full bg-muted">
-                <div
-                  className="h-full rounded-full bg-amber-400 transition-[width] duration-500 ease-out"
-                  style={{ width: `${percentage}%` }}
-                />
-              </div>
-              <span className="w-10 shrink-0 text-right text-[11px] tabular-nums text-muted-foreground">
-                {starCount.toLocaleString()}
-              </span>
-            </button>
-          );
-        })}
       </div>
 
-      <div className="flex flex-col items-center justify-center rounded-xl bg-muted/30 px-3 py-4 text-center sm:py-2">
-        <p className="font-cal text-4xl font-semibold tabular-nums leading-none text-foreground">
-          {avgRating.toFixed(1)}
+      {activeFilter !== "all" ? (
+        <p className="mt-3 text-center text-xs text-muted-foreground">
+          {copy.showingStarReviews.replace("{stars}", String(activeFilter))}{" "}
+          <button
+            type="button"
+            onClick={() => onFilterChange("all")}
+            className="font-medium text-[var(--booking-accent)] hover:underline"
+          >
+            {copy.clearReviewFilter}
+          </button>
         </p>
-        <StarRating rating={avgRating} size="md" className="mt-2" />
-        <p className="mt-2 text-xs text-muted-foreground">({reviewCount.toLocaleString()})</p>
-      </div>
+      ) : null}
     </div>
   );
 }

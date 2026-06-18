@@ -1,13 +1,10 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import { AnimatePresence, m } from "motion/react";
 import type { BookingCopy } from "@/lib/i18n";
 import type { PublicReview, ReviewDistribution } from "@/lib/reviews-public";
-import { cn } from "@/lib/utils";
 import { Icon } from "@/components/ui/Icon";
 import { Button } from "@/components/ui/button";
-import { BusinessRating } from "./BusinessRating";
 import { ReviewRatingSummary, type StarFilter } from "./ReviewRatingSummary";
 import { StarRating } from "./StarRating";
 
@@ -58,11 +55,9 @@ export function BookingReviewsSection({
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(initialReviews.length < reviewCount);
   const [loading, setLoading] = useState(false);
-  const [expanded, setExpanded] = useState(false);
   const [starFilter, setStarFilter] = useState<StarFilter>("all");
 
   const resetDialogState = useCallback(() => {
-    setExpanded(false);
     setStarFilter("all");
     setReviews(initialReviews);
     setPage(1);
@@ -131,79 +126,28 @@ export function BookingReviewsSection({
 
       <dialog
         ref={dialogRef}
-        className={cn(
-          "fixed top-1/2 left-1/2 z-50 m-0 -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl border border-border bg-card p-0 text-foreground shadow-xl backdrop:bg-black/40 open:flex open:flex-col",
-          "transition-[width,max-height] duration-300 ease-out",
-          expanded
-            ? "w-[min(100vw-2rem,40rem)] max-h-[min(92dvh,44rem)]"
-            : "w-[min(100vw-2rem,28rem)] max-h-[min(85dvh,36rem)]",
-        )}
+        className="fixed top-1/2 left-1/2 z-50 m-0 flex w-[min(100vw-2rem,40rem)] max-h-[min(92dvh,44rem)] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-2xl border border-border bg-card p-0 text-foreground shadow-xl backdrop:bg-black/40 open:flex"
         onClick={(event) => {
           if (event.target === event.currentTarget) closeDialog();
         }}
         onClose={resetDialogState}
       >
         <div className="border-b border-border px-5 py-4">
-          <div className="flex items-center justify-between gap-3">
+          <div className="mb-4 flex items-center justify-between gap-3">
             <h2 className="text-base font-semibold">{copy.reviewsTitle}</h2>
-            <div className="flex items-center gap-0.5">
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-xs"
-                onClick={() => setExpanded((value) => !value)}
-                aria-expanded={expanded}
-                aria-label={expanded ? copy.collapseReviewSummary : copy.expandReviewSummary}
-                title={expanded ? copy.collapseReviewSummary : copy.expandReviewSummary}
-              >
-                <Icon name="bar-chart-line-fill" className={cn(expanded && "text-[var(--booking-accent)]")} />
-              </Button>
-              <Button type="button" variant="ghost" size="icon-xs" onClick={closeDialog} aria-label={copy.close}>
-                <Icon name="x-lg" />
-              </Button>
-            </div>
+            <Button type="button" variant="ghost" size="icon-xs" onClick={closeDialog} aria-label={copy.close}>
+              <Icon name="x-lg" />
+            </Button>
           </div>
 
-          <AnimatePresence initial={false}>
-            {expanded ? (
-              <m.div
-                key="summary-expanded"
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-                className="overflow-hidden"
-              >
-                <div className="pt-4">
-                  <ReviewRatingSummary
-                    avgRating={avgRating}
-                    reviewCount={reviewCount}
-                    distribution={reviewDistribution}
-                    activeFilter={starFilter}
-                    onFilterChange={(filter) => void handleFilterChange(filter)}
-                    copy={copy}
-                    expanded
-                  />
-                </div>
-              </m.div>
-            ) : (
-              <m.div
-                key="summary-compact"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.15 }}
-                className="mt-2"
-              >
-                <BusinessRating
-                  avgRating={avgRating}
-                  reviewCount={reviewCount}
-                  copy={copy}
-                  size="sm"
-                />
-              </m.div>
-            )}
-          </AnimatePresence>
+          <ReviewRatingSummary
+            avgRating={avgRating}
+            reviewCount={reviewCount}
+            distribution={reviewDistribution}
+            activeFilter={starFilter}
+            onFilterChange={(filter) => void handleFilterChange(filter)}
+            copy={copy}
+          />
         </div>
 
         <ul className="min-h-0 flex-1 overflow-y-auto p-2">
