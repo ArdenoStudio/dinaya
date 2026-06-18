@@ -84,6 +84,7 @@ export default function StepDateTime({
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [hasFetched, setHasFetched] = useState(false);
   const [slotEmptyState, setSlotEmptyState] = useState<SlotEmptyState>("none");
+  const slotCacheRef = useRef<Record<string, { slots: SlotOption[]; emptyState: SlotEmptyState }>>({});
   const [nextAvailable, setNextAvailable] = useState<NextSlot | null>(null);
   const [showMobileCalendar, setShowMobileCalendar] = useState(false);
   const [monthDayStatus, setMonthDayStatus] = useState<Record<string, MonthDayStatus>>({});
@@ -93,11 +94,23 @@ export default function StepDateTime({
   const canLoad = Boolean(service && (staff || anyStaff));
   const sessionToken = typeof window !== "undefined" ? getBookingSessionToken() : "";
 
+  useEffect(() => {
+    slotCacheRef.current = {};
+  }, [businessId, service?.id, staff?.id, anyStaff, dealId, locationId]);
+
   async function loadSlots(date: string) {
     if (!service || (!staff && !anyStaff)) return;
+
+    const cached = slotCacheRef.current[date];
+    if (cached) {
+      setSlots(cached.slots);
+      setSlotEmptyState(cached.emptyState);
+      setHasFetched(true);
+    }
+
     setLoadingSlots(true);
-    onSlotsChange?.([], true, "none");
-    setHasFetched(false);
+    onSlotsChange?.(cached?.slots ?? slots, true, cached?.emptyState ?? slotEmptyState);
+
     const query = new URLSearchParams({
       businessId,
       staffId: anyStaff ? ANY_STAFF_ID : staff!.id,
@@ -115,6 +128,8 @@ export default function StepDateTime({
       data.capacityReached ? "capacity" :
       fetchedSlots.length === 0 ? "full" :
       "none";
+
+    slotCacheRef.current[date] = { slots: fetchedSlots, emptyState: fetchedEmptyState };
     setSlots(fetchedSlots);
     setSlotEmptyState(fetchedEmptyState);
     setLoadingSlots(false);
@@ -145,6 +160,7 @@ export default function StepDateTime({
     if (!canLoad || !selectedDate) {
       setSlots([]);
       setHasFetched(false);
+      slotCacheRef.current = {};
       return;
     }
 
@@ -238,12 +254,16 @@ export default function StepDateTime({
     );
   }
 
+  const showSlotSkeleton = loadingSlots && slots.length === 0;
+  const isRefreshingSlots = loadingSlots && slots.length > 0;
+
   const slotPanelProps = {
     slots,
     selectedStartUtc: selectedSlot?.startUtc ?? null,
     copy,
     onSelect: onSlotSelect,
-    loading: loadingSlots,
+    loading: showSlotSkeleton,
+    refreshing: isRefreshingSlots,
     emptyState: slotEmptyState,
     timezone,
     busyTimes: calendarOverlay?.busyTimes,

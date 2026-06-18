@@ -4,7 +4,7 @@ import { parseISO } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import type { BookingCopy } from "@/lib/i18n";
 import { Icon } from "@/components/ui/Icon";
-import { Skeleton } from "@/components/ui/skeleton";
+import { TimeSlotGridSkeleton } from "./SlotListPanelSkeleton";
 import {
   slotConflictsWithBusyTime,
   type CalendarBusyTime,
@@ -44,6 +44,7 @@ interface Props {
   copy: BookingCopy;
   onSelect: (slot: SlotOption) => void;
   loading?: boolean;
+  refreshing?: boolean;
   emptyState?: SlotEmptyState;
   timezone?: string;
   busyTimes?: CalendarBusyTime[];
@@ -55,18 +56,13 @@ export default function TimeSlotGrid({
   copy,
   onSelect,
   loading,
+  refreshing = false,
   emptyState = "none",
   timezone = DEFAULT_TZ,
   busyTimes = [],
 }: Props) {
   if (loading) {
-    return (
-      <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
-        {Array.from({ length: 10 }).map((_, i) => (
-          <Skeleton key={i} className="h-11 rounded-xl" />
-        ))}
-      </div>
-    );
+    return <TimeSlotGridSkeleton label={copy.loadingAvailableTimes} />;
   }
 
   if (slots.length === 0) {
@@ -96,7 +92,10 @@ export default function TimeSlotGrid({
   })).filter((g) => g.slots.length > 0);
 
   return (
-    <div className="space-y-5">
+    <div
+      className={`space-y-5 transition-opacity ${refreshing ? "pointer-events-none opacity-50" : ""}`}
+      aria-busy={refreshing || undefined}
+    >
       {grouped.map(({ period, label, slots: periodSlots }) => (
         <div key={period}>
           <p className="mb-2.5 text-xs font-semibold text-muted-foreground">{label}</p>

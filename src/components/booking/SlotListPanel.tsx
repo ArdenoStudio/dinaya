@@ -3,8 +3,8 @@
 import { parseISO } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import { Icon } from "@/components/ui/Icon";
-import { Skeleton } from "@/components/ui/skeleton";
 import type { BookingCopy } from "@/lib/i18n";
+import { SlotListPanelSkeleton } from "./SlotListPanelSkeleton";
 import {
   slotConflictsWithBusyTime,
   type CalendarBusyTime,
@@ -35,6 +35,7 @@ interface SlotListPanelProps {
   copy: BookingCopy;
   onSelect: (slot: SlotOption) => void;
   loading?: boolean;
+  refreshing?: boolean;
   emptyState?: SlotEmptyState;
   timezone?: string;
   busyTimes?: CalendarBusyTime[];
@@ -46,18 +47,13 @@ export function SlotListPanel({
   copy,
   onSelect,
   loading = false,
+  refreshing = false,
   emptyState = "none",
   timezone = DEFAULT_TZ,
   busyTimes = [],
 }: SlotListPanelProps) {
   if (loading) {
-    return (
-      <div className="flex flex-col gap-2">
-        {Array.from({ length: 8 }).map((_, i) => (
-          <Skeleton key={i} className="h-12 rounded-xl" />
-        ))}
-      </div>
-    );
+    return <SlotListPanelSkeleton label={copy.loadingAvailableTimes} />;
   }
 
   if (slots.length === 0) {
@@ -84,7 +80,10 @@ export function SlotListPanel({
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div
+      className={`flex flex-col gap-4 transition-opacity ${refreshing ? "pointer-events-none opacity-50" : ""}`}
+      aria-busy={refreshing || undefined}
+    >
       {PERIOD_ORDER.map((period) => {
         const periodSlots = byPeriod[period];
         if (periodSlots.length === 0) return null;
