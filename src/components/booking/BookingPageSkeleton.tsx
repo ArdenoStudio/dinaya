@@ -4,7 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 export function BookingPageSkeleton() {
   return (
     <div className="flex min-h-dvh flex-col items-center bg-muted/20 md:justify-center md:py-10">
-      <div className="w-full max-w-4xl px-0 md:px-4">
+      <div className="w-full max-w-5xl px-0 md:px-4">
         <Card className="rounded-none border-x-0 md:rounded-xl md:border-x">
           <CardHeader className="flex flex-row items-center gap-4 space-y-0">
             <Skeleton className="size-14 rounded-full" />

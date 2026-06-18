@@ -25,7 +25,7 @@ export function BookingBookerSkeleton() {
             </div>
 
             <div className="min-w-0 px-4 py-4 md:px-0 md:py-6">
-              <div className="grid min-h-[22rem] md:grid-cols-[minmax(0,1fr)_minmax(0,14rem)] md:divide-x md:divide-border lg:grid-cols-[minmax(0,1fr)_minmax(0,17rem)]">
+              <div className="grid min-h-[22rem] md:grid-cols-[minmax(20rem,1fr)_minmax(0,14rem)] md:divide-x md:divide-border lg:grid-cols-[minmax(22rem,1fr)_minmax(0,17rem)]">
                 <section className="min-w-0 pb-4 md:px-6 md:pb-0 lg:px-8">
                   <Skeleton className="mb-4 h-4 w-24" />
                   <div className="grid grid-cols-7 gap-1">

@@ -132,7 +132,7 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
         <div
           className={
             centeredLayout
-              ? "w-full max-w-4xl px-0 md:px-4"
+              ? "w-full max-w-5xl px-0 md:px-4"
               : "mx-auto max-w-5xl px-0 md:px-8 md:py-6"
           }
         >
