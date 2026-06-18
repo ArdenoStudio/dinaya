@@ -66,14 +66,14 @@ export function SlotsEmptyView({
   }
 
   return (
-    <div className="flex min-h-[12rem] flex-col items-center justify-center gap-3 px-2 py-8 text-center">
+    <div className="flex min-h-[12rem] flex-col items-center justify-center gap-3 px-3 py-8 text-center">
       <Icon name={emptyIcon(emptyState)} className="text-xl text-muted-foreground/50" />
       <p className="text-xs leading-relaxed text-muted-foreground">{message}</p>
       {showNext && nextLabel && (
         <button
           type="button"
           onClick={() => onNextAvailable(nextAvailable)}
-          className="flex min-h-11 w-full max-w-[12rem] items-center justify-center rounded-lg bg-[var(--booking-accent)] px-3 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[var(--booking-accent)]/90"
+          className="flex min-h-11 w-full items-center justify-center rounded-lg bg-[var(--booking-accent)] px-3 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[var(--booking-accent)]/90"
           aria-label={`${copy.nextAvailable}: ${nextLabel}`}
         >
           {nextLabel}

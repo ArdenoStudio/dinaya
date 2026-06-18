@@ -291,7 +291,7 @@ export default function StepDateTime({
         {copy.pickDateTime}
       </p>
 
-      <div className="flex min-w-0 flex-col md:grid md:min-h-[22rem] md:grid-cols-[minmax(0,1fr)_minmax(0,11rem)] md:divide-x md:divide-border lg:grid-cols-[minmax(0,1fr)_minmax(0,12rem)]">
+      <div className="flex min-w-0 flex-col md:grid md:min-h-[22rem] md:grid-cols-[minmax(0,1fr)_minmax(0,14rem)] md:divide-x md:divide-border lg:grid-cols-[minmax(0,1fr)_minmax(0,17rem)]">
         <section className="min-w-0 pb-4 md:px-6 md:pb-0 md:pt-0 lg:px-8">
           <div className="mb-3 flex items-center justify-between gap-2 md:mb-4">
             <p className="text-sm font-medium text-foreground md:sr-only">{copy.chooseDate}</p>
