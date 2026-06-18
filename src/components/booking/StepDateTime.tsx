@@ -14,6 +14,7 @@ import MonthCalendar, { type MonthDayStatus } from "./MonthCalendar";
 import DateQuickStrip from "./DateQuickStrip";
 import TimeSlotGrid, { type SlotEmptyState, type SlotOption } from "./TimeSlotGrid";
 import { SlotListPanel } from "./SlotListPanel";
+import type { NextAvailableSlot } from "./SlotsEmptyView";
 import { CalendarOverlayControl } from "./CalendarOverlayControl";
 import type { GoogleCalendarOverlay } from "./useGoogleCalendarOverlay";
 
@@ -21,13 +22,6 @@ import { ANY_STAFF_ID } from "@/lib/booking-staff";
 
 const DEFAULT_TZ = "Asia/Colombo";
 const POLL_MS = 60_000;
-
-type NextSlot = {
-  date: string;
-  startUtc: string;
-  endUtc: string;
-  label: string;
-};
 
 interface Props {
   businessId: string;
@@ -85,7 +79,7 @@ export default function StepDateTime({
   const [hasFetched, setHasFetched] = useState(false);
   const [slotEmptyState, setSlotEmptyState] = useState<SlotEmptyState>("none");
   const slotCacheRef = useRef<Record<string, { slots: SlotOption[]; emptyState: SlotEmptyState }>>({});
-  const [nextAvailable, setNextAvailable] = useState<NextSlot | null>(null);
+  const [nextAvailable, setNextAvailable] = useState<NextAvailableSlot | null>(null);
   const [showMobileCalendar, setShowMobileCalendar] = useState(false);
   const [monthDayStatus, setMonthDayStatus] = useState<Record<string, MonthDayStatus>>({});
   const [calendarMonth, setCalendarMonth] = useState(() => format(today, "yyyy-MM"));
@@ -236,6 +230,18 @@ export default function StepDateTime({
     [onCalendarMonthChange],
   );
 
+  const handleNextAvailable = useCallback(
+    (slot: NextAvailableSlot) => {
+      onDateChange(slot.date);
+      onSlotSelect({
+        startUtc: slot.startUtc,
+        endUtc: slot.endUtc,
+        label: slot.label,
+      });
+    },
+    [onDateChange, onSlotSelect],
+  );
+
   const dateHeading = selectedDate
     ? format(parseISO(selectedDate + "T12:00:00"), "EEEE, d MMMM yyyy")
     : null;
@@ -254,6 +260,14 @@ export default function StepDateTime({
     );
   }
 
+  const showNextAvailable =
+    Boolean(
+      nextAvailable &&
+        nextAvailable.date !== selectedDate &&
+        hasFetched &&
+        slotEmptyState !== "none",
+    );
+
   const showSlotSkeleton = loadingSlots && slots.length === 0;
   const isRefreshingSlots = loadingSlots && slots.length > 0;
 
@@ -267,6 +281,8 @@ export default function StepDateTime({
     emptyState: slotEmptyState,
     timezone,
     busyTimes: calendarOverlay?.busyTimes,
+    nextAvailable: showNextAvailable ? nextAvailable : null,
+    onNextAvailable: handleNextAvailable,
   };
 
   return (
@@ -274,33 +290,6 @@ export default function StepDateTime({
       <p className="mb-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground md:hidden">
         {copy.pickDateTime}
       </p>
-
-      {nextAvailable && nextAvailable.date !== selectedDate && hasFetched && slotEmptyState !== "none" && (
-        <button
-          type="button"
-          onClick={() => {
-            onDateChange(nextAvailable.date);
-            onSlotSelect({
-              startUtc: nextAvailable.startUtc,
-              endUtc: nextAvailable.endUtc,
-              label: nextAvailable.label,
-            });
-          }}
-          className="mb-4 flex w-full items-center justify-between rounded-xl border-2 border-[var(--booking-accent-soft)] booking-bg-accent-muted px-4 py-3.5 text-left text-sm shadow-sm transition-colors hover:border-[var(--booking-accent)]"
-        >
-          <span>
-            <span className="block text-[10px] font-bold uppercase tracking-wider booking-text-accent">
-              {copy.nextAvailable}
-            </span>
-            <span className="mt-0.5 block font-semibold text-gray-800 dark:text-gray-200">
-              {format(parseISO(nextAvailable.date + "T12:00:00"), "EEE d MMM")} · {nextAvailable.label}
-            </span>
-          </span>
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-full booking-bg-accent text-white">
-            <Icon name="lightning-charge-fill" />
-          </span>
-        </button>
-      )}
 
       <div className="flex min-w-0 flex-col md:grid md:min-h-[22rem] md:grid-cols-[minmax(0,1fr)_minmax(0,11rem)] md:divide-x md:divide-border lg:grid-cols-[minmax(0,1fr)_minmax(0,12rem)]">
         <section className="min-w-0 pb-4 md:px-6 md:pb-0 md:pt-0 lg:px-8">
@@ -329,6 +318,7 @@ export default function StepDateTime({
                 maxDate={maxDate}
                 dayStatus={monthDayStatus}
                 personalBusyDates={calendarOverlay?.busyDates}
+                nextAvailableDate={showNextAvailable ? nextAvailable?.date : undefined}
                 onMonthChange={handleMonthChange}
                 onSelect={onDateChange}
                 size="comfortable"
@@ -351,6 +341,7 @@ export default function StepDateTime({
               maxDate={maxDate}
               dayStatus={monthDayStatus}
               personalBusyDates={calendarOverlay?.busyDates}
+              nextAvailableDate={showNextAvailable ? nextAvailable?.date : undefined}
               onMonthChange={handleMonthChange}
               onSelect={onDateChange}
               size="comfortable"

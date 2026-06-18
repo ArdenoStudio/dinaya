@@ -10,6 +10,7 @@ import {
   type CalendarBusyTime,
 } from "@/lib/google-calendar-overlay";
 import type { SlotEmptyState, SlotOption } from "./TimeSlotGrid";
+import { SlotsEmptyView, type NextAvailableSlot } from "./SlotsEmptyView";
 
 const DEFAULT_TZ = "Asia/Colombo";
 
@@ -39,6 +40,8 @@ interface SlotListPanelProps {
   emptyState?: SlotEmptyState;
   timezone?: string;
   busyTimes?: CalendarBusyTime[];
+  nextAvailable?: NextAvailableSlot | null;
+  onNextAvailable?: (slot: NextAvailableSlot) => void;
 }
 
 export function SlotListPanel({
@@ -51,26 +54,22 @@ export function SlotListPanel({
   emptyState = "none",
   timezone = DEFAULT_TZ,
   busyTimes = [],
+  nextAvailable,
+  onNextAvailable,
 }: SlotListPanelProps) {
   if (loading) {
     return <SlotListPanelSkeleton label={copy.loadingAvailableTimes} />;
   }
 
   if (slots.length === 0) {
-    const emptyText =
-      emptyState === "closed"
-        ? copy.dayClosed
-        : emptyState === "capacity"
-          ? copy.capacityReached
-          : emptyState === "full"
-            ? copy.dayFull
-            : copy.noSlots;
-
     return (
-      <div className="flex min-h-[12rem] flex-col items-center justify-center gap-2 px-2 py-8 text-center">
-        <Icon name="calendar-x" className="text-xl text-muted-foreground/50" />
-        <p className="text-xs leading-relaxed text-muted-foreground">{emptyText}</p>
-      </div>
+      <SlotsEmptyView
+        copy={copy}
+        emptyState={emptyState}
+        nextAvailable={nextAvailable}
+        onNextAvailable={onNextAvailable}
+        variant="list"
+      />
     );
   }
 
