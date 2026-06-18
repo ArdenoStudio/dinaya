@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   createCalendarOverlayTicket,
+  isCalendarOverlayOriginAllowed,
   verifyCalendarOverlayTicket,
 } from "@/lib/calendar-overlay-ticket";
 
@@ -43,5 +44,37 @@ describe("calendar overlay connection tickets", () => {
   it("rejects tampered tickets", () => {
     const created = createCalendarOverlayTicket("https://dinaya.lk");
     expect(verifyCalendarOverlayTicket(`${created.ticket}tampered`)).toBeNull();
+  });
+
+  it("allows only Dinaya-controlled origins for OAuth token handoff", () => {
+    const config = {
+      appUrl: "https://dinaya.lk",
+      appDomain: "dinaya.lk",
+    };
+
+    expect(
+      isCalendarOverlayOriginAllowed({
+        ...config,
+        origin: "https://dinaya.lk",
+      }),
+    ).toBe(true);
+    expect(
+      isCalendarOverlayOriginAllowed({
+        ...config,
+        origin: "https://salon.dinaya.lk",
+      }),
+    ).toBe(true);
+    expect(
+      isCalendarOverlayOriginAllowed({
+        ...config,
+        origin: "https://book.salon.lk",
+      }),
+    ).toBe(false);
+    expect(
+      isCalendarOverlayOriginAllowed({
+        ...config,
+        origin: "https://dinaya.lk.evil.example",
+      }),
+    ).toBe(false);
   });
 });

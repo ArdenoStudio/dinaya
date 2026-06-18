@@ -26,7 +26,11 @@ import { BookingAttributionCapture } from "./BookingAttributionCapture";
 import { BookingDealsSection } from "./BookingDealsSection";
 import type { DealListItem } from "@/lib/deals/queries";
 import { useBookingContactStorage } from "./useBookingContactStorage";
-import { applyEmbedThemeFromQuery, postEmbedEvent } from "./embed-events";
+import {
+  applyEmbedThemeFromQuery,
+  createBookingCompletedEmbedEvent,
+  postEmbedEvent,
+} from "./embed-events";
 import {
   useGoogleCalendarOverlay,
   type CalendarOverlayConfig,
@@ -187,6 +191,7 @@ function BookingWizardInner({
     businessId: business.id,
     serviceId: state.service?.id ?? null,
     staffId: state.staff?.id ?? null,
+    locationId: state.location?.id ?? null,
     enabled: true,
   });
 
@@ -236,12 +241,7 @@ function BookingWizardInner({
         return;
       }
       if (embedMode) {
-        postEmbedEvent({
-          type: "dinaya:booking_completed",
-          slug: business.slug,
-          bookingId: data.bookingId,
-          status: data.status,
-        });
+        postEmbedEvent(createBookingCompletedEmbedEvent(business.slug, data.status));
       }
       router.push(`/book/${business.slug}/confirmed?bookingId=${data.bookingId}`);
     },

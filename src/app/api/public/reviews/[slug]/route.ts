@@ -1,23 +1,30 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getPublicReviews } from "@/lib/reviews-public";
+import { withRateLimit } from "@/lib/rate-limit";
+import { parsePublicReviewsQuery } from "@/lib/reviews-query";
 
 interface Ctx {
   params: Promise<{ slug: string }>;
 }
 
-export async function GET(req: Request, { params }: Ctx) {
-  const { slug } = await params;
-  const { searchParams } = new URL(req.url);
-  const page = Math.max(Number(searchParams.get("page")) || 1, 1);
-  const limit = Math.min(Math.max(Number(searchParams.get("limit")) || 20, 1), 50);
-  const offset = (page - 1) * limit;
-  const ratingParam = searchParams.get("rating");
-  const rating =
-    ratingParam != null && ratingParam !== ""
-      ? Math.min(Math.max(Number(ratingParam), 1), 5)
-      : undefined;
+export async function GET(req: NextRequest, { params }: Ctx) {
+  const limited = await withRateLimit(req, {
+    scope: "public-reviews",
+    limit: 60,
+    windowSeconds: 60,
+  });
+  if (!limited.ok) return limited.response;
 
-  const data = await getPublicReviews(slug, { limit, offset, rating });
+  const { slug } = await params;
+  const query = parsePublicReviewsQuery(req.nextUrl.searchParams);
+  if (!query) {
+    return NextResponse.json(
+      { error: "Invalid pagination request." },
+      { status: 400 },
+    );
+  }
+
+  const data = await getPublicReviews(slug, query);
 
   if (!data) {
     return NextResponse.json({ error: "Not found." }, { status: 404 });
@@ -27,7 +34,7 @@ export async function GET(req: Request, { params }: Ctx) {
     businessName: data.businessName,
     avgRating: data.avgRating,
     reviewCount: data.reviewCount,
-    page,
+    page: query.page,
     hasMore: data.hasMore,
     reviews: data.reviews.map((review) => ({
       ...review,

@@ -13,6 +13,7 @@ export function useSlotHold(input: {
   businessId: string;
   serviceId: string | null;
   staffId: string | null;
+  locationId?: string | null;
   enabled?: boolean;
 }) {
   const [hold, setHold] = useState<HoldState>(null);
@@ -76,6 +77,7 @@ export function useSlotHold(input: {
             businessId: input.businessId,
             staffId,
             serviceId: input.serviceId,
+            locationId: input.locationId,
             startUtc: slot.startUtc,
             endUtc: slot.endUtc,
             sessionToken: token,
@@ -99,7 +101,14 @@ export function useSlotHold(input: {
         setHolding(false);
       }
     },
-    [input.businessId, input.enabled, input.serviceId, input.staffId, sessionToken],
+    [
+      input.businessId,
+      input.enabled,
+      input.locationId,
+      input.serviceId,
+      input.staffId,
+      sessionToken,
+    ],
   );
 
   useEffect(() => {

@@ -7,7 +7,7 @@
  * - `dinaya:resize` — `{ height: number }` (existing)
  * - `dinaya:ready` — `{ slug: string }` when booking UI mounts
  * - `dinaya:booking_started` — `{ slug: string, serviceId?: string }` when service selected
- * - `dinaya:booking_completed` — `{ slug: string, bookingId: string, status?: string }`
+ * - `dinaya:booking_completed` — `{ slug: string, status?: string }`
  *
  * Optional theming via query `?embedAccent=%23hex` sets `--booking-accent` on the embed root.
  */
@@ -16,7 +16,18 @@ export type EmbedEvent =
   | { type: "dinaya:resize"; height: number }
   | { type: "dinaya:ready"; slug: string }
   | { type: "dinaya:booking_started"; slug: string; serviceId?: string }
-  | { type: "dinaya:booking_completed"; slug: string; bookingId: string; status?: string };
+  | { type: "dinaya:booking_completed"; slug: string; status?: string };
+
+export function createBookingCompletedEmbedEvent(
+  slug: string,
+  status?: string,
+): EmbedEvent {
+  return {
+    type: "dinaya:booking_completed",
+    slug,
+    status,
+  };
+}
 
 function resolveEmbedParentOrigin(): string | null {
   if (typeof window === "undefined") return null;

@@ -11,6 +11,47 @@ type CalendarOverlayTicketPayload = {
   language?: BookingLanguage;
 };
 
+function hostnameFromDomain(value: string | undefined): string | null {
+  const trimmed = value?.trim();
+  if (!trimmed) return null;
+
+  try {
+    return new URL(
+      trimmed.includes("://") ? trimmed : `https://${trimmed}`,
+    ).hostname.toLowerCase();
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * OAuth tokens may only be returned to Dinaya-controlled origins. Tenant
+ * custom domains are excluded because their DNS remains outside Dinaya's
+ * control.
+ */
+export function isCalendarOverlayOriginAllowed(input: {
+  origin: string;
+  appUrl: string;
+  appDomain?: string;
+}): boolean {
+  try {
+    const candidate = new URL(input.origin);
+    const canonical = new URL(input.appUrl);
+    if (candidate.origin === canonical.origin) return true;
+    if (candidate.protocol !== canonical.protocol) return false;
+
+    const appHostname =
+      hostnameFromDomain(input.appDomain) ?? canonical.hostname.toLowerCase();
+    const candidateHostname = candidate.hostname.toLowerCase();
+    return (
+      candidateHostname === appHostname ||
+      candidateHostname.endsWith(`.${appHostname}`)
+    );
+  } catch {
+    return false;
+  }
+}
+
 function encode(input: string): string {
   return Buffer.from(input, "utf8").toString("base64url");
 }

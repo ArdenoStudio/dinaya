@@ -14,7 +14,10 @@ import { BookingTeamSection } from "@/components/booking/BookingTeamSection";
 import { BookingReviewsSection } from "@/components/booking/BookingReviewsSection";
 import { getBusinessRating } from "@/components/booking/BusinessRating";
 import type { BookingPageData } from "@/lib/booking/load-page-data";
-import { createCalendarOverlayTicket } from "@/lib/calendar-overlay-ticket";
+import {
+  createCalendarOverlayTicket,
+  isCalendarOverlayOriginAllowed,
+} from "@/lib/calendar-overlay-ticket";
 import type { CalendarOverlayConfig } from "./useGoogleCalendarOverlay";
 
 type Props = {
@@ -29,7 +32,8 @@ async function buildCalendarOverlayConfig(
   mode: Props["mode"],
   language: string,
 ): Promise<CalendarOverlayConfig | null> {
-  if (mode === "embed" || !process.env.GOOGLE_CLIENT_ID || !process.env.NEXT_PUBLIC_APP_URL) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+  if (mode === "embed" || !process.env.GOOGLE_CLIENT_ID || !appUrl) {
     return null;
   }
 
@@ -43,11 +47,20 @@ async function buildCalendarOverlayConfig(
     const protocol =
       forwardedProto || (host.startsWith("localhost") || host.startsWith("127.0.0.1") ? "http" : "https");
     const origin = new URL(`${protocol}://${host}`).origin;
+    if (
+      !isCalendarOverlayOriginAllowed({
+        origin,
+        appUrl,
+        appDomain: process.env.NEXT_PUBLIC_APP_DOMAIN,
+      })
+    ) {
+      return null;
+    }
     const { ticket, channel } = createCalendarOverlayTicket(
       origin,
       language === "si" || language === "ta" ? language : "en",
     );
-    const connectUrl = new URL("/calendar-overlay/connect", process.env.NEXT_PUBLIC_APP_URL);
+    const connectUrl = new URL("/calendar-overlay/connect", appUrl);
     connectUrl.searchParams.set("ticket", ticket);
     return { connectUrl: connectUrl.toString(), channel };
   } catch {

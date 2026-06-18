@@ -11,6 +11,7 @@ const createSchema = z.object({
   businessId: z.string().uuid(),
   staffId: z.string().uuid(),
   serviceId: z.string().uuid(),
+  locationId: z.string().uuid().optional().nullable(),
   startUtc: z.string().datetime(),
   endUtc: z.string().datetime(),
   sessionToken: z.string().min(16).max(64),
@@ -29,11 +30,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
 
-  const { businessId, staffId, serviceId, startUtc, endUtc, sessionToken } = parsed.data;
+  const {
+    businessId,
+    staffId,
+    serviceId,
+    locationId,
+    startUtc,
+    endUtc,
+    sessionToken,
+  } = parsed.data;
   const result = await createSlotReservation({
     businessId,
     staffId,
     serviceId,
+    locationId,
     startsAt: new Date(startUtc),
     endsAt: new Date(endUtc),
     sessionToken,
