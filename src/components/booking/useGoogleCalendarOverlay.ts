@@ -2,7 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  fetchGoogleCalendarBusyTimes,
+  busyTimesForDate,
+  countBusyDates,
+  fetchGoogleCalendarBusyMonth,
   type CalendarBusyTime,
 } from "@/lib/google-calendar-overlay";
 
@@ -46,9 +48,17 @@ export type GoogleCalendarOverlay = {
   disconnect: () => void;
 };
 
+function monthsToPrefetch(viewMonth: string | undefined, selectedDate: string): string[] {
+  const months = new Set<string>();
+  if (viewMonth) months.add(viewMonth);
+  if (selectedDate) months.add(selectedDate.slice(0, 7));
+  return [...months];
+}
+
 export function useGoogleCalendarOverlay(input: {
   config?: CalendarOverlayConfig | null;
   selectedDate: string;
+  viewMonth?: string;
   timezone: string;
 }): GoogleCalendarOverlay {
   const [connected, setConnected] = useState(false);
@@ -56,7 +66,7 @@ export function useGoogleCalendarOverlay(input: {
   const [connecting, setConnecting] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<CalendarOverlayError | null>(null);
-  const [busyByDate, setBusyByDate] = useState<Record<string, CalendarBusyTime[]>>({});
+  const [monthBusyCache, setMonthBusyCache] = useState<Record<string, CalendarBusyTime[]>>({});
   const [refreshKey, setRefreshKey] = useState(0);
   const tokenRef = useRef<{ value: string; expiresAt: number } | null>(null);
   const popupRef = useRef<Window | null>(null);
@@ -151,8 +161,13 @@ export function useGoogleCalendarOverlay(input: {
     return () => stopPopupPolling();
   }, [stopPopupPolling]);
 
+  const prefetchMonths = useMemo(
+    () => monthsToPrefetch(input.viewMonth, input.selectedDate),
+    [input.selectedDate, input.viewMonth],
+  );
+
   useEffect(() => {
-    if (!enabled || !connected || !input.selectedDate) return;
+    if (!enabled || !connected || prefetchMonths.length === 0) return;
     const token = tokenRef.current;
     if (!token || token.expiresAt <= Date.now()) {
       tokenRef.current = null;
@@ -165,14 +180,26 @@ export function useGoogleCalendarOverlay(input: {
     const controller = new AbortController();
     setLoading(true);
     setError(null);
-    void fetchGoogleCalendarBusyTimes({
-      accessToken: token.value,
-      date: input.selectedDate,
-      timezone: input.timezone,
-      signal: controller.signal,
-    })
-      .then((busyTimes) => {
-        setBusyByDate((current) => ({ ...current, [input.selectedDate]: busyTimes }));
+
+    void Promise.all(
+      prefetchMonths.map((month) =>
+        fetchGoogleCalendarBusyMonth({
+          accessToken: token.value,
+          month,
+          timezone: input.timezone,
+          signal: controller.signal,
+        }).then((busyTimes) => [month, busyTimes] as const),
+      ),
+    )
+      .then((results) => {
+        if (controller.signal.aborted) return;
+        setMonthBusyCache((current) => {
+          const next = { ...current };
+          for (const [month, busyTimes] of results) {
+            next[month] = busyTimes;
+          }
+          return next;
+        });
       })
       .catch((fetchError: Error & { status?: number }) => {
         if (fetchError.name === "AbortError") return;
@@ -190,13 +217,7 @@ export function useGoogleCalendarOverlay(input: {
       });
 
     return () => controller.abort();
-  }, [
-    connected,
-    enabled,
-    input.selectedDate,
-    input.timezone,
-    refreshKey,
-  ]);
+  }, [connected, enabled, input.timezone, prefetchMonths, refreshKey]);
 
   const disconnect = useCallback(() => {
     tokenRef.current = null;
@@ -204,7 +225,7 @@ export function useGoogleCalendarOverlay(input: {
     setEnabled(false);
     setConnecting(false);
     setError(null);
-    setBusyByDate({});
+    setMonthBusyCache({});
     stopPopupPolling();
     popupRef.current?.close();
     popupRef.current = null;
@@ -229,14 +250,28 @@ export function useGoogleCalendarOverlay(input: {
     setRefreshKey((value) => value + 1);
   }, [connect, connected]);
 
-  const busyDates = useMemo(
+  const cachedBusyTimes = useMemo(() => {
+    if (!enabled) return [];
+    const merged = new Map<string, CalendarBusyTime>();
+    for (const busyTimes of Object.values(monthBusyCache)) {
+      for (const busy of busyTimes) {
+        merged.set(`${busy.start}|${busy.end}`, busy);
+      }
+    }
+    return [...merged.values()];
+  }, [enabled, monthBusyCache]);
+
+  const busyTimes = useMemo(
     () =>
-      Object.fromEntries(
-        Object.entries(busyByDate)
-          .filter(([, busyTimes]) => busyTimes.length > 0)
-          .map(([date, busyTimes]) => [date, busyTimes.length]),
-      ),
-    [busyByDate],
+      enabled && input.selectedDate
+        ? busyTimesForDate(input.selectedDate, cachedBusyTimes, input.timezone)
+        : [],
+    [cachedBusyTimes, enabled, input.selectedDate, input.timezone],
+  );
+
+  const busyDates = useMemo(
+    () => (enabled ? countBusyDates(cachedBusyTimes, input.timezone) : {}),
+    [cachedBusyTimes, enabled, input.timezone],
   );
 
   return {
@@ -246,8 +281,8 @@ export function useGoogleCalendarOverlay(input: {
     connecting,
     loading,
     error,
-    busyTimes: enabled ? (busyByDate[input.selectedDate] ?? []) : [],
-    busyDates: enabled ? busyDates : {},
+    busyTimes,
+    busyDates,
     toggle,
     retry,
     disconnect,

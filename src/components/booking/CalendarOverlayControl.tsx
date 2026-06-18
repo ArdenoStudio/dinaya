@@ -72,7 +72,9 @@ export function CalendarOverlayControl({
                 ? copy.calendarPopupClosed
                 : overlay.error === "permission_denied"
                   ? copy.calendarPermissionDenied
-                  : copy.calendarOverlayError}
+                  : overlay.error === "token_expired"
+                    ? copy.calendarTokenExpired
+                    : copy.calendarOverlayError}
           </span>
           <button
             type="button"

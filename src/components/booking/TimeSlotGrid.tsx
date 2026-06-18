@@ -4,6 +4,7 @@ import { parseISO } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import type { BookingCopy } from "@/lib/i18n";
 import { Icon } from "@/components/ui/Icon";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   slotConflictsWithBusyTime,
   type CalendarBusyTime,
@@ -62,7 +63,7 @@ export default function TimeSlotGrid({
     return (
       <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
         {Array.from({ length: 10 }).map((_, i) => (
-          <div key={i} className="h-11 animate-pulse rounded-xl bg-gray-100 dark:bg-neutral-800" />
+          <Skeleton key={i} className="h-11 rounded-xl" />
         ))}
       </div>
     );

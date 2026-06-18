@@ -46,6 +46,7 @@ interface Props {
   onBack?: () => void;
   hideSlots?: boolean;
   onSlotsChange?: (slots: SlotOption[], loading: boolean, emptyState: SlotEmptyState) => void;
+  onCalendarMonthChange?: (month: string) => void;
   calendarOverlay?: GoogleCalendarOverlay;
 }
 
@@ -69,6 +70,7 @@ export default function StepDateTime({
   onBack,
   hideSlots = false,
   onSlotsChange,
+  onCalendarMonthChange,
   calendarOverlay,
 }: Props) {
   const today = toZonedTime(new Date(), timezone);
@@ -193,9 +195,13 @@ export default function StepDateTime({
     void loadMonthStatus(calendarMonth);
   }, [calendarMonth, canLoad, loadMonthStatus]);
 
-  const handleMonthChange = useCallback((month: string) => {
-    setCalendarMonth(month);
-  }, []);
+  const handleMonthChange = useCallback(
+    (month: string) => {
+      setCalendarMonth(month);
+      onCalendarMonthChange?.(month);
+    },
+    [onCalendarMonthChange],
+  );
 
   const dateHeading = selectedDate
     ? format(parseISO(selectedDate + "T12:00:00"), "EEEE, d MMMM yyyy")
@@ -259,7 +265,7 @@ export default function StepDateTime({
           </div>
 
           {calendarOverlay && (
-            <div className="mb-4 hidden md:block">
+            <div className="mb-4">
               <CalendarOverlayControl copy={copy} overlay={calendarOverlay} />
             </div>
           )}

@@ -187,9 +187,13 @@ function BookingWizardInner({
   const [wizardLoadingSlots, setWizardLoadingSlots] = useState(false);
   const [wizardSlotEmptyState, setWizardSlotEmptyState] = useState<SlotEmptyState>("none");
   const [isMobile, setIsMobile] = useState(false);
+  const [calendarViewMonth, setCalendarViewMonth] = useState(() =>
+    format(toZonedTime(new Date(), timezone), "yyyy-MM"),
+  );
   const calendarOverlay = useGoogleCalendarOverlay({
     config: embedMode ? null : calendarOverlayConfig,
     selectedDate: state.date,
+    viewMonth: calendarViewMonth,
     timezone,
   });
 
@@ -517,6 +521,7 @@ function BookingWizardInner({
                         setWizardLoadingSlots(loading);
                         setWizardSlotEmptyState(emptyState);
                       }}
+                      onCalendarMonthChange={setCalendarViewMonth}
                       calendarOverlay={calendarOverlay}
                     />
                   </BookingPanel>

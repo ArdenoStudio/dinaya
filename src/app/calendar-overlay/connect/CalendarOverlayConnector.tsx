@@ -1,8 +1,9 @@
 "use client";
 
 import Script from "next/script";
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { GOOGLE_CALENDAR_FREE_BUSY_SCOPE } from "@/lib/google-calendar-overlay";
 
 type TokenResponse = {
@@ -45,8 +46,9 @@ export default function CalendarOverlayConnector({
   const [connecting, setConnecting] = useState(false);
   const [error, setError] = useState(false);
   const [success, setSuccess] = useState(false);
+  const connectStartedRef = useRef(false);
 
-  function sendError() {
+  const sendError = useCallback(() => {
     window.opener?.postMessage(
       {
         type: "dinaya:google-calendar-overlay",
@@ -55,9 +57,10 @@ export default function CalendarOverlayConnector({
       },
       targetOrigin,
     );
-  }
+  }, [channel, targetOrigin]);
 
-  function connect() {
+  const connect = useCallback(() => {
+    if (connectStartedRef.current) return;
     const oauth = window.google?.accounts?.oauth2;
     if (!oauth || !window.opener) {
       setError(true);
@@ -65,6 +68,7 @@ export default function CalendarOverlayConnector({
       return;
     }
 
+    connectStartedRef.current = true;
     setConnecting(true);
     setError(false);
     const client = oauth.initTokenClient({
@@ -99,7 +103,12 @@ export default function CalendarOverlayConnector({
       },
     });
     client.requestAccessToken({ prompt: "consent" });
-  }
+  }, [channel, clientId, sendError, targetOrigin]);
+
+  useEffect(() => {
+    if (!scriptReady || success || error) return;
+    connect();
+  }, [connect, error, scriptReady, success]);
 
   return (
     <main className="flex min-h-dvh items-center justify-center bg-[#f2f2f7] px-5 py-10 dark:bg-neutral-950">
@@ -109,20 +118,18 @@ export default function CalendarOverlayConnector({
         onLoad={() => setScriptReady(true)}
         onError={() => setError(true)}
       />
-      <div className="w-full max-w-sm overflow-hidden rounded-3xl border border-black/5 bg-white shadow-[0_24px_80px_-24px_rgba(0,0,0,0.28)] dark:border-white/10 dark:bg-neutral-900">
-        <div className="border-b border-gray-100 px-6 py-5 dark:border-neutral-800">
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-gray-400">
-            Dinaya
-          </p>
-          <h1 className="mt-2 font-cal text-2xl tracking-tight text-gray-950 dark:text-white">
+      <Card className="w-full max-w-sm overflow-hidden rounded-3xl border-black/5 shadow-[0_24px_80px_-24px_rgba(0,0,0,0.28)] dark:border-white/10">
+        <CardHeader className="border-b border-gray-100 px-6 py-5 dark:border-neutral-800">
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-gray-400">Dinaya</p>
+          <CardTitle className="mt-2 font-cal text-2xl tracking-tight text-gray-950 dark:text-white">
             Compare your calendar
-          </h1>
-          <p className="mt-2 text-sm leading-6 text-gray-500 dark:text-gray-400">
+          </CardTitle>
+          <CardDescription className="mt-2 text-sm leading-6">
             Dinaya will read busy times from your primary Google Calendar for this booking tab.
-          </p>
-        </div>
+          </CardDescription>
+        </CardHeader>
 
-        <div className="px-6 py-6">
+        <CardContent className="px-6 py-6">
           <div className="mb-5 flex items-start gap-3 rounded-2xl bg-gray-50 px-4 py-3.5 dark:bg-neutral-950/60">
             <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-white text-gray-500 shadow-sm dark:bg-neutral-900 dark:text-gray-300">
               <Icon name="shield-check" aria-hidden="true" />
@@ -132,7 +139,8 @@ export default function CalendarOverlayConnector({
                 Read-only availability
               </p>
               <p className="mt-0.5 text-xs leading-5 text-gray-500 dark:text-gray-400">
-                Event names and details are not requested. The access token stays in the booking tab and expires automatically.
+                Event names and details are not requested. The access token stays in the booking tab
+                and expires automatically.
               </p>
             </div>
           </div>
@@ -150,7 +158,7 @@ export default function CalendarOverlayConnector({
               className="flex w-full items-center justify-center gap-2 rounded-xl bg-gray-950 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-gray-800 disabled:cursor-wait disabled:opacity-60 dark:bg-white dark:text-gray-950 dark:hover:bg-gray-200"
             >
               <Icon name="calendar2-check" aria-hidden="true" />
-              {connecting ? "Opening Google…" : "Continue with Google"}
+              {connecting ? "Opening Google…" : scriptReady ? "Continue with Google" : "Loading Google…"}
             </button>
           )}
 
@@ -167,8 +175,8 @@ export default function CalendarOverlayConnector({
           >
             Cancel
           </button>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </main>
   );
 }

@@ -3,6 +3,7 @@
 import { parseISO } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import { Icon } from "@/components/ui/Icon";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { BookingCopy } from "@/lib/i18n";
 import {
   slotConflictsWithBusyTime,
@@ -53,7 +54,7 @@ export function SlotListPanel({
     return (
       <div className="flex flex-col gap-2">
         {Array.from({ length: 8 }).map((_, i) => (
-          <div key={i} className="h-12 animate-pulse rounded-xl bg-gray-100 dark:bg-neutral-800" />
+          <Skeleton key={i} className="h-12 rounded-xl" />
         ))}
       </div>
     );
