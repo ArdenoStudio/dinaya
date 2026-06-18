@@ -83,8 +83,6 @@ export function ServiceMetaPanel({
       ? computeDiscountedPrice(service.priceLkr, selectedDeal.discountPercent)
       : service?.priceLkr ?? 0;
 
-  const timezoneLabel = business.timezone?.replace(/_/g, " ") ?? "Asia/Colombo";
-
   return (
     <div className="flex flex-col">
       <div className="flex items-center gap-2">
@@ -140,10 +138,6 @@ export function ServiceMetaPanel({
               <li className="flex items-center gap-2.5">
                 <Icon name="tag" className="shrink-0 text-base" />
                 <span>{service.priceLkr > 0 ? formatLkr(price) : "Free"}</span>
-              </li>
-              <li className="flex items-center gap-2.5">
-                <Icon name="globe" className="shrink-0 text-base" />
-                <span>{timezoneLabel}</span>
               </li>
               {(staff || anyStaff) && (
                 <li className="flex items-center gap-2.5">
