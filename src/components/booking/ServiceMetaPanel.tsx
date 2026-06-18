@@ -86,7 +86,7 @@ export function ServiceMetaPanel({
   const timezoneLabel = business.timezone?.replace(/_/g, " ") ?? "Asia/Colombo";
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex flex-col">
       <div className="flex items-center gap-2">
         <Avatar className="size-7">
           {business.logoUrl ? (
@@ -220,7 +220,7 @@ export function ServiceMetaPanel({
         </div>
       )}
 
-      <p className="mt-auto hidden pt-6 text-[10px] text-muted-foreground/70 md:block">
+      <p className="mt-6 hidden pt-2 text-[10px] text-muted-foreground/70 md:block">
         <Icon name="lock-fill" className="mr-1" />
         {bookingUrlLabel}
       </p>

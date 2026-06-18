@@ -472,14 +472,29 @@ function BookingWizardInner({
               />
             </div>
           ) : (
-            <div className="grid gap-6 md:grid-cols-[minmax(0,17rem)_1fr] md:gap-0 md:divide-x md:divide-border lg:grid-cols-[minmax(0,19rem)_1fr]">
-              <div className="border-b border-border pb-6 md:border-0 md:px-6 md:pb-0 md:pt-1 lg:px-8">
+            <div className="grid gap-6 md:grid-cols-[minmax(0,17rem)_1fr] md:items-start md:gap-0 md:divide-x md:divide-border lg:grid-cols-[minmax(0,19rem)_1fr]">
+              <div className="border-b border-border pb-6 md:sticky md:top-6 md:self-start md:border-0 md:px-6 md:pb-0 md:pt-1 lg:px-8">
                 <ServiceMetaPanel {...metaPanelProps} />
               </div>
 
               <div className="min-w-0 md:py-1">
                 {canPickSlots ? (
-                  <>
+                  showContactForm ? (
+                    <div className="px-4 md:px-6 lg:px-8">
+                      <StepConfirm
+                        variant="inline"
+                        formId="booking-contact-form"
+                        state={state}
+                        business={business}
+                        copy={copy}
+                        selectedDeal={selectedDeal}
+                        sessionToken={slotHold.sessionToken}
+                        onUpdate={update}
+                        onBack={clearSlot}
+                        onConfirmed={handleConfirmed}
+                      />
+                    </div>
+                  ) : (
                     <StepDateTime
                       businessId={business.id}
                       copy={copy}
@@ -501,22 +516,7 @@ function BookingWizardInner({
                       onCalendarMonthChange={setCalendarViewMonth}
                       calendarOverlay={calendarOverlay}
                     />
-                    {showContactForm && (
-                      <div className="mt-6 border-t border-border px-4 pt-6 md:px-6 lg:px-8">
-                        <StepConfirm
-                          variant="inline"
-                          state={state}
-                          business={business}
-                          copy={copy}
-                          selectedDeal={selectedDeal}
-                          sessionToken={slotHold.sessionToken}
-                          onUpdate={update}
-                          onBack={clearSlot}
-                          onConfirmed={handleConfirmed}
-                        />
-                      </div>
-                    )}
-                  </>
+                  )
                 ) : (
                   <p className="py-12 text-center text-sm text-amber-600">{copy.noStaff}</p>
                 )}
