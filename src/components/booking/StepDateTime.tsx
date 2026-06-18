@@ -13,6 +13,7 @@ import type { BookingCopy } from "@/lib/i18n";
 import MonthCalendar, { type MonthDayStatus } from "./MonthCalendar";
 import DateQuickStrip from "./DateQuickStrip";
 import TimeSlotGrid, { type SlotEmptyState, type SlotOption } from "./TimeSlotGrid";
+import { SlotListPanel } from "./SlotListPanel";
 import { CalendarOverlayControl } from "./CalendarOverlayControl";
 import type { GoogleCalendarOverlay } from "./useGoogleCalendarOverlay";
 
@@ -208,6 +209,9 @@ export default function StepDateTime({
   const dateHeading = selectedDate
     ? format(parseISO(selectedDate + "T12:00:00"), "EEEE, d MMMM yyyy")
     : null;
+  const compactDateHeading = selectedDate
+    ? format(parseISO(selectedDate + "T12:00:00"), "EEE d")
+    : null;
 
   if (!service || (!staff && !anyStaff)) {
     return (
@@ -220,9 +224,20 @@ export default function StepDateTime({
     );
   }
 
+  const slotPanelProps = {
+    slots,
+    selectedStartUtc: selectedSlot?.startUtc ?? null,
+    copy,
+    onSelect: onSlotSelect,
+    loading: loadingSlots,
+    emptyState: slotEmptyState,
+    timezone,
+    busyTimes: calendarOverlay?.busyTimes,
+  };
+
   return (
     <div className="flex h-full min-w-0 flex-col">
-      <p className="mb-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+      <p className="mb-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground md:hidden">
         {copy.pickDateTime}
       </p>
 
@@ -253,10 +268,10 @@ export default function StepDateTime({
         </button>
       )}
 
-      <div className="flex min-w-0 flex-col md:gap-5">
-        <section className="min-w-0 pb-4 md:rounded-xl md:border md:border-border md:bg-card md:p-5">
-          <div className="mb-3 flex items-center justify-between gap-2">
-            <p className="text-sm font-medium text-foreground">{copy.chooseDate}</p>
+      <div className="flex min-w-0 flex-col md:grid md:min-h-[22rem] md:grid-cols-[minmax(0,1fr)_minmax(0,11rem)] md:divide-x md:divide-border lg:grid-cols-[minmax(0,1fr)_minmax(0,12rem)]">
+        <section className="min-w-0 pb-4 md:px-6 md:pb-0 md:pt-1 lg:px-8">
+          <div className="mb-3 flex items-center justify-between gap-2 md:mb-4">
+            <p className="text-sm font-medium text-foreground md:sr-only">{copy.chooseDate}</p>
             <button
               type="button"
               onClick={() => setShowMobileCalendar((v) => !v)}
@@ -310,45 +325,47 @@ export default function StepDateTime({
         {!hideSlots && (
           <>
             <Separator className="md:hidden" />
-            <section className="min-w-0 pt-4 md:rounded-xl md:border md:border-border md:bg-card md:p-5 md:pt-5">
-            {dateHeading ? (
-              <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2 border-b border-border pb-3">
-                <h3 className="text-sm font-semibold text-foreground">{dateHeading}</h3>
-                <span className="text-xs text-muted-foreground">{copy.availableTimes}</span>
-              </div>
-            ) : (
-              <p className="mb-3 text-xs text-muted-foreground">{copy.selectDate}</p>
-            )}
+            <section className="min-w-0 pt-4 md:flex md:flex-col md:px-4 md:pt-1 lg:px-5">
+              {compactDateHeading ? (
+                <div className="mb-3 flex items-baseline justify-between gap-2 md:mb-4">
+                  <h3 className="text-sm font-semibold text-foreground md:text-base">{compactDateHeading}</h3>
+                  <span className="hidden text-xs text-muted-foreground md:inline">{copy.availableTimes}</span>
+                </div>
+              ) : (
+                <p className="mb-3 text-xs text-muted-foreground">{copy.selectDate}</p>
+              )}
 
-            {holdLabel && (
-              <p className="mb-3 rounded-lg booking-bg-accent-muted px-3 py-2 text-xs font-medium booking-text-accent">
-                <Icon name="clock" className="mr-1.5" />
-                {holdLabel}
-              </p>
-            )}
+              {dateHeading && (
+                <p className="mb-3 text-sm font-semibold text-foreground md:hidden">{dateHeading}</p>
+              )}
 
-            {slotUnavailable && (
-              <div className="mb-3 rounded-lg border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-950/40 px-3 py-2.5 text-xs text-amber-800 dark:text-amber-200">
-                <p className="font-medium">{copy.slotTaken}</p>
-                <p className="mt-1 text-amber-700/90 dark:text-amber-300/90">{copy.slotTakenAction}</p>
-              </div>
-            )}
+              {holdLabel && (
+                <p className="mb-3 rounded-lg booking-bg-accent-muted px-3 py-2 text-xs font-medium booking-text-accent">
+                  <Icon name="clock" className="mr-1.5" />
+                  {holdLabel}
+                </p>
+              )}
 
-            {!hasFetched && !loadingSlots ? (
-              <p className="py-6 text-center text-sm text-muted-foreground">{copy.selectDate}</p>
-            ) : (
-              <TimeSlotGrid
-                slots={slots}
-                selectedStartUtc={selectedSlot?.startUtc ?? null}
-                copy={copy}
-                onSelect={onSlotSelect}
-                loading={loadingSlots}
-                emptyState={slotEmptyState}
-                timezone={timezone}
-                busyTimes={calendarOverlay?.busyTimes}
-              />
-            )}
-          </section>
+              {slotUnavailable && (
+                <div className="mb-3 rounded-lg border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-950/40 px-3 py-2.5 text-xs text-amber-800 dark:text-amber-200">
+                  <p className="font-medium">{copy.slotTaken}</p>
+                  <p className="mt-1 text-amber-700/90 dark:text-amber-300/90">{copy.slotTakenAction}</p>
+                </div>
+              )}
+
+              {!hasFetched && !loadingSlots ? (
+                <p className="py-6 text-center text-sm text-muted-foreground">{copy.selectDate}</p>
+              ) : (
+                <>
+                  <div className="md:hidden">
+                    <TimeSlotGrid {...slotPanelProps} />
+                  </div>
+                  <div className="hidden max-h-[min(28rem,calc(100vh-12rem))] overflow-y-auto md:block md:pr-1">
+                    <SlotListPanel {...slotPanelProps} />
+                  </div>
+                </>
+              )}
+            </section>
           </>
         )}
       </div>

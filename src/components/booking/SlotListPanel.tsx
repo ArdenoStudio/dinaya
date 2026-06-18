@@ -71,9 +71,9 @@ export function SlotListPanel({
             : copy.noSlots;
 
     return (
-      <div className="flex min-h-[160px] flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-gray-200 dark:border-neutral-800 bg-gray-50/50 dark:bg-neutral-900/50 px-4 py-8 text-center">
-        <Icon name="calendar-x" className="text-2xl text-gray-300 dark:text-neutral-600" />
-        <p className="text-sm text-gray-500 dark:text-gray-400">{emptyText}</p>
+      <div className="flex min-h-[12rem] flex-col items-center justify-center gap-2 px-2 py-8 text-center">
+        <Icon name="calendar-x" className="text-xl text-muted-foreground/50" />
+        <p className="text-xs leading-relaxed text-muted-foreground">{emptyText}</p>
       </div>
     );
   }
@@ -107,15 +107,18 @@ export function SlotListPanel({
                       hasCalendarConflict ? `, ${copy.calendarConflict}` : ""
                     }`}
                     onClick={() => onSelect(slot)}
-                    className={`flex min-h-12 w-full items-center justify-between rounded-xl border px-4 py-2.5 text-sm font-medium transition-colors ${
+                    className={`flex min-h-11 w-full items-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-medium transition-colors ${
                       hasCalendarConflict
                         ? "cursor-not-allowed border-gray-200 bg-gray-100 text-gray-400 dark:border-neutral-800 dark:bg-neutral-800/70 dark:text-gray-500"
                         : isSelected
                         ? "booking-bg-accent border-transparent text-white booking-shadow-accent"
-                        : "border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-gray-800 dark:text-gray-200 hover:border-[var(--booking-accent)] hover:booking-text-accent"
+                        : "border-border bg-card text-foreground hover:border-[var(--booking-accent)] hover:bg-[var(--booking-accent-muted)]/30"
                     }`}
                   >
-                    <span className="min-w-0 text-left">
+                    {!hasCalendarConflict && !isSelected && (
+                      <span className="size-1.5 shrink-0 rounded-full bg-emerald-500" aria-hidden />
+                    )}
+                    <span className="min-w-0 flex-1 text-left">
                       <span className={hasCalendarConflict ? "line-through decoration-gray-300" : ""}>
                         {slot.label}
                       </span>
@@ -125,10 +128,9 @@ export function SlotListPanel({
                         </span>
                       )}
                     </span>
-                    <Icon
-                      name={hasCalendarConflict ? "calendar-x" : isSelected ? "check" : "chevron-right"}
-                      className="text-xs opacity-60"
-                    />
+                    {isSelected && !hasCalendarConflict && (
+                      <Icon name="check" className="shrink-0 text-xs opacity-90" />
+                    )}
                   </button>
                 );
               })}
