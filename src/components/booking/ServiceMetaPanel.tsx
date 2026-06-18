@@ -16,6 +16,7 @@ import { fadeInUp } from "@/lib/booking/booking-animations";
 import StaffPicker from "./StaffPicker";
 import StepLocation from "./StepLocation";
 import { computeDiscountedPrice } from "@/lib/deals/pricing";
+import { BusinessRating, getBusinessRating } from "./BusinessRating";
 
 interface ServiceMetaPanelProps {
   business: BookingBusiness;
@@ -36,6 +37,8 @@ interface ServiceMetaPanelProps {
   selectedDeal: DealListItem | null;
   copy: BookingCopy;
   lockServiceSelection: boolean;
+  avgRating?: number | null;
+  reviewCount?: number;
   onSelectStaff: (staff: Staff) => void;
   onSelectAnyStaff: () => void;
   onSelectLocation: (location: Pick<Location, "id" | "name" | "address">) => void;
@@ -68,6 +71,8 @@ export function ServiceMetaPanel({
   selectedDeal,
   copy,
   lockServiceSelection,
+  avgRating,
+  reviewCount,
   onSelectStaff,
   onSelectAnyStaff,
   onSelectLocation,
@@ -83,10 +88,11 @@ export function ServiceMetaPanel({
       : service?.priceLkr ?? 0;
 
   const staffLabel = staff && staff.name !== business.name ? staff.name : null;
+  const rating = getBusinessRating(avgRating, reviewCount);
 
   return (
     <div className="flex flex-col">
-      <div className="flex items-center gap-3">
+      <div className="flex items-start gap-3">
         <Avatar className="size-10 shrink-0" data-size="lg">
           {business.logoUrl ? (
             <AvatarImage src={business.logoUrl} alt={business.name} className="object-contain bg-white p-0.5" />
@@ -95,7 +101,18 @@ export function ServiceMetaPanel({
             {business.name.charAt(0).toUpperCase()}
           </AvatarFallback>
         </Avatar>
-        <p className="min-w-0 truncate text-sm font-medium text-foreground">{business.name}</p>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-medium text-foreground">{business.name}</p>
+          {rating && (
+            <BusinessRating
+              avgRating={rating.avgRating}
+              reviewCount={rating.reviewCount}
+              copy={copy}
+              size="sm"
+              className="mt-1.5"
+            />
+          )}
+        </div>
       </div>
 
       {needsLocationPicker && (

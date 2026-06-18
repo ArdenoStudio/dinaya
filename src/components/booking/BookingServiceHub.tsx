@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { BusinessRating, getBusinessRating } from "./BusinessRating";
 import type { BookingCopy } from "@/lib/i18n";
 import type { BookingService } from "./BookingWizard";
 
@@ -33,7 +34,7 @@ export default function BookingServiceHub({
 }: Props) {
   if (services.length <= 1) return null;
 
-  const hasRating = avgRating != null && reviewCount != null && reviewCount > 0;
+  const rating = getBusinessRating(avgRating, reviewCount);
 
   const cardClass =
     "overflow-hidden rounded-none border-x-0 shadow-none md:rounded-xl md:border md:border-border md:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]";
@@ -57,16 +58,14 @@ export default function BookingServiceHub({
           <div className="min-w-0 flex-1 space-y-1">
             <CardTitle className="text-xl">{businessName}</CardTitle>
             <CardDescription>{copy.chooseServiceAndTime}</CardDescription>
-            {hasRating && (
-              <div className="flex items-center gap-2 pt-1">
-                <Badge variant="secondary" className="gap-1">
-                  <Icon name="star-fill" className="text-amber-400" />
-                  {avgRating.toFixed(1)}
-                </Badge>
-                <span className="text-xs text-muted-foreground">
-                  {reviewCount} review{reviewCount !== 1 ? "s" : ""}
-                </span>
-              </div>
+            {rating && (
+              <BusinessRating
+                avgRating={rating.avgRating}
+                reviewCount={rating.reviewCount}
+                copy={copy}
+                size="sm"
+                className="pt-1"
+              />
             )}
           </div>
           <Badge variant="secondary" className="hidden shrink-0 sm:inline-flex">

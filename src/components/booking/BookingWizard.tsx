@@ -127,6 +127,8 @@ function BookingWizardInner({
   lockServiceSelection = false,
   embedMode = false,
   calendarOverlayConfig = null,
+  avgRating,
+  reviewCount,
   teamMembers = [],
   hubHref = null,
 }: Props) {
@@ -414,6 +416,8 @@ function BookingWizardInner({
     selectedDeal,
     copy,
     lockServiceSelection,
+    avgRating,
+    reviewCount,
     onSelectStaff: (s: Staff) => {
       setAnyStaff(false);
       clearSlot();

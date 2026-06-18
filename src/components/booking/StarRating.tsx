@@ -13,8 +13,8 @@ export function StarRating({ rating, size = "sm" }: Props) {
       {[1, 2, 3, 4, 5].map((value) => (
         <Icon
           key={value}
-          name={value <= rating ? "star-fill" : "star"}
-          className={`${value <= rating ? "text-amber-400" : "text-gray-300"} ${iconClass}`}
+          name={value <= Math.round(rating) ? "star-fill" : "star"}
+          className={`${value <= Math.round(rating) ? "text-amber-400" : "text-gray-300 dark:text-neutral-600"} ${iconClass}`}
         />
       ))}
     </span>

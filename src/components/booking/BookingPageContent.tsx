@@ -9,27 +9,13 @@ import { BookingThemeToggle } from "@/components/booking/BookingThemeToggle";
 import { getBookingCopy } from "@/lib/i18n";
 import { normalizePublicHttpsUrl } from "@/lib/public-url";
 import { isOptimizableRemoteImage } from "@/lib/utils";
-import { Icon } from "@/components/ui/Icon";
 import { Card, CardContent } from "@/components/ui/card";
 import { BookingTeamSection } from "@/components/booking/BookingTeamSection";
+import { BusinessRating } from "@/components/booking/BusinessRating";
+import { StarRating } from "@/components/booking/StarRating";
 import type { BookingPageData } from "@/lib/booking/load-page-data";
 import { createCalendarOverlayTicket } from "@/lib/calendar-overlay-ticket";
 import type { CalendarOverlayConfig } from "./useGoogleCalendarOverlay";
-
-function StarRating({ rating, size = "sm" }: { rating: number; size?: "sm" | "md" }) {
-  const starSize = size === "md" ? "text-base" : "text-xs";
-  return (
-    <span className="inline-flex items-center gap-0.5">
-      {[1, 2, 3, 4, 5].map((n) => (
-        <Icon
-          key={n}
-          name={n <= Math.round(rating) ? "star-fill" : "star"}
-          className={`${n <= Math.round(rating) ? "text-amber-400" : "text-gray-300 dark:text-neutral-600"} ${starSize}`}
-        />
-      ))}
-    </span>
-  );
-}
 
 type Props = {
   data: Extract<BookingPageData, { status: "ok" }>;
@@ -307,13 +293,13 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
             >
               <CardContent className="p-6">
                 {avgRating !== null && reviewCount > 0 && (
-                  <div className="mb-4 flex items-center gap-2">
-                    <StarRating rating={avgRating} size="md" />
-                    <span className="font-semibold text-foreground">{avgRating.toFixed(1)}</span>
-                    <span className="text-sm text-muted-foreground">
-                      ({reviewCount} review{reviewCount !== 1 ? "s" : ""})
-                    </span>
-                  </div>
+                  <BusinessRating
+                    avgRating={avgRating}
+                    reviewCount={reviewCount}
+                    copy={copy}
+                    size="md"
+                    className="mb-4"
+                  />
                 )}
                 {business.description && (
                   <p className="text-sm leading-relaxed text-muted-foreground">{business.description}</p>
@@ -344,11 +330,14 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
             <section className="space-y-4 px-0 pb-8 md:px-0">
               <div className="border-b border-border bg-card px-4 py-4 md:border-0 md:bg-transparent md:px-0 md:py-0">
                 <h2 className="font-cal text-lg text-foreground">Reviews</h2>
-                {avgRating !== null && (
-                  <div className="mt-1 flex items-center gap-2">
-                    <StarRating rating={avgRating} size="md" />
-                    <span className="font-semibold text-foreground">{avgRating.toFixed(1)}</span>
-                  </div>
+                {avgRating !== null && reviewCount > 0 && (
+                  <BusinessRating
+                    avgRating={avgRating}
+                    reviewCount={reviewCount}
+                    copy={copy}
+                    size="md"
+                    className="mt-1"
+                  />
                 )}
               </div>
               <div className="space-y-0 md:space-y-3">
