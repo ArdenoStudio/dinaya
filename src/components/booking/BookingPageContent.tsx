@@ -122,6 +122,9 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
     mode === "embed" ||
     services.length === 1;
 
+  /** Single-service / deep-link booker — cal.com-style centered card */
+  const bookerFocus = mode === "service" || mode === "embed" || services.length === 1;
+
   const wizardService =
     mode === "service"
       ? initialService
@@ -134,11 +137,24 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
 
   return (
     <BookingTheme accentColor={business.accentColor} embed={mode === "embed"}>
-      <div className="booking-page-bg min-h-dvh bg-muted/30" data-booking-embed-root={mode === "embed" ? "" : undefined}>
+      <div
+        className={
+          bookerFocus
+            ? "booking-page-bg flex min-h-dvh flex-col items-center bg-muted/20 md:justify-center md:py-10"
+            : "booking-page-bg min-h-dvh bg-muted/30"
+        }
+        data-booking-embed-root={mode === "embed" ? "" : undefined}
+      >
         {mode === "embed" ? <EmbedResizeReporter slug={business.slug} /> : null}
         {mode !== "embed" ? <BookingThemeToggle /> : null}
-        <div className="mx-auto max-w-5xl px-0 md:px-8 md:py-6">
-          {!hideSidebarSections && gallery.length > 0 && (
+        <div
+          className={
+            bookerFocus
+              ? "w-full max-w-4xl px-0 md:px-4"
+              : "mx-auto max-w-5xl px-0 md:px-8 md:py-6"
+          }
+        >
+          {!bookerFocus && !hideSidebarSections && gallery.length > 0 && (
             <Card className="overflow-hidden rounded-none border-x-0 border-t-0 shadow-none md:mb-6 md:rounded-xl md:border-x md:shadow-sm">
               <div
                 className={`grid gap-0.5 overflow-hidden md:gap-2 ${
@@ -174,7 +190,7 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
             </Card>
           )}
 
-          {!hideSidebarSections && hasTrustBlock && (
+          {!bookerFocus && !hideSidebarSections && hasTrustBlock && (
             <>
               <BookingPolicyAccordion
                 copy={copy}
@@ -257,8 +273,39 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
             />
           )}
 
+          {bookerFocus && !hideSidebarSections && hasTrustBlock && (
+            <div className="mt-4 border-t border-border/60 px-4 pt-4 md:mt-5 md:rounded-xl md:border md:bg-card/50 md:px-5 md:py-4">
+              <BookingPolicyAccordion
+                copy={copy}
+                cancellationPolicy={business.cancellationPolicy}
+                depositPolicy={business.depositPolicy}
+                bankTransferInstructions={business.bankTransferInstructions}
+              />
+              <div className="hidden space-y-3 text-center text-xs text-muted-foreground md:block">
+                {business.cancellationPolicy && (
+                  <p>
+                    <span className="font-medium text-foreground">{copy.cancellationPolicy}:</span>{" "}
+                    {business.cancellationPolicy}
+                  </p>
+                )}
+                {business.depositPolicy && (
+                  <p>
+                    <span className="font-medium text-foreground">{copy.depositPolicy}:</span>{" "}
+                    {business.depositPolicy}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
           {!hideSidebarSections && hasAboutSection && (
-            <Card className="mt-0 overflow-hidden rounded-none border-x-0 shadow-none md:mt-6 md:rounded-xl md:border-x md:shadow-sm">
+            <Card
+              className={`mt-0 overflow-hidden rounded-none border-x-0 shadow-none ${
+                bookerFocus
+                  ? "mt-6 border-border/60 md:rounded-xl md:border-x md:shadow-none"
+                  : "md:mt-6 md:rounded-xl md:border-x md:shadow-sm"
+              }`}
+            >
               <CardContent className="p-6">
                 {avgRating !== null && reviewCount > 0 && (
                   <div className="mb-4 flex items-center gap-2">
@@ -278,7 +325,13 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
 
           {!hideSidebarSections && staffWithBio.length > 0 && (
             <section className="md:px-0">
-              <Card className="mt-0 overflow-hidden rounded-none border-x-0 py-0 shadow-none md:mt-6 md:rounded-xl md:border-x md:shadow-sm">
+              <Card
+                className={`mt-0 overflow-hidden rounded-none border-x-0 py-0 shadow-none ${
+                  bookerFocus
+                    ? "mt-6 border-border/60 md:rounded-xl md:border-x md:shadow-none"
+                    : "md:mt-6 md:rounded-xl md:border-x md:shadow-sm"
+                }`}
+              >
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base">Meet the team</CardTitle>
                 </CardHeader>

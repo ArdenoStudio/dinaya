@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { addDays, format, parseISO } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import { Icon } from "@/components/ui/Icon";
@@ -88,6 +88,7 @@ export default function StepDateTime({
   const [showMobileCalendar, setShowMobileCalendar] = useState(false);
   const [monthDayStatus, setMonthDayStatus] = useState<Record<string, MonthDayStatus>>({});
   const [calendarMonth, setCalendarMonth] = useState(() => format(today, "yyyy-MM"));
+  const autoAdvancedDateRef = useRef(false);
 
   const canLoad = Boolean(service && (staff || anyStaff));
   const sessionToken = typeof window !== "undefined" ? getBookingSessionToken() : "";
@@ -189,6 +190,19 @@ export default function StepDateTime({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [businessId, staff?.id, service?.id, canLoad]);
+
+  useEffect(() => {
+    autoAdvancedDateRef.current = false;
+  }, [service?.id, staff?.id]);
+
+  useEffect(() => {
+    if (!canLoad || !hasFetched || autoAdvancedDateRef.current) return;
+    if (slotEmptyState === "none" || !nextAvailable) return;
+    if (nextAvailable.date === selectedDate) return;
+
+    autoAdvancedDateRef.current = true;
+    onDateChange(nextAvailable.date);
+  }, [canLoad, hasFetched, slotEmptyState, nextAvailable, selectedDate, onDateChange]);
 
   useEffect(() => {
     if (!canLoad) {

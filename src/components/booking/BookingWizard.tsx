@@ -430,7 +430,7 @@ function BookingWizardInner({
 
   return (
     <BookingTheme accentColor={business.accentColor} embed={embedMode}>
-      <div className="min-w-0 overflow-hidden bg-card md:rounded-2xl md:border md:border-border md:shadow-[0_24px_64px_-12px_var(--booking-accent-shadow),0_8px_24px_-8px_rgba(0,0,0,0.08)]">
+      <div className="min-w-0 overflow-hidden bg-card md:rounded-xl md:border md:border-border md:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]">
         <BookingAttributionCapture businessId={business.id} />
         <BookingDealsSection
           deals={activeDeals}
@@ -438,7 +438,7 @@ function BookingWizardInner({
           onSelectDeal={applyDeal}
         />
 
-        <div className="px-4 py-4 md:px-8 md:py-7">
+        <div className="px-4 py-4 md:px-0 md:py-0">
           {!state.service ? (
             <div className="mx-auto w-full max-w-lg">
               {needsLocationPicker && (
