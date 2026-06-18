@@ -53,6 +53,17 @@ export function uniqueSuffix(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
+/** Next Mon–Sat date string (yyyy-MM-dd) for reliable booking slot e2e. */
+export function nextBookableDate(): string {
+  const candidate = new Date();
+  candidate.setDate(candidate.getDate() + 1);
+  while (candidate.getDay() === 0) {
+    candidate.setDate(candidate.getDate() + 1);
+  }
+  const pad = (value: number) => String(value).padStart(2, "0");
+  return `${candidate.getFullYear()}-${pad(candidate.getMonth() + 1)}-${pad(candidate.getDate())}`;
+}
+
 export function makeAccount(label: string): TestAccount {
   const suffix = uniqueSuffix();
   return {

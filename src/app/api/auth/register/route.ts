@@ -179,7 +179,7 @@ export async function POST(req: NextRequest) {
           })),
         ),
         db.insert(availability).values(
-          [1, 2, 3, 4, 5].map((dayOfWeek) => ({
+          [1, 2, 3, 4, 5, 6].map((dayOfWeek) => ({
             staffId,
             dayOfWeek,
             startTime: "09:00",

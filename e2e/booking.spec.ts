@@ -34,6 +34,19 @@ test.describe("Public booking — single location", () => {
     await expect(page).toHaveURL(new RegExp(`/book/${account.slug}/confirmed`));
     await expect(page.getByText(/Booking confirmed|Booking request received/i)).toBeVisible();
   });
+
+  test("desktop booker shows time slots in the right column", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto(`/book/${account.slug}`);
+    await page.getByRole("button", { name: /Haircut/i }).click();
+
+    const slotButtons = page.locator("button").filter({ hasText: /^\d{1,2}:\d{2}\s*(am|pm)?$/i });
+    await expect(slotButtons.first()).toBeVisible({ timeout: 20_000 });
+    expect(await slotButtons.count()).toBeGreaterThanOrEqual(3);
+
+    await expect(page.getByText(/Fully booked on this date/i)).not.toBeVisible();
+    await expect(page.getByText("Available times")).toBeVisible();
+  });
 });
 
 test.describe("Public booking — multi-location (Pro)", () => {
