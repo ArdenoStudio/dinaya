@@ -20,6 +20,7 @@ export default async function BookingPageEditorRoute() {
       depositPolicy: businesses.depositPolicy,
       facebookUrl: businesses.facebookUrl,
       galleryImages: businesses.galleryImages,
+      logoUrl: businesses.logoUrl,
       instagramUrl: businesses.instagramUrl,
       language: businesses.language,
       lankaqrImageUrl: businesses.lankaqrImageUrl,

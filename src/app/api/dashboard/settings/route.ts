@@ -31,6 +31,16 @@ const publicImageUrlSchema = z
     message: "Image URL must be a public HTTPS link.",
   });
 
+const logoUrlSchema = z
+  .string()
+  .trim()
+  .max(1000)
+  .optional()
+  .nullable()
+  .refine((value) => !value || isPublicHttpsUrl(value) || value.startsWith("/"), {
+    message: "Logo must be a public HTTPS URL or a site path like /logo.png.",
+  });
+
 const settingsSchema = z.object({
   name: z.string().trim().min(1, "Business name is required.").max(100),
   description: z.string().trim().max(2000).optional().nullable(),
@@ -46,6 +56,7 @@ const settingsSchema = z.object({
   instagramUrl: publicHttpsUrlSchema,
   facebookUrl: publicHttpsUrlSchema,
   websiteUrl: publicHttpsUrlSchema,
+  logoUrl: logoUrlSchema,
   galleryImages: z
     .array(
       z
@@ -98,6 +109,7 @@ export async function PATCH(req: NextRequest) {
     depositPolicy,
     language,
     lankaqrImageUrl,
+    logoUrl,
     name,
     payhereEnabled,
     payhereMerchantId,
@@ -157,6 +169,7 @@ export async function PATCH(req: NextRequest) {
       instagramUrl: normalizePublicHttpsUrl(instagramUrl),
       facebookUrl: normalizePublicHttpsUrl(facebookUrl),
       websiteUrl: normalizePublicHttpsUrl(websiteUrl),
+      logoUrl: logoUrl?.trim() || null,
       galleryImages: Array.isArray(galleryImages) ? galleryImages.filter(Boolean) : null,
       ...(payhereEnabled !== undefined && { payhereEnabled: Boolean(payhereEnabled) }),
       ...(payhereMerchantId !== undefined && { payhereMerchantId: payhereMerchantId || null }),
