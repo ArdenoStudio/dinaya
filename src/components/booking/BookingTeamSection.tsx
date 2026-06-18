@@ -14,7 +14,7 @@ type StaffMember = Pick<Staff, "id" | "name" | "bio" | "avatarUrl">;
 interface Props {
   members: StaffMember[];
   copy: BookingCopy;
-  /** dialog = compact trigger + overlay (keeps booker centered). card = inline section for hub pages. */
+  /** dialog = compact trigger + overlay (centered booker/hub). card = inline section for wide layouts. */
   variant: "dialog" | "card";
   className?: string;
 }

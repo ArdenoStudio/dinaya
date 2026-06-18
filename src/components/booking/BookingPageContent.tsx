@@ -121,8 +121,9 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
     mode === "embed" ||
     services.length === 1;
 
-  /** Single-service / deep-link booker — cal.com-style centered card */
+  /** Single-service booker or multi-service hub — cal.com-style centered card */
   const bookerFocus = mode === "service" || mode === "embed" || services.length === 1;
+  const centeredLayout = bookerFocus || showHub;
 
   const wizardService =
     mode === "service"
@@ -138,7 +139,7 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
     <BookingTheme accentColor={business.accentColor} embed={mode === "embed"}>
       <div
         className={
-          bookerFocus
+          centeredLayout
             ? "booking-page-bg flex min-h-dvh flex-col items-center bg-muted/20 md:justify-center md:py-10"
             : "booking-page-bg min-h-dvh bg-muted/30"
         }
@@ -148,12 +149,12 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
         {mode !== "embed" ? <BookingThemeToggle /> : null}
         <div
           className={
-            bookerFocus
+            centeredLayout
               ? "w-full max-w-4xl px-0 md:px-4"
               : "mx-auto max-w-5xl px-0 md:px-8 md:py-6"
           }
         >
-          {!bookerFocus && !hideSidebarSections && gallery.length > 0 && (
+          {!centeredLayout && !hideSidebarSections && gallery.length > 0 && (
             <Card className="overflow-hidden rounded-none border-x-0 border-t-0 shadow-none md:mb-6 md:rounded-xl md:border-x md:shadow-sm">
               <div
                 className={`grid gap-0.5 overflow-hidden md:gap-2 ${
@@ -189,7 +190,7 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
             </Card>
           )}
 
-          {!bookerFocus && !hideSidebarSections && hasTrustBlock && (
+          {!centeredLayout && !hideSidebarSections && hasTrustBlock && (
             <>
               <BookingPolicyAccordion
                 copy={copy}
@@ -276,7 +277,7 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
             />
           )}
 
-          {bookerFocus && !hideSidebarSections && hasTrustBlock && (
+          {centeredLayout && !hideSidebarSections && hasTrustBlock && (
             <div className="mt-4 border-t border-border/60 px-4 pt-4 md:mt-5 md:rounded-xl md:border md:bg-card/50 md:px-5 md:py-4">
               <BookingPolicyAccordion
                 copy={copy}
@@ -304,7 +305,7 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
           {!hideSidebarSections && hasAboutSection && (
             <Card
               className={`mt-0 overflow-hidden rounded-none border-x-0 shadow-none ${
-                bookerFocus
+                centeredLayout
                   ? "mt-6 border-border/60 md:rounded-xl md:border-x md:shadow-none"
                   : "md:mt-6 md:rounded-xl md:border-x md:shadow-sm"
               }`}
@@ -326,7 +327,16 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
             </Card>
           )}
 
-          {!bookerFocus && !hideSidebarSections && staffWithBio.length > 0 && (
+          {showHub && !hideSidebarSections && staffWithBio.length > 0 && (
+            <BookingTeamSection
+              members={staffWithBio}
+              copy={copy}
+              variant="dialog"
+              className="mt-6 flex justify-center"
+            />
+          )}
+
+          {!centeredLayout && !hideSidebarSections && staffWithBio.length > 0 && (
             <BookingTeamSection
               members={staffWithBio}
               copy={copy}

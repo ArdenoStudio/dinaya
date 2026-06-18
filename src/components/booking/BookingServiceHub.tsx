@@ -36,8 +36,8 @@ export default function BookingServiceHub({
   const hasRating = avgRating != null && reviewCount != null && reviewCount > 0;
 
   return (
-    <div className="md:mx-auto md:mb-6 md:max-w-2xl">
-      <Card className="overflow-hidden rounded-none border-x-0 shadow-none md:rounded-xl md:border-x md:shadow-sm">
+    <div className="w-full">
+      <Card className="overflow-hidden rounded-none border-x-0 shadow-none md:rounded-xl md:border md:border-border md:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]">
         <CardHeader className="flex flex-row items-start gap-4 space-y-0 border-b border-border pb-4">
           <Avatar className="size-14" data-size="lg">
             {businessLogoUrl ? (
