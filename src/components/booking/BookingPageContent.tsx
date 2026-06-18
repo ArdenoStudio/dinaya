@@ -270,6 +270,9 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
               reviewCount={reviewCount}
               businessDescription={business.description}
               teamMembers={staffWithBio}
+              hubHref={
+                mode === "service" && services.length > 1 ? `/book/${business.slug}` : null
+              }
             />
           )}
 

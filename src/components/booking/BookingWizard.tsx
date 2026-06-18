@@ -20,6 +20,7 @@ import { trackBookingStart } from "@/lib/analytics/gtag";
 import { ServiceMetaPanel } from "./ServiceMetaPanel";
 import { BookingWizardSkeleton } from "./BookingWizardSkeleton";
 import BookingBranding from "./BookingBranding";
+import { BookingBackPill } from "./BookingBackPill";
 import { BookingTeamSection } from "./BookingTeamSection";
 import { BookingAttributionCapture } from "./BookingAttributionCapture";
 import { BookingDealsSection } from "./BookingDealsSection";
@@ -54,6 +55,7 @@ interface Props {
   reviewCount?: number;
   businessDescription?: string | null;
   teamMembers?: Pick<Staff, "id" | "name" | "bio" | "avatarUrl">[];
+  hubHref?: string | null;
 }
 
 export type BookingBusiness = {
@@ -128,6 +130,7 @@ function BookingWizardInner({
   embedMode = false,
   calendarOverlayConfig = null,
   teamMembers = [],
+  hubHref = null,
 }: Props) {
   const copy = getBookingCopy(business.language);
   const router = useRouter();
@@ -428,11 +431,25 @@ function BookingWizardInner({
       clearSlot();
       update({ location, staff: null });
     },
-    onChangeService: !lockServiceSelection ? clearService : undefined,
+    onChangeService: !lockServiceSelection && !hubHref ? clearService : undefined,
   };
+
+  const showBackPill =
+    !embedMode &&
+    Boolean(state.service) &&
+    (Boolean(hubHref) || (!lockServiceSelection && services.length > 1));
 
   return (
     <BookingTheme accentColor={business.accentColor} embed={embedMode}>
+      {showBackPill && (
+        <div className="mb-3 flex justify-start px-4 md:mb-4 md:px-0">
+          <BookingBackPill
+            label={hubHref ? copy.allServices : copy.back}
+            href={hubHref ?? undefined}
+            onClick={!hubHref && !lockServiceSelection ? clearService : undefined}
+          />
+        </div>
+      )}
       <div className="min-w-0 overflow-hidden bg-card md:rounded-xl md:border md:border-border md:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]">
         <BookingAttributionCapture businessId={business.id} />
         <BookingDealsSection
