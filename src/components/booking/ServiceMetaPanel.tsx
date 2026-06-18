@@ -10,6 +10,7 @@ import type { DealListItem } from "@/lib/deals/queries";
 import { formatLkr } from "@/lib/utils";
 import { Icon } from "@/components/ui/Icon";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { fadeInUp } from "@/lib/booking/booking-animations";
 import StaffPicker from "./StaffPicker";
@@ -18,7 +19,6 @@ import { computeDiscountedPrice } from "@/lib/deals/pricing";
 
 interface ServiceMetaPanelProps {
   business: BookingBusiness;
-  bookingUrlLabel: string;
   service: BookingService | null;
   staff: Staff | null;
   anyStaff: boolean;
@@ -51,7 +51,6 @@ function formatDuration(minutes: number): string {
 
 export function ServiceMetaPanel({
   business,
-  bookingUrlLabel,
   service,
   staff,
   anyStaff,
@@ -83,18 +82,20 @@ export function ServiceMetaPanel({
       ? computeDiscountedPrice(service.priceLkr, selectedDeal.discountPercent)
       : service?.priceLkr ?? 0;
 
+  const staffLabel = staff && staff.name !== business.name ? staff.name : null;
+
   return (
     <div className="flex flex-col">
-      <div className="flex items-center gap-2">
-        <Avatar className="size-7">
+      <div className="flex items-center gap-3">
+        <Avatar className="size-10 shrink-0" data-size="lg">
           {business.logoUrl ? (
             <AvatarImage src={business.logoUrl} alt={business.name} className="object-contain bg-white p-0.5" />
           ) : null}
-          <AvatarFallback className="bg-[var(--booking-accent-muted)] text-xs font-semibold text-[var(--booking-accent)]">
+          <AvatarFallback className="bg-[var(--booking-accent-muted)] text-sm font-semibold text-[var(--booking-accent)]">
             {business.name.charAt(0).toUpperCase()}
           </AvatarFallback>
         </Avatar>
-        <p className="truncate text-sm text-muted-foreground">{business.name}</p>
+        <p className="min-w-0 truncate text-sm font-medium text-foreground">{business.name}</p>
       </div>
 
       {needsLocationPicker && (
@@ -114,7 +115,7 @@ export function ServiceMetaPanel({
             key="service-info"
             {...fadeInUp}
             initial={lockServiceSelection ? false : fadeInUp.initial}
-            className="mt-4 md:mt-5"
+            className="mt-5 border-t border-border/70 pt-5"
           >
             {!lockServiceSelection && onChangeService && (
               <button
@@ -130,24 +131,28 @@ export function ServiceMetaPanel({
             {service.description && (
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{service.description}</p>
             )}
-            <ul className="mt-4 space-y-2.5 text-sm text-muted-foreground">
-              <li className="flex items-center gap-2.5">
-                <Icon name="clock" className="shrink-0 text-base" />
-                <span>{formatDuration(service.durationMinutes)}</span>
-              </li>
-              <li className="flex items-center gap-2.5">
-                <Icon name="tag" className="shrink-0 text-base" />
-                <span>{service.priceLkr > 0 ? formatLkr(price) : "Free"}</span>
-              </li>
-              {(staff || anyStaff) && (
-                <li className="flex items-center gap-2.5">
-                  <Icon name="person" className="shrink-0 text-base" />
-                  <span className="text-foreground">
-                    {anyStaff && !staff ? copy.anyAvailableStaff : staff?.name}
-                  </span>
-                </li>
-              )}
-            </ul>
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              <Badge variant="secondary" className="gap-1.5">
+                <Icon name="clock" />
+                {formatDuration(service.durationMinutes)}
+              </Badge>
+              <Badge variant="outline" className="gap-1.5">
+                <Icon name="tag" />
+                {service.priceLkr > 0 ? formatLkr(price) : "Free"}
+              </Badge>
+            </div>
+            {staffLabel && (
+              <p className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
+                <Icon name="person" className="shrink-0 text-base" />
+                <span className="text-foreground">{staffLabel}</span>
+              </p>
+            )}
+            {anyStaff && !staff && (
+              <p className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
+                <Icon name="people" className="shrink-0 text-base" />
+                <span className="text-foreground">{copy.anyAvailableStaff}</span>
+              </p>
+            )}
             {service.depositPercent > 0 && service.priceLkr > 0 && (
               <p className="mt-3 text-xs text-[var(--booking-accent)]">
                 {copy.depositDue}: {formatLkr(Math.ceil((price * service.depositPercent) / 100))}
@@ -218,11 +223,6 @@ export function ServiceMetaPanel({
           <p className="mt-0.5">{copy.slotTakenAction}</p>
         </div>
       )}
-
-      <p className="mt-6 hidden pt-2 text-[10px] text-muted-foreground/70 md:block">
-        <Icon name="lock-fill" className="mr-1" />
-        {bookingUrlLabel}
-      </p>
     </div>
   );
 }

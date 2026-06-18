@@ -41,7 +41,6 @@ interface Props {
   staffServiceMap: { staffId: string; serviceId: string }[];
   staffLocationMap: { staffId: string; locationId: string }[];
   locations: Pick<Location, "id" | "name" | "address">[];
-  bookingUrlLabel: string;
   businessIcon?: string | null;
   showBranding?: boolean;
   activeDeals?: DealListItem[];
@@ -120,7 +119,6 @@ function BookingWizardInner({
   staffServiceMap,
   staffLocationMap,
   locations,
-  bookingUrlLabel,
   showBranding = true,
   activeDeals = [],
   initialDealId = null,
@@ -399,7 +397,6 @@ function BookingWizardInner({
 
   const metaPanelProps = {
     business,
-    bookingUrlLabel,
     service: state.service,
     staff: state.staff,
     anyStaff,
@@ -490,11 +487,11 @@ function BookingWizardInner({
             </div>
           ) : (
             <div className="grid gap-6 md:grid-cols-[minmax(0,17rem)_1fr] md:items-start md:gap-0 md:divide-x md:divide-border lg:grid-cols-[minmax(0,19rem)_1fr]">
-              <div className="border-b border-border pb-6 md:sticky md:top-6 md:self-start md:border-0 md:px-6 md:pb-0 md:pt-1 lg:px-8">
+              <div className="border-b border-border pb-6 md:sticky md:top-6 md:self-start md:border-0 md:px-6 md:pb-6 md:pt-6 lg:px-8">
                 <ServiceMetaPanel {...metaPanelProps} />
               </div>
 
-              <div className="min-w-0 md:py-1">
+              <div className="min-w-0 md:py-6">
                 {canPickSlots ? (
                   showContactForm ? (
                     <div className="px-4 md:px-6 lg:px-8">

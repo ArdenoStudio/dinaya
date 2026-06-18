@@ -94,10 +94,6 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
   const facebookUrl = normalizePublicHttpsUrl(business.facebookUrl);
   const websiteUrl = normalizePublicHttpsUrl(business.websiteUrl);
 
-  const appDomain = process.env.NEXT_PUBLIC_APP_DOMAIN ?? "";
-  const bookingUrlLabel =
-    appDomain === "dinaya.lk" ? `${business.slug}.dinaya.lk` : `${business.slug} · Dinaya`;
-
   const hasTrustBlock = Boolean(
     business.cancellationPolicy ||
       business.depositPolicy ||
@@ -259,7 +255,6 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
               staffServiceMap={staffServiceMap}
               staffLocationMap={staffLocationMap}
               locations={locations}
-              bookingUrlLabel={bookingUrlLabel}
               showBranding
               activeDeals={activeDeals}
               initialDealId={dealId ?? null}
