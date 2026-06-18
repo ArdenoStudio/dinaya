@@ -1,11 +1,14 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
+import { AnimatePresence, m } from "motion/react";
 import type { BookingCopy } from "@/lib/i18n";
-import type { PublicReview } from "@/lib/reviews-public";
+import type { PublicReview, ReviewDistribution } from "@/lib/reviews-public";
+import { cn } from "@/lib/utils";
 import { Icon } from "@/components/ui/Icon";
 import { Button } from "@/components/ui/button";
 import { BusinessRating } from "./BusinessRating";
+import { ReviewRatingSummary, type StarFilter } from "./ReviewRatingSummary";
 import { StarRating } from "./StarRating";
 
 const PAGE_SIZE = 20;
@@ -17,6 +20,7 @@ interface Props {
   businessName: string;
   avgRating: number;
   reviewCount: number;
+  reviewDistribution: ReviewDistribution;
   initialReviews: SerializedPublicReview[];
   copy: BookingCopy;
   className?: string;
@@ -30,11 +34,21 @@ function formatReviewDate(iso: string) {
   });
 }
 
+function reviewsUrl(slug: string, page: number, filter: StarFilter) {
+  const params = new URLSearchParams({
+    page: String(page),
+    limit: String(PAGE_SIZE),
+  });
+  if (filter !== "all") params.set("rating", String(filter));
+  return `/api/public/reviews/${encodeURIComponent(slug)}?${params.toString()}`;
+}
+
 export function BookingReviewsSection({
   businessSlug,
   businessName,
   avgRating,
   reviewCount,
+  reviewDistribution,
   initialReviews,
   copy,
   className,
@@ -44,6 +58,17 @@ export function BookingReviewsSection({
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(initialReviews.length < reviewCount);
   const [loading, setLoading] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const [starFilter, setStarFilter] = useState<StarFilter>("all");
+
+  const resetDialogState = useCallback(() => {
+    setExpanded(false);
+    setStarFilter("all");
+    setReviews(initialReviews);
+    setPage(1);
+    setHasMore(initialReviews.length < reviewCount);
+    setLoading(false);
+  }, [initialReviews, reviewCount]);
 
   const openDialog = () => {
     const dialog = dialogRef.current;
@@ -51,27 +76,37 @@ export function BookingReviewsSection({
     if (typeof dialog.showModal === "function") dialog.showModal();
   };
 
-  const closeDialog = () => dialogRef.current?.close();
+  const closeDialog = () => {
+    dialogRef.current?.close();
+    resetDialogState();
+  };
 
-  async function loadMore() {
-    if (loading || !hasMore) return;
+  async function fetchReviews(nextPage: number, filter: StarFilter, append: boolean) {
     setLoading(true);
     try {
-      const nextPage = page + 1;
-      const res = await fetch(
-        `/api/public/reviews/${encodeURIComponent(businessSlug)}?page=${nextPage}&limit=${PAGE_SIZE}`,
-      );
+      const res = await fetch(reviewsUrl(businessSlug, nextPage, filter));
       if (!res.ok) return;
       const data = (await res.json()) as {
         reviews: SerializedPublicReview[];
         hasMore: boolean;
       };
-      setReviews((prev) => [...prev, ...data.reviews]);
+      setReviews((prev) => (append ? [...prev, ...data.reviews] : data.reviews));
       setPage(nextPage);
       setHasMore(data.hasMore);
     } finally {
       setLoading(false);
     }
+  }
+
+  async function handleFilterChange(filter: StarFilter) {
+    if (filter === starFilter || loading) return;
+    setStarFilter(filter);
+    await fetchReviews(1, filter, false);
+  }
+
+  async function loadMore() {
+    if (loading || !hasMore) return;
+    await fetchReviews(page + 1, starFilter, true);
   }
 
   return (
@@ -96,51 +131,112 @@ export function BookingReviewsSection({
 
       <dialog
         ref={dialogRef}
-        className="fixed top-1/2 left-1/2 z-50 m-0 w-[min(100vw-2rem,28rem)] max-h-[min(85dvh,36rem)] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl border border-border bg-card p-0 text-foreground shadow-xl backdrop:bg-black/40 open:flex open:flex-col"
+        className={cn(
+          "fixed top-1/2 left-1/2 z-50 m-0 -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl border border-border bg-card p-0 text-foreground shadow-xl backdrop:bg-black/40 open:flex open:flex-col",
+          "transition-[width,max-height] duration-300 ease-out",
+          expanded
+            ? "w-[min(100vw-2rem,40rem)] max-h-[min(92dvh,44rem)]"
+            : "w-[min(100vw-2rem,28rem)] max-h-[min(85dvh,36rem)]",
+        )}
         onClick={(event) => {
           if (event.target === event.currentTarget) closeDialog();
         }}
-        onClose={closeDialog}
+        onClose={resetDialogState}
       >
         <div className="border-b border-border px-5 py-4">
           <div className="flex items-center justify-between gap-3">
             <h2 className="text-base font-semibold">{copy.reviewsTitle}</h2>
-            <Button type="button" variant="ghost" size="icon-xs" onClick={closeDialog} aria-label={copy.close}>
-              <Icon name="x-lg" />
-            </Button>
+            <div className="flex items-center gap-0.5">
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-xs"
+                onClick={() => setExpanded((value) => !value)}
+                aria-expanded={expanded}
+                aria-label={expanded ? copy.collapseReviewSummary : copy.expandReviewSummary}
+                title={expanded ? copy.collapseReviewSummary : copy.expandReviewSummary}
+              >
+                <Icon name="bar-chart-line-fill" className={cn(expanded && "text-[var(--booking-accent)]")} />
+              </Button>
+              <Button type="button" variant="ghost" size="icon-xs" onClick={closeDialog} aria-label={copy.close}>
+                <Icon name="x-lg" />
+              </Button>
+            </div>
           </div>
-          <BusinessRating
-            avgRating={avgRating}
-            reviewCount={reviewCount}
-            copy={copy}
-            size="sm"
-            className="mt-2"
-          />
+
+          <AnimatePresence initial={false}>
+            {expanded ? (
+              <m.div
+                key="summary-expanded"
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+                className="overflow-hidden"
+              >
+                <div className="pt-4">
+                  <ReviewRatingSummary
+                    avgRating={avgRating}
+                    reviewCount={reviewCount}
+                    distribution={reviewDistribution}
+                    activeFilter={starFilter}
+                    onFilterChange={(filter) => void handleFilterChange(filter)}
+                    copy={copy}
+                    expanded
+                  />
+                </div>
+              </m.div>
+            ) : (
+              <m.div
+                key="summary-compact"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.15 }}
+                className="mt-2"
+              >
+                <BusinessRating
+                  avgRating={avgRating}
+                  reviewCount={reviewCount}
+                  copy={copy}
+                  size="sm"
+                />
+              </m.div>
+            )}
+          </AnimatePresence>
         </div>
 
         <ul className="min-h-0 flex-1 overflow-y-auto p-2">
-          {reviews.map((review) => (
-            <li key={review.id} className="rounded-xl px-3 py-3">
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-foreground">{review.clientName}</p>
-                  <StarRating rating={review.rating} />
-                </div>
-                <p className="shrink-0 text-[11px] text-muted-foreground">{formatReviewDate(review.createdAt)}</p>
-              </div>
-              {review.comment ? (
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{review.comment}</p>
-              ) : null}
-              {review.ownerReply ? (
-                <div className="mt-3 rounded-lg bg-muted/50 px-3 py-2.5">
-                  <p className="text-xs font-medium text-foreground">
-                    {copy.responseFrom.replace("{business}", businessName)}
-                  </p>
-                  <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{review.ownerReply}</p>
-                </div>
-              ) : null}
+          {reviews.length === 0 && !loading ? (
+            <li className="px-3 py-8 text-center text-sm text-muted-foreground">
+              {copy.noReviewsForFilter}
             </li>
-          ))}
+          ) : (
+            reviews.map((review) => (
+              <li key={review.id} className="rounded-xl px-3 py-3">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-foreground">{review.clientName}</p>
+                    <StarRating rating={review.rating} />
+                  </div>
+                  <p className="shrink-0 text-[11px] text-muted-foreground">
+                    {formatReviewDate(review.createdAt)}
+                  </p>
+                </div>
+                {review.comment ? (
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{review.comment}</p>
+                ) : null}
+                {review.ownerReply ? (
+                  <div className="mt-3 rounded-lg bg-muted/50 px-3 py-2.5">
+                    <p className="text-xs font-medium text-foreground">
+                      {copy.responseFrom.replace("{business}", businessName)}
+                    </p>
+                    <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{review.ownerReply}</p>
+                  </div>
+                ) : null}
+              </li>
+            ))
+          )}
         </ul>
 
         {hasMore ? (

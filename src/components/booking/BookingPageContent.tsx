@@ -66,6 +66,7 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
     reviews: reviewList,
     avgRating,
     reviewCount,
+    reviewDistribution,
     activeDeals,
     bookingRouter,
     hideBranding,
@@ -332,6 +333,7 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
               businessName={business.name}
               avgRating={businessRating.avgRating}
               reviewCount={businessRating.reviewCount}
+              reviewDistribution={reviewDistribution}
               initialReviews={initialReviews}
               copy={copy}
               className={`flex justify-center pb-8 ${centeredLayout ? "mt-3" : "mt-6"}`}

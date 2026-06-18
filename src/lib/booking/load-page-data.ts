@@ -8,6 +8,7 @@ import { resolveActiveRouter, type BookingRouter } from "@/lib/booking-router";
 import { listActiveDealsForBusiness } from "@/lib/deals/queries";
 import { backfillServiceSlugsForBusiness } from "@/lib/slot-reservations";
 import { resolveServiceSlug } from "@/lib/service-slug";
+import { getReviewDistribution } from "@/lib/reviews-public";
 import { hasPublicColumn, withTransientDbRetry } from "@/lib/dashboard/db-compat";
 
 export type BookingPageData = NonNullable<Awaited<ReturnType<typeof loadBookingPageData>>>;
@@ -96,7 +97,7 @@ async function loadBookingPageDataInner(slug: string, serviceSlug?: string) {
 
   const intakeEnabled = canUseFeature(effectivePlan, "intakeForms");
 
-  const [serviceList, staffList, reviewList, ratingData, locationList, staffLocationMap, activeDeals] =
+  const [serviceList, staffList, reviewList, ratingData, reviewDistribution, locationList, staffLocationMap, activeDeals] =
     await Promise.all([
       db
         .select({
@@ -132,6 +133,7 @@ async function loadBookingPageDataInner(slug: string, serviceSlug?: string) {
         .select({ avg: avg(reviews.rating), count: count() })
         .from(reviews)
         .where(and(eq(reviews.businessId, business.id), eq(reviews.isPublished, true))),
+      getReviewDistribution(business.id),
       listActiveLocations(business.id),
       getStaffLocationMap(business.id),
       listActiveDealsForBusiness(business.id),
@@ -176,6 +178,7 @@ async function loadBookingPageDataInner(slug: string, serviceSlug?: string) {
     reviews: reviewList,
     avgRating: ratingData[0]?.avg ? parseFloat(ratingData[0].avg) : null,
     reviewCount: ratingData[0]?.count ?? 0,
+    reviewDistribution,
     activeDeals,
     bookingRouter,
     initialService,

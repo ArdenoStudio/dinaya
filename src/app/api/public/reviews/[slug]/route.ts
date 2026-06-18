@@ -11,8 +11,13 @@ export async function GET(req: Request, { params }: Ctx) {
   const page = Math.max(Number(searchParams.get("page")) || 1, 1);
   const limit = Math.min(Math.max(Number(searchParams.get("limit")) || 20, 1), 50);
   const offset = (page - 1) * limit;
+  const ratingParam = searchParams.get("rating");
+  const rating =
+    ratingParam != null && ratingParam !== ""
+      ? Math.min(Math.max(Number(ratingParam), 1), 5)
+      : undefined;
 
-  const data = await getPublicReviews(slug, { limit, offset });
+  const data = await getPublicReviews(slug, { limit, offset, rating });
 
   if (!data) {
     return NextResponse.json({ error: "Not found." }, { status: 404 });
@@ -22,6 +27,7 @@ export async function GET(req: Request, { params }: Ctx) {
     businessName: data.businessName,
     avgRating: data.avgRating,
     reviewCount: data.reviewCount,
+    distribution: data.distribution,
     page,
     hasMore: data.hasMore,
     reviews: data.reviews.map((review) => ({

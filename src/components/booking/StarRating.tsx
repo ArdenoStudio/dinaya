@@ -1,15 +1,17 @@
 import { Icon } from "@/components/ui/Icon";
+import { cn } from "@/lib/utils";
 
 interface Props {
   rating: number;
   size?: "sm" | "md";
+  className?: string;
 }
 
-export function StarRating({ rating, size = "sm" }: Props) {
+export function StarRating({ rating, size = "sm", className }: Props) {
   const iconClass = size === "md" ? "text-base" : "text-xs";
 
   return (
-    <span className="inline-flex gap-0.5">
+    <span className={cn("inline-flex gap-0.5", className)}>
       {[1, 2, 3, 4, 5].map((value) => (
         <Icon
           key={value}
