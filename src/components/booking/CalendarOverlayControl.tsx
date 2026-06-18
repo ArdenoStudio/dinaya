@@ -1,6 +1,9 @@
 "use client";
 
+import { useId } from "react";
 import { Icon } from "@/components/ui/Icon";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import type { BookingCopy } from "@/lib/i18n";
 import type { GoogleCalendarOverlay } from "./useGoogleCalendarOverlay";
 
@@ -13,6 +16,8 @@ export function CalendarOverlayControl({
   overlay: GoogleCalendarOverlay;
   compact?: boolean;
 }) {
+  const switchId = useId();
+
   if (!overlay.available) return null;
 
   const status = overlay.connecting
@@ -36,31 +41,24 @@ export function CalendarOverlayControl({
           <Icon name="calendar2-check" className="text-base" aria-hidden="true" />
         </span>
         <div className="min-w-0 flex-1">
-          <span className="block text-xs font-semibold text-gray-800 dark:text-gray-200">
+          <Label
+            htmlFor={switchId}
+            className="block text-xs font-semibold text-gray-800 dark:text-gray-200"
+          >
             {copy.overlayMyCalendar}
-          </span>
+          </Label>
           <span className="mt-0.5 block text-[11px] leading-4 text-gray-500 dark:text-gray-400">
             {status}
           </span>
         </div>
-        <button
-          type="button"
-          role="switch"
-          aria-label={copy.overlayMyCalendar}
-          aria-checked={overlay.enabled}
+        <Switch
+          id={switchId}
+          checked={overlay.enabled}
           disabled={overlay.connecting}
-          onClick={overlay.toggle}
-          className={`relative h-6 w-11 shrink-0 rounded-full transition-colors disabled:cursor-wait disabled:opacity-60 ${
-            overlay.enabled ? "booking-bg-accent" : "bg-gray-200 dark:bg-neutral-700"
-          }`}
-        >
-          <span
-            aria-hidden="true"
-            className={`absolute top-0.5 size-5 rounded-full bg-white shadow-sm transition-transform ${
-              overlay.enabled ? "translate-x-5" : "translate-x-0.5"
-            }`}
-          />
-        </button>
+          onCheckedChange={() => overlay.toggle()}
+          aria-label={copy.overlayMyCalendar}
+          className="h-6 w-11 shrink-0 data-[size=default]:h-6 data-[size=default]:w-11 data-checked:booking-bg-accent data-unchecked:bg-gray-200 dark:data-unchecked:bg-neutral-700"
+        />
       </div>
 
       {overlay.error && (
