@@ -27,9 +27,11 @@ If either secret is missing, e2e is skipped with a workflow warning (verify stil
 
 `AUTH_URL` and `NEXT_PUBLIC_APP_URL` must point at the active production host, for example `https://dinaya-lk.vercel.app` or `https://dinaya.lk`. Do not leave them pointing at an old preview deployment such as `dinaya-tau.vercel.app`; Auth.js will set stale callback cookies and dashboard sign-in can fail or redirect to the wrong app.
 
-Optional but recommended:
+Production rate limiting (required on the live app, not preview):
 
-- `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` — distributed rate limiting (falls back to in-memory)
+- `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` — distributed rate limiting. Production returns **503** when Upstash is missing or unreachable (no per-instance memory fallback). Preview and local dev may use the in-memory limiter.
+
+Optional but recommended:
 - `UPTIME_MONITOR_SUMMARY_URL` — full URL to `history/summary.json` for `/admin/health` Upptime history (30d uptime, incidents). `/admin/health` works without this: it runs live DB / email / PayHere probes instead.
 - `UPTIME_MONITOR_GITHUB_REPO`, `UPTIME_MONITOR_GITHUB_BRANCH`, `UPTIME_MONITOR_GITHUB_TOKEN` — alternative to the URL above; defaults to `ArdenoStudio/dinaya-uptime-monitor` with `master` then `main` when branch is unset; token enables private-repo fetch via GitHub Contents API
 - `VERCEL_TOKEN`, `VERCEL_PROJECT_ID_OR_NAME`, `VERCEL_TEAM_ID` or `VERCEL_TEAM_SLUG` — custom-domain provisioning for tenant-owned domains
@@ -80,6 +82,7 @@ All cron workflows use `DINAYA_APP_URL` and `CRON_SECRET`. Schedules are UTC:
 | `booking-reminders-cron.yml` | `/api/cron/reminders` | daily at 04:30 |
 | `deal-suggestions-cron.yml` | `/api/cron/deal-suggestions` | daily at 03:00 |
 | `deal-holds-cron.yml` | `/api/cron/deal-holds` | every 15 minutes |
+| `expire-pending-bookings-cron.yml` | `/api/cron/expire-pending-bookings` | every 15 minutes |
 
 `SECRET_ENCRYPTION_KEY` must stay stable. Rotating it without re-encrypting stored secrets will make PayHere merchant secrets unreadable.
 
@@ -132,6 +135,7 @@ npm run db:migrate
    - `0020_deals.sql`
    - `0021_deal_slot_release.sql`
    - `0022_platform_admin_security.sql`
+   - `0033_booking_idempotency.sql` — public booking idempotency keys (`Idempotency-Key` header / session token)
 4. Deploy the app.
 5. Smoke test:
    - `GET /api/health`
@@ -147,6 +151,9 @@ npm run db:migrate
    - signed review page at `/reviews/[token]`
    - client booking manage link at `/client/[token]` (if enabled)
    - a test booking conflict attempt for the same staff/time
+   - booking on a configured business holiday → API returns 409 / slot unavailable
+   - double-submit the same public booking with the same `Idempotency-Key` → same booking returned
+   - abandon a PayHere checkout → pending booking is cancelled after ~30 minutes by `expire-pending-bookings`
 
 ## Live stream demo loop
 
