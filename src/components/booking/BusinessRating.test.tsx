@@ -3,7 +3,7 @@ import {
   getBusinessRating,
   HIGH_RATING_THRESHOLD,
   shouldShowReviewCount,
-} from "./BusinessRating";
+} from "@/lib/booking/rating";
 import { getBookingCopy } from "@/lib/i18n";
 
 const copy = getBookingCopy("en");

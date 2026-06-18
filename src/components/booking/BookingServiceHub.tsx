@@ -9,7 +9,8 @@ import { BookingBusinessAvatar } from "./BookingBusinessAvatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { BusinessRating, getBusinessRating } from "./BusinessRating";
+import { BusinessRating } from "./BusinessRating";
+import { getBusinessRating } from "@/lib/booking/rating";
 import type { BookingCopy } from "@/lib/i18n";
 import type { BookingService } from "./BookingWizard";
 

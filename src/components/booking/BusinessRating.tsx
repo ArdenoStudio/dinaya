@@ -2,13 +2,11 @@
 
 import { cn } from "@/lib/utils";
 import { formatBookingCopy, type BookingCopy } from "@/lib/i18n";
+import { shouldShowReviewCount } from "@/lib/booking/rating";
 
 export const BOOKING_REVIEWS_SECTION_ID = "booking-reviews";
-export const HIGH_RATING_THRESHOLD = 4.5;
 
-export function shouldShowReviewCount(avgRating: number, showCount?: boolean) {
-  return showCount ?? avgRating < HIGH_RATING_THRESHOLD;
-}
+export { HIGH_RATING_THRESHOLD, shouldShowReviewCount } from "@/lib/booking/rating";
 
 interface BusinessRatingProps {
   avgRating: number;
@@ -99,12 +97,4 @@ export function BusinessRating({
       {content}
     </div>
   );
-}
-
-export function getBusinessRating(
-  avgRating: number | null | undefined,
-  reviewCount: number | null | undefined,
-): { avgRating: number; reviewCount: number } | null {
-  if (avgRating == null || reviewCount == null || reviewCount <= 0) return null;
-  return { avgRating, reviewCount };
 }

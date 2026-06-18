@@ -7,7 +7,8 @@ import type { BookingCopy } from "@/lib/i18n";
 import { formatLkr } from "@/lib/utils";
 import type { BookingService } from "./BookingWizard";
 import { BookingStepIndicator } from "./BookingStepIndicator";
-import { BusinessRating, getBusinessRating } from "./BusinessRating";
+import { BusinessRating } from "./BusinessRating";
+import { getBusinessRating } from "@/lib/booking/rating";
 
 type Props = {
   businessName: string;

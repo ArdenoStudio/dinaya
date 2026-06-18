@@ -12,7 +12,7 @@ import { isOptimizableRemoteImage } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { BookingTeamSection } from "@/components/booking/BookingTeamSection";
 import { BookingReviewsSection } from "@/components/booking/BookingReviewsSection";
-import { getBusinessRating } from "@/components/booking/BusinessRating";
+import { getBusinessRating } from "@/lib/booking/rating";
 import type { BookingPageData } from "@/lib/booking/load-page-data";
 import {
   createCalendarOverlayTicket,

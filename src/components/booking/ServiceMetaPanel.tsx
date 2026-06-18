@@ -16,7 +16,8 @@ import { fadeInUp } from "@/lib/booking/booking-animations";
 import StaffPicker from "./StaffPicker";
 import StepLocation from "./StepLocation";
 import { computeDiscountedPrice } from "@/lib/deals/pricing";
-import { BusinessRating, getBusinessRating } from "./BusinessRating";
+import { BusinessRating } from "./BusinessRating";
+import { getBusinessRating } from "@/lib/booking/rating";
 
 interface ServiceMetaPanelProps {
   business: BookingBusiness;
