@@ -35,10 +35,13 @@ export default function BookingServiceHub({
 
   const hasRating = avgRating != null && reviewCount != null && reviewCount > 0;
 
+  const cardClass =
+    "overflow-hidden rounded-none border-x-0 shadow-none md:rounded-xl md:border md:border-border md:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]";
+
   return (
-    <div className="w-full">
-      <Card className="overflow-hidden rounded-none border-x-0 shadow-none md:rounded-xl md:border md:border-border md:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]">
-        <CardHeader className="flex flex-row items-start gap-4 space-y-0 border-b border-border pb-4">
+    <div className="flex w-full flex-col gap-4 md:gap-5">
+      <Card className={cardClass}>
+        <CardHeader className="flex flex-row items-start gap-4 space-y-0 pb-4">
           <Avatar className="size-14" data-size="lg">
             {businessLogoUrl ? (
               <AvatarImage
@@ -70,7 +73,9 @@ export default function BookingServiceHub({
             {services.length} services
           </Badge>
         </CardHeader>
+      </Card>
 
+      <Card className={cardClass}>
         <CardContent className="p-0">
           {services.map((service, index) => {
             const href = buildServiceBookingPath(businessSlug, service.slug ?? service.id);
