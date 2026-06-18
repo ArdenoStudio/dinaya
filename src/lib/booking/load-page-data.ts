@@ -8,11 +8,15 @@ import { resolveActiveRouter, type BookingRouter } from "@/lib/booking-router";
 import { listActiveDealsForBusiness } from "@/lib/deals/queries";
 import { backfillServiceSlugsForBusiness } from "@/lib/slot-reservations";
 import { resolveServiceSlug } from "@/lib/service-slug";
-import { hasPublicColumn } from "@/lib/dashboard/db-compat";
+import { hasPublicColumn, withTransientDbRetry } from "@/lib/dashboard/db-compat";
 
 export type BookingPageData = NonNullable<Awaited<ReturnType<typeof loadBookingPageData>>>;
 
 export async function loadBookingPageData(slug: string, serviceSlug?: string) {
+  return withTransientDbRetry(() => loadBookingPageDataInner(slug, serviceSlug));
+}
+
+async function loadBookingPageDataInner(slug: string, serviceSlug?: string) {
   const [includePaypal, includeAccentColor, includeBookingRouter, includeServiceSlug, includeServiceImage] =
     await Promise.all([
       hasPublicColumn("businesses", "paypal_enabled"),
