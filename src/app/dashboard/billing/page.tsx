@@ -127,7 +127,7 @@ export default async function BillingPage() {
         description="Manage your Dinaya plan and subscription."
       />
 
-      <section className="rounded-xl border border-neutral-200 bg-white p-6">
+      <section className="rounded-xl border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900">
         <div className="flex items-center justify-between">
           <div>
             <div className="text-xs uppercase tracking-wider text-neutral-500">Current plan</div>
@@ -153,7 +153,7 @@ export default async function BillingPage() {
             )}
           </div>
           {isPaid && activeSub?.status === "past_due" && (
-            <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700 ring-1 ring-amber-500/30">
+            <span className="rounded-full bg-amber-50 dark:bg-amber-950/40 px-3 py-1 text-xs font-medium text-amber-700 ring-1 ring-amber-500/30">
               Payment past due
             </span>
           )}
@@ -161,7 +161,7 @@ export default async function BillingPage() {
       </section>
 
       {plan === "trial" && (
-        <section className="rounded-xl border border-blue-200 bg-blue-50/60 p-6">
+        <section className="rounded-xl border border-blue-200 bg-blue-50 dark:bg-blue-950/40 p-6">
           <h2 className="text-lg font-semibold text-blue-900">
             {trialDaysLeft !== null && trialDaysLeft > 0
               ? `${trialDaysLeft} ${trialDaysLeft === 1 ? "day" : "days"} left in your free trial`
@@ -175,7 +175,7 @@ export default async function BillingPage() {
       )}
 
       {plan === "expired" && (
-        <section className="rounded-xl border border-red-200 bg-red-50/70 p-6">
+        <section className="rounded-xl border border-red-200 bg-red-50 dark:border-red-900/50 dark:bg-red-950/40 p-6">
           <h2 className="text-lg font-semibold text-red-900">Your free trial has ended</h2>
           <p className="mt-1 text-sm text-red-900/80">
             Your public booking page is offline and new bookings are paused. Your data is safe —
@@ -186,7 +186,7 @@ export default async function BillingPage() {
 
       {(plan === "trial" || plan === "expired") && (
         <>
-          <section className="rounded-xl border border-neutral-200 bg-white p-6">
+          <section className="rounded-xl border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900">
             <h2 className="text-lg font-semibold">Subscribe to Starter</h2>
             <p className="mt-1 text-sm text-neutral-700">
               Public booking page, PayHere payments, unlimited bookings, 1 branch, 2 staff, and 10 services.
@@ -199,7 +199,7 @@ export default async function BillingPage() {
             />
           </section>
 
-          <section className="rounded-xl border border-blue-200 bg-blue-50/50 p-6">
+          <section className="rounded-xl border border-blue-200 bg-blue-50 dark:bg-blue-950/40 p-6">
             <h2 className="text-lg font-semibold">Upgrade to Pro</h2>
             <p className="mt-1 text-sm text-neutral-700">
               Main plan for serious small businesses: 1 branch, 5 staff, reviews, reports, Google Calendar, and reminder credits.
@@ -212,7 +212,7 @@ export default async function BillingPage() {
             />
           </section>
 
-          <section className="rounded-xl border border-amber-200 bg-amber-50/50 p-6">
+          <section className="rounded-xl border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-950/40 p-6">
             <h2 className="text-lg font-semibold">Upgrade to Growth</h2>
             <p className="mt-1 text-sm text-neutral-700">
               Automation and AI growth: 3 branches, 15 staff, custom domain, branding removal, and AI workflows.
@@ -232,7 +232,7 @@ export default async function BillingPage() {
 
       {plan === "starter" && (
         <>
-          <section className="rounded-xl border border-blue-200 bg-blue-50/50 p-6">
+          <section className="rounded-xl border border-blue-200 bg-blue-50 dark:bg-blue-950/40 p-6">
             <h2 className="text-lg font-semibold">Upgrade to Pro</h2>
             <p className="mt-1 text-sm text-neutral-700">
               Add reviews, reports, Google Calendar sync, automations, and reminder credits for a growing team.
@@ -245,7 +245,7 @@ export default async function BillingPage() {
             />
           </section>
 
-          <section className="rounded-xl border border-amber-200 bg-amber-50/50 p-6">
+          <section className="rounded-xl border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-950/40 p-6">
             <h2 className="text-lg font-semibold">Upgrade to Growth</h2>
             <p className="mt-1 text-sm text-neutral-700">
               Add AI workflows, custom domain, branding removal, and 3-branch scale.
@@ -261,7 +261,7 @@ export default async function BillingPage() {
       )}
 
       {plan === "pro" && (
-        <section className="rounded-xl border border-amber-200 bg-amber-50/50 p-6">
+        <section className="rounded-xl border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-950/40 p-6">
           <h2 className="text-lg font-semibold">Upgrade to Growth</h2>
           <p className="mt-1 text-sm text-neutral-700">
             Unlock AI growth workflows, custom domain, branding removal, and 3-branch scale. AI Voice Receptionist is coming later.
@@ -276,7 +276,7 @@ export default async function BillingPage() {
       )}
 
       {isPaid && activeSub && (
-        <section className="rounded-xl border border-neutral-200 bg-white p-6">
+        <section className="rounded-xl border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900">
           <h2 className="text-lg font-semibold">Manage subscription</h2>
           <p className="mt-1 text-sm text-neutral-600">
             Cancel anytime. You&apos;ll keep {planDisplayName(plan)} features until the current period ends.

@@ -110,7 +110,7 @@ const donts = [
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full border bg-white px-3 py-1 text-xs font-medium text-gray-600 shadow-sm mb-4">
+    <span className="inline-flex items-center gap-1.5 rounded-full border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-1 text-xs font-medium text-gray-600 dark:text-gray-400 shadow-sm mb-4">
       {children}
     </span>
   );
@@ -118,7 +118,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 
 export default function BrandPage() {
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-white dark:bg-neutral-950">
       <PublicNav />
 
       {/* Hero */}
@@ -154,7 +154,7 @@ export default function BrandPage() {
       </div>
 
       {/* Logo */}
-      <section className="max-w-6xl mx-auto px-6 pb-20 border-t border-gray-100 pt-20">
+      <section className="max-w-6xl mx-auto px-6 pb-20 border-t border-gray-100 dark:border-neutral-800 pt-20">
         <FadeContainer>
           <FadeDiv className="mb-2">
             <SectionLabel>
@@ -172,12 +172,12 @@ export default function BrandPage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Default */}
             <FadeDiv className="flex flex-col">
-              <div className="flex-1 flex items-center justify-center rounded-2xl border bg-white shadow-sm h-44 p-6">
+              <div className="flex-1 flex items-center justify-center rounded-2xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 shadow-sm h-44 p-6">
                 <Logo size="lg" href="#" />
               </div>
               <div className="flex items-center justify-between mt-3 px-1">
-                <span className="text-sm font-medium text-gray-700">Default</span>
-                <span className="inline-flex items-center gap-1 rounded-md bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-500">
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Default</span>
+                <span className="inline-flex items-center gap-1 rounded-md bg-gray-100 dark:bg-neutral-800 px-2 py-0.5 text-[11px] font-medium text-gray-500 dark:text-gray-400">
                   <Icon name="download" className="text-[10px]" /> SVG
                 </span>
               </div>
@@ -185,7 +185,7 @@ export default function BrandPage() {
 
             {/* Icon only */}
             <FadeDiv className="flex flex-col">
-              <div className="flex-1 flex items-center justify-center rounded-2xl border bg-white shadow-sm h-44 p-6">
+              <div className="flex-1 flex items-center justify-center rounded-2xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 shadow-sm h-44 p-6">
                 <svg
                   width={48}
                   height={48}
@@ -199,8 +199,8 @@ export default function BrandPage() {
                 </svg>
               </div>
               <div className="flex items-center justify-between mt-3 px-1">
-                <span className="text-sm font-medium text-gray-700">Icon only</span>
-                <span className="inline-flex items-center gap-1 rounded-md bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-500">
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Icon only</span>
+                <span className="inline-flex items-center gap-1 rounded-md bg-gray-100 dark:bg-neutral-800 px-2 py-0.5 text-[11px] font-medium text-gray-500 dark:text-gray-400">
                   <Icon name="download" className="text-[10px]" /> SVG
                 </span>
               </div>
@@ -224,8 +224,8 @@ export default function BrandPage() {
                 </span>
               </div>
               <div className="flex items-center justify-between mt-3 px-1">
-                <span className="text-sm font-medium text-gray-700">Dark</span>
-                <span className="inline-flex items-center gap-1 rounded-md bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-500">
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Dark</span>
+                <span className="inline-flex items-center gap-1 rounded-md bg-gray-100 dark:bg-neutral-800 px-2 py-0.5 text-[11px] font-medium text-gray-500 dark:text-gray-400">
                   <Icon name="download" className="text-[10px]" /> SVG
                 </span>
               </div>
@@ -249,8 +249,8 @@ export default function BrandPage() {
                 </span>
               </div>
               <div className="flex items-center justify-between mt-3 px-1">
-                <span className="text-sm font-medium text-gray-700">Brand blue</span>
-                <span className="inline-flex items-center gap-1 rounded-md bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-500">
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Brand blue</span>
+                <span className="inline-flex items-center gap-1 rounded-md bg-gray-100 dark:bg-neutral-800 px-2 py-0.5 text-[11px] font-medium text-gray-500 dark:text-gray-400">
                   <Icon name="download" className="text-[10px]" /> SVG
                 </span>
               </div>
@@ -260,7 +260,7 @@ export default function BrandPage() {
       </section>
 
       {/* Colours */}
-      <section className="max-w-6xl mx-auto px-6 pb-20 border-t border-gray-100 pt-20">
+      <section className="max-w-6xl mx-auto px-6 pb-20 border-t border-gray-100 dark:border-neutral-800 pt-20">
         <FadeContainer>
           <FadeDiv className="mb-2">
             <SectionLabel>
@@ -296,7 +296,7 @@ export default function BrandPage() {
       </section>
 
       {/* Typography */}
-      <section className="max-w-6xl mx-auto px-6 pb-20 border-t border-gray-100 pt-20">
+      <section className="max-w-6xl mx-auto px-6 pb-20 border-t border-gray-100 dark:border-neutral-800 pt-20">
         <FadeContainer>
           <FadeDiv className="mb-2">
             <SectionLabel>
@@ -313,18 +313,18 @@ export default function BrandPage() {
 
           <div className="grid md:grid-cols-2 gap-4">
             {/* CalSans */}
-            <FadeDiv className="rounded-2xl border bg-white shadow-sm p-8 flex flex-col gap-5">
+            <FadeDiv className="rounded-2xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 shadow-sm p-8 flex flex-col gap-5">
               <div>
-                <p className="font-cal text-7xl tracking-tight text-gray-900 leading-none">Aa</p>
+                <p className="font-cal text-7xl tracking-tight text-gray-900 dark:text-gray-100 leading-none">Aa</p>
               </div>
-              <p className="font-cal text-base tracking-wide text-gray-400 leading-relaxed">
+              <p className="font-cal text-base tracking-wide text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 leading-relaxed">
                 A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
               </p>
-              <p className="font-cal text-xl tracking-tight text-gray-800 leading-snug">
+              <p className="font-cal text-xl tracking-tight text-gray-800 dark:text-gray-200 leading-snug">
                 &quot;Your calendar, open for business.&quot;
               </p>
-              <div className="border-t border-gray-100 pt-4 space-y-1">
-                <p className="text-sm font-semibold text-gray-900">CalSans SemiBold</p>
+              <div className="border-t border-gray-100 dark:border-neutral-800 pt-4 space-y-1">
+                <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">CalSans SemiBold</p>
                 <p className="text-xs text-muted-foreground">Display &amp; Headings · Weight 600</p>
                 <p className="text-xs text-muted-foreground mt-1">
                   Used for all headings, hero text, and brand moments where authority matters.
@@ -333,18 +333,18 @@ export default function BrandPage() {
             </FadeDiv>
 
             {/* Inter */}
-            <FadeDiv className="rounded-2xl border bg-white shadow-sm p-8 flex flex-col gap-5">
+            <FadeDiv className="rounded-2xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 shadow-sm p-8 flex flex-col gap-5">
               <div>
-                <p className="font-sans text-7xl font-light text-gray-900 leading-none">Aa</p>
+                <p className="font-sans text-7xl font-light text-gray-900 dark:text-gray-100 leading-none">Aa</p>
               </div>
-              <p className="font-sans text-base text-gray-400 leading-relaxed tracking-wide">
+              <p className="font-sans text-base text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 leading-relaxed tracking-wide">
                 A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
               </p>
-              <p className="font-sans text-base text-gray-700 leading-relaxed">
+              <p className="font-sans text-base text-gray-700 dark:text-gray-300 leading-relaxed">
                 &quot;Give your business a booking page. No more WhatsApp back-and-forth.&quot;
               </p>
-              <div className="border-t border-gray-100 pt-4 space-y-1">
-                <p className="text-sm font-semibold text-gray-900">Inter</p>
+              <div className="border-t border-gray-100 dark:border-neutral-800 pt-4 space-y-1">
+                <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">Inter</p>
                 <p className="text-xs text-muted-foreground">Body &amp; UI · Variable</p>
                 <p className="text-xs text-muted-foreground mt-1">
                   Used for body copy, labels, form fields, and all functional UI elements.
@@ -356,7 +356,7 @@ export default function BrandPage() {
       </section>
 
       {/* Voice & Tone */}
-      <section className="max-w-6xl mx-auto px-6 pb-20 border-t border-gray-100 pt-20">
+      <section className="max-w-6xl mx-auto px-6 pb-20 border-t border-gray-100 dark:border-neutral-800 pt-20">
         <FadeContainer>
           <FadeDiv className="mb-2">
             <SectionLabel>
@@ -373,8 +373,8 @@ export default function BrandPage() {
 
           <div className="grid md:grid-cols-3 gap-4">
             {voice.map((v) => (
-              <FadeDiv key={v.trait} className="rounded-2xl border bg-white shadow-sm p-7">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 mb-5">
+              <FadeDiv key={v.trait} className="rounded-2xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 shadow-sm p-7">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-950/40 mb-5">
                   <Icon name={v.icon} className="text-blue-600 text-base" />
                 </div>
                 <h3 className="font-cal text-xl tracking-tight mb-2">{v.trait}</h3>
@@ -386,7 +386,7 @@ export default function BrandPage() {
       </section>
 
       {/* Usage guidelines */}
-      <section className="max-w-6xl mx-auto px-6 pb-24 border-t border-gray-100 pt-20">
+      <section className="max-w-6xl mx-auto px-6 pb-24 border-t border-gray-100 dark:border-neutral-800 pt-20">
         <FadeContainer>
           <FadeDiv className="mb-2">
             <SectionLabel>
@@ -403,16 +403,16 @@ export default function BrandPage() {
 
           <div className="grid md:grid-cols-2 gap-4">
             {/* Do */}
-            <FadeDiv className="rounded-2xl border bg-white shadow-sm p-7">
+            <FadeDiv className="rounded-2xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 shadow-sm p-7">
               <div className="flex items-center gap-2 mb-5">
-                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50">
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-950/40">
                   <Icon name="check-lg" className="text-blue-600 text-sm" />
                 </span>
-                <span className="font-semibold text-gray-900">Do</span>
+                <span className="font-semibold text-gray-900 dark:text-gray-100">Do</span>
               </div>
               <ul className="space-y-3">
                 {dos.map((d) => (
-                  <li key={d} className="flex items-start gap-3 text-sm text-gray-700">
+                  <li key={d} className="flex items-start gap-3 text-sm text-gray-700 dark:text-gray-300">
                     <Icon name="check" className="text-blue-500 text-base mt-0.5 shrink-0" />
                     {d}
                   </li>
@@ -421,16 +421,16 @@ export default function BrandPage() {
             </FadeDiv>
 
             {/* Don't */}
-            <FadeDiv className="rounded-2xl border bg-white shadow-sm p-7">
+            <FadeDiv className="rounded-2xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 shadow-sm p-7">
               <div className="flex items-center gap-2 mb-5">
                 <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-red-50">
                   <Icon name="x-lg" className="text-red-500 text-sm" />
                 </span>
-                <span className="font-semibold text-gray-900">Don&apos;t</span>
+                <span className="font-semibold text-gray-900 dark:text-gray-100">Don&apos;t</span>
               </div>
               <ul className="space-y-3">
                 {donts.map((d) => (
-                  <li key={d} className="flex items-start gap-3 text-sm text-gray-700">
+                  <li key={d} className="flex items-start gap-3 text-sm text-gray-700 dark:text-gray-300">
                     <Icon name="x-lg" className="text-red-400 text-base mt-0.5 shrink-0" />
                     {d}
                   </li>

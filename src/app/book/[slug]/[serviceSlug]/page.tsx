@@ -25,8 +25,8 @@ export default async function ServiceBookingPage({ params, searchParams }: Props
 
   if (data.status === "suspended" || data.status === "offline") {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-gray-50 px-6">
-        <div className="max-w-md rounded-2xl border bg-white p-8 text-center shadow-sm">
+      <main className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-neutral-900/60 px-6">
+        <div className="max-w-md rounded-2xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-8 text-center shadow-sm">
           <h1 className="font-cal text-2xl tracking-tight">{data.business.name}</h1>
           <p className="mt-3 text-sm text-muted-foreground">
             Online booking is temporarily unavailable for this business.

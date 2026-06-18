@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { services, slotReservations } from "@/db/schema";
 import { SLOT_HOLD_MINUTES } from "@/lib/booking-session";
 import { allocateServiceSlug } from "@/lib/service-slug";
+import { hasPublicColumn } from "@/lib/dashboard/db-compat";
 
 export type SlotReservationInput = {
   businessId: string;
@@ -164,6 +165,8 @@ export async function touchSlotReservation(sessionToken: string): Promise<Date |
 }
 
 export async function backfillServiceSlugsForBusiness(businessId: string): Promise<void> {
+  if (!(await hasPublicColumn("services", "slug"))) return;
+
   const rows = await db
     .select({ id: services.id, name: services.name, slug: services.slug })
     .from(services)

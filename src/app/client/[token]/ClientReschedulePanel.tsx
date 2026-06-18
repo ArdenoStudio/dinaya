@@ -86,8 +86,8 @@ export function ClientReschedulePanel({
   }
 
   return (
-    <div className="rounded-xl border bg-gray-50/80 p-4">
-      <p className="text-sm font-medium">{copy.clientChooseNewTime}</p>
+    <div className="rounded-xl border bg-gray-50/80 p-4 dark:border-neutral-800 dark:bg-neutral-900/60">
+      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{copy.clientChooseNewTime}</p>
       <p className="mt-1 text-xs text-muted-foreground">
         {copy.clientCurrentAppointment}: {new Date(currentStartsAt).toLocaleString()}
       </p>
@@ -115,7 +115,7 @@ export function ClientReschedulePanel({
           type="button"
           disabled={loading || slotHold.holding}
           onClick={confirmReschedule}
-          className="mt-4 w-full rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white hover:bg-primary/90 disabled:opacity-60"
+          className="mt-4 w-full rounded-xl booking-bg-accent px-4 py-3 text-sm font-semibold text-white booking-shadow-accent hover:opacity-90 disabled:opacity-60"
         >
           {loading ? copy.clientWorking : copy.clientReschedule}
         </button>

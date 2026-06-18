@@ -24,6 +24,9 @@ type SettingsBusiness = {
   payhereEnabled: boolean;
   payhereMerchantId: string | null;
   hasPayhereMerchantSecret: boolean;
+  paypalEnabled: boolean;
+  paypalClientId: string | null;
+  hasPaypalClientSecret: boolean;
   hideDinayaBranding: boolean;
   accentColor: string | null;
   customDomain: string | null;
@@ -63,6 +66,9 @@ export default function SettingsForm({ business }: Props) {
     payhereEnabled: business.payhereEnabled,
     payhereMerchantId: business.payhereMerchantId ?? "",
     payhereMerchantSecret: "",
+    paypalEnabled: business.paypalEnabled,
+    paypalClientId: business.paypalClientId ?? "",
+    paypalClientSecret: "",
     hideDinayaBranding: business.hideDinayaBranding,
     accentColor: business.accentColor ?? "#2563eb",
   });
@@ -85,6 +91,8 @@ export default function SettingsForm({ business }: Props) {
       ...form,
       galleryImages,
       payhereMerchantSecret: form.payhereMerchantSecret.trim() || undefined,
+      paypalClientId: form.paypalClientId.trim() || null,
+      paypalClientSecret: form.paypalClientSecret.trim() || undefined,
     };
 
     const res = await fetch("/api/dashboard/settings", {
@@ -114,13 +122,14 @@ export default function SettingsForm({ business }: Props) {
     setGalleryImages((prev) => prev.filter((u) => u !== url));
   }
 
-  const inputCls = "mt-1 w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 bg-white";
+  const inputCls =
+    "mt-1 w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 bg-white dark:border-neutral-700 dark:bg-neutral-900";
 
   return (
     <div className="space-y-5">
       <form onSubmit={handleSave} className="grid gap-5 xl:grid-cols-2">
         {/* Business info */}
-        <div className="bg-white border rounded-xl p-6 space-y-4">
+        <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-6 space-y-4">
           <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Business info</p>
           <div>
             <label className="text-sm font-medium">Business name *</label>
@@ -211,7 +220,7 @@ export default function SettingsForm({ business }: Props) {
         </div>
 
         {/* Booking policies */}
-        <div className="bg-white border rounded-xl p-6 space-y-4">
+        <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-6 space-y-4">
           <div className="flex items-center gap-2">
             <Icon name="shield-check" className="text-sm text-muted-foreground" />
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Booking trust</p>
@@ -242,7 +251,7 @@ export default function SettingsForm({ business }: Props) {
         </div>
 
         {/* Local payment fallback */}
-        <div className="bg-white border rounded-xl p-6 space-y-4">
+        <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-6 space-y-4">
           <div className="flex items-center gap-2">
             <Icon name="bank" className="text-sm text-muted-foreground" />
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Local payment fallback</p>
@@ -272,7 +281,7 @@ export default function SettingsForm({ business }: Props) {
         </div>
 
         {/* Social links */}
-        <div className="bg-white border rounded-xl p-6 space-y-4">
+        <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-6 space-y-4">
           <div className="flex items-center gap-2">
             <Icon name="share" className="text-sm text-muted-foreground" />
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Social links</p>
@@ -304,7 +313,7 @@ export default function SettingsForm({ business }: Props) {
           </div>
           <div>
             <label className="text-sm font-medium flex items-center gap-1.5">
-              <Icon name="globe" className="text-gray-500" /> Website
+              <Icon name="globe" className="text-gray-500 dark:text-gray-400" /> Website
             </label>
             <input
               value={form.websiteUrl}
@@ -316,7 +325,7 @@ export default function SettingsForm({ business }: Props) {
         </div>
 
         {/* Portfolio gallery */}
-        <div className="bg-white border rounded-xl p-6 space-y-4">
+        <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-6 space-y-4">
           <div className="flex items-center gap-2">
             <Icon name="images" className="text-sm text-muted-foreground" />
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Portfolio gallery</p>
@@ -356,7 +365,7 @@ export default function SettingsForm({ business }: Props) {
               value={newImageUrl}
               onChange={(e) => setNewImageUrl(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addGalleryImage())}
-              className="flex-1 border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 bg-white"
+              className="flex-1 border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 bg-white dark:border-neutral-700 dark:bg-neutral-900"
               placeholder="https://example.com/photo.jpg"
             />
             <button
@@ -377,7 +386,7 @@ export default function SettingsForm({ business }: Props) {
         </div>
 
         {/* Pro branding */}
-        <div className="bg-white border rounded-xl p-6 space-y-4">
+        <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-6 space-y-4">
           <div className="flex items-center gap-2">
             <Icon name="palette" className="text-sm text-muted-foreground" />
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Booking page branding</p>
@@ -407,7 +416,7 @@ export default function SettingsForm({ business }: Props) {
                     type="color"
                     value={form.accentColor}
                     onChange={(e) => setForm((f) => ({ ...f, accentColor: e.target.value }))}
-                    className="h-10 w-14 cursor-pointer rounded border bg-white p-1"
+                    className="h-10 w-14 cursor-pointer rounded border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-1"
                   />
                   <input
                     type="text"
@@ -449,7 +458,7 @@ export default function SettingsForm({ business }: Props) {
         </div>
 
         {/* PayHere */}
-        <div className="bg-white border rounded-xl p-6 space-y-4">
+        <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-6 space-y-4">
           <div className="flex items-center gap-2">
             <Icon name="credit-card" className="text-sm text-muted-foreground" />
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">PayHere</p>
@@ -500,8 +509,56 @@ export default function SettingsForm({ business }: Props) {
           )}
         </div>
 
+        {/* PayPal */}
+        <div className="bg-white border rounded-xl p-6 space-y-4">
+          <div className="flex items-center gap-2">
+            <Icon name="globe" className="text-sm text-muted-foreground" />
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">PayPal</p>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Accept international card and PayPal wallet payments in USD. Best for overseas customers booking your
+            Sri Lankan business. Create a REST app in the{" "}
+            <a href="https://developer.paypal.com/dashboard/applications/live" target="_blank" rel="noopener noreferrer" className="underline">
+              PayPal Developer Dashboard
+            </a>
+            .
+          </p>
+          <label className="flex items-center gap-2.5 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={form.paypalEnabled}
+              onChange={(e) => setForm((f) => ({ ...f, paypalEnabled: e.target.checked }))}
+              className="rounded"
+            />
+            <span className="text-sm font-medium">Enable PayPal for international payments</span>
+          </label>
+          {form.paypalEnabled && (
+            <div className="space-y-3 pl-5 border-l-2 border-primary/20">
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">Client ID</label>
+                <input
+                  value={form.paypalClientId}
+                  onChange={(e) => setForm((f) => ({ ...f, paypalClientId: e.target.value }))}
+                  placeholder="Abc123..."
+                  className={inputCls}
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">Client Secret</label>
+                <input
+                  type="password"
+                  value={form.paypalClientSecret}
+                  onChange={(e) => setForm((f) => ({ ...f, paypalClientSecret: e.target.value }))}
+                  placeholder={business.hasPaypalClientSecret ? "Saved - leave blank to keep existing" : "Paste client secret"}
+                  className={inputCls}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* Data controls */}
-        <div className="bg-white border rounded-xl p-6 space-y-3">
+        <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-6 space-y-3">
           <div className="flex items-center gap-2">
             <Icon name="download" className="text-sm text-muted-foreground" />
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Data controls</p>

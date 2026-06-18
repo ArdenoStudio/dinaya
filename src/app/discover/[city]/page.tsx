@@ -43,7 +43,7 @@ export default async function DiscoverCityPage({ params, searchParams }: Props) 
   });
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-white dark:bg-neutral-950">
       <PublicNav />
 
       <section className="mx-auto max-w-6xl px-6 public-page-offset pb-16">

@@ -51,7 +51,7 @@ export default async function AdminSupportPage({
       <div>
         <div className="flex items-center gap-2">
           <h1 className="font-cal text-3xl tracking-tight">Support</h1>
-          <span className="inline-flex items-center gap-1 rounded-full bg-rose-500/10 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-rose-700">
+          <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 dark:bg-rose-950/30 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-rose-700">
             <LifeBuoy className="size-3" aria-hidden="true" />
             Internal use
           </span>
@@ -62,7 +62,7 @@ export default async function AdminSupportPage({
         </p>
       </div>
 
-      <form method="get" className="flex flex-wrap items-center gap-3 rounded-xl border bg-white p-3">
+      <form method="get" className="flex flex-wrap items-center gap-3 rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-3">
         <div className="relative min-w-[16rem] flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
           <input
@@ -70,7 +70,7 @@ export default async function AdminSupportPage({
             name="q"
             defaultValue={q}
             placeholder="Search by user name, email, or business name"
-            className="h-10 w-full rounded-md border bg-white pl-9 pr-3 text-sm outline-none transition-shadow placeholder:text-muted-foreground/60 focus:ring-2 focus:ring-primary/30"
+            className="h-10 w-full rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 pl-9 pr-3 text-sm outline-none transition-shadow placeholder:text-muted-foreground/60 focus:ring-2 focus:ring-primary/30"
           />
         </div>
         <button type="submit" className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">
@@ -82,7 +82,7 @@ export default async function AdminSupportPage({
 
       <RefundPaymentForm />
 
-      <div className="rounded-xl border bg-white p-5 text-sm">
+      <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5 text-sm">
         <p className="font-semibold">Webhook replay</p>
         <p className="mt-1 text-muted-foreground">
           Failed webhook deliveries can be replayed from the{" "}

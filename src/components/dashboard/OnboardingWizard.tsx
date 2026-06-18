@@ -20,7 +20,7 @@ export function OnboardingWizard({ steps, bookingUrl, whatsappShare }: Props) {
   const progress = Math.round((completed / steps.length) * 100);
 
   return (
-    <div className="overflow-hidden rounded-2xl border bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-6 shadow-sm">
+    <div className="overflow-hidden rounded-2xl border bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-6 shadow-sm dark:border-neutral-800 dark:from-blue-950/40 dark:via-neutral-900 dark:to-indigo-950/30">
       <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-widest text-primary">Get live in 5 minutes</p>
@@ -29,16 +29,16 @@ export function OnboardingWizard({ steps, bookingUrl, whatsappShare }: Props) {
             {completed}/{steps.length} steps complete
           </p>
         </div>
-        <div className="rounded-full bg-white px-3 py-1 text-sm font-semibold ring-1 ring-primary/15">
+        <div className="rounded-full bg-white px-3 py-1 text-sm font-semibold ring-1 ring-primary/15 dark:bg-neutral-800 dark:ring-primary/25">
           {progress}%
         </div>
       </div>
 
-      <div className="mb-5 h-2 overflow-hidden rounded-full bg-white ring-1 ring-gray-200">
+      <div className="mb-5 h-2 overflow-hidden rounded-full bg-white ring-1 ring-gray-200 dark:bg-neutral-800 dark:ring-neutral-700">
         <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${progress}%` }} />
       </div>
 
-      <div className="rounded-xl border bg-white p-5">
+      <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Next step</p>
         <h3 className="mt-1 font-semibold">{nextStep.label}</h3>
         <p className="mt-2 text-sm text-muted-foreground">{nextStep.description}</p>
@@ -72,7 +72,7 @@ export function OnboardingWizard({ steps, bookingUrl, whatsappShare }: Props) {
             href={step.href}
             target={step.href.startsWith("http") ? "_blank" : undefined}
             className={`flex items-center justify-between rounded-lg border px-3 py-2 text-sm ${
-              step.done ? "border-emerald-200 bg-emerald-50/60" : "bg-white hover:border-primary/30"
+              step.done ? "border-emerald-200 dark:border-emerald-800/50 bg-emerald-50 dark:bg-emerald-950/40" : "bg-white dark:bg-neutral-900 hover:border-primary/30"
             }`}
           >
             <span>{step.label}</span>

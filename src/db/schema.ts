@@ -136,6 +136,9 @@ export const businesses = pgTable("businesses", {
   payhereEnabled: boolean("payhere_enabled").default(false).notNull(),
   payhereMerchantId: varchar("payhere_merchant_id", { length: 100 }),
   payhereMerchantSecret: text("payhere_merchant_secret"),
+  paypalEnabled: boolean("paypal_enabled").default(false).notNull(),
+  paypalClientId: varchar("paypal_client_id", { length: 200 }),
+  paypalClientSecret: text("paypal_client_secret"),
   hideDinayaBranding: boolean("hide_dinaya_branding").default(false).notNull(),
   // Hex accent for public booking page theming (e.g. #2563eb). Pro+ customization.
   accentColor: varchar("accent_color", { length: 7 }),
@@ -308,6 +311,8 @@ export const services = pgTable("services", {
   maximumAdvanceDays: integer("maximum_advance_days"),
   // Per-service intake/booking questions (null/[] = none). Configured by Pro+ businesses.
   intakeQuestions: jsonb("intake_questions").$type<import("@/lib/intake").IntakeQuestion[]>(),
+  // Optional post-booking redirect (https URL or same-site path).
+  successRedirectUrl: text("success_redirect_url"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -647,14 +652,20 @@ export const payments = pgTable("payments", {
     .notNull()
     .references(() => bookings.id, { onDelete: "cascade" }),
   amountLkr: integer("amount_lkr").notNull(),
-  payhereOrderId: varchar("payhere_order_id", { length: 100 }).unique(),
+  provider: varchar("provider", { length: 20 }).default("payhere").notNull(),
+  currency: varchar("currency", { length: 3 }).default("LKR").notNull(),
+  providerOrderId: varchar("provider_order_id", { length: 100 }),
   status: paymentStatusEnum("status").default("pending").notNull(),
+  payhereOrderId: varchar("payhere_order_id", { length: 100 }).unique(),
   payherePayload: jsonb("payhere_payload"),
+  providerPayload: jsonb("provider_payload"),
   receiptSentAt: timestamp("receipt_sent_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 }, (table) => ({
   bookingIdIdx: index("payments_booking_id_idx").on(table.bookingId),
   statusCreatedAtIdx: index("payments_status_created_at_idx").on(table.status, table.createdAt),
+  providerOrderUnique: uniqueIndex("payments_provider_order_unique")
+    .on(table.provider, table.providerOrderId),
 }));
 
 // ─── Automations / Messaging ─────────────────────────────────────────────────

@@ -14,7 +14,7 @@ export default function ReviewsLoading() {
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3 mb-6">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="bg-white border rounded-xl p-4 text-center">
+          <div key={i} className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-4 text-center">
             <Skeleton className="h-8 w-12 mx-auto mb-2" />
             <Skeleton className="h-3 w-20 mx-auto" />
           </div>
@@ -22,7 +22,7 @@ export default function ReviewsLoading() {
       </div>
 
       {/* Table */}
-      <div className="bg-white border rounded-xl overflow-hidden">
+      <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 overflow-hidden">
         <table className="w-full">
           <thead className="border-b bg-muted/20">
             <tr>

@@ -120,7 +120,7 @@ export function BroadcastsClient() {
         description="Send a one-time message to client segments by email, WhatsApp, or SMS. Clients who opted out are excluded."
       />
 
-      <form onSubmit={handleSubmit} className="space-y-4 rounded-xl border bg-white p-5">
+      <form onSubmit={handleSubmit} className="space-y-4 rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
         <h2 className="font-semibold">New broadcast</h2>
 
         <div className="grid gap-4 sm:grid-cols-2">
@@ -236,7 +236,7 @@ export function BroadcastsClient() {
           description="Send your first campaign to re-engage clients or announce a promotion."
         />
       ) : (
-        <div className="overflow-hidden rounded-xl border bg-white">
+        <div className="overflow-hidden rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
           <table className="min-w-full text-sm">
             <thead className="border-b bg-muted/40 text-left">
               <tr>

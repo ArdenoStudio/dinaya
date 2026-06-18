@@ -87,7 +87,7 @@ export default async function DashboardSearchPage({
         {clientRows.length === 0 ? (
           <p className="text-sm text-muted-foreground">No matching clients.</p>
         ) : (
-          <ul className="divide-y rounded-xl border bg-white">
+          <ul className="divide-y rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
             {clientRows.map((client) => (
               <li key={client.id}>
                 <Link href={`/dashboard/clients/${client.id}`} className="block px-4 py-3 hover:bg-muted/40">
@@ -105,7 +105,7 @@ export default async function DashboardSearchPage({
         {bookingRows.length === 0 ? (
           <p className="text-sm text-muted-foreground">No matching bookings.</p>
         ) : (
-          <ul className="divide-y rounded-xl border bg-white">
+          <ul className="divide-y rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
             {bookingRows.map((booking) => (
               <li key={booking.id}>
                 <Link href={`/dashboard/bookings/${booking.id}`} className="block px-4 py-3 hover:bg-muted/40">
@@ -125,7 +125,7 @@ export default async function DashboardSearchPage({
         {serviceRows.length === 0 ? (
           <p className="text-sm text-muted-foreground">No matching services.</p>
         ) : (
-          <ul className="divide-y rounded-xl border bg-white">
+          <ul className="divide-y rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
             {serviceRows.map((service) => (
               <li key={service.id}>
                 <Link href={`/dashboard/services/${service.id}`} className="block px-4 py-3 hover:bg-muted/40">

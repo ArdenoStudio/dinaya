@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { BookOpen, Menu, Search, ShieldCheck, UserCircle, X } from "lucide-react";
 import { Logo } from "@/components/Logo";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { DashboardToastProvider } from "@/components/dashboard/ToastProvider";
 import { useDashboardCopy, useDashboardRole } from "@/components/dashboard/DashboardLocaleProvider";
 import { MacOSSidebar } from "@/components/ui/macos-sidebar";
@@ -115,7 +116,7 @@ export function DashboardShell({
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-neutral-200 dark:bg-neutral-900">
       {readOnlyImpersonation ? (
-        <div className="shrink-0 border-b border-amber-500/30 bg-amber-50 px-4 py-2 text-center text-sm text-amber-900">
+        <div className="shrink-0 border-b border-amber-500/30 bg-amber-50 dark:bg-amber-950/40 px-4 py-2 text-center text-sm text-amber-900 dark:text-amber-200">
           Read-only impersonation session
           {impersonatedBy ? ` (admin: ${impersonatedBy})` : ""}. Mutations are blocked.
         </div>
@@ -124,7 +125,7 @@ export function DashboardShell({
       {plan === "trial" ? (
         <Link
           href="/dashboard/billing"
-          className="shrink-0 border-b border-blue-500/30 bg-blue-50 px-4 py-2 text-center text-sm text-blue-900 transition-colors hover:bg-blue-100"
+          className="shrink-0 border-b border-blue-500/30 bg-blue-50 dark:bg-blue-950/40 px-4 py-2 text-center text-sm text-blue-900 dark:text-blue-100 transition-colors hover:bg-blue-100 dark:hover:bg-blue-950/60"
         >
           {trialDaysLeft != null && trialDaysLeft > 0
             ? `${trialDaysLeft} ${trialDaysLeft === 1 ? "day" : "days"} left in your free trial`
@@ -136,7 +137,7 @@ export function DashboardShell({
       {plan === "expired" ? (
         <Link
           href="/dashboard/billing"
-          className="shrink-0 border-b border-red-500/30 bg-red-50 px-4 py-2 text-center text-sm font-medium text-red-900 transition-colors hover:bg-red-100"
+          className="shrink-0 border-b border-red-500/30 bg-red-50 px-4 py-2 text-center text-sm font-medium text-red-900 transition-colors hover:bg-red-100 dark:bg-red-950/40 dark:text-red-200 dark:hover:bg-red-950/60"
         >
           Your free trial has ended — your booking page is offline. Reactivate by subscribing →
         </Link>
@@ -287,6 +288,7 @@ export function DashboardShell({
             </form>
 
             <div className="hidden items-center gap-2 rounded-md border border-neutral-200 bg-white px-2.5 py-2 sm:flex dark:border-neutral-700 dark:bg-neutral-900">
+              <ThemeToggle />
               <UserCircle className="size-4 text-neutral-400" aria-hidden="true" />
               <span className="max-w-[10rem] truncate text-sm text-neutral-800 dark:text-neutral-100">
                 {userName ?? userEmail}

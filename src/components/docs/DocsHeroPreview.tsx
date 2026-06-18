@@ -25,7 +25,7 @@ export function DocsHeroPreview() {
 
   return (
     <div className="relative mx-auto mt-6 max-w-2xl">
-      <div className="pointer-events-none absolute -inset-4 rounded-[2rem] bg-gradient-to-b from-blue-200/20 via-transparent to-transparent blur-2xl" />
+      <div className="pointer-events-none absolute -inset-4 rounded-[2rem] bg-gradient-to-b from-blue-200/20 via-transparent to-transparent dark:from-blue-950/25 blur-2xl" />
       <AnimatePresence mode="wait">
         <motion.div
           key={mockupId}

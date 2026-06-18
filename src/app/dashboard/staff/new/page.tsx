@@ -51,7 +51,7 @@ export default function NewStaffPage() {
   return (
     <div className="max-w-lg">
       <h1 className="font-cal text-2xl mb-6">New team member</h1>
-      <form onSubmit={handleSubmit} className="bg-white border rounded-xl p-6 space-y-4">
+      <form onSubmit={handleSubmit} className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-6 space-y-4">
         <div>
           <label className="text-sm font-medium">Name *</label>
           <input required value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}

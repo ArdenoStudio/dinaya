@@ -5,6 +5,7 @@ import type { Staff } from "@/db/schema";
 import type { BookingCopy } from "@/lib/i18n";
 import { getEligibleStaff } from "@/lib/booking-staff";
 import { isOptimizableRemoteImage } from "@/lib/utils";
+import { Icon } from "@/components/ui/Icon";
 
 interface Props {
   allStaff: Staff[];
@@ -38,7 +39,7 @@ export default function StaffPicker({
 
   return (
     <div className={compact ? "mt-4" : "mb-5"}>
-      <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-400">
+      <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
         {copy.chooseTeam}
       </p>
       <div className="flex flex-wrap gap-2" role="group" aria-label={copy.chooseTeam}>
@@ -47,13 +48,19 @@ export default function StaffPicker({
             type="button"
             onClick={onSelectAny}
             aria-pressed={anyStaffSelected}
-            className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
+            className={`inline-flex max-w-full flex-col items-start gap-0.5 rounded-2xl border px-3 py-2 text-left text-xs font-medium transition-all sm:flex-row sm:items-center sm:gap-2 sm:rounded-full sm:py-1.5 ${
               anyStaffSelected
                 ? "booking-border-accent booking-bg-accent-muted booking-text-accent ring-2 booking-ring-accent"
-                : "border-gray-200 bg-white text-gray-600 hover:border-blue-300"
+                : "border-gray-200 bg-white text-gray-600 hover:border-blue-300 dark:border-neutral-800 dark:bg-neutral-900 dark:text-gray-400"
             }`}
           >
-            {copy.anyAvailableStaff}
+            <span className="inline-flex items-center gap-1.5">
+              <Icon name="lightning-charge-fill" className="text-[10px]" />
+              {copy.anyAvailableStaff}
+            </span>
+            <span className="text-[10px] font-normal text-gray-400 dark:text-gray-500">
+              {copy.anyAvailableStaffHint}
+            </span>
           </button>
         )}
         {eligible.map((s) => {
@@ -67,7 +74,7 @@ export default function StaffPicker({
               className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
                 isSelected
                   ? "booking-border-accent booking-bg-accent-muted booking-text-accent ring-2 booking-ring-accent"
-                  : "border-gray-200 bg-white text-gray-600 hover:border-blue-300"
+                  : "border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 text-gray-600 dark:text-gray-400 hover:border-blue-300"
               }`}
             >
               {s.avatarUrl ? (

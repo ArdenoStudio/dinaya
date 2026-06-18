@@ -36,14 +36,14 @@ export default function DateQuickStrip({ selectedDate, minDate, maxDate, copy, o
             className={`flex shrink-0 snap-start flex-col items-center rounded-xl border px-3.5 py-2.5 transition-all ${
               isSelected
                 ? "booking-border-accent booking-bg-accent text-white shadow-md booking-shadow-accent"
-                : "border-gray-200 bg-white text-gray-600"
+                : "border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 text-gray-600 dark:text-gray-400"
             }`}
           >
-            <span className={`text-[10px] font-medium ${isSelected ? "text-white/80" : "text-gray-400"}`}>
+            <span className={`text-[10px] font-medium ${isSelected ? "text-white/80" : "text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500"}`}>
               {isToday(d) ? copy.today : format(d, "EEE")}
             </span>
             <span className="mt-0.5 text-base font-bold tabular-nums">{format(d, "d")}</span>
-            <span className={`text-[10px] ${isSelected ? "text-white/80" : "text-gray-400"}`}>
+            <span className={`text-[10px] ${isSelected ? "text-white/80" : "text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500"}`}>
               {format(d, "MMM")}
             </span>
           </button>

@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { LogoIcon } from "@/components/Logo";
 import { useNav } from "@/context/NavContext";
 import { GlassButton } from "@/components/ui/glass-button";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const WEBP_DISPLACEMENT_MAP = (GlassButton as typeof GlassButton & { displacementMap: string }).displacementMap;
 
@@ -107,7 +108,7 @@ export function UnderlayNav() {
 
       {/* ── Expanding pill nav ───────────────────────────────────────────── */}
       <motion.header
-        className="fixed z-[100] text-gray-900 overflow-hidden"
+        className="fixed z-[100] text-gray-900 dark:text-gray-100 overflow-hidden"
         initial={false}
         animate={{
           top:          mobileOpen ? 0 : 12,
@@ -128,20 +129,20 @@ export function UnderlayNav() {
         <span
           className="absolute inset-0 -z-10 rounded-[inherit] pointer-events-none"
           style={{
-            backgroundColor: "rgba(255, 255, 255, 0.82)",
+            backgroundColor: "var(--nav-glass-bg)",
             backdropFilter: "blur(20px) saturate(180%)",
             WebkitBackdropFilter: "blur(20px) saturate(180%)",
             boxShadow: `
-              inset 0 0 0 1px rgba(255, 255, 255, 0.55),
-              inset 1.8px 3px 0px -2px rgba(255, 255, 255, 0.90),
-              inset -2px -2px 0px -2px rgba(255, 255, 255, 0.80),
-              inset -3px -8px 1px -6px rgba(255, 255, 255, 0.60),
+              inset 0 0 0 1px var(--nav-glass-inset-light),
+              inset 1.8px 3px 0px -2px var(--nav-glass-inset-light),
+              inset -2px -2px 0px -2px var(--nav-glass-inset-mid),
+              inset -3px -8px 1px -6px var(--nav-glass-inset-soft),
               inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.06),
               inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.10),
               inset 0px 3px 4px -2px rgba(0, 0, 0, 0.10),
               inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.05),
               0px 1px 5px 0px rgba(0, 0, 0, 0.08),
-              0px 8px 32px 0px rgba(0, 0, 0, 0.12)
+              0px 8px 32px 0px var(--nav-glass-shadow-outer)
             `,
           }}
         />
@@ -158,17 +159,17 @@ export function UnderlayNav() {
           >
             <span className="flex flex-col gap-[0.3em] w-[1rem]" aria-hidden="true">
               <motion.span
-                className="h-[1.5px] w-full bg-gray-900 rounded-full origin-center"
+                className="h-[1.5px] w-full bg-gray-900 dark:bg-gray-100 dark:bg-neutral-800 rounded-full origin-center"
                 animate={isOpen ? { y: "0.265em", rotate: 45 } : { y: 0, rotate: 0 }}
                 transition={{ duration: 0.5, ease: BACK_OUT }}
               />
               <motion.span
-                className="h-[1.5px] w-full bg-gray-900 rounded-full origin-center"
+                className="h-[1.5px] w-full bg-gray-900 dark:bg-gray-100 dark:bg-neutral-800 rounded-full origin-center"
                 animate={isOpen ? { y: "-0.265em", rotate: -45 } : { y: 0, rotate: 0 }}
                 transition={{ duration: 0.5, ease: BACK_OUT }}
               />
             </span>
-            <span className="text-base font-medium text-gray-900">{isOpen ? "Close" : "Menu"}</span>
+            <span className="text-base font-medium text-gray-900 dark:text-gray-100">{isOpen ? "Close" : "Menu"}</span>
           </button>
 
           {/* Logo — threshold swap: text ↔ icon */}
@@ -179,12 +180,12 @@ export function UnderlayNav() {
               animate={{ opacity: (scrolled && !isOpen) ? 0 : 1, y: (scrolled && !isOpen) ? 8 : 0 }}
               transition={{ duration: 0.25, ease: "easeInOut" }}
             >
-              <Link href="/" className="font-cal text-xl text-gray-900 leading-none whitespace-nowrap">
+              <Link href="/" className="font-cal text-xl text-gray-900 dark:text-gray-100 leading-none whitespace-nowrap">
                 Dinaya.lk
               </Link>
             </motion.div>
             <motion.div
-              className="absolute text-gray-900"
+              className="absolute text-gray-900 dark:text-gray-100"
               initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: (scrolled && !isOpen) ? 1 : 0, y: (scrolled && !isOpen) ? 0 : -8 }}
               transition={{ duration: 0.25, ease: "easeInOut", delay: (scrolled && !isOpen) ? 0.1 : 0 }}
@@ -196,10 +197,11 @@ export function UnderlayNav() {
 
           {/* Auth CTAs */}
           <div className="flex items-center gap-2">
+            <ThemeToggle className="hidden sm:inline-flex" />
             <Link
               href="/auth/signin"
-              className="hidden sm:block text-base text-gray-600 hover:text-gray-900 transition-colors
-                         px-4 py-2 rounded-full border border-gray-300 hover:border-gray-400"
+              className="hidden sm:block text-base text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors
+                         px-4 py-2 rounded-full border border-gray-300 dark:border-neutral-600 hover:border-gray-400 dark:hover:border-neutral-500"
             >
               Log in
             </Link>
@@ -228,12 +230,12 @@ export function UnderlayNav() {
           {layout.isMobile ? (
             /* ── Mobile menu ── */
             <>
-              <div className="mx-5 h-px bg-gray-200" />
+              <div className="mx-5 h-px bg-gray-200 dark:bg-neutral-700" />
               <div className="px-5 pt-5 pb-6 flex flex-col gap-6">
 
                 {/* Nav links */}
                 <div>
-                  <p className="text-[0.6875rem] font-semibold tracking-[0.12em] text-gray-400 uppercase mb-4">
+                  <p className="text-[0.6875rem] font-semibold tracking-[0.12em] text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase mb-4">
                     Explore
                   </p>
                   <ul className="flex flex-col m-0 p-0 list-none">
@@ -251,13 +253,13 @@ export function UnderlayNav() {
                             className={[
                               "block py-2.5 text-[clamp(1.6rem,8vw,2.2rem)] font-bold",
                               "tracking-[-0.03em] leading-none transition-colors",
-                              isNavLinkActive(pathname, item) ? "text-primary" : "text-gray-900 hover:text-gray-400",
+                              isNavLinkActive(pathname, item) ? "text-primary" : "text-gray-900 dark:text-gray-100 hover:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500",
                             ].join(" ")}
                           >
                             {item.label}
                           </Link>
                         </motion.div>
-                        {i < NAV_LINKS.length - 1 && <div className="h-px bg-gray-100" />}
+                        {i < NAV_LINKS.length - 1 && <div className="h-px bg-gray-100 dark:bg-neutral-800" />}
                       </li>
                     ))}
                   </ul>
@@ -270,10 +272,13 @@ export function UnderlayNav() {
                   animate={isOpen ? { opacity: 1, y: 0 } : { opacity: 0, y: 6 }}
                   transition={{ delay: isOpen ? 0.52 : 0, duration: 0.35, ease: "easeOut" }}
                 >
+                  <div className="flex justify-center pb-1 sm:hidden">
+                    <ThemeToggle variant="pill" />
+                  </div>
                   <Link
                     href="/auth/signin"
                     onClick={close}
-                    className="block text-center py-3.5 rounded-xl text-sm font-semibold border border-gray-200 text-gray-700 hover:bg-black/5 transition-colors"
+                    className="block text-center py-3.5 rounded-xl text-sm font-semibold border border-gray-200 dark:border-neutral-800 text-gray-700 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white dark:hover:bg-neutral-800/5 transition-colors"
                   >
                     Log in
                   </Link>
@@ -294,7 +299,7 @@ export function UnderlayNav() {
                   transition={{ delay: isOpen ? 0.58 : 0, duration: 0.3 }}
                 >
                   {QUICK_LINKS.map((l) => (
-                    <Link key={l.label} href={l.href} onClick={close} className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
+                    <Link key={l.label} href={l.href} onClick={close} className="text-xs text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:text-gray-400 transition-colors">
                       {l.label}
                     </Link>
                   ))}
@@ -305,12 +310,12 @@ export function UnderlayNav() {
           ) : (
             /* ── Desktop menu (original layout) ── */
             <div style={{ width: layout.open }}>
-              <div className="mx-5 h-px bg-gray-200" />
+              <div className="mx-5 h-px bg-gray-200 dark:bg-neutral-700" />
               <div className="px-5 pt-5 pb-6 grid grid-cols-[1.2fr_1fr_auto_auto] gap-8">
 
                 {/* Column 1 — main nav links */}
                 <div>
-                  <p className="text-[0.6875rem] font-semibold tracking-[0.12em] text-gray-400 uppercase mb-4">
+                  <p className="text-[0.6875rem] font-semibold tracking-[0.12em] text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase mb-4">
                     Explore
                   </p>
                   <ul className="flex flex-col m-0 p-0 list-none">
@@ -328,21 +333,21 @@ export function UnderlayNav() {
                             className={[
                               "block py-2.5 text-[clamp(1.15rem,2.5vw,1.5rem)] font-bold",
                               "tracking-[-0.03em] leading-none transition-colors",
-                              isNavLinkActive(pathname, item) ? "text-primary" : "text-gray-900 hover:text-gray-400",
+                              isNavLinkActive(pathname, item) ? "text-primary" : "text-gray-900 dark:text-gray-100 hover:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500",
                             ].join(" ")}
                           >
                             {item.label}
                           </Link>
                         </motion.div>
-                        {i < NAV_LINKS.length - 1 && <div className="h-px bg-gray-100" />}
+                        {i < NAV_LINKS.length - 1 && <div className="h-px bg-gray-100 dark:bg-neutral-800" />}
                       </li>
                     ))}
                   </ul>
                 </div>
 
                 {/* Column 2 — Popular Resources (Fills middle space) */}
-                <div className="hidden lg:block border-l border-gray-100 pl-8">
-                  <p className="text-[0.6875rem] font-semibold tracking-[0.12em] text-gray-400 uppercase mb-4">
+                <div className="hidden lg:block border-l border-gray-100 dark:border-neutral-800 pl-8">
+                  <p className="text-[0.6875rem] font-semibold tracking-[0.12em] text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase mb-4">
                     Popular Guides
                   </p>
                   <div className="flex flex-col gap-6 mt-2">
@@ -352,10 +357,10 @@ export function UnderlayNav() {
                       transition={{ delay: isOpen ? 0.40 : 0, duration: 0.5, ease: "easeOut" }}
                     >
                       <Link href="/help" onClick={close} className="group flex flex-col gap-1">
-                        <span className="text-sm font-bold text-gray-900 group-hover:text-primary transition-colors">
+                        <span className="text-sm font-bold text-gray-900 dark:text-gray-100 group-hover:text-primary transition-colors">
                           Setting up AI Hub
                         </span>
-                        <span className="text-[0.8rem] text-gray-500 leading-snug">
+                        <span className="text-[0.8rem] text-gray-500 dark:text-gray-400 leading-snug">
                           Automate your schedule in 5 minutes with our smart booking rules.
                         </span>
                       </Link>
@@ -367,10 +372,10 @@ export function UnderlayNav() {
                       transition={{ delay: isOpen ? 0.44 : 0, duration: 0.5, ease: "easeOut" }}
                     >
                       <Link href="/help" onClick={close} className="group flex flex-col gap-1">
-                        <span className="text-sm font-bold text-gray-900 group-hover:text-primary transition-colors">
+                        <span className="text-sm font-bold text-gray-900 dark:text-gray-100 group-hover:text-primary transition-colors">
                           Google Calendar Sync
                         </span>
-                        <span className="text-[0.8rem] text-gray-500 leading-snug">
+                        <span className="text-[0.8rem] text-gray-500 dark:text-gray-400 leading-snug">
                           Keep your personal events strictly private while avoiding double bookings.
                         </span>
                       </Link>
@@ -382,10 +387,10 @@ export function UnderlayNav() {
                       transition={{ delay: isOpen ? 0.48 : 0, duration: 0.5, ease: "easeOut" }}
                     >
                       <Link href="/help" onClick={close} className="group flex flex-col gap-1">
-                        <span className="text-sm font-bold text-gray-900 group-hover:text-primary transition-colors">
+                        <span className="text-sm font-bold text-gray-900 dark:text-gray-100 group-hover:text-primary transition-colors">
                           Client Booking Tips
                         </span>
-                        <span className="text-[0.8rem] text-gray-500 leading-snug">
+                        <span className="text-[0.8rem] text-gray-500 dark:text-gray-400 leading-snug">
                           Best practices for reducing no-shows and maximizing attendance.
                         </span>
                       </Link>
@@ -400,7 +405,7 @@ export function UnderlayNav() {
 
                 {/* Column 4 — original CTA card */}
                 <motion.div
-                  className="w-52 rounded-xl bg-gray-900/5 border border-gray-200 p-5 flex flex-col justify-between gap-4"
+                  className="w-52 rounded-xl bg-gray-900/5 dark:bg-white/5 border border-gray-200 dark:border-neutral-800 p-5 flex flex-col justify-between gap-4"
                   initial={{ opacity: 0, scale: 0.96 }}
                   animate={isOpen ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.96 }}
                   transition={{ delay: isOpen ? 0.48 : 0, duration: 0.55, ease: ENERGY }}
@@ -409,10 +414,10 @@ export function UnderlayNav() {
                     <span className="self-start text-[0.6875rem] font-bold tracking-widest uppercase bg-primary text-white px-2.5 py-1 rounded-full">
                       Get started
                     </span>
-                    <p className="text-gray-900 font-bold text-base leading-snug">
+                    <p className="text-gray-900 dark:text-gray-100 font-bold text-base leading-snug">
                       Book your first session today
                     </p>
-                    <p className="text-gray-500 text-sm leading-relaxed">
+                    <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
                       Discover instructors near you and manage your bookings in one place.
                     </p>
                   </div>
@@ -445,7 +450,7 @@ function SubCol({
 }) {
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-[0.6875rem] font-semibold tracking-[0.12em] text-gray-400 uppercase">
+      <p className="text-[0.6875rem] font-semibold tracking-[0.12em] text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">
         {heading}
       </p>
       {items.map((item, i) => (
@@ -455,7 +460,7 @@ function SubCol({
           animate={isOpen ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 }}
           transition={{ delay: isOpen ? baseDelay + i * 0.05 : 0, duration: 0.45, ease: "easeOut" }}
         >
-          <Link href={item.href} onClick={onClose} className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
+          <Link href={item.href} onClick={onClose} className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:text-gray-100 transition-colors">
             {item.label}
           </Link>
         </motion.div>

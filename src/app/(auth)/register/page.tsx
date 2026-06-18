@@ -5,7 +5,9 @@ import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { slugify } from "@/lib/utils";
+import { trackSignup } from "@/lib/analytics/gtag";
 import { Logo } from "@/components/Logo";
+import { AuthThemeToggle } from "@/components/AuthThemeToggle";
 import { Icon } from "@/components/ui/Icon";
 
 const perks = [
@@ -33,7 +35,7 @@ const businessTypes = [
 ];
 
 const inputCls =
-  "mt-1.5 w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 placeholder:text-gray-300 transition-all";
+  "mt-1.5 w-full border border-gray-200 dark:border-neutral-800 rounded-lg px-3 py-2.5 text-sm bg-white dark:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 placeholder:text-gray-300 dark:placeholder:text-neutral-600 transition-all";
 
 function getPasswordStrength(pw: string): 0 | 1 | 2 | 3 {
   if (pw.length === 0) return 0;
@@ -113,6 +115,8 @@ export default function RegisterPage() {
         return;
       }
 
+      trackSignup({ businessType: form.businessType, language: form.language });
+
       const signInResult = await signIn("credentials", {
         email: form.email,
         password: form.password,
@@ -137,6 +141,7 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen flex">
+      <AuthThemeToggle />
 
       {/* ── Left branding panel ── */}
       <div
@@ -209,10 +214,7 @@ export default function RegisterPage() {
       </div>
 
       {/* ── Right form panel ── */}
-      <div
-        className="flex-1 flex items-center justify-center px-4 py-12"
-        style={{ background: "#f5f4f1" }}
-      >
+      <div className="flex-1 flex items-center justify-center px-4 py-12 bg-[#f5f4f1] dark:bg-neutral-950">
         <div className="w-full max-w-sm">
           {/* Mobile logo */}
           <div className="lg:hidden mb-6 flex justify-center">
@@ -222,12 +224,12 @@ export default function RegisterPage() {
           {/* Step dots */}
           <div className="flex items-center gap-1.5 justify-center mb-5">
             <div className={`h-1.5 rounded-full transition-all duration-300 ${step === 1 ? "w-6 bg-primary" : "w-3 bg-primary/60"}`} />
-            <div className={`h-1.5 rounded-full transition-all duration-300 ${step === 2 ? "w-6 bg-primary" : "w-3 bg-gray-300"}`} />
+            <div className={`h-1.5 rounded-full transition-all duration-300 ${step === 2 ? "w-6 bg-primary" : "w-3 bg-gray-300 dark:bg-neutral-600"}`} />
           </div>
 
           {/* Card */}
           <div
-            className="bg-white rounded-2xl px-7 py-8"
+            className="bg-white dark:bg-neutral-900 rounded-2xl px-7 py-8"
             style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.05), 0 8px 32px rgba(0,0,0,0.07)" }}
           >
             {step === 1 ? (
@@ -237,29 +239,29 @@ export default function RegisterPage() {
 
                 <form onSubmit={handleStep1} className="space-y-4" noValidate>
                   <div>
-                    <label className="text-sm font-medium text-gray-700" htmlFor="name">Your name</label>
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300" htmlFor="name">Your name</label>
                     <input ref={step1Ref} id="name" name="name" required autoComplete="name"
                       value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
                       className={inputCls} placeholder="Amara Silva" />
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium text-gray-700" htmlFor="email">Email</label>
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300" htmlFor="email">Email</label>
                     <input id="email" name="email" type="email" required autoComplete="email" inputMode="email"
                       value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
                       className={inputCls} placeholder="you@example.com" />
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium text-gray-700" htmlFor="password">Password</label>
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300" htmlFor="password">Password</label>
                     <div className="relative mt-1.5">
                       <input id="password" name="password" type={showPassword ? "text" : "password"}
                         required minLength={8} autoComplete="new-password"
                         value={form.password} onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
-                        className="w-full border border-gray-200 rounded-lg pl-3 pr-10 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 placeholder:text-gray-300 transition-all"
+                        className="w-full border border-gray-200 dark:border-neutral-800 rounded-lg pl-3 pr-10 py-2.5 text-sm bg-white dark:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 placeholder:text-gray-300 dark:placeholder:text-neutral-600 transition-all"
                         placeholder="Min. 8 characters" />
                       <button type="button" onClick={() => setShowPassword((s) => !s)}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-gray-300 hover:text-gray-500 rounded-md transition-colors"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-gray-300 hover:text-gray-500 dark:text-gray-400 rounded-md transition-colors"
                         aria-label={showPassword ? "Hide password" : "Show password"} tabIndex={-1}>
                         {showPassword ? <Icon name="eye-slash" className="text-sm" /> : <Icon name="eye" className="text-sm" />}
                       </button>
@@ -268,13 +270,13 @@ export default function RegisterPage() {
                       <div className="mt-2">
                         <div className="flex gap-1">
                           {[1, 2, 3].map((i) => (
-                            <div key={i} className={`h-1 flex-1 rounded-full transition-all duration-300 ${i <= strength ? strengthColor[strength] : "bg-gray-100"}`} />
+                            <div key={i} className={`h-1 flex-1 rounded-full transition-all duration-300 ${i <= strength ? strengthColor[strength] : "bg-gray-100 dark:bg-neutral-800"}`} />
                           ))}
                         </div>
                         <p className={`text-xs mt-1 ${strengthText[strength]}`}>
                           {strengthLabel[strength]}
                           {strength < 3 && (
-                            <span className="text-gray-400">
+                            <span className="text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
                               {strength === 1 && " — add numbers or symbols"}
                               {strength === 2 && " — add a symbol to strengthen"}
                             </span>
@@ -299,7 +301,7 @@ export default function RegisterPage() {
             ) : (
               <>
                 <button type="button" onClick={() => { setStep(1); setError(""); }}
-                  className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 mb-5 -ml-0.5 transition-colors">
+                  className="flex items-center gap-1.5 text-sm text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:text-gray-300 mb-5 -ml-0.5 transition-colors">
                   <Icon name="arrow-left" className="text-xs" /> Back
                 </button>
 
@@ -308,33 +310,33 @@ export default function RegisterPage() {
 
                 <form onSubmit={handleSubmit} className="space-y-4" noValidate>
                   <div>
-                    <label className="text-sm font-medium text-gray-700" htmlFor="businessName">Business name</label>
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300" htmlFor="businessName">Business name</label>
                     <input ref={step2Ref} id="businessName" name="businessName" required autoComplete="organization"
                       value={form.businessName} onChange={(e) => handleBusinessNameChange(e.target.value)}
                       className={inputCls} placeholder="e.g. Glow Beauty Studio" />
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium text-gray-700" htmlFor="slug">Your booking URL</label>
-                    <div className="mt-1.5 flex items-center border border-gray-200 rounded-lg overflow-hidden bg-white focus-within:ring-2 focus-within:ring-primary/40 transition-all">
-                      <span className="bg-gray-50 text-gray-300 text-sm px-3 py-2.5 border-r border-gray-200 whitespace-nowrap select-none">
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300" htmlFor="slug">Your booking URL</label>
+                    <div className="mt-1.5 flex items-center border border-gray-200 dark:border-neutral-800 rounded-lg overflow-hidden bg-white dark:bg-neutral-900 focus-within:ring-2 focus-within:ring-primary/40 transition-all">
+                      <span className="bg-gray-50 dark:bg-neutral-900/60 text-gray-300 text-sm px-3 py-2.5 border-r border-gray-200 dark:border-neutral-800 whitespace-nowrap select-none">
                         dinaya.lk/
                       </span>
                       <input id="slug" name="slug" required value={form.slug}
                         onChange={(e) => handleSlugChange(e.target.value)}
-                        className="flex-1 px-3 py-2.5 text-sm focus:outline-none placeholder:text-gray-300"
+                        className="flex-1 px-3 py-2.5 text-sm focus:outline-none placeholder:text-gray-300 dark:placeholder:text-neutral-600"
                         placeholder="your-business" />
                     </div>
                     {form.slug && (
-                      <p className="text-xs text-gray-400 mt-1.5 flex items-center gap-1">
+                      <p className="text-xs text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-1.5 flex items-center gap-1">
                         <Icon name="check-circle" className="text-emerald-500" />
-                        Clients will book at <span className="font-medium text-gray-600">dinaya.lk/{form.slug}</span>
+                        Clients will book at <span className="font-medium text-gray-600 dark:text-gray-400">dinaya.lk/{form.slug}</span>
                       </p>
                     )}
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium text-gray-700" htmlFor="businessType">Business type</label>
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300" htmlFor="businessType">Business type</label>
                     <select
                       id="businessType"
                       value={form.businessType}
@@ -345,13 +347,13 @@ export default function RegisterPage() {
                         <option key={type.value} value={type.value}>{type.label}</option>
                       ))}
                     </select>
-                    <p className="text-xs text-gray-400 mt-1.5">
+                    <p className="text-xs text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-1.5">
                       {businessTypes.find((type) => type.value === form.businessType)?.helper}
                     </p>
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium text-gray-700" htmlFor="language">Booking page language</label>
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300" htmlFor="language">Booking page language</label>
                     <select
                       id="language"
                       value={form.language}
@@ -362,7 +364,7 @@ export default function RegisterPage() {
                       <option value="si">Sinhala</option>
                       <option value="ta">Tamil</option>
                     </select>
-                    <p className="text-xs text-gray-400 mt-1.5">
+                    <p className="text-xs text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-1.5">
                       You can change this later in Settings.
                     </p>
                   </div>
@@ -382,12 +384,12 @@ export default function RegisterPage() {
               </>
             )}
 
-            <div className="flex items-center justify-center gap-1.5 mt-4 text-xs text-gray-400">
+            <div className="flex items-center justify-center gap-1.5 mt-4 text-xs text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
               <Icon name="lock" /><span>Secure sign-up · No credit card required</span>
             </div>
           </div>
 
-          <p className="text-center text-sm text-gray-400 mt-5">
+          <p className="text-center text-sm text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-5">
             Already have an account?{" "}
             <Link href="/auth/signin" className="text-primary hover:underline font-medium">Sign in</Link>
           </p>

@@ -39,7 +39,7 @@ export function CancelButton() {
   }
 
   return (
-    <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+    <div className="rounded-lg border border-red-200 bg-red-50 dark:border-red-900/50 dark:bg-red-950/40 p-4">
       <p className="text-sm text-red-900">
         Cancel your Pro subscription? You&apos;ll keep Pro features until the current period ends.
       </p>
@@ -54,12 +54,12 @@ export function CancelButton() {
         <button
           onClick={() => setConfirming(false)}
           disabled={loading}
-          className="rounded-lg border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-white"
+          className="rounded-lg border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-white dark:hover:bg-neutral-800"
         >
           Keep Pro
         </button>
       </div>
-      {error && <p className="mt-2 text-sm text-red-700">{error}</p>}
+      {error && <p className="mt-2 text-sm text-red-700 dark:text-red-300">{error}</p>}
     </div>
   );
 }

@@ -30,7 +30,7 @@ export function DashboardToastProvider({ children }: { children: React.ReactNode
       {messages.map((message) => (
         <Toast.Root
           key={message.id}
-          className="rounded-lg border bg-white p-4 shadow-lg"
+          className="rounded-lg border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-4 shadow-lg"
           onOpenChange={(open) => {
             if (!open) {
               setMessages((current) => current.filter((item) => item.id !== message.id));

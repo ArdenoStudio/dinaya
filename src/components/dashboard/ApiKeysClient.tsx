@@ -101,7 +101,7 @@ export function ApiKeysClient() {
 
   return (
     <div className="space-y-6">
-      <form onSubmit={createKey} className="rounded-xl border bg-white p-5 space-y-3">
+      <form onSubmit={createKey} className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5 space-y-3">
         <h2 className="font-semibold">Create API key</h2>
         <input
           value={name}
@@ -128,7 +128,7 @@ export function ApiKeysClient() {
         </div>
         {error && <p className="text-sm text-red-600">{error}</p>}
         {rawKey && (
-          <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm">
+          <div className="rounded-lg border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-950/40 p-3 text-sm">
             Copy this key now — it won&apos;t be shown again:
             <code className="mt-2 block break-all font-mono text-xs">{rawKey}</code>
           </div>
@@ -145,7 +145,7 @@ export function ApiKeysClient() {
         </button>
       </form>
 
-      <div className="rounded-xl border bg-white divide-y">
+      <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 divide-y">
         {loading ? (
           <p className="p-5 text-sm text-muted-foreground">Loading…</p>
         ) : keys.length === 0 ? (

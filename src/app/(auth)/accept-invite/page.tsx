@@ -4,6 +4,7 @@ import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Logo } from "@/components/Logo";
+import { AuthThemeToggle } from "@/components/AuthThemeToggle";
 
 function AcceptInviteForm() {
   const router = useRouter();
@@ -55,7 +56,7 @@ function AcceptInviteForm() {
           minLength={8}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="mt-1.5 w-full rounded-lg border px-3 py-2.5 text-sm"
+          className="mt-1.5 w-full rounded-lg border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-3 py-2.5 text-sm"
         />
       </div>
       <div>
@@ -66,7 +67,7 @@ function AcceptInviteForm() {
           minLength={8}
           value={confirm}
           onChange={(e) => setConfirm(e.target.value)}
-          className="mt-1.5 w-full rounded-lg border px-3 py-2.5 text-sm"
+          className="mt-1.5 w-full rounded-lg border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-3 py-2.5 text-sm"
         />
       </div>
       {error && <p className="text-sm text-red-600">{error}</p>}
@@ -83,8 +84,9 @@ function AcceptInviteForm() {
 
 export default function AcceptInvitePage() {
   return (
-    <main className="min-h-screen bg-gray-50 flex items-center justify-center px-6">
-      <div className="w-full max-w-md rounded-2xl border bg-white p-8 shadow-sm">
+    <main className="min-h-screen bg-gray-50 dark:bg-neutral-950 flex items-center justify-center px-6">
+      <AuthThemeToggle />
+      <div className="w-full max-w-md rounded-2xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-8 shadow-sm">
         <Logo href="/" size="sm" />
         <h1 className="mt-6 font-cal text-2xl tracking-tight">Accept your invite</h1>
         <p className="mt-2 text-sm text-muted-foreground">

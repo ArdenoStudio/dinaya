@@ -69,7 +69,7 @@ const testimonials = [
 
 export default function LandingPage() {
   return (
-    <div className="min-h-dvh bg-white">
+    <div className="min-h-dvh bg-white dark:bg-neutral-950">
 
       {/* Nav — fix #5 (mobile menu) + fix #6 (dead resource links) via LandingNav */}
       <LandingNav />
@@ -80,14 +80,14 @@ export default function LandingPage() {
           <div className="mb-8">
             <a
               href="/register"
-              className="inline-flex items-center gap-3 rounded-full bg-white px-2.5 py-0.5 pr-3 pl-0.5 text-sm font-medium text-gray-900 ring-1 shadow-lg shadow-primary/10 ring-black/10 transition-colors hover:bg-primary/5"
+              className="inline-flex items-center gap-3 rounded-full bg-white dark:bg-neutral-900 px-2.5 py-0.5 pr-3 pl-0.5 text-sm font-medium text-gray-900 dark:text-gray-100 ring-1 shadow-lg shadow-primary/10 ring-black/10 dark:ring-white/10 transition-colors hover:bg-primary/5"
             >
-              <span className="shrink-0 rounded-full border bg-gray-50 px-2.5 py-1 text-xs text-gray-600">
+              <span className="shrink-0 rounded-full border bg-gray-50 dark:bg-neutral-900/60 px-2.5 py-1 text-xs text-gray-600 dark:text-gray-400">
                 New
               </span>
               <span className="flex items-center gap-1 truncate">
                 Free 14-day trial — no card needed
-                <Icon name="arrow-up-right" className="text-xs shrink-0 text-gray-700" />
+                <Icon name="arrow-up-right" className="text-xs shrink-0 text-gray-700 dark:text-gray-300" />
               </span>
             </a>
           </div>
@@ -124,7 +124,7 @@ export default function LandingPage() {
             <CTAPrimaryButton>Create your booking page</CTAPrimaryButton>
             <Link
               href="#demo"
-              className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-6 py-3 text-sm font-medium text-gray-800 shadow-sm hover:bg-gray-50 transition-colors"
+              className="inline-flex items-center gap-2 rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-6 py-3 text-sm font-medium text-gray-800 dark:text-gray-200 shadow-sm hover:bg-gray-50 dark:hover:bg-neutral-900/60 transition-colors"
             >
               <Icon name="play-circle" className="text-base" />
               See a live demo
@@ -157,14 +157,14 @@ export default function LandingPage() {
         </div>
 
         {/* Payment providers — localized trust signals */}
-        <div className="mt-5 pt-5 border-t border-dashed border-gray-200/80 flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
-          <span className="text-[11px] uppercase tracking-widest text-gray-400 font-semibold">
+        <div className="mt-5 pt-5 border-t border-dashed border-gray-200 dark:border-neutral-800/80 flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
+          <span className="text-[11px] uppercase tracking-widest text-gray-400 dark:text-gray-500 font-semibold">
             Accept payments via
           </span>
           {["PayHere", "Visa", "Mastercard", "LankaQR", "FriMi"].map((p) => (
             <span
               key={p}
-              className="inline-flex items-center rounded-md border border-gray-200 bg-white px-2.5 py-1 text-xs font-semibold text-gray-700 shadow-sm"
+              className="inline-flex items-center rounded-md border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-2.5 py-1 text-xs font-semibold text-gray-700 dark:text-gray-300 shadow-sm"
             >
               {p}
             </span>
@@ -232,20 +232,20 @@ export default function LandingPage() {
 
         <div className="relative grid md:grid-cols-3 gap-10">
           {/* Connecting line behind the icons */}
-          <div className="hidden md:block absolute top-7 left-[16.5%] right-[16.5%] h-px bg-gray-200" />
+          <div className="hidden md:block absolute top-7 left-[16.5%] right-[16.5%] h-px bg-gray-200 dark:bg-neutral-700" />
 
           {steps.map((step) => (
             <div key={step.number} className="flex flex-col items-center text-center">
               {/* Icon badge with step number dot */}
               <div className="relative z-10 mb-6">
-                <div className="flex size-14 items-center justify-center rounded-2xl bg-white border border-gray-200 shadow-sm ring-4 ring-white">
+                <div className="flex size-14 items-center justify-center rounded-2xl bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-800 shadow-sm ring-4 ring-white dark:ring-neutral-950">
                   <Icon name={step.icon} className="text-xl text-primary" />
                 </div>
                 <span className="absolute -top-2 -right-2 flex size-5 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-white">
                   {parseInt(step.number)}
                 </span>
               </div>
-              <h3 className="font-semibold text-gray-900 text-lg mb-2">{step.title}</h3>
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-lg mb-2">{step.title}</h3>
               <p className="text-muted-foreground text-sm leading-relaxed max-w-[220px]">{step.desc}</p>
             </div>
           ))}
@@ -273,14 +273,14 @@ export default function LandingPage() {
           {testimonials.map((t) => (
             <div
               key={t.name}
-              className="p-6 rounded-2xl border bg-white hover:shadow-md transition-shadow flex flex-col"
+              className="p-6 rounded-2xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 hover:shadow-md transition-shadow flex flex-col"
             >
               <div className="flex gap-0.5 mb-4">
                 {[...Array(5)].map((_, i) => (
                   <Icon key={i} name="star-fill" className="text-xs text-amber-400" />
                 ))}
               </div>
-              <blockquote className="text-sm leading-relaxed text-gray-700 flex-1 mb-6 text-pretty">
+              <blockquote className="text-sm leading-relaxed text-gray-700 dark:text-gray-300 flex-1 mb-6 text-pretty">
                 &ldquo;{t.quote}&rdquo;
               </blockquote>
               <div className="flex items-center gap-3">
@@ -288,7 +288,7 @@ export default function LandingPage() {
                   {t.initial}
                 </div>
                 <div>
-                  <div className="text-sm font-semibold text-gray-900">{t.name}</div>
+                  <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">{t.name}</div>
                   <div className="text-xs text-muted-foreground">
                     {t.role} · {t.location}
                   </div>
@@ -343,14 +343,14 @@ export default function LandingPage() {
               <div className="flex flex-wrap gap-4 justify-center">
                 <Link
                   href="/register"
-                  className="inline-flex items-center gap-2 bg-white text-blue-700 px-7 py-3.5 rounded-xl font-semibold shadow-lg hover:bg-white/95 transition-colors"
+                  className="inline-flex items-center gap-2 bg-white text-blue-700 px-7 py-3.5 rounded-xl font-semibold shadow-lg hover:bg-blue-50 transition-colors"
                 >
                   Create your page
                   <Icon name="arrow-right" className="text-sm" />
                 </Link>
                 <Link
                   href="/auth/signin"
-                  className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-white px-7 py-3.5 rounded-xl font-medium hover:bg-white/20 transition-colors"
+                  className="inline-flex items-center gap-2 bg-black/25 border border-white/35 text-white px-7 py-3.5 rounded-xl font-medium hover:bg-black/40 backdrop-blur-sm transition-colors"
                 >
                   Sign in
                 </Link>

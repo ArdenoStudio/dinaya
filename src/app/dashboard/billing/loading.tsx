@@ -10,7 +10,7 @@ export default function BillingLoading() {
       </div>
 
       {/* Current Plan */}
-      <div className="rounded-xl border bg-white p-6 mb-6">
+      <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-6 mb-6">
         <div className="flex items-center justify-between mb-4">
           <div>
             <Skeleton className="h-6 w-32 mb-2" />
@@ -29,7 +29,7 @@ export default function BillingLoading() {
       </div>
 
       {/* Invoices */}
-      <div className="rounded-xl border bg-white p-6">
+      <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-6">
         <Skeleton className="h-6 w-40 mb-4" />
         <div className="space-y-3">
           {[1, 2, 3, 4].map((i) => (

@@ -13,7 +13,7 @@ export default function DashboardLoading() {
       {/* Stats Grid */}
       <div className="grid gap-4 md:grid-cols-4">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="overflow-hidden rounded-xl border bg-white">
+          <div key={i} className="overflow-hidden rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
             <Skeleton className="h-[3px] w-full" />
             <div className="flex items-start gap-3 p-5">
               <Skeleton className="size-10 rounded-lg" />
@@ -29,7 +29,7 @@ export default function DashboardLoading() {
       {/* Main Content Grid */}
       <div className="grid gap-6 lg:grid-cols-[1.4fr_0.9fr]">
         {/* Today Timeline */}
-        <div className="rounded-xl border bg-white p-5">
+        <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
           <div className="mb-4 flex items-center justify-between">
             <Skeleton className="h-5 w-32" />
             <Skeleton className="h-4 w-16" />
@@ -65,7 +65,7 @@ export default function DashboardLoading() {
           </div>
 
           {/* Recent Activity */}
-          <div className="rounded-xl border bg-white p-5">
+          <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
             <Skeleton className="h-5 w-32 mb-4" />
             <div className="space-y-3">
               {[1, 2, 3, 4].map((i) => (

@@ -20,6 +20,7 @@ export default function NewServicePage() {
     dailyCapacity: "" as string | number,
     maximumAdvanceDays: 0,
     intakeQuestions: [] as IntakeQuestion[],
+    successRedirectUrl: "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -47,7 +48,7 @@ export default function NewServicePage() {
   return (
     <div className="max-w-lg">
       <h1 className="font-cal text-2xl mb-6">New service</h1>
-      <form onSubmit={handleSubmit} className="bg-white border rounded-xl p-6 space-y-4">
+      <form onSubmit={handleSubmit} className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-6 space-y-4">
         <div>
           <label className="text-sm font-medium">Service name *</label>
           <input required value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
@@ -146,6 +147,18 @@ export default function NewServicePage() {
           value={form.intakeQuestions}
           onChange={(intakeQuestions) => setForm((f) => ({ ...f, intakeQuestions }))}
         />
+        <div>
+          <label className="text-sm font-medium">Success redirect URL</label>
+          <p className="text-xs text-muted-foreground mb-2">
+            Optional. Send clients here after booking (https:// URL or path like /thank-you).
+          </p>
+          <input
+            value={form.successRedirectUrl}
+            onChange={(e) => setForm((f) => ({ ...f, successRedirectUrl: e.target.value }))}
+            placeholder="https://example.com/thank-you or /thank-you"
+            className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+        </div>
         <label className="flex items-center gap-2 cursor-pointer">
           <input type="checkbox" checked={form.requiresPayment}
             onChange={(e) => setForm((f) => ({ ...f, requiresPayment: e.target.checked }))}

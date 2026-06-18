@@ -145,14 +145,14 @@ export default async function AdminAccountDetailPage({
       value: Number(totalBookings).toLocaleString(),
       sub: `${Number(bookings30)} in last 30d`,
       icon: CalendarCheck,
-      accent: "bg-emerald-500",
+      accent: "bg-emerald-50 dark:bg-emerald-950/400",
     },
     {
       label: "GMV (30d)",
       value: formatLkr(Number(gmv30)),
       sub: `${formatLkr(Number(totalGmv))} lifetime`,
       icon: CreditCard,
-      accent: "bg-amber-500",
+      accent: "bg-amber-50 dark:bg-amber-950/400",
     },
     {
       label: "Clients",
@@ -188,21 +188,21 @@ export default async function AdminAccountDetailPage({
                   biz.plan === "pro"
                     ? "rounded-full bg-primary/10 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-primary"
                     : biz.plan === "starter"
-                      ? "rounded-full bg-emerald-500/10 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-emerald-700"
+                      ? "rounded-full bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-emerald-700"
                     : biz.plan === "max"
-                      ? "rounded-full bg-amber-500/10 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-amber-700"
+                      ? "rounded-full bg-amber-50 dark:bg-amber-950/30 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-amber-700"
                     : "rounded-full bg-muted px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-muted-foreground"
                 }
               >
                 {planDisplayName(biz.plan as Plan)}
               </span>
               {biz.deletedAt && (
-                <span className="rounded-full bg-rose-500/10 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-rose-700">
+                <span className="rounded-full bg-rose-50 dark:bg-rose-950/30 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-rose-700">
                   Deleted
                 </span>
               )}
               {!biz.deletedAt && biz.isSuspended && (
-                <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-amber-700">
+                <span className="rounded-full bg-amber-50 dark:bg-amber-950/30 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-amber-700">
                   Suspended
                 </span>
               )}
@@ -216,7 +216,7 @@ export default async function AdminAccountDetailPage({
               href={`/book/${biz.slug}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-md border bg-white px-3 py-2 text-xs font-medium hover:bg-muted"
+              className="inline-flex items-center gap-1.5 rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs font-medium hover:bg-muted"
             >
               View booking page <ExternalLink className="size-3" aria-hidden="true" />
             </a>
@@ -228,7 +228,7 @@ export default async function AdminAccountDetailPage({
         {kpis.map((kpi) => {
           const Icon = kpi.icon;
           return (
-            <div key={kpi.label} className="overflow-hidden rounded-xl border bg-white">
+            <div key={kpi.label} className="overflow-hidden rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
               <div className={`h-[3px] ${kpi.accent}`} />
               <div className="p-5">
                 <div className="flex items-start gap-3">
@@ -249,7 +249,7 @@ export default async function AdminAccountDetailPage({
 
       <div className="grid gap-6 lg:grid-cols-[1.4fr_0.9fr]">
         <div className="space-y-6">
-          <div className="rounded-xl border bg-white p-5">
+          <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
             <h2 className="mb-4 font-semibold">Profile</h2>
             <dl className="grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
               <div>
@@ -285,7 +285,7 @@ export default async function AdminAccountDetailPage({
             </dl>
           </div>
 
-          <div className="rounded-xl border bg-white p-5">
+          <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
             <h2 className="mb-4 font-semibold">Subscription history</h2>
             {accountSubs.length === 0 ? (
               <p className="text-sm text-muted-foreground">No subscriptions on record.</p>
@@ -309,7 +309,7 @@ export default async function AdminAccountDetailPage({
             )}
           </div>
 
-          <div className="rounded-xl border bg-white p-5">
+          <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
             <h2 className="mb-4 font-semibold">Recent bookings</h2>
             {recentBookings.length === 0 ? (
               <p className="text-sm text-muted-foreground">No bookings yet.</p>
@@ -334,7 +334,7 @@ export default async function AdminAccountDetailPage({
         </div>
 
         <div className="space-y-6">
-          <div className="rounded-xl border bg-white p-5">
+          <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
             <h2 className="mb-4 font-semibold">Team ({accountUsers.length})</h2>
             <div className="space-y-2">
               {accountUsers.map((u) => (
@@ -357,7 +357,7 @@ export default async function AdminAccountDetailPage({
             </div>
           </div>
 
-          <div className="rounded-xl border bg-white p-5">
+          <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
             <h2 className="mb-4 font-semibold">Recent activity</h2>
             {recentActivity.length === 0 ? (
               <p className="text-sm text-muted-foreground">No activity yet.</p>

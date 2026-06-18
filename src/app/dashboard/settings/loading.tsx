@@ -10,7 +10,7 @@ export default function SettingsLoading() {
 
       <div className="grid gap-5 xl:grid-cols-2">
         {[1, 2, 3, 4, 5, 6].map((section) => (
-          <div key={section} className="rounded-xl border bg-white p-6">
+          <div key={section} className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-6">
             <Skeleton className="mb-4 h-4 w-40" />
             <div className="space-y-4">
               {[1, 2, 3].map((field) => (

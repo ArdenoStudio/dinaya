@@ -29,7 +29,7 @@ export function WebhooksAdminClient({ deliveries }: { deliveries: DeliveryRow[] 
   return (
     <div className="space-y-4">
       {message && <p className="rounded-xl border bg-muted/40 px-4 py-3 text-sm">{message}</p>}
-      <div className="overflow-hidden rounded-xl border bg-white">
+      <div className="overflow-hidden rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
         <table className="w-full text-sm">
           <thead className="bg-muted/30 text-left text-xs uppercase tracking-wider text-muted-foreground">
             <tr>

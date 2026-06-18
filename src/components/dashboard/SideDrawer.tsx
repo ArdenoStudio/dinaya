@@ -23,7 +23,7 @@ export function SideDrawer({
       {trigger && <Dialog.Trigger asChild>{trigger}</Dialog.Trigger>}
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-40 bg-black/25" />
-        <Dialog.Content className="fixed inset-y-0 right-0 z-50 flex w-full max-w-xl flex-col border-l bg-white shadow-xl">
+        <Dialog.Content className="fixed inset-y-0 right-0 z-50 flex w-full max-w-xl flex-col border-l bg-white shadow-xl dark:border-neutral-800 dark:bg-neutral-900">
           <div className="flex items-start justify-between gap-4 border-b px-6 py-5">
             <div>
               <Dialog.Title className="text-lg font-semibold">{title}</Dialog.Title>

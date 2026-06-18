@@ -89,11 +89,11 @@ export default function BookingRouterPage() {
       </p>
 
       {services.length === 0 ? (
-        <div className="rounded-xl border bg-white p-6 text-sm text-muted-foreground">
+        <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-6 text-sm text-muted-foreground">
           Add at least one service first, then come back to set up routing.
         </div>
       ) : (
-        <div className="bg-white border rounded-xl p-6 space-y-4">
+        <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-6 space-y-4">
           <label className="flex items-center gap-2 cursor-pointer">
             <input type="checkbox" checked={router.enabled}
               onChange={(e) => setRouter((r) => ({ ...r, enabled: e.target.checked }))} className="rounded" />

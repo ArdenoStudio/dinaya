@@ -83,10 +83,10 @@ export default function MonthCalendar({
 
   return (
     <div
-      className={`min-w-0 w-full ${comfortable ? "" : "rounded-xl border border-gray-100 bg-gray-50/60 p-3.5"}`}
+      className={`min-w-0 w-full ${comfortable ? "" : "rounded-xl border border-gray-100 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-900/60 p-3.5"}`}
     >
       <div className={`flex items-center justify-between ${comfortable ? "mb-4" : "mb-3"}`}>
-        <span className={`font-bold text-gray-800 ${comfortable ? "text-base" : "text-sm"}`}>
+        <span className={`font-bold text-gray-800 dark:text-gray-200 ${comfortable ? "text-base" : "text-sm"}`}>
           {format(viewMonth, "MMMM yyyy")}
         </span>
         <div className="flex gap-1">
@@ -94,7 +94,7 @@ export default function MonthCalendar({
             type="button"
             disabled={!canGoPrev}
             onClick={() => setViewMonth((m) => subMonths(m, 1))}
-            className={`flex items-center justify-center rounded-lg text-gray-400 transition-all hover:bg-gray-100 hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-30 ${
+            className={`flex items-center justify-center rounded-lg text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 transition-all hover:bg-gray-100 dark:bg-neutral-800 hover:text-gray-700 dark:text-gray-300 disabled:cursor-not-allowed disabled:opacity-30 ${
               comfortable ? "size-9" : "size-7"
             }`}
             aria-label="Previous month"
@@ -104,7 +104,7 @@ export default function MonthCalendar({
           <button
             type="button"
             onClick={() => setViewMonth((m) => addMonths(m, 1))}
-            className={`flex items-center justify-center rounded-lg text-gray-400 transition-all hover:bg-gray-100 hover:text-gray-700 ${
+            className={`flex items-center justify-center rounded-lg text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 transition-all hover:bg-gray-100 dark:bg-neutral-800 hover:text-gray-700 dark:text-gray-300 ${
               comfortable ? "size-9" : "size-7"
             }`}
             aria-label="Next month"
@@ -119,7 +119,7 @@ export default function MonthCalendar({
         {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
           <div
             key={d}
-            className={`font-bold text-gray-400 ${comfortable ? "pb-3 text-[11px] tracking-wide" : "pb-1.5 text-[10px] tracking-wide"}`}
+            className={`font-bold text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 ${comfortable ? "pb-3 text-[11px] tracking-wide" : "pb-1.5 text-[10px] tracking-wide"}`}
           >
             {comfortable ? d : d.slice(0, 3)}
           </div>
@@ -150,7 +150,7 @@ export default function MonthCalendar({
                   ? "cursor-not-allowed text-gray-300"
                   : showToday
                   ? "font-semibold booking-text-accent ring-2 ring-[var(--booking-accent-soft)]"
-                  : "text-gray-700 hover:booking-bg-accent-muted"
+                  : "text-gray-700 dark:text-gray-300 hover:booking-bg-accent-muted"
               }`}
             >
               {format(day, "d")}

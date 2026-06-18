@@ -181,8 +181,8 @@ export default async function DashboardOverview() {
     cancelled: "border-l-slate-300",
   };
   const statusBadge: Record<string, string> = {
-    confirmed: "bg-blue-50 text-blue-700",
-    pending: "bg-amber-50 text-amber-700",
+    confirmed: "bg-blue-50 dark:bg-blue-950/40 text-blue-700",
+    pending: "bg-amber-50 dark:bg-amber-950/40 text-amber-700",
     completed: "bg-green-50 text-green-700",
     no_show: "bg-red-50 text-red-600",
     cancelled: "bg-slate-100 text-slate-500",
@@ -234,7 +234,7 @@ export default async function DashboardOverview() {
       )}
 
       <div className="grid gap-6 lg:grid-cols-[1.4fr_0.9fr]">
-        <div className="rounded-xl border bg-white p-5">
+        <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="font-semibold">Today timeline</h2>
             <Link href="/dashboard/calendar" className="text-sm text-primary hover:underline">Calendar</Link>
@@ -246,7 +246,7 @@ export default async function DashboardOverview() {
                 <div className="mt-4 space-y-2">
                   <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Next appointments</p>
                   {nextRows.map((row) => (
-                    <Link key={row.id} href={`/dashboard/bookings/${row.id}`} className="block rounded-md border bg-white px-3 py-2 text-sm hover:border-primary/40">
+                    <Link key={row.id} href={`/dashboard/bookings/${row.id}`} className="block rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-sm hover:border-primary/40">
                       <span className="font-medium">{row.clientName}</span>
                       <span className="text-muted-foreground"> - {row.serviceName} on {format(row.startsAt, "d MMM, h:mm a")}</span>
                     </Link>
@@ -302,18 +302,18 @@ export default async function DashboardOverview() {
               </span>
               <p className="text-sm font-semibold">Share booking link</p>
             </div>
-            <code className="block truncate rounded-lg border border-primary/15 bg-white px-3 py-2 font-mono text-sm text-primary">
+            <code className="block truncate rounded-lg border border-primary/15 bg-white dark:bg-neutral-900 px-3 py-2 font-mono text-sm text-primary">
               {bookingDisplayUrl}
             </code>
             <div className="mt-3 flex flex-wrap gap-2">
-              <a href={bookingUrl} target="_blank" rel="noopener noreferrer" className="rounded-md border bg-white px-3 py-2 text-xs font-medium text-primary hover:bg-primary/5">Open</a>
-              <a href={whatsappShare} target="_blank" rel="noopener noreferrer" className="rounded-md border bg-white px-3 py-2 text-xs font-medium text-primary hover:bg-primary/5">WhatsApp</a>
-              <Link href="/dashboard/marketing" className="rounded-md border bg-white px-3 py-2 text-xs font-medium text-primary hover:bg-primary/5">QR & embed</Link>
+              <a href={bookingUrl} target="_blank" rel="noopener noreferrer" className="rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs font-medium text-primary hover:bg-primary/5">Open</a>
+              <a href={whatsappShare} target="_blank" rel="noopener noreferrer" className="rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs font-medium text-primary hover:bg-primary/5">WhatsApp</a>
+              <Link href="/dashboard/marketing" className="rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-xs font-medium text-primary hover:bg-primary/5">QR & embed</Link>
             </div>
-            <textarea readOnly value={embedSnippet} className="mt-3 h-16 w-full resize-none rounded-md border bg-white p-2 text-xs text-muted-foreground" />
+            <textarea readOnly value={embedSnippet} className="mt-3 h-16 w-full resize-none rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-2 text-xs text-muted-foreground" />
           </div>
 
-          <div className="rounded-xl border bg-white p-5">
+          <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
             <h2 className="mb-4 font-semibold">Recent activity</h2>
             {recentActivity.length === 0 ? (
               <p className="text-sm text-muted-foreground">No recent activity yet.</p>

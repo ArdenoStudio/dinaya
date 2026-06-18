@@ -73,33 +73,33 @@ export default async function AdminVoicePage() {
       <div className="rounded-xl border border-primary/20 bg-primary/5 p-5">
         <h2 className="text-sm font-semibold text-primary">Phase 2: Dinaya-hosted Twilio voice</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          Set <code className="rounded bg-white px-1 text-xs">TWILIO_CONVERSATION_RELAY_WS_URL</code> to
+          Set <code className="rounded bg-white px-1 dark:bg-neutral-800 text-xs">TWILIO_CONVERSATION_RELAY_WS_URL</code> to
           enable ConversationRelay for inbound calls. Point a Twilio number voice webhook to:
         </p>
-        <p className="mt-2 rounded-md border bg-white px-3 py-2 font-mono text-xs">
+        <p className="mt-2 rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 font-mono text-xs">
           POST /api/v1/voice/twilio?businessId=&lt;business-uuid&gt;
         </p>
         <p className="mt-2 text-xs text-muted-foreground">
-          This is paused for tenant users until rollout. After launch, bookings will flow through <code className="rounded bg-white px-1">/api/v1/bookings</code> with source <code className="rounded bg-white px-1">voice_agent</code>.
+          This is paused for tenant users until rollout. After launch, bookings will flow through <code className="rounded bg-white px-1 dark:bg-neutral-800">/api/v1/bookings</code> with source <code className="rounded bg-white px-1 dark:bg-neutral-800">voice_agent</code>.
         </p>
       </div>
 
       <div className="rounded-xl border border-primary/20 bg-primary/5 p-5">
         <h2 className="text-sm font-semibold text-primary">Phase 2: Dinaya-hosted Twilio voice</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          Set <code className="rounded bg-white px-1 text-xs">TWILIO_CONVERSATION_RELAY_WS_URL</code> to
+          Set <code className="rounded bg-white px-1 dark:bg-neutral-800 text-xs">TWILIO_CONVERSATION_RELAY_WS_URL</code> to
           enable ConversationRelay for inbound calls. Point a Twilio number voice webhook to:
         </p>
-        <p className="mt-2 rounded-md border bg-white px-3 py-2 font-mono text-xs">
+        <p className="mt-2 rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 font-mono text-xs">
           POST /api/v1/voice/twilio?businessId=&lt;business-uuid&gt;
         </p>
         <p className="mt-2 text-xs text-muted-foreground">
-          This is paused for tenant users until rollout. After launch, bookings will flow through <code className="rounded bg-white px-1">/api/v1/bookings</code> with source <code className="rounded bg-white px-1">voice_agent</code>.
+          This is paused for tenant users until rollout. After launch, bookings will flow through <code className="rounded bg-white px-1 dark:bg-neutral-800">/api/v1/bookings</code> with source <code className="rounded bg-white px-1 dark:bg-neutral-800">voice_agent</code>.
         </p>
       </div>
 
       {rows.length === 0 ? (
-        <div className="rounded-xl border border-dashed bg-white p-8 text-center">
+        <div className="rounded-xl border border-dashed border-neutral-200 bg-white p-8 text-center dark:border-neutral-700 dark:bg-neutral-900">
           <p className="font-medium">No voice setup requests yet.</p>
           <p className="mt-1 text-sm text-muted-foreground">
             Requests will appear here after Dinaya opens the voice setup form.
@@ -108,7 +108,7 @@ export default async function AdminVoicePage() {
       ) : (
         <div className="space-y-4">
           {rows.map(({ business, integration }) => (
-            <section key={integration.id} className="overflow-hidden rounded-xl border bg-white">
+            <section key={integration.id} className="overflow-hidden rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
               <div className="grid gap-4 border-b bg-muted/30 p-5 lg:grid-cols-[minmax(0,1fr)_16rem]">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
@@ -116,7 +116,7 @@ export default async function AdminVoicePage() {
                     <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium uppercase text-primary">
                       {business.plan}
                     </span>
-                    <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
+                    <span className="rounded-full bg-blue-50 dark:bg-blue-950/40 px-2 py-0.5 text-xs font-medium text-blue-700">
                       {voiceStatusLabel(integration.status)}
                     </span>
                   </div>
@@ -156,14 +156,14 @@ export default async function AdminVoicePage() {
                   </div>
                 </div>
 
-                <form action={updateVoiceIntegration} className="space-y-3 rounded-lg border bg-white p-4">
+                <form action={updateVoiceIntegration} className="space-y-3 rounded-lg border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-4">
                   <input type="hidden" name="id" value={integration.id} />
                   <label className="block">
                     <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Status</span>
                     <select
                       name="status"
                       defaultValue={integration.status}
-                      className="mt-1 h-10 w-full rounded-md border bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
+                      className="mt-1 h-10 w-full rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
                     >
                       {VOICE_STATUSES.map((status) => (
                         <option key={status} value={status}>{voiceStatusLabel(status)}</option>

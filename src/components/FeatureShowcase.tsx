@@ -7,10 +7,10 @@ import { Icon } from "@/components/ui/Icon";
 // ─── Cursor SVG ───────────────────────────────────────────────────────────────
 function CursorSVG() {
   return (
-    <svg width="20" height="24" viewBox="0 0 28 28" fill="none">
+    <svg width="20" height="24" viewBox="0 0 28 28" fill="none" className="text-gray-900 dark:text-gray-100">
       <path
         d="M4.5 2.3C4.5 1.69 5.23 1.39 5.67 1.81L23.2 18.2C23.67 18.64 23.36 19.43 22.72 19.44L12.7 19.53L5.67 26.01C5.23 26.41 4.5 26.1 4.5 25.5V2.3Z"
-        fill="#111111"
+        fill="currentColor"
         strokeLinejoin="round"
         strokeLinecap="round"
       />
@@ -169,7 +169,7 @@ function BookingMockup() {
 
   return (
     <div ref={containerRef} className="relative w-full max-w-xs mx-auto">
-      <div className="rounded-2xl border border-white/70 bg-white/80 shadow-lg shadow-primary/10 overflow-hidden" style={{ backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}>
+      <div className="rounded-2xl border border-white/70 bg-white/80 dark:border-neutral-700/70 dark:bg-neutral-900/80 shadow-lg shadow-primary/10 overflow-hidden" style={{ backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}>
         <div className="bg-primary px-4 py-3 flex items-center gap-2.5">
           <div className="flex size-8 items-center justify-center rounded-full bg-white/20">
             <Icon name="scissors" className="text-white text-xs" />
@@ -179,10 +179,10 @@ function BookingMockup() {
             <div className="text-white/70 text-[11px]">dilini.dinaya.lk</div>
           </div>
         </div>
-        <div className="px-4 py-3 border-b border-gray-100">
+        <div className="px-4 py-3 border-b border-gray-100 dark:border-neutral-800">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs font-semibold text-gray-900">Haircut &amp; Style</div>
+              <div className="text-xs font-semibold text-gray-900 dark:text-gray-100">Haircut &amp; Style</div>
               <div className="text-[11px] text-muted-foreground">45 min</div>
             </div>
             <div className="text-xs font-bold text-primary">Rs. 2,500</div>
@@ -198,7 +198,7 @@ function BookingMockup() {
                 className={`rounded-lg border px-1.5 py-1.5 text-center text-[11px] font-medium transition-all duration-200 ${
                   i === selectedSlot
                     ? "border-primary bg-primary text-white shadow-sm shadow-primary/25"
-                    : "border-gray-200 bg-gray-50 text-gray-600"
+                    : "border-gray-200 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-900/60 text-gray-600 dark:text-gray-400"
                 }`}
               >
                 {s}
@@ -245,7 +245,7 @@ function PaymentMockup() {
 
   return (
     <div className="w-full max-w-xs mx-auto space-y-2.5">
-      <div className="rounded-2xl border border-white/70 bg-white/80 shadow-lg shadow-green-500/10 overflow-hidden" style={{ backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}>
+      <div className="rounded-2xl border border-white/70 bg-white/80 dark:border-neutral-700/70 dark:bg-neutral-900/80 shadow-lg shadow-green-500/10 overflow-hidden" style={{ backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}>
         <motion.div
           animate={{
             background: isPaid
@@ -273,7 +273,7 @@ function PaymentMockup() {
           ].map((r) => (
             <div key={r.label} className="flex justify-between text-xs">
               <span className="text-muted-foreground">{r.label}</span>
-              <span className="font-medium text-gray-900">
+              <span className="font-medium text-gray-900 dark:text-gray-100">
                 {r.label === "Balance on arrival" && !isPaid ? "Rs. 2,500" : r.value}
               </span>
             </div>
@@ -283,13 +283,13 @@ function PaymentMockup() {
       <motion.div
         animate={notified ? { opacity: 1, y: 0 } : { opacity: 0.45, y: 4 }}
         transition={{ duration: 0.25 }}
-        className="flex items-center gap-2 rounded-full border border-white/60 bg-white/80 px-3 py-2 shadow-sm w-fit mx-auto"
+        className="flex items-center gap-2 rounded-full border border-white/60 bg-white/80 dark:border-neutral-700/60 dark:bg-neutral-900/80 px-3 py-2 shadow-sm w-fit mx-auto"
         style={{ backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}
       >
         <div className="flex size-5 items-center justify-center rounded-full bg-primary/10">
           <Icon name={notified ? "check-circle" : "bell"} className="text-[10px] text-primary" />
         </div>
-        <span className="text-xs text-gray-700 font-medium">
+        <span className="text-xs text-gray-700 dark:text-gray-300 font-medium">
           {notified ? "Owner notified instantly" : "Sending owner notification..."}
         </span>
       </motion.div>
@@ -324,18 +324,18 @@ function RemindersMockup() {
             key={`reminder-bell-${step}`}
             animate={sendingIndex >= 0 ? { rotate: [0, -10, 10, -6, 6, 0], scale: [1, 1.08, 1] } : { rotate: 0, scale: 1 }}
             transition={{ duration: 0.7, ease: "easeOut" }}
-            className="flex size-6 items-center justify-center rounded-full bg-violet-100"
+            className="flex size-6 items-center justify-center rounded-full bg-violet-100 dark:bg-violet-950/50"
           >
-            <Icon name="bell" className="text-[10px] text-violet-600" />
+            <Icon name="bell" className="text-[10px] text-violet-600 dark:text-violet-400" />
           </motion.div>
-          <span className="text-xs font-semibold text-gray-700">Automated reminders</span>
+          <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">Automated reminders</span>
         </div>
         <motion.span
           key={`sent-count-${sentCount}`}
           initial={{ scale: 0.86, opacity: 0.6 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: "spring", stiffness: 320, damping: 20 }}
-          className="text-[11px] font-semibold text-green-600 bg-green-50 border border-green-200 rounded-full px-2 py-0.5"
+          className="text-[11px] font-semibold text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950/40 border border-green-200 dark:border-green-800/50 rounded-full px-2 py-0.5"
         >
           {sentCount} sent today
         </motion.span>
@@ -370,19 +370,19 @@ function RemindersMockup() {
               : "0 1px 2px rgba(15,23,42,0.03)",
           }}
           transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
-          className="flex items-center gap-2.5 rounded-xl border border-white/60 bg-white/80 px-3 py-2.5 shadow-sm"
+          className="flex items-center gap-2.5 rounded-xl border border-white/60 bg-white/80 dark:border-neutral-700/60 dark:bg-neutral-900/80 px-3 py-2.5 shadow-sm"
           style={{ backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)" }}
         >
           <motion.div
             animate={isSending ? { scale: [1, 1.06, 1] } : { scale: 1 }}
             transition={{ duration: 0.9, repeat: isSending ? Number.POSITIVE_INFINITY : 0, ease: "easeInOut" }}
-            className="flex size-8 shrink-0 items-center justify-center rounded-full bg-violet-100 text-[11px] font-bold text-violet-700"
+            className="flex size-8 shrink-0 items-center justify-center rounded-full bg-violet-100 dark:bg-violet-950/50 text-[11px] font-bold text-violet-700 dark:text-violet-300"
           >
             {r.name[0]}{r.name.split(" ")[1]?.[0]}
           </motion.div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-gray-900">{r.name}</span>
+              <span className="text-xs font-semibold text-gray-900 dark:text-gray-100">{r.name}</span>
               <span className="text-[11px] text-muted-foreground">{r.time}</span>
             </div>
             <div className="flex items-center justify-between">
@@ -429,9 +429,9 @@ function DashboardMockup() {
 
   const bookings = [
     { time: "10:30", name: "Kavya S.",  service: "Haircut & Style",   amount: "Rs. 2,500", color: "bg-primary/10 text-primary" },
-    { time: "12:00", name: "Ravi P.",   service: "Facial Treatment",  amount: "Rs. 3,800", color: "bg-violet-100 text-violet-700" },
-    { time: "14:30", name: "Amali K.",  service: "Eyebrow Threading", amount: "Rs. 800",   color: "bg-amber-100 text-amber-700" },
-    { time: "16:00", name: "Nimal S.",  service: "Haircut & Style",   amount: "Rs. 2,500", color: "bg-green-100 text-green-700" },
+    { time: "12:00", name: "Ravi P.",   service: "Facial Treatment",  amount: "Rs. 3,800", color: "bg-violet-100 dark:bg-violet-950/50 text-violet-700 dark:text-violet-300" },
+    { time: "14:30", name: "Amali K.",  service: "Eyebrow Threading", amount: "Rs. 800",   color: "bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300" },
+    { time: "16:00", name: "Nimal S.",  service: "Haircut & Style",   amount: "Rs. 2,500", color: "bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-300" },
   ];
   const showNewBooking = step >= 2;
   const visibleBookings = showNewBooking
@@ -449,15 +449,15 @@ function DashboardMockup() {
         New booking received · 16:00
       </motion.div>
 
-      <div className="rounded-2xl border border-white/70 bg-white/80 shadow-lg shadow-amber-500/10 overflow-hidden relative h-[212px] flex flex-col" style={{ backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}>
-        <div className="grid grid-cols-3 divide-x border-b">
+      <div className="rounded-2xl border border-white/70 bg-white/80 dark:border-neutral-700/70 dark:bg-neutral-900/80 shadow-lg shadow-amber-500/10 overflow-hidden relative h-[212px] flex flex-col" style={{ backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}>
+        <div className="grid grid-cols-3 divide-x divide-gray-100 dark:divide-neutral-800 border-b border-gray-100 dark:border-neutral-800">
         {[
           { label: "Today", value: showNewBooking ? "4" : "3" },
           { label: "Revenue", value: showNewBooking ? "Rs. 9,600" : "Rs. 7,100" },
           { label: "No-shows", value: "0" },
         ].map((s) => (
           <div key={s.label} className="px-3 py-2.5 text-center">
-            <RollingValue value={s.value} className="text-sm font-bold text-gray-900 tabular-nums" />
+            <RollingValue value={s.value} className="text-sm font-bold text-gray-900 dark:text-gray-100 tabular-nums" />
             <div className="text-[10px] text-muted-foreground">{s.label}</div>
           </div>
         ))}
@@ -499,10 +499,10 @@ function DashboardMockup() {
                     {b.name[0]}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-xs font-semibold text-gray-900 truncate">{b.name}</div>
+                    <div className="text-xs font-semibold text-gray-900 dark:text-gray-100 truncate">{b.name}</div>
                     <div className="text-[10px] text-muted-foreground truncate">{b.service}</div>
                   </div>
-                  <span className="text-[11px] font-semibold text-gray-700 shrink-0">{b.amount}</span>
+                  <span className="text-[11px] font-semibold text-gray-700 dark:text-gray-300 shrink-0">{b.amount}</span>
                 </motion.div>
               );
             })}
@@ -633,14 +633,14 @@ function AvailabilityMockup() {
   const lateStart = step >= 5;
 
   return (
-    <div ref={containerRef} className="relative z-10 w-full max-w-xs mx-auto rounded-2xl border border-white/70 bg-white/80 shadow-lg shadow-cyan-500/10 overflow-visible" style={{ backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}>
-      <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+    <div ref={containerRef} className="relative z-10 w-full max-w-xs mx-auto rounded-2xl border border-white/70 bg-white/80 dark:border-neutral-700/70 dark:bg-neutral-900/80 shadow-lg shadow-cyan-500/10 overflow-visible" style={{ backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}>
+      <div className="px-4 py-3 border-b border-gray-100 dark:border-neutral-800 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="flex size-7 items-center justify-center rounded-full bg-cyan-100">
             <Icon name="calendar2-week" className="text-cyan-700 text-[11px]" />
           </div>
           <div>
-            <div className="text-xs font-semibold text-gray-900">Custom availability</div>
+            <div className="text-xs font-semibold text-gray-900 dark:text-gray-100">Custom availability</div>
             <div className="text-[11px] text-muted-foreground">Weekly schedule</div>
           </div>
         </div>
@@ -650,7 +650,7 @@ function AvailabilityMockup() {
             type="button"
             animate={bufferOpen ? { y: -1 } : { y: 0 }}
             transition={{ duration: 0.2 }}
-            className="flex items-center gap-1.5 text-[11px] font-semibold text-cyan-700 rounded-full bg-cyan-50 border border-cyan-200 px-2.5 py-0.5"
+            className="flex items-center gap-1.5 text-[11px] font-semibold text-cyan-700 dark:text-cyan-300 rounded-full bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200 dark:border-cyan-800/50 px-2.5 py-0.5"
           >
             <span>Buffer {buffer}</span>
             <motion.span animate={bufferOpen ? { rotate: 90 } : { rotate: 0 }} transition={{ duration: 0.2 }}>
@@ -662,7 +662,7 @@ function AvailabilityMockup() {
             initial={false}
             animate={bufferOpen ? { opacity: 1, y: 0, pointerEvents: "auto" } : { opacity: 0, y: -6, pointerEvents: "none" }}
             transition={{ duration: 0.18 }}
-            className="absolute right-0 top-full mt-1 z-20 w-28 rounded-xl border border-cyan-200 bg-white/95 p-1.5 shadow-lg shadow-cyan-500/10"
+            className="absolute right-0 top-full mt-1 z-20 w-28 rounded-xl border border-cyan-200 dark:border-cyan-800/50 bg-white/95 dark:bg-neutral-900/95 p-1.5 shadow-lg shadow-cyan-500/10"
             style={{ backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}
           >
             {["15 min", "30 min", "45 min"].map((opt) => {
@@ -673,7 +673,7 @@ function AvailabilityMockup() {
                   ref={opt === "30 min" ? bufferOption30Ref : null}
                   type="button"
                   className={`w-full rounded-md px-2 py-1 text-left text-[11px] font-medium ${
-                    selected ? "bg-cyan-50 text-cyan-700" : "text-gray-600"
+                    selected ? "bg-cyan-50 dark:bg-cyan-950/40 text-cyan-700 dark:text-cyan-300" : "text-gray-600 dark:text-gray-400"
                   }`}
                 >
                   {opt}
@@ -692,7 +692,7 @@ function AvailabilityMockup() {
               <div
                 key={`${d}-${i}`}
                 ref={i === 3 ? thursdayRef : null}
-                className={`rounded-md border py-1 font-semibold ${active ? "border-cyan-200 bg-cyan-50 text-cyan-700" : "border-gray-200 bg-gray-50 text-gray-400"}`}
+                className={`rounded-md border py-1 font-semibold ${active ? "border-cyan-200 dark:border-cyan-800/50 bg-cyan-50 dark:bg-cyan-950/40 text-cyan-700 dark:text-cyan-300" : "border-gray-200 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-900/60 text-gray-400 dark:text-gray-500"}`}
               >
                 {d}
               </div>
@@ -706,11 +706,11 @@ function AvailabilityMockup() {
             type="button"
             animate={hoursOpen ? { y: -1 } : { y: 0 }}
             transition={{ duration: 0.2 }}
-            className="w-full rounded-lg border border-gray-100 bg-gray-50 px-2.5 py-2 text-[11px] flex items-center justify-between"
+            className="w-full rounded-lg border border-gray-100 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-900/60 px-2.5 py-2 text-[11px] flex items-center justify-between"
           >
             <span className="text-muted-foreground">Working hours</span>
             <div className="flex items-center gap-1.5">
-              <motion.span key={`hours-${hoursValue}`} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="font-semibold text-gray-800">
+              <motion.span key={`hours-${hoursValue}`} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="font-semibold text-gray-800 dark:text-gray-200">
                 {hoursValue}
               </motion.span>
               <motion.span animate={hoursOpen ? { rotate: 90 } : { rotate: 0 }} transition={{ duration: 0.2 }}>
@@ -723,7 +723,7 @@ function AvailabilityMockup() {
             initial={false}
             animate={hoursOpen ? { opacity: 1, y: 0, pointerEvents: "auto" } : { opacity: 0, y: -6, pointerEvents: "none" }}
             transition={{ duration: 0.18 }}
-            className="absolute right-0 top-full mt-1 z-30 w-44 rounded-xl border border-gray-200 bg-white/95 p-1.5 shadow-lg shadow-cyan-500/10"
+            className="absolute right-0 top-full mt-1 z-30 w-44 rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/95 p-1.5 shadow-lg shadow-cyan-500/10"
             style={{ backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}
           >
             {["9:00 AM - 6:00 PM", "10:00 AM - 6:00 PM", "11:00 AM - 7:00 PM"].map((opt) => {
@@ -734,7 +734,7 @@ function AvailabilityMockup() {
                   ref={opt === "10:00 AM - 6:00 PM" ? hoursOptionLateRef : null}
                   type="button"
                   className={`w-full rounded-md px-2 py-1 text-left text-[11px] font-medium ${
-                    selected ? "bg-cyan-50 text-cyan-700" : "text-gray-600"
+                    selected ? "bg-cyan-50 dark:bg-cyan-950/40 text-cyan-700 dark:text-cyan-300" : "text-gray-600 dark:text-gray-400"
                   }`}
                 >
                   {opt}
@@ -755,7 +755,7 @@ function AvailabilityMockup() {
                   initial={{ opacity: 0.6 }}
                   animate={{ opacity: disabled ? 0.45 : 1 }}
                   transition={{ duration: 0.2 }}
-                  className={`rounded-lg border px-1.5 py-1 text-center text-[11px] font-medium ${disabled ? "border-gray-200 bg-gray-100 text-gray-400 line-through" : "border-cyan-200 bg-white text-gray-700"}`}
+                  className={`rounded-lg border px-1.5 py-1 text-center text-[11px] font-medium ${disabled ? "border-gray-200 dark:border-neutral-800 bg-gray-100 dark:bg-neutral-800 text-gray-400 dark:text-gray-500 line-through" : "border-cyan-200 dark:border-cyan-800/50 bg-white dark:bg-neutral-900 text-gray-700 dark:text-gray-300"}`}
                 >
                   {slot}
                 </motion.div>
@@ -858,13 +858,13 @@ function ShareLinkMockup() {
 
   return (
     <div ref={containerRef} className="relative w-full max-w-xs mx-auto space-y-2.5">
-      <div className="rounded-2xl border border-white/70 bg-white/80 shadow-lg shadow-primary/10 overflow-hidden" style={{ backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}>
-        <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-2">
+      <div className="rounded-2xl border border-white/70 bg-white/80 dark:border-neutral-700/70 dark:bg-neutral-900/80 shadow-lg shadow-primary/10 overflow-hidden" style={{ backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}>
+        <div className="px-4 py-3 border-b border-gray-100 dark:border-neutral-800 flex items-center gap-2">
           <div className="flex size-7 items-center justify-center rounded-full bg-primary/10">
             <Icon name="share" className="text-primary text-[11px]" />
           </div>
           <div>
-            <div className="text-xs font-semibold text-gray-900">Shareable booking link</div>
+            <div className="text-xs font-semibold text-gray-900 dark:text-gray-100">Shareable booking link</div>
             <div className="text-[11px] text-muted-foreground">yourname.dinaya.lk</div>
           </div>
         </div>
@@ -872,14 +872,14 @@ function ShareLinkMockup() {
         <div className="px-4 py-3 space-y-2.5">
           <div className="flex items-center gap-2 rounded-lg border border-primary/15 bg-primary/[0.04] px-2.5 py-2">
             <Icon name="link-45deg" className="text-muted-foreground text-xs" />
-            <span className="text-[11px] text-gray-700 flex-1 truncate">dilini.dinaya.lk</span>
+            <span className="text-[11px] text-gray-700 dark:text-gray-300 flex-1 truncate">dilini.dinaya.lk</span>
             <motion.button
               ref={copyRef}
               type="button"
               animate={copied ? { scale: [1, 0.94, 1] } : { scale: 1 }}
               transition={{ duration: 0.22 }}
               className={`rounded-md px-2 py-1 text-[10px] font-semibold ${
-                copied ? "bg-primary text-white" : "bg-primary/10 text-primary"
+                copied ? "bg-primary text-white" : "bg-primary/10 text-primary dark:text-blue-300"
               }`}
             >
               {copied ? "Copied" : "Copy"}
@@ -900,11 +900,11 @@ function ShareLinkMockup() {
                   animate={active ? { y: -2, opacity: 1 } : { y: 0, opacity: sent ? 0.65 : 1 }}
                   transition={{ duration: 0.22 }}
                   className={`rounded-lg border px-1.5 py-1.5 text-center ${
-                    active ? "border-primary/40 bg-primary/10" : "border-primary/15 bg-white"
+                    active ? "border-primary/40 bg-primary/10" : "border-primary/15 bg-white dark:bg-neutral-900"
                   }`}
                 >
-                  <Icon name={ch.icon} className={`text-[11px] mx-auto ${active ? "text-primary" : "text-gray-600"}`} />
-                  <div className={`text-[10px] mt-0.5 ${active ? "text-primary font-medium" : "text-gray-600"}`}>{ch.label}</div>
+                  <Icon name={ch.icon} className={`text-[11px] mx-auto ${active ? "text-primary" : "text-gray-600 dark:text-gray-400"}`} />
+                  <div className={`text-[10px] mt-0.5 ${active ? "text-primary font-medium" : "text-gray-600 dark:text-gray-400"}`}>{ch.label}</div>
                 </motion.div>
               );
             })}
@@ -915,13 +915,13 @@ function ShareLinkMockup() {
       <motion.div
         animate={booked ? { opacity: 1, y: 0 } : { opacity: sent ? 0.8 : 0.4, y: booked ? 0 : 4 }}
         transition={{ duration: 0.25 }}
-        className="flex items-center gap-2 rounded-full border border-primary/15 bg-white/85 px-3 py-2 shadow-sm w-fit mx-auto"
+        className="flex items-center gap-2 rounded-full border border-primary/15 bg-white/85 dark:bg-neutral-900/85 px-3 py-2 shadow-sm w-fit mx-auto"
         style={{ backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}
       >
         <div className="flex size-5 items-center justify-center rounded-full bg-primary/10">
           <Icon name={booked ? "calendar-check" : sent ? "send" : "link-45deg"} className="text-[10px] text-primary" />
         </div>
-        <span className="text-xs text-gray-700 font-medium">
+        <span className="text-xs text-gray-700 dark:text-gray-300 font-medium">
           {booked ? "1 new booking from shared link" : sent ? "Shared to WhatsApp story" : "Ready to share"}
         </span>
       </motion.div>
@@ -990,27 +990,12 @@ function FeatureCard({ f, i }: { f: typeof features[number]; i: number }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-80px" }}
       transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1], delay: (i % 2) * 0.12 }}
-      className="rounded-3xl overflow-hidden"
-      style={{
-        backgroundColor: "rgba(255, 255, 255, 0.68)",
-        backdropFilter: "blur(24px) saturate(180%)",
-        WebkitBackdropFilter: "blur(24px) saturate(180%)",
-        boxShadow: `
-          inset 0 0 0 1px rgba(255, 255, 255, 0.60),
-          inset 1.5px 2.5px 0px -2px rgba(255, 255, 255, 0.92),
-          inset -2px -2px 0px -2px rgba(255, 255, 255, 0.72),
-          inset -3px -8px 1px -6px rgba(255, 255, 255, 0.50),
-          inset 0px 3px 4px -2px rgba(0, 0, 0, 0.08),
-          0px 2px 8px 0px rgba(0, 0, 0, 0.05),
-          0px 12px 40px 0px rgba(0, 0, 0, 0.09)
-        `,
-      }}
+      className="rounded-3xl overflow-hidden border border-white/60 bg-white/70 backdrop-blur-2xl saturate-[1.8] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.6),0_12px_40px_rgba(0,0,0,0.09)] dark:border-neutral-700/50 dark:bg-neutral-900/75 dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06),0_12px_40px_rgba(0,0,0,0.35)]"
     >
       {/* Mockup area */}
       <div
-        className={`${f.mockupBg} px-8 py-10 flex items-center justify-center`}
+        className={`${f.mockupBg} px-8 py-10 flex items-center justify-center [background-image:radial-gradient(circle,rgba(0,0,0,0.05)_1px,transparent_1px)] dark:[background-image:radial-gradient(circle,rgba(255,255,255,0.06)_1px,transparent_1px)]`}
         style={{
-          backgroundImage: "radial-gradient(circle, rgba(0,0,0,0.05) 1px, transparent 1px)",
           backgroundSize: "20px 20px",
         }}
       >
@@ -1018,11 +1003,11 @@ function FeatureCard({ f, i }: { f: typeof features[number]; i: number }) {
       </div>
 
       {/* Text area */}
-      <div className="px-7 py-6 border-t border-white/50">
+      <div className="px-7 py-6 border-t border-white/50 dark:border-neutral-800/80">
         <div className="text-xs font-bold tracking-widest text-muted-foreground mb-3">
           {f.num} · {f.tag}
         </div>
-        <h3 className="font-cal text-2xl tracking-tight text-balance text-gray-900 leading-snug">
+        <h3 className="font-cal text-2xl tracking-tight text-balance text-gray-900 dark:text-gray-100 leading-snug">
           {f.headlinePre}
           <Pill icon={f.verb.icon}>{f.verb.label}</Pill>
           {f.headlinePost}

@@ -15,7 +15,7 @@ export default async function EmbedReviewsPage({ params }: Props) {
   if (!data) notFound();
 
   return (
-    <main className="min-h-screen bg-[#f2f2f7] p-4">
+    <main className="booking-page-bg min-h-screen p-4">
       <ReviewsWidget
         businessName={data.businessName}
         avgRating={data.avgRating}

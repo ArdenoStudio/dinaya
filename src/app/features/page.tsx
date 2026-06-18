@@ -153,14 +153,14 @@ const highlights = [
 
 export default function FeaturesPage() {
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-white dark:bg-neutral-950">
       <PublicNav />
 
       {/* Hero */}
       <section className="max-w-4xl mx-auto px-6 public-page-offset pb-14 text-center">
         <FadeContainer className="flex flex-col items-center">
           <FadeDiv className="mb-6">
-            <span className="inline-flex items-center gap-2 rounded-full border bg-white px-3 py-1 text-xs font-medium text-gray-700 shadow-sm">
+            <span className="inline-flex items-center gap-2 rounded-full border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 shadow-sm">
               <Icon name="stars" className="text-xs text-primary" />
               Built for Sri Lankan businesses
             </span>
@@ -193,9 +193,9 @@ export default function FeaturesPage() {
 
       {/* Stats strip */}
       <section className="max-w-5xl mx-auto px-6 pb-20">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-gray-200/70 rounded-2xl overflow-hidden border border-gray-200/70">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-gray-200 dark:bg-neutral-700/70 rounded-2xl overflow-hidden border border-gray-200 dark:border-neutral-800/70">
           {highlights.map((h) => (
-            <div key={h.label} className="bg-white px-6 py-7 text-center">
+            <div key={h.label} className="bg-white dark:bg-neutral-900 px-6 py-7 text-center">
               <div className="font-cal text-3xl tracking-tight text-primary mb-1">{h.stat}</div>
               <div className="text-sm text-muted-foreground">{h.label}</div>
             </div>
@@ -206,11 +206,11 @@ export default function FeaturesPage() {
       {/* Booking features */}
       <section className="max-w-6xl mx-auto px-6 pb-20" id="booking">
         <div className="mb-10">
-          <div className="inline-flex items-center gap-2 rounded-xl ring-1 ring-amber-100 bg-amber-50/50 px-3.5 py-2 mb-4">
-            <span className="flex h-6 w-6 items-center justify-center rounded-md bg-amber-500 text-white">
+          <div className="inline-flex items-center gap-2 rounded-xl ring-1 ring-amber-100 dark:ring-amber-900/50 bg-amber-50 dark:bg-amber-950/40 px-3.5 py-2 mb-4">
+            <span className="flex h-6 w-6 items-center justify-center rounded-md bg-amber-50 dark:bg-amber-950/400 text-white">
               <Icon name="calendar" className="text-xs" />
             </span>
-            <span className="text-sm font-semibold text-gray-900">Booking</span>
+            <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">Booking</span>
           </div>
           <h2 className="font-cal text-3xl md:text-4xl tracking-tight mb-3">
             Your calendar, open for business.
@@ -220,11 +220,11 @@ export default function FeaturesPage() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-px bg-gray-200/70 rounded-2xl overflow-hidden border border-gray-200/70">
+        <div className="grid md:grid-cols-3 gap-px bg-gray-200 dark:bg-neutral-700/70 rounded-2xl overflow-hidden border border-gray-200 dark:border-neutral-800/70">
           {bookingFeatures.map((f) => (
-            <div key={f.title} className="group relative p-7 bg-white hover:bg-gradient-to-br hover:from-amber-500/[0.03] hover:to-white transition-colors">
+            <div key={f.title} className="group relative p-7 bg-white dark:bg-neutral-900 hover:bg-gradient-to-br hover:from-amber-500/[0.03] hover:to-white dark:hover:to-neutral-900 transition-colors">
               <div className="relative mb-5 inline-flex">
-                <div className="absolute inset-0 rounded-xl bg-amber-500/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="absolute inset-0 rounded-xl bg-amber-50 dark:bg-amber-950/30 blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-amber-500/15 to-amber-500/5">
                   <Icon name={f.icon} className="text-[1.15rem] text-amber-600" />
                 </div>
@@ -240,11 +240,11 @@ export default function FeaturesPage() {
       {/* Payments features */}
       <section className="max-w-6xl mx-auto px-6 pb-20" id="payments">
         <div className="mb-10">
-          <div className="inline-flex items-center gap-2 rounded-xl ring-1 ring-blue-100 bg-blue-50/50 px-3.5 py-2 mb-4">
+          <div className="inline-flex items-center gap-2 rounded-xl ring-1 ring-blue-100 dark:ring-blue-900/50 bg-blue-50 dark:bg-blue-950/40 px-3.5 py-2 mb-4">
             <span className="flex h-6 w-6 items-center justify-center rounded-md bg-blue-600 text-white">
               <Icon name="credit-card" className="text-xs" />
             </span>
-            <span className="text-sm font-semibold text-gray-900">Payments</span>
+            <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">Payments</span>
           </div>
           <h2 className="font-cal text-3xl md:text-4xl tracking-tight mb-3">
             Get paid. Automatically.
@@ -254,9 +254,9 @@ export default function FeaturesPage() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-px bg-gray-200/70 rounded-2xl overflow-hidden border border-gray-200/70">
+        <div className="grid md:grid-cols-3 gap-px bg-gray-200 dark:bg-neutral-700/70 rounded-2xl overflow-hidden border border-gray-200 dark:border-neutral-800/70">
           {paymentFeatures.map((f) => (
-            <div key={f.title} className="group relative p-7 bg-white hover:bg-gradient-to-br hover:from-blue-600/[0.03] hover:to-white transition-colors">
+            <div key={f.title} className="group relative p-7 bg-white dark:bg-neutral-900 hover:bg-gradient-to-br hover:from-blue-600/[0.03] hover:to-white dark:hover:to-neutral-900 transition-colors">
               <div className="relative mb-5 inline-flex">
                 <div className="absolute inset-0 rounded-xl bg-blue-600/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-blue-600/15 to-blue-600/5">
@@ -274,11 +274,11 @@ export default function FeaturesPage() {
       {/* Engagement features */}
       <section className="max-w-6xl mx-auto px-6 pb-20" id="engagement">
         <div className="mb-10">
-          <div className="inline-flex items-center gap-2 rounded-xl ring-1 ring-violet-100 bg-violet-50/50 px-3.5 py-2 mb-4">
+          <div className="inline-flex items-center gap-2 rounded-xl ring-1 ring-violet-100 dark:ring-violet-900/50 bg-violet-50/50 dark:bg-violet-950/40 px-3.5 py-2 mb-4">
             <span className="flex h-6 w-6 items-center justify-center rounded-md bg-violet-500 text-white">
               <Icon name="bell" className="text-xs" />
             </span>
-            <span className="text-sm font-semibold text-gray-900">Engagement</span>
+            <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">Engagement</span>
           </div>
           <h2 className="font-cal text-3xl md:text-4xl tracking-tight mb-3">
             Clients show up. And come back.
@@ -288,9 +288,9 @@ export default function FeaturesPage() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-px bg-gray-200/70 rounded-2xl overflow-hidden border border-gray-200/70">
+        <div className="grid md:grid-cols-3 gap-px bg-gray-200 dark:bg-neutral-700/70 rounded-2xl overflow-hidden border border-gray-200 dark:border-neutral-800/70">
           {engagementFeatures.map((f) => (
-            <div key={f.title} className="group relative p-7 bg-white hover:bg-gradient-to-br hover:from-violet-500/[0.03] hover:to-white transition-colors">
+            <div key={f.title} className="group relative p-7 bg-white dark:bg-neutral-900 hover:bg-gradient-to-br hover:from-violet-500/[0.03] hover:to-white dark:hover:to-neutral-900 transition-colors">
               <div className="relative mb-5 inline-flex">
                 <div className="absolute inset-0 rounded-xl bg-violet-500/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-violet-500/15 to-violet-500/5">
@@ -308,11 +308,11 @@ export default function FeaturesPage() {
       {/* Max AI growth */}
       <section className="max-w-6xl mx-auto px-6 pb-20" id="max-ai">
         <div className="mb-10">
-          <div className="inline-flex items-center gap-2 rounded-xl ring-1 ring-amber-100 bg-amber-50/50 px-3.5 py-2 mb-4">
+          <div className="inline-flex items-center gap-2 rounded-xl ring-1 ring-amber-100 dark:ring-amber-900/50 bg-amber-50 dark:bg-amber-950/40 px-3.5 py-2 mb-4">
             <span className="flex h-6 w-6 items-center justify-center rounded-md bg-amber-600 text-white">
               <Icon name="stars" className="text-xs" />
             </span>
-            <span className="text-sm font-semibold text-gray-900">Max AI growth</span>
+            <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">Max AI growth</span>
             <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-800">
               Available on Max
             </span>
@@ -325,11 +325,11 @@ export default function FeaturesPage() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-px bg-gray-200/70 rounded-2xl overflow-hidden border border-gray-200/70">
+        <div className="grid md:grid-cols-3 gap-px bg-gray-200 dark:bg-neutral-700/70 rounded-2xl overflow-hidden border border-gray-200 dark:border-neutral-800/70">
           {proAiFeatures.map((f) => (
-            <div key={f.title} className="group relative p-7 bg-white hover:bg-gradient-to-br hover:from-amber-500/[0.03] hover:to-white transition-colors">
+            <div key={f.title} className="group relative p-7 bg-white dark:bg-neutral-900 hover:bg-gradient-to-br hover:from-amber-500/[0.03] hover:to-white dark:hover:to-neutral-900 transition-colors">
               <div className="relative mb-5 inline-flex">
-                <div className="absolute inset-0 rounded-xl bg-amber-500/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="absolute inset-0 rounded-xl bg-amber-50 dark:bg-amber-950/30 blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-amber-500/15 to-amber-500/5">
                   <Icon name={f.icon} className="text-[1.15rem] text-amber-600" />
                 </div>
@@ -400,7 +400,7 @@ export default function FeaturesPage() {
 
       {/* Feature checklist */}
       <section className="max-w-5xl mx-auto px-6 pb-20">
-        <div className="rounded-2xl border bg-gray-50/50 p-8 md:p-12">
+        <div className="rounded-2xl border border-gray-200 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-900/50 p-8 md:p-12">
           <div className="text-center mb-10">
             <span className="relative text-sm font-semibold tracking-tight text-primary">
               <span className="absolute top-0.5 -left-3 h-4 w-[3px] rounded-r-sm bg-primary" />
@@ -434,7 +434,7 @@ export default function FeaturesPage() {
                 <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-primary/15">
                   <Icon name="check" className="text-primary" style={{ fontSize: '0.625rem' }} />
                 </span>
-                <span className="text-gray-700">{f}</span>
+                <span className="text-gray-700 dark:text-gray-300">{f}</span>
               </div>
             ))}
           </div>
@@ -456,7 +456,7 @@ export default function FeaturesPage() {
               </p>
               <Link
                 href="/register"
-                className="inline-flex items-center gap-2 bg-white text-blue-700 px-7 py-3.5 rounded-xl font-semibold shadow-lg hover:bg-white/95 transition-colors"
+                className="inline-flex items-center gap-2 bg-white text-blue-700 px-7 py-3.5 rounded-xl font-semibold shadow-lg hover:bg-blue-50 transition-colors"
               >
                 Create your page — it&apos;s free
                 <Icon name="arrow-right" className="text-sm" />

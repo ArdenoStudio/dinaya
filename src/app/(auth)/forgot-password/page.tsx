@@ -3,10 +3,11 @@
 import { Suspense, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
+import { AuthThemeToggle } from "@/components/AuthThemeToggle";
 import { Icon } from "@/components/ui/Icon";
 
 const inputCls =
-  "mt-1.5 w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 placeholder:text-gray-300 transition-all";
+  "mt-1.5 w-full border border-gray-200 dark:border-neutral-800 rounded-lg px-3 py-2.5 text-sm bg-white dark:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 placeholder:text-gray-300 dark:placeholder:text-neutral-600 transition-all";
 
 function ForgotPasswordForm() {
   const emailRef = useRef<HTMLInputElement>(null);
@@ -57,7 +58,7 @@ function ForgotPasswordForm() {
       </div>
 
       <div
-        className="bg-white rounded-2xl px-7 py-8"
+        className="bg-white dark:bg-neutral-900 rounded-2xl px-7 py-8"
         style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.05), 0 8px 32px rgba(0,0,0,0.07)" }}
       >
         <h1 className="font-cal text-2xl mb-1">Forgot password?</h1>
@@ -67,7 +68,7 @@ function ForgotPasswordForm() {
 
         {success ? (
           <div className="space-y-4">
-            <div className="flex items-start gap-2 px-3 py-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm">
+            <div className="flex items-start gap-2 px-3 py-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/50 text-emerald-800 text-sm">
               <Icon name="check-circle-fill" className="text-sm mt-0.5 shrink-0" />
               <span>{success}</span>
             </div>
@@ -81,7 +82,7 @@ function ForgotPasswordForm() {
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4" noValidate>
             <div>
-              <label className="text-sm font-medium text-gray-700" htmlFor="email">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300" htmlFor="email">
                 Email
               </label>
               <input
@@ -122,7 +123,7 @@ function ForgotPasswordForm() {
       </div>
 
       {!success && (
-        <p className="text-center text-sm text-gray-400 mt-5">
+        <p className="text-center text-sm text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-5">
           Remember your password?{" "}
           <Link href="/auth/signin" className="text-primary hover:underline font-medium">
             Sign in
@@ -135,10 +136,8 @@ function ForgotPasswordForm() {
 
 export default function ForgotPasswordPage() {
   return (
-    <div
-      className="min-h-screen flex items-center justify-center px-4 py-12"
-      style={{ background: "#f5f4f1" }}
-    >
+    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-[#f5f4f1] dark:bg-neutral-950">
+      <AuthThemeToggle />
       <Suspense fallback={<div className="w-full max-w-sm h-[320px]" />}>
         <ForgotPasswordForm />
       </Suspense>

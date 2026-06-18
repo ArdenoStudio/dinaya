@@ -20,6 +20,7 @@ interface ServiceForm {
   dailyCapacity: string | number;
   maximumAdvanceDays: number;
   intakeQuestions: IntakeQuestion[];
+  successRedirectUrl: string;
 }
 
 interface StaffMember {
@@ -60,6 +61,7 @@ export default function EditServicePage({ params }: { params: Promise<{ id: stri
         dailyCapacity: d.dailyCapacity ?? "",
         maximumAdvanceDays: d.maximumAdvanceDays ?? 0,
         intakeQuestions: d.intakeQuestions ?? [],
+        successRedirectUrl: d.successRedirectUrl ?? "",
       });
       setAllStaff(Array.isArray(staffList) ? staffList : []);
       setAssignedStaffIds(
@@ -150,7 +152,7 @@ export default function EditServicePage({ params }: { params: Promise<{ id: stri
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-white border rounded-xl p-6 space-y-4">
+      <form onSubmit={handleSubmit} className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-6 space-y-4">
         <div>
           <label className="text-sm font-medium">Service name *</label>
           <input required value={form.name}
@@ -254,6 +256,19 @@ export default function EditServicePage({ params }: { params: Promise<{ id: stri
           onChange={(intakeQuestions) => setForm((f) => f && ({ ...f, intakeQuestions }))}
         />
 
+        <div>
+          <label className="text-sm font-medium">Success redirect URL</label>
+          <p className="text-xs text-muted-foreground mb-2">
+            Optional. Send clients here after booking (https:// URL or path like /thank-you).
+          </p>
+          <input
+            value={form.successRedirectUrl}
+            onChange={(e) => setForm((f) => f && ({ ...f, successRedirectUrl: e.target.value }))}
+            placeholder="https://example.com/thank-you or /thank-you"
+            className={inputCls}
+          />
+        </div>
+
         <div className="flex gap-4">
           <label className="flex items-center gap-2 cursor-pointer">
             <input type="checkbox" checked={form.requiresPayment}
@@ -300,7 +315,7 @@ export default function EditServicePage({ params }: { params: Promise<{ id: stri
       </form>
 
       {/* Staff assignment */}
-      <div className="bg-white border rounded-xl p-6 mt-6">
+      <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-6 mt-6">
         <h2 className="text-base font-semibold mb-1">Team members</h2>
         <p className="text-xs text-muted-foreground mb-4">
           Choose which staff members offer this service.

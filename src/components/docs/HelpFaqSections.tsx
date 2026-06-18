@@ -32,7 +32,7 @@ export function HelpFaqSections() {
 
   return (
     <>
-      <section className="relative overflow-hidden border-b bg-gradient-to-b from-blue-50/60 to-white">
+      <section className="relative overflow-hidden border-b bg-gradient-to-b from-blue-50/60 to-white dark:from-blue-950/30 dark:to-neutral-950 dark:border-neutral-800">
         <div
           className="pointer-events-none absolute inset-0 opacity-40"
           style={{
@@ -42,7 +42,7 @@ export function HelpFaqSections() {
           }}
         />
         <div className="relative max-w-3xl mx-auto px-6 public-page-offset pb-20 text-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white px-3 py-1 text-xs font-medium text-blue-700 shadow-sm mb-5">
+          <span className="inline-flex items-center gap-2 rounded-full border border-blue-200 dark:border-blue-800/60 bg-white dark:bg-neutral-900 px-3 py-1 text-xs font-medium text-blue-700 dark:text-blue-300 shadow-sm mb-5">
             <Icon name="question-circle" className="text-xs" />
             Help Center
           </span>
@@ -56,7 +56,7 @@ export function HelpFaqSections() {
             </Link>
           </p>
           <div className="w-full max-w-xl mx-auto relative">
-            <Icon name="search" className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none" />
+            <Icon name="search" className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 text-sm pointer-events-none" />
             <input
               type="text"
               value={search}
@@ -65,7 +65,7 @@ export function HelpFaqSections() {
                 setActiveCategory(null);
               }}
               placeholder="Search help topics — e.g. refund, availability"
-              className="w-full rounded-xl border bg-white pl-10 pr-4 py-3.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+              className="w-full rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 pl-10 pr-4 py-3.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
             />
             {search && (
               <p className="text-xs text-muted-foreground mt-2 text-left pl-1">
@@ -80,7 +80,7 @@ export function HelpFaqSections() {
 
       {!search && (
         <section className="max-w-4xl mx-auto px-6 py-10">
-          <h2 className="text-xs font-semibold tracking-widest uppercase text-gray-400 mb-4">
+          <h2 className="text-xs font-semibold tracking-widest uppercase text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 mb-4">
             Popular articles
           </h2>
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3">
@@ -91,7 +91,7 @@ export function HelpFaqSections() {
                   <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${cat.colorClasses.icon} text-white`}>
                     <Icon name={a.icon} className="text-xs" />
                   </span>
-                  <span className="text-sm text-gray-700 group-hover:text-gray-900 leading-snug">{a.label}</span>
+                  <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:text-gray-100 leading-snug">{a.label}</span>
                   <Icon name="chevron-right" className="ml-auto text-xs text-gray-300" />
                 </>
               );
@@ -100,7 +100,7 @@ export function HelpFaqSections() {
                   <Link
                     key={a.label}
                     href={`/docs/guides/${a.guideSlug}`}
-                    className="group flex items-center gap-3 rounded-xl border bg-white p-3.5 hover:border-primary/30 hover:shadow-sm transition-all"
+                    className="group flex items-center gap-3 rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-3.5 hover:border-primary/30 hover:shadow-sm transition-all"
                   >
                     {inner}
                   </Link>
@@ -114,7 +114,7 @@ export function HelpFaqSections() {
                     setActiveCategory(a.cat);
                     document.getElementById(a.cat)?.scrollIntoView({ behavior: "smooth" });
                   }}
-                  className="group flex items-center gap-3 rounded-xl border bg-white p-3.5 text-left hover:border-primary/30 hover:shadow-sm transition-all w-full"
+                  className="group flex items-center gap-3 rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-3.5 text-left hover:border-primary/30 hover:shadow-sm transition-all w-full"
                 >
                   {inner}
                 </button>
@@ -125,13 +125,13 @@ export function HelpFaqSections() {
       )}
 
       {!search && (
-        <div className="sticky top-24 z-40 bg-white/90 backdrop-blur-sm border-b">
+        <div className="sticky top-24 z-40 bg-white/90 backdrop-blur dark:bg-neutral-950/90-sm border-b dark:bg-neutral-950/90 dark:border-neutral-800">
           <div className="max-w-4xl mx-auto px-6 flex gap-1 overflow-x-auto py-2">
             <button
               type="button"
               onClick={() => setActiveCategory(null)}
               className={`shrink-0 rounded-lg px-3 py-1.5 text-sm font-medium ${
-                activeCategory === null ? "bg-gray-900 text-white" : "text-gray-600 hover:bg-gray-100"
+                activeCategory === null ? "bg-gray-900 text-white" : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:bg-neutral-800"
               }`}
             >
               All topics
@@ -145,7 +145,7 @@ export function HelpFaqSections() {
                   document.getElementById(cat.id)?.scrollIntoView({ behavior: "smooth" });
                 }}
                 className={`shrink-0 rounded-lg px-3 py-1.5 text-sm font-medium ${
-                  activeCategory === cat.id ? `${cat.colorClasses.accent} text-white` : "text-gray-600 hover:bg-gray-100"
+                  activeCategory === cat.id ? `${cat.colorClasses.accent} text-white` : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:bg-neutral-800"
                 }`}
               >
                 {cat.label}
@@ -167,11 +167,11 @@ export function HelpFaqSections() {
                 <p className="text-xs text-muted-foreground">{cat.faqs.length} articles</p>
               </div>
             </div>
-            <div className="rounded-2xl border overflow-hidden divide-y">
+            <div className="rounded-2xl border border-gray-200 dark:border-neutral-800 overflow-hidden divide-y divide-gray-200 dark:divide-neutral-800">
               {cat.faqs.map((faq) => (
-                <details key={faq.id} className="group bg-white">
-                  <summary className="flex cursor-pointer list-none items-start justify-between gap-4 px-6 py-5 hover:bg-gray-50/70">
-                    <span className="font-cal text-base tracking-tight text-gray-900 leading-snug">{faq.q}</span>
+                <details key={faq.id} className="group bg-white dark:bg-neutral-900">
+                  <summary className="flex cursor-pointer list-none items-start justify-between gap-4 px-6 py-5 hover:bg-gray-50 dark:hover:bg-neutral-800/80">
+                    <span className="font-cal text-base tracking-tight text-gray-900 dark:text-gray-100 leading-snug">{faq.q}</span>
                     <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border group-open:bg-primary group-open:text-white group-open:border-primary">
                       <svg className="size-3 group-open:rotate-45 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                         <path d="M12 5v14M5 12h14" />

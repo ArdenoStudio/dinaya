@@ -8,19 +8,19 @@ const VARIANT_STYLES: Record<
   { container: string; label: string; icon: string; title: string }
 > = {
   tip: {
-    container: "border-blue-100 bg-blue-50/60",
+    container: "border-blue-100 bg-blue-50 dark:bg-blue-950/40",
     label: "text-blue-700",
     icon: "cursor-fill",
     title: "Where to click",
   },
   note: {
-    container: "border-gray-200 bg-gray-50/80",
-    label: "text-gray-600",
+    container: "border-gray-200 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-900/60",
+    label: "text-gray-600 dark:text-gray-400",
     icon: "info-circle",
     title: "Note",
   },
   warning: {
-    container: "border-amber-200 bg-amber-50/70",
+    container: "border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-950/40",
     label: "text-amber-800",
     icon: "exclamation-triangle",
     title: "Important",
@@ -43,7 +43,7 @@ export function DocsCallout({ variant = "tip", title, children, className }: Pro
         <Icon name={styles.icon} className="text-xs" />
         {title ?? styles.title}
       </p>
-      <div className="mt-1.5 text-sm leading-relaxed text-gray-900">{children}</div>
+      <div className="mt-1.5 text-sm leading-relaxed text-gray-900 dark:text-gray-100">{children}</div>
     </div>
   );
 }

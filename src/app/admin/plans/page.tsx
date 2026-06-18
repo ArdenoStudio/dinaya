@@ -103,11 +103,11 @@ export default async function AdminPlansPage() {
         <div className="flex flex-wrap items-center gap-2">
           <h1 className="font-cal text-3xl tracking-tight">Plans</h1>
           {config.proLaunched ? (
-            <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-emerald-700">
+            <span className="rounded-full bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-emerald-700">
               Pro live
             </span>
           ) : (
-            <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-amber-700">
+            <span className="rounded-full bg-amber-50 dark:bg-amber-950/30 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-amber-700">
               Pro in preview (not billed)
             </span>
           )}
@@ -126,7 +126,7 @@ export default async function AdminPlansPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <div className="overflow-hidden rounded-xl border bg-white">
+        <div className="overflow-hidden rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
           <div className="h-[3px] bg-primary" />
           <div className="p-5">
             <p className="text-xs text-muted-foreground">Total accounts</p>
@@ -136,8 +136,8 @@ export default async function AdminPlansPage() {
             </p>
           </div>
         </div>
-        <div className="overflow-hidden rounded-xl border bg-white">
-          <div className="h-[3px] bg-emerald-500" />
+        <div className="overflow-hidden rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
+          <div className="h-[3px] bg-emerald-50 dark:bg-emerald-950/400" />
           <div className="p-5">
             <p className="text-xs text-muted-foreground">Active subscriptions</p>
             <p className="mt-1 text-2xl font-bold tracking-tight">{Number(activeSubCount)}</p>
@@ -146,8 +146,8 @@ export default async function AdminPlansPage() {
             </p>
           </div>
         </div>
-        <div className="overflow-hidden rounded-xl border bg-white">
-          <div className="h-[3px] bg-amber-500" />
+        <div className="overflow-hidden rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
+          <div className="h-[3px] bg-amber-50 dark:bg-amber-950/400" />
           <div className="p-5">
             <p className="text-xs text-muted-foreground">MRR</p>
             <p className="mt-1 text-2xl font-bold tracking-tight">{formatLkr(Number(activeMrr))}</p>
@@ -158,7 +158,7 @@ export default async function AdminPlansPage() {
         </div>
       </div>
 
-      <div className="flex gap-3 rounded-xl border border-amber-500/30 bg-amber-50/60 p-4 text-xs text-amber-900">
+      <div className="flex gap-3 rounded-xl border border-amber-500/30 bg-amber-50 dark:bg-amber-950/35 p-4 text-xs text-amber-900 dark:text-amber-200">
         <AlertTriangle className="size-4 shrink-0" aria-hidden="true" />
         <div>
           <p className="font-semibold">Heads-up about feature gates</p>
@@ -172,7 +172,7 @@ export default async function AdminPlansPage() {
       </div>
 
       <form action={savePlans} className="space-y-6">
-        <div className="rounded-xl border bg-white p-5">
+        <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
           <h2 className="mb-4 font-semibold">Starter plan billing</h2>
           <div className="grid gap-4 sm:grid-cols-3">
             <div>
@@ -186,7 +186,7 @@ export default async function AdminPlansPage() {
                 min={0}
                 step={10}
                 defaultValue={config.starterMonthlyPriceLkr}
-                className="mt-1 h-10 w-full rounded-md border bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
+                className="mt-1 h-10 w-full rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
               />
             </div>
             <div>
@@ -200,7 +200,7 @@ export default async function AdminPlansPage() {
                 min={0}
                 step={10}
                 defaultValue={config.starterAnnualPriceLkr}
-                className="mt-1 h-10 w-full rounded-md border bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
+                className="mt-1 h-10 w-full rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
               />
             </div>
             <div className="sm:col-span-2">
@@ -220,7 +220,7 @@ export default async function AdminPlansPage() {
           </div>
         </div>
 
-        <div className="rounded-xl border bg-white p-5">
+        <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
           <h2 className="mb-4 font-semibold">Pro plan billing</h2>
           <div className="grid gap-4 sm:grid-cols-3">
             <div>
@@ -234,7 +234,7 @@ export default async function AdminPlansPage() {
                 min={0}
                 step={10}
                 defaultValue={config.proMonthlyPriceLkr}
-                className="mt-1 h-10 w-full rounded-md border bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
+                className="mt-1 h-10 w-full rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
               />
             </div>
             <div>
@@ -248,7 +248,7 @@ export default async function AdminPlansPage() {
                 min={0}
                 step={10}
                 defaultValue={config.proAnnualPriceLkr}
-                className="mt-1 h-10 w-full rounded-md border bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
+                className="mt-1 h-10 w-full rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
               />
             </div>
             <div className="sm:col-span-2">
@@ -271,7 +271,7 @@ export default async function AdminPlansPage() {
           </div>
         </div>
 
-        <div className="rounded-xl border bg-white p-5">
+        <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
           <h2 className="mb-4 font-semibold">Growth plan billing</h2>
           <div className="grid gap-4 sm:grid-cols-3">
             <div>
@@ -285,7 +285,7 @@ export default async function AdminPlansPage() {
                 min={0}
                 step={10}
                 defaultValue={config.maxMonthlyPriceLkr}
-                className="mt-1 h-10 w-full rounded-md border bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
+                className="mt-1 h-10 w-full rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
               />
             </div>
             <div>
@@ -299,7 +299,7 @@ export default async function AdminPlansPage() {
                 min={0}
                 step={10}
                 defaultValue={config.maxAnnualPriceLkr}
-                className="mt-1 h-10 w-full rounded-md border bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
+                className="mt-1 h-10 w-full rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
               />
             </div>
             <div className="sm:col-span-2">
@@ -339,7 +339,7 @@ export default async function AdminPlansPage() {
                 ? Number(starterCount)
                 : Number(trialCount);
             return (
-              <fieldset key={planKey} className={`overflow-hidden rounded-2xl border bg-white ${accent}`}>
+              <fieldset key={planKey} className={`overflow-hidden rounded-2xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 ${accent}`}>
                 <div className="border-b px-6 py-5">
                   <div className="flex items-center justify-between">
                     <legend className={`inline-block rounded-full px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider ${tile}`}>
@@ -364,7 +364,7 @@ export default async function AdminPlansPage() {
                           name={`${planKey}.${limitKey}`}
                           defaultValue={limitInputValue(entitlements.limits[limitKey])}
                           placeholder="Unlimited"
-                          className="mt-1 h-9 w-full rounded-md border bg-white px-2 text-sm outline-none focus:ring-2 focus:ring-primary/30"
+                          className="mt-1 h-9 w-full rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 text-sm outline-none focus:ring-2 focus:ring-primary/30"
                         />
                       </label>
                     ))}
@@ -392,7 +392,7 @@ export default async function AdminPlansPage() {
                           </label>
                           <span className="ml-auto flex items-center gap-1.5">
                             {enforced ? (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wider text-emerald-700">
+                              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wider text-emerald-700">
                                 <ShieldCheck className="size-3" aria-hidden="true" />
                                 Enforced
                               </span>
@@ -412,7 +412,7 @@ export default async function AdminPlansPage() {
           })}
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-white p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-4">
           <p className="text-xs text-muted-foreground">
             Saves to Postgres (<code className="rounded bg-muted px-1">platform_settings</code>) and
             mirrors to <code className="rounded bg-muted px-1">.dinaya/plans.json</code> for local dev.

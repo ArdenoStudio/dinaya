@@ -41,15 +41,15 @@ export function AccountModerationPanel({ businessId, isSuspended, deletedAt }: P
   }
 
   return (
-    <div className="rounded-xl border border-rose-500/20 bg-rose-50/50 p-5">
-      <h2 className="mb-2 text-sm font-semibold text-rose-900">Danger zone</h2>
-      <p className="text-xs text-rose-900/70">
+    <div className="rounded-xl border border-rose-500/20 bg-rose-50 dark:bg-rose-950/40 p-5">
+      <h2 className="mb-2 text-sm font-semibold text-rose-900 dark:text-rose-200">Danger zone</h2>
+      <p className="text-xs text-rose-900 dark:text-rose-200/70">
         Suspend access or soft-delete this account. Deleted accounts keep data but cannot sign in
         or accept bookings.
       </p>
 
       {isDeleted && (
-        <p className="mt-3 rounded-md border border-rose-500/30 bg-white px-3 py-2 text-xs text-rose-900">
+        <p className="mt-3 rounded-md border border-rose-500/30 bg-white px-3 py-2 text-xs text-rose-900 dark:text-rose-200">
           This account was deleted on{" "}
           {new Date(deletedAt!).toLocaleDateString("en-LK", {
             day: "numeric",
@@ -64,8 +64,8 @@ export function AccountModerationPanel({ businessId, isSuspended, deletedAt }: P
         <p
           className={`mt-3 rounded-md border px-3 py-2 text-xs ${
             result.ok
-              ? "border-emerald-500/30 bg-emerald-50 text-emerald-900"
-              : "border-rose-500/30 bg-white text-rose-900"
+              ? "border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-200"
+              : "border-rose-500/30 bg-white text-rose-900 dark:text-rose-200"
           }`}
         >
           {result.ok ? "Action completed successfully." : result.error}
@@ -79,7 +79,7 @@ export function AccountModerationPanel({ businessId, isSuspended, deletedAt }: P
               type="button"
               disabled={pending}
               onClick={() => setConfirmAction("unsuspend")}
-              className="inline-flex items-center gap-1.5 rounded-md border border-emerald-600/30 bg-white px-3 py-2 text-xs font-medium text-emerald-800 hover:bg-emerald-50 disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 rounded-md border border-emerald-600/30 bg-white px-3 py-2 text-xs font-medium text-emerald-800 hover:bg-emerald-50 dark:bg-emerald-950/40 disabled:opacity-50"
             >
               {pending && confirmAction === "unsuspend" && (
                 <Loader2 className="size-3 animate-spin" aria-hidden="true" />
@@ -91,7 +91,7 @@ export function AccountModerationPanel({ businessId, isSuspended, deletedAt }: P
               type="button"
               disabled={pending}
               onClick={() => setConfirmAction("suspend")}
-              className="inline-flex items-center gap-1.5 rounded-md border border-amber-600/30 bg-white px-3 py-2 text-xs font-medium text-amber-900 hover:bg-amber-50 disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 rounded-md border border-amber-600/30 bg-white px-3 py-2 text-xs font-medium text-amber-900 dark:text-amber-200 hover:bg-amber-50 dark:bg-amber-950/40 disabled:opacity-50"
             >
               {pending && confirmAction === "suspend" && (
                 <Loader2 className="size-3 animate-spin" aria-hidden="true" />
@@ -116,7 +116,7 @@ export function AccountModerationPanel({ businessId, isSuspended, deletedAt }: P
 
       {confirmAction && (
         <div className="mt-4 rounded-md border border-rose-500/30 bg-white p-3">
-          <p className="text-xs text-rose-900">
+          <p className="text-xs text-rose-900 dark:text-rose-200">
             {confirmAction === "suspend" &&
               "Suspend this account? Users won't be able to sign in and the booking page will be unavailable."}
             {confirmAction === "unsuspend" && "Restore access for this account?"}

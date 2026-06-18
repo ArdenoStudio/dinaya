@@ -31,7 +31,7 @@ export default function GlobalError({
   return (
     <html lang="en">
       <body>
-        <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-4">
+        <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 dark:bg-neutral-900/60 px-4">
           <div className="text-center max-w-md">
             <div className="mb-6 flex justify-center">
               <div className="flex size-20 items-center justify-center rounded-full bg-red-100">
@@ -51,10 +51,10 @@ export default function GlobalError({
                 </svg>
               </div>
             </div>
-            <h1 className="mb-2 text-2xl font-bold text-gray-900">
+            <h1 className="mb-2 text-2xl font-bold text-gray-900 dark:text-gray-100">
               Something went wrong
             </h1>
-            <p className="mb-8 text-gray-600">
+            <p className="mb-8 text-gray-600 dark:text-gray-400">
               We apologize for the inconvenience. An unexpected error has occurred.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-3">
@@ -66,13 +66,13 @@ export default function GlobalError({
               </button>
               <Link
                 href="/"
-                className="rounded-md border border-gray-300 px-6 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                className="rounded-md border border-gray-300 dark:border-neutral-700 px-6 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:bg-neutral-900/60 transition-colors"
               >
                 Go to Homepage
               </Link>
             </div>
             {error.digest && (
-              <p className="mt-6 text-xs text-gray-400">
+              <p className="mt-6 text-xs text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
                 Error ID: {error.digest}
               </p>
             )}

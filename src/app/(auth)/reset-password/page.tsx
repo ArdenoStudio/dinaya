@@ -4,10 +4,11 @@ import { Suspense, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Logo } from "@/components/Logo";
+import { AuthThemeToggle } from "@/components/AuthThemeToggle";
 import { Icon } from "@/components/ui/Icon";
 
 const inputCls =
-  "mt-1.5 w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 placeholder:text-gray-300 transition-all";
+  "mt-1.5 w-full border border-gray-200 dark:border-neutral-800 rounded-lg px-3 py-2.5 text-sm bg-white dark:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 placeholder:text-gray-300 dark:placeholder:text-neutral-600 transition-all";
 
 function getPasswordStrength(pw: string): 0 | 1 | 2 | 3 {
   if (pw.length === 0) return 0;
@@ -86,7 +87,7 @@ function ResetPasswordForm() {
     return (
       <div className="w-full max-w-sm">
         <div
-          className="bg-white rounded-2xl px-7 py-8"
+          className="bg-white dark:bg-neutral-900 rounded-2xl px-7 py-8"
           style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.05), 0 8px 32px rgba(0,0,0,0.07)" }}
         >
           <h1 className="font-cal text-2xl mb-2">Invalid reset link</h1>
@@ -111,7 +112,7 @@ function ResetPasswordForm() {
       </div>
 
       <div
-        className="bg-white rounded-2xl px-7 py-8"
+        className="bg-white dark:bg-neutral-900 rounded-2xl px-7 py-8"
         style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.05), 0 8px 32px rgba(0,0,0,0.07)" }}
       >
         <h1 className="font-cal text-2xl mb-1">Choose a new password</h1>
@@ -121,7 +122,7 @@ function ResetPasswordForm() {
 
         <form onSubmit={handleSubmit} className="space-y-4" noValidate>
           <div>
-            <label className="text-sm font-medium text-gray-700" htmlFor="password">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300" htmlFor="password">
               New password
             </label>
             <div className="relative mt-1.5">
@@ -134,13 +135,13 @@ function ResetPasswordForm() {
                 autoComplete="new-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full border border-gray-200 rounded-lg pl-3 pr-10 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 placeholder:text-gray-300 transition-all"
+                className="w-full border border-gray-200 dark:border-neutral-800 rounded-lg pl-3 pr-10 py-2.5 text-sm bg-white dark:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 placeholder:text-gray-300 dark:placeholder:text-neutral-600 transition-all"
                 placeholder="••••••••"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword((s) => !s)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-gray-300 hover:text-gray-500 rounded-md transition-colors"
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-gray-300 hover:text-gray-500 dark:text-gray-400 rounded-md transition-colors"
                 aria-label={showPassword ? "Hide password" : "Show password"}
                 tabIndex={-1}
               >
@@ -158,7 +159,7 @@ function ResetPasswordForm() {
                     <div
                       key={n}
                       className={`h-1 flex-1 rounded-full transition-colors ${
-                        strength >= n ? strengthColor[strength] : "bg-gray-200"
+                        strength >= n ? strengthColor[strength] : "bg-gray-200 dark:bg-neutral-700"
                       }`}
                     />
                   ))}
@@ -171,7 +172,7 @@ function ResetPasswordForm() {
           </div>
 
           <div>
-            <label className="text-sm font-medium text-gray-700" htmlFor="confirmPassword">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300" htmlFor="confirmPassword">
               Confirm password
             </label>
             <input
@@ -208,7 +209,7 @@ function ResetPasswordForm() {
         </form>
       </div>
 
-      <p className="text-center text-sm text-gray-400 mt-5">
+      <p className="text-center text-sm text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-5">
         <Link href="/auth/signin" className="text-primary hover:underline font-medium">
           Back to sign in
         </Link>
@@ -219,10 +220,8 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <div
-      className="min-h-screen flex items-center justify-center px-4 py-12"
-      style={{ background: "#f5f4f1" }}
-    >
+    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-[#f5f4f1] dark:bg-neutral-950">
+      <AuthThemeToggle />
       <Suspense fallback={<div className="w-full max-w-sm h-[360px]" />}>
         <ResetPasswordForm />
       </Suspense>

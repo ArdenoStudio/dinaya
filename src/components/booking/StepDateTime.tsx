@@ -42,6 +42,8 @@ interface Props {
   showContinue?: boolean;
   onContinue?: () => void;
   onBack?: () => void;
+  hideSlots?: boolean;
+  onSlotsChange?: (slots: SlotOption[], loading: boolean, emptyState: SlotEmptyState) => void;
 }
 
 export default function StepDateTime({
@@ -62,6 +64,8 @@ export default function StepDateTime({
   showContinue,
   onContinue,
   onBack,
+  hideSlots = false,
+  onSlotsChange,
 }: Props) {
   const today = toZonedTime(new Date(), timezone);
   const maxDate = service?.maximumAdvanceDays
@@ -82,6 +86,7 @@ export default function StepDateTime({
   async function loadSlots(date: string) {
     if (!service || (!staff && !anyStaff)) return;
     setLoadingSlots(true);
+    onSlotsChange?.([], true, "none");
     setHasFetched(false);
     const query = new URLSearchParams({
       businessId,
@@ -94,18 +99,17 @@ export default function StepDateTime({
     if (sessionToken) query.set("sessionToken", sessionToken);
     const res = await fetch(`/api/availability?${query.toString()}`);
     const data = await res.json();
-    setSlots(data.slots ?? []);
-    if (data.closed) {
-      setSlotEmptyState("closed");
-    } else if (data.capacityReached) {
-      setSlotEmptyState("capacity");
-    } else if ((data.slots ?? []).length === 0) {
-      setSlotEmptyState("full");
-    } else {
-      setSlotEmptyState("none");
-    }
+    const fetchedSlots: SlotOption[] = data.slots ?? [];
+    const fetchedEmptyState: SlotEmptyState =
+      data.closed ? "closed" :
+      data.capacityReached ? "capacity" :
+      fetchedSlots.length === 0 ? "full" :
+      "none";
+    setSlots(fetchedSlots);
+    setSlotEmptyState(fetchedEmptyState);
     setLoadingSlots(false);
     setHasFetched(true);
+    onSlotsChange?.(fetchedSlots, false, fetchedEmptyState);
   }
 
   const loadMonthStatus = useCallback(
@@ -195,9 +199,9 @@ export default function StepDateTime({
 
   if (!service || (!staff && !anyStaff)) {
     return (
-      <div className="flex min-h-[280px] items-center justify-center rounded-xl border border-dashed border-gray-200 bg-white px-6 py-12 text-center text-sm text-gray-400 md:min-h-[320px]">
+      <div className="flex min-h-[280px] items-center justify-center rounded-xl border border-dashed border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-6 py-12 text-center text-sm text-gray-400 dark:text-gray-500 md:min-h-[320px]">
         <div>
-          <Icon name="calendar2-plus" className="mb-3 block text-3xl text-gray-300" />
+          <Icon name="calendar2-plus" className="mb-3 block text-3xl text-gray-300 dark:text-neutral-600" />
           {copy.selectServiceHint}
         </div>
       </div>
@@ -206,7 +210,7 @@ export default function StepDateTime({
 
   return (
     <div className="flex h-full min-w-0 flex-col">
-      <p className="mb-4 text-[10px] font-bold uppercase tracking-widest text-gray-400">
+      <p className="mb-4 text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
         {copy.pickDateTime}
       </p>
 
@@ -221,22 +225,26 @@ export default function StepDateTime({
               label: nextAvailable.label,
             });
           }}
-          className="mb-4 flex w-full items-center justify-between rounded-xl border border-[var(--booking-accent-soft)] booking-bg-accent-muted px-4 py-3 text-left text-sm transition-colors hover:border-[var(--booking-accent)]"
+          className="mb-4 flex w-full items-center justify-between rounded-xl border-2 border-[var(--booking-accent-soft)] booking-bg-accent-muted px-4 py-3.5 text-left text-sm shadow-sm transition-colors hover:border-[var(--booking-accent)]"
         >
           <span>
-            <span className="font-semibold booking-text-accent">{copy.nextAvailable}</span>
-            <span className="ml-2 text-gray-600">
+            <span className="block text-[10px] font-bold uppercase tracking-wider booking-text-accent">
+              {copy.nextAvailable}
+            </span>
+            <span className="mt-0.5 block font-semibold text-gray-800 dark:text-gray-200">
               {format(parseISO(nextAvailable.date + "T12:00:00"), "EEE d MMM")} · {nextAvailable.label}
             </span>
           </span>
-          <Icon name="lightning-charge-fill" className="booking-text-accent" />
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-full booking-bg-accent text-white">
+            <Icon name="lightning-charge-fill" />
+          </span>
         </button>
       )}
 
       <div className="flex min-w-0 flex-col gap-4 md:gap-5">
-        <section className="min-w-0 rounded-xl border border-gray-100 bg-white p-4 md:p-5">
+        <section className="min-w-0 rounded-xl border border-gray-100 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-4 md:p-5">
           <div className="mb-3 flex items-center justify-between gap-2">
-            <p className="text-xs font-semibold text-gray-700">{copy.chooseDate}</p>
+            <p className="text-xs font-semibold text-gray-700 dark:text-gray-300">{copy.chooseDate}</p>
             <button
               type="button"
               onClick={() => setShowMobileCalendar((v) => !v)}
@@ -279,47 +287,50 @@ export default function StepDateTime({
           </div>
         </section>
 
-        <section className="min-w-0 rounded-xl border border-gray-100 bg-white p-4 md:p-5">
-          {dateHeading ? (
-            <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2 border-b border-gray-100 pb-3">
-              <h3 className="text-sm font-semibold text-gray-900">{dateHeading}</h3>
-              <span className="text-xs text-gray-400">{copy.availableTimes}</span>
-            </div>
-          ) : (
-            <p className="mb-3 text-xs text-gray-400">{copy.selectDate}</p>
-          )}
+        {!hideSlots && (
+          <section className="min-w-0 rounded-xl border border-gray-100 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-4 md:p-5">
+            {dateHeading ? (
+              <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2 border-b border-gray-100 dark:border-neutral-800 pb-3">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">{dateHeading}</h3>
+                <span className="text-xs text-gray-400 dark:text-gray-500">{copy.availableTimes}</span>
+              </div>
+            ) : (
+              <p className="mb-3 text-xs text-gray-400 dark:text-gray-500">{copy.selectDate}</p>
+            )}
 
-          {holdLabel && (
-            <p className="mb-3 rounded-lg booking-bg-accent-muted px-3 py-2 text-xs font-medium booking-text-accent">
-              <Icon name="clock" className="mr-1.5" />
-              {holdLabel}
-            </p>
-          )}
+            {holdLabel && (
+              <p className="mb-3 rounded-lg booking-bg-accent-muted px-3 py-2 text-xs font-medium booking-text-accent">
+                <Icon name="clock" className="mr-1.5" />
+                {holdLabel}
+              </p>
+            )}
 
-          {slotUnavailable && (
-            <div className="mb-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
-              {copy.slotTaken}
-            </div>
-          )}
+            {slotUnavailable && (
+              <div className="mb-3 rounded-lg border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-950/40 px-3 py-2.5 text-xs text-amber-800 dark:text-amber-200">
+                <p className="font-medium">{copy.slotTaken}</p>
+                <p className="mt-1 text-amber-700/90 dark:text-amber-300/90">{copy.slotTakenAction}</p>
+              </div>
+            )}
 
-          {!hasFetched && !loadingSlots ? (
-            <p className="py-6 text-center text-sm text-gray-400">{copy.selectDate}</p>
-          ) : (
-            <TimeSlotGrid
-              slots={slots}
-              selectedStartUtc={selectedSlot?.startUtc ?? null}
-              copy={copy}
-              onSelect={onSlotSelect}
-              loading={loadingSlots}
-              emptyState={slotEmptyState}
-              timezone={timezone}
-            />
-          )}
-        </section>
+            {!hasFetched && !loadingSlots ? (
+              <p className="py-6 text-center text-sm text-gray-400 dark:text-gray-500">{copy.selectDate}</p>
+            ) : (
+              <TimeSlotGrid
+                slots={slots}
+                selectedStartUtc={selectedSlot?.startUtc ?? null}
+                copy={copy}
+                onSelect={onSlotSelect}
+                loading={loadingSlots}
+                emptyState={slotEmptyState}
+                timezone={timezone}
+              />
+            )}
+          </section>
+        )}
       </div>
 
       {dateHeading && selectedSlot && (
-        <div className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50/60 px-4 py-2.5 text-sm text-emerald-800 md:hidden">
+        <div className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50 dark:bg-emerald-950/40 px-4 py-2.5 text-sm text-emerald-800 md:hidden">
           <Icon name="check-circle" className="mr-1.5" />
           <span className="font-medium">{selectedSlot.label}</span>
           <span className="text-emerald-600"> · {dateHeading}</span>
@@ -332,7 +343,7 @@ export default function StepDateTime({
             <button
               type="button"
               onClick={onBack}
-              className="flex items-center gap-1 text-sm text-gray-500 transition-colors hover:text-gray-800"
+              className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 transition-colors hover:text-gray-800 dark:text-gray-200"
             >
               <Icon name="chevron-left" className="text-sm" /> {copy.back}
             </button>

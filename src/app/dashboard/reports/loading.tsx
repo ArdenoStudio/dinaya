@@ -15,7 +15,7 @@ export default function ReportsLoading() {
       {/* Stats */}
       <div className="grid gap-4 md:grid-cols-4 mb-6">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="rounded-xl border bg-white p-5">
+          <div key={i} className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
             <Skeleton className="h-4 w-24 mb-2" />
             <Skeleton className="h-8 w-32" />
           </div>
@@ -23,13 +23,13 @@ export default function ReportsLoading() {
       </div>
 
       {/* Chart */}
-      <div className="rounded-xl border bg-white p-6 mb-6">
+      <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-6 mb-6">
         <Skeleton className="h-6 w-40 mb-4" />
         <Skeleton className="h-64 w-full rounded-lg" />
       </div>
 
       {/* Table */}
-      <div className="rounded-xl border bg-white p-6">
+      <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-6">
         <Skeleton className="h-6 w-32 mb-4" />
         <div className="space-y-3">
           {[1, 2, 3, 4, 5].map((i) => (

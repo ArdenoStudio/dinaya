@@ -31,7 +31,7 @@ export function StaffInviteForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-xl border bg-white p-5 space-y-3">
+    <form onSubmit={handleSubmit} className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5 space-y-3">
       <h2 className="font-semibold">Invite a team member</h2>
       <p className="text-sm text-muted-foreground">
         They&apos;ll get dashboard access as staff — not an owner account.

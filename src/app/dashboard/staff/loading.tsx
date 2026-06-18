@@ -12,7 +12,7 @@ export default function StaffLoading() {
       {/* Staff Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {[1, 2, 3, 4, 5, 6].map((i) => (
-          <div key={i} className="rounded-xl border bg-white p-5">
+          <div key={i} className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
             <div className="flex items-center gap-4 mb-4">
               <Skeleton className="size-12 rounded-full" />
               <div className="flex-1">

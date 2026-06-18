@@ -61,7 +61,7 @@ export default async function GuidePage({ params }: Props) {
         <span className="text-foreground">{guide.title}</span>
       </nav>
 
-      <header className="mb-10 rounded-3xl border border-gray-200 bg-gradient-to-br from-white via-slate-50 to-blue-50/60 px-6 py-6 shadow-sm shadow-gray-900/5">
+      <header className="mb-10 rounded-3xl border border-gray-200 dark:border-neutral-800 bg-gradient-to-br from-white via-slate-50 to-blue-50/60 px-6 py-6 shadow-sm shadow-gray-900/5 dark:shadow-black/20">
         <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2">
             {guide.planRequired ? <PlanBadge plan={guide.planRequired} /> : null}
@@ -96,14 +96,14 @@ export default async function GuidePage({ params }: Props) {
       </Suspense>
 
       {related.length > 0 ? (
-        <section className="mt-14 border-t border-gray-200 pt-10">
+        <section className="mt-14 border-t border-gray-200 dark:border-neutral-800 pt-10">
           <h2 className="font-cal text-lg tracking-tight mb-4">Related guides</h2>
           <ul className="grid sm:grid-cols-2 gap-3">
             {related.map((r) => (
               <li key={r.slug}>
                 <Link
                   href={`/docs/guides/${r.slug}`}
-                  className="block overflow-hidden rounded-xl border border-gray-200 bg-white text-sm shadow-sm shadow-gray-900/5 transition hover:border-primary/30 hover:shadow-md"
+                  className="block overflow-hidden rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:border-neutral-800 dark:bg-neutral-900 text-sm shadow-sm shadow-gray-900/5 dark:shadow-black/20 transition hover:border-primary/30 hover:shadow-md"
                 >
                   <DocsGuideThumbnail
                     mockupId={getGuidePreviewMockupId(r)}
@@ -120,7 +120,7 @@ export default async function GuidePage({ params }: Props) {
         </section>
       ) : null}
 
-      <section className="mt-10 rounded-3xl border border-gray-200 bg-gradient-to-br from-gray-50 to-white p-6 text-center">
+      <section className="mt-10 rounded-3xl border border-gray-200 dark:border-neutral-800 bg-gradient-to-br from-gray-50 to-white p-6 text-center">
         <p className="text-sm text-muted-foreground mb-3">Was this guide helpful?</p>
         <a
           href="mailto:support@dinaya.lk"

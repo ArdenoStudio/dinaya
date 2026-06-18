@@ -28,7 +28,7 @@ export function ReferralSettings({
   const platformReferralUrl = buildPlatformReferralUrl(referralCode);
 
   return (
-    <div className="rounded-xl border bg-white p-5 space-y-5">
+    <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5 space-y-5">
       <div>
         <h2 className="font-semibold">Referrals</h2>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -56,8 +56,8 @@ export function ReferralSettings({
         </p>
       </div>
 
-      <div className="rounded-lg border bg-gray-50/80 p-4 text-xs text-muted-foreground">
-        <p className="font-medium text-gray-800">Track campaigns with UTM links</p>
+      <div className="rounded-lg border bg-gray-50 dark:bg-neutral-900/60 p-4 text-xs text-muted-foreground">
+        <p className="font-medium text-gray-800 dark:text-gray-200">Track campaigns with UTM links</p>
         <p className="mt-1">
           Append <code>?utm_source=instagram</code>, <code>?utm_source=whatsapp</code>, or{" "}
           <code>?channel=directory</code> to your booking link.

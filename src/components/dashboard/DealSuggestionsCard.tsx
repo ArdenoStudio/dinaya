@@ -93,14 +93,14 @@ function SuggestionCard({
             apptWindowEnd: suggestion.apptWindowEnd,
             suggestionId: suggestion.id,
           })}
-          className="rounded-md border bg-white px-3 py-1.5 text-xs"
+          className="rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-1.5 text-xs"
         >
           Customize
         </Link>
         <button
           type="button"
           onClick={() => onDismiss(suggestion.id)}
-          className="rounded-md border bg-white px-3 py-1.5 text-xs"
+          className="rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-1.5 text-xs"
         >
           Dismiss
         </button>

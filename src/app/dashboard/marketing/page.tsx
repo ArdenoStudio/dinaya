@@ -95,7 +95,7 @@ export default async function MarketingPage() {
             referralBookings={Number(referralBookings ?? 0)}
           />
 
-          <div className="rounded-xl border bg-white p-5">
+          <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
             <h2 className="mb-3 font-semibold">Share tools</h2>
             <code className="block truncate rounded-md border bg-muted/30 px-3 py-2 text-sm text-primary">
               {bookingUrl}
@@ -115,7 +115,7 @@ export default async function MarketingPage() {
             services={serviceList}
           />
 
-          <div className="rounded-xl border bg-white p-5">
+          <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
             <h2 className="mb-3 font-semibold">QR poster</h2>
             <Image
               src={qrPng}
@@ -130,7 +130,7 @@ export default async function MarketingPage() {
             </p>
           </div>
 
-          <div className="rounded-xl border bg-white p-5">
+          <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
             <h2 className="mb-3 font-semibold">Snippets</h2>
             <label className="text-xs font-medium text-muted-foreground">WhatsApp / Facebook</label>
             <textarea readOnly value={whatsappSnippet} className="mt-1 h-20 w-full resize-none rounded-md border p-2 text-sm" />
@@ -147,7 +147,7 @@ export default async function MarketingPage() {
           </div>
         </div>
 
-        <div className="rounded-xl border bg-white p-5">
+        <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="font-semibold">Live preview</h2>
             <a href={`${bookingUrl}?preview=1`} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">

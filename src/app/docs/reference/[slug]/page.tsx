@@ -45,7 +45,7 @@ export default async function ReferencePage({ params }: Props) {
         <span className="mx-1">/</span>
         <span className="text-foreground">{ref.title}</span>
       </nav>
-      <header className="mb-8 rounded-3xl border border-gray-200 bg-gradient-to-br from-white via-slate-50 to-blue-50/60 px-6 py-6 shadow-sm shadow-gray-900/5">
+      <header className="mb-8 rounded-3xl border border-gray-200 dark:border-neutral-800 bg-gradient-to-br from-white via-slate-50 to-blue-50/60 px-6 py-6 shadow-sm shadow-gray-900/5 dark:shadow-black/20">
         <div className="mb-4 flex items-start justify-between gap-4">
           <div>
             <h1 className="font-cal text-3xl tracking-tight mb-2">{ref.title}</h1>
@@ -61,7 +61,7 @@ export default async function ReferencePage({ params }: Props) {
       </header>
       <div className="space-y-8">
         {ref.sections.map((s) => (
-          <section key={s.heading} className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm shadow-gray-900/5">
+          <section key={s.heading} className="rounded-2xl border border-gray-200 dark:border-neutral-800 bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5 shadow-sm shadow-gray-900/5 dark:shadow-black/20">
             <h2 className="font-cal text-lg tracking-tight mb-2">{s.heading}</h2>
             <p className="text-sm text-muted-foreground leading-relaxed">{s.body}</p>
           </section>

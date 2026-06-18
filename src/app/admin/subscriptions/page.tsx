@@ -11,9 +11,9 @@ import { requirePlatformAdmin } from "@/lib/platform-admin";
 export const dynamic = "force-dynamic";
 
 const STATUS_STYLES: Record<string, string> = {
-  active: "bg-emerald-500/10 text-emerald-700",
-  past_due: "bg-amber-500/10 text-amber-700",
-  cancelled: "bg-rose-500/10 text-rose-700",
+  active: "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700",
+  past_due: "bg-amber-50 dark:bg-amber-950/30 text-amber-700",
+  cancelled: "bg-rose-50 dark:bg-rose-950/30 text-rose-700",
   ended: "bg-muted text-muted-foreground",
 };
 
@@ -72,19 +72,19 @@ export default async function AdminSubscriptionsPage({
       label: "Active",
       value: byStatus.active?.count ?? 0,
       sub: formatLkr(byStatus.active?.sum ?? 0) + " MRR",
-      accent: "bg-emerald-500",
+      accent: "bg-emerald-50 dark:bg-emerald-950/400",
     },
     {
       label: "Past due",
       value: byStatus.past_due?.count ?? 0,
       sub: formatLkr(byStatus.past_due?.sum ?? 0) + " at risk",
-      accent: "bg-amber-500",
+      accent: "bg-amber-50 dark:bg-amber-950/400",
     },
     {
       label: "Cancelled",
       value: byStatus.cancelled?.count ?? 0,
       sub: "lifetime",
-      accent: "bg-rose-500",
+      accent: "bg-rose-50 dark:bg-rose-950/400",
     },
     {
       label: "Ended",
@@ -113,7 +113,7 @@ export default async function AdminSubscriptionsPage({
 
       <div className="grid gap-4 md:grid-cols-4">
         {tiles.map((t) => (
-          <div key={t.label} className="overflow-hidden rounded-xl border bg-white">
+          <div key={t.label} className="overflow-hidden rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
             <div className={`h-[3px] ${t.accent}`} />
             <div className="p-5">
               <p className="text-xs text-muted-foreground">{t.label}</p>
@@ -135,7 +135,7 @@ export default async function AdminSubscriptionsPage({
               className={
                 active
                   ? "rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground"
-                  : "rounded-full border bg-white px-3 py-1 text-xs font-medium text-muted-foreground hover:text-foreground"
+                  : "rounded-full border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-1 text-xs font-medium text-muted-foreground hover:text-foreground"
               }
             >
               {chip.label}
@@ -144,7 +144,7 @@ export default async function AdminSubscriptionsPage({
         })}
       </div>
 
-      <div className="overflow-hidden rounded-xl border bg-white">
+      <div className="overflow-hidden rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-muted/30 text-left text-xs uppercase tracking-wider text-muted-foreground">

@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
+import { AuthThemeToggle } from "@/components/AuthThemeToggle";
 import { Icon } from "@/components/ui/Icon";
 import { buildPublicBookingUrlLabel } from "@/lib/booking-url";
+import { trackOnboardingComplete } from "@/lib/analytics/gtag";
 
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -17,7 +19,7 @@ const STEPS = [
 ];
 
 const inputCls =
-  "mt-1.5 w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 placeholder:text-gray-300 transition-all";
+  "mt-1.5 w-full border border-gray-200 dark:border-neutral-800 rounded-lg px-3 py-2.5 text-sm bg-white dark:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 placeholder:text-gray-300 dark:placeholder:text-neutral-600 transition-all";
 
 type AvailRow = { dayOfWeek: number; startTime: string; endTime: string };
 
@@ -208,6 +210,7 @@ export function SetupWizard() {
       setSaving(false);
       return;
     }
+    trackOnboardingComplete();
     router.push("/dashboard?onboarded=1");
     router.refresh();
   }
@@ -233,18 +236,21 @@ export function SetupWizard() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f5f4f1]">
+      <div className="flex min-h-screen items-center justify-center bg-[#f5f4f1] dark:bg-neutral-950">
         <Icon name="arrow-repeat" className="animate-spin text-2xl text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f4f1]">
-      <header className="border-b bg-white px-6 py-4">
-        <div className="mx-auto flex max-w-2xl items-center justify-between">
+    <div className="min-h-screen bg-[#f5f4f1] dark:bg-neutral-950">
+      <header className="border-b bg-white dark:border-neutral-800 dark:bg-neutral-900 px-6 py-4">
+        <div className="mx-auto flex max-w-2xl items-center justify-between gap-4">
           <Logo size="sm" />
-          <span className="text-xs font-medium text-muted-foreground">Step {step} of 4</span>
+          <div className="flex items-center gap-3">
+            <span className="text-xs font-medium text-muted-foreground">Step {step} of 4</span>
+            <AuthThemeToggle />
+          </div>
         </div>
       </header>
 
@@ -253,19 +259,19 @@ export function SetupWizard() {
           <p className="text-xs font-semibold uppercase tracking-widest text-primary">Get live in minutes</p>
           <h1 className="mt-2 font-cal text-3xl tracking-tight">{STEPS[step - 1].label}</h1>
           <p className="mt-2 text-sm text-muted-foreground">{STEPS[step - 1].description}</p>
-          <div className="mt-4 h-2 overflow-hidden rounded-full bg-white ring-1 ring-gray-200">
+          <div className="mt-4 h-2 overflow-hidden rounded-full bg-white ring-1 ring-gray-200 dark:bg-neutral-800 dark:ring-neutral-700">
             <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${progress}%` }} />
           </div>
         </div>
 
         <div
-          className="rounded-2xl bg-white px-7 py-8"
+          className="rounded-2xl border border-transparent bg-white px-7 py-8 dark:border-neutral-800 dark:bg-neutral-900"
           style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.05), 0 8px 32px rgba(0,0,0,0.07)" }}
         >
           {step === 1 && (
             <form onSubmit={handleStep1} className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-gray-700" htmlFor="biz-name">Business name</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300" htmlFor="biz-name">Business name</label>
                 <input
                   id="biz-name"
                   required
@@ -275,7 +281,7 @@ export function SetupWizard() {
                 />
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-700" htmlFor="phone">Phone (WhatsApp)</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300" htmlFor="phone">Phone (WhatsApp)</label>
                 <input
                   id="phone"
                   required
@@ -286,7 +292,7 @@ export function SetupWizard() {
                 />
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-700" htmlFor="address">Address</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300" htmlFor="address">Address</label>
                 <input
                   id="address"
                   required
@@ -297,7 +303,7 @@ export function SetupWizard() {
                 />
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-700" htmlFor="description">Short description</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300" htmlFor="description">Short description</label>
                 <textarea
                   id="description"
                   required
@@ -325,7 +331,7 @@ export function SetupWizard() {
                 We pre-filled a starter service based on your business type. Edit it to match what you offer.
               </p>
               <div>
-                <label className="text-sm font-medium text-gray-700" htmlFor="svc-name">Service name</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300" htmlFor="svc-name">Service name</label>
                 <input
                   id="svc-name"
                   required
@@ -336,7 +342,7 @@ export function SetupWizard() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-700" htmlFor="duration">Duration (min)</label>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300" htmlFor="duration">Duration (min)</label>
                   <input
                     id="duration"
                     type="number"
@@ -348,7 +354,7 @@ export function SetupWizard() {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700" htmlFor="price">Price (LKR)</label>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300" htmlFor="price">Price (LKR)</label>
                   <input
                     id="price"
                     type="number"
@@ -361,7 +367,7 @@ export function SetupWizard() {
                 </div>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-700" htmlFor="svc-desc">Description</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300" htmlFor="svc-desc">Description</label>
                 <textarea
                   id="svc-desc"
                   rows={2}
@@ -400,7 +406,7 @@ export function SetupWizard() {
                       type="button"
                       onClick={() => toggleDay(day)}
                       className={`rounded-full border px-3 py-1.5 text-sm font-medium transition ${
-                        active ? "border-primary bg-primary/10 text-primary" : "bg-white text-muted-foreground"
+                        active ? "border-primary bg-primary/10 text-primary" : "bg-white text-muted-foreground dark:bg-neutral-800"
                       }`}
                     >
                       {name}
@@ -446,7 +452,7 @@ export function SetupWizard() {
 
           {step === 4 && (
             <div className="space-y-6">
-              <div className="rounded-xl border bg-emerald-50/60 p-5 text-center">
+              <div className="rounded-xl border bg-emerald-50 dark:bg-emerald-950/40 p-5 text-center">
                 <Icon name="check-circle-fill" className="text-3xl text-emerald-600" />
                 <h2 className="mt-3 font-cal text-xl">Your page is live!</h2>
                 <p className="mt-2 text-sm text-muted-foreground">
@@ -458,7 +464,7 @@ export function SetupWizard() {
               </div>
 
               <div className="overflow-hidden rounded-xl border">
-                <iframe src={bookingUrl} title="Booking page preview" className="h-64 w-full border-0 bg-white" />
+                <iframe src={bookingUrl} title="Booking page preview" className="h-64 w-full border-0 bg-white dark:bg-neutral-900" />
               </div>
 
               <div className="flex flex-wrap gap-3">

@@ -19,7 +19,7 @@ export default async function IntegrationsPage() {
 
       <div className="grid gap-4 md:grid-cols-2">
         {integrations.rows.map((item) => (
-          <div key={item.name} className="rounded-xl border bg-white p-5">
+          <div key={item.name} className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h2 className="font-semibold">{item.name}</h2>

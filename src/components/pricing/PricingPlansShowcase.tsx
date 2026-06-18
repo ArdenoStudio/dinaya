@@ -225,13 +225,13 @@ export function PricingPlansShowcase({
                   <div className="flex items-baseline gap-1">
                     {priceParts ? (
                       <>
-                        <span className="text-sm font-medium text-gray-400">LKR</span>
+                        <span className="text-sm font-medium text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">LKR</span>
                         <NumberFlow
                           value={priceParts.whole}
                           className="font-cal text-4xl tracking-tight"
                         />
                         {plan.monthlyPriceLkr != null ? (
-                          <span className="ml-1 text-sm text-gray-400">
+                          <span className="ml-1 text-sm text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
                             /{isYearly ? "year" : "month"}
                           </span>
                         ) : null}

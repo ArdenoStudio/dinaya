@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dinaya — Coming Soon Carousel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<style>
+@font-face {
+  font-family: 'Cal Sans';
+  src: url('https://cdn.jsdelivr.net/npm/cal-sans@1.0.1/fonts/CalSans-SemiBold.woff2') format('woff2'),
+       url('https://cdn.jsdelivr.net/npm/cal-sans@1.0.1/fonts/CalSans-SemiBold.woff') format('woff');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --P:  #2563EB; /* cobalt primary */
+  --PL: #93C5FD; /* blue-300 light */
+  --PD: #1E40AF; /* blue-800 dark */
+  --LB: #EFF6FF; /* blue-50 light bg */
+  --BO: #BFDBFE; /* blue-200 border */
+  --DB: #060C18; /* near-black dark bg */
+  --GR: linear-gradient(160deg, #1E40AF 0%, #2563EB 55%, #60A5FA 100%);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Plus Jakarta Sans', sans-serif;
+  background: #080808;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 40px 20px 60px;
+}
+
+.cal {
+  font-family: 'Cal Sans', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Plus Jakarta Sans', sans-serif;
+  font-weight: 600;
+}
+.sf {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Plus Jakarta Sans', sans-serif;
+}
+
+/* ─── Instagram Frame ─────────────────────── */
+.ig-frame {
+  width: 420px;
+  max-width: 420px;
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 32px 96px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04);
+}
+
+.ig-header {
+  background: #fff;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid #f0f0f0;
+}
+.ig-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--P);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  box-shadow: 0 0 0 2px var(--P);
+}
+.ig-header-text { flex: 1; min-width: 0; }
+.ig-handle { font-size: 13px; font-weight: 700; color: #000; }
+.ig-sub { font-size: 11px; color: #888; }
+.ig-more { color: #555; font-size: 20px; line-height: 1; cursor: pointer; }
+
+/* ─── Carousel ────────────────────────────── */
+.carousel-viewport {
+  width: 420px;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  position: relative;
+  cursor: grab;
+  user-select: none;
+}
+.carousel-viewport:active { cursor: grabbing; }
+
+.carousel-track {
+  display: flex;
+  height: 100%;
+  transition: transform 0.38s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform;
+}
+
+/* ─── Slide base ──────────────────────────── */
+.slide {
+  width: 420px;
+  min-width: 420px;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.sl { background: var(--LB); }
+.sd { background: var(--DB); }
+.sg { background: var(--GR); }
+
+/* ─── IG chrome ───────────────────────────── */
+.ig-dots {
+  background: #fff;
+  padding: 9px 0 7px;
+  display: flex; align-items: center; justify-content: center; gap: 5px;
+}
+.dot {
+  width: 6px; height: 6px; border-radius: 3px;
+  background: #ddd; transition: all 0.3s ease;
+  cursor: pointer;
+}
+.dot.active { background: var(--P); width: 16px; }
+
+.ig-actions {
+  background: #fff;
+  padding: 10px 14px 7px;
+  display: flex; align-items: center; gap: 14px;
+}
+.ig-bookmark { margin-left: auto; }
+
+.ig-caption {
+  background: #fff;
+  padding: 3px 14px 16px;
+  font-size: 13px; color: #000; line-height: 1.55;
+}
+.ig-caption strong { font-weight: 700; }
+.ig-caption .ts { color: #999; font-size: 11px; margin-top: 5px; display: block; }
+</style>
+</head>
+<body>
+
+<div class="ig-frame" id="igFrame">
+
+  <!-- ── Header ── -->
+  <div class="ig-header">
+    <div class="ig-avatar">
+      <svg width="20" height="20" viewBox="350 400 860 860" fill="white">
+        <path d="M 819.949219 499.695312 L 563.980469 755.773438 C 513.210938 806.554688 513.210938 889.15625 563.980469 939.941406 C 614.75 990.777344 697.378906 990.726562 748.09375 939.941406 L 966.117188 721.851562 C 982.484375 705.480469 982.484375 678.953125 966.117188 662.582031 C 949.75 646.207031 923.230469 646.207031 906.863281 662.582031 L 688.84375 880.671875 C 670.753906 898.707031 641.375 898.761719 623.234375 880.671875 C 605.144531 862.578125 605.144531 833.132812 623.234375 815.042969 L 879.203125 558.96875 C 931.742188 506.464844 1017.1875 506.464844 1069.671875 558.96875 C 1095.097656 584.425781 1109.117188 618.265625 1109.117188 654.257812 C 1109.117188 690.226562 1095.097656 724.0625 1069.671875 749.523438 L 782.496094 1036.789062 C 740.375 1078.921875 684.367188 1102.117188 624.816406 1102.117188 C 565.261719 1102.117188 509.285156 1078.921875 467.164062 1036.789062 C 380.222656 949.820312 380.222656 808.328125 467.164062 721.359375 L 797.144531 391.253906 C 813.511719 374.878906 813.511719 348.355469 797.144531 331.980469 C 780.773438 315.609375 754.257812 315.609375 737.890625 331.980469 L 407.910156 662.089844 C 288.285156 781.722656 288.285156 976.425781 407.910156 1096.058594 C 465.828125 1154.019531 542.867188 1185.945312 624.816406 1185.945312 C 706.765625 1185.945312 783.804688 1154.019531 841.746094 1096.058594 L 1128.925781 808.792969 C 1214.121094 723.570312 1214.121094 584.917969 1128.925781 499.695312 C 1043.78125 414.558594 905.144531 414.445312 819.949219 499.695312 Z"/>
+      </svg>
+    </div>
+    <div class="ig-header-text">
+      <div class="ig-handle">dinaya.lk</div>
+      <div class="ig-sub">Smart Booking for Sri Lanka</div>
+    </div>
+    <span class="ig-more">···</span>
+  </div>
+
+  <!-- ── Viewport ── -->
+  <div class="carousel-viewport" id="vp">
+    <div class="carousel-track" id="track">
+
+      <!-- ══════════════════════════════════════
+           SLIDE 1 — HERO (Light)
+      ══════════════════════════════════════ -->
+      <div class="slide sl">
+
+        <!-- Subtle radial glow top-right -->
+        <div style="position:absolute;top:-60px;right:-60px;width:300px;height:300px;background:radial-gradient(circle,rgba(37,99,235,0.10) 0%,transparent 65%);pointer-events:none;"></div>
+
+        <div style="display:flex;flex-direction:column;justify-content:center;height:100%;padding:0 38px 54px;">
+
+          <!-- Logo lockup -->
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:36px;">
+            <div style="width:42px;height:42px;border-radius:12px;background:#2563EB;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(37,99,235,0.35);">
+              <svg width="22" height="22" viewBox="350 400 860 860" fill="white">
+                <path d="M 819.949219 499.695312 L 563.980469 755.773438 C 513.210938 806.554688 513.210938 889.15625 563.980469 939.941406 C 614.75 990.777344 697.378906 990.726562 748.09375 939.941406 L 966.117188 721.851562 C 982.484375 705.480469 982.484375 678.953125 966.117188 662.582031 C 949.75 646.207031 923.230469 646.207031 906.863281 662.582031 L 688.84375 880.671875 C 670.753906 898.707031 641.375 898.761719 623.234375 880.671875 C 605.144531 862.578125 605.144531 833.132812 623.234375 815.042969 L 879.203125 558.96875 C 931.742188 506.464844 1017.1875 506.464844 1069.671875 558.96875 C 1095.097656 584.425781 1109.117188 618.265625 1109.117188 654.257812 C 1109.117188 690.226562 1095.097656 724.0625 1069.671875 749.523438 L 782.496094 1036.789062 C 740.375 1078.921875 684.367188 1102.117188 624.816406 1102.117188 C 565.261719 1102.117188 509.285156 1078.921875 467.164062 1036.789062 C 380.222656 949.820312 380.222656 808.328125 467.164062 721.359375 L 797.144531 391.253906 C 813.511719 374.878906 813.511719 348.355469 797.144531 331.980469 C 780.773438 315.609375 754.257812 315.609375 737.890625 331.980469 L 407.910156 662.089844 C 288.285156 781.722656 288.285156 976.425781 407.910156 1096.058594 C 465.828125 1154.019531 542.867188 1185.945312 624.816406 1185.945312 C 706.765625 1185.945312 783.804688 1154.019531 841.746094 1096.058594 L 1128.925781 808.792969 C 1214.121094 723.570312 1214.121094 584.917969 1128.925781 499.695312 C 1043.78125 414.558594 905.144531 414.445312 819.949219 499.695312 Z"/>
+              </svg>
+            </div>
+            <span class="sf" style="font-size:14px;font-weight:700;color:#1E293B;letter-spacing:1px;">DINAYA</span>
+          </div>
+
+          <!-- Tag -->
+          <span class="sf" style="display:inline-block;font-size:10px;font-weight:600;letter-spacing:2.5px;color:#2563EB;text-transform:uppercase;margin-bottom:14px;">COMING SOON</span>
+
+          <!-- Headline -->
+          <h1 class="cal" style="font-size:46px;color:#0F172A;line-height:1.0;letter-spacing:-1.5px;margin-bottom:20px;">Booking,<br>Reimagined<span style="color:#2563EB;">.</span></h1>
+
+          <!-- Body -->
+          <p class="sf" style="font-size:14px;color:#475569;line-height:1.65;margin-bottom:30px;max-width:275px;">The smart booking platform built for Sri Lankan salons, clinics, and tutors.</p>
+
+          <!-- Badge -->
+          <div style="display:inline-flex;align-items:center;gap:9px;padding:9px 18px;background:rgba(37,99,235,0.07);border:1px solid rgba(37,99,235,0.18);border-radius:28px;width:fit-content;">
+            <div style="width:7px;height:7px;border-radius:50%;background:#2563EB;box-shadow:0 0 0 3px rgba(37,99,235,0.2);"></div>
+            <span class="sf" style="font-size:12px;font-weight:600;color:#2563EB;">Launching in Sri Lanka</span>
+          </div>
+        </div>
+
+        <!-- Swipe arrow -->
+        <div style="position:absolute;right:0;top:0;bottom:0;width:50px;z-index:9;display:flex;align-items:center;justify-content:center;background:linear-gradient(to right,transparent,rgba(0,0,0,0.05));">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="rgba(0,0,0,0.22)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+
+        <!-- Progress bar -->
+        <div style="position:absolute;bottom:0;left:0;right:0;padding:14px 28px 18px;z-index:10;display:flex;align-items:center;gap:10px;">
+          <div style="flex:1;height:2.5px;background:rgba(0,0,0,0.08);border-radius:2px;overflow:hidden;">
+            <div style="height:100%;width:14.3%;background:#2563EB;border-radius:2px;"></div>
+          </div>
+          <span class="sf" style="font-size:11px;color:rgba(0,0,0,0.28);font-weight:500;">1/7</span>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════
+           SLIDE 2 — PROBLEM (Dark)
+      ══════════════════════════════════════ -->
+      <div class="slide sd">
+
+        <!-- Faint grid texture -->
+        <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.02) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;"></div>
+
+        <div style="display:flex;flex-direction:column;justify-content:flex-end;height:100%;padding:0 38px 54px;position:relative;z-index:2;">
+
+          <span class="sf" style="display:inline-block;font-size:10px;font-weight:600;letter-spacing:2.5px;color:#93C5FD;text-transform:uppercase;margin-bottom:16px;">THE PROBLEM</span>
+
+          <h2 class="cal" style="font-size:32px;color:#fff;line-height:1.08;letter-spacing:-0.5px;margin-bottom:14px;">WhatsApp chaos is<br>costing you clients.</h2>
+
+          <p class="sf" style="font-size:13px;color:rgba(255,255,255,0.45);line-height:1.6;margin-bottom:24px;">Missed messages, double bookings, awkward back-and-forths — you deserve better.</p>
+
+          <!-- Strikethrough pills -->
+          <div style="display:flex;flex-wrap:wrap;gap:7px;">
+            <span class="sf" style="font-size:11px;padding:5px 13px;border:1px solid rgba(255,255,255,0.08);border-radius:20px;color:#4E5A6E;text-decoration:line-through;">WhatsApp threads</span>
+            <span class="sf" style="font-size:11px;padding:5px 13px;border:1px solid rgba(255,255,255,0.08);border-radius:20px;color:#4E5A6E;text-decoration:line-through;">Manual reminders</span>
+            <span class="sf" style="font-size:11px;padding:5px 13px;border:1px solid rgba(255,255,255,0.08);border-radius:20px;color:#4E5A6E;text-decoration:line-through;">Double bookings</span>
+            <span class="sf" style="font-size:11px;padding:5px 13px;border:1px solid rgba(255,255,255,0.08);border-radius:20px;color:#4E5A6E;text-decoration:line-through;">Missed calls</span>
+            <span class="sf" style="font-size:11px;padding:5px 13px;border:1px solid rgba(255,255,255,0.08);border-radius:20px;color:#4E5A6E;text-decoration:line-through;">Pen &amp; paper</span>
+          </div>
+        </div>
+
+        <!-- Swipe arrow -->
+        <div style="position:absolute;right:0;top:0;bottom:0;width:50px;z-index:9;display:flex;align-items:center;justify-content:center;background:linear-gradient(to right,transparent,rgba(255,255,255,0.06));">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="rgba(255,255,255,0.30)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+
+        <!-- Progress bar -->
+        <div style="position:absolute;bottom:0;left:0;right:0;padding:14px 28px 18px;z-index:10;display:flex;align-items:center;gap:10px;">
+          <div style="flex:1;height:2.5px;background:rgba(255,255,255,0.10);border-radius:2px;overflow:hidden;">
+            <div style="height:100%;width:28.6%;background:#fff;border-radius:2px;"></div>
+          </div>
+          <span class="sf" style="font-size:11px;color:rgba(255,255,255,0.32);font-weight:500;">2/7</span>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════
+           SLIDE 3 — SOLUTION (Gradient)
+      ══════════════════════════════════════ -->
+      <div class="slide sg">
+
+        <!-- Subtle radial highlight -->
+        <div style="position:absolute;top:-80px;right:-80px;width:320px;height:320px;background:radial-gradient(circle,rgba(255,255,255,0.08) 0%,transparent 60%);pointer-events:none;"></div>
+
+        <div style="display:flex;flex-direction:column;justify-content:center;height:100%;padding:0 38px 54px;position:relative;z-index:2;">
+
+          <span class="sf" style="display:inline-block;font-size:10px;font-weight:600;letter-spacing:2.5px;color:rgba(255,255,255,0.55);text-transform:uppercase;margin-bottom:16px;">THE SOLUTION</span>
+
+          <h2 class="cal" style="font-size:40px;color:#fff;line-height:1.04;letter-spacing:-0.8px;margin-bottom:16px;">Meet Dinaya.</h2>
+
+          <p class="sf" style="font-size:14px;color:rgba(255,255,255,0.8);line-height:1.65;margin-bottom:28px;">Give your business a real booking page. Clients pick a slot, pay online, and you get notified — automatically.</p>
+
+          <!-- Booking confirmation preview box -->
+          <div style="padding:18px;background:rgba(0,0,0,0.22);border-radius:14px;border:1px solid rgba(255,255,255,0.10);">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+              <div style="width:8px;height:8px;border-radius:50%;background:#34D399;"></div>
+              <span class="sf" style="font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.4);">Booking confirmed</span>
+            </div>
+            <p class="cal" style="font-size:15px;color:#fff;line-height:1.45;font-style:italic;">"Your appointment at Glow Studio is confirmed for Friday, 10:00 AM. See you then! ✨"</p>
+          </div>
+        </div>
+
+        <!-- Swipe arrow -->
+        <div style="position:absolute;right:0;top:0;bottom:0;width:50px;z-index:9;display:flex;align-items:center;justify-content:center;background:linear-gradient(to right,transparent,rgba(0,0,0,0.12));">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="rgba(255,255,255,0.30)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+
+        <!-- Progress bar -->
+        <div style="position:absolute;bottom:0;left:0;right:0;padding:14px 28px 18px;z-index:10;display:flex;align-items:center;gap:10px;">
+          <div style="flex:1;height:2.5px;background:rgba(255,255,255,0.12);border-radius:2px;overflow:hidden;">
+            <div style="height:100%;width:42.9%;background:#fff;border-radius:2px;"></div>
+          </div>
+          <span class="sf" style="font-size:11px;color:rgba(255,255,255,0.32);font-weight:500;">3/7</span>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════
+           SLIDE 4 — FEATURES (Light)
+      ══════════════════════════════════════ -->
+      <div class="slide sl">
+
+        <div style="display:flex;flex-direction:column;justify-content:flex-end;height:100%;padding:0 38px 54px;">
+
+          <span class="sf" style="display:inline-block;font-size:10px;font-weight:600;letter-spacing:2.5px;color:#2563EB;text-transform:uppercase;margin-bottom:14px;">WHAT YOU GET</span>
+
+          <h2 class="cal" style="font-size:30px;color:#0F172A;line-height:1.08;letter-spacing:-0.4px;margin-bottom:22px;">Everything your<br>business needs.</h2>
+
+          <!-- Feature rows -->
+          <div>
+            <div style="display:flex;align-items:center;gap:14px;padding:11px 0;border-bottom:1px solid #BFDBFE;">
+              <div style="width:32px;height:32px;border-radius:9px;background:#EFF6FF;border:1px solid #BFDBFE;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;">📅</div>
+              <div>
+                <div class="sf" style="font-size:13px;font-weight:700;color:#0F172A;">Smart Booking Page</div>
+                <div class="sf" style="font-size:11px;color:#64748B;margin-top:1px;">A custom link clients book from 24/7</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;padding:11px 0;border-bottom:1px solid #BFDBFE;">
+              <div style="width:32px;height:32px;border-radius:9px;background:#EFF6FF;border:1px solid #BFDBFE;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;">💳</div>
+              <div>
+                <div class="sf" style="font-size:13px;font-weight:700;color:#0F172A;">Online Payments</div>
+                <div class="sf" style="font-size:11px;color:#64748B;margin-top:1px;">PayHere, LankaQR, FriMi — zero commission</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;padding:11px 0;border-bottom:1px solid #BFDBFE;">
+              <div style="width:32px;height:32px;border-radius:9px;background:#EFF6FF;border:1px solid #BFDBFE;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;">🔔</div>
+              <div>
+                <div class="sf" style="font-size:13px;font-weight:700;color:#0F172A;">Auto-Reminders</div>
+                <div class="sf" style="font-size:11px;color:#64748B;margin-top:1px;">Clients notified automatically — fewer no-shows</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;padding:11px 0;">
+              <div style="width:32px;height:32px;border-radius:9px;background:#EFF6FF;border:1px solid #BFDBFE;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;">📊</div>
+              <div>
+                <div class="sf" style="font-size:13px;font-weight:700;color:#0F172A;">Owner Dashboard</div>
+                <div class="sf" style="font-size:11px;color:#64748B;margin-top:1px;">All your bookings in one clean view</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Swipe arrow -->
+        <div style="position:absolute;right:0;top:0;bottom:0;width:50px;z-index:9;display:flex;align-items:center;justify-content:center;background:linear-gradient(to right,transparent,rgba(0,0,0,0.05));">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="rgba(0,0,0,0.22)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+
+        <!-- Progress bar -->
+        <div style="position:absolute;bottom:0;left:0;right:0;padding:14px 28px 18px;z-index:10;display:flex;align-items:center;gap:10px;">
+          <div style="flex:1;height:2.5px;background:rgba(0,0,0,0.08);border-radius:2px;overflow:hidden;">
+            <div style="height:100%;width:57.1%;background:#2563EB;border-radius:2px;"></div>
+          </div>
+          <span class="sf" style="font-size:11px;color:rgba(0,0,0,0.28);font-weight:500;">4/7</span>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════
+           SLIDE 5 — APP PREVIEW (Dark) iPhone mockup
+      ══════════════════════════════════════ -->
+      <div class="slide sd" style="overflow:hidden;">
+
+        <!-- Content up top -->
+        <div style="padding:36px 38px 0;position:relative;z-index:3;">
+          <span class="sf" style="display:inline-block;font-size:10px;font-weight:600;letter-spacing:2.5px;color:#93C5FD;text-transform:uppercase;margin-bottom:14px;">APP PREVIEW</span>
+          <h2 class="cal" style="font-size:28px;color:#fff;line-height:1.1;letter-spacing:-0.3px;margin-bottom:8px;">Looks great on<br>every device.</h2>
+          <p class="sf" style="font-size:12px;color:rgba(255,255,255,0.4);line-height:1.5;">Clean, fast, and easy for your clients.</p>
+        </div>
+
+        <!-- Glow orb behind phone -->
+        <div style="position:absolute;bottom:-40px;left:50%;transform:translateX(-50%);width:340px;height:340px;background:radial-gradient(circle,rgba(37,99,235,0.22) 0%,transparent 65%);pointer-events:none;z-index:1;"></div>
+
+        <!-- iPhone mockup — centred, cut at bottom -->
+        <div style="position:absolute;bottom:-90px;left:50%;transform:translateX(-50%);z-index:2;">
+          <div style="
+            width: 198px;
+            height: 430px;
+            background: #17181C;
+            border-radius: 40px;
+            border: 1.5px solid #2E3038;
+            position: relative;
+            box-shadow:
+              0 0 0 0.5px rgba(255,255,255,0.05) inset,
+              0 30px 80px rgba(0,0,0,0.7),
+              0 0 60px rgba(37,99,235,0.18);
+            overflow: hidden;
+          ">
+            <!-- Dynamic island -->
+            <div style="position:absolute;top:11px;left:50%;transform:translateX(-50%);width:66px;height:18px;background:#000;border-radius:20px;z-index:10;"></div>
+
+            <!-- Screen -->
+            <div style="height:100%;background:#F8FAFC;border-radius:39px;overflow:hidden;">
+
+              <!-- Status bar -->
+              <div style="height:34px;background:#F8FAFC;display:flex;align-items:flex-end;justify-content:space-between;padding:0 16px 5px;">
+                <span class="sf" style="font-size:9px;font-weight:700;color:#0F172A;">9:41</span>
+                <div style="display:flex;gap:3px;align-items:center;">
+                  <svg width="11" height="8" viewBox="0 0 14 10" fill="#0F172A"><rect x="0" y="4" width="2.5" height="6" rx="0.5"/><rect x="4" y="2" width="2.5" height="8" rx="0.5"/><rect x="8" y="0" width="2.5" height="10" rx="0.5"/><rect x="12" y="1" width="2" height="9" rx="0.5" opacity="0.25"/></svg>
+                  <svg width="11" height="8" viewBox="0 0 24 18" fill="#0F172A"><path d="M12 3C8.2 3 4.7 4.4 2 6.8L0 4.8C3.3 1.8 7.5 0 12 0s8.7 1.8 12 4.8l-2 2C19.3 4.4 15.8 3 12 3zm0 5c-2.4 0-4.5.9-6.2 2.3L4 8.5C6.2 6.9 9 6 12 6s5.8.9 8 2.5l-1.8 1.8C16.5 8.9 14.4 8 12 8zm0 5c-1.2 0-2.3.5-3.1 1.3L12 18l3.1-3.7c-.8-.8-1.9-1.3-3.1-1.3z"/></svg>
+                  <div style="width:16px;height:8px;border:1px solid rgba(0,0,0,0.3);border-radius:2px;padding:1px;display:flex;"><div style="flex:1;background:#0F172A;border-radius:1px;"></div></div>
+                </div>
+              </div>
+
+              <!-- App content -->
+              <div style="padding:8px 12px;">
+
+                <!-- Business header -->
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+                  <div style="width:30px;height:30px;border-radius:9px;background:#2563EB;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 3px 8px rgba(37,99,235,0.4);">
+                    <svg width="15" height="15" viewBox="350 400 860 860" fill="white"><path d="M 819.949219 499.695312 L 563.980469 755.773438 C 513.210938 806.554688 513.210938 889.15625 563.980469 939.941406 C 614.75 990.777344 697.378906 990.726562 748.09375 939.941406 L 966.117188 721.851562 C 982.484375 705.480469 982.484375 678.953125 966.117188 662.582031 C 949.75 646.207031 923.230469 646.207031 906.863281 662.582031 L 688.84375 880.671875 C 670.753906 898.707031 641.375 898.761719 623.234375 880.671875 C 605.144531 862.578125 605.144531 833.132812 623.234375 815.042969 L 879.203125 558.96875 C 931.742188 506.464844 1017.1875 506.464844 1069.671875 558.96875 C 1095.097656 584.425781 1109.117188 618.265625 1109.117188 654.257812 C 1109.117188 690.226562 1095.097656 724.0625 1069.671875 749.523438 L 782.496094 1036.789062 C 740.375 1078.921875 684.367188 1102.117188 624.816406 1102.117188 C 565.261719 1102.117188 509.285156 1078.921875 467.164062 1036.789062 C 380.222656 949.820312 380.222656 808.328125 467.164062 721.359375 L 797.144531 391.253906 C 813.511719 374.878906 813.511719 348.355469 797.144531 331.980469 C 780.773438 315.609375 754.257812 315.609375 737.890625 331.980469 L 407.910156 662.089844 C 288.285156 781.722656 288.285156 976.425781 407.910156 1096.058594 C 465.828125 1154.019531 542.867188 1185.945312 624.816406 1185.945312 C 706.765625 1185.945312 783.804688 1154.019531 841.746094 1096.058594 L 1128.925781 808.792969 C 1214.121094 723.570312 1214.121094 584.917969 1128.925781 499.695312 C 1043.78125 414.558594 905.144531 414.445312 819.949219 499.695312 Z"/></svg>
+                  </div>
+                  <div>
+                    <div class="sf" style="font-size:11px;font-weight:700;color:#0F172A;">Glow Studio</div>
+                    <div class="sf" style="font-size:9px;color:#64748B;">Hair &amp; Beauty · Colombo</div>
+                  </div>
+                </div>
+
+                <!-- Section label -->
+                <div class="sf" style="font-size:9px;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:1px;margin-bottom:7px;">Select a service</div>
+
+                <!-- Service cards -->
+                <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:10px;">
+                  <div style="padding:7px 10px;background:#EFF6FF;border-radius:8px;border:1.5px solid #2563EB;display:flex;justify-content:space-between;align-items:center;">
+                    <div>
+                      <div class="sf" style="font-size:10px;font-weight:700;color:#0F172A;">Hair Cut &amp; Style</div>
+                      <div class="sf" style="font-size:8px;color:#64748B;">60 min</div>
+                    </div>
+                    <div class="sf" style="font-size:10px;font-weight:800;color:#2563EB;">Rs. 2,500</div>
+                  </div>
+                  <div style="padding:7px 10px;background:#fff;border-radius:8px;border:1px solid #E2E8F0;display:flex;justify-content:space-between;align-items:center;">
+                    <div>
+                      <div class="sf" style="font-size:10px;font-weight:600;color:#0F172A;">Color Treatment</div>
+                      <div class="sf" style="font-size:8px;color:#64748B;">90 min</div>
+                    </div>
+                    <div class="sf" style="font-size:10px;font-weight:700;color:#475569;">Rs. 5,500</div>
+                  </div>
+                  <div style="padding:7px 10px;background:#fff;border-radius:8px;border:1px solid #E2E8F0;display:flex;justify-content:space-between;align-items:center;">
+                    <div>
+                      <div class="sf" style="font-size:10px;font-weight:600;color:#0F172A;">Deep Conditioning</div>
+                      <div class="sf" style="font-size:8px;color:#64748B;">45 min</div>
+                    </div>
+                    <div class="sf" style="font-size:10px;font-weight:700;color:#475569;">Rs. 3,000</div>
+                  </div>
+                </div>
+
+                <!-- Date strip -->
+                <div style="padding:8px 10px;background:#F8FAFC;border-radius:8px;border:1px solid #E2E8F0;margin-bottom:9px;">
+                  <div class="sf" style="font-size:8px;color:#94A3B8;margin-bottom:5px;font-weight:600;">Pick a date</div>
+                  <div style="display:flex;gap:4px;">
+                    <div style="width:26px;height:32px;border-radius:6px;background:#EFF6FF;border:1.5px solid #2563EB;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1px;">
+                      <span class="sf" style="font-size:7px;color:#2563EB;font-weight:700;text-transform:uppercase;">Fri</span>
+                      <span class="sf" style="font-size:10px;color:#2563EB;font-weight:800;">6</span>
+                    </div>
+                    <div style="width:26px;height:32px;border-radius:6px;background:#fff;border:1px solid #E2E8F0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1px;">
+                      <span class="sf" style="font-size:7px;color:#94A3B8;text-transform:uppercase;">Sat</span>
+                      <span class="sf" style="font-size:10px;color:#475569;font-weight:600;">7</span>
+                    </div>
+                    <div style="width:26px;height:32px;border-radius:6px;background:#fff;border:1px solid #E2E8F0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1px;">
+                      <span class="sf" style="font-size:7px;color:#CBD5E1;text-transform:uppercase;">Sun</span>
+                      <span class="sf" style="font-size:10px;color:#CBD5E1;font-weight:600;">8</span>
+                    </div>
+                    <div style="width:26px;height:32px;border-radius:6px;background:#fff;border:1px solid #E2E8F0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1px;">
+                      <span class="sf" style="font-size:7px;color:#94A3B8;text-transform:uppercase;">Mon</span>
+                      <span class="sf" style="font-size:10px;color:#475569;font-weight:600;">9</span>
+                    </div>
+                    <div style="width:26px;height:32px;border-radius:6px;background:#fff;border:1px solid #E2E8F0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1px;">
+                      <span class="sf" style="font-size:7px;color:#94A3B8;text-transform:uppercase;">Tue</span>
+                      <span class="sf" style="font-size:10px;color:#475569;font-weight:600;">10</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Book button -->
+                <div style="padding:9px;background:linear-gradient(135deg,#2563EB,#1D4ED8);border-radius:9px;text-align:center;box-shadow:0 4px 12px rgba(37,99,235,0.4);">
+                  <span class="sf" style="font-size:11px;font-weight:700;color:#fff;letter-spacing:0.3px;">Book Now</span>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Swipe arrow -->
+        <div style="position:absolute;right:0;top:0;bottom:0;width:50px;z-index:9;display:flex;align-items:center;justify-content:center;background:linear-gradient(to right,transparent,rgba(255,255,255,0.06));">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="rgba(255,255,255,0.30)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+
+        <!-- Progress bar -->
+        <div style="position:absolute;bottom:0;left:0;right:0;padding:14px 28px 18px;z-index:10;display:flex;align-items:center;gap:10px;">
+          <div style="flex:1;height:2.5px;background:rgba(255,255,255,0.10);border-radius:2px;overflow:hidden;">
+            <div style="height:100%;width:71.4%;background:#fff;border-radius:2px;"></div>
+          </div>
+          <span class="sf" style="font-size:11px;color:rgba(255,255,255,0.32);font-weight:500;">5/7</span>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════
+           SLIDE 6 — HOW IT WORKS (Light)
+      ══════════════════════════════════════ -->
+      <div class="slide sl">
+
+        <div style="display:flex;flex-direction:column;justify-content:flex-end;height:100%;padding:0 38px 54px;">
+
+          <span class="sf" style="display:inline-block;font-size:10px;font-weight:600;letter-spacing:2.5px;color:#2563EB;text-transform:uppercase;margin-bottom:14px;">HOW IT WORKS</span>
+
+          <h2 class="cal" style="font-size:30px;color:#0F172A;line-height:1.08;letter-spacing:-0.4px;margin-bottom:6px;">Live in 5 minutes.</h2>
+          <p class="sf" style="font-size:13px;color:#64748B;line-height:1.5;margin-bottom:22px;">No tech skills needed. Set it up once, and you're ready.</p>
+
+          <div>
+            <div style="display:flex;align-items:flex-start;gap:16px;padding:13px 0;border-bottom:1px solid #BFDBFE;">
+              <span class="cal" style="font-size:26px;font-weight:600;color:#2563EB;min-width:36px;line-height:1;opacity:0.85;">01</span>
+              <div style="padding-top:2px;">
+                <div class="sf" style="font-size:13px;font-weight:700;color:#0F172A;margin-bottom:2px;">Create your page</div>
+                <div class="sf" style="font-size:11px;color:#64748B;line-height:1.5;">Add services, prices, and your availability</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:16px;padding:13px 0;border-bottom:1px solid #BFDBFE;">
+              <span class="cal" style="font-size:26px;font-weight:600;color:#2563EB;min-width:36px;line-height:1;opacity:0.85;">02</span>
+              <div style="padding-top:2px;">
+                <div class="sf" style="font-size:13px;font-weight:700;color:#0F172A;margin-bottom:2px;">Share your link</div>
+                <div class="sf" style="font-size:11px;color:#64748B;line-height:1.5;">Post it on Instagram, WhatsApp, or anywhere</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:16px;padding:13px 0;">
+              <span class="cal" style="font-size:26px;font-weight:600;color:#2563EB;min-width:36px;line-height:1;opacity:0.85;">03</span>
+              <div style="padding-top:2px;">
+                <div class="sf" style="font-size:13px;font-weight:700;color:#0F172A;margin-bottom:2px;">Get booked</div>
+                <div class="sf" style="font-size:11px;color:#64748B;line-height:1.5;">Clients book &amp; pay. You get notified instantly.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Swipe arrow -->
+        <div style="position:absolute;right:0;top:0;bottom:0;width:50px;z-index:9;display:flex;align-items:center;justify-content:center;background:linear-gradient(to right,transparent,rgba(0,0,0,0.05));">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="rgba(0,0,0,0.22)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+
+        <!-- Progress bar -->
+        <div style="position:absolute;bottom:0;left:0;right:0;padding:14px 28px 18px;z-index:10;display:flex;align-items:center;gap:10px;">
+          <div style="flex:1;height:2.5px;background:rgba(0,0,0,0.08);border-radius:2px;overflow:hidden;">
+            <div style="height:100%;width:85.7%;background:#2563EB;border-radius:2px;"></div>
+          </div>
+          <span class="sf" style="font-size:11px;color:rgba(0,0,0,0.28);font-weight:500;">6/7</span>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════
+           SLIDE 7 — CTA (Gradient) — no arrow
+      ══════════════════════════════════════ -->
+      <div class="slide sg">
+
+        <!-- Background orbs -->
+        <div style="position:absolute;top:-60px;left:-60px;width:260px;height:260px;background:radial-gradient(circle,rgba(255,255,255,0.07) 0%,transparent 65%);pointer-events:none;"></div>
+        <div style="position:absolute;bottom:-80px;right:-40px;width:280px;height:280px;background:radial-gradient(circle,rgba(0,0,0,0.12) 0%,transparent 65%);pointer-events:none;"></div>
+
+        <!-- Faint watermark clip icon -->
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);opacity:0.04;pointer-events:none;">
+          <svg width="260" height="260" viewBox="350 400 860 860" fill="white">
+            <path d="M 819.949219 499.695312 L 563.980469 755.773438 C 513.210938 806.554688 513.210938 889.15625 563.980469 939.941406 C 614.75 990.777344 697.378906 990.726562 748.09375 939.941406 L 966.117188 721.851562 C 982.484375 705.480469 982.484375 678.953125 966.117188 662.582031 C 949.75 646.207031 923.230469 646.207031 906.863281 662.582031 L 688.84375 880.671875 C 670.753906 898.707031 641.375 898.761719 623.234375 880.671875 C 605.144531 862.578125 605.144531 833.132812 623.234375 815.042969 L 879.203125 558.96875 C 931.742188 506.464844 1017.1875 506.464844 1069.671875 558.96875 C 1095.097656 584.425781 1109.117188 618.265625 1109.117188 654.257812 C 1109.117188 690.226562 1095.097656 724.0625 1069.671875 749.523438 L 782.496094 1036.789062 C 740.375 1078.921875 684.367188 1102.117188 624.816406 1102.117188 C 565.261719 1102.117188 509.285156 1078.921875 467.164062 1036.789062 C 380.222656 949.820312 380.222656 808.328125 467.164062 721.359375 L 797.144531 391.253906 C 813.511719 374.878906 813.511719 348.355469 797.144531 331.980469 C 780.773438 315.609375 754.257812 315.609375 737.890625 331.980469 L 407.910156 662.089844 C 288.285156 781.722656 288.285156 976.425781 407.910156 1096.058594 C 465.828125 1154.019531 542.867188 1185.945312 624.816406 1185.945312 C 706.765625 1185.945312 783.804688 1154.019531 841.746094 1096.058594 L 1128.925781 808.792969 C 1214.121094 723.570312 1214.121094 584.917969 1128.925781 499.695312 C 1043.78125 414.558594 905.144531 414.445312 819.949219 499.695312 Z"/>
+          </svg>
+        </div>
+
+        <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:100%;padding:0 38px 54px;text-align:center;position:relative;z-index:2;">
+
+          <!-- Logo lockup -->
+          <div style="display:flex;align-items:center;gap:11px;margin-bottom:40px;">
+            <div style="width:50px;height:50px;border-radius:15px;background:rgba(255,255,255,0.12);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,0.2);">
+              <svg width="26" height="26" viewBox="350 400 860 860" fill="white">
+                <path d="M 819.949219 499.695312 L 563.980469 755.773438 C 513.210938 806.554688 513.210938 889.15625 563.980469 939.941406 C 614.75 990.777344 697.378906 990.726562 748.09375 939.941406 L 966.117188 721.851562 C 982.484375 705.480469 982.484375 678.953125 966.117188 662.582031 C 949.75 646.207031 923.230469 646.207031 906.863281 662.582031 L 688.84375 880.671875 C 670.753906 898.707031 641.375 898.761719 623.234375 880.671875 C 605.144531 862.578125 605.144531 833.132812 623.234375 815.042969 L 879.203125 558.96875 C 931.742188 506.464844 1017.1875 506.464844 1069.671875 558.96875 C 1095.097656 584.425781 1109.117188 618.265625 1109.117188 654.257812 C 1109.117188 690.226562 1095.097656 724.0625 1069.671875 749.523438 L 782.496094 1036.789062 C 740.375 1078.921875 684.367188 1102.117188 624.816406 1102.117188 C 565.261719 1102.117188 509.285156 1078.921875 467.164062 1036.789062 C 380.222656 949.820312 380.222656 808.328125 467.164062 721.359375 L 797.144531 391.253906 C 813.511719 374.878906 813.511719 348.355469 797.144531 331.980469 C 780.773438 315.609375 754.257812 315.609375 737.890625 331.980469 L 407.910156 662.089844 C 288.285156 781.722656 288.285156 976.425781 407.910156 1096.058594 C 465.828125 1154.019531 542.867188 1185.945312 624.816406 1185.945312 C 706.765625 1185.945312 783.804688 1154.019531 841.746094 1096.058594 L 1128.925781 808.792969 C 1214.121094 723.570312 1214.121094 584.917969 1128.925781 499.695312 C 1043.78125 414.558594 905.144531 414.445312 819.949219 499.695312 Z"/>
+              </svg>
+            </div>
+            <span class="sf" style="font-size:18px;font-weight:700;color:#fff;letter-spacing:1px;">DINAYA</span>
+          </div>
+
+          <h2 class="cal" style="font-size:38px;color:#fff;line-height:1.06;letter-spacing:-0.8px;margin-bottom:16px;">Be the first<br>to know.</h2>
+
+          <p class="sf" style="font-size:14px;color:rgba(255,255,255,0.72);line-height:1.65;margin-bottom:34px;max-width:260px;">We're launching soon. Follow us for early access, updates, and a special launch offer.</p>
+
+          <!-- CTA Button -->
+          <div style="display:inline-flex;align-items:center;gap:9px;padding:14px 30px;background:#fff;border-radius:32px;box-shadow:0 8px 28px rgba(0,0,0,0.25);">
+            <span class="sf" style="font-size:14px;font-weight:700;color:#1E40AF;">Follow @dinaya.lk</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M12 5l7 7-7 7" stroke="#1E40AF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+
+          <p class="sf" style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:22px;letter-spacing:1.5px;text-transform:uppercase;">dinaya.lk · Smart Booking for Sri Lanka</p>
+        </div>
+
+        <!-- Progress bar (full) -->
+        <div style="position:absolute;bottom:0;left:0;right:0;padding:14px 28px 18px;z-index:10;display:flex;align-items:center;gap:10px;">
+          <div style="flex:1;height:2.5px;background:rgba(255,255,255,0.12);border-radius:2px;overflow:hidden;">
+            <div style="height:100%;width:100%;background:#fff;border-radius:2px;"></div>
+          </div>
+          <span class="sf" style="font-size:11px;color:rgba(255,255,255,0.32);font-weight:500;">7/7</span>
+        </div>
+      </div>
+
+    </div><!-- /track -->
+  </div><!-- /viewport -->
+
+  <!-- ── Dots ── -->
+  <div class="ig-dots" id="dots">
+    <div class="dot active" data-i="0"></div>
+    <div class="dot" data-i="1"></div>
+    <div class="dot" data-i="2"></div>
+    <div class="dot" data-i="3"></div>
+    <div class="dot" data-i="4"></div>
+    <div class="dot" data-i="5"></div>
+    <div class="dot" data-i="6"></div>
+  </div>
+
+  <!-- ── Actions ── -->
+  <div class="ig-actions">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="1.8"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    <svg class="ig-bookmark" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="1.8"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+  </div>
+
+  <!-- ── Caption ── -->
+  <div class="ig-caption">
+    <strong>dinaya.lk</strong> Booking, reimagined. The smart way for Sri Lankan businesses to take appointments — coming soon. 🔗 dinaya.lk
+    <span class="ts">2 HOURS AGO</span>
+  </div>
+
+</div><!-- /ig-frame -->
+
+<script>
+(function () {
+  const track  = document.getElementById('track');
+  const vp     = document.getElementById('vp');
+  const dotEls = document.querySelectorAll('.dot');
+  const TOTAL  = 7;
+  const W      = 420;
+  let cur = 0, startX = 0, startTX = 0, dragging = false;
+
+  function goTo(n) {
+    cur = Math.max(0, Math.min(TOTAL - 1, n));
+    track.style.transform = `translateX(${-cur * W}px)`;
+    dotEls.forEach((d, i) => d.classList.toggle('active', i === cur));
+  }
+
+  vp.addEventListener('pointerdown', e => {
+    dragging = true;
+    startX = e.clientX;
+    startTX = -cur * W;
+    track.style.transition = 'none';
+    vp.setPointerCapture(e.pointerId);
+  });
+
+  vp.addEventListener('pointermove', e => {
+    if (!dragging) return;
+    track.style.transform = `translateX(${startTX + (e.clientX - startX)}px)`;
+  });
+
+  vp.addEventListener('pointerup', e => {
+    if (!dragging) return;
+    dragging = false;
+    track.style.transition = 'transform 0.38s cubic-bezier(0.25,0.46,0.45,0.94)';
+    const dx = e.clientX - startX;
+    if (dx < -50) goTo(cur + 1);
+    else if (dx > 50) goTo(cur - 1);
+    else goTo(cur);
+  });
+
+  vp.addEventListener('pointercancel', () => {
+    dragging = false;
+    track.style.transition = 'transform 0.38s cubic-bezier(0.25,0.46,0.45,0.94)';
+    goTo(cur);
+  });
+
+  dotEls.forEach(d => d.addEventListener('click', () => goTo(+d.dataset.i)));
+})();
+</script>
+</body>
+</html>

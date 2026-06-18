@@ -15,6 +15,11 @@ type Props = {
   showCityFilters?: boolean;
 };
 
+const FILTER_PILL_ACTIVE =
+  "border-primary/30 bg-primary/5 font-medium text-primary";
+const FILTER_PILL_INACTIVE =
+  "border-gray-200 bg-white text-gray-700 hover:border-primary/40 dark:border-neutral-700 dark:bg-neutral-900 dark:text-gray-300";
+
 export function DiscoverListings({ listings, activeCategory, activeCity, showCityFilters = true }: Props) {
   const cities = Array.from(new Set(listings.map((item) => item.directoryCity).filter(Boolean))) as string[];
 
@@ -23,8 +28,8 @@ export function DiscoverListings({ listings, activeCategory, activeCity, showCit
       <div className="mb-6 flex flex-wrap gap-2">
         <Link
           href={discoverFilterHref({ city: activeCity ?? undefined, category: null })}
-          className={`rounded-full border px-3 py-1.5 text-sm font-medium ${
-            !activeCategory ? "bg-primary/5 text-primary" : "hover:border-primary/40"
+          className={`rounded-full border px-3 py-1.5 text-sm ${
+            !activeCategory ? FILTER_PILL_ACTIVE : FILTER_PILL_INACTIVE
           }`}
         >
           All categories
@@ -34,9 +39,7 @@ export function DiscoverListings({ listings, activeCategory, activeCity, showCit
             key={category.value}
             href={discoverFilterHref({ city: activeCity ?? undefined, category: category.value })}
             className={`rounded-full border px-3 py-1.5 text-sm ${
-              activeCategory === category.value
-                ? "bg-primary/5 font-medium text-primary"
-                : "bg-white hover:border-primary/40"
+              activeCategory === category.value ? FILTER_PILL_ACTIVE : FILTER_PILL_INACTIVE
             }`}
           >
             {category.label}
@@ -48,8 +51,8 @@ export function DiscoverListings({ listings, activeCategory, activeCity, showCit
         <div className="mb-8 flex flex-wrap gap-2">
           <Link
             href={discoverFilterHref({ category: activeCategory ?? undefined })}
-            className={`rounded-full border px-3 py-1.5 text-sm font-medium ${
-              !activeCity ? "bg-primary/5 text-primary" : "hover:border-primary/40"
+            className={`rounded-full border px-3 py-1.5 text-sm ${
+              !activeCity ? FILTER_PILL_ACTIVE : FILTER_PILL_INACTIVE
             }`}
           >
             All cities
@@ -59,7 +62,7 @@ export function DiscoverListings({ listings, activeCategory, activeCity, showCit
               key={city}
               href={discoverFilterHref({ city, category: activeCategory ?? undefined })}
               className={`rounded-full border px-3 py-1.5 text-sm ${
-                activeCity === city ? "bg-primary/5 font-medium text-primary" : "hover:border-primary/40"
+                activeCity === city ? FILTER_PILL_ACTIVE : FILTER_PILL_INACTIVE
               }`}
             >
               {city}
@@ -69,7 +72,7 @@ export function DiscoverListings({ listings, activeCategory, activeCity, showCit
       ) : null}
 
       {listings.length === 0 ? (
-        <div className="rounded-2xl border bg-gray-50 p-10 text-center">
+        <div className="rounded-2xl border bg-gray-50 dark:bg-neutral-900/60 p-10 text-center">
           <p className="text-muted-foreground">No businesses match these filters yet.</p>
           <Link href="/register" className="mt-4 inline-flex rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground">
             Create your booking page
@@ -83,7 +86,7 @@ export function DiscoverListings({ listings, activeCategory, activeCity, showCit
               <Link
                 key={business.slug}
                 href={bookingUrl}
-                className="rounded-2xl border bg-white p-5 shadow-sm transition hover:border-primary/30 hover:shadow-md"
+                className="rounded-2xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5 shadow-sm transition hover:border-primary/30 hover:shadow-md"
               >
                 <div className="mb-3 flex items-start justify-between gap-3">
                   <div className="flex min-w-0 items-start gap-3">
@@ -95,7 +98,7 @@ export function DiscoverListings({ listings, activeCategory, activeCity, showCit
                         className="size-10 shrink-0 rounded-lg border object-cover"
                       />
                     ) : (
-                      <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border bg-gray-50 text-xs font-semibold text-primary">
+                      <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border bg-gray-50 dark:bg-neutral-900/60 text-xs font-semibold text-primary">
                         {business.name.slice(0, 2).toUpperCase()}
                       </div>
                     )}
@@ -130,14 +133,17 @@ export function DiscoverCityLinks({ listings, activeCategory }: { listings: Dire
 
   return (
     <div className="mb-8 flex flex-wrap gap-2">
-      <Link href={discoverFilterHref({ category: activeCategory ?? undefined })} className="rounded-full border bg-primary/5 px-3 py-1.5 text-sm font-medium text-primary">
+      <Link
+        href={discoverFilterHref({ category: activeCategory ?? undefined })}
+        className={`rounded-full border px-3 py-1.5 text-sm ${FILTER_PILL_ACTIVE}`}
+      >
         All cities
       </Link>
       {cities.map((city) => (
         <Link
           key={city}
           href={discoverFilterHref({ city, category: activeCategory ?? undefined })}
-          className="rounded-full border px-3 py-1.5 text-sm hover:border-primary/40"
+          className={`rounded-full border px-3 py-1.5 text-sm ${FILTER_PILL_INACTIVE}`}
         >
           {city}
         </Link>

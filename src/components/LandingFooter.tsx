@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Icon } from "@/components/ui/Icon";
+import { FooterColumn } from "@/components/FooterColumn";
 import { getPublicSupportWhatsApp } from "@/lib/public-support";
 
 const supportWhatsApp = getPublicSupportWhatsApp();
@@ -18,17 +19,17 @@ export function LandingFooter() {
       <div className="absolute top-0 inset-x-1/4 h-[2px] bg-gradient-to-r from-transparent via-primary/50 to-transparent blur-sm" />
 
       <div className="max-w-7xl mx-auto px-6 lg:px-10 relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_1fr] gap-16 lg:gap-8 mb-24">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_1fr] gap-x-12 gap-y-0 md:gap-16 lg:gap-8 mb-24">
 
           {/* Brand & CTA */}
-          <div className="flex flex-col">
+          <div className="flex flex-col mb-8 md:mb-0">
             <span className="font-cal text-3xl tracking-tight mb-5">Dinaya.lk</span>
-            <p className="text-gray-400 max-w-sm mb-8 leading-relaxed text-sm">
+            <p className="text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 max-w-sm mb-8 leading-relaxed text-sm">
               Online booking for Sri Lankan businesses. No WhatsApp chaos, no setup fees, no commissions.
             </p>
             <Link
               href="/register"
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-white text-black px-6 py-3.5 text-sm font-semibold hover:bg-gray-200 transition-all hover:scale-[1.02] active:scale-95 self-start"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-white text-gray-900 px-6 py-3.5 text-sm font-semibold hover:bg-gray-100 transition-all hover:scale-[1.02] active:scale-95 self-start"
             >
               Get started free
               <Icon name="arrow-right" className="text-xs" />
@@ -36,88 +37,56 @@ export function LandingFooter() {
           </div>
 
           {/* Links: Product */}
-          <div>
-            <h3 className="font-cal text-xs tracking-widest uppercase text-gray-500 mb-6">Product</h3>
-            <ul className="flex flex-col gap-4 text-sm">
-              {[
-                { label: "Features",       href: "/features"  },
-                { label: "Documentation",  href: "/docs"      },
-                { label: "Help center",    href: "/help"      },
-                { label: "Pricing",        href: "/pricing"   },
-                { label: "Solutions",      href: "/solutions" },
-                { label: "Get started",    href: "/register"  },
-                { label: "Sign in",        href: "/auth/signin" },
-              ].map(({ label, href }) => (
-                <li key={href}>
-                  <Link href={href} className="text-gray-400 hover:text-white transition-colors">
-                    {label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          <FooterColumn
+            title="Product"
+            links={[
+              { label: "Features", href: "/features" },
+              { label: "Documentation", href: "/docs" },
+              { label: "Help center", href: "/help" },
+              { label: "Pricing", href: "/pricing" },
+              { label: "Solutions", href: "/solutions" },
+              { label: "Get started", href: "/register" },
+              { label: "Sign in", href: "/auth/signin" },
+            ]}
+          />
 
           {/* Links: About */}
-          <div>
-            <h3 className="font-cal text-xs tracking-widest uppercase text-gray-500 mb-6">About</h3>
-            <ul className="flex flex-col gap-4 text-sm">
-              {[
-                { label: "About Us",   href: "/about"      },
-                { label: "Our Story",  href: "/our-story"  },
-                { label: "Contact",    href: "/contact"    },
-              ].map(({ label, href }) => (
-                <li key={href}>
-                  <Link href={href} className="text-gray-400 hover:text-white transition-colors">
-                    {label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          <FooterColumn
+            title="About"
+            links={[
+              { label: "About Us", href: "/about" },
+              { label: "Our Story", href: "/our-story" },
+              { label: "Contact", href: "/contact" },
+            ]}
+          />
 
           {/* Links: Resources */}
-          <div>
-            <h3 className="font-cal text-xs tracking-widest uppercase text-gray-500 mb-6">Resources</h3>
-            <ul className="flex flex-col gap-4 text-sm">
-              {[
-                { label: "Getting started", href: "/register"   },
-                { label: "Help center",     href: "/help"       },
-                { label: "What's new",      href: "/whats-new"  },
-              ].map(({ label, href }) => (
-                <li key={href}>
-                  <Link href={href} className="text-gray-400 hover:text-white transition-colors">
-                    {label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          <FooterColumn
+            title="Resources"
+            links={[
+              { label: "Getting started", href: "/register" },
+              { label: "Help center", href: "/help" },
+              { label: "What's new", href: "/whats-new" },
+            ]}
+          />
 
           {/* Links: Legal */}
-          <div>
-            <h3 className="font-cal text-xs tracking-widest uppercase text-gray-500 mb-6">Legal</h3>
-            <ul className="flex flex-col gap-4 text-sm">
-              {[
-                { label: "Brand",            href: "/brand"          },
-                { label: "Terms of Service", href: "/legal/terms"    },
-                { label: "Privacy Policy",   href: "/legal/privacy"  },
-                { label: "Refund Policy",    href: "/legal/refund"   },
-              ].map(({ label, href }) => (
-                <li key={href}>
-                  <Link href={href} className="text-gray-400 hover:text-white transition-colors">
-                    {label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          <FooterColumn
+            title="Legal"
+            links={[
+              { label: "Brand", href: "/brand" },
+              { label: "Terms of Service", href: "/legal/terms" },
+              { label: "Privacy Policy", href: "/legal/privacy" },
+              { label: "Refund Policy", href: "/legal/refund" },
+            ]}
+          />
         </div>
 
         {/* Bottom Metadata */}
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-6 text-xs text-gray-500 pb-4 border-b border-white/10 mb-4">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-6 text-xs text-gray-500 dark:text-gray-400 pb-4 border-b border-white/10 mb-4">
           <div className="flex items-center gap-1.5">
             <span>© {new Date().getFullYear()} Dinaya by</span>
-            <span className="text-gray-400 hover:text-white transition-colors cursor-default">Ardeno Studio</span>
+            <span className="text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 hover:text-white transition-colors cursor-default">Ardeno Studio</span>
           </div>
           {/* Social Icons */}
           <div className="flex items-center gap-3">
@@ -128,7 +97,7 @@ export function LandingFooter() {
                 aria-label={label}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/15 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-all hover:scale-110 active:scale-95"
+                className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white dark:hover:bg-neutral-800/15 border border-white/10 flex items-center justify-center text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 hover:text-white transition-all hover:scale-110 active:scale-95"
               >
                 <Icon name={name} size={14} />
               </a>

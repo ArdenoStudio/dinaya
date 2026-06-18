@@ -26,16 +26,16 @@ const STAGES: { key: "" | Stage; label: string }[] = [
 ];
 
 const STAGE_STYLES: Record<Stage, string> = {
-  lead: "bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-700/20",
+  lead: "bg-blue-50 dark:bg-blue-950/40 text-blue-700 ring-1 ring-inset ring-blue-700/20",
   prospect: "bg-violet-50 text-violet-700 ring-1 ring-inset ring-violet-700/20",
-  active: "bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-700/20",
-  churned: "bg-gray-100 text-gray-500 ring-1 ring-inset ring-gray-400/20",
+  active: "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 ring-1 ring-inset ring-emerald-700/20",
+  churned: "bg-gray-100 dark:bg-neutral-800 text-gray-500 dark:text-gray-400 ring-1 ring-inset ring-gray-400/20",
 };
 
 const STAGE_DOT: Record<Stage, string> = {
-  lead: "bg-blue-500",
+  lead: "bg-blue-50 dark:bg-blue-950/400",
   prospect: "bg-violet-500",
-  active: "bg-emerald-500",
+  active: "bg-emerald-50 dark:bg-emerald-950/400",
   churned: "bg-gray-400",
 };
 
@@ -137,16 +137,16 @@ export default function ClientsPage() {
       value: stats.active,
       icon: "person-check",
       iconColor: "text-emerald-600",
-      iconBg: "bg-emerald-50",
-      accent: "bg-emerald-500",
+      iconBg: "bg-emerald-50 dark:bg-emerald-950/40",
+      accent: "bg-emerald-50 dark:bg-emerald-950/400",
     },
     {
       label: "Leads",
       value: stats.leads,
       icon: "person-plus",
       iconColor: "text-blue-600",
-      iconBg: "bg-blue-50",
-      accent: "bg-blue-500",
+      iconBg: "bg-blue-50 dark:bg-blue-950/40",
+      accent: "bg-blue-50 dark:bg-blue-950/400",
     },
     {
       label: "Prospects",
@@ -176,7 +176,7 @@ export default function ClientsPage() {
           <button
             onClick={exportCsv}
             disabled={clients.length === 0}
-            className="flex items-center gap-1.5 border bg-white px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:border-gray-300 hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="flex items-center gap-1.5 border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:border-gray-300 dark:border-neutral-700 hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
             <Icon name="download" className="text-xs" /> Export CSV
           </button>
@@ -192,7 +192,7 @@ export default function ClientsPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         {statCards.map((s) => (
-          <div key={s.label} className="bg-white border rounded-xl overflow-hidden">
+          <div key={s.label} className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 overflow-hidden">
             <div className={`h-[3px] w-full ${s.accent}`} />
             <div className="p-4 flex items-start gap-3">
               <div
@@ -227,7 +227,7 @@ export default function ClientsPage() {
             value={q}
             onChange={(e) => setQ(e.target.value)}
             aria-label="Search customers"
-            className="w-full bg-white border rounded-lg pl-9 pr-8 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 placeholder:text-muted-foreground/60 transition-shadow"
+            className="w-full bg-white dark:bg-neutral-900 border rounded-lg pl-9 pr-8 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 placeholder:text-muted-foreground/60 transition-shadow"
           />
           {q && (
             <button
@@ -249,7 +249,7 @@ export default function ClientsPage() {
               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                 stage === s.key
                   ? "bg-primary text-primary-foreground shadow-sm"
-                  : "bg-white border text-muted-foreground hover:border-gray-300 hover:text-foreground"
+                  : "bg-white dark:bg-neutral-900 border text-muted-foreground hover:border-gray-300 dark:border-neutral-700 hover:text-foreground"
               }`}
             >
               {s.label}
@@ -260,7 +260,7 @@ export default function ClientsPage() {
 
       {/* List */}
       {loading ? (
-        <div className="bg-white border rounded-xl overflow-hidden">
+        <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 overflow-hidden">
           {Array.from({ length: 5 }).map((_, i) => (
             <div
               key={i}
@@ -277,7 +277,7 @@ export default function ClientsPage() {
           ))}
         </div>
       ) : showEmptyAll ? (
-        <div className="bg-white border rounded-xl p-14 text-center">
+        <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-14 text-center">
           <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
             <Icon name="people" className="text-[1.15rem] text-primary" />
           </div>
@@ -293,7 +293,7 @@ export default function ClientsPage() {
           </Link>
         </div>
       ) : showEmptyFiltered ? (
-        <div className="bg-white border rounded-xl p-14 text-center">
+        <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-14 text-center">
           <div className="w-12 h-12 rounded-full bg-muted/40 flex items-center justify-center mx-auto mb-4">
             <Icon name="search" className="text-[1.15rem] text-muted-foreground" />
           </div>
@@ -303,13 +303,13 @@ export default function ClientsPage() {
           </p>
           <button
             onClick={clearFilters}
-            className="inline-flex items-center gap-1.5 border bg-white px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:border-gray-300 hover:text-foreground transition-colors"
+            className="inline-flex items-center gap-1.5 border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:border-gray-300 dark:border-neutral-700 hover:text-foreground transition-colors"
           >
             <Icon name="x-lg" className="text-xs" /> Clear filters
           </button>
         </div>
       ) : (
-        <div className="bg-white border rounded-xl overflow-hidden">
+        <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 overflow-hidden">
           {/* Header row (desktop) */}
           <div className="hidden md:grid grid-cols-[1fr_190px_140px_130px_72px] gap-4 px-5 py-2.5 border-b bg-muted/20 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
             <div>Customer</div>

@@ -212,7 +212,7 @@ export default async function AdminOverviewPage() {
       value: formatLkr(Number(mrrLkr ?? 0)),
       sub: `From ${Number(activeSubs)} active subs`,
       delta: null,
-      accent: "bg-amber-500",
+      accent: "bg-amber-50 dark:bg-amber-950/400",
       icon: TrendingUp,
     },
     {
@@ -220,7 +220,7 @@ export default async function AdminOverviewPage() {
       value: bookingsCurr.toLocaleString(),
       sub: `${formatLkr(Number(gmv30 ?? 0))} GMV`,
       delta: { value: bookingsDelta, label: "vs prior 30d" },
-      accent: "bg-emerald-500",
+      accent: "bg-emerald-50 dark:bg-emerald-950/400",
       icon: CalendarCheck,
     },
   ];
@@ -241,7 +241,7 @@ export default async function AdminOverviewPage() {
         {kpis.map((kpi) => {
           const Icon = kpi.icon;
           return (
-            <div key={kpi.label} className="overflow-hidden rounded-xl border bg-white">
+            <div key={kpi.label} className="overflow-hidden rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
               <div className={`h-[3px] ${kpi.accent}`} />
               <div className="p-5">
                 <div className="flex items-start gap-3">
@@ -259,8 +259,8 @@ export default async function AdminOverviewPage() {
                     <span
                       className={
                         kpi.delta.value >= 0
-                          ? "rounded-full bg-emerald-500/10 px-2 py-0.5 font-medium text-emerald-600"
-                          : "rounded-full bg-rose-500/10 px-2 py-0.5 font-medium text-rose-600"
+                          ? "rounded-full bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.5 font-medium text-emerald-600"
+                          : "rounded-full bg-rose-50 dark:bg-rose-950/30 px-2 py-0.5 font-medium text-rose-600"
                       }
                     >
                       {kpi.delta.value >= 0 ? "+" : ""}
@@ -276,7 +276,7 @@ export default async function AdminOverviewPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <div className="rounded-xl border bg-white p-5">
+        <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
           <p className="text-xs text-muted-foreground">New signups (30d)</p>
           <p className="mt-1 text-2xl font-bold tracking-tight">{signupsCurr}</p>
           <p className="mt-1 text-xs">
@@ -293,7 +293,7 @@ export default async function AdminOverviewPage() {
             <span className="text-muted-foreground">vs prior 30d</span>
           </p>
         </div>
-        <div className="rounded-xl border bg-white p-5">
+        <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
           <p className="text-xs text-muted-foreground">Pro adoption</p>
           <p className="mt-1 text-2xl font-bold tracking-tight">{proShare}%</p>
           <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-muted">
@@ -303,7 +303,7 @@ export default async function AdminOverviewPage() {
             {pro} of {total} accounts
           </p>
         </div>
-        <div className="rounded-xl border bg-white p-5">
+        <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
           <p className="text-xs text-muted-foreground">Churn (30d)</p>
           <p className="mt-1 text-2xl font-bold tracking-tight">{churnRate}%</p>
           <p className="mt-1 text-xs text-muted-foreground">
@@ -313,7 +313,7 @@ export default async function AdminOverviewPage() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1.4fr_0.9fr]">
-        <div className="rounded-xl border bg-white p-5">
+        <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="font-semibold">Top accounts by bookings (30d)</h2>
             <Link
@@ -367,7 +367,7 @@ export default async function AdminOverviewPage() {
         </div>
 
         <div className="space-y-6">
-          <div className="rounded-xl border bg-white p-5">
+          <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
             <div className="mb-3 flex items-center gap-2.5">
               <span className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
                 <UserPlus className="size-4" aria-hidden="true" />
@@ -397,7 +397,7 @@ export default async function AdminOverviewPage() {
             )}
           </div>
 
-          <div className="rounded-xl border bg-white p-5">
+          <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
             <h2 className="mb-4 font-semibold">Recent platform activity</h2>
             {recentActivity.length === 0 ? (
               <p className="text-sm text-muted-foreground">No activity yet.</p>
@@ -423,15 +423,15 @@ export default async function AdminOverviewPage() {
             )}
           </div>
 
-          <div className="rounded-xl border border-amber-500/20 bg-amber-50/60 p-4">
-            <div className="flex items-center gap-2 text-amber-900">
+          <div className="rounded-xl border border-amber-500/20 bg-amber-50 dark:bg-amber-950/35 p-4">
+            <div className="flex items-center gap-2 text-amber-900 dark:text-amber-200">
               <Users className="size-4" aria-hidden="true" />
               <p className="text-xs font-semibold uppercase tracking-wider">Total users</p>
             </div>
             <p className="mt-1 text-2xl font-bold tracking-tight text-amber-950">
               {Number(totalUsers).toLocaleString()}
             </p>
-            <p className="text-xs text-amber-900/70">
+            <p className="text-xs text-amber-900 dark:text-amber-200/70">
               Across all tenants (owners + staff)
             </p>
           </div>

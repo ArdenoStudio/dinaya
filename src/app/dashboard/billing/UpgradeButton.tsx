@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { BillingInterval, PaidPlan } from "@/lib/plan";
+import { trackPlanUpgradeStart } from "@/lib/analytics/gtag";
 
 export function UpgradeButton({
   targetPlan = "pro",
@@ -32,6 +33,8 @@ export function UpgradeButton({
         setLoading(false);
         return;
       }
+
+      trackPlanUpgradeStart({ plan: targetPlan, interval });
 
       const form = document.createElement("form");
       form.method = "POST";

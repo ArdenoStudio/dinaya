@@ -61,21 +61,21 @@ export function SupportClient({ users }: { users: UserRow[] }) {
         <div
           className={
             result.ok
-              ? "rounded-xl border border-emerald-500/30 bg-emerald-50 p-4"
-              : "rounded-xl border border-rose-500/30 bg-rose-50 p-4 text-rose-900"
+              ? "rounded-xl border border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/40 p-4"
+              : "rounded-xl border border-rose-500/30 bg-rose-50 dark:bg-rose-950/40 p-4 text-rose-900 dark:text-rose-200"
           }
         >
           {result.ok ? (
             <div>
-              <p className="text-sm font-semibold text-emerald-900">
+              <p className="text-sm font-semibold text-emerald-900 dark:text-emerald-200">
                 Password reset for {result.email}
               </p>
-              <p className="mt-1 text-xs text-emerald-900/80">
+              <p className="mt-1 text-xs text-emerald-900 dark:text-emerald-200/80">
                 Share this one-time password with the user. They&apos;ll need to change it after
                 signing in. This will only be shown once.
               </p>
               <div className="mt-3 flex items-center gap-2">
-                <code className="flex-1 select-all rounded-md border border-emerald-500/30 bg-white px-3 py-2 font-mono text-base font-bold tracking-wider text-emerald-900">
+                <code className="flex-1 select-all rounded-md border border-emerald-500/30 bg-white px-3 py-2 font-mono text-base font-bold tracking-wider text-emerald-900 dark:text-emerald-200">
                   {result.tempPassword}
                 </code>
                 <button
@@ -101,7 +101,7 @@ export function SupportClient({ users }: { users: UserRow[] }) {
         </div>
       )}
 
-      <div className="overflow-hidden rounded-xl border bg-white">
+      <div className="overflow-hidden rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-muted/30 text-left text-xs uppercase tracking-wider text-muted-foreground">
@@ -144,7 +144,7 @@ export function SupportClient({ users }: { users: UserRow[] }) {
                         type="button"
                         disabled={pending}
                         onClick={() => handleImpersonate(u.id)}
-                        className="inline-flex items-center gap-1.5 rounded-md border bg-white px-3 py-1.5 text-xs font-medium hover:bg-muted disabled:opacity-50"
+                        className="inline-flex items-center gap-1.5 rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-1.5 text-xs font-medium hover:bg-muted disabled:opacity-50"
                       >
                         <UserRoundSearch className="size-3.5" aria-hidden="true" /> Impersonate
                       </button>
@@ -169,7 +169,7 @@ export function SupportClient({ users }: { users: UserRow[] }) {
                           <button
                             type="button"
                             onClick={() => setConfirmId(null)}
-                            className="rounded-md border bg-white px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground"
+                            className="rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground"
                           >
                             Cancel
                           </button>
@@ -181,7 +181,7 @@ export function SupportClient({ users }: { users: UserRow[] }) {
                             setResult(null);
                             setConfirmId(u.id);
                           }}
-                          className="inline-flex items-center gap-1.5 rounded-md border bg-white px-3 py-1.5 text-xs font-medium hover:bg-muted"
+                          className="inline-flex items-center gap-1.5 rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-1.5 text-xs font-medium hover:bg-muted"
                         >
                           <KeyRound className="size-3.5" aria-hidden="true" /> Reset password
                         </button>

@@ -26,6 +26,9 @@ export default async function SettingsPage() {
       payhereEnabled: businesses.payhereEnabled,
       payhereMerchantId: businesses.payhereMerchantId,
       hasPayhereMerchantSecret: businesses.payhereMerchantSecret,
+      paypalEnabled: businesses.paypalEnabled,
+      paypalClientId: businesses.paypalClientId,
+      hasPaypalClientSecret: businesses.paypalClientSecret,
       hideDinayaBranding: businesses.hideDinayaBranding,
       accentColor: businesses.accentColor,
       customDomain: businesses.customDomain,
@@ -56,6 +59,7 @@ export default async function SettingsPage() {
         business={{
           ...business,
           hasPayhereMerchantSecret: Boolean(business?.hasPayhereMerchantSecret),
+          hasPaypalClientSecret: Boolean(business?.hasPaypalClientSecret),
           hideDinayaBranding: business.hideDinayaBranding,
           customDomain: business.customDomain,
           customDomainVerified: Boolean(business.customDomainVerified),

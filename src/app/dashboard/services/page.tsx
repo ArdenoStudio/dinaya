@@ -45,7 +45,7 @@ export default async function ServicesPage() {
           }
         />
       ) : (
-        <div className="bg-white border rounded-xl divide-y">
+        <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 divide-y">
           {list.map((s) => (
             <div key={s.id} className="flex items-center justify-between px-5 py-4 hover:bg-muted/20 transition-colors">
               <div className="flex-1 min-w-0">
@@ -78,7 +78,7 @@ export default async function ServicesPage() {
                 </div>
               </div>
               <div className="flex items-center gap-3 ml-4 shrink-0">
-                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${s.isActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
+                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${s.isActive ? "bg-green-100 text-green-700" : "bg-gray-100 dark:bg-neutral-800 text-gray-500 dark:text-gray-400"}`}>
                   {s.isActive ? "Active" : "Inactive"}
                 </span>
                 <Link

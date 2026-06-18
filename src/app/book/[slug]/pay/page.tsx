@@ -4,7 +4,7 @@ import { db } from "@/db";
 import { businesses } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { getBookingCopy } from "@/lib/i18n";
-import PayHereRedirect from "./PayHereRedirect";
+import PaymentRedirect from "./PaymentRedirect";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -34,7 +34,7 @@ export default async function BookingPayPage({ params }: Props) {
             </div>
           }
         >
-          <PayHereRedirect
+          <PaymentRedirect
             slug={slug}
             copy={{
               redirectingToPayment: copy.redirectingToPayment,

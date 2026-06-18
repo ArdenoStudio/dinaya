@@ -48,7 +48,7 @@ function renderSegment(segment: Segment, key: number) {
   switch (segment.type) {
     case "bold":
       return (
-        <strong key={key} className="font-semibold text-gray-900">
+        <strong key={key} className="font-semibold text-gray-900 dark:text-gray-100">
           {segment.value}
         </strong>
       );
@@ -56,7 +56,7 @@ function renderSegment(segment: Segment, key: number) {
       return (
         <code
           key={key}
-          className="rounded-md border border-gray-200 bg-gray-50 px-1.5 py-0.5 font-mono text-[0.85em] text-gray-800"
+          className="rounded-md border border-gray-200 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-900/60 px-1.5 py-0.5 font-mono text-[0.85em] text-gray-800 dark:text-gray-200"
         >
           {segment.value}
         </code>
