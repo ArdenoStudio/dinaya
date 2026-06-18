@@ -39,6 +39,8 @@ interface Props {
     provider?: string;
     status?: string;
   }) => void;
+  variant?: "inline" | "full";
+  formId?: string;
 }
 
 const fieldBaseCls =
@@ -148,6 +150,8 @@ export default function StepConfirm({
   onUpdate,
   onBack,
   onConfirmed,
+  variant = "full",
+  formId = "booking-contact-form",
 }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -618,65 +622,105 @@ export default function StepConfirm({
     </div>
   );
 
+  const paymentExtras = (
+    <>
+      {hasManualPaymentFallback && (
+        <div className="mb-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm dark:border-amber-800/50 dark:bg-amber-950/40 md:mb-4">
+          <p className="mb-2 font-medium text-amber-900 dark:text-amber-200">{copy.localPayment}</p>
+          {business.bankTransferInstructions && (
+            <p className="whitespace-pre-wrap text-amber-900 dark:text-amber-200/80">
+              {business.bankTransferInstructions}
+            </p>
+          )}
+          {business.lankaqrImageUrl && (
+            <div className="mt-3">
+              <Image
+                src={business.lankaqrImageUrl}
+                alt="LankaQR"
+                width={144}
+                height={144}
+                className="h-36 w-36 rounded-lg border bg-white object-contain p-2 dark:border-neutral-800 dark:bg-neutral-900"
+                unoptimized={!isOptimizableRemoteImage(business.lankaqrImageUrl)}
+              />
+            </div>
+          )}
+        </div>
+      )}
+      {upsell && (
+        <div className="mb-3 rounded-xl border border-blue-100 bg-[var(--booking-accent-muted)]/70 p-4 text-sm md:mb-4">
+          <p className="font-medium text-blue-950 dark:text-blue-100">Recommended add-on</p>
+          <p className="mt-1 text-[var(--booking-accent)]/80">
+            {upsell.reason} Ask about <span className="font-semibold">{upsell.name}</span>
+            {upsell.priceLkr > 0 ? ` (${formatLkr(upsell.priceLkr)})` : ""} during your visit.
+          </p>
+        </div>
+      )}
+      {onlineMethods.length > 1 && service?.requiresPayment && dueNow > 0 && (
+        <div className="mb-3 space-y-2 rounded-xl border border-border bg-card p-4 md:mb-4">
+          <p className="text-sm font-medium text-foreground">{copy.paymentMethod}</p>
+          <label className="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground">
+            <input
+              type="radio"
+              name="paymentMethod"
+              checked={paymentMethod === "payhere"}
+              onChange={() => setPaymentMethod("payhere")}
+            />
+            {copy.paymentMethodPayhere}
+          </label>
+          <label className="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground">
+            <input
+              type="radio"
+              name="paymentMethod"
+              checked={paymentMethod === "paypal"}
+              onChange={() => setPaymentMethod("paypal")}
+            />
+            {copy.paymentMethodPaypal}
+          </label>
+        </div>
+      )}
+    </>
+  );
+
+  if (variant === "inline") {
+    return (
+      <div id={formId} className="mt-6 border-t border-border pt-6">
+        {paymentExtras}
+        {contactForm}
+        {error && (
+          <div className="mt-3 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300">
+            <Icon name="exclamation-circle" className="mt-0.5 shrink-0 text-sm" />
+            <span>{error}</span>
+          </div>
+        )}
+        <button
+          type="button"
+          onClick={handleBook}
+          disabled={!canSubmit}
+          className="mt-4 w-full rounded-xl bg-[var(--booking-accent)] py-3.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {loading ? "Booking…" : payLabel}
+        </button>
+        <button
+          type="button"
+          onClick={onBack}
+          className="mt-3 text-sm text-muted-foreground transition-colors hover:text-foreground"
+        >
+          {copy.back}
+        </button>
+        <div className="mt-3 flex items-center justify-center gap-1">
+          <Icon name="shield-check" className="text-[11px] text-muted-foreground" />
+          <span className="text-[11px] text-muted-foreground">{copy.paymentSecure}</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col">
       <div className="flex flex-col gap-3 booking-panel-bg px-[14px] py-3 md:grid md:grid-cols-2 md:gap-8 md:bg-transparent md:px-8 md:py-7">
         <div>{summaryCards}</div>
         <div>
-          {hasManualPaymentFallback && (
-            <div className="mb-3 rounded-xl border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-950/40 p-4 text-sm md:mb-4">
-              <p className="mb-2 font-medium text-amber-900 dark:text-amber-200">{copy.localPayment}</p>
-              {business.bankTransferInstructions && (
-                <p className="whitespace-pre-wrap text-amber-900 dark:text-amber-200/80">
-                  {business.bankTransferInstructions}
-                </p>
-              )}
-              {business.lankaqrImageUrl && (
-                <div className="mt-3">
-                  <Image
-                    src={business.lankaqrImageUrl}
-                    alt="LankaQR"
-                    width={144}
-                    height={144}
-                    className="h-36 w-36 rounded-lg border bg-white dark:border-neutral-800 dark:bg-neutral-900 object-contain p-2"
-                    unoptimized={!isOptimizableRemoteImage(business.lankaqrImageUrl)}
-                  />
-                </div>
-              )}
-            </div>
-          )}
-          {upsell && (
-            <div className="mb-3 rounded-xl border border-blue-100 booking-bg-accent-muted/70 p-4 text-sm md:mb-4">
-              <p className="font-medium text-blue-950 dark:text-blue-100">Recommended add-on</p>
-              <p className="mt-1 booking-text-accent/80">
-                {upsell.reason} Ask about <span className="font-semibold">{upsell.name}</span>
-                {upsell.priceLkr > 0 ? ` (${formatLkr(upsell.priceLkr)})` : ""} during your visit.
-              </p>
-            </div>
-          )}
-          {onlineMethods.length > 1 && service?.requiresPayment && dueNow > 0 && (
-            <div className="mb-3 space-y-2 rounded-xl border border-gray-100 bg-white p-4 md:mb-4">
-              <p className="text-sm font-medium text-gray-900">{copy.paymentMethod}</p>
-              <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
-                <input
-                  type="radio"
-                  name="paymentMethod"
-                  checked={paymentMethod === "payhere"}
-                  onChange={() => setPaymentMethod("payhere")}
-                />
-                {copy.paymentMethodPayhere}
-              </label>
-              <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
-                <input
-                  type="radio"
-                  name="paymentMethod"
-                  checked={paymentMethod === "paypal"}
-                  onChange={() => setPaymentMethod("paypal")}
-                />
-                {copy.paymentMethodPaypal}
-              </label>
-            </div>
-          )}
+          {paymentExtras}
           {contactForm}
         </div>
       </div>
