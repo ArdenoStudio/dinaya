@@ -18,9 +18,28 @@ export type EmbedEvent =
   | { type: "dinaya:booking_started"; slug: string; serviceId?: string }
   | { type: "dinaya:booking_completed"; slug: string; bookingId: string; status?: string };
 
+function resolveEmbedParentOrigin(): string | null {
+  if (typeof window === "undefined") return null;
+
+  const parentOrigin = new URLSearchParams(window.location.search).get("parentOrigin");
+  if (!parentOrigin) return null;
+
+  try {
+    const url = new URL(parentOrigin);
+    if (url.protocol !== "http:" && url.protocol !== "https:") return null;
+    return url.origin;
+  } catch {
+    return null;
+  }
+}
+
 export function postEmbedEvent(event: EmbedEvent) {
   if (typeof window === "undefined" || window.parent === window) return;
-  window.parent.postMessage(event, "*");
+
+  const targetOrigin = resolveEmbedParentOrigin();
+  if (!targetOrigin) return;
+
+  window.parent.postMessage(event, targetOrigin);
 }
 
 export function applyEmbedThemeFromQuery() {

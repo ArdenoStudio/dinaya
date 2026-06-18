@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { decryptSecret } from "@/lib/secrets";
 import { withRateLimit } from "@/lib/rate-limit";
 import { hasPublicColumn } from "@/lib/dashboard/db-compat";
+import { parseRequiredBusinessSlug } from "@/lib/booking/public-booking-access";
 import { createPayhereCheckout } from "@/lib/payments/providers/payhere";
 import { createPaypalCheckout, getPaypalOrder } from "@/lib/payments/providers/paypal";
 
@@ -21,7 +22,10 @@ export async function GET(req: NextRequest, context: RouteContext) {
   if (!limited.ok) return limited.response;
 
   const { id: bookingId } = await context.params;
-  const slug = req.nextUrl.searchParams.get("slug");
+  const slug = parseRequiredBusinessSlug(req.nextUrl.searchParams.get("slug"));
+  if (!slug) {
+    return NextResponse.json({ error: "Booking not found" }, { status: 404 });
+  }
   const includePaypal = await hasPublicColumn("businesses", "paypal_enabled");
   const includePaymentProvider = await hasPublicColumn("payments", "provider");
 
@@ -64,7 +68,7 @@ export async function GET(req: NextRequest, context: RouteContext) {
     .where(eq(bookings.id, bookingId))
     .limit(1);
 
-  if (!row || (slug && row.businessSlug !== slug)) {
+  if (!row || row.businessSlug !== slug) {
     return NextResponse.json({ error: "Booking not found" }, { status: 404 });
   }
 

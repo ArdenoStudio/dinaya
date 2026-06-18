@@ -1,6 +1,6 @@
 import { and, eq, gt, lt, ne, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { services, slotReservations } from "@/db/schema";
+import { services, slotReservations, staff, staffServices } from "@/db/schema";
 import { SLOT_HOLD_MINUTES } from "@/lib/booking-session";
 import { allocateServiceSlug } from "@/lib/service-slug";
 import { hasPublicColumn } from "@/lib/dashboard/db-compat";
@@ -14,11 +14,50 @@ export type SlotReservationInput = {
   sessionToken: string;
 };
 
-export async function purgeExpiredSlotReservations(): Promise<void> {
-  await db.delete(slotReservations).where(lt(slotReservations.expiresAt, new Date()));
+export async function isValidSlotReservationInput(input: {
+  businessId: string;
+  staffId: string;
+  serviceId: string;
+}): Promise<boolean> {
+  const [staffRow] = await db
+    .select({ businessId: staff.businessId, isActive: staff.isActive })
+    .from(staff)
+    .where(eq(staff.id, input.staffId))
+    .limit(1);
+
+  if (!staffRow?.isActive || staffRow.businessId !== input.businessId) {
+    return false;
+  }
+
+  const [serviceRow] = await db
+    .select({ businessId: services.businessId, isActive: services.isActive })
+    .from(services)
+    .where(eq(services.id, input.serviceId))
+    .limit(1);
+
+  if (!serviceRow?.isActive || serviceRow.businessId !== input.businessId) {
+    return false;
+  }
+
+  const [assignment] = await db
+    .select({ staffId: staffServices.staffId })
+    .from(staffServices)
+    .where(
+      and(
+        eq(staffServices.staffId, input.staffId),
+        eq(staffServices.serviceId, input.serviceId),
+      ),
+    )
+    .limit(1);
+
+  return Boolean(assignment);
 }
 
 export async function createSlotReservation(input: SlotReservationInput) {
+  if (!(await isValidSlotReservationInput(input))) {
+    return { ok: false as const, reason: "invalid_request" as const };
+  }
+
   await purgeExpiredSlotReservations();
 
   const expiresAt = new Date(Date.now() + SLOT_HOLD_MINUTES * 60 * 1000);
@@ -63,6 +102,10 @@ export async function createSlotReservation(input: SlotReservationInput) {
     });
 
   return { ok: true as const, reservation: row };
+}
+
+export async function purgeExpiredSlotReservations(): Promise<void> {
+  await db.delete(slotReservations).where(lt(slotReservations.expiresAt, new Date()));
 }
 
 export async function releaseSlotReservation(sessionToken: string): Promise<void> {

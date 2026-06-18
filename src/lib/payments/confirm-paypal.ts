@@ -10,6 +10,7 @@ import { sendBookingNotificationToBusiness } from "@/lib/resend";
 import { capturePaypalOrder } from "@/lib/payments/providers/paypal";
 import { sendPaymentReceiptEmail } from "@/lib/receipts";
 import { decryptSecret } from "@/lib/secrets";
+import { validatePaypalCaptureForBooking } from "@/lib/payments/validate-paypal-capture";
 import type { Plan } from "@/lib/plan";
 import type { BookingLanguage } from "@/lib/i18n";
 
@@ -20,6 +21,7 @@ export type PaypalConfirmResult =
 export async function confirmPaypalPayment(input: {
   bookingId: string;
   orderId: string;
+  businessSlug: string;
 }): Promise<PaypalConfirmResult> {
   const [row] = await db
     .select({
@@ -57,6 +59,10 @@ export async function confirmPaypalPayment(input: {
     return { ok: false, error: "Booking not found.", status: 404 };
   }
 
+  if (row.businessSlug !== input.businessSlug) {
+    return { ok: false, error: "Booking not found.", status: 404 };
+  }
+
   if (row.providerOrderId && row.providerOrderId !== input.orderId) {
     return { ok: false, error: "PayPal order mismatch.", status: 400 };
   }
@@ -75,6 +81,21 @@ export async function confirmPaypalPayment(input: {
     clientSecret,
     orderId: input.orderId,
   });
+
+  const captureValidation = validatePaypalCaptureForBooking({
+    payload: capture.payload,
+    bookingId: input.bookingId,
+    paymentId: row.paymentId,
+    amountLkr: row.amountLkr ?? 0,
+  });
+  if (!captureValidation.ok) {
+    await db
+      .update(payments)
+      .set({ status: "failed", providerPayload: capture.payload })
+      .where(and(eq(payments.id, row.paymentId), eq(payments.status, "pending")));
+
+    return { ok: false, error: captureValidation.error, status: 400 };
+  }
 
   if (capture.status !== "COMPLETED") {
     await db

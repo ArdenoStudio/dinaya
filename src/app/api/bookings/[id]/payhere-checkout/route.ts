@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { bookings, businesses, payments, services } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { buildPayhereFormData, getPayhereUrl } from "@/lib/payhere";
+import { parseRequiredBusinessSlug } from "@/lib/booking/public-booking-access";
 import { decryptSecret } from "@/lib/secrets";
 import { withRateLimit } from "@/lib/rate-limit";
 
@@ -19,7 +20,10 @@ export async function GET(req: NextRequest, context: RouteContext) {
   if (!limited.ok) return limited.response;
 
   const { id: bookingId } = await context.params;
-  const slug = req.nextUrl.searchParams.get("slug");
+  const slug = parseRequiredBusinessSlug(req.nextUrl.searchParams.get("slug"));
+  if (!slug) {
+    return NextResponse.json({ error: "Booking not found" }, { status: 404 });
+  }
 
   const [row] = await db
     .select({
@@ -47,7 +51,7 @@ export async function GET(req: NextRequest, context: RouteContext) {
     .where(eq(bookings.id, bookingId))
     .limit(1);
 
-  if (!row || (slug && row.businessSlug !== slug)) {
+  if (!row || row.businessSlug !== slug) {
     return NextResponse.json({ error: "Booking not found" }, { status: 404 });
   }
 

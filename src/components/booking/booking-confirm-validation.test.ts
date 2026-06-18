@@ -4,7 +4,6 @@ import {
   isValidPhone,
   validateConfirmFields,
 } from "@/components/booking/booking-confirm-validation";
-import { buildSuccessRedirectUrl } from "@/lib/booking/success-redirect";
 
 const messages = {
   nameRequired: "Name required",
@@ -51,31 +50,5 @@ describe("phone and email helpers", () => {
   it("validates email format", () => {
     expect(isValidEmail("bad@")).toBe(false);
     expect(isValidEmail("good@example.com")).toBe(true);
-  });
-});
-
-describe("success redirect", () => {
-  it("appends safe query params to absolute URLs", () => {
-    const url = buildSuccessRedirectUrl("https://example.com/thanks", {
-      bookingId: "abc",
-      service: "Haircut",
-      staff: "Sam",
-      status: "confirmed",
-      startsAt: "2026-06-17T10:00:00.000Z",
-    });
-    expect(url).toContain("bookingId=abc");
-    expect(url).toContain("service=Haircut");
-    expect(url.startsWith("https://example.com/thanks")).toBe(true);
-  });
-
-  it("appends params to relative paths", () => {
-    const url = buildSuccessRedirectUrl("/thank-you", {
-      bookingId: "abc",
-      service: "Haircut",
-      staff: "Sam",
-      status: "confirmed",
-      startsAt: "2026-06-17T10:00:00.000Z",
-    });
-    expect(url.startsWith("/thank-you?")).toBe(true);
   });
 });

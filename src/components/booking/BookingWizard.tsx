@@ -14,7 +14,7 @@ import StepDateTime from "./StepDateTime";
 import StepConfirm from "./StepConfirm";
 import { BookingPanel } from "./BookingPanel";
 import { BookingTheme } from "./BookingTheme";
-import { useBookingUrlState, useBookingUrlSync } from "./useBookingUrlState";
+import { useBookingUrlState, useBookingUrlSync, useStripBookingContactFromUrl } from "./useBookingUrlState";
 import { useSlotHold } from "./useSlotHold";
 import { getBookingCopy } from "@/lib/i18n";
 import { getEligibleStaff, pickDefaultStaff } from "@/lib/booking-staff";
@@ -218,6 +218,8 @@ function BookingWizardInner({
     dealId: selectedDealId,
     enabled: !embedMode,
   });
+
+  useStripBookingContactFromUrl();
 
   useEffect(() => {
     if (!embedMode) return;
