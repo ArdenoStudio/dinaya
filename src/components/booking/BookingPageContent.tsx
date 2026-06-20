@@ -318,7 +318,7 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
           )}
 
           {showHub && !hideSidebarSections && (staffWithBio.length > 0 || businessRating) ? (
-            <footer className="mt-5 flex flex-col items-center gap-3 border-t border-border/50 px-4 pt-5">
+            <footer className="mt-6 flex flex-col items-center gap-4 border-t border-border px-4 pt-6">
               {staffWithBio.length > 0 ? (
                 <BookingTeamSection
                   members={staffWithBio}

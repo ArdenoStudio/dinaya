@@ -119,10 +119,22 @@ export default function BookingServiceHub({
     <BlurFade className="w-full">
       <article className={cn("flex w-full flex-col", shell)}>
         {heroImageUrl ? (
-          <BookingHubHeroImage src={heroImageUrl} alt={businessName} />
+          <div className="relative">
+            <BookingHubHeroImage src={heroImageUrl} alt={businessName} />
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-card via-card/90 to-transparent px-4 pb-4 pt-20 md:px-6 md:pb-5">
+              <h1 className="font-cal text-[2rem] font-semibold leading-[1.05] tracking-tight text-foreground md:text-4xl">
+                {businessName}
+              </h1>
+            </div>
+          </div>
         ) : null}
 
-        <header className="flex flex-col gap-4 px-4 pb-3 pt-5 md:px-6 md:pt-6">
+        <header
+          className={cn(
+            "flex flex-col gap-4 px-4 pb-3 md:px-6",
+            heroImageUrl ? "pt-4" : "pt-5 md:pt-6",
+          )}
+        >
           <div className={cn("flex gap-4", showHeaderAvatar ? "items-start" : "flex-col")}>
             {showHeaderAvatar ? (
               <Avatar className="size-12 shrink-0 ring-2 ring-border/80" data-size="lg">
@@ -140,10 +152,17 @@ export default function BookingServiceHub({
             ) : null}
 
             <div className="min-w-0 flex-1">
-              <h1 className="font-cal text-3xl font-bold leading-[1.1] tracking-tight text-foreground md:text-4xl">
-                {businessName}
-              </h1>
-              <p className="mt-2 text-[0.9375rem] leading-relaxed text-muted-foreground">
+              {!heroImageUrl ? (
+                <h1 className="font-cal text-3xl font-semibold leading-[1.05] tracking-tight text-foreground md:text-4xl">
+                  {businessName}
+                </h1>
+              ) : null}
+              <p
+                className={cn(
+                  "text-[0.9375rem] leading-relaxed text-muted-foreground dark:text-zinc-300",
+                  heroImageUrl ? "" : "mt-2",
+                )}
+              >
                 {tagline}
               </p>
               {rating ? (
@@ -168,17 +187,11 @@ export default function BookingServiceHub({
             </div>
           </div>
 
-          <div className="hidden items-center justify-between gap-4 border-t border-border/50 pt-4 md:flex">
-            <p className="text-sm text-muted-foreground">
+          <div className="hidden border-t border-border/50 pt-4 md:block">
+            <p className="text-sm text-muted-foreground dark:text-zinc-400">
               {copy.chooseServiceAndTime}
               <span className="ml-2 text-foreground/60">· {services.length} services</span>
             </p>
-            <BookingHubCta
-              businessSlug={businessSlug}
-              serviceSlug={primaryService.slug ?? primaryService.id}
-              label={copy.chooseService}
-              variant="inline"
-            />
           </div>
         </header>
 
@@ -196,7 +209,7 @@ export default function BookingServiceHub({
                   className={cn(
                     "group flex min-h-[4.75rem] items-start gap-3.5 rounded-xl border border-transparent px-3 py-4 md:py-[1.125rem]",
                     "transition-[background-color,transform,box-shadow,border-color] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]",
-                    "hover:border-border/80 hover:bg-muted/60 hover:shadow-sm",
+                    "hover:border-border/80 hover:bg-[var(--booking-accent-muted)] hover:shadow-sm",
                     "active:scale-[0.985] md:hover:translate-y-[-1px]",
                     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--booking-accent-soft)]",
                   )}
@@ -224,22 +237,28 @@ export default function BookingServiceHub({
                       {service.name}
                     </p>
                     {service.description ? (
-                      <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-muted-foreground dark:text-zinc-400">
+                      <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-muted-foreground dark:text-zinc-300">
                         {service.description}
                       </p>
                     ) : null}
                     <div className="mt-2.5 flex flex-wrap items-center gap-2">
-                      <Badge variant="secondary" className="gap-1 text-xs font-normal">
+                      <Badge
+                        variant="secondary"
+                        className="h-auto gap-1 px-2.5 py-1 text-xs font-normal"
+                      >
                         <Icon name="clock" className="text-[0.8rem]" />
                         {service.durationMinutes}m
                       </Badge>
                       {service.priceLkr > 0 ? (
-                        <Badge variant="secondary" className="gap-1 text-xs font-medium">
+                        <Badge
+                          variant="outline"
+                          className="h-auto gap-1 border-border/80 px-2.5 py-1 text-xs font-medium"
+                        >
                           <Icon name="cash-stack" className="text-[0.8rem]" />
                           {formatLkr(service.priceLkr)}
                         </Badge>
                       ) : (
-                        <Badge variant="secondary" className="text-xs">
+                        <Badge variant="secondary" className="h-auto px-2.5 py-1 text-xs">
                           Free
                         </Badge>
                       )}
@@ -248,7 +267,7 @@ export default function BookingServiceHub({
 
                   <Icon
                     name="chevron-right"
-                    className="size-4 shrink-0 self-center text-muted-foreground/50 transition-transform duration-200 ease-out group-hover:translate-x-1 group-hover:text-[var(--booking-accent)]"
+                    className="size-4 shrink-0 self-center text-muted-foreground/60 transition-[transform,color] duration-200 ease-out group-hover:translate-x-1 group-hover:text-[var(--booking-accent)]"
                   />
                 </Link>
               </li>
@@ -281,6 +300,7 @@ export default function BookingServiceHub({
         serviceSlug={primaryService.slug ?? primaryService.id}
         label={copy.chooseService}
         variant="sticky"
+        emphasis="secondary"
       />
     </BlurFade>
   );
