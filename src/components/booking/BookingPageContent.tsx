@@ -89,6 +89,7 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
   const copy = getBookingCopy(business.language);
   const calendarOverlayConfig = await buildCalendarOverlayConfig(mode, business.language);
   const gallery = business.galleryImages ?? [];
+  const heroImageUrl = !hideGallery && gallery.length > 0 ? gallery[0]! : null;
   const staffWithBio = staff.filter((s) => s.bio || s.avatarUrl);
   const instagramUrl = normalizePublicHttpsUrl(business.instagramUrl);
   const facebookUrl = normalizePublicHttpsUrl(business.facebookUrl);
@@ -126,9 +127,13 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
     mode === "embed" ||
     services.length === 1;
 
-  /** Single-service booker or multi-service hub — cal.com-style centered card */
   const bookerFocus = mode === "service" || mode === "embed" || services.length === 1;
   const centeredLayout = bookerFocus || showHub;
+  const layoutMaxWidth = showHub
+    ? "w-full max-w-2xl px-0 md:px-4"
+    : bookerFocus
+      ? "w-full max-w-5xl px-0 md:px-4"
+      : "mx-auto max-w-5xl px-0 md:px-8 md:py-6";
 
   const wizardService =
     mode === "service"
@@ -139,14 +144,15 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
 
   const hideSidebarSections =
     mode === "embed" ? hideGallery !== false : Boolean(hideGallery);
+  const showSecondarySections = !hideSidebarSections && !(bookerFocus && !showHub);
 
   return (
     <BookingTheme accentColor={business.accentColor} embed={mode === "embed"}>
       <div
         className={
           centeredLayout
-            ? "booking-page-bg flex min-h-dvh flex-col items-center bg-muted/20 md:justify-center md:py-10"
-            : "booking-page-bg min-h-dvh bg-muted/30"
+            ? "booking-page-bg flex min-h-dvh flex-col items-center md:justify-center md:py-10"
+            : "booking-page-bg min-h-dvh"
         }
         data-booking-embed-root={mode === "embed" ? "" : undefined}
       >
@@ -154,9 +160,7 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
         {mode !== "embed" ? <BookingThemeToggle /> : null}
         <div
           className={
-            centeredLayout
-              ? "w-full max-w-5xl px-0 md:px-4"
-              : "mx-auto max-w-5xl px-0 md:px-8 md:py-6"
+            centeredLayout ? layoutMaxWidth : "mx-auto max-w-5xl px-0 md:px-8 md:py-6"
           }
         >
           {!centeredLayout && !hideSidebarSections && gallery.length > 0 && (
@@ -233,10 +237,19 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
               businessSlug={business.slug}
               businessName={business.name}
               businessLogoUrl={business.logoUrl}
+              businessDescription={business.description}
+              businessAddress={business.address}
+              businessPhone={business.phone}
+              heroImageUrl={heroImageUrl}
               services={services}
               copy={copy}
               avgRating={avgRating}
               reviewCount={reviewCount}
+              cancellationPolicy={business.cancellationPolicy}
+              depositPolicy={business.depositPolicy}
+              bankTransferInstructions={business.bankTransferInstructions}
+              hasTeam={!hideSidebarSections && staffWithBio.length > 0}
+              hasReviews={!hideSidebarSections && Boolean(businessRating)}
             />
           )}
 
@@ -281,7 +294,7 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
             />
           )}
 
-          {centeredLayout && !hideSidebarSections && hasTrustBlock && (
+          {centeredLayout && !showHub && showSecondarySections && hasTrustBlock && (
             <div className="mt-4 border-t border-border/60 px-4 pt-4 md:mt-5 md:rounded-xl md:border md:bg-card/50 md:px-5 md:py-4">
               <BookingPolicyAccordion
                 copy={copy}
@@ -289,24 +302,10 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
                 depositPolicy={business.depositPolicy}
                 bankTransferInstructions={business.bankTransferInstructions}
               />
-              <div className="hidden space-y-3 text-center text-xs text-muted-foreground md:block">
-                {business.cancellationPolicy && (
-                  <p>
-                    <span className="font-medium text-foreground">{copy.cancellationPolicy}:</span>{" "}
-                    {business.cancellationPolicy}
-                  </p>
-                )}
-                {business.depositPolicy && (
-                  <p>
-                    <span className="font-medium text-foreground">{copy.depositPolicy}:</span>{" "}
-                    {business.depositPolicy}
-                  </p>
-                )}
-              </div>
             </div>
           )}
 
-          {!hideSidebarSections && hasAboutSection && (
+          {!showHub && showSecondarySections && hasAboutSection && (
             <Card
               className={`mt-0 overflow-hidden rounded-none border-x-0 shadow-none ${
                 centeredLayout
@@ -322,14 +321,31 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
             </Card>
           )}
 
-          {showHub && !hideSidebarSections && staffWithBio.length > 0 && (
-            <BookingTeamSection
-              members={staffWithBio}
-              copy={copy}
-              variant="dialog"
-              className="mt-6 flex justify-center"
-            />
-          )}
+          {showHub && !hideSidebarSections && (staffWithBio.length > 0 || businessRating) ? (
+            <footer className="mt-6 flex flex-col items-center gap-4 border-t border-border px-4 pt-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+              {staffWithBio.length > 0 ? (
+                <BookingTeamSection
+                  members={staffWithBio}
+                  copy={copy}
+                  variant="dialog"
+                  id="booking-hub-team"
+                />
+              ) : null}
+              {businessRating ? (
+                <BookingReviewsSection
+                  businessSlug={business.slug}
+                  businessName={business.name}
+                  avgRating={businessRating.avgRating}
+                  reviewCount={businessRating.reviewCount}
+                  reviewDistribution={reviewDistribution}
+                  initialReviews={initialReviews}
+                  copy={copy}
+                  id="booking-hub-reviews"
+                  className="pb-8"
+                />
+              ) : null}
+            </footer>
+          ) : null}
 
           {!centeredLayout && !hideSidebarSections && staffWithBio.length > 0 && (
             <BookingTeamSection
@@ -340,7 +356,7 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
             />
           )}
 
-          {!hideSidebarSections && businessRating && (
+          {!showHub && showSecondarySections && businessRating && (
             <BookingReviewsSection
               businessSlug={business.slug}
               businessName={business.name}
@@ -349,7 +365,7 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
               reviewDistribution={reviewDistribution}
               initialReviews={initialReviews}
               copy={copy}
-              className={`flex justify-center pb-8 ${centeredLayout ? "mt-3" : "mt-6"}`}
+              className={`flex justify-center pb-8 ${centeredLayout ? "mt-4" : "mt-6"}`}
             />
           )}
         </div>

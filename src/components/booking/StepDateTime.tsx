@@ -5,7 +5,6 @@ import { addDays, format, parseISO } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import { Icon } from "@/components/ui/Icon";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import type { Staff } from "@/db/schema";
 import { getBookingSessionToken } from "@/lib/booking-session";
 import type { BookingService } from "./BookingWizard";
@@ -45,6 +44,7 @@ interface Props {
   onSlotsChange?: (slots: SlotOption[], loading: boolean, emptyState: SlotEmptyState) => void;
   onCalendarMonthChange?: (month: string) => void;
   calendarOverlay?: GoogleCalendarOverlay;
+  hideHeading?: boolean;
 }
 
 export default function StepDateTime({
@@ -69,6 +69,7 @@ export default function StepDateTime({
   onSlotsChange,
   onCalendarMonthChange,
   calendarOverlay,
+  hideHeading = false,
 }: Props) {
   const today = toZonedTime(new Date(), timezone);
   const maxDate = service?.maximumAdvanceDays
@@ -114,7 +115,15 @@ export default function StepDateTime({
     if (locationId) query.set("locationId", locationId);
     if (dealId) query.set("dealId", dealId);
     if (sessionToken) query.set("sessionToken", sessionToken);
+    try {
     const res = await fetch(`/api/availability?${query.toString()}`);
+    if (!res.ok) {
+      setSlotEmptyState("full");
+      setSlots([]);
+      setLoadingSlots(false);
+      setHasFetched(true);
+      return;
+    }
     const data = await res.json();
     const fetchedSlots: SlotOption[] = data.slots ?? [];
     const fetchedEmptyState: SlotEmptyState =
@@ -129,6 +138,12 @@ export default function StepDateTime({
     setLoadingSlots(false);
     setHasFetched(true);
     onSlotsChange?.(fetchedSlots, false, fetchedEmptyState);
+    } catch {
+      setSlotEmptyState("full");
+      setSlots([]);
+      setLoadingSlots(false);
+      setHasFetched(true);
+    }
   }
 
   const loadMonthStatus = useCallback(
@@ -173,7 +188,7 @@ export default function StepDateTime({
       clearInterval(interval);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [businessId, staff?.id, service?.id, selectedDate, canLoad, dealId]);
+  }, [businessId, staff?.id, anyStaff, service?.id, selectedDate, canLoad, dealId, locationId]);
 
   useEffect(() => {
     if (!canLoad) {
@@ -242,18 +257,15 @@ export default function StepDateTime({
     [onDateChange, onSlotSelect],
   );
 
-  const dateHeading = selectedDate
-    ? format(parseISO(selectedDate + "T12:00:00"), "EEEE, d MMMM yyyy")
-    : null;
   const compactDateHeading = selectedDate
     ? format(parseISO(selectedDate + "T12:00:00"), "EEE d")
     : null;
 
   if (!service || (!staff && !anyStaff)) {
     return (
-      <div className="flex min-h-[280px] items-center justify-center rounded-xl border border-dashed border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-6 py-12 text-center text-sm text-gray-400 dark:text-gray-500 md:min-h-[320px]">
+      <div className="flex min-h-[280px] items-center justify-center rounded-xl border border-dashed border-border bg-card px-6 py-12 text-center text-sm text-muted-foreground md:min-h-[320px]">
         <div>
-          <Icon name="calendar2-plus" className="mb-3 block text-3xl text-gray-300 dark:text-neutral-600" />
+          <Icon name="calendar2-plus" className="mb-3 block text-3xl text-muted-foreground/50" />
           {copy.selectServiceHint}
         </div>
       </div>
@@ -286,13 +298,15 @@ export default function StepDateTime({
   };
 
   return (
-    <div className="flex h-full min-w-0 flex-col">
-      <p className="mb-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground md:hidden">
-        {copy.pickDateTime}
-      </p>
+      <div className="flex h-full min-w-0 w-full max-w-full flex-col">
+      {!hideHeading ? (
+        <p className="mb-4 text-sm font-medium text-muted-foreground md:hidden">
+          {copy.pickDateTime}
+        </p>
+      ) : null}
 
-      <div className="flex min-w-0 flex-col md:grid md:min-h-[22rem] md:grid-cols-[minmax(20rem,1fr)_minmax(0,14rem)] md:divide-x md:divide-border lg:grid-cols-[minmax(22rem,1fr)_minmax(0,17rem)]">
-        <section className="min-w-0 pb-4 md:px-6 md:pb-0 md:pt-0 lg:px-8">
+      <div className="flex min-w-0 w-full max-w-full flex-col lg:grid lg:min-h-[22rem] lg:grid-cols-[minmax(0,1fr)_minmax(0,16rem)] lg:divide-x lg:divide-border xl:grid-cols-[minmax(0,1fr)_minmax(0,18rem)]">
+        <section className="min-w-0 pb-0 lg:px-4 lg:pb-0 lg:pt-0 xl:px-5">
           <div className="mb-3 flex items-center justify-between gap-2 md:mb-4">
             <p className="text-sm font-medium text-foreground md:sr-only">{copy.chooseDate}</p>
             <button
@@ -334,7 +348,21 @@ export default function StepDateTime({
             )}
           </div>
 
-          <div className="hidden min-w-0 md:block">
+          <div className="hidden min-w-0 md:block lg:hidden">
+            <MonthCalendar
+              selectedDate={selectedDate}
+              minDate={today}
+              maxDate={maxDate}
+              dayStatus={monthDayStatus}
+              personalBusyDates={calendarOverlay?.busyDates}
+              nextAvailableDate={showNextAvailable ? nextAvailable?.date : undefined}
+              onMonthChange={handleMonthChange}
+              onSelect={onDateChange}
+              size="comfortable"
+            />
+          </div>
+
+          <div className="hidden min-w-0 lg:block">
             <MonthCalendar
               selectedDate={selectedDate}
               minDate={today}
@@ -349,21 +377,15 @@ export default function StepDateTime({
           </div>
         </section>
 
-        {!hideSlots && (
-          <>
-            <Separator className="md:hidden" />
-            <section className="min-w-0 pt-4 md:flex md:flex-col md:px-4 md:pt-0 lg:px-5">
-              {compactDateHeading ? (
+        {!hideSlots ? (
+          <section className="min-w-0 border-t border-border pt-3 lg:flex lg:min-h-0 lg:flex-col lg:border-t-0 lg:px-4 lg:pt-0 xl:px-5">
+            {compactDateHeading ? (
                 <div className="mb-3 flex items-baseline justify-between gap-2 md:mb-4">
                   <h3 className="text-sm font-semibold text-foreground md:text-base">{compactDateHeading}</h3>
                   <span className="hidden text-xs text-muted-foreground md:inline">{copy.availableTimes}</span>
                 </div>
               ) : (
                 <p className="mb-3 text-xs text-muted-foreground">{copy.selectDate}</p>
-              )}
-
-              {dateHeading && (
-                <p className="mb-3 text-sm font-semibold text-foreground md:hidden">{dateHeading}</p>
               )}
 
               {holdLabel && (
@@ -384,26 +406,17 @@ export default function StepDateTime({
                 <p className="py-6 text-center text-sm text-muted-foreground">{copy.selectDate}</p>
               ) : (
                 <>
-                  <div className="md:hidden">
+                  <div className="lg:hidden">
                     <TimeSlotGrid {...slotPanelProps} />
                   </div>
-                  <div className="hidden max-h-[min(28rem,calc(100vh-12rem))] overflow-y-auto md:block md:pr-1">
+                  <div className="scrollbar-hide hidden min-w-0 max-h-[min(28rem,calc(100vh-12rem))] overflow-y-auto overflow-x-hidden lg:block">
                     <SlotListPanel {...slotPanelProps} />
                   </div>
                 </>
               )}
-            </section>
-          </>
-        )}
+          </section>
+        ) : null}
       </div>
-
-      {dateHeading && selectedSlot && (
-        <div className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50 dark:bg-emerald-950/40 px-4 py-2.5 text-sm text-emerald-800 md:hidden">
-          <Icon name="check-circle" className="mr-1.5" />
-          <span className="font-medium">{selectedSlot.label}</span>
-          <span className="text-emerald-600"> · {dateHeading}</span>
-        </div>
-      )}
 
       {(onBack || showContinue) && (
         <div className="mt-4 flex items-center gap-3 border-t border-border pt-4 md:hidden">
@@ -416,7 +429,7 @@ export default function StepDateTime({
           {showContinue && selectedSlot && onContinue && (
             <Button
               type="button"
-              className="ml-auto bg-[var(--booking-accent)] text-white hover:bg-[var(--booking-accent)]/90"
+              className="ml-auto min-h-11 bg-[var(--booking-accent)] px-5 text-base text-white hover:bg-[var(--booking-accent)]/90 md:text-sm"
               onClick={onContinue}
             >
               {copy.continue}

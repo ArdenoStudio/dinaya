@@ -5,6 +5,8 @@ import type { BookingCopy } from "@/lib/i18n";
 import type { PublicReview, ReviewDistribution } from "@/lib/reviews-public";
 import { Icon } from "@/components/ui/Icon";
 import { Button } from "@/components/ui/button";
+import { BlurFade } from "@/components/ui/blur-fade";
+import { NumberTicker } from "@/components/ui/number-ticker";
 import { ReviewRatingSummary, type StarFilter } from "./ReviewRatingSummary";
 import { StarRating } from "./StarRating";
 
@@ -21,6 +23,7 @@ interface Props {
   initialReviews: SerializedPublicReview[];
   copy: BookingCopy;
   className?: string;
+  id?: string;
 }
 
 function formatReviewDate(iso: string) {
@@ -49,6 +52,7 @@ export function BookingReviewsSection({
   initialReviews,
   copy,
   className,
+  id,
 }: Props) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [reviews, setReviews] = useState(initialReviews);
@@ -102,28 +106,44 @@ export function BookingReviewsSection({
   }
 
   return (
-    <div className={className}>
-      <button
-        type="button"
-        onClick={openDialog}
-        className="group mx-auto flex items-center gap-3 rounded-full border border-border/60 bg-card/60 px-4 py-2 text-sm text-muted-foreground transition-colors hover:border-border hover:bg-card hover:text-foreground"
-      >
-        <span className="flex items-center gap-2">
-          <StarRating rating={avgRating} size="sm" />
-          <span className="font-semibold tabular-nums text-foreground">{avgRating.toFixed(1)}</span>
-        </span>
-        <span className="font-medium">
-          {copy.readReviews}
-          <span className="ml-1 font-normal text-muted-foreground">
-            ({reviewCount.toLocaleString()})
+    <BlurFade inView className={className}>
+      <div id={id} className="mx-auto flex w-full max-w-3xl justify-center px-4">
+        <button
+          type="button"
+          onClick={openDialog}
+          className="group flex min-h-11 items-center gap-3 rounded-full border border-border/70 bg-card/80 px-4 py-2.5 text-sm text-muted-foreground shadow-sm backdrop-blur-sm transition-[background-color,border-color,transform,box-shadow] duration-200 ease-out hover:border-border hover:bg-card hover:text-foreground hover:shadow active:scale-[0.99]"
+        >
+          <span className="flex items-center gap-2">
+            <StarRating rating={avgRating} size="sm" />
+            <NumberTicker
+              value={avgRating}
+              decimalPlaces={1}
+              className="text-sm font-semibold text-foreground"
+              aria-label={avgRating.toFixed(1)}
+            />
           </span>
-        </span>
-        <Icon name="chevron-right" className="text-xs opacity-50 transition-transform group-hover:translate-x-0.5" />
-      </button>
+          <span className="font-medium">
+            {copy.readReviews}
+            <span className="ml-1 font-normal text-muted-foreground">
+              (
+              <NumberTicker
+                value={reviewCount}
+                className="text-muted-foreground"
+                aria-label={String(reviewCount)}
+              />
+              )
+            </span>
+          </span>
+          <Icon
+            name="chevron-right"
+            className="text-xs opacity-50 transition-transform duration-200 ease-out group-hover:translate-x-0.5"
+          />
+        </button>
+      </div>
 
       <dialog
         ref={dialogRef}
-        className="fixed top-1/2 left-1/2 z-50 m-0 w-[min(100vw-2rem,40rem)] max-h-[min(92dvh,44rem)] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl border border-border bg-card p-0 text-foreground shadow-xl backdrop:bg-black/40 open:flex open:flex-col"
+        className="fixed top-1/2 left-1/2 z-50 m-0 hidden max-h-[min(92dvh,44rem)] w-[min(100vw-2rem,40rem)] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl border border-border bg-card p-0 text-foreground shadow-xl backdrop:bg-black/40 open:flex open:flex-col"
         onClick={(event) => {
           if (event.target === event.currentTarget) closeDialog();
         }}
@@ -194,6 +214,6 @@ export function BookingReviewsSection({
           </div>
         ) : null}
       </dialog>
-    </div>
+    </BlurFade>
   );
 }

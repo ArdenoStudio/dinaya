@@ -8,15 +8,16 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { BlurFade } from "@/components/ui/blur-fade";
 
 type StaffMember = Pick<Staff, "id" | "name" | "bio" | "avatarUrl">;
 
 interface Props {
   members: StaffMember[];
   copy: BookingCopy;
-  /** dialog = compact trigger + overlay (centered booker/hub). card = inline section for wide layouts. */
   variant: "dialog" | "card";
   className?: string;
+  id?: string;
 }
 
 function MemberAvatar({
@@ -28,21 +29,22 @@ function MemberAvatar({
   size?: "sm" | "md" | "lg";
   stacked?: boolean;
 }) {
-  const sizeClass = size === "lg" ? "size-16 text-2xl" : size === "sm" ? "size-7 text-xs" : "size-14 text-xl";
+  const sizeClass = size === "lg" ? "size-16 text-2xl" : size === "sm" ? "size-8 text-xs" : "size-14 text-xl";
   return (
     <Avatar
-      className={`${sizeClass} ${stacked ? "border-2 border-background" : ""}`}
+      className={`${sizeClass} ${stacked ? "border-2 border-background ring-1 ring-border/50" : ""}`}
       data-size={size === "lg" ? "lg" : undefined}
+      title={member.name}
     >
       {member.avatarUrl ? <AvatarImage src={member.avatarUrl} alt={member.name} /> : null}
-      <AvatarFallback className="bg-[var(--booking-accent-muted)] font-bold text-[var(--booking-accent)]">
+      <AvatarFallback className="bg-[var(--booking-accent-muted)] font-semibold text-[var(--booking-accent)]">
         {member.name.charAt(0).toUpperCase()}
       </AvatarFallback>
     </Avatar>
   );
 }
 
-export function BookingTeamSection({ members, copy, variant, className }: Props) {
+export function BookingTeamSection({ members, copy, variant, className, id }: Props) {
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   if (members.length === 0) return null;
@@ -60,18 +62,19 @@ export function BookingTeamSection({ members, copy, variant, className }: Props)
     const overflow = members.length - preview.length;
 
     return (
-      <div className={className}>
-        <button
+      <BlurFade inView className={className}>
+        <div id={id} className="flex justify-center">
+          <button
           type="button"
           onClick={openDialog}
-          className="group mx-auto flex items-center gap-3 rounded-full border border-border/60 bg-card/60 px-4 py-2 text-sm text-muted-foreground transition-colors hover:border-border hover:bg-card hover:text-foreground"
+          className="group flex min-h-11 items-center gap-3 rounded-full border border-border/70 bg-card/80 px-4 py-2.5 text-sm text-muted-foreground shadow-sm transition-[background-color,border-color,transform] duration-200 ease-out hover:border-border hover:bg-card hover:text-foreground active:scale-[0.99]"
         >
-          <span className="flex -space-x-2">
+          <span className="flex -space-x-2.5">
             {preview.map((member) => (
               <MemberAvatar key={member.id} member={member} size="sm" stacked />
             ))}
             {overflow > 0 && (
-              <span className="flex size-7 items-center justify-center rounded-full border-2 border-background bg-muted text-[10px] font-semibold text-muted-foreground">
+              <span className="flex size-8 items-center justify-center rounded-full border-2 border-background bg-muted text-[10px] font-semibold text-muted-foreground ring-1 ring-border/50">
                 +{overflow}
               </span>
             )}
@@ -80,12 +83,15 @@ export function BookingTeamSection({ members, copy, variant, className }: Props)
             {copy.meetTeam}
             <span className="ml-1 font-normal text-muted-foreground">({members.length})</span>
           </span>
-          <Icon name="chevron-right" className="text-xs opacity-50 transition-transform group-hover:translate-x-0.5" />
+          <Icon
+            name="chevron-right"
+            className="text-xs opacity-50 transition-transform duration-200 ease-out group-hover:translate-x-0.5"
+          />
         </button>
 
         <dialog
           ref={dialogRef}
-          className="fixed top-1/2 left-1/2 z-50 m-0 w-[min(100vw-2rem,28rem)] max-h-[min(85dvh,32rem)] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl border border-border bg-card p-0 text-foreground shadow-xl backdrop:bg-black/40 open:flex open:flex-col"
+          className="fixed top-1/2 left-1/2 z-50 m-0 hidden max-h-[min(85dvh,32rem)] w-[min(100vw-2rem,28rem)] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl border border-border bg-card p-0 text-foreground shadow-xl backdrop:bg-black/40 open:flex open:flex-col"
           onClick={(event) => {
             if (event.target === event.currentTarget) closeDialog();
           }}
@@ -111,43 +117,41 @@ export function BookingTeamSection({ members, copy, variant, className }: Props)
             ))}
           </ul>
         </dialog>
-      </div>
+        </div>
+      </BlurFade>
     );
   }
 
   return (
-    <section className={className}>
-      <Card className="mt-0 overflow-hidden rounded-none border-x-0 py-0 shadow-none md:mt-6 md:rounded-xl md:border-x md:shadow-sm">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">{copy.meetTeam}</CardTitle>
-        </CardHeader>
-        <Separator />
-        {members.length === 1 ? (
-          <CardContent className="flex items-center gap-4 py-4">
-            <MemberAvatar member={members[0]!} size="lg" />
-            <div className="min-w-0">
-              <p className="font-semibold text-foreground">{members[0]!.name}</p>
-              {members[0]!.bio && (
-                <p className="mt-0.5 text-sm leading-relaxed text-muted-foreground">{members[0]!.bio}</p>
-              )}
-            </div>
-          </CardContent>
-        ) : (
-          <CardContent className="grid gap-px bg-border p-0 sm:grid-cols-2">
-            {members.map((member) => (
-              <div key={member.id} className="flex flex-col items-center gap-2 bg-card p-4 text-center">
-                <MemberAvatar member={member} />
-                <div>
-                  <p className="text-sm font-semibold text-foreground">{member.name}</p>
-                  {member.bio && (
-                    <p className="mt-0.5 line-clamp-3 text-xs leading-relaxed text-muted-foreground">{member.bio}</p>
-                  )}
-                </div>
+    <BlurFade inView className={className}>
+      <section id={id}>
+        <Card className="mt-0 overflow-hidden rounded-none border-x-0 py-0 shadow-none md:mt-6 md:rounded-xl md:border-x md:shadow-sm">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">{copy.meetTeam}</CardTitle>
+          </CardHeader>
+          <Separator />
+          {members.length === 1 ? (
+            <CardContent className="flex items-center gap-4 py-4">
+              <MemberAvatar member={members[0]!} size="lg" />
+              <div className="min-w-0">
+                <p className="font-semibold text-foreground">{members[0]!.name}</p>
+                {members[0]!.bio && (
+                  <p className="mt-0.5 text-sm leading-relaxed text-muted-foreground">{members[0]!.bio}</p>
+                )}
               </div>
-            ))}
-          </CardContent>
-        )}
-      </Card>
-    </section>
+            </CardContent>
+          ) : (
+            <CardContent className="flex flex-wrap justify-center gap-4 py-6">
+              {members.map((member) => (
+                <div key={member.id} className="flex w-28 flex-col items-center gap-2 text-center">
+                  <MemberAvatar member={member} />
+                  <p className="text-sm font-medium text-foreground">{member.name}</p>
+                </div>
+              ))}
+            </CardContent>
+          )}
+        </Card>
+      </section>
+    </BlurFade>
   );
 }

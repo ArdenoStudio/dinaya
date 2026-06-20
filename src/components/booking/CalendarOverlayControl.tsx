@@ -51,22 +51,22 @@ export function CalendarOverlayControl({
 
   return (
     <div
-      className={`rounded-xl border border-gray-100 bg-gray-50/70 dark:border-neutral-800 dark:bg-neutral-950/40 ${
+      className={`rounded-xl border border-border bg-muted/50 ${
         compact ? "px-3 py-2.5" : "px-3.5 py-3"
       }`}
     >
       <div className="flex items-center gap-3">
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white text-gray-500 shadow-sm ring-1 ring-gray-100 dark:bg-neutral-900 dark:text-gray-300 dark:ring-neutral-800">
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-card text-muted-foreground shadow-sm ring-1 ring-border">
           <Icon name="calendar2-check" className="text-base" aria-hidden="true" />
         </span>
         <div className="min-w-0 flex-1">
           <Label
             htmlFor={switchId}
-            className="block text-xs font-semibold text-gray-800 dark:text-gray-200"
+            className="block text-xs font-semibold text-foreground"
           >
             {copy.overlayMyCalendar}
           </Label>
-          <span className="mt-0.5 block text-[11px] leading-4 text-gray-500 dark:text-gray-400">
+          <span className="mt-0.5 block text-[11px] leading-4 text-muted-foreground">
             {status}
           </span>
         </div>
@@ -76,7 +76,7 @@ export function CalendarOverlayControl({
           disabled={overlay.connecting || overlay.loading}
           onCheckedChange={() => overlay.toggle()}
           aria-label={copy.overlayMyCalendar}
-          className="h-6 w-11 shrink-0 data-[size=default]:h-6 data-[size=default]:w-11 data-checked:booking-bg-accent data-unchecked:bg-gray-200 dark:data-unchecked:bg-neutral-700"
+          className="h-6 w-11 shrink-0 data-[size=default]:h-6 data-[size=default]:w-11 data-checked:booking-bg-accent data-unchecked:bg-muted"
         />
       </div>
 
@@ -98,12 +98,12 @@ export function CalendarOverlayControl({
       )}
 
       {overlay.connected && !overlay.error && !compact && (
-        <div className="mt-2.5 flex items-center justify-between border-t border-gray-200/70 pt-2.5 text-[10px] text-gray-400 dark:border-neutral-800 dark:text-gray-500">
+        <div className="mt-2.5 flex items-center justify-between border-t border-border pt-2.5 text-[10px] text-muted-foreground">
           <span>{copy.calendarPrivacyHint}</span>
           <button
             type="button"
             onClick={overlay.disconnect}
-            className="font-medium text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+            className="font-medium text-muted-foreground hover:text-foreground"
           >
             {copy.disconnect}
           </button>

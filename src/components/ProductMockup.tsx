@@ -89,11 +89,11 @@ function DinayaLogo({ size = 13 }: { size?: number }) {
 
 function DinayaBranding({ compact = false }: { compact?: boolean }) {
   return (
-    <div className={`inline-flex items-center gap-1.5 bg-gray-50 dark:bg-neutral-900/60 border border-gray-100 dark:border-neutral-800 rounded-full ${compact ? "px-2.5 py-1" : "px-3 py-1.5"}`}>
-      <span className={`text-gray-500 dark:text-gray-400 ${compact ? "text-[11px]" : "text-xs"}`}>Powered by</span>
-      <span className="inline-flex items-center gap-1 text-gray-900 dark:text-gray-100">
+    <div className={`inline-flex items-center gap-1.5 rounded-full border border-border bg-card ${compact ? "px-2.5 py-1" : "px-3 py-1.5"}`}>
+      <span className={`text-muted-foreground ${compact ? "text-[11px]" : "text-xs"}`}>Powered by</span>
+      <span className="inline-flex items-center gap-1 text-foreground">
         <DinayaLogo size={compact ? 11 : 15} />
-        <span className={`font-cal leading-none text-gray-900 dark:text-gray-100 ${compact ? "text-[11px]" : "text-xs"}`}>Dinaya.lk</span>
+        <span className={`font-cal leading-none text-foreground ${compact ? "text-[11px]" : "text-xs"}`}>Dinaya.lk</span>
       </span>
     </div>
   );
@@ -117,20 +117,20 @@ function CalendarDay({ cell }: { cell: DayCell }) {
 
   return (
     <div
-      className={`relative flex flex-col items-center justify-center text-[10px] py-0.5 rounded-lg font-medium transition-all min-h-[22px] ${
+      className={`relative mx-auto flex size-7 items-center justify-center rounded-lg text-[9px] font-medium transition-all xl:size-8 xl:rounded-xl xl:text-[10px] ${
         isSelected
-          ? "bg-blue-600 text-white shadow-sm shadow-blue-500/40"
+          ? "bg-blue-600 text-white shadow-md"
           : isBooked
-          ? "text-gray-300 line-through cursor-not-allowed"
-          : d
-          ? "text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-neutral-800 hover:shadow-sm cursor-pointer"
-          : ""
+            ? "cursor-not-allowed text-muted-foreground/35 line-through"
+            : d
+              ? "text-foreground hover:bg-muted"
+              : ""
       }`}
     >
       {d}
-      {isAvailable && !isSelected && (
-        <span className="absolute bottom-0.5 size-1 rounded-full bg-emerald-400 dark:bg-emerald-500" />
-      )}
+      {isAvailable && !isSelected ? (
+        <span className="absolute bottom-0.5 size-1 rounded-full bg-blue-600" />
+      ) : null}
     </div>
   );
 }
@@ -165,123 +165,111 @@ function FloatingToasts({ persona }: { persona: PersonaData }) {
   );
 }
 
+function BackPill({ label }: { label: string }) {
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full border border-border/70 bg-card/95 px-2.5 py-1 text-[10px] font-medium text-muted-foreground shadow-sm backdrop-blur-sm">
+      <Icon name="chevron-left" className="text-[8px]" />
+      {label}
+    </span>
+  );
+}
+
+function MockField({
+  label,
+  optional,
+  value,
+  placeholder,
+}: {
+  label: string;
+  optional?: boolean;
+  value?: string;
+  placeholder?: string;
+}) {
+  return (
+    <div>
+      <p className="text-[11px] font-medium text-foreground">
+        {label}{" "}
+        {optional ? (
+          <span className="font-normal text-muted-foreground">(optional)</span>
+        ) : (
+          <span className="font-normal text-muted-foreground">*</span>
+        )}
+      </p>
+      <div
+        className={`mt-[5px] rounded-xl border border-border bg-card px-[10px] py-[9px] text-[12px] ${
+          value ? "text-foreground" : "text-muted-foreground"
+        }`}
+      >
+        {value ?? placeholder}
+      </div>
+    </div>
+  );
+}
+
 function PhoneScreen({ persona }: { persona: PersonaData }) {
   const selectedService = persona.services.find((s) => s.selected)!;
-  const num = parseInt(selectedService.price.replace(/[^0-9]/g, ""));
-  const depositAmount = `Rs. ${(num / 2).toLocaleString()}`;
   const selectedTime = persona.slots[persona.selectedSlot].label;
 
   return (
-    <div className="w-full h-full flex flex-col bg-[#f2f2f7] dark:bg-neutral-950">
-      <div className="bg-gradient-to-b from-blue-700 via-blue-600 to-blue-600 px-[18px] pt-[66px] pb-[18px]">
-        <div className="flex items-center gap-[12px] mb-[14px]">
-          <div className="size-[42px] rounded-[13px] bg-white/20 flex items-center justify-center ring-1 ring-white/25 shrink-0">
-            <Icon name={persona.icon} className="text-white text-[18px]" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-white font-semibold text-[16px] leading-tight truncate">{persona.business}</p>
-            <TrustLine persona={persona} light />
-          </div>
-          <div className="flex items-center gap-[5px] bg-white/15 rounded-full px-[9px] py-[5px] shrink-0">
-            <span className="size-[7px] rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-white text-[11px] font-medium">Open</span>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-[7px]">
-          {[
-            { label: "Service", done: true },
-            { label: "Time", done: true },
-            { label: "Confirm", done: false },
-          ].map((step, i) => (
-            <div key={step.label} className="flex items-center gap-[7px]">
-              <div
-                className={`flex items-center gap-[5px] rounded-full px-[9px] py-[5px] text-[11px] font-semibold ${
-                  step.done ? "bg-white/20 text-white/75" : "bg-white text-blue-600 shadow-sm"
-                }`}
-              >
-                {step.done ? (
-                  <Icon name="check-lg" className="text-[9px]" />
-                ) : (
-                  <span className="size-[8px] rounded-full bg-blue-300 inline-block" />
-                )}
-                {step.label}
-              </div>
-              {i < 2 && <div className="h-px w-[8px] bg-white/25 shrink-0" />}
-            </div>
-          ))}
-        </div>
+    <div className="flex h-full w-full flex-col bg-muted/40 dark:bg-black">
+      <div className="px-[14px] pb-[8px] pt-[58px]">
+        <BackPill label="Date & Time" />
       </div>
 
-      <div className="flex-1 px-[14px] py-[12px] flex flex-col gap-[8px]">
-        <div className="bg-white dark:bg-neutral-900 rounded-[16px] px-[15px] py-[13px]">
-          <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-[0.08em] mb-[9px]">Selected Service</p>
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="text-[15px] font-semibold text-gray-900 dark:text-gray-100 leading-snug">{selectedService.name}</p>
-              <div className="flex items-center gap-[4px] mt-[3px]">
-                <Icon name="clock" className="text-gray-300 text-[10px]" />
-                <p className="text-[11px] text-gray-400 dark:text-gray-500">{selectedService.duration}</p>
-              </div>
+      <div className="mx-[14px] flex min-h-0 flex-1 flex-col overflow-hidden">
+        <div className="pb-[12px]">
+          <div className="flex items-start gap-[10px]">
+            <div className="flex size-[40px] shrink-0 items-center justify-center rounded-full bg-blue-600/10 text-blue-600">
+              <Icon name={persona.icon} className="text-[14px]" />
             </div>
-            <p className="text-[16px] font-bold text-blue-600 tabular-nums shrink-0">{selectedService.price}</p>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-[13px] font-medium text-foreground">{persona.business}</p>
+              <TrustLine persona={persona} />
+            </div>
+          </div>
+
+          <div className="mt-[14px] border-t border-border/70 pt-[14px]">
+            <p className="text-[17px] font-semibold leading-tight text-foreground">{selectedService.name}</p>
+            <p className="mt-[6px] text-[11px] leading-relaxed text-muted-foreground">Professional cut and styling.</p>
+            <p className="mt-[10px] flex items-center gap-[6px] text-[11px] text-muted-foreground">
+              <Icon name="clock" className="text-[11px]" />
+              {selectedService.duration.replace(" min", "m")}
+              <span className="text-muted-foreground/50">·</span>
+              <span className="font-medium text-foreground">{selectedService.price}</span>
+            </p>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-neutral-900 rounded-[16px] px-[15px] py-[13px]">
-          <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-[0.08em] mb-[9px]">Appointment</p>
-          <div className="flex items-center gap-[11px] mb-[9px]">
-            <div className="size-[34px] rounded-[10px] bg-blue-50 dark:bg-blue-950/40 flex items-center justify-center shrink-0">
-              <Icon name="calendar3" className="text-blue-500 text-[13px]" />
-            </div>
-            <div>
-              <p className="text-[13px] font-semibold text-gray-900 dark:text-gray-100">Thursday, May 15</p>
-              <p className="text-[11px] text-gray-400 dark:text-gray-500">2025</p>
-            </div>
-          </div>
-          <div className="h-px bg-gray-100 dark:bg-neutral-800 mb-[9px]" />
-          <div className="flex items-center gap-[11px]">
-            <div className="size-[34px] rounded-[10px] bg-emerald-50 dark:bg-emerald-950/40 flex items-center justify-center shrink-0">
-              <Icon name="clock" className="text-emerald-500 text-[13px]" />
-            </div>
-            <div className="flex-1">
-              <p className="text-[13px] font-semibold text-gray-900 dark:text-gray-100">{selectedTime}</p>
-              <p className="text-[11px] text-gray-400 dark:text-gray-500">{selectedService.duration}</p>
-            </div>
-            <span className="text-[11px] text-emerald-600 font-semibold bg-emerald-50 dark:bg-emerald-950/40 dark:border-emerald-800 dark:text-emerald-400 px-[8px] py-[3px] rounded-full border border-emerald-100 shrink-0">
-              Available
-            </span>
+        <div className="border-b border-border py-[10px]">
+          <p className="truncate text-[12px] font-medium text-foreground">Thu 15 May · {selectedTime}</p>
+        </div>
+
+        <div className="flex-1 overflow-y-auto py-[12px]">
+          <p className="text-[14px] font-semibold text-foreground">Your details</p>
+          <div className="mt-[10px] space-y-[10px]">
+            <MockField label="Full name" value={`${persona.clientName} Perera`} />
+            <MockField label="Phone number" placeholder="+94 77 123 4567" />
+            <MockField label="Email" optional placeholder="you@email.com" />
+            <MockField label="Notes" optional placeholder="Anything we should know?" />
           </div>
         </div>
 
-        <div className="bg-white dark:bg-neutral-900 rounded-[16px] px-[15px] py-[13px]">
-          <div className="flex justify-between items-center">
-            <p className="text-[12px] text-gray-500 dark:text-gray-400">{selectedService.name}</p>
-            <p className="text-[12px] text-gray-700 dark:text-gray-300 font-medium tabular-nums">{selectedService.price}</p>
-          </div>
-          <div className="flex justify-between items-center mt-[5px]">
-            <p className="text-[11px] text-gray-400 dark:text-gray-500">Due now (50% deposit)</p>
-            <p className="text-[11px] text-blue-600 font-semibold tabular-nums">{depositAmount}</p>
-          </div>
-          <div className="h-px bg-gray-100 dark:bg-neutral-800 my-[9px]" />
-          <div className="flex justify-between items-center">
-            <p className="text-[13px] font-bold text-gray-900 dark:text-gray-100">Total</p>
-            <p className="text-[14px] font-bold text-gray-900 dark:text-gray-100 tabular-nums">{selectedService.price}</p>
+        <div className="border-t border-border pb-[18px] pt-[10px]">
+          <button
+            type="button"
+            className="w-full rounded-xl bg-blue-600 py-[13px] text-[13px] font-semibold text-white shadow-sm"
+          >
+            Confirm booking
+          </button>
+          <div className="mt-[8px] flex items-center justify-center gap-[4px]">
+            <Icon name="shield-check" className="text-[10px] text-muted-foreground" />
+            <span className="text-[10px] text-muted-foreground">Secure checkout · SSL encrypted</span>
           </div>
         </div>
       </div>
 
-      <div className="px-[14px] pb-[26px] pt-[2px]">
-        <button className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-[17px] rounded-[14px] text-[16px] font-bold shadow-lg shadow-blue-500/25">
-          Confirm & Pay — {selectedService.price}
-        </button>
-        <div className="flex items-center justify-center gap-[5px] mt-[9px]">
-          <Icon name="shield-check" className="text-gray-300 text-[11px]" />
-          <span className="text-[11px] text-gray-400 dark:text-gray-500">Secured by PayHere · SSL encrypted</span>
-        </div>
-        <div className="flex justify-center mt-[8px]">
-          <DinayaBranding compact />
-        </div>
+      <div className="flex justify-center py-[10px]">
+        <DinayaBranding compact />
       </div>
     </div>
   );
@@ -380,77 +368,90 @@ function OwnerDashboardPhoneScreen({ persona }: { persona: PersonaData }) {
   );
 }
 
+function SlotButton({
+  label,
+  selected,
+}: {
+  label: string;
+  selected: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      className={`flex min-h-[34px] w-full items-center gap-1.5 rounded-lg border px-2 py-1.5 text-[10px] font-medium transition-all ${
+        selected
+          ? "border-transparent bg-blue-600 text-white shadow-sm"
+          : "border-border bg-secondary/40 text-foreground ring-1 ring-white/5 hover:border-blue-400/40"
+      }`}
+    >
+      {!selected ? <span className="size-1.5 shrink-0 rounded-full bg-emerald-500" aria-hidden /> : null}
+      <span className="min-w-0 flex-1 truncate text-left">{label}</span>
+      {selected ? <Icon name="check" className="shrink-0 text-[8px] opacity-90" /> : null}
+    </button>
+  );
+}
+
 function CustomerBookingDesktop({ persona }: { persona: PersonaData }) {
-  const selectedService = persona.services.find((s) => s.selected);
+  const selectedService = persona.services.find((s) => s.selected)!;
+  const selectedTime = persona.slots[persona.selectedSlot].label;
 
   return (
-    <div className="h-full flex flex-col bg-white dark:bg-neutral-900 p-5 sm:p-6 overflow-hidden">
-      <div className="flex items-center gap-3.5 mb-3.5 pb-3.5 border-b border-gray-100 dark:border-neutral-800 shrink-0">
-        <div className="size-11 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center shrink-0 shadow-lg shadow-blue-500/25">
-          <Icon name={persona.icon} className="text-white text-xl" />
-        </div>
-        <div className="min-w-0">
-          <h3 className="font-semibold text-base text-gray-900 dark:text-gray-100 truncate">{persona.business}</h3>
-          <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 truncate">{persona.location}</p>
-          <TrustLine persona={persona} />
-        </div>
-        <div className="ml-auto flex items-center gap-1.5 text-xs text-green-600 dark:text-green-400 font-medium bg-green-50 dark:bg-green-950/40 px-2.5 py-1 rounded-full border border-green-100/80 dark:border-green-800/50 shrink-0">
-          <span className="size-1.5 rounded-full bg-green-500 animate-pulse" />
-          Available today
-        </div>
+    <div className="flex h-full flex-col overflow-hidden bg-muted/30 p-4 dark:bg-black sm:p-5">
+      <div className="mb-3 shrink-0">
+        <BackPill label="All services" />
       </div>
 
-      <div className="flex-1 min-h-0 grid sm:grid-cols-2 gap-5">
-        <div className="min-h-0 flex flex-col">
-          <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2 shrink-0">Choose a service</p>
-          <div className="space-y-1.5 min-h-0">
-            {persona.services.map((s) => (
-              <div
-                key={s.name}
-                className={`flex justify-between items-center p-3 rounded-xl cursor-pointer transition-all ${
-                  s.selected
-                    ? "border border-blue-500 ring-2 ring-blue-500/10 bg-blue-50 dark:bg-blue-950/40 shadow-sm"
-                    : "border border-gray-100 dark:border-neutral-800 hover:border-gray-200 dark:border-neutral-800"
-                }`}
-              >
-                <div className="flex items-center gap-2 min-w-0">
-                  <div
-                    className={`size-3.5 rounded-full border-2 shrink-0 flex items-center justify-center ${
-                      s.selected ? "border-blue-500 bg-blue-50 dark:bg-blue-950/40" : "border-gray-300 dark:border-neutral-700"
-                    }`}
-                  >
-                    {s.selected && <div className="size-1 rounded-full bg-blue-600 dark:bg-blue-400" />}
-                  </div>
-                  <div className="min-w-0">
-                    <p className={`text-sm font-medium truncate ${s.selected ? "text-blue-900" : "text-gray-800 dark:text-gray-200"}`}>{s.name}</p>
-                    <p className="text-xs text-gray-400 dark:text-gray-500">{s.duration}</p>
-                  </div>
-                </div>
-                <span className={`text-sm font-bold shrink-0 tabular-nums ml-2 ${s.selected ? "text-blue-600" : "text-gray-600 dark:text-gray-400"}`}>
-                  {s.price}
+      <div className="flex min-h-0 flex-1 overflow-hidden rounded-xl border border-border bg-card shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)] dark:shadow-none dark:ring-1 dark:ring-white/10">
+        <aside className="flex w-[30%] max-w-[14rem] shrink-0 flex-col border-r border-border px-3.5 py-4 xl:max-w-[15rem] xl:px-4">
+          <div className="flex items-start gap-2.5">
+            <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-blue-600/10 text-blue-600">
+              <Icon name={persona.icon} className="text-sm" />
+            </div>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-medium text-foreground">{persona.business}</p>
+              <TrustLine persona={persona} />
+            </div>
+          </div>
+
+          <div className="mt-4 border-t border-border/70 pt-4">
+            <p className="text-base font-semibold leading-tight text-foreground">{selectedService.name}</p>
+            <p className="mt-1.5 text-[11px] leading-relaxed text-muted-foreground">Professional cut and styling.</p>
+            <p className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Icon name="clock" className="text-[10px]" />
+              {selectedService.duration.replace(" min", "m")}
+              <span className="text-muted-foreground/50">·</span>
+              <span className="font-medium text-foreground">{selectedService.price}</span>
+            </p>
+          </div>
+
+          <div className="mt-4 space-y-2 border-t border-border/70 pt-4 text-xs">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Icon name="calendar3" className="shrink-0 text-[11px]" />
+              <span className="text-foreground">Thu, 15 May 2025</span>
+            </div>
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Icon name="clock" className="shrink-0 text-[11px] text-blue-600" />
+              <span className="font-medium text-foreground">{selectedTime}</span>
+            </div>
+          </div>
+        </aside>
+
+        <div className="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)_minmax(0,11rem)] divide-x divide-border xl:grid-cols-[minmax(0,1fr)_minmax(0,12.5rem)]">
+          <div className="p-3.5 xl:px-4">
+            <div className="mb-3 flex items-center justify-between">
+              <span className="text-[11px] font-semibold text-foreground">May 2025</span>
+              <div className="flex gap-1">
+                <span className="flex size-6 items-center justify-center rounded-lg text-muted-foreground">
+                  <Icon name="chevron-left" className="text-[9px]" />
+                </span>
+                <span className="flex size-6 items-center justify-center rounded-lg text-muted-foreground">
+                  <Icon name="chevron-right" className="text-[9px]" />
                 </span>
               </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="min-h-0 flex flex-col">
-          <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2 shrink-0">Pick a date &amp; time</p>
-          <div className="rounded-xl border border-gray-100 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-900/60 p-2.5 mb-2 shrink-0">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-sm font-bold text-gray-800 dark:text-gray-200">May 2025</span>
-              <div className="flex gap-1">
-                <button className="size-6 rounded-lg flex items-center justify-center hover:bg-white dark:hover:bg-neutral-800 hover:shadow-sm text-gray-400 dark:text-gray-500 transition-all" aria-label="Previous month">
-                  <Icon name="chevron-left" className="text-[10px]" />
-                </button>
-                <button className="size-6 rounded-lg flex items-center justify-center hover:bg-white dark:hover:bg-neutral-800 hover:shadow-sm text-gray-400 dark:text-gray-500 transition-all" aria-label="Next month">
-                  <Icon name="chevron-right" className="text-[10px]" />
-                </button>
-              </div>
             </div>
-            <div className="grid grid-cols-7 text-center gap-y-0.5">
-              {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => (
-                <div key={i} className="text-[8px] font-bold text-gray-400 dark:text-gray-500 pb-1 tracking-wider">
+            <div className="grid grid-cols-7 gap-1 text-center">
+              {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
+                <div key={d} className="pb-1 text-[8px] font-semibold tracking-wide text-muted-foreground">
                   {d}
                 </div>
               ))}
@@ -459,43 +460,33 @@ function CustomerBookingDesktop({ persona }: { persona: PersonaData }) {
               ))}
             </div>
           </div>
-          <div className="grid grid-cols-3 gap-1 shrink-0">
-            {persona.slots.map((slot, i) => (
-              <button
-                key={slot.label}
-                className={`relative flex flex-col items-center justify-center text-xs py-2 rounded-lg font-semibold transition-all min-h-[40px] ${
-                  i === persona.selectedSlot
-                    ? "bg-blue-600 text-white shadow-md shadow-blue-500/25"
-                    : "border border-gray-200 dark:border-neutral-800 text-gray-600 dark:text-gray-400 hover:border-blue-300 hover:text-blue-600 bg-white dark:bg-neutral-900"
-                }`}
-              >
-                {slot.label}
-                {slot.badge && (
-                  <span
-                    className={`text-[8px] font-bold mt-0.5 leading-none ${
-                      i === persona.selectedSlot ? "text-blue-100" : "text-amber-600"
-                    }`}
-                  >
-                    {slot.badge}
-                  </span>
-                )}
-              </button>
-            ))}
+
+          <div className="p-3.5 xl:px-4">
+            <div className="mb-2 flex items-baseline justify-between gap-2">
+              <p className="text-xs font-semibold text-foreground">Thu 15</p>
+              <p className="text-[10px] text-muted-foreground">Available times</p>
+            </div>
+            <p className="mb-1.5 text-[9px] font-semibold uppercase tracking-wide text-muted-foreground">Morning</p>
+            <div className="grid grid-cols-2 gap-1.5">
+              {persona.slots.slice(0, 4).map((slot, i) => (
+                <SlotButton key={slot.label} label={slot.label} selected={i === persona.selectedSlot} />
+              ))}
+            </div>
+            <p className="mb-1.5 mt-2.5 text-[9px] font-semibold uppercase tracking-wide text-muted-foreground">Afternoon</p>
+            <div className="grid grid-cols-2 gap-1.5">
+              {persona.slots.slice(4).map((slot, i) => (
+                <SlotButton
+                  key={slot.label}
+                  label={slot.label}
+                  selected={i + 4 === persona.selectedSlot}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="mt-3.5 pt-3.5 border-t border-gray-100 dark:border-neutral-800 flex items-center gap-3 shrink-0">
-        <button className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 rounded-xl font-semibold text-sm shadow-lg shadow-blue-500/25">
-          Confirm & Pay — {selectedService?.price}
-        </button>
-        <div className="flex items-center gap-1.5 text-xs text-gray-400 dark:text-gray-500 shrink-0">
-          <Icon name="shield-check" className="text-blue-400 text-xs" />
-          PayHere
-        </div>
-      </div>
-
-      <div className="mt-2 flex justify-center shrink-0">
+      <div className="mt-2 flex shrink-0 justify-center">
         <DinayaBranding compact />
       </div>
     </div>
@@ -734,7 +725,7 @@ export default function ProductMockup() {
   const [current, setCurrent] = useState(0);
   const [fading, setFading] = useState(false);
   const { resolvedTheme } = useTheme();
-  const screenBg = resolvedTheme === "dark" ? "#0a0a0a" : "#f9f9f9";
+  const screenBg = resolvedTheme === "dark" ? "#000000" : "#f4f4f5";
 
   const persona = primaryPersona;
   const slide = slides[current];

@@ -95,7 +95,7 @@ export default function TimeSlotGrid({
       {grouped.map(({ period, label, slots: periodSlots }) => (
         <div key={period}>
           <p className="mb-2.5 text-xs font-semibold text-muted-foreground">{label}</p>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
+          <div className="grid grid-cols-2 gap-2 min-[400px]:grid-cols-3 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-3">
             {periodSlots.map((slot) => {
               const isSelected = selectedStartUtc === slot.startUtc;
               const hasCalendarConflict = slotConflictsWithBusyTime(slot, busyTimes);
@@ -114,7 +114,7 @@ export default function TimeSlotGrid({
                       ? "cursor-not-allowed border border-border bg-muted text-muted-foreground line-through"
                       : isSelected
                       ? "bg-[var(--booking-accent)] text-white shadow-sm ring-2 ring-[var(--booking-accent-soft)]"
-                      : "border border-border bg-card text-foreground hover:border-[var(--booking-accent)] hover:bg-[var(--booking-accent-muted)]/40"
+                      : "border border-border bg-secondary/40 text-foreground ring-1 ring-white/5 hover:border-[var(--booking-accent)] hover:bg-[var(--booking-accent-muted)]/40"
                   }`}
                   title={hasCalendarConflict ? copy.calendarConflict : undefined}
                 >

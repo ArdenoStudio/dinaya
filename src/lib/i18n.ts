@@ -3,6 +3,7 @@ export type BookingLanguage = "en" | "si" | "ta";
 export const bookingCopy = {
   en: {
     bookAppointment: "Book an appointment",
+    chooseTime: "Choose a time",
     chooseServiceAndTime: "Choose a service and pick a time that works for you.",
     branch: "Branch",
     chooseBranch: "Choose a branch",
@@ -176,6 +177,7 @@ export const bookingCopy = {
   },
   si: {
     bookAppointment: "වේලාවක් වෙන් කරගන්න",
+    chooseTime: "වේලාවක් තෝරන්න",
     chooseServiceAndTime: "සේවාවක් තෝරා ඔබට පහසු වේලාවක් වෙන් කරගන්න.",
     branch: "ශාඛාව",
     chooseBranch: "ශාඛාවක් තෝරන්න",
@@ -349,6 +351,7 @@ export const bookingCopy = {
   },
   ta: {
     bookAppointment: "நேரத்தை முன்பதிவு செய்யுங்கள்",
+    chooseTime: "நேரத்தைத் தேர்ந்தெடுக்கவும்",
     chooseServiceAndTime: "சேவையைத் தேர்ந்தெடுத்து உங்களுக்கு ஏற்ற நேரத்தை பதிவு செய்யுங்கள்.",
     branch: "கிளை",
     chooseBranch: "கிளையைத் தேர்ந்தெடுக்கவும்",

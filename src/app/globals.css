@@ -104,6 +104,13 @@ html.nav-open {
     --input: 217.2 32.6% 17.5%;
     --ring: 220 84% 67%;
   }
+  .theme {
+    --animate-shiny-text: shiny-text 8s infinite;
+    --animate-marquee: marquee var(--duration) infinite linear;
+    --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
+    --animate-shine: shine var(--duration) infinite linear;
+    --animate-gradient: gradient 8s linear infinite;
+  }
 }
 
 @layer base {
@@ -125,15 +132,15 @@ html.nav-open {
   }
 
   .booking-page-bg {
-    @apply bg-muted/30 dark:bg-neutral-950;
+    @apply bg-muted/30 dark:bg-black;
   }
 
   .booking-panel-bg {
-    @apply bg-card dark:bg-neutral-950;
+    @apply bg-card;
   }
 
   .booking-sticky-bar {
-    @apply bg-background/95 dark:bg-neutral-950/95;
+    @apply bg-background/95 backdrop-blur-md;
   }
 
   .public-page-offset {
@@ -144,7 +151,6 @@ html.nav-open {
     padding-top: calc(var(--public-nav-top) + var(--public-nav-height) + 2.75rem);
   }
 }
-
 
 /* Hide scrollbar globally but preserve scrolling functionality */
 html, body {
@@ -181,6 +187,22 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
     --booking-accent-soft: color-mix(in srgb, var(--booking-accent) 24%, black);
     --booking-accent-shadow: color-mix(in srgb, var(--booking-accent) 45%, transparent);
     --booking-accent-on-dark: color-mix(in srgb, var(--booking-accent) 65%, white);
+
+    /* Apple-style grouped surfaces: true black canvas, neutral elevated cards */
+    --background: 0 0% 0%;
+    --foreground: 0 0% 98%;
+    --card: 240 5% 11%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 5% 11%;
+    --popover-foreground: 0 0% 98%;
+    --secondary: 240 4% 16%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 4% 16%;
+    --muted-foreground: 240 4% 64%;
+    --accent: 240 4% 16%;
+    --accent-foreground: 0 0% 98%;
+    --border: 240 4% 22%;
+    --input: 240 4% 18%;
   }
 
   .booking-bg-accent { background-color: var(--booking-accent); }
@@ -194,5 +216,60 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
   .booking-bg-accent-soft { background-color: var(--booking-accent-soft); }
   .booking-gradient-accent {
     background-image: linear-gradient(to right, var(--booking-accent), var(--booking-accent-hover));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee,
+  .animate-marquee-vertical,
+  .animate-scroll,
+  .animate-shiny-text,
+  .animate-shine,
+  .animate-gradient,
+  .motion-safe\:animate-pulse {
+    animation: none !important;
+  }
+}
+
+@theme inline {
+  @keyframes shiny-text {
+  0%, 90%, 100% {
+    background-position: calc(-100% - var(--shiny-width)) 0;
+    }
+  30%, 60% {
+    background-position: calc(100% + var(--shiny-width)) 0;
+    }
+  }
+  @keyframes marquee {
+  from {
+    transform: translateX(0);
+    }
+  to {
+    transform: translateX(calc(-100% - var(--gap)));
+    }
+  }
+  @keyframes marquee-vertical {
+  from {
+    transform: translateY(0);
+    }
+  to {
+    transform: translateY(calc(-100% - var(--gap)));
+    }
+  }
+  @keyframes shine {
+  0% {
+    background-position: 0% 0%;
+    }
+  50% {
+    background-position: 100% 100%;
+    }
+  to {
+    background-position: 0% 0%;
+    }
+  }
+  @keyframes gradient {
+  to {
+    background-position: var(--bg-size, 300%) 0;
+    }
   }
 }
