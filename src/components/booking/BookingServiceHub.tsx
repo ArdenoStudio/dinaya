@@ -15,7 +15,6 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { BlurFade } from "@/components/ui/blur-fade";
 import { BookingHubHeroImage } from "@/components/booking/BookingHubHeroImage";
-import { BookingHubCta } from "@/components/booking/BookingHubCta";
 import { BookingPolicyAccordion } from "@/components/booking/BookingPolicyAccordion";
 import { BusinessRating, getBusinessRating } from "./BusinessRating";
 import type { BookingCopy } from "@/lib/i18n";
@@ -294,14 +293,6 @@ export default function BookingServiceHub({
           <Link href={primaryHref}>{copy.chooseService}</Link>
         </div>
       </article>
-
-      <BookingHubCta
-        businessSlug={businessSlug}
-        serviceSlug={primaryService.slug ?? primaryService.id}
-        label={copy.chooseService}
-        variant="sticky"
-        emphasis="secondary"
-      />
     </BlurFade>
   );
 }
