@@ -16,11 +16,11 @@ export function SlotListPanelSkeleton({
       <span className="sr-only">{label}</span>
       <div>
         <Skeleton className="mb-2 h-3 w-14" />
-        <div className="flex flex-col gap-1.5">
+        <div className="grid grid-cols-2 gap-1.5">
           {Array.from({ length: rows }).map((_, i) => (
             <div
               key={i}
-              className="flex min-h-11 items-center gap-2 rounded-lg border border-border/40 px-3 py-2.5"
+              className="flex min-h-11 items-center gap-2 rounded-lg border border-border/40 px-2.5 py-2"
             >
               <Skeleton className="size-1.5 shrink-0 rounded-full" />
               <Skeleton className={`h-4 ${ROW_WIDTHS[i % ROW_WIDTHS.length]}`} />

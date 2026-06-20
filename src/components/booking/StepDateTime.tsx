@@ -305,7 +305,7 @@ export default function StepDateTime({
         </p>
       ) : null}
 
-      <div className="flex min-w-0 w-full max-w-full flex-col lg:grid lg:min-h-[22rem] lg:grid-cols-[minmax(0,1fr)_11.5rem] lg:divide-x lg:divide-border xl:grid-cols-[minmax(0,1fr)_12rem]">
+      <div className="flex min-w-0 w-full max-w-full flex-col lg:grid lg:min-h-[22rem] lg:grid-cols-[minmax(0,1fr)_minmax(0,16rem)] lg:divide-x lg:divide-border xl:grid-cols-[minmax(0,1fr)_minmax(0,18rem)]">
         <section className="min-w-0 pb-0 lg:px-4 lg:pb-0 lg:pt-0 xl:px-5">
           <div className="mb-3 flex items-center justify-between gap-2 md:mb-4">
             <p className="text-sm font-medium text-foreground md:sr-only">{copy.chooseDate}</p>
@@ -372,7 +372,7 @@ export default function StepDateTime({
               nextAvailableDate={showNextAvailable ? nextAvailable?.date : undefined}
               onMonthChange={handleMonthChange}
               onSelect={onDateChange}
-              size="compact"
+              size="comfortable"
             />
           </div>
         </section>
