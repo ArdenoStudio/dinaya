@@ -117,9 +117,9 @@ function CalendarDay({ cell }: { cell: DayCell }) {
 
   return (
     <div
-      className={`relative flex min-h-[22px] flex-col items-center justify-center rounded-lg py-0.5 text-[10px] font-medium transition-all ${
+      className={`relative mx-auto flex size-7 items-center justify-center rounded-lg text-[9px] font-medium transition-all xl:size-8 xl:rounded-xl xl:text-[10px] ${
         isSelected
-          ? "bg-blue-600 text-white shadow-sm"
+          ? "bg-blue-600 text-white shadow-md"
           : isBooked
             ? "cursor-not-allowed text-muted-foreground/35 line-through"
             : d
@@ -129,7 +129,7 @@ function CalendarDay({ cell }: { cell: DayCell }) {
     >
       {d}
       {isAvailable && !isSelected ? (
-        <span className="absolute bottom-0.5 size-1 rounded-full bg-emerald-500" />
+        <span className="absolute bottom-0.5 size-1 rounded-full bg-blue-600" />
       ) : null}
     </div>
   );
@@ -167,10 +167,42 @@ function FloatingToasts({ persona }: { persona: PersonaData }) {
 
 function BackPill({ label }: { label: string }) {
   return (
-    <span className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-2.5 py-1 text-[10px] font-medium text-muted-foreground shadow-sm">
+    <span className="inline-flex items-center gap-1 rounded-full border border-border/70 bg-card/95 px-2.5 py-1 text-[10px] font-medium text-muted-foreground shadow-sm backdrop-blur-sm">
       <Icon name="chevron-left" className="text-[8px]" />
       {label}
     </span>
+  );
+}
+
+function MockField({
+  label,
+  optional,
+  value,
+  placeholder,
+}: {
+  label: string;
+  optional?: boolean;
+  value?: string;
+  placeholder?: string;
+}) {
+  return (
+    <div>
+      <p className="text-[11px] font-medium text-foreground">
+        {label}{" "}
+        {optional ? (
+          <span className="font-normal text-muted-foreground">(optional)</span>
+        ) : (
+          <span className="font-normal text-muted-foreground">*</span>
+        )}
+      </p>
+      <div
+        className={`mt-[5px] rounded-xl border border-border bg-card px-[10px] py-[9px] text-[12px] ${
+          value ? "text-foreground" : "text-muted-foreground"
+        }`}
+      >
+        {value ?? placeholder}
+      </div>
+    </div>
   );
 }
 
@@ -179,15 +211,15 @@ function PhoneScreen({ persona }: { persona: PersonaData }) {
   const selectedTime = persona.slots[persona.selectedSlot].label;
 
   return (
-    <div className="w-full h-full flex flex-col bg-muted/40 dark:bg-black">
-      <div className="px-[14px] pt-[58px] pb-[8px]">
+    <div className="flex h-full w-full flex-col bg-muted/40 dark:bg-black">
+      <div className="px-[14px] pb-[8px] pt-[58px]">
         <BackPill label="Date & Time" />
       </div>
 
-      <div className="mx-[12px] flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-border bg-card dark:ring-1 dark:ring-white/10">
-        <div className="border-b border-border px-[14px] py-[12px]">
+      <div className="mx-[14px] flex min-h-0 flex-1 flex-col overflow-hidden">
+        <div className="pb-[12px]">
           <div className="flex items-start gap-[10px]">
-            <div className="flex size-[34px] shrink-0 items-center justify-center rounded-full bg-blue-600/10 text-blue-600">
+            <div className="flex size-[40px] shrink-0 items-center justify-center rounded-full bg-blue-600/10 text-blue-600">
               <Icon name={persona.icon} className="text-[14px]" />
             </div>
             <div className="min-w-0 flex-1">
@@ -195,40 +227,37 @@ function PhoneScreen({ persona }: { persona: PersonaData }) {
               <TrustLine persona={persona} />
             </div>
           </div>
-          <div className="mt-[10px]">
-            <p className="text-[15px] font-semibold leading-tight text-foreground">{selectedService.name}</p>
-            <p className="mt-[4px] text-[11px] text-muted-foreground">
-              {selectedService.duration.replace(" min", "m")} · {selectedService.price}
+
+          <div className="mt-[14px] border-t border-border/70 pt-[14px]">
+            <p className="text-[17px] font-semibold leading-tight text-foreground">{selectedService.name}</p>
+            <p className="mt-[6px] text-[11px] leading-relaxed text-muted-foreground">Professional cut and styling.</p>
+            <p className="mt-[10px] flex items-center gap-[6px] text-[11px] text-muted-foreground">
+              <Icon name="clock" className="text-[11px]" />
+              {selectedService.duration.replace(" min", "m")}
+              <span className="text-muted-foreground/50">·</span>
+              <span className="font-medium text-foreground">{selectedService.price}</span>
             </p>
           </div>
         </div>
 
-        <div className="border-b border-border px-[14px] py-[10px]">
+        <div className="border-b border-border py-[10px]">
           <p className="truncate text-[12px] font-medium text-foreground">Thu 15 May · {selectedTime}</p>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-[14px] py-[12px]">
+        <div className="flex-1 overflow-y-auto py-[12px]">
           <p className="text-[14px] font-semibold text-foreground">Your details</p>
           <div className="mt-[10px] space-y-[10px]">
-            <div>
-              <p className="text-[11px] font-medium text-foreground">Full name</p>
-              <div className="mt-[5px] rounded-xl border border-border bg-card px-[10px] py-[9px] text-[12px] text-foreground">
-                {persona.clientName} Perera
-              </div>
-            </div>
-            <div>
-              <p className="text-[11px] font-medium text-foreground">Phone number</p>
-              <div className="mt-[5px] rounded-xl border border-border bg-card px-[10px] py-[9px] text-[12px] text-muted-foreground">
-                +94 77 123 4567
-              </div>
-            </div>
+            <MockField label="Full name" value={`${persona.clientName} Perera`} />
+            <MockField label="Phone number" placeholder="+94 77 123 4567" />
+            <MockField label="Email" optional placeholder="you@email.com" />
+            <MockField label="Notes" optional placeholder="Anything we should know?" />
           </div>
         </div>
 
-        <div className="border-t border-border px-[14px] pb-[22px] pt-[10px]">
+        <div className="border-t border-border pb-[18px] pt-[10px]">
           <button
             type="button"
-            className="w-full rounded-xl bg-blue-600 py-[14px] text-[14px] font-semibold text-white shadow-sm"
+            className="w-full rounded-xl bg-blue-600 py-[13px] text-[13px] font-semibold text-white shadow-sm"
           >
             Confirm booking
           </button>
@@ -339,6 +368,29 @@ function OwnerDashboardPhoneScreen({ persona }: { persona: PersonaData }) {
   );
 }
 
+function SlotButton({
+  label,
+  selected,
+}: {
+  label: string;
+  selected: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      className={`flex min-h-[34px] w-full items-center gap-1.5 rounded-lg border px-2 py-1.5 text-[10px] font-medium transition-all ${
+        selected
+          ? "border-transparent bg-blue-600 text-white shadow-sm"
+          : "border-border bg-secondary/40 text-foreground ring-1 ring-white/5 hover:border-blue-400/40"
+      }`}
+    >
+      {!selected ? <span className="size-1.5 shrink-0 rounded-full bg-emerald-500" aria-hidden /> : null}
+      <span className="min-w-0 flex-1 truncate text-left">{label}</span>
+      {selected ? <Icon name="check" className="shrink-0 text-[8px] opacity-90" /> : null}
+    </button>
+  );
+}
+
 function CustomerBookingDesktop({ persona }: { persona: PersonaData }) {
   const selectedService = persona.services.find((s) => s.selected)!;
   const selectedTime = persona.slots[persona.selectedSlot].label;
@@ -349,8 +401,8 @@ function CustomerBookingDesktop({ persona }: { persona: PersonaData }) {
         <BackPill label="All services" />
       </div>
 
-      <div className="flex min-h-0 flex-1 overflow-hidden rounded-xl border border-border bg-card dark:ring-1 dark:ring-white/10">
-        <aside className="flex w-[34%] shrink-0 flex-col border-r border-border px-4 py-4">
+      <div className="flex min-h-0 flex-1 overflow-hidden rounded-xl border border-border bg-card shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)] dark:shadow-none dark:ring-1 dark:ring-white/10">
+        <aside className="flex w-[30%] max-w-[14rem] shrink-0 flex-col border-r border-border px-3.5 py-4 xl:max-w-[15rem] xl:px-4">
           <div className="flex items-start gap-2.5">
             <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-blue-600/10 text-blue-600">
               <Icon name={persona.icon} className="text-sm" />
@@ -361,9 +413,9 @@ function CustomerBookingDesktop({ persona }: { persona: PersonaData }) {
             </div>
           </div>
 
-          <div className="mt-4 border-t border-border pt-4">
+          <div className="mt-4 border-t border-border/70 pt-4">
             <p className="text-base font-semibold leading-tight text-foreground">{selectedService.name}</p>
-            <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">Professional cut and styling.</p>
+            <p className="mt-1.5 text-[11px] leading-relaxed text-muted-foreground">Professional cut and styling.</p>
             <p className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
               <Icon name="clock" className="text-[10px]" />
               {selectedService.duration.replace(" min", "m")}
@@ -372,7 +424,7 @@ function CustomerBookingDesktop({ persona }: { persona: PersonaData }) {
             </p>
           </div>
 
-          <div className="mt-4 space-y-2 border-t border-border pt-4 text-xs">
+          <div className="mt-4 space-y-2 border-t border-border/70 pt-4 text-xs">
             <div className="flex items-center gap-2 text-muted-foreground">
               <Icon name="calendar3" className="shrink-0 text-[11px]" />
               <span className="text-foreground">Thu, 15 May 2025</span>
@@ -384,35 +436,32 @@ function CustomerBookingDesktop({ persona }: { persona: PersonaData }) {
           </div>
         </aside>
 
-        <div className="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)_minmax(0,0.95fr)] divide-x divide-border">
-          <div className="p-3.5">
-            <p className="mb-2 text-[10px] font-medium text-foreground">Choose a date</p>
-            <div className="rounded-xl border border-border bg-card p-2.5">
-              <div className="mb-2 flex items-center justify-between">
-                <span className="text-xs font-semibold text-foreground">May 2025</span>
-                <div className="flex gap-1">
-                  <span className="flex size-6 items-center justify-center rounded-lg text-muted-foreground">
-                    <Icon name="chevron-left" className="text-[9px]" />
-                  </span>
-                  <span className="flex size-6 items-center justify-center rounded-lg text-muted-foreground">
-                    <Icon name="chevron-right" className="text-[9px]" />
-                  </span>
+        <div className="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)_minmax(0,11rem)] divide-x divide-border xl:grid-cols-[minmax(0,1fr)_minmax(0,12.5rem)]">
+          <div className="p-3.5 xl:px-4">
+            <div className="mb-3 flex items-center justify-between">
+              <span className="text-[11px] font-semibold text-foreground">May 2025</span>
+              <div className="flex gap-1">
+                <span className="flex size-6 items-center justify-center rounded-lg text-muted-foreground">
+                  <Icon name="chevron-left" className="text-[9px]" />
+                </span>
+                <span className="flex size-6 items-center justify-center rounded-lg text-muted-foreground">
+                  <Icon name="chevron-right" className="text-[9px]" />
+                </span>
+              </div>
+            </div>
+            <div className="grid grid-cols-7 gap-1 text-center">
+              {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
+                <div key={d} className="pb-1 text-[8px] font-semibold tracking-wide text-muted-foreground">
+                  {d}
                 </div>
-              </div>
-              <div className="grid grid-cols-7 gap-0.5 text-center">
-                {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => (
-                  <div key={i} className="pb-1 text-[8px] font-semibold text-muted-foreground">
-                    {d}
-                  </div>
-                ))}
-                {mockDays.map((cell, i) => (
-                  <CalendarDay key={i} cell={cell} />
-                ))}
-              </div>
+              ))}
+              {mockDays.map((cell, i) => (
+                <CalendarDay key={i} cell={cell} />
+              ))}
             </div>
           </div>
 
-          <div className="p-3.5">
+          <div className="p-3.5 xl:px-4">
             <div className="mb-2 flex items-baseline justify-between gap-2">
               <p className="text-xs font-semibold text-foreground">Thu 15</p>
               <p className="text-[10px] text-muted-foreground">Available times</p>
@@ -420,43 +469,18 @@ function CustomerBookingDesktop({ persona }: { persona: PersonaData }) {
             <p className="mb-1.5 text-[9px] font-semibold uppercase tracking-wide text-muted-foreground">Morning</p>
             <div className="grid grid-cols-2 gap-1.5">
               {persona.slots.slice(0, 4).map((slot, i) => (
-                <button
-                  key={slot.label}
-                  type="button"
-                  className={`flex min-h-[34px] items-center gap-1.5 rounded-lg border px-2 py-1.5 text-[10px] font-medium transition-all ${
-                    i === persona.selectedSlot
-                      ? "border-transparent bg-blue-600 text-white shadow-sm"
-                      : "border-border bg-secondary/40 text-foreground ring-1 ring-white/5 hover:border-blue-400/40"
-                  }`}
-                >
-                  {i !== persona.selectedSlot ? (
-                    <span className="size-1.5 shrink-0 rounded-full bg-emerald-500" aria-hidden />
-                  ) : null}
-                  <span className="truncate">{slot.label}</span>
-                </button>
+                <SlotButton key={slot.label} label={slot.label} selected={i === persona.selectedSlot} />
               ))}
             </div>
             <p className="mb-1.5 mt-2.5 text-[9px] font-semibold uppercase tracking-wide text-muted-foreground">Afternoon</p>
             <div className="grid grid-cols-2 gap-1.5">
-              {persona.slots.slice(4).map((slot, i) => {
-                const slotIndex = i + 4;
-                return (
-                  <button
-                    key={slot.label}
-                    type="button"
-                    className={`flex min-h-[34px] items-center gap-1.5 rounded-lg border px-2 py-1.5 text-[10px] font-medium transition-all ${
-                      slotIndex === persona.selectedSlot
-                        ? "border-transparent bg-blue-600 text-white shadow-sm"
-                        : "border-border bg-secondary/40 text-foreground ring-1 ring-white/5 hover:border-blue-400/40"
-                    }`}
-                  >
-                    {slotIndex !== persona.selectedSlot ? (
-                      <span className="size-1.5 shrink-0 rounded-full bg-emerald-500" aria-hidden />
-                    ) : null}
-                    <span className="truncate">{slot.label}</span>
-                  </button>
-                );
-              })}
+              {persona.slots.slice(4).map((slot, i) => (
+                <SlotButton
+                  key={slot.label}
+                  label={slot.label}
+                  selected={i + 4 === persona.selectedSlot}
+                />
+              ))}
             </div>
           </div>
         </div>
