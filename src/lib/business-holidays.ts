@@ -99,7 +99,8 @@ export function filterSlotsByBusinessHoliday(
   holiday: BusinessHoliday | null,
   timezone: string,
 ): TimeSlot[] {
-  if (!holiday || holiday.isClosed) return [];
+  if (!holiday) return slots;
+  if (holiday.isClosed) return [];
   if (!holiday.startTime || !holiday.endTime) return slots;
 
   const localDate = parseISO(holiday.date);
