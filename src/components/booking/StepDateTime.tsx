@@ -45,6 +45,7 @@ interface Props {
   onSlotsChange?: (slots: SlotOption[], loading: boolean, emptyState: SlotEmptyState) => void;
   onCalendarMonthChange?: (month: string) => void;
   calendarOverlay?: GoogleCalendarOverlay;
+  hideHeading?: boolean;
 }
 
 export default function StepDateTime({
@@ -69,6 +70,7 @@ export default function StepDateTime({
   onSlotsChange,
   onCalendarMonthChange,
   calendarOverlay,
+  hideHeading = false,
 }: Props) {
   const today = toZonedTime(new Date(), timezone);
   const maxDate = service?.maximumAdvanceDays
@@ -301,9 +303,11 @@ export default function StepDateTime({
 
   return (
       <div className="flex h-full min-w-0 w-full max-w-full flex-col">
-      <p className="mb-4 text-sm font-medium text-muted-foreground md:hidden">
-        {copy.pickDateTime}
-      </p>
+      {!hideHeading ? (
+        <p className="mb-4 text-sm font-medium text-muted-foreground md:hidden">
+          {copy.pickDateTime}
+        </p>
+      ) : null}
 
       <div className="flex min-w-0 w-full max-w-full flex-col lg:grid lg:min-h-[22rem] lg:grid-cols-[minmax(0,1fr)_11.5rem] lg:divide-x lg:divide-border xl:grid-cols-[minmax(0,1fr)_12rem]">
         <section className="min-w-0 pb-4 lg:px-4 lg:pb-0 lg:pt-0 xl:px-5">

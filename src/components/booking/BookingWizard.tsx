@@ -554,6 +554,7 @@ function BookingWizardInner({
                       onSlotSelect={selectSlot}
                       onCalendarMonthChange={setCalendarViewMonth}
                       calendarOverlay={calendarOverlay}
+                      hideHeading
                     />
                   )
                 ) : (
