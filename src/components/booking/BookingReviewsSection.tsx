@@ -157,7 +157,7 @@ export function BookingReviewsSection({
 
       <dialog
         ref={dialogRef}
-        className="fixed top-1/2 left-1/2 z-50 m-0 flex max-h-[min(92dvh,44rem)] w-[min(100vw-2rem,40rem)] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-2xl border border-border bg-card p-0 text-foreground shadow-xl backdrop:bg-black/40 open:flex"
+        className="fixed top-1/2 left-1/2 z-50 m-0 hidden max-h-[min(92dvh,44rem)] w-[min(100vw-2rem,40rem)] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl border border-border bg-card p-0 text-foreground shadow-xl backdrop:bg-black/40 open:flex open:flex-col"
         onClick={(event) => {
           if (event.target === event.currentTarget) closeDialog();
         }}
