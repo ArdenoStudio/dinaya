@@ -6,9 +6,9 @@ import { CTAPrimaryButton } from "@/components/cta-primary-button";
 import { LandingFooter } from "@/components/LandingFooter";
 import { LandingIndustries } from "@/components/LandingIndustries";
 import { Icon } from "@/components/ui/Icon";
-import { TextAnimate } from "@/components/ui/text-animate";
 import { BeforeAfterToggle } from "@/components/BeforeAfterToggle";
 import { FeatureShowcase } from "@/components/FeatureShowcase";
+import { LANDING_LIVE_DEMO_PATH } from "@/lib/landing-demo";
 
 const HowItWorks = dynamic(() =>
   import("@/components/HowItWorks").then((m) => ({ default: m.HowItWorks }))
@@ -54,18 +54,12 @@ export default function LandingPage() {
       <section className="max-w-4xl mx-auto px-6 public-page-offset-lg pb-12 text-center">
         <div className="flex flex-col items-center">
           <div className="mb-8">
-            <Link
-              href="/register"
-              className="inline-flex items-center gap-3 rounded-full bg-white dark:bg-neutral-900 px-2.5 py-0.5 pr-3 pl-0.5 text-sm font-medium text-gray-900 dark:text-gray-100 ring-1 shadow-lg shadow-primary/10 ring-black/10 dark:ring-white/10 transition-colors hover:bg-primary/5"
-            >
+            <div className="inline-flex items-center gap-3 rounded-full bg-white dark:bg-neutral-900 px-2.5 py-0.5 pr-3 pl-0.5 text-sm font-medium text-gray-900 dark:text-gray-100 ring-1 shadow-lg shadow-primary/10 ring-black/10 dark:ring-white/10">
               <span className="shrink-0 rounded-full border bg-gray-50 dark:bg-neutral-900/60 px-2.5 py-1 text-xs text-gray-600 dark:text-gray-400">
                 New
               </span>
-              <span className="flex items-center gap-1 truncate">
-                Free 14-day trial — no card needed
-                <Icon name="arrow-up-right" className="text-xs shrink-0 text-gray-700 dark:text-gray-300" />
-              </span>
-            </Link>
+              <span className="truncate">Free 14-day trial — no card needed</span>
+            </div>
           </div>
 
           <h1 className="font-cal text-5xl tracking-tight mb-6 text-balance">
@@ -75,24 +69,18 @@ export default function LandingPage() {
             Get a real booking page in 5 minutes.
           </h1>
 
-          <TextAnimate
-            animation="fadeIn"
-            by="word"
-            as="p"
-            startOnView={false}
-            className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto text-pretty"
-          >
+          <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto text-pretty">
             Give your salon, clinic, or tuition class a booking page that works. Clients pick a time, pay online, and you get notified.
-          </TextAnimate>
+          </p>
 
           <div className="flex flex-wrap items-center justify-center gap-3">
             <CTAPrimaryButton>Create your booking page</CTAPrimaryButton>
             <Link
-              href="#demo"
+              href={LANDING_LIVE_DEMO_PATH}
               className="inline-flex items-center gap-2 rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-6 py-3 text-sm font-medium text-gray-800 dark:text-gray-200 shadow-sm hover:bg-gray-50 dark:hover:bg-neutral-900/60 transition-colors"
             >
-              <Icon name="play-circle" className="text-base" />
-              See a live demo
+              <Icon name="box-arrow-up-right" className="text-base" />
+              Try a live booking page
             </Link>
           </div>
         </div>
@@ -101,22 +89,6 @@ export default function LandingPage() {
       <div id="demo">
         <ProductMockup />
       </div>
-
-      <section className="max-w-6xl mx-auto px-6 py-6 border-t">
-        <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-xs text-muted-foreground">
-          {[
-            { icon: "geo-alt-fill", text: "Built exclusively for Sri Lanka" },
-            { icon: "currency-dollar", text: "No USD subscriptions" },
-            { icon: "percent", text: "Zero commission on bookings" },
-            { icon: "whatsapp", text: "Replace WhatsApp chaos for good" },
-          ].map((item) => (
-            <div key={item.text} className="flex items-center gap-1.5">
-              <Icon name={item.icon} className="text-primary text-xs" />
-              <span>{item.text}</span>
-            </div>
-          ))}
-        </div>
-      </section>
 
       <section className="max-w-6xl mx-auto px-6 py-20 border-t">
         <div className="grid md:grid-cols-2 gap-12 items-center">
@@ -145,15 +117,6 @@ export default function LandingPage() {
                 </li>
               ))}
             </ul>
-            <div className="mt-7">
-              <Link
-                href="/register"
-                className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary/80 transition-colors"
-              >
-                Create your booking page
-                <Icon name="arrow-right" className="text-xs" />
-              </Link>
-            </div>
           </div>
         </div>
       </section>
@@ -170,14 +133,9 @@ export default function LandingPage() {
             <span className="absolute top-0.5 -left-3 h-4 w-[3px] rounded-r-sm bg-primary" />
             Early access users
           </span>
-          <TextAnimate
-            animation="fadeIn"
-            by="word"
-            as="h2"
-            className="font-cal text-3xl md:text-4xl mt-3 tracking-tight"
-          >
+          <h2 className="font-cal text-3xl md:text-4xl mt-3 tracking-tight">
             What businesses are saying
-          </TextAnimate>
+          </h2>
         </div>
 
         <div className="grid md:grid-cols-3 gap-5">
@@ -211,33 +169,6 @@ export default function LandingPage() {
       </section>
 
       <LandingIndustries />
-
-      <section className="relative z-10 px-6 pb-20">
-        <div className="max-w-6xl mx-auto">
-          <div className="rounded-3xl border border-border bg-card px-8 py-16 text-center shadow-sm">
-            <TextAnimate
-              animation="fadeIn"
-              by="word"
-              as="h2"
-              className="font-cal text-3xl md:text-4xl tracking-tight text-foreground mb-3"
-            >
-              Ready to go bookable?
-            </TextAnimate>
-            <p className="text-lg text-muted-foreground mb-8 max-w-md mx-auto">
-              Set up your booking page in 5 minutes. Start accepting clients today.
-            </p>
-            <div className="flex flex-wrap gap-4 justify-center">
-              <CTAPrimaryButton size="md">Create your booking page</CTAPrimaryButton>
-              <Link
-                href="/auth/signin"
-                className="inline-flex items-center gap-2 rounded-xl border border-border px-7 py-3 text-sm font-medium text-muted-foreground hover:bg-muted/50 transition-colors"
-              >
-                Sign in
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
 
       <LandingFooter />
     </div>

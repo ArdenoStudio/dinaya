@@ -82,6 +82,20 @@ export function LandingFooter() {
           />
         </div>
 
+        {/* Sri Lanka trust signals */}
+        <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 mb-10 pb-10 border-b border-white/10 text-xs text-gray-400">
+          {[
+            { icon: "geo-alt-fill", text: "Built for Sri Lanka" },
+            { icon: "currency-dollar", text: "No USD subscriptions" },
+            { icon: "percent", text: "Zero commission on bookings" },
+          ].map((item) => (
+            <div key={item.text} className="flex items-center gap-1.5">
+              <Icon name={item.icon} className="text-primary text-xs" />
+              <span>{item.text}</span>
+            </div>
+          ))}
+        </div>
+
         {/* Payment providers */}
         <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 mb-10 pb-10 border-b border-white/10">
           <span className="text-[11px] uppercase tracking-widest text-gray-500 font-semibold">

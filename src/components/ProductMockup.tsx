@@ -1,9 +1,11 @@
 "use client";
 
-import { type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
+import Link from "next/link";
 import { useTheme } from "next-themes";
 import IPhoneMockup from "@/components/ui/iphone-mockup";
 import { Icon } from "@/components/ui/Icon";
+import { LANDING_LIVE_DEMO_PATH } from "@/lib/landing-demo";
 
 type DayCell = { day: number | null; status?: "available" | "booked" | "selected" };
 
@@ -15,9 +17,10 @@ type PersonaData = {
   categoryName: string;
   services: { name: string; duration: string; price: string; selected: boolean }[];
   slots: Slot[];
-  selectedSlot: number;
   trust: { rating: number; bookings: number };
 };
+
+const INITIAL_SELECTED_SLOT = 2;
 
 const primaryPersona: PersonaData = {
   business: "Dilini's Beauty Studio",
@@ -36,7 +39,6 @@ const primaryPersona: PersonaData = {
     { label: "3:30 PM" },
     { label: "4:00 PM", badge: "Last slot!" },
   ],
-  selectedSlot: 2,
   trust: { rating: 4.9, bookings: 240 },
 };
 
@@ -137,9 +139,17 @@ function BookingContextNav({ backLabel, categoryLabel }: { backLabel: string; ca
   );
 }
 
-function PhoneDateTimeScreen({ persona }: { persona: PersonaData }) {
+function PhoneDateTimeScreen({
+  persona,
+  selectedSlot,
+  onSelectSlot,
+}: {
+  persona: PersonaData;
+  selectedSlot: number;
+  onSelectSlot: (index: number) => void;
+}) {
   const selectedService = persona.services.find((s) => s.selected)!;
-  const selectedTime = persona.slots[persona.selectedSlot].label;
+  const selectedTime = persona.slots[selectedSlot].label;
 
   return (
     <div className="flex h-full w-full flex-col bg-muted/40 dark:bg-black">
@@ -194,7 +204,12 @@ function PhoneDateTimeScreen({ persona }: { persona: PersonaData }) {
           <p className="mb-2 text-[11px] font-semibold text-foreground">Thu 15 · Available times</p>
           <div className="grid grid-cols-2 gap-1.5">
             {persona.slots.map((slot, i) => (
-              <SlotButton key={slot.label} label={slot.label} selected={i === persona.selectedSlot} />
+              <SlotButton
+                key={slot.label}
+                label={slot.label}
+                selected={i === selectedSlot}
+                onSelect={() => onSelectSlot(i)}
+              />
             ))}
           </div>
         </div>
@@ -219,13 +234,16 @@ function PhoneDateTimeScreen({ persona }: { persona: PersonaData }) {
 function SlotButton({
   label,
   selected,
+  onSelect,
 }: {
   label: string;
   selected: boolean;
+  onSelect: () => void;
 }) {
   return (
     <button
       type="button"
+      onClick={onSelect}
       className={`flex min-h-[34px] w-full items-center gap-1.5 rounded-lg border px-2 py-1.5 text-[10px] font-medium transition-all ${
         selected
           ? "border-transparent bg-blue-600 text-white shadow-sm"
@@ -239,9 +257,17 @@ function SlotButton({
   );
 }
 
-function CustomerBookingDesktop({ persona }: { persona: PersonaData }) {
+function CustomerBookingDesktop({
+  persona,
+  selectedSlot,
+  onSelectSlot,
+}: {
+  persona: PersonaData;
+  selectedSlot: number;
+  onSelectSlot: (index: number) => void;
+}) {
   const selectedService = persona.services.find((s) => s.selected)!;
-  const selectedTime = persona.slots[persona.selectedSlot].label;
+  const selectedTime = persona.slots[selectedSlot].label;
 
   return (
     <div className="flex h-full flex-col overflow-hidden bg-muted/30 p-4 dark:bg-black sm:p-5">
@@ -317,7 +343,12 @@ function CustomerBookingDesktop({ persona }: { persona: PersonaData }) {
             <p className="mb-1.5 text-[9px] font-semibold uppercase tracking-wide text-muted-foreground">Morning</p>
             <div className="grid grid-cols-2 gap-1.5">
               {persona.slots.slice(0, 4).map((slot, i) => (
-                <SlotButton key={slot.label} label={slot.label} selected={i === persona.selectedSlot} />
+                <SlotButton
+                  key={slot.label}
+                  label={slot.label}
+                  selected={i === selectedSlot}
+                  onSelect={() => onSelectSlot(i)}
+                />
               ))}
             </div>
             <p className="mb-1.5 mt-2.5 text-[9px] font-semibold uppercase tracking-wide text-muted-foreground">Afternoon</p>
@@ -326,7 +357,8 @@ function CustomerBookingDesktop({ persona }: { persona: PersonaData }) {
                 <SlotButton
                   key={slot.label}
                   label={slot.label}
-                  selected={i + 4 === persona.selectedSlot}
+                  selected={i + 4 === selectedSlot}
+                  onSelect={() => onSelectSlot(i + 4)}
                 />
               ))}
             </div>
@@ -350,6 +382,7 @@ function DemoFrame({ children }: { children: ReactNode }) {
 }
 
 export default function ProductMockup() {
+  const [selectedSlot, setSelectedSlot] = useState(INITIAL_SELECTED_SLOT);
   const { resolvedTheme } = useTheme();
   const screenBg = resolvedTheme === "dark" ? "#000000" : "#f4f4f5";
   const persona = primaryPersona;
@@ -384,15 +417,30 @@ export default function ProductMockup() {
             innerShadow={false}
             style={{ transformOrigin: "top left" }}
           >
-            <PhoneDateTimeScreen persona={persona} />
+            <PhoneDateTimeScreen
+              persona={persona}
+              selectedSlot={selectedSlot}
+              onSelectSlot={setSelectedSlot}
+            />
           </IPhoneMockup>
         </div>
+        <p className="mt-4 text-center text-xs text-muted-foreground">Tap a time slot to preview the flow</p>
       </div>
 
       <div className="mx-auto hidden max-w-5xl md:block">
         <DemoFrame>
-          <CustomerBookingDesktop persona={persona} />
+          <CustomerBookingDesktop
+            persona={persona}
+            selectedSlot={selectedSlot}
+            onSelectSlot={setSelectedSlot}
+          />
         </DemoFrame>
+        <p className="mt-4 text-center text-sm text-muted-foreground">
+          Interactive preview —{" "}
+          <Link href={LANDING_LIVE_DEMO_PATH} className="font-medium text-primary hover:text-primary/80">
+            open the live booking page
+          </Link>
+        </p>
       </div>
     </section>
   );
