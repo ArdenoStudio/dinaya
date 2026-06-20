@@ -13,7 +13,7 @@ import { availability, businesses, services, staff } from "../src/db/schema";
 dotenv.config({ path: ".env.local" });
 dotenv.config({ path: ".env" });
 
-const DEFAULT_DAYS = [1, 2, 3, 4, 5, 6]; // Mon–Sat, matches registration defaults
+const DEFAULT_DAYS = [0, 1, 2, 3, 4, 5, 6]; // Sun–Sat for easy local QA
 
 async function main() {
   const slug = process.argv[2] && !process.argv[2].startsWith("--") ? process.argv[2] : "test";
