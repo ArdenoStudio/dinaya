@@ -22,6 +22,7 @@ import { BookingWizardSkeleton } from "./BookingWizardSkeleton";
 import BookingBranding from "./BookingBranding";
 import { BookingChoiceSummary } from "./BookingChoiceSummary";
 import { BookingBackPill } from "./BookingBackPill";
+import { BookingCategoryPill } from "./BookingCategoryPill";
 import { BookingTeamSection } from "./BookingTeamSection";
 import { BookingAttributionCapture } from "./BookingAttributionCapture";
 import { BookingDealsSection } from "./BookingDealsSection";
@@ -98,6 +99,8 @@ export type BookingService = {
   requiresPayment: boolean;
   depositPercent: number;
   intakeQuestions: IntakeQuestion[];
+  categoryId?: string | null;
+  categoryName?: string | null;
 };
 
 export type BookingState = {
@@ -459,16 +462,22 @@ function BookingWizardInner({
     ? format(parseISO(state.date + "T12:00:00"), "EEE d MMM")
     : null;
 
+  const categoryLabel = state.service?.categoryName?.trim() || null;
+
   return (
     <BookingTheme accentColor={business.accentColor} embed={embedMode}>
       {showBackPill && (
-        <div className="mb-3 flex justify-start px-4 md:mb-4 md:px-0">
+        <nav
+          aria-label="Booking context"
+          className="mb-3 flex min-w-0 items-center gap-2.5 px-4 md:mb-4 md:gap-3 md:px-0"
+        >
           <BookingBackPill
             label={backPillLabel}
             href={backPillHref}
             onClick={backPillOnClick}
           />
-        </div>
+          {categoryLabel ? <BookingCategoryPill label={categoryLabel} /> : null}
+        </nav>
       )}
       <div className="w-full min-w-0 max-w-full bg-card lg:overflow-visible lg:rounded-xl lg:border lg:border-border lg:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)] dark:lg:shadow-none dark:lg:ring-1 dark:lg:ring-white/10">
         <BookingAttributionCapture businessId={business.id} />

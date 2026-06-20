@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { db } from "@/db";
-import { businesses, services, staff, staffServices, reviews } from "@/db/schema";
+import { businesses, services, staff, staffServices, reviews, serviceCategories } from "@/db/schema";
 import { listActiveLocations, getStaffLocationMap, ensureBusinessHasDefaultLocation } from "@/lib/locations";
 import { eq, and, avg, count } from "drizzle-orm";
 import { canUseFeature, resolveEffectivePlan } from "@/lib/plan";
@@ -104,6 +104,8 @@ async function loadBookingPageDataInner(slug: string, serviceSlug?: string) {
           id: services.id,
           businessId: services.businessId,
           name: services.name,
+          categoryId: services.categoryId,
+          categoryName: serviceCategories.name,
           ...(includeServiceSlug ? { slug: services.slug } : {}),
           ...(includeServiceImage ? { imageUrl: services.imageUrl } : {}),
           description: services.description,
@@ -121,6 +123,7 @@ async function loadBookingPageDataInner(slug: string, serviceSlug?: string) {
           createdAt: services.createdAt,
         })
         .from(services)
+        .leftJoin(serviceCategories, eq(services.categoryId, serviceCategories.id))
         .where(and(eq(services.businessId, business.id), eq(services.isActive, true))),
       db.select().from(staff).where(and(eq(staff.businessId, business.id), eq(staff.isActive, true))),
       db
@@ -147,6 +150,8 @@ async function loadBookingPageDataInner(slug: string, serviceSlug?: string) {
 
   const servicesWithSlugs = serviceList.map((s) => ({
     ...s,
+    categoryId: s.categoryId ?? null,
+    categoryName: s.categoryName ?? null,
     slug: resolveServiceSlug({
       slug: includeServiceSlug ? (s as { slug?: string | null }).slug ?? null : null,
       name: s.name,
