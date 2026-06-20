@@ -14,7 +14,7 @@ type Props = {
 };
 
 const ctaClass =
-  "inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-amber-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,transform,box-shadow] duration-200 ease-out hover:bg-amber-600 hover:shadow-md active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2";
+  "inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[var(--booking-accent)] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,transform,box-shadow] duration-200 ease-out hover:bg-[var(--booking-accent-hover)] hover:shadow-md active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--booking-accent-soft)] focus-visible:ring-offset-2";
 
 export function BookingHubCta({
   businessSlug,
@@ -29,7 +29,7 @@ export function BookingHubCta({
     return (
       <div
         className={cn(
-          "pointer-events-none fixed inset-x-0 bottom-0 z-40 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] md:hidden",
+          "pointer-events-none fixed inset-x-0 bottom-0 z-40 border-t border-border/50 bg-background/90 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-md md:hidden",
           className,
         )}
       >

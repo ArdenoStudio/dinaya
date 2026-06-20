@@ -17,6 +17,7 @@ interface Props {
   copy: BookingCopy;
   variant: "dialog" | "card";
   className?: string;
+  id?: string;
 }
 
 function MemberAvatar({
@@ -43,7 +44,7 @@ function MemberAvatar({
   );
 }
 
-export function BookingTeamSection({ members, copy, variant, className }: Props) {
+export function BookingTeamSection({ members, copy, variant, className, id }: Props) {
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   if (members.length === 0) return null;
@@ -62,7 +63,8 @@ export function BookingTeamSection({ members, copy, variant, className }: Props)
 
     return (
       <BlurFade inView className={className}>
-        <button
+        <div id={id} className="flex justify-center">
+          <button
           type="button"
           onClick={openDialog}
           className="group flex min-h-11 items-center gap-3 rounded-full border border-border/70 bg-card/80 px-4 py-2.5 text-sm text-muted-foreground shadow-sm transition-[background-color,border-color,transform] duration-200 ease-out hover:border-border hover:bg-card hover:text-foreground active:scale-[0.99]"
@@ -115,13 +117,14 @@ export function BookingTeamSection({ members, copy, variant, className }: Props)
             ))}
           </ul>
         </dialog>
+        </div>
       </BlurFade>
     );
   }
 
   return (
     <BlurFade inView className={className}>
-      <section>
+      <section id={id}>
         <Card className="mt-0 overflow-hidden rounded-none border-x-0 py-0 shadow-none md:mt-6 md:rounded-xl md:border-x md:shadow-sm">
           <CardHeader className="pb-3">
             <CardTitle className="text-base">{copy.meetTeam}</CardTitle>

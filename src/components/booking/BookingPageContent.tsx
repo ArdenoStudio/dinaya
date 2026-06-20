@@ -234,6 +234,8 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
               businessName={business.name}
               businessLogoUrl={business.logoUrl}
               businessDescription={business.description}
+              businessAddress={business.address}
+              businessPhone={business.phone}
               heroImageUrl={heroImageUrl}
               services={services}
               copy={copy}
@@ -242,6 +244,8 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
               cancellationPolicy={business.cancellationPolicy}
               depositPolicy={business.depositPolicy}
               bankTransferInstructions={business.bankTransferInstructions}
+              hasTeam={!hideSidebarSections && staffWithBio.length > 0}
+              hasReviews={!hideSidebarSections && Boolean(businessRating)}
             />
           )}
 
@@ -319,6 +323,7 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
               copy={copy}
               variant="dialog"
               className="mt-5 flex justify-center"
+              id="booking-hub-team"
             />
           )}
 
@@ -340,6 +345,7 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
               reviewDistribution={reviewDistribution}
               initialReviews={initialReviews}
               copy={copy}
+              id={showHub ? "booking-hub-reviews" : undefined}
               className={`flex justify-center pb-8 ${centeredLayout ? "mt-4" : "mt-6"}`}
             />
           )}

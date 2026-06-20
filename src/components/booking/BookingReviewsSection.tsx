@@ -23,6 +23,7 @@ interface Props {
   initialReviews: SerializedPublicReview[];
   copy: BookingCopy;
   className?: string;
+  id?: string;
 }
 
 function formatReviewDate(iso: string) {
@@ -51,6 +52,7 @@ export function BookingReviewsSection({
   initialReviews,
   copy,
   className,
+  id,
 }: Props) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [reviews, setReviews] = useState(initialReviews);
@@ -105,7 +107,7 @@ export function BookingReviewsSection({
 
   return (
     <BlurFade inView className={className}>
-      <div className="mx-auto flex w-full max-w-3xl justify-center px-4">
+      <div id={id} className="mx-auto flex w-full max-w-3xl justify-center px-4">
         <button
           type="button"
           onClick={openDialog}
