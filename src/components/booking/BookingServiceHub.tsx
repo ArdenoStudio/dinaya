@@ -69,7 +69,7 @@ function HubQuickLinks({
         </a>
       ) : null}
       {hasTeam && hasReviews ? (
-        <span className="text-muted-foreground/40" aria-hidden>
+        <span className="text-muted-foreground/60" aria-hidden>
           ·
         </span>
       ) : null}
@@ -125,7 +125,7 @@ export default function BookingServiceHub({
         <header className="flex flex-col gap-4 px-4 pb-3 pt-5 md:px-6 md:pt-6">
           <div className={cn("flex gap-4", showHeaderAvatar ? "items-start" : "flex-col")}>
             {showHeaderAvatar ? (
-              <Avatar className="size-12 shrink-0 ring-2 ring-border/60" data-size="lg">
+              <Avatar className="size-12 shrink-0 ring-2 ring-border/80" data-size="lg">
                 {businessLogoUrl ? (
                   <AvatarImage
                     src={businessLogoUrl}
@@ -140,7 +140,7 @@ export default function BookingServiceHub({
             ) : null}
 
             <div className="min-w-0 flex-1">
-              <h1 className="font-cal text-[1.75rem] font-semibold leading-tight tracking-tight text-foreground md:text-3xl">
+              <h1 className="font-cal text-3xl font-bold leading-[1.1] tracking-tight text-foreground md:text-4xl">
                 {businessName}
               </h1>
               <p className="mt-2 text-[0.9375rem] leading-relaxed text-muted-foreground">
@@ -152,6 +152,7 @@ export default function BookingServiceHub({
                   reviewCount={rating.reviewCount}
                   copy={copy}
                   size="sm"
+                  compactAttribution
                   className="mt-3"
                 />
               ) : null}
@@ -183,19 +184,9 @@ export default function BookingServiceHub({
 
         <Separator className="opacity-60" />
 
-        <div className="px-4 pt-3 md:px-6">
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Services
-          </h2>
-        </div>
-
-        <ul className="flex flex-col gap-1.5 p-2 pt-1 md:gap-2 md:p-3 md:pt-2">
+        <ul className="flex flex-col gap-1.5 p-2 md:gap-2 md:p-3">
           {services.map((service) => {
             const href = buildServiceBookingPath(businessSlug, service.slug ?? service.id);
-            const depositAmount =
-              service.depositPercent > 0
-                ? Math.ceil((service.priceLkr * service.depositPercent) / 100)
-                : service.priceLkr;
             const iconName = serviceIconName(service.name);
 
             return (
@@ -203,10 +194,10 @@ export default function BookingServiceHub({
                 <Link
                   href={href}
                   className={cn(
-                    "group flex min-h-[4.75rem] items-start gap-4 rounded-xl border border-transparent px-3 py-3.5",
+                    "group flex min-h-[4.75rem] items-start gap-3.5 rounded-xl border border-transparent px-3 py-4 md:py-[1.125rem]",
                     "transition-[background-color,transform,box-shadow,border-color] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]",
                     "hover:border-border/80 hover:bg-muted/60 hover:shadow-sm",
-                    "active:scale-[0.99] md:hover:translate-y-[-1px]",
+                    "active:scale-[0.985] md:hover:translate-y-[-1px]",
                     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--booking-accent-soft)]",
                   )}
                 >
@@ -214,13 +205,13 @@ export default function BookingServiceHub({
                     <Image
                       src={service.imageUrl}
                       alt=""
-                      width={52}
-                      height={52}
-                      className="size-[3.25rem] shrink-0 rounded-xl object-cover ring-1 ring-border/50"
+                      width={48}
+                      height={48}
+                      className="size-12 shrink-0 rounded-xl object-cover ring-1 ring-border/50"
                       unoptimized={!isOptimizableRemoteImage(service.imageUrl)}
                     />
                   ) : (
-                    <div className="flex size-[3.25rem] shrink-0 items-center justify-center rounded-xl bg-[var(--booking-accent-muted)] ring-1 ring-border/40">
+                    <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-[var(--booking-accent-muted)] ring-1 ring-border/40">
                       <Icon
                         name={iconName}
                         className="text-lg text-[var(--booking-accent)]"
@@ -233,42 +224,31 @@ export default function BookingServiceHub({
                       {service.name}
                     </p>
                     {service.description ? (
-                      <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-muted-foreground dark:text-muted-foreground/90">
+                      <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-muted-foreground dark:text-zinc-400">
                         {service.description}
                       </p>
                     ) : null}
                     <div className="mt-2.5 flex flex-wrap items-center gap-2">
-                      <Badge variant="secondary" className="text-xs font-normal">
+                      <Badge variant="secondary" className="gap-1 text-xs font-normal">
                         <Icon name="clock" className="text-[0.8rem]" />
                         {service.durationMinutes}m
                       </Badge>
                       {service.priceLkr > 0 ? (
-                        <Badge
-                          variant="outline"
-                          className="border-amber-200/70 text-xs font-medium text-amber-900 dark:border-amber-800/40 dark:text-amber-200"
-                        >
+                        <Badge variant="secondary" className="gap-1 text-xs font-medium">
                           <Icon name="cash-stack" className="text-[0.8rem]" />
                           {formatLkr(service.priceLkr)}
                         </Badge>
                       ) : (
-                        <Badge variant="outline" className="text-xs">
+                        <Badge variant="secondary" className="text-xs">
                           Free
                         </Badge>
                       )}
-                      {service.requiresPayment &&
-                      service.depositPercent > 0 &&
-                      service.priceLkr > 0 ? (
-                        <Badge variant="outline" className="text-xs font-normal">
-                          <Icon name="shield-check" />
-                          {copy.depositDue}: {formatLkr(depositAmount)}
-                        </Badge>
-                      ) : null}
                     </div>
                   </div>
 
                   <Icon
                     name="chevron-right"
-                    className="mt-1.5 size-4 shrink-0 text-muted-foreground/50 transition-transform duration-200 ease-out group-hover:translate-x-1 group-hover:text-[var(--booking-accent)]"
+                    className="size-4 shrink-0 self-center text-muted-foreground/50 transition-transform duration-200 ease-out group-hover:translate-x-1 group-hover:text-[var(--booking-accent)]"
                   />
                 </Link>
               </li>

@@ -317,15 +317,31 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
             </Card>
           )}
 
-          {showHub && !hideSidebarSections && staffWithBio.length > 0 && (
-            <BookingTeamSection
-              members={staffWithBio}
-              copy={copy}
-              variant="dialog"
-              className="mt-5 flex justify-center"
-              id="booking-hub-team"
-            />
-          )}
+          {showHub && !hideSidebarSections && (staffWithBio.length > 0 || businessRating) ? (
+            <footer className="mt-5 flex flex-col items-center gap-3 border-t border-border/50 px-4 pt-5">
+              {staffWithBio.length > 0 ? (
+                <BookingTeamSection
+                  members={staffWithBio}
+                  copy={copy}
+                  variant="dialog"
+                  id="booking-hub-team"
+                />
+              ) : null}
+              {businessRating ? (
+                <BookingReviewsSection
+                  businessSlug={business.slug}
+                  businessName={business.name}
+                  avgRating={businessRating.avgRating}
+                  reviewCount={businessRating.reviewCount}
+                  reviewDistribution={reviewDistribution}
+                  initialReviews={initialReviews}
+                  copy={copy}
+                  id="booking-hub-reviews"
+                  className="pb-8"
+                />
+              ) : null}
+            </footer>
+          ) : null}
 
           {!centeredLayout && !hideSidebarSections && staffWithBio.length > 0 && (
             <BookingTeamSection
@@ -336,7 +352,7 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
             />
           )}
 
-          {!hideSidebarSections && businessRating && (
+          {!showHub && !hideSidebarSections && businessRating && (
             <BookingReviewsSection
               businessSlug={business.slug}
               businessName={business.name}
@@ -345,7 +361,6 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
               reviewDistribution={reviewDistribution}
               initialReviews={initialReviews}
               copy={copy}
-              id={showHub ? "booking-hub-reviews" : undefined}
               className={`flex justify-center pb-8 ${centeredLayout ? "mt-4" : "mt-6"}`}
             />
           )}
