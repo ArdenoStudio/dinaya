@@ -111,12 +111,16 @@ export default function BookingServiceHub({
   const tagline = hubTagline(businessDescription, copy.selectServiceHint);
   const locationLine = formatHubLocationLine(businessAddress, businessPhone);
   const showHeaderAvatar = !heroImageUrl;
+  // A footer (team/reviews) renders after the hub whenever either exists. When it
+  // does, that footer owns the clearance for the fixed mobile CTA, so the hub
+  // skips its own bottom padding to avoid a large empty gap before the footer.
+  const footerFollows = Boolean(hasTeam || hasReviews);
 
   const shell =
     "overflow-hidden rounded-none border-x-0 bg-card shadow-none md:rounded-2xl md:border md:border-border/80 md:shadow-[0_12px_40px_-24px_rgba(15,23,42,0.28)] dark:md:shadow-none dark:md:ring-1 dark:md:ring-white/10";
 
   return (
-    <BlurFade className="w-full pb-28 md:pb-0">
+    <BlurFade className={cn("w-full md:pb-0", footerFollows ? "pb-0" : "pb-28")}>
       <article className={cn("flex w-full flex-col", shell)}>
         {heroImageUrl ? (
           <div className="relative">
