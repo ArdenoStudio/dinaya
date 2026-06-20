@@ -42,15 +42,26 @@ interface Props {
   }) => void;
   variant?: "inline" | "full";
   formId?: string;
+  /** When the wizard shows BookingBackPill, hide the duplicate inline back link. */
+  hideInlineBack?: boolean;
 }
 
 const fieldBaseCls =
   "mt-1.5 w-full min-h-11 rounded-xl border px-3 py-2.5 text-base transition-shadow placeholder:text-muted-foreground focus:outline-none focus:ring-2 md:text-sm";
 const fieldOkCls = `${fieldBaseCls} border-border bg-card focus:border-[var(--booking-accent)] focus:ring-[var(--booking-accent-soft)]`;
-const fieldErrCls = `${fieldBaseCls} border-destructive/50 bg-destructive/5 focus:border-destructive focus:ring-destructive/20`;
+const fieldErrCls = `${fieldBaseCls} border-destructive bg-card focus:border-destructive focus:ring-destructive/25`;
 
 function fieldErrorId(field: string) {
   return `confirm-error-${field}`;
+}
+
+function FieldError({ id, message }: { id: string; message: string }) {
+  return (
+    <p id={id} className="mt-1.5 flex items-center gap-1.5 text-sm text-destructive">
+      <Icon name="exclamation-circle" className="shrink-0 text-xs" aria-hidden />
+      <span>{message}</span>
+    </p>
+  );
 }
 
 function IntakeField({
@@ -75,9 +86,9 @@ function IntakeField({
       <label htmlFor={id} className="text-sm font-medium text-foreground">
         {question.label}{" "}
         {question.required ? (
-          <span className="font-normal text-gray-400 dark:text-gray-500">*</span>
+          <span className="font-normal text-muted-foreground">*</span>
         ) : (
-          <span className="text-xs font-normal text-gray-400 dark:text-gray-500">(optional)</span>
+          <span className="text-xs font-normal text-muted-foreground">(optional)</span>
         )}
       </label>
       {question.sensitive ? (
@@ -133,11 +144,7 @@ function IntakeField({
           className={cls}
         />
       )}
-      {error ? (
-        <p id={errorId} className="mt-1 text-xs text-red-600 dark:text-red-400">
-          {error}
-        </p>
-      ) : null}
+      {error ? <FieldError id={errorId} message={error} /> : null}
     </div>
   );
 }
@@ -153,6 +160,7 @@ export default function StepConfirm({
   onConfirmed,
   variant = "full",
   formId = "booking-contact-form",
+  hideInlineBack = false,
 }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -441,13 +449,11 @@ export default function StepConfirm({
   const emailError = showFieldError("clientEmail");
 
   const contactForm = (
-    <div className="space-y-3 md:rounded-xl md:border md:border-border md:bg-card md:p-5">
-      <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground md:mb-1">
-        {copy.details}
-      </p>
+    <div className="space-y-4 md:rounded-xl md:border md:border-border md:bg-card md:p-6">
+      <p className="text-base font-semibold text-foreground">{copy.details}</p>
       <div>
         <label htmlFor="clientName" className="text-sm font-medium text-foreground">
-          Full name <span className="font-normal text-gray-400 dark:text-gray-500">*</span>
+          Full name <span className="font-normal text-muted-foreground">*</span>
         </label>
         <input
           id="clientName"
@@ -463,15 +469,11 @@ export default function StepConfirm({
           className={nameError ? fieldErrCls : fieldOkCls}
           placeholder="Nimal Perera"
         />
-        {nameError ? (
-          <p id={fieldErrorId("clientName")} className="mt-1 text-xs text-red-600 dark:text-red-400">
-            {nameError}
-          </p>
-        ) : null}
+        {nameError ? <FieldError id={fieldErrorId("clientName")} message={nameError} /> : null}
       </div>
       <div>
         <label htmlFor="clientPhone" className="text-sm font-medium text-foreground">
-          Phone number <span className="font-normal text-gray-400 dark:text-gray-500">*</span>
+          Phone number <span className="font-normal text-muted-foreground">*</span>
         </label>
         <input
           id="clientPhone"
@@ -488,15 +490,11 @@ export default function StepConfirm({
           className={phoneError ? fieldErrCls : fieldOkCls}
           placeholder="+94 77 123 4567"
         />
-        {phoneError ? (
-          <p id={fieldErrorId("clientPhone")} className="mt-1 text-xs text-red-600 dark:text-red-400">
-            {phoneError}
-          </p>
-        ) : null}
+        {phoneError ? <FieldError id={fieldErrorId("clientPhone")} message={phoneError} /> : null}
       </div>
       <div>
         <label htmlFor="clientEmail" className="text-sm font-medium text-foreground">
-          Email <span className="text-xs font-normal text-gray-400 dark:text-gray-500">(optional)</span>
+          Email <span className="text-xs font-normal text-muted-foreground">(optional)</span>
         </label>
         <input
           id="clientEmail"
@@ -512,15 +510,11 @@ export default function StepConfirm({
           className={emailError ? fieldErrCls : fieldOkCls}
           placeholder="you@email.com"
         />
-        {emailError ? (
-          <p id={fieldErrorId("clientEmail")} className="mt-1 text-xs text-red-600 dark:text-red-400">
-            {emailError}
-          </p>
-        ) : null}
+        {emailError ? <FieldError id={fieldErrorId("clientEmail")} message={emailError} /> : null}
       </div>
       <div>
         <label htmlFor="notes" className="text-sm font-medium text-foreground">
-          Notes <span className="text-xs font-normal text-gray-400 dark:text-gray-500">(optional)</span>
+          Notes <span className="text-xs font-normal text-muted-foreground">(optional)</span>
         </label>
         <textarea
           id="notes"
@@ -624,31 +618,33 @@ export default function StepConfirm({
 
   if (variant === "inline") {
     return (
-      <div id={formId} className="pt-2">
+      <div id={formId}>
         {paymentExtras}
         {contactForm}
         {error && (
-          <div className="mt-3 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300">
+          <div className="mt-4 flex items-start gap-2 rounded-xl border border-destructive/30 bg-card px-3 py-2.5 text-sm text-destructive">
             <Icon name="exclamation-circle" className="mt-0.5 shrink-0 text-sm" />
             <span>{error}</span>
           </div>
         )}
         <BookingSubmitButton
-          className="mt-4"
+          className="mt-6"
           loading={loading}
           disabled={!canSubmit}
           onClick={handleBook}
         >
           {payLabel}
         </BookingSubmitButton>
-        <button
-          type="button"
-          onClick={onBack}
-          className="mt-3 flex min-h-11 items-center text-sm text-muted-foreground transition-colors hover:text-foreground"
-        >
-          {copy.back}
-        </button>
-        <div className="mt-3 flex items-center justify-center gap-1">
+        {!hideInlineBack ? (
+          <button
+            type="button"
+            onClick={onBack}
+            className="mt-4 flex min-h-11 items-center text-sm text-muted-foreground transition-colors hover:text-foreground"
+          >
+            {copy.back}
+          </button>
+        ) : null}
+        <div className={`flex items-center justify-center gap-1 ${hideInlineBack ? "mt-4" : "mt-3"}`}>
           <Icon name="shield-check" className="text-[11px] text-muted-foreground" />
           <span className="text-[11px] text-muted-foreground">{copy.paymentSecure}</span>
         </div>

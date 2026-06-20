@@ -515,12 +515,18 @@ function BookingWizardInner({
               </div>
 
               <div className="min-w-0 lg:py-6">
-                {state.service && !showContactForm ? (
+                {state.service ? (
                   <div className="border-b border-border py-3 lg:hidden">
                     <BookingChoiceSummary
                       dateLabel={choiceDateLabel}
                       timeLabel={state.timeLabel || null}
-                      stepLabel={selectedSlot ? copy.details : copy.pickDateTime}
+                      stepLabel={
+                        showContactForm
+                          ? copy.details
+                          : selectedSlot
+                            ? copy.details
+                            : copy.pickDateTime
+                      }
                     />
                   </div>
                 ) : null}
@@ -538,6 +544,7 @@ function BookingWizardInner({
                         onUpdate={update}
                         onBack={clearSlot}
                         onConfirmed={handleConfirmed}
+                        hideInlineBack={showBackPill}
                       />
                     </div>
                   ) : (
