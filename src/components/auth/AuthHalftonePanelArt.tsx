@@ -44,15 +44,6 @@ export function AuthHalftonePanelArt() {
           ].join(", "),
         }}
       />
-
-      {/* Vignette so overlaid copy stays readable */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(to top, rgba(5,5,5,0.92) 0%, rgba(5,5,5,0.35) 38%, rgba(5,5,5,0.12) 68%, rgba(5,5,5,0.55) 100%)",
-        }}
-      />
     </div>
   );
 }
