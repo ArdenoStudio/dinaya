@@ -88,10 +88,10 @@ export function SlotListPanel({
         if (periodSlots.length === 0) return null;
         return (
           <div key={period}>
-            <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
               {copy[PERIOD_LABEL[period]]}
             </p>
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-2">
               {periodSlots.map((slot) => {
                 const isSelected = slot.startUtc === selectedStartUtc;
                 const hasCalendarConflict = slotConflictsWithBusyTime(slot, busyTimes);
@@ -105,16 +105,16 @@ export function SlotListPanel({
                       hasCalendarConflict ? `, ${copy.calendarConflict}` : ""
                     }`}
                     onClick={() => onSelect(slot)}
-                    className={`flex min-h-11 w-full items-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-medium transition-colors ${
+                    className={`flex min-h-12 w-full items-center gap-2.5 rounded-lg border px-3 py-2.5 text-sm font-medium transition-colors ${
                       hasCalendarConflict
-                        ? "cursor-not-allowed border-gray-200 bg-gray-100 text-gray-400 dark:border-neutral-800 dark:bg-neutral-800/70 dark:text-gray-500"
+                        ? "cursor-not-allowed border-border bg-muted text-muted-foreground"
                         : isSelected
                         ? "booking-bg-accent border-transparent text-white booking-shadow-accent"
                         : "border-border bg-card text-foreground hover:border-[var(--booking-accent)] hover:bg-[var(--booking-accent-muted)]/30"
                     }`}
                   >
                     {!hasCalendarConflict && !isSelected && (
-                      <span className="size-1.5 shrink-0 rounded-full bg-emerald-500" aria-hidden />
+                      <span className="size-2 shrink-0 rounded-full bg-emerald-500" aria-hidden />
                     )}
                     <span className="min-w-0 flex-1 text-left">
                       <span className={hasCalendarConflict ? "line-through decoration-gray-300" : ""}>

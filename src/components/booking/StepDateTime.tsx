@@ -300,13 +300,13 @@ export default function StepDateTime({
   };
 
   return (
-    <div className="flex h-full min-w-0 flex-col">
+      <div className="flex h-full min-w-0 w-full max-w-full flex-col">
       <p className="mb-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground md:hidden">
         {copy.pickDateTime}
       </p>
 
-      <div className="flex min-w-0 flex-col md:grid md:min-h-[22rem] md:grid-cols-[minmax(18rem,1fr)_minmax(11rem,17rem)] md:divide-x md:divide-border">
-        <section className="min-w-0 pb-4 md:px-6 md:pb-0 md:pt-0 lg:px-8">
+      <div className="flex min-w-0 w-full max-w-full flex-col lg:grid lg:min-h-[22rem] lg:grid-cols-[minmax(0,1fr)_11.5rem] lg:divide-x lg:divide-border xl:grid-cols-[minmax(0,1fr)_12rem]">
+        <section className="min-w-0 pb-4 lg:px-4 lg:pb-0 lg:pt-0 xl:px-5">
           <div className="mb-3 flex items-center justify-between gap-2 md:mb-4">
             <p className="text-sm font-medium text-foreground md:sr-only">{copy.chooseDate}</p>
             <button
@@ -348,7 +348,7 @@ export default function StepDateTime({
             )}
           </div>
 
-          <div className="hidden min-w-0 md:block">
+          <div className="hidden min-w-0 md:block lg:hidden">
             <MonthCalendar
               selectedDate={selectedDate}
               minDate={today}
@@ -361,10 +361,24 @@ export default function StepDateTime({
               size="comfortable"
             />
           </div>
+
+          <div className="hidden min-w-0 lg:block">
+            <MonthCalendar
+              selectedDate={selectedDate}
+              minDate={today}
+              maxDate={maxDate}
+              dayStatus={monthDayStatus}
+              personalBusyDates={calendarOverlay?.busyDates}
+              nextAvailableDate={showNextAvailable ? nextAvailable?.date : undefined}
+              onMonthChange={handleMonthChange}
+              onSelect={onDateChange}
+              size="compact"
+            />
+          </div>
         </section>
 
         {!hideSlots ? (
-          <section className="min-w-0 pt-4 md:flex md:min-h-0 md:flex-col md:px-4 md:pt-0 lg:px-5">
+          <section className="min-w-0 pt-4 lg:flex lg:min-h-0 lg:flex-col lg:px-4 lg:pt-0 xl:px-5">
             <Separator className="mb-4 md:hidden" />
             {compactDateHeading ? (
                 <div className="mb-3 flex items-baseline justify-between gap-2 md:mb-4">
@@ -397,10 +411,10 @@ export default function StepDateTime({
                 <p className="py-6 text-center text-sm text-muted-foreground">{copy.selectDate}</p>
               ) : (
                 <>
-                  <div className="md:hidden">
+                  <div className="lg:hidden">
                     <TimeSlotGrid {...slotPanelProps} />
                   </div>
-                  <div className="hidden max-h-[min(28rem,calc(100vh-12rem))] overflow-y-auto md:block md:pr-1">
+                  <div className="hidden min-w-0 max-h-[min(28rem,calc(100vh-12rem))] overflow-y-auto overflow-x-hidden lg:block">
                     <SlotListPanel {...slotPanelProps} />
                   </div>
                 </>

@@ -90,7 +90,7 @@ export default function MonthCalendar({
       className={`min-w-0 w-full ${comfortable ? "" : "rounded-xl border border-gray-100 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-900/60 p-3.5"}`}
     >
       <div className={`flex items-center justify-between ${comfortable ? "mb-4" : "mb-3"}`}>
-        <span className={`font-bold text-gray-800 dark:text-gray-200 ${comfortable ? "text-base" : "text-sm"}`}>
+        <span className={`font-semibold text-foreground ${comfortable ? "text-lg" : "text-sm"}`}>
           {format(viewMonth, "MMMM yyyy")}
         </span>
         <div className="flex gap-1">
@@ -146,7 +146,7 @@ export default function MonthCalendar({
               onClick={() => !disabled && onSelect(dateStr)}
               className={`relative min-w-0 font-medium transition-all ${
                 comfortable
-                  ? "mx-auto flex size-10 items-center justify-center rounded-xl text-sm"
+                  ? "mx-auto flex size-11 items-center justify-center rounded-xl text-sm"
                   : "mx-auto flex aspect-square w-full max-w-10 items-center justify-center rounded-lg text-xs"
               } ${
                 !inMonth

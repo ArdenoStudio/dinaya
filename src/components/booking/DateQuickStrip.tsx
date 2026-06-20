@@ -33,10 +33,10 @@ export default function DateQuickStrip({ selectedDate, minDate, maxDate, copy, o
             key={dateStr}
             type="button"
             onClick={() => onSelect(dateStr)}
-            className={`flex shrink-0 snap-start flex-col items-center rounded-xl border px-3.5 py-2.5 transition-all ${
+            className={`flex min-h-11 min-w-11 shrink-0 snap-start flex-col items-center justify-center rounded-xl border px-3.5 py-2.5 transition-all ${
               isSelected
                 ? "booking-border-accent booking-bg-accent text-white shadow-md booking-shadow-accent"
-                : "border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 text-gray-600 dark:text-gray-400"
+                : "border-border bg-card text-muted-foreground"
             }`}
           >
             <span className={`text-[10px] font-medium ${isSelected ? "text-white/80" : "text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500"}`}>

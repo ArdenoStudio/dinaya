@@ -129,6 +129,11 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
 
   const bookerFocus = mode === "service" || mode === "embed" || services.length === 1;
   const centeredLayout = bookerFocus || showHub;
+  const layoutMaxWidth = showHub
+    ? "w-full max-w-2xl px-0 md:px-4"
+    : bookerFocus
+      ? "w-full max-w-5xl px-0 md:px-4"
+      : "mx-auto max-w-5xl px-0 md:px-8 md:py-6";
 
   const wizardService =
     mode === "service"
@@ -154,9 +159,7 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
         {mode !== "embed" ? <BookingThemeToggle /> : null}
         <div
           className={
-            centeredLayout
-              ? "w-full max-w-2xl px-0 md:px-4"
-              : "mx-auto max-w-5xl px-0 md:px-8 md:py-6"
+            centeredLayout ? layoutMaxWidth : "mx-auto max-w-5xl px-0 md:px-8 md:py-6"
           }
         >
           {!centeredLayout && !hideSidebarSections && gallery.length > 0 && (

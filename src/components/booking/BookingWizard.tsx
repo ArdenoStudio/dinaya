@@ -451,7 +451,7 @@ function BookingWizardInner({
           />
         </div>
       )}
-      <div className="min-w-0 overflow-hidden bg-card md:rounded-xl md:border md:border-border md:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]">
+      <div className="w-full min-w-0 max-w-full bg-card lg:overflow-visible lg:rounded-xl lg:border lg:border-border lg:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]">
         <BookingAttributionCapture businessId={business.id} />
         <BookingDealsSection
           deals={activeDeals}
@@ -490,12 +490,12 @@ function BookingWizardInner({
               />
             </div>
           ) : (
-            <div className="grid gap-6 md:grid-cols-[minmax(0,17rem)_1fr] md:items-start md:gap-0 md:divide-x md:divide-border lg:grid-cols-[minmax(0,19rem)_1fr]">
-              <div className="border-b border-border pb-6 md:sticky md:top-6 md:self-start md:border-0 md:px-6 md:pb-6 md:pt-6 lg:px-8">
+            <div className="grid w-full min-w-0 max-w-full gap-6 lg:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] lg:items-start lg:gap-0 lg:divide-x lg:divide-border xl:grid-cols-[minmax(0,16rem)_minmax(0,1fr)]">
+              <div className="border-b border-border pb-6 lg:sticky lg:top-6 lg:self-start lg:border-0 lg:px-4 lg:pb-6 lg:pt-6 xl:px-5">
                 <ServiceMetaPanel {...metaPanelProps} />
               </div>
 
-              <div className="min-w-0 md:py-6">
+              <div className="min-w-0 lg:py-6">
                 {canPickSlots ? (
                   showContactForm ? (
                     <div className="px-4 md:px-6 lg:px-8">
