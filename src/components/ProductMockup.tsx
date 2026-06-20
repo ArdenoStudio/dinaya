@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useTheme } from "next-themes";
 import IPhoneMockup from "@/components/ui/iphone-mockup";
 import { Icon } from "@/components/ui/Icon";
@@ -15,6 +15,7 @@ type PersonaData = {
   icon: string;
   url: string;
   clientName: string;
+  categoryName: string;
   services: { name: string; duration: string; price: string; selected: boolean }[];
   slots: Slot[];
   selectedSlot: number;
@@ -30,6 +31,7 @@ const primaryPersona: PersonaData = {
   icon: "scissors",
   url: "dilini.dinaya.lk",
   clientName: "Samadhi",
+  categoryName: "Hair Services",
   services: [
     { name: "Haircut & Style", duration: "45 min", price: "Rs. 2,500", selected: true },
     { name: "Facial Treatment", duration: "60 min", price: "Rs. 3,800", selected: false },
@@ -135,33 +137,18 @@ function CalendarDay({ cell }: { cell: DayCell }) {
   );
 }
 
-function FloatingToasts({ persona }: { persona: PersonaData }) {
+function FloatingToast({ persona }: { persona: PersonaData }) {
   return (
-    <>
-      <div className="absolute -top-5 -right-5 flex bg-white/90 backdrop-blur dark:bg-neutral-950/90 rounded-2xl border border-white/70 dark:border-neutral-700/70 shadow-2xl shadow-gray-900/12 dark:shadow-black/40 p-3.5 items-center gap-3 max-w-[230px]">
-        <div className="size-10 bg-gradient-to-br from-amber-400 to-amber-500 rounded-full flex items-center justify-center shrink-0 shadow-md shadow-amber-500/30">
-          <Icon name="check-lg" className="text-white text-sm" />
-        </div>
-        <div>
-          <p className="text-xs font-bold text-gray-900 dark:text-gray-100">{persona.notif.title}</p>
-          <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">{persona.notif.detail}</p>
-          <p className="text-[11px] font-semibold text-amber-600">{persona.notif.amount}</p>
-        </div>
+    <div className="absolute -top-4 right-4 flex max-w-[220px] items-center gap-3 rounded-2xl border border-border/70 bg-card/95 p-3.5 shadow-2xl shadow-black/10 backdrop-blur-sm dark:shadow-black/40">
+      <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-amber-500 shadow-md shadow-amber-500/30">
+        <Icon name="check-lg" className="text-sm text-white" />
       </div>
-
-      <div className="absolute -bottom-5 -left-5 flex bg-white/90 backdrop-blur dark:bg-neutral-950/90 rounded-2xl border border-white/70 dark:border-neutral-700/70 shadow-2xl shadow-gray-900/12 dark:shadow-black/40 p-3.5 items-center gap-3 max-w-[210px]">
-        <div className="size-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shrink-0 shadow-md shadow-blue-500/30">
-          <Icon name="credit-card" className="text-white text-sm" />
-        </div>
-        <div>
-          <p className="text-xs font-bold text-gray-900 dark:text-gray-100">{persona.payment.title}</p>
-          <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
-            {persona.payment.detail}{" "}
-            <span className="font-semibold text-blue-600">{persona.payment.amount}</span>
-          </p>
-        </div>
+      <div className="min-w-0">
+        <p className="text-xs font-bold text-foreground">{persona.notif.title}</p>
+        <p className="mt-0.5 text-[11px] text-muted-foreground">{persona.notif.detail}</p>
+        <p className="text-[11px] font-semibold text-amber-600">{persona.notif.amount}</p>
       </div>
-    </>
+    </div>
   );
 }
 
@@ -174,53 +161,38 @@ function BackPill({ label }: { label: string }) {
   );
 }
 
-function MockField({
-  label,
-  optional,
-  value,
-  placeholder,
-}: {
-  label: string;
-  optional?: boolean;
-  value?: string;
-  placeholder?: string;
-}) {
+function CategoryPill({ label }: { label: string }) {
   return (
-    <div>
-      <p className="text-[11px] font-medium text-foreground">
-        {label}{" "}
-        {optional ? (
-          <span className="font-normal text-muted-foreground">(optional)</span>
-        ) : (
-          <span className="font-normal text-muted-foreground">*</span>
-        )}
-      </p>
-      <div
-        className={`mt-[5px] rounded-xl border border-border bg-card px-[10px] py-[9px] text-[12px] ${
-          value ? "text-foreground" : "text-muted-foreground"
-        }`}
-      >
-        {value ?? placeholder}
-      </div>
-    </div>
+    <span className="inline-flex max-w-[9rem] shrink-0 items-center truncate rounded-full border border-border/60 bg-muted/35 px-2 py-0.5 text-[10px] font-medium text-muted-foreground dark:bg-muted/20">
+      {label}
+    </span>
   );
 }
 
-function PhoneScreen({ persona }: { persona: PersonaData }) {
+function BookingContextNav({ backLabel, categoryLabel }: { backLabel: string; categoryLabel: string }) {
+  return (
+    <nav aria-label="Booking context" className="flex min-w-0 items-center gap-2">
+      <BackPill label={backLabel} />
+      <CategoryPill label={categoryLabel} />
+    </nav>
+  );
+}
+
+function PhoneDateTimeScreen({ persona }: { persona: PersonaData }) {
   const selectedService = persona.services.find((s) => s.selected)!;
   const selectedTime = persona.slots[persona.selectedSlot].label;
 
   return (
     <div className="flex h-full w-full flex-col bg-muted/40 dark:bg-black">
       <div className="px-[14px] pb-[8px] pt-[58px]">
-        <BackPill label="Date & Time" />
+        <BookingContextNav backLabel="All services" categoryLabel={persona.categoryName} />
       </div>
 
       <div className="mx-[14px] flex min-h-0 flex-1 flex-col overflow-hidden">
-        <div className="pb-[12px]">
+        <div className="pb-[10px]">
           <div className="flex items-start gap-[10px]">
-            <div className="flex size-[40px] shrink-0 items-center justify-center rounded-full bg-blue-600/10 text-blue-600">
-              <Icon name={persona.icon} className="text-[14px]" />
+            <div className="flex size-[36px] shrink-0 items-center justify-center rounded-full bg-blue-600/10 text-blue-600">
+              <Icon name={persona.icon} className="text-[13px]" />
             </div>
             <div className="min-w-0 flex-1">
               <p className="truncate text-[13px] font-medium text-foreground">{persona.business}</p>
@@ -228,10 +200,9 @@ function PhoneScreen({ persona }: { persona: PersonaData }) {
             </div>
           </div>
 
-          <div className="mt-[14px] border-t border-border/70 pt-[14px]">
-            <p className="text-[17px] font-semibold leading-tight text-foreground">{selectedService.name}</p>
-            <p className="mt-[6px] text-[11px] leading-relaxed text-muted-foreground">Professional cut and styling.</p>
-            <p className="mt-[10px] flex items-center gap-[6px] text-[11px] text-muted-foreground">
+          <div className="mt-[12px] border-t border-border/70 pt-[12px]">
+            <p className="text-[15px] font-semibold leading-tight text-foreground">{selectedService.name}</p>
+            <p className="mt-[6px] flex items-center gap-[6px] text-[11px] text-muted-foreground">
               <Icon name="clock" className="text-[11px]" />
               {selectedService.duration.replace(" min", "m")}
               <span className="text-muted-foreground/50">·</span>
@@ -240,35 +211,46 @@ function PhoneScreen({ persona }: { persona: PersonaData }) {
           </div>
         </div>
 
-        <div className="border-b border-border py-[10px]">
-          <p className="truncate text-[12px] font-medium text-foreground">Thu 15 May · {selectedTime}</p>
-        </div>
-
-        <div className="flex-1 overflow-y-auto py-[12px]">
-          <p className="text-[14px] font-semibold text-foreground">Your details</p>
-          <div className="mt-[10px] space-y-[10px]">
-            <MockField label="Full name" value={`${persona.clientName} Perera`} />
-            <MockField label="Phone number" placeholder="+94 77 123 4567" />
-            <MockField label="Email" optional placeholder="you@email.com" />
-            <MockField label="Notes" optional placeholder="Anything we should know?" />
+        <div className="border-y border-border py-[10px]">
+          <div className="mb-2 flex items-center justify-between">
+            <span className="text-[11px] font-semibold text-foreground">May 2025</span>
+            <div className="flex gap-1 text-muted-foreground">
+              <Icon name="chevron-left" className="text-[9px]" />
+              <Icon name="chevron-right" className="text-[9px]" />
+            </div>
+          </div>
+          <div className="grid grid-cols-7 gap-0.5 text-center">
+            {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => (
+              <div key={`${d}-${i}`} className="pb-0.5 text-[7px] font-semibold text-muted-foreground">
+                {d}
+              </div>
+            ))}
+            {mockDays.map((cell, i) => (
+              <CalendarDay key={i} cell={cell} />
+            ))}
           </div>
         </div>
 
-        <div className="border-t border-border pb-[18px] pt-[10px]">
+        <div className="flex-1 overflow-y-auto py-[10px]">
+          <p className="mb-2 text-[11px] font-semibold text-foreground">Thu 15 · Available times</p>
+          <div className="grid grid-cols-2 gap-1.5">
+            {persona.slots.map((slot, i) => (
+              <SlotButton key={slot.label} label={slot.label} selected={i === persona.selectedSlot} />
+            ))}
+          </div>
+        </div>
+
+        <div className="border-t border-border pb-[16px] pt-[10px]">
           <button
             type="button"
-            className="w-full rounded-xl bg-blue-600 py-[13px] text-[13px] font-semibold text-white shadow-sm"
+            className="w-full rounded-xl bg-blue-600 py-[12px] text-[13px] font-semibold text-white shadow-sm"
           >
-            Confirm booking
+            Continue · {selectedTime}
           </button>
-          <div className="mt-[8px] flex items-center justify-center gap-[4px]">
-            <Icon name="shield-check" className="text-[10px] text-muted-foreground" />
-            <span className="text-[10px] text-muted-foreground">Secure checkout · SSL encrypted</span>
-          </div>
         </div>
       </div>
 
-      <div className="flex justify-center py-[10px]">
+      <div className="flex justify-center py-[8px]">
         <DinayaBranding compact />
       </div>
     </div>
@@ -320,47 +302,47 @@ function OwnerDashboardPhoneScreen({ persona }: { persona: PersonaData }) {
   const selectedService = persona.services.find((s) => s.selected)!;
 
   return (
-    <div className="w-full h-full flex flex-col bg-gray-50 dark:bg-neutral-900/60">
-      <div className="bg-white dark:bg-neutral-900 border-b border-gray-100 dark:border-neutral-800 px-[16px] pt-[66px] pb-[14px]">
-        <p className="font-cal text-[15px] font-semibold text-gray-900 dark:text-gray-100">Dinaya</p>
-        <p className="text-[12px] text-gray-500 dark:text-gray-400 mt-[2px]">Today&apos;s schedule</p>
+    <div className="flex h-full w-full flex-col bg-muted/30 dark:bg-black">
+      <div className="border-b border-border bg-card px-[16px] pb-[14px] pt-[66px]">
+        <p className="font-cal text-[15px] font-semibold text-foreground">Dinaya</p>
+        <p className="mt-[2px] text-[12px] text-muted-foreground">Today&apos;s schedule</p>
       </div>
 
-      <div className="flex-1 px-[14px] py-[12px] flex flex-col gap-[8px]">
+      <div className="flex flex-1 flex-col gap-[8px] px-[14px] py-[12px]">
         <div className="grid grid-cols-2 gap-[8px]">
-          <div className="bg-white dark:bg-neutral-900 rounded-[12px] px-[12px] py-[10px] border border-gray-100 dark:border-neutral-800">
-            <p className="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-wide">Revenue</p>
-            <p className="text-[15px] font-bold text-gray-900 dark:text-gray-100 mt-[2px]">Rs. 2,500</p>
+          <div className="rounded-[12px] border border-border bg-card px-[12px] py-[10px]">
+            <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Revenue</p>
+            <p className="mt-[2px] text-[15px] font-bold text-foreground">Rs. 2,500</p>
           </div>
-          <div className="bg-white dark:bg-neutral-900 rounded-[12px] px-[12px] py-[10px] border border-gray-100 dark:border-neutral-800">
-            <p className="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-wide">Bookings</p>
-            <p className="text-[15px] font-bold text-gray-900 dark:text-gray-100 mt-[2px]">3 today</p>
+          <div className="rounded-[12px] border border-border bg-card px-[12px] py-[10px]">
+            <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Bookings</p>
+            <p className="mt-[2px] text-[15px] font-bold text-foreground">3 today</p>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-neutral-900 rounded-[16px] px-[14px] py-[12px] border border-gray-100 dark:border-neutral-800">
-          <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-[0.08em] mb-[8px]">Up next</p>
+        <div className="rounded-[16px] border border-border bg-card px-[14px] py-[12px]">
+          <p className="mb-[8px] text-[10px] font-bold uppercase tracking-[0.08em] text-muted-foreground">Up next</p>
           <div className="flex items-center gap-[10px]">
-            <div className="size-[36px] rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+            <div className="flex size-[36px] shrink-0 items-center justify-center rounded-full bg-blue-600/10">
               <span className="text-[13px] font-bold text-blue-600">S</span>
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[13px] font-semibold text-gray-900 dark:text-gray-100 truncate">{persona.clientName} Perera</p>
-              <p className="text-[11px] text-gray-500 dark:text-gray-400">{selectedService.name} · 11:00 AM</p>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-[13px] font-semibold text-foreground">{persona.clientName} Perera</p>
+              <p className="text-[11px] text-muted-foreground">{selectedService.name} · 11:00 AM</p>
             </div>
-            <span className="text-[11px] font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 px-[7px] py-[3px] rounded-full shrink-0">
+            <span className="shrink-0 rounded-full bg-emerald-500/10 px-[7px] py-[3px] text-[11px] font-semibold text-emerald-600">
               Paid
             </span>
           </div>
         </div>
 
-        <div className="bg-amber-50 dark:bg-amber-950/40 border border-amber-100 rounded-[14px] px-[12px] py-[10px] flex items-center gap-[10px]">
-          <div className="size-[32px] bg-amber-400 rounded-full flex items-center justify-center shrink-0">
-            <Icon name="check-lg" className="text-white text-[12px]" />
+        <div className="flex items-center gap-[10px] rounded-[14px] border border-amber-500/20 bg-amber-500/10 px-[12px] py-[10px]">
+          <div className="flex size-[32px] shrink-0 items-center justify-center rounded-full bg-amber-400">
+            <Icon name="check-lg" className="text-[12px] text-white" />
           </div>
           <div>
-            <p className="text-[12px] font-bold text-gray-900 dark:text-gray-100">{persona.notif.title}</p>
-            <p className="text-[11px] text-gray-600 dark:text-gray-400">{persona.notif.detail}</p>
+            <p className="text-[12px] font-bold text-foreground">{persona.notif.title}</p>
+            <p className="text-[11px] text-muted-foreground">{persona.notif.detail}</p>
           </div>
         </div>
       </div>
@@ -398,7 +380,7 @@ function CustomerBookingDesktop({ persona }: { persona: PersonaData }) {
   return (
     <div className="flex h-full flex-col overflow-hidden bg-muted/30 p-4 dark:bg-black sm:p-5">
       <div className="mb-3 shrink-0">
-        <BackPill label="All services" />
+        <BookingContextNav backLabel="All services" categoryLabel={persona.categoryName} />
       </div>
 
       <div className="flex min-h-0 flex-1 overflow-hidden rounded-xl border border-border bg-card shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)] dark:shadow-none dark:ring-1 dark:ring-white/10">
@@ -503,19 +485,21 @@ function OwnerDashboardDesktop({ persona }: { persona: PersonaData }) {
   ];
 
   return (
-    <div className="h-full bg-gray-50 dark:bg-neutral-900/60 p-4 sm:p-5 overflow-hidden">
+    <div className="h-full overflow-hidden bg-muted/30 p-4 dark:bg-black sm:p-5">
       <div className="flex h-full gap-3">
-        <aside className="hidden sm:flex w-[26%] shrink-0 flex-col bg-white dark:bg-neutral-900 rounded-xl border border-gray-100 dark:border-neutral-800 overflow-hidden">
-          <div className="border-b px-3 py-2">
-            <p className="font-cal text-xs font-semibold text-gray-900 dark:text-gray-100">Dinaya</p>
-            <p className="text-[9px] text-gray-400 dark:text-gray-500 truncate">{persona.business}</p>
+        <aside className="hidden w-[26%] shrink-0 flex-col overflow-hidden rounded-xl border border-border bg-card sm:flex">
+          <div className="border-b border-border px-3 py-2">
+            <p className="font-cal text-xs font-semibold text-foreground">Dinaya</p>
+            <p className="truncate text-[9px] text-muted-foreground">{persona.business}</p>
           </div>
-          <nav className="flex-1 px-1.5 py-1.5 space-y-0.5">
+          <nav className="flex-1 space-y-0.5 px-1.5 py-1.5">
             {["Overview", "Bookings", "Clients", "Payments", "Settings"].map((item) => (
               <div
                 key={item}
                 className={`rounded-lg px-2 py-1 text-[11px] ${
-                  item === "Bookings" ? "bg-blue-50 dark:bg-blue-950/40 font-semibold text-blue-700" : "text-gray-600 dark:text-gray-400"
+                  item === "Bookings"
+                    ? "bg-blue-600/10 font-semibold text-blue-600"
+                    : "text-muted-foreground"
                 }`}
               >
                 {item}
@@ -524,24 +508,24 @@ function OwnerDashboardDesktop({ persona }: { persona: PersonaData }) {
           </nav>
         </aside>
 
-        <div className="flex-1 min-w-0 flex flex-col">
-          <div className="flex items-center justify-between mb-2 shrink-0">
+        <div className="flex min-w-0 flex-1 flex-col">
+          <div className="mb-2 flex shrink-0 items-center justify-between">
             <div>
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Today&apos;s schedule</h3>
-              <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">Thursday, May 15, 2025</p>
+              <h3 className="text-sm font-semibold text-foreground">Today&apos;s schedule</h3>
+              <p className="mt-0.5 text-[10px] text-muted-foreground">Thursday, May 15, 2025</p>
             </div>
             <div className="flex gap-1.5">
-              <span className="text-[10px] font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-800 rounded-full px-2 py-0.5">
+              <span className="rounded-full border border-border bg-card px-2 py-0.5 text-[10px] font-semibold text-foreground">
                 Rs. 7,100 today
               </span>
-              <span className="text-[10px] font-semibold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-800/50 rounded-full px-2 py-0.5">
+              <span className="rounded-full border border-blue-600/20 bg-blue-600/10 px-2 py-0.5 text-[10px] font-semibold text-blue-600">
                 3 bookings
               </span>
             </div>
           </div>
 
-          <div className="flex-1 min-h-0 bg-white dark:bg-neutral-900 rounded-xl border border-gray-100 dark:border-neutral-800 overflow-hidden">
-            <div className="grid grid-cols-[auto_1fr_auto_auto] gap-x-3 gap-y-0 text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider px-3 py-2 border-b bg-gray-50 dark:bg-neutral-900/60">
+          <div className="min-h-0 flex-1 overflow-hidden rounded-xl border border-border bg-card">
+            <div className="grid grid-cols-[auto_1fr_auto_auto] gap-x-3 border-b border-border bg-muted/30 px-3 py-2 text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
               <span>Time</span>
               <span>Client</span>
               <span>Status</span>
@@ -550,25 +534,25 @@ function OwnerDashboardDesktop({ persona }: { persona: PersonaData }) {
             {todayBookings.map((b) => (
               <div
                 key={b.time}
-                className="grid grid-cols-[auto_1fr_auto_auto] gap-x-3 items-center px-3 py-2 border-b last:border-b-0 text-xs hover:bg-gray-50 dark:hover:bg-neutral-800/50"
+                className="grid grid-cols-[auto_1fr_auto_auto] items-center gap-x-3 border-b px-3 py-2 text-xs last:border-b-0 hover:bg-muted/30"
               >
-                <span className="text-[10px] font-medium text-gray-500 dark:text-gray-400 tabular-nums w-14">{b.time}</span>
+                <span className="w-14 text-[10px] font-medium tabular-nums text-muted-foreground">{b.time}</span>
                 <div className="min-w-0">
-                  <p className="font-medium text-gray-900 dark:text-gray-100 truncate">{b.client}</p>
-                  <p className="text-[10px] text-gray-400 dark:text-gray-500 truncate">{b.service}</p>
+                  <p className="truncate font-medium text-foreground">{b.client}</p>
+                  <p className="truncate text-[10px] text-muted-foreground">{b.service}</p>
                 </div>
                 <span
-                  className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full whitespace-nowrap ${
+                  className={`whitespace-nowrap rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
                     b.status === "Confirmed"
-                      ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700"
+                      ? "bg-emerald-500/10 text-emerald-600"
                       : b.status === "Completed"
-                      ? "bg-gray-100 dark:bg-neutral-800 text-gray-600 dark:text-gray-400"
-                      : "bg-amber-50 dark:bg-amber-950/40 text-amber-700"
+                        ? "bg-muted text-muted-foreground"
+                        : "bg-amber-500/10 text-amber-600"
                   }`}
                 >
                   {b.status}
                 </span>
-                <span className="text-[10px] font-semibold text-gray-700 dark:text-gray-300 tabular-nums text-right">{b.amount}</span>
+                <span className="text-right text-[10px] font-semibold tabular-nums text-foreground">{b.amount}</span>
               </div>
             ))}
           </div>
@@ -580,37 +564,37 @@ function OwnerDashboardDesktop({ persona }: { persona: PersonaData }) {
 
 function ConfirmationDesktop({ persona }: { persona: PersonaData }) {
   return (
-    <div className="h-full bg-gradient-to-br from-gray-50 to-white dark:from-neutral-950 dark:to-neutral-900 p-4 sm:p-6 flex flex-col items-center justify-center overflow-hidden">
+    <div className="flex h-full flex-col items-center justify-center overflow-hidden bg-muted/30 p-4 dark:bg-black sm:p-6">
       <div className="w-full max-w-md">
-        <div className="flex items-center gap-2 mb-3">
-          <div className="size-8 rounded-full bg-[#25D366] flex items-center justify-center shrink-0">
-            <Icon name="whatsapp" className="text-white text-base" />
+        <div className="mb-3 flex items-center gap-2">
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#25D366]">
+            <Icon name="whatsapp" className="text-base text-white" />
           </div>
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{persona.business}</p>
-            <p className="text-[10px] text-gray-400 dark:text-gray-500">WhatsApp Business</p>
+            <p className="truncate text-sm font-semibold text-foreground">{persona.business}</p>
+            <p className="text-[10px] text-muted-foreground">WhatsApp Business</p>
           </div>
-          <span className="ml-auto text-[9px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-800/50 rounded-full px-2 py-0.5 shrink-0">
+          <span className="ml-auto shrink-0 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[9px] font-semibold text-emerald-600">
             Sent automatically
           </span>
         </div>
 
-        <div className="bg-[#e5ddd5] rounded-xl p-3 shadow-inner">
-          <div className="bg-white dark:bg-neutral-800 rounded-lg rounded-tl-sm px-3 py-2.5 max-w-[90%] shadow-sm">
-            <p className="text-xs text-gray-800 dark:text-gray-200 leading-relaxed">{persona.confirmationMessage}</p>
-            <div className="flex items-center justify-end gap-1 mt-1">
-              <span className="text-[9px] text-gray-400 dark:text-gray-500">11:02 AM</span>
-              <Icon name="check-lg" className="text-blue-400 text-[10px]" />
+        <div className="rounded-xl bg-[#e5ddd5] p-3 shadow-inner dark:bg-[#0b141a]">
+          <div className="max-w-[90%] rounded-lg rounded-tl-sm bg-card px-3 py-2.5 shadow-sm">
+            <p className="text-xs leading-relaxed text-foreground">{persona.confirmationMessage}</p>
+            <div className="mt-1 flex items-center justify-end gap-1">
+              <span className="text-[9px] text-muted-foreground">11:02 AM</span>
+              <Icon name="check-lg" className="text-[10px] text-blue-400" />
             </div>
           </div>
         </div>
 
-        <div className="mt-2 flex items-center justify-center gap-1.5 text-[10px] text-gray-500 dark:text-gray-400">
-          <Icon name="envelope" className="text-gray-400 dark:text-gray-500 text-xs" />
+        <div className="mt-2 flex items-center justify-center gap-1.5 text-[10px] text-muted-foreground">
+          <Icon name="envelope" className="text-xs text-muted-foreground" />
           <span className="truncate">Email sent to {persona.clientName.toLowerCase()}@email.com</span>
         </div>
 
-        <p className="text-center text-xs text-gray-500 dark:text-gray-400 mt-3">
+        <p className="mt-3 text-center text-xs text-muted-foreground">
           Automated WhatsApp &amp; email — no manual follow-up
         </p>
       </div>
@@ -618,24 +602,10 @@ function ConfirmationDesktop({ persona }: { persona: PersonaData }) {
   );
 }
 
-function BrowserChrome({ url, children }: { url: string; children: ReactNode }) {
+function DemoFrame({ children }: { children: ReactNode }) {
   return (
-    <div
-      className="rounded-2xl overflow-hidden aspect-video flex flex-col shadow-[0_32px_80px_-8px_rgba(37,99,235,0.14),0_16px_40px_-8px_rgba(0,0,0,0.10),0_0_0_1px_rgba(0,0,0,0.05)]"
-      style={{ transform: "rotateX(1.5deg)" }}
-    >
-      <div className="flex shrink-0 items-center gap-3 px-4 py-2.5 bg-gradient-to-b from-gray-100/95 to-gray-50 dark:from-neutral-800 dark:to-neutral-900 border-b border-gray-200 dark:border-neutral-800/80">
-        <div className="flex gap-1.5 shrink-0">
-          <div className="size-3 rounded-full bg-[#ff5f57]" />
-          <div className="size-3 rounded-full bg-[#febc2e]" />
-          <div className="size-3 rounded-full bg-[#28c840]" />
-        </div>
-        <div className="flex-1 max-w-xs mx-auto bg-white dark:bg-neutral-800 rounded-md border border-gray-200 dark:border-neutral-800/80 px-3 py-1 text-xs text-gray-400 dark:text-gray-500 font-mono text-center flex items-center justify-center gap-1.5">
-          <Icon name="lock-fill" className="text-blue-400 text-[9px]" />
-          {url}
-        </div>
-      </div>
-      <div className="relative flex-1 min-h-0 overflow-hidden">{children}</div>
+    <div className="aspect-[16/10] min-h-[300px] overflow-hidden rounded-2xl border border-border bg-card shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)] dark:shadow-none dark:ring-1 dark:ring-white/10">
+      {children}
     </div>
   );
 }
@@ -659,6 +629,62 @@ function AlsoWorksFor() {
   );
 }
 
+function SlideLabels({
+  current,
+  onGoTo,
+  compact = false,
+}: {
+  current: number;
+  onGoTo: (index: number) => void;
+  compact?: boolean;
+}) {
+  return (
+    <div className={`flex justify-center ${compact ? "gap-4" : "gap-5"}`}>
+      {slides.map((slide, i) => (
+        <button
+          key={slide.type}
+          type="button"
+          onClick={() => onGoTo(i)}
+          className={`font-medium transition-colors ${
+            compact ? "text-xs" : "text-sm"
+          } ${
+            i === current
+              ? "text-blue-600 dark:text-blue-400"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          {slide.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function SlideDots({
+  current,
+  onGoTo,
+}: {
+  current: number;
+  onGoTo: (index: number) => void;
+}) {
+  return (
+    <div className="flex justify-center gap-2">
+      {slides.map((slide, i) => (
+        <button
+          key={slide.type}
+          type="button"
+          onClick={() => onGoTo(i)}
+          aria-label={slide.ariaLabel}
+          aria-current={i === current ? "true" : undefined}
+          className={`h-1.5 rounded-full transition-all duration-300 motion-reduce:transition-none ${
+            i === current ? "w-6 bg-blue-600" : "w-1.5 bg-muted-foreground/30 hover:bg-muted-foreground/50"
+          }`}
+        />
+      ))}
+    </div>
+  );
+}
+
 function SlideIndicators({
   current,
   onGoTo,
@@ -668,31 +694,9 @@ function SlideIndicators({
 }) {
   return (
     <div className="mt-9">
-      <div className="flex justify-center gap-5 mb-3.5">
-        {slides.map((slide, i) => (
-          <button
-            key={slide.type}
-            onClick={() => onGoTo(i)}
-            className={`text-sm font-medium transition-colors ${
-              i === current ? "text-blue-600 dark:text-blue-400" : "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
-            }`}
-          >
-            {slide.label}
-          </button>
-        ))}
-      </div>
-      <div className="flex justify-center gap-2">
-        {slides.map((slide, i) => (
-          <button
-            key={slide.type}
-            onClick={() => onGoTo(i)}
-            aria-label={slide.ariaLabel}
-            aria-current={i === current ? "true" : undefined}
-            className={`h-1.5 rounded-full transition-all duration-300 ${
-              i === current ? "bg-blue-600 w-6" : "bg-gray-300 dark:bg-neutral-700 w-1.5 hover:bg-gray-400 dark:hover:bg-neutral-600"
-            }`}
-          />
-        ))}
+      <SlideLabels current={current} onGoTo={onGoTo} />
+      <div className="mb-3.5 mt-3.5">
+        <SlideDots current={current} onGoTo={onGoTo} />
       </div>
       <AlsoWorksFor />
     </div>
@@ -702,7 +706,7 @@ function SlideIndicators({
 function renderMobileScreen(slideType: (typeof slides)[number]["type"], persona: PersonaData) {
   switch (slideType) {
     case "customer":
-      return <PhoneScreen persona={persona} />;
+      return <PhoneDateTimeScreen persona={persona} />;
     case "owner":
       return <OwnerDashboardPhoneScreen persona={persona} />;
     case "confirmation":
@@ -724,14 +728,27 @@ function renderDesktopContent(slideType: (typeof slides)[number]["type"], person
 export default function ProductMockup() {
   const [current, setCurrent] = useState(0);
   const [fading, setFading] = useState(false);
+  const [reduceMotion, setReduceMotion] = useState(false);
   const { resolvedTheme } = useTheme();
   const screenBg = resolvedTheme === "dark" ? "#000000" : "#f4f4f5";
 
   const persona = primaryPersona;
   const slide = slides[current];
 
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReduceMotion(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+
   function goTo(index: number) {
     if (fading || index === current) return;
+    if (reduceMotion) {
+      setCurrent(index);
+      return;
+    }
     setFading(true);
     setTimeout(() => {
       setCurrent(index);
@@ -745,16 +762,14 @@ export default function ProductMockup() {
 
   const navBtn = (dir: number, label: string, extraClass: string) => (
     <button
+      type="button"
       onClick={() => navigate(dir)}
       aria-label={label}
-      className={`z-20 size-12 rounded-full bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-800 shadow-lg flex items-center justify-center text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-200 dark:hover:border-blue-800 hover:shadow-md transition-all ${extraClass}`}
+      className={`z-20 flex size-12 items-center justify-center rounded-full border border-border bg-card text-muted-foreground shadow-lg transition-all hover:border-blue-600/30 hover:text-blue-600 hover:shadow-md ${extraClass}`}
     >
       <Icon name={`chevron-${dir === -1 ? "left" : "right"}`} className="text-base" />
     </button>
   );
-
-  const browserUrl =
-    slide.type === "owner" ? "dashboard.dinaya.lk" : slide.type === "confirmation" ? "messages" : persona.url;
 
   const mobileScale = 0.72 * DEMO_SCALE;
   const mobileOuterWidth = 417; // 15-pro screen + bezel
@@ -762,11 +777,7 @@ export default function ProductMockup() {
   const mobileScaledWidth = Math.round(mobileOuterWidth * mobileScale);
   const mobileScaledHeight = Math.round(mobileOuterHeight * mobileScale);
 
-  const desktopPhoneScale = 0.62 * DEMO_SCALE;
-  const desktopPhoneWidth = Math.round(260 * DEMO_SCALE);
-  const desktopPhoneHeight = Math.round(360 * DEMO_SCALE);
-  const desktopPhoneRight = Math.round(16 * DEMO_SCALE);
-  const desktopPhoneBottom = Math.round(-48 * DEMO_SCALE);
+  const fadeClass = reduceMotion ? "" : fading ? "opacity-0" : "opacity-100";
 
   return (
     <section className="max-w-[77rem] mx-auto px-6 md:px-12 lg:px-16 pb-16 relative overflow-x-clip">
@@ -779,7 +790,7 @@ export default function ProductMockup() {
       {/* Mobile — wrapper matches scaled iPhone size so layout does not overflow */}
       <div className="md:hidden flex flex-col items-center">
         <div
-          className={`relative mx-auto overflow-hidden transition-opacity duration-200 ${fading ? "opacity-0" : "opacity-100"}`}
+          className={`relative mx-auto overflow-hidden transition-opacity duration-200 motion-reduce:transition-none ${fadeClass}`}
           style={{ width: mobileScaledWidth, height: mobileScaledHeight }}
         >
           <IPhoneMockup
@@ -796,22 +807,13 @@ export default function ProductMockup() {
             {renderMobileScreen(slide.type, persona)}
           </IPhoneMockup>
         </div>
-        <div className="flex items-center gap-4 mt-6">
-          {navBtn(-1, "Previous", "")}
-          <div className="flex gap-2">
-            {slides.map((s, i) => (
-              <button
-                key={s.type}
-                onClick={() => goTo(i)}
-                aria-label={s.ariaLabel}
-                aria-current={i === current ? "true" : undefined}
-                className={`h-1.5 rounded-full transition-all duration-300 ${
-                  i === current ? "bg-blue-600 w-6" : "bg-gray-300 dark:bg-neutral-700 w-1.5 hover:bg-gray-400 dark:hover:bg-neutral-600"
-                }`}
-              />
-            ))}
+        <div className="mt-5 flex w-full max-w-sm flex-col items-center gap-3">
+          <SlideLabels current={current} onGoTo={goTo} compact />
+          <div className="flex items-center gap-4">
+            {navBtn(-1, "Previous", "")}
+            <SlideDots current={current} onGoTo={goTo} />
+            {navBtn(1, "Next", "")}
           </div>
-          {navBtn(1, "Next", "")}
         </div>
         <AlsoWorksFor />
       </div>
@@ -821,31 +823,10 @@ export default function ProductMockup() {
         <div className="flex items-center gap-3 lg:gap-5">
           {navBtn(-1, "Previous", "shrink-0")}
 
-          <div className="relative flex-1 min-w-0" style={{ perspective: "1200px" }}>
-            <div className={`relative transition-opacity duration-200 ${fading ? "opacity-0" : "opacity-100"}`}>
-              <BrowserChrome url={browserUrl}>{renderDesktopContent(slide.type, persona)}</BrowserChrome>
-
-              {slide.type === "owner" && <FloatingToasts persona={persona} />}
-
-              {slide.type === "customer" && (
-                <div
-                  className="absolute pointer-events-none overflow-hidden"
-                  style={{ right: desktopPhoneRight, bottom: desktopPhoneBottom, zIndex: 20, width: desktopPhoneWidth, height: desktopPhoneHeight }}
-                >
-                  <IPhoneMockup
-                    model="15-pro"
-                    color="space-black"
-                    scale={desktopPhoneScale}
-                    screenBg={screenBg}
-                    shadow={false}
-                    safeArea={false}
-                    showHomeIndicator={false}
-                    innerShadow={false}
-                  >
-                    <PhoneScreen persona={persona} />
-                  </IPhoneMockup>
-                </div>
-              )}
+          <div className="relative min-w-0 flex-1">
+            <div className={`relative transition-opacity duration-200 motion-reduce:transition-none ${fadeClass}`}>
+              <DemoFrame>{renderDesktopContent(slide.type, persona)}</DemoFrame>
+              {slide.type === "owner" ? <FloatingToast persona={persona} /> : null}
             </div>
           </div>
 
