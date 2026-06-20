@@ -12,6 +12,10 @@ import { isOptimizableRemoteImage } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { BookingTeamSection } from "@/components/booking/BookingTeamSection";
 import { BookingReviewsSection } from "@/components/booking/BookingReviewsSection";
+import { BookingHubGallery } from "@/components/booking/BookingHubGallery";
+import { BookingHubStickyCta } from "@/components/booking/BookingHubStickyCta";
+import { DotBackground } from "@/components/ui/dot-background";
+import { BlurFade } from "@/components/ui/blur-fade";
 import { getBusinessRating } from "@/components/booking/BusinessRating";
 import type { BookingPageData } from "@/lib/booking/load-page-data";
 import {
@@ -140,13 +144,15 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
   const hideSidebarSections =
     mode === "embed" ? hideGallery !== false : Boolean(hideGallery);
 
+  const hubPrimaryService = showHub ? services[0] : null;
+
   return (
     <BookingTheme accentColor={business.accentColor} embed={mode === "embed"}>
-      <div
+      <DotBackground
         className={
           centeredLayout
-            ? "booking-page-bg flex min-h-dvh flex-col items-center bg-muted/20 md:justify-center md:py-10"
-            : "booking-page-bg min-h-dvh bg-muted/30"
+            ? "booking-page-bg flex min-h-dvh flex-col items-center md:justify-center md:py-10"
+            : "booking-page-bg min-h-dvh"
         }
         data-booking-embed-root={mode === "embed" ? "" : undefined}
       >
@@ -228,6 +234,10 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
             </>
           )}
 
+          {showHub && !hideSidebarSections && gallery.length > 0 && (
+            <BookingHubGallery images={gallery} className="mt-6" />
+          )}
+
           {showHub && (
             <BookingServiceHub
               businessSlug={business.slug}
@@ -307,19 +317,21 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
           )}
 
           {!hideSidebarSections && hasAboutSection && (
-            <Card
-              className={`mt-0 overflow-hidden rounded-none border-x-0 shadow-none ${
-                centeredLayout
-                  ? "mt-6 border-border/60 md:rounded-xl md:border-x md:shadow-none"
-                  : "md:mt-6 md:rounded-xl md:border-x md:shadow-sm"
-              }`}
-            >
-              <CardContent className="p-6">
-                {business.description && (
-                  <p className="text-sm leading-relaxed text-muted-foreground">{business.description}</p>
-                )}
-              </CardContent>
-            </Card>
+            <BlurFade>
+              <Card
+                className={`mt-0 overflow-hidden rounded-none border-x-0 shadow-none ${
+                  centeredLayout
+                    ? "mt-6 border-border/60 md:rounded-xl md:border-x md:shadow-none"
+                    : "md:mt-6 md:rounded-xl md:border-x md:shadow-sm"
+                }`}
+              >
+                <CardContent className="p-6">
+                  {business.description && (
+                    <p className="text-sm leading-relaxed text-muted-foreground">{business.description}</p>
+                  )}
+                </CardContent>
+              </Card>
+            </BlurFade>
           )}
 
           {showHub && !hideSidebarSections && staffWithBio.length > 0 && (
@@ -353,7 +365,14 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
             />
           )}
         </div>
-      </div>
+        {showHub && hubPrimaryService ? (
+          <BookingHubStickyCta
+            businessSlug={business.slug}
+            serviceSlug={hubPrimaryService.slug ?? hubPrimaryService.id}
+            label={copy.chooseService}
+          />
+        ) : null}
+      </DotBackground>
     </BookingTheme>
   );
 }

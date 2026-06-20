@@ -8,6 +8,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { BlurFade } from "@/components/ui/blur-fade";
+import { AnimatedTooltip } from "@/components/ui/animated-tooltip";
+import { AvatarCircles } from "@/components/ui/avatar-circles";
 
 type StaffMember = Pick<Staff, "id" | "name" | "bio" | "avatarUrl">;
 
@@ -42,6 +45,17 @@ function MemberAvatar({
   );
 }
 
+function teamTooltipItems(members: StaffMember[]) {
+  return members.map((member, index) => ({
+    id: index,
+    name: member.name,
+    designation: member.bio?.slice(0, 48) ?? "Team member",
+    image:
+      member.avatarUrl ??
+      `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(member.name)}`,
+  }));
+}
+
 export function BookingTeamSection({ members, copy, variant, className }: Props) {
   const dialogRef = useRef<HTMLDialogElement>(null);
 
@@ -56,25 +70,29 @@ export function BookingTeamSection({ members, copy, variant, className }: Props)
   const closeDialog = () => dialogRef.current?.close();
 
   if (variant === "dialog") {
-    const preview = members.slice(0, 4);
+    const preview = members.slice(0, 5);
     const overflow = members.length - preview.length;
+    const avatarUrls = preview.map((member) => ({
+      imageUrl:
+        member.avatarUrl ??
+        `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(member.name)}`,
+      profileUrl: "#",
+    }));
 
     return (
-      <div className={className}>
+      <BlurFade className={className}>
         <button
           type="button"
           onClick={openDialog}
-          className="group mx-auto flex items-center gap-3 rounded-full border border-border/60 bg-card/60 px-4 py-2 text-sm text-muted-foreground transition-colors hover:border-border hover:bg-card hover:text-foreground"
+          className="group mx-auto flex min-h-11 items-center gap-3 rounded-full border border-border/60 bg-card/60 px-4 py-2.5 text-sm text-muted-foreground transition-colors hover:border-border hover:bg-card hover:text-foreground"
         >
-          <span className="flex -space-x-2">
-            {preview.map((member) => (
-              <MemberAvatar key={member.id} member={member} size="sm" stacked />
-            ))}
-            {overflow > 0 && (
-              <span className="flex size-7 items-center justify-center rounded-full border-2 border-background bg-muted text-[10px] font-semibold text-muted-foreground">
-                +{overflow}
-              </span>
-            )}
+          {members.length <= 5 ? (
+            <span className="hidden sm:flex">
+              <AnimatedTooltip items={teamTooltipItems(preview)} />
+            </span>
+          ) : null}
+          <span className={members.length <= 5 ? "sm:hidden" : ""}>
+            <AvatarCircles avatarUrls={avatarUrls} numPeople={overflow > 0 ? overflow : undefined} />
           </span>
           <span className="font-medium">
             {copy.meetTeam}
@@ -85,7 +103,7 @@ export function BookingTeamSection({ members, copy, variant, className }: Props)
 
         <dialog
           ref={dialogRef}
-          className="fixed top-1/2 left-1/2 z-50 m-0 w-[min(100vw-2rem,28rem)] max-h-[min(85dvh,32rem)] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl border border-border bg-card p-0 text-foreground shadow-xl backdrop:bg-black/40 open:flex open:flex-col"
+          className="fixed top-1/2 left-1/2 z-50 m-0 flex max-h-[min(85dvh,32rem)] w-[min(100vw-2rem,28rem)] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-2xl border border-border bg-card p-0 text-foreground shadow-xl backdrop:bg-black/40 open:flex"
           onClick={(event) => {
             if (event.target === event.currentTarget) closeDialog();
           }}
@@ -111,43 +129,35 @@ export function BookingTeamSection({ members, copy, variant, className }: Props)
             ))}
           </ul>
         </dialog>
-      </div>
+      </BlurFade>
     );
   }
 
   return (
-    <section className={className}>
-      <Card className="mt-0 overflow-hidden rounded-none border-x-0 py-0 shadow-none md:mt-6 md:rounded-xl md:border-x md:shadow-sm">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">{copy.meetTeam}</CardTitle>
-        </CardHeader>
-        <Separator />
-        {members.length === 1 ? (
-          <CardContent className="flex items-center gap-4 py-4">
-            <MemberAvatar member={members[0]!} size="lg" />
-            <div className="min-w-0">
-              <p className="font-semibold text-foreground">{members[0]!.name}</p>
-              {members[0]!.bio && (
-                <p className="mt-0.5 text-sm leading-relaxed text-muted-foreground">{members[0]!.bio}</p>
-              )}
-            </div>
-          </CardContent>
-        ) : (
-          <CardContent className="grid gap-px bg-border p-0 sm:grid-cols-2">
-            {members.map((member) => (
-              <div key={member.id} className="flex flex-col items-center gap-2 bg-card p-4 text-center">
-                <MemberAvatar member={member} />
-                <div>
-                  <p className="text-sm font-semibold text-foreground">{member.name}</p>
-                  {member.bio && (
-                    <p className="mt-0.5 line-clamp-3 text-xs leading-relaxed text-muted-foreground">{member.bio}</p>
-                  )}
-                </div>
+    <BlurFade className={className}>
+      <section>
+        <Card className="mt-0 overflow-hidden rounded-none border-x-0 py-0 shadow-none md:mt-6 md:rounded-xl md:border-x md:shadow-sm">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">{copy.meetTeam}</CardTitle>
+          </CardHeader>
+          <Separator />
+          {members.length === 1 ? (
+            <CardContent className="flex items-center gap-4 py-4">
+              <MemberAvatar member={members[0]!} size="lg" />
+              <div className="min-w-0">
+                <p className="font-semibold text-foreground">{members[0]!.name}</p>
+                {members[0]!.bio && (
+                  <p className="mt-0.5 text-sm leading-relaxed text-muted-foreground">{members[0]!.bio}</p>
+                )}
               </div>
-            ))}
-          </CardContent>
-        )}
-      </Card>
-    </section>
+            </CardContent>
+          ) : (
+            <CardContent className="flex justify-center py-6">
+              <AnimatedTooltip items={teamTooltipItems(members.slice(0, 8))} />
+            </CardContent>
+          )}
+        </Card>
+      </section>
+    </BlurFade>
   );
 }

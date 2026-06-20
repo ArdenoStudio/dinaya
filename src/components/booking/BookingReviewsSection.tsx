@@ -5,6 +5,9 @@ import type { BookingCopy } from "@/lib/i18n";
 import type { PublicReview, ReviewDistribution } from "@/lib/reviews-public";
 import { Icon } from "@/components/ui/Icon";
 import { Button } from "@/components/ui/button";
+import { BlurFade } from "@/components/ui/blur-fade";
+import { Marquee } from "@/components/ui/marquee";
+import { NumberTicker } from "@/components/ui/number-ticker";
 import { ReviewRatingSummary, type StarFilter } from "./ReviewRatingSummary";
 import { StarRating } from "./StarRating";
 
@@ -57,6 +60,8 @@ export function BookingReviewsSection({
   const [loading, setLoading] = useState(false);
   const [starFilter, setStarFilter] = useState<StarFilter>("all");
 
+  const snippetReviews = initialReviews.filter((r) => r.comment?.trim()).slice(0, 8);
+
   const resetDialogState = useCallback(() => {
     setStarFilter("all");
     setReviews(initialReviews);
@@ -102,28 +107,57 @@ export function BookingReviewsSection({
   }
 
   return (
-    <div className={className}>
-      <button
-        type="button"
-        onClick={openDialog}
-        className="group mx-auto flex items-center gap-3 rounded-full border border-border/60 bg-card/60 px-4 py-2 text-sm text-muted-foreground transition-colors hover:border-border hover:bg-card hover:text-foreground"
-      >
-        <span className="flex items-center gap-2">
-          <StarRating rating={avgRating} size="sm" />
-          <span className="font-semibold tabular-nums text-foreground">{avgRating.toFixed(1)}</span>
-        </span>
-        <span className="font-medium">
-          {copy.readReviews}
-          <span className="ml-1 font-normal text-muted-foreground">
-            ({reviewCount.toLocaleString()})
+    <BlurFade className={className}>
+      <div className="mx-auto flex w-full max-w-3xl flex-col items-center gap-4 px-4">
+        {snippetReviews.length > 0 ? (
+          <Marquee pauseOnHover className="[--duration:45s] [--gap:1rem]">
+            {snippetReviews.map((review) => (
+              <figure
+                key={review.id}
+                className="w-[min(85vw,18rem)] shrink-0 rounded-xl border border-border/60 bg-card/80 px-4 py-3 shadow-sm"
+              >
+                <div className="mb-2 flex items-center gap-2">
+                  <StarRating rating={review.rating} size="sm" />
+                  <span className="text-xs font-medium text-foreground">{review.clientName}</span>
+                </div>
+                <blockquote className="line-clamp-3 text-sm leading-relaxed text-muted-foreground">
+                  &ldquo;{review.comment}&rdquo;
+                </blockquote>
+              </figure>
+            ))}
+          </Marquee>
+        ) : null}
+
+        <button
+          type="button"
+          onClick={openDialog}
+          className="group mx-auto flex min-h-11 items-center gap-3 rounded-full border border-border/60 bg-card/60 px-4 py-2.5 text-sm text-muted-foreground transition-colors hover:border-border hover:bg-card hover:text-foreground"
+        >
+          <span className="flex items-center gap-2">
+            <StarRating rating={avgRating} size="sm" />
+            <NumberTicker
+              value={avgRating}
+              decimalPlaces={1}
+              className="text-sm font-semibold text-foreground"
+            />
           </span>
-        </span>
-        <Icon name="chevron-right" className="text-xs opacity-50 transition-transform group-hover:translate-x-0.5" />
-      </button>
+          <span className="font-medium">
+            {copy.readReviews}
+            <span className="ml-1 font-normal text-muted-foreground">
+              (
+              <NumberTicker value={reviewCount} className="text-muted-foreground" />)
+            </span>
+          </span>
+          <Icon
+            name="chevron-right"
+            className="text-xs opacity-50 transition-transform group-hover:translate-x-0.5"
+          />
+        </button>
+      </div>
 
       <dialog
         ref={dialogRef}
-        className="fixed top-1/2 left-1/2 z-50 m-0 w-[min(100vw-2rem,40rem)] max-h-[min(92dvh,44rem)] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl border border-border bg-card p-0 text-foreground shadow-xl backdrop:bg-black/40 open:flex open:flex-col"
+        className="fixed top-1/2 left-1/2 z-50 m-0 flex max-h-[min(92dvh,44rem)] w-[min(100vw-2rem,40rem)] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-2xl border border-border bg-card p-0 text-foreground shadow-xl backdrop:bg-black/40 open:flex"
         onClick={(event) => {
           if (event.target === event.currentTarget) closeDialog();
         }}
@@ -194,6 +228,6 @@ export function BookingReviewsSection({
           </div>
         ) : null}
       </dialog>
-    </div>
+    </BlurFade>
   );
 }
