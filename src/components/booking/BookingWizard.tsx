@@ -441,6 +441,20 @@ function BookingWizardInner({
     Boolean(state.service) &&
     (Boolean(hubHref) || (!lockServiceSelection && services.length > 1));
 
+  const backPillLabel = showContactForm
+    ? copy.dateTime
+    : hubHref
+      ? copy.allServices
+      : copy.back;
+
+  const backPillHref = showContactForm ? undefined : hubHref ?? undefined;
+
+  const backPillOnClick = showContactForm
+    ? clearSlot
+    : !hubHref && !lockServiceSelection
+      ? clearService
+      : undefined;
+
   const choiceDateLabel = state.date
     ? format(parseISO(state.date + "T12:00:00"), "EEE d MMM")
     : null;
@@ -450,9 +464,9 @@ function BookingWizardInner({
       {showBackPill && (
         <div className="mb-3 flex justify-start px-4 md:mb-4 md:px-0">
           <BookingBackPill
-            label={hubHref ? copy.allServices : copy.back}
-            href={hubHref ?? undefined}
-            onClick={!hubHref && !lockServiceSelection ? clearService : undefined}
+            label={backPillLabel}
+            href={backPillHref}
+            onClick={backPillOnClick}
           />
         </div>
       )}
