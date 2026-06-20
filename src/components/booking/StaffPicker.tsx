@@ -39,7 +39,7 @@ export default function StaffPicker({
 
   return (
     <div className={compact ? "mt-4" : "mb-5"}>
-      <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+      <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
         {copy.chooseTeam}
       </p>
       <div className="flex flex-wrap gap-2" role="group" aria-label={copy.chooseTeam}>
@@ -51,14 +51,14 @@ export default function StaffPicker({
             className={`inline-flex max-w-full flex-col items-start gap-0.5 rounded-2xl border px-3 py-2 text-left text-xs font-medium transition-all sm:flex-row sm:items-center sm:gap-2 sm:rounded-full sm:py-1.5 ${
               anyStaffSelected
                 ? "booking-border-accent booking-bg-accent-muted booking-text-accent ring-2 booking-ring-accent"
-                : "border-gray-200 bg-white text-gray-600 hover:border-blue-300 dark:border-neutral-800 dark:bg-neutral-900 dark:text-gray-400"
+                : "border-border bg-secondary/50 text-muted-foreground hover:border-[var(--booking-accent)]"
             }`}
           >
             <span className="inline-flex items-center gap-1.5">
               <Icon name="lightning-charge-fill" className="text-[10px]" />
               {copy.anyAvailableStaff}
             </span>
-            <span className="text-[10px] font-normal text-gray-400 dark:text-gray-500">
+            <span className="text-[10px] font-normal text-muted-foreground">
               {copy.anyAvailableStaffHint}
             </span>
           </button>
@@ -74,7 +74,7 @@ export default function StaffPicker({
               className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
                 isSelected
                   ? "booking-border-accent booking-bg-accent-muted booking-text-accent ring-2 booking-ring-accent"
-                  : "border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 text-gray-600 dark:text-gray-400 hover:border-blue-300"
+                  : "border-border bg-secondary/50 text-muted-foreground hover:border-[var(--booking-accent)]"
               }`}
             >
               {s.avatarUrl ? (
@@ -87,7 +87,7 @@ export default function StaffPicker({
                   unoptimized={!isOptimizableRemoteImage(s.avatarUrl)}
                 />
               ) : (
-                <span className="flex size-5 items-center justify-center rounded-full bg-blue-100 text-[10px] font-bold booking-text-accent">
+                <span className="flex size-5 items-center justify-center rounded-full booking-bg-accent-muted text-[10px] font-bold booking-text-accent">
                   {s.name.charAt(0)}
                 </span>
               )}

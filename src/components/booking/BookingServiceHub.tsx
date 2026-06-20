@@ -113,7 +113,7 @@ export default function BookingServiceHub({
   const showHeaderAvatar = !heroImageUrl;
 
   const shell =
-    "overflow-hidden rounded-none border-x-0 bg-card shadow-none md:rounded-2xl md:border md:border-border/80 md:shadow-[0_12px_40px_-24px_rgba(15,23,42,0.28)]";
+    "overflow-hidden rounded-none border-x-0 bg-card shadow-none md:rounded-2xl md:border md:border-border/80 md:shadow-[0_12px_40px_-24px_rgba(15,23,42,0.28)] dark:md:shadow-none dark:md:ring-1 dark:md:ring-white/10";
 
   return (
     <BlurFade className="w-full pb-28 md:pb-0">
@@ -159,7 +159,7 @@ export default function BookingServiceHub({
               ) : null}
               <p
                 className={cn(
-                  "text-[0.9375rem] leading-relaxed text-muted-foreground dark:text-zinc-300",
+                  "text-[0.9375rem] leading-relaxed text-muted-foreground",
                   heroImageUrl ? "" : "mt-2",
                 )}
               >
@@ -188,7 +188,7 @@ export default function BookingServiceHub({
           </div>
 
           <div className="hidden border-t border-border/50 pt-4 md:block">
-            <p className="text-sm text-muted-foreground dark:text-zinc-400">
+            <p className="text-sm text-muted-foreground">
               {copy.chooseServiceAndTime}
               <span className="ml-2 text-foreground/60">· {services.length} services</span>
             </p>

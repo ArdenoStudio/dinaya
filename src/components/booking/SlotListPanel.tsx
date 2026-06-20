@@ -110,7 +110,7 @@ export function SlotListPanel({
                         ? "cursor-not-allowed border-border bg-muted text-muted-foreground"
                         : isSelected
                         ? "booking-bg-accent border-transparent text-white booking-shadow-accent"
-                        : "border-border bg-card text-foreground hover:border-[var(--booking-accent)] hover:bg-[var(--booking-accent-muted)]/30"
+                        : "border-border bg-secondary/40 text-foreground ring-1 ring-white/5 hover:border-[var(--booking-accent)] hover:bg-[var(--booking-accent-muted)]/40"
                     }`}
                   >
                     {!hasCalendarConflict && !isSelected && (

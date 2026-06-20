@@ -263,9 +263,9 @@ export default function StepDateTime({
 
   if (!service || (!staff && !anyStaff)) {
     return (
-      <div className="flex min-h-[280px] items-center justify-center rounded-xl border border-dashed border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-6 py-12 text-center text-sm text-gray-400 dark:text-gray-500 md:min-h-[320px]">
+      <div className="flex min-h-[280px] items-center justify-center rounded-xl border border-dashed border-border bg-card px-6 py-12 text-center text-sm text-muted-foreground md:min-h-[320px]">
         <div>
-          <Icon name="calendar2-plus" className="mb-3 block text-3xl text-gray-300 dark:text-neutral-600" />
+          <Icon name="calendar2-plus" className="mb-3 block text-3xl text-muted-foreground/50" />
           {copy.selectServiceHint}
         </div>
       </div>

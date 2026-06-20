@@ -470,7 +470,7 @@ function BookingWizardInner({
           />
         </div>
       )}
-      <div className="w-full min-w-0 max-w-full bg-card lg:overflow-visible lg:rounded-xl lg:border lg:border-border lg:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]">
+      <div className="w-full min-w-0 max-w-full bg-card lg:overflow-visible lg:rounded-xl lg:border lg:border-border lg:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)] dark:lg:shadow-none dark:lg:ring-1 dark:lg:ring-white/10">
         <BookingAttributionCapture businessId={business.id} />
         <BookingDealsSection
           deals={activeDeals}

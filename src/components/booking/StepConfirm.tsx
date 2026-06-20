@@ -92,7 +92,7 @@ function IntakeField({
         )}
       </label>
       {question.sensitive ? (
-        <p className="mt-0.5 text-xs text-gray-400 dark:text-gray-500">{copy.intakePrivacy}</p>
+        <p className="mt-0.5 text-xs text-muted-foreground">{copy.intakePrivacy}</p>
       ) : null}
       {question.type === "textarea" ? (
         <textarea
@@ -530,10 +530,10 @@ export default function StepConfirm({
       </div>
 
       {intakeQuestions.length > 0 && (
-        <div className="space-y-3 border-t border-gray-100 dark:border-neutral-800 pt-4">
+        <div className="space-y-3 border-t border-border pt-4">
           <div>
-            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{copy.intakeSection}</p>
-            <p className="mt-0.5 text-xs text-gray-400 dark:text-gray-500">{copy.intakePrivacy}</p>
+            <p className="text-sm font-semibold text-foreground">{copy.intakeSection}</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">{copy.intakePrivacy}</p>
           </div>
           {intakeQuestions.map((q) => (
             <IntakeField
@@ -574,7 +574,7 @@ export default function StepConfirm({
                 alt="LankaQR"
                 width={144}
                 height={144}
-                className="h-36 w-36 rounded-lg border bg-white object-contain p-2 dark:border-neutral-800 dark:bg-neutral-900"
+                className="h-36 w-36 rounded-lg border border-border bg-card object-contain p-2"
                 unoptimized={!isOptimizableRemoteImage(business.lankaqrImageUrl)}
               />
             </div>
@@ -663,7 +663,7 @@ export default function StepConfirm({
       </div>
 
       {error && (
-        <div className="mx-[14px] mb-2 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 dark:border-red-900/50 dark:bg-red-950/40 px-3 py-2.5 text-sm text-red-700 dark:text-red-300 md:mx-8">
+        <div className="mx-[14px] mb-2 flex items-start gap-2 rounded-xl border border-destructive/30 bg-card px-3 py-2.5 text-sm text-destructive md:mx-8">
           <Icon name="exclamation-circle" className="mt-0.5 shrink-0 text-sm" />
           <span>{error}</span>
         </div>

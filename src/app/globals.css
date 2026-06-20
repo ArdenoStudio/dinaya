@@ -132,15 +132,15 @@ html.nav-open {
   }
 
   .booking-page-bg {
-    @apply bg-muted/30 dark:bg-neutral-950;
+    @apply bg-muted/30 dark:bg-black;
   }
 
   .booking-panel-bg {
-    @apply bg-card dark:bg-neutral-950;
+    @apply bg-card;
   }
 
   .booking-sticky-bar {
-    @apply bg-background/95 dark:bg-neutral-950/95;
+    @apply bg-background/95 backdrop-blur-md;
   }
 
   .public-page-offset {
@@ -187,6 +187,22 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
     --booking-accent-soft: color-mix(in srgb, var(--booking-accent) 24%, black);
     --booking-accent-shadow: color-mix(in srgb, var(--booking-accent) 45%, transparent);
     --booking-accent-on-dark: color-mix(in srgb, var(--booking-accent) 65%, white);
+
+    /* Apple-style grouped surfaces: true black canvas, neutral elevated cards */
+    --background: 0 0% 0%;
+    --foreground: 0 0% 98%;
+    --card: 240 5% 11%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 5% 11%;
+    --popover-foreground: 0 0% 98%;
+    --secondary: 240 4% 16%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 4% 16%;
+    --muted-foreground: 240 4% 64%;
+    --accent: 240 4% 16%;
+    --accent-foreground: 0 0% 98%;
+    --border: 240 4% 22%;
+    --input: 240 4% 18%;
   }
 
   .booking-bg-accent { background-color: var(--booking-accent); }

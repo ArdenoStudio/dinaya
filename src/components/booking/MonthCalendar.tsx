@@ -87,7 +87,7 @@ export default function MonthCalendar({
 
   return (
     <div
-      className={`min-w-0 w-full ${comfortable ? "" : "rounded-xl border border-border bg-muted/40 p-3.5"}`}
+      className={`min-w-0 w-full ${comfortable ? "" : "rounded-xl border border-border bg-card p-3.5"}`}
     >
       <div className={`flex items-center justify-between ${comfortable ? "mb-4" : "mb-3"}`}>
         <span className={`font-semibold text-foreground ${comfortable ? "text-lg" : "text-sm"}`}>
@@ -150,7 +150,7 @@ export default function MonthCalendar({
                   : isSelected
                   ? "booking-bg-accent text-white shadow-md booking-shadow-accent"
                   : disabled
-                  ? "cursor-not-allowed text-muted-foreground/40"
+                  ? "cursor-not-allowed text-muted-foreground/45"
                   : showToday
                   ? "font-semibold booking-text-accent ring-2 ring-[var(--booking-accent-soft)]"
                   : isNextAvailable
