@@ -22,7 +22,7 @@ export default function DateQuickStrip({ selectedDate, minDate, maxDate, copy, o
   const maxStr = maxDate ? format(maxDate, "yyyy-MM-dd") : null;
 
   return (
-    <div className="-mx-4 flex gap-2 overflow-x-auto scroll-px-4 px-4 pb-1 scrollbar-hide snap-x snap-mandatory">
+    <div className="-mx-4 flex gap-2 overflow-x-auto scroll-px-4 px-4 pb-2 scrollbar-hide snap-x snap-mandatory">
       {dates.map((d) => {
         const dateStr = format(d, "yyyy-MM-dd");
         const isSelected = selectedDate === dateStr;
@@ -33,17 +33,25 @@ export default function DateQuickStrip({ selectedDate, minDate, maxDate, copy, o
             key={dateStr}
             type="button"
             onClick={() => onSelect(dateStr)}
-            className={`flex h-12 w-[4.5rem] shrink-0 snap-start flex-col items-center justify-center rounded-xl border px-3 transition-all ${
+            className={`flex min-h-[4.75rem] w-[4.5rem] shrink-0 snap-start flex-col items-center justify-center gap-0.5 rounded-xl border px-2 py-2.5 transition-all ${
               isSelected
                 ? "booking-border-accent booking-bg-accent text-white shadow-md booking-shadow-accent"
                 : "border-border bg-card text-muted-foreground"
             }`}
           >
-            <span className={`text-[10px] font-medium ${isSelected ? "text-white/80" : "text-muted-foreground"}`}>
+            <span
+              className={`shrink-0 text-[10px] font-medium leading-none ${
+                isSelected ? "text-white/80" : "text-muted-foreground"
+              }`}
+            >
               {isToday(d) ? copy.today : format(d, "EEE")}
             </span>
-            <span className="mt-0.5 text-base font-semibold tabular-nums">{format(d, "d")}</span>
-            <span className={`text-[10px] ${isSelected ? "text-white/80" : "text-muted-foreground"}`}>
+            <span className="shrink-0 text-base font-semibold leading-none tabular-nums">{format(d, "d")}</span>
+            <span
+              className={`shrink-0 text-[10px] leading-none ${
+                isSelected ? "text-white/80" : "text-muted-foreground"
+              }`}
+            >
               {format(d, "MMM")}
             </span>
           </button>
