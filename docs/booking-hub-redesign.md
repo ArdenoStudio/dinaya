@@ -1,6 +1,8 @@
 # Booking Hub Redesign — Component Catalog
 
-Consolidated picks from Step 1–2 research. All installed components live under `src/components/ui/`.
+**Design direction (Apple pass):** one unified card, name-first hierarchy, single hero image, interaction-only motion, honest signals only. Decorative effects (border beam, marquee, glow stacks) removed from the hub surface.
+
+Consolidated picks from Step 1–2 research. Installed components remain in `src/components/ui/` for reuse elsewhere; the hub itself uses restraint.
 
 ## Header / identity card
 

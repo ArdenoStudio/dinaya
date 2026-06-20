@@ -12,10 +12,6 @@ import { isOptimizableRemoteImage } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { BookingTeamSection } from "@/components/booking/BookingTeamSection";
 import { BookingReviewsSection } from "@/components/booking/BookingReviewsSection";
-import { BookingHubGallery } from "@/components/booking/BookingHubGallery";
-import { BookingHubStickyCta } from "@/components/booking/BookingHubStickyCta";
-import { DotBackground } from "@/components/ui/dot-background";
-import { BlurFade } from "@/components/ui/blur-fade";
 import { getBusinessRating } from "@/components/booking/BusinessRating";
 import type { BookingPageData } from "@/lib/booking/load-page-data";
 import {
@@ -93,6 +89,7 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
   const copy = getBookingCopy(business.language);
   const calendarOverlayConfig = await buildCalendarOverlayConfig(mode, business.language);
   const gallery = business.galleryImages ?? [];
+  const heroImageUrl = !hideGallery && gallery.length > 0 ? gallery[0]! : null;
   const staffWithBio = staff.filter((s) => s.bio || s.avatarUrl);
   const instagramUrl = normalizePublicHttpsUrl(business.instagramUrl);
   const facebookUrl = normalizePublicHttpsUrl(business.facebookUrl);
@@ -130,7 +127,6 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
     mode === "embed" ||
     services.length === 1;
 
-  /** Single-service booker or multi-service hub — cal.com-style centered card */
   const bookerFocus = mode === "service" || mode === "embed" || services.length === 1;
   const centeredLayout = bookerFocus || showHub;
 
@@ -144,11 +140,9 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
   const hideSidebarSections =
     mode === "embed" ? hideGallery !== false : Boolean(hideGallery);
 
-  const hubPrimaryService = showHub ? services[0] : null;
-
   return (
     <BookingTheme accentColor={business.accentColor} embed={mode === "embed"}>
-      <DotBackground
+      <div
         className={
           centeredLayout
             ? "booking-page-bg flex min-h-dvh flex-col items-center md:justify-center md:py-10"
@@ -161,7 +155,7 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
         <div
           className={
             centeredLayout
-              ? "w-full max-w-5xl px-0 md:px-4"
+              ? "w-full max-w-2xl px-0 md:px-4"
               : "mx-auto max-w-5xl px-0 md:px-8 md:py-6"
           }
         >
@@ -234,19 +228,20 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
             </>
           )}
 
-          {showHub && !hideSidebarSections && gallery.length > 0 && (
-            <BookingHubGallery images={gallery} className="mt-6" />
-          )}
-
           {showHub && (
             <BookingServiceHub
               businessSlug={business.slug}
               businessName={business.name}
               businessLogoUrl={business.logoUrl}
+              businessDescription={business.description}
+              heroImageUrl={heroImageUrl}
               services={services}
               copy={copy}
               avgRating={avgRating}
               reviewCount={reviewCount}
+              cancellationPolicy={business.cancellationPolicy}
+              depositPolicy={business.depositPolicy}
+              bankTransferInstructions={business.bankTransferInstructions}
             />
           )}
 
@@ -291,7 +286,7 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
             />
           )}
 
-          {centeredLayout && !hideSidebarSections && hasTrustBlock && (
+          {centeredLayout && !showHub && !hideSidebarSections && hasTrustBlock && (
             <div className="mt-4 border-t border-border/60 px-4 pt-4 md:mt-5 md:rounded-xl md:border md:bg-card/50 md:px-5 md:py-4">
               <BookingPolicyAccordion
                 copy={copy}
@@ -299,39 +294,23 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
                 depositPolicy={business.depositPolicy}
                 bankTransferInstructions={business.bankTransferInstructions}
               />
-              <div className="hidden space-y-3 text-center text-xs text-muted-foreground md:block">
-                {business.cancellationPolicy && (
-                  <p>
-                    <span className="font-medium text-foreground">{copy.cancellationPolicy}:</span>{" "}
-                    {business.cancellationPolicy}
-                  </p>
-                )}
-                {business.depositPolicy && (
-                  <p>
-                    <span className="font-medium text-foreground">{copy.depositPolicy}:</span>{" "}
-                    {business.depositPolicy}
-                  </p>
-                )}
-              </div>
             </div>
           )}
 
-          {!hideSidebarSections && hasAboutSection && (
-            <BlurFade>
-              <Card
-                className={`mt-0 overflow-hidden rounded-none border-x-0 shadow-none ${
-                  centeredLayout
-                    ? "mt-6 border-border/60 md:rounded-xl md:border-x md:shadow-none"
-                    : "md:mt-6 md:rounded-xl md:border-x md:shadow-sm"
-                }`}
-              >
-                <CardContent className="p-6">
-                  {business.description && (
-                    <p className="text-sm leading-relaxed text-muted-foreground">{business.description}</p>
-                  )}
-                </CardContent>
-              </Card>
-            </BlurFade>
+          {!showHub && !hideSidebarSections && hasAboutSection && (
+            <Card
+              className={`mt-0 overflow-hidden rounded-none border-x-0 shadow-none ${
+                centeredLayout
+                  ? "mt-6 border-border/60 md:rounded-xl md:border-x md:shadow-none"
+                  : "md:mt-6 md:rounded-xl md:border-x md:shadow-sm"
+              }`}
+            >
+              <CardContent className="p-6">
+                {business.description && (
+                  <p className="text-sm leading-relaxed text-muted-foreground">{business.description}</p>
+                )}
+              </CardContent>
+            </Card>
           )}
 
           {showHub && !hideSidebarSections && staffWithBio.length > 0 && (
@@ -339,7 +318,7 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
               members={staffWithBio}
               copy={copy}
               variant="dialog"
-              className="mt-6 flex justify-center"
+              className="mt-5 flex justify-center"
             />
           )}
 
@@ -361,18 +340,11 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
               reviewDistribution={reviewDistribution}
               initialReviews={initialReviews}
               copy={copy}
-              className={`flex justify-center pb-8 ${centeredLayout ? "mt-3" : "mt-6"}`}
+              className={`flex justify-center pb-8 ${centeredLayout ? "mt-4" : "mt-6"}`}
             />
           )}
         </div>
-        {showHub && hubPrimaryService ? (
-          <BookingHubStickyCta
-            businessSlug={business.slug}
-            serviceSlug={hubPrimaryService.slug ?? hubPrimaryService.id}
-            label={copy.chooseService}
-          />
-        ) : null}
-      </DotBackground>
+      </div>
     </BookingTheme>
   );
 }

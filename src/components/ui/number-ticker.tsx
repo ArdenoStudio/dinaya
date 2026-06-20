@@ -27,8 +27,9 @@ export function NumberTicker({
   const reducedMotion = useReducedMotion()
   const motionValue = useMotionValue(direction === "down" ? value : startValue)
   const springValue = useSpring(motionValue, {
-    damping: 60,
-    stiffness: 100,
+    damping: 30,
+    stiffness: 120,
+    mass: 0.8,
   })
   const isInView = useInView(ref, { once: true, margin: "0px" })
 
@@ -71,6 +72,11 @@ export function NumberTicker({
     [springValue, decimalPlaces]
   )
 
+  const formattedValue = Intl.NumberFormat("en-US", {
+    minimumFractionDigits: decimalPlaces,
+    maximumFractionDigits: decimalPlaces,
+  }).format(value)
+
   return (
     <span
       ref={ref}
@@ -78,9 +84,15 @@ export function NumberTicker({
         "inline-block tabular-nums text-foreground",
         className
       )}
+      aria-label={formattedValue}
       {...props}
     >
-      {startValue}
+      {reducedMotion || !isInView
+        ? formattedValue
+        : Intl.NumberFormat("en-US", {
+            minimumFractionDigits: decimalPlaces,
+            maximumFractionDigits: decimalPlaces,
+          }).format(startValue)}
     </span>
   )
 }
