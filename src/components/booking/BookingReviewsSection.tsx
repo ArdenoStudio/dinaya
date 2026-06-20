@@ -5,6 +5,8 @@ import type { BookingCopy } from "@/lib/i18n";
 import type { PublicReview, ReviewDistribution } from "@/lib/reviews-public";
 import { Icon } from "@/components/ui/Icon";
 import { Button } from "@/components/ui/button";
+import { BlurFade } from "@/components/ui/blur-fade";
+import { NumberTicker } from "@/components/ui/number-ticker";
 import { ReviewRatingSummary, type StarFilter } from "./ReviewRatingSummary";
 import { StarRating } from "./StarRating";
 
@@ -103,23 +105,29 @@ export function BookingReviewsSection({
 
   return (
     <div className={className}>
-      <button
-        type="button"
-        onClick={openDialog}
-        className="group mx-auto flex items-center gap-3 rounded-full border border-border/60 bg-card/60 px-4 py-2 text-sm text-muted-foreground transition-colors hover:border-border hover:bg-card hover:text-foreground"
-      >
-        <span className="flex items-center gap-2">
-          <StarRating rating={avgRating} size="sm" />
-          <span className="font-semibold tabular-nums text-foreground">{avgRating.toFixed(1)}</span>
-        </span>
-        <span className="font-medium">
-          {copy.readReviews}
-          <span className="ml-1 font-normal text-muted-foreground">
-            ({reviewCount.toLocaleString()})
+      <BlurFade className="mx-auto">
+        <button
+          type="button"
+          onClick={openDialog}
+          className="group flex items-center gap-3 rounded-full border border-border/60 bg-card/60 px-4 py-2 text-sm text-muted-foreground shadow-sm transition-colors hover:border-border hover:bg-card hover:text-foreground"
+        >
+          <span className="flex items-center gap-2">
+            <StarRating rating={avgRating} size="sm" />
+            <NumberTicker
+              value={avgRating}
+              decimals={1}
+              className="font-semibold tabular-nums text-foreground"
+            />
           </span>
-        </span>
-        <Icon name="chevron-right" className="text-xs opacity-50 transition-transform group-hover:translate-x-0.5" />
-      </button>
+          <span className="font-medium">
+            {copy.readReviews}
+            <span className="ml-1 font-normal text-muted-foreground">
+              (<NumberTicker value={reviewCount} className="tabular-nums" />)
+            </span>
+          </span>
+          <Icon name="chevron-right" className="text-xs opacity-50 transition-transform group-hover:translate-x-0.5" />
+        </button>
+      </BlurFade>
 
       <dialog
         ref={dialogRef}

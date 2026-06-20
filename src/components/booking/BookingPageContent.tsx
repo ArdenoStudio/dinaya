@@ -237,6 +237,15 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
               copy={copy}
               avgRating={avgRating}
               reviewCount={reviewCount}
+              businessDescription={business.description}
+              businessAddress={business.address}
+              businessPhone={business.phone}
+              businessWebsiteUrl={business.websiteUrl}
+              businessInstagramUrl={business.instagramUrl}
+              businessFacebookUrl={business.facebookUrl}
+              cancellationPolicy={business.cancellationPolicy}
+              galleryImages={gallery}
+              accentColor={business.accentColor}
             />
           )}
 
