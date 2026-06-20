@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef } from "react";
 import { AnimatePresence, motion, animate, useMotionValue } from "motion/react";
 import { Icon } from "@/components/ui/Icon";
+import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
+import Link from "next/link";
 
 // ─── Cursor SVG ───────────────────────────────────────────────────────────────
 function CursorSVG() {
@@ -68,177 +70,42 @@ function RollingValue({ value, className }: { value: string; className?: string 
 }
 
 
-// ─── Mockup 1: Booking ────────────────────────────────────────────────────────
-function BookingMockup() {
-  const slots = ["9:00 AM", "10:30 AM", "11:00 AM", "2:00 PM", "3:30 PM"];
-  const [selectedSlot, setSelectedSlot] = useState(1);
-  const [btnPressed, setBtnPressed] = useState(false);
-
-  const containerRef = useRef<HTMLDivElement>(null);
-  const slotRefs = useRef<(HTMLDivElement | null)[]>([null, null, null, null, null]);
-  const btnRef = useRef<HTMLDivElement>(null);
-
-  const cx = useMotionValue(0);
-  const cy = useMotionValue(0);
-  const cScale = useMotionValue(1);
-  const cOpacity = useMotionValue(0);
-
-  const getPos = (el: HTMLElement | null) => {
-    if (!el || !containerRef.current) return { x: 0, y: 0 };
-    const cr = containerRef.current.getBoundingClientRect();
-    const er = el.getBoundingClientRect();
-    return { x: er.left - cr.left + er.width / 2, y: er.top - cr.top + er.height / 2 };
-  };
-
-  useEffect(() => {
-    let alive = true;
-    const { sleep, clear } = createManagedSleep();
-
-    const run = async () => {
-      await sleep(1000);
-      while (alive) {
-        // Reset state
-        setSelectedSlot(-1);
-        setBtnPressed(false);
-        const p2 = getPos(slotRefs.current[2]);
-        cx.set(p2.x + 28);
-        cy.set(p2.y + 36);
-        cOpacity.set(0);
-        cScale.set(1);
-
-        await sleep(400);
-        if (!alive) break;
-
-        // Fade in
-        await animate(cOpacity, 1, { duration: 0.22 });
-
-        // Drift toward 9:00 AM
-        const p0 = getPos(slotRefs.current[0]);
-        await Promise.all([
-          animate(cx, p0.x, { duration: 0.52, ease: [0.25, 0.1, 0.25, 1] }),
-          animate(cy, p0.y, { duration: 0.52, ease: [0.25, 0.1, 0.25, 1] }),
-        ]);
-        await sleep(320);
-        if (!alive) break;
-
-        // Move to 10:30 AM
-        const p1 = getPos(slotRefs.current[1]);
-        await Promise.all([
-          animate(cx, p1.x, { duration: 0.38, ease: [0.25, 0.1, 0.25, 1] }),
-          animate(cy, p1.y, { duration: 0.38, ease: [0.25, 0.1, 0.25, 1] }),
-        ]);
-
-        // Click — compress then bounce back
-        await animate(cScale, 0.68, { duration: 0.08 });
-        setSelectedSlot(1);
-        await animate(cScale, 1.06, { duration: 0.13 });
-        await animate(cScale, 1, { duration: 0.1 });
-
-        await sleep(520);
-        if (!alive) break;
-
-        // Move to Confirm button
-        const pb = getPos(btnRef.current);
-        await Promise.all([
-          animate(cx, pb.x, { duration: 0.58, ease: [0.25, 0.1, 0.25, 1] }),
-          animate(cy, pb.y, { duration: 0.58, ease: [0.25, 0.1, 0.25, 1] }),
-        ]);
-
-        // Click button
-        await animate(cScale, 0.68, { duration: 0.08 });
-        setBtnPressed(true);
-        await animate(cScale, 1, { duration: 0.15 });
-
-        await sleep(700);
-        if (!alive) break;
-
-        // Fade out
-        await animate(cOpacity, 0, { duration: 0.3 });
-        setBtnPressed(false);
-
-        await sleep(1400);
-      }
-    };
-
-    run();
-    return () => {
-      alive = false;
-      clear();
-    };
-  }, [cOpacity, cScale, cx, cy]);
-
+// ─── Feature 1: points to live demo (no duplicate booking UI) ───────────────
+function BookingFeatureIllustration() {
   return (
-    <div ref={containerRef} className="relative w-full max-w-xs mx-auto">
-      <div className="rounded-2xl border border-white/70 bg-white/80 dark:border-neutral-700/70 dark:bg-neutral-900/80 shadow-lg shadow-primary/10 overflow-hidden" style={{ backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}>
-        <div className="bg-primary px-4 py-3 flex items-center gap-2.5">
-          <div className="flex size-8 items-center justify-center rounded-full bg-white/20">
-            <Icon name="scissors" className="text-white text-xs" />
-          </div>
-          <div>
-            <div className="text-white font-semibold text-xs">Dilini&apos;s Beauty Studio</div>
-            <div className="text-white/70 text-[11px]">dilini.dinaya.lk</div>
-          </div>
-        </div>
-        <div className="px-4 py-3 border-b border-gray-100 dark:border-neutral-800">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-xs font-semibold text-gray-900 dark:text-gray-100">Haircut &amp; Style</div>
-              <div className="text-[11px] text-muted-foreground">45 min</div>
-            </div>
-            <div className="text-xs font-bold text-primary">Rs. 2,500</div>
-          </div>
-        </div>
-        <div className="px-4 py-3">
-          <div className="text-[11px] text-muted-foreground uppercase tracking-wider mb-2 font-semibold">Thu, May 22</div>
-          <div className="grid grid-cols-3 gap-1.5">
-            {slots.map((s, i) => (
-              <div
-                key={s}
-                ref={el => { slotRefs.current[i] = el; }}
-                className={`rounded-lg border px-1.5 py-1.5 text-center text-[11px] font-medium transition-all duration-200 ${
-                  i === selectedSlot
-                    ? "border-primary bg-primary text-white shadow-sm shadow-primary/25"
-                    : "border-gray-200 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-900/60 text-gray-600 dark:text-gray-400"
-                }`}
-              >
-                {s}
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="px-4 pb-4">
-          <motion.div
-            ref={btnRef}
-            animate={btnPressed ? { scale: 0.96, opacity: 0.88 } : { scale: 1, opacity: 1 }}
-            transition={{ duration: 0.12 }}
-            className="rounded-xl bg-primary py-2.5 text-center text-xs font-semibold text-white"
-          >
-            Confirm &amp; Pay deposit
-          </motion.div>
-        </div>
+    <div className="flex w-full max-w-xs flex-col items-center gap-4 px-4 py-2 text-center mx-auto">
+      <div className="flex size-16 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary">
+        <Icon name="calendar-check" className="text-3xl" />
       </div>
-
-      {/* Animated cursor */}
-      <motion.div
-        className="pointer-events-none absolute top-0 left-0 z-50 drop-shadow-sm"
-        style={{ x: cx, y: cy, scale: cScale, opacity: cOpacity, translateX: "-3px", translateY: "-2px" }}
+      <p className="text-sm leading-relaxed text-muted-foreground text-pretty">
+        Your clients book on a page like the live demo above — calendar, slots, and payment in one flow.
+      </p>
+      <Link
+        href="#demo"
+        className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors"
       >
-        <CursorSVG />
-      </motion.div>
+        View demo
+        <Icon name="arrow-up" className="text-xs" />
+      </Link>
     </div>
   );
 }
 
 // ─── Mockup 2: Payment ────────────────────────────────────────────────────────
 function PaymentMockup() {
-  const [phase, setPhase] = useState(0);
+  const reduceMotion = usePrefersReducedMotion();
+  const [phase, setPhase] = useState(reduceMotion ? 2 : 0);
 
   useEffect(() => {
+    if (reduceMotion) {
+      setPhase(2);
+      return;
+    }
     const id = window.setInterval(() => {
       setPhase((p) => (p + 1) % 3);
     }, 1600);
     return () => window.clearInterval(id);
-  }, []);
+  }, [reduceMotion]);
 
   const isPaid = phase >= 1;
   const notified = phase === 2;
@@ -299,19 +166,24 @@ function PaymentMockup() {
 
 // ─── Mockup 3: Reminders ──────────────────────────────────────────────────────
 function RemindersMockup() {
+  const reduceMotion = usePrefersReducedMotion();
   const reminders = [
     { name: "Kavya S.", time: "10:30 AM", service: "Haircut & Style" },
     { name: "Nimal P.", time: "2:00 PM", service: "Facial Treatment" },
     { name: "Amali K.", time: "3:30 PM", service: "Eyebrow Threading" },
   ];
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(reduceMotion ? reminders.length + 1 : 0);
 
   useEffect(() => {
+    if (reduceMotion) {
+      setStep(reminders.length + 1);
+      return;
+    }
     const id = window.setInterval(() => {
       setStep((s) => (s + 1) % (reminders.length + 2));
     }, 1450);
     return () => window.clearInterval(id);
-  }, [reminders.length]);
+  }, [reduceMotion, reminders.length]);
 
   const sendingIndex = step < reminders.length ? step : -1;
   const sentCount = Math.min(step, reminders.length);
@@ -418,14 +290,19 @@ function RemindersMockup() {
 
 // ─── Mockup 4: Dashboard ──────────────────────────────────────────────────────
 function DashboardMockup() {
-  const [step, setStep] = useState(0);
+  const reduceMotion = usePrefersReducedMotion();
+  const [step, setStep] = useState(reduceMotion ? 2 : 0);
 
   useEffect(() => {
+    if (reduceMotion) {
+      setStep(2);
+      return;
+    }
     const id = window.setInterval(() => {
       setStep((s) => (s + 1) % 4);
     }, 1800);
     return () => window.clearInterval(id);
-  }, []);
+  }, [reduceMotion]);
 
   const bookings = [
     { time: "10:30", name: "Kavya S.",  service: "Haircut & Style",   amount: "Rs. 2,500", color: "bg-primary/10 text-primary" },
@@ -515,7 +392,8 @@ function DashboardMockup() {
 
 // ─── Mockup 5: Availability ──────────────────────────────────────────────────
 function AvailabilityMockup() {
-  const [step, setStep] = useState(0);
+  const reduceMotion = usePrefersReducedMotion();
+  const [step, setStep] = useState(reduceMotion ? 5 : 0);
   const containerRef = useRef<HTMLDivElement>(null);
   const thursdayRef = useRef<HTMLDivElement>(null);
   const bufferRef = useRef<HTMLButtonElement>(null);
@@ -536,6 +414,10 @@ function AvailabilityMockup() {
   };
 
   useEffect(() => {
+    if (reduceMotion) {
+      setStep(5);
+      return;
+    }
     let alive = true;
     const { sleep, clear } = createManagedSleep();
 
@@ -623,7 +505,7 @@ function AvailabilityMockup() {
       alive = false;
       clear();
     };
-  }, [cOpacity, cScale, cx, cy]);
+  }, [cOpacity, cScale, cx, cy, reduceMotion]);
 
   const bufferOpen = step === 2;
   const buffer = step >= 3 ? "30 min" : "15 min";
@@ -777,7 +659,8 @@ function AvailabilityMockup() {
 
 // ─── Mockup 6: Shareable link ────────────────────────────────────────────────
 function ShareLinkMockup() {
-  const [step, setStep] = useState(0);
+  const reduceMotion = usePrefersReducedMotion();
+  const [step, setStep] = useState(reduceMotion ? 3 : 0);
   const containerRef = useRef<HTMLDivElement>(null);
   const copyRef = useRef<HTMLButtonElement>(null);
   const whatsappRef = useRef<HTMLDivElement>(null);
@@ -795,6 +678,10 @@ function ShareLinkMockup() {
   };
 
   useEffect(() => {
+    if (reduceMotion) {
+      setStep(3);
+      return;
+    }
     let alive = true;
     const { sleep, clear } = createManagedSleep();
 
@@ -850,7 +737,7 @@ function ShareLinkMockup() {
       alive = false;
       clear();
     };
-  }, [cOpacity, cScale, cx, cy]);
+  }, [cOpacity, cScale, cx, cy, reduceMotion]);
 
   const copied = step >= 1;
   const sent = step >= 2;
@@ -942,7 +829,7 @@ const features = [
     num: "01", tag: "SELF-BOOKING",
     headlinePre: "Dinaya", verb: { icon: "calendar-check", label: "books" }, headlinePost: "clients while you sleep.",
     desc: "Your own page at yourname.dinaya.lk. Clients pick a time and pay — without a single WhatsApp message.",
-    mockup: <BookingMockup />,
+    mockup: <BookingFeatureIllustration />,
     mockupBg: "bg-blue-300/20",
   },
   {
@@ -983,13 +870,13 @@ const features = [
 ];
 
 // ─── Feature card ─────────────────────────────────────────────────────────────
-function FeatureCard({ f, i }: { f: typeof features[number]; i: number }) {
+function FeatureCard({ f, i, reduceMotion }: { f: typeof features[number]; i: number; reduceMotion: boolean }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 28 }}
-      whileInView={{ opacity: 1, y: 0 }}
+      initial={reduceMotion ? false : { opacity: 0, y: 28 }}
+      whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-80px" }}
-      transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1], delay: (i % 2) * 0.12 }}
+      transition={reduceMotion ? undefined : { duration: 0.55, ease: [0.22, 1, 0.36, 1], delay: (i % 2) * 0.12 }}
       className="rounded-3xl overflow-hidden border border-white/60 bg-white/70 backdrop-blur-2xl saturate-[1.8] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.6),0_12px_40px_rgba(0,0,0,0.09)] dark:border-neutral-700/50 dark:bg-neutral-900/75 dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06),0_12px_40px_rgba(0,0,0,0.35)]"
     >
       {/* Mockup area */}
@@ -1022,6 +909,8 @@ function FeatureCard({ f, i }: { f: typeof features[number]; i: number }) {
 
 // ─── Main export ──────────────────────────────────────────────────────────────
 export function FeatureShowcase() {
+  const reduceMotion = usePrefersReducedMotion();
+
   return (
     <div className="relative overflow-hidden">
       {/* Background blobs for glass to blur through */}
@@ -1046,7 +935,7 @@ export function FeatureShowcase() {
 
       <div className="grid md:grid-cols-2 gap-5">
         {features.map((f, i) => (
-          <FeatureCard key={f.num} f={f} i={i} />
+          <FeatureCard key={f.num} f={f} i={i} reduceMotion={reduceMotion} />
         ))}
       </div>
     </section>

@@ -29,9 +29,9 @@ export function LandingFooter() {
             </p>
             <Link
               href="/register"
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-white text-gray-900 px-6 py-3.5 text-sm font-semibold hover:bg-gray-100 transition-all hover:scale-[1.02] active:scale-95 self-start"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-white/90 hover:text-white transition-colors self-start"
             >
-              Get started free
+              Create your booking page
               <Icon name="arrow-right" className="text-xs" />
             </Link>
           </div>
@@ -80,6 +80,21 @@ export function LandingFooter() {
               { label: "Refund Policy", href: "/legal/refund" },
             ]}
           />
+        </div>
+
+        {/* Payment providers */}
+        <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 mb-10 pb-10 border-b border-white/10">
+          <span className="text-[11px] uppercase tracking-widest text-gray-500 font-semibold">
+            Accept payments via
+          </span>
+          {["PayHere", "Visa", "Mastercard", "LankaQR", "FriMi"].map((p) => (
+            <span
+              key={p}
+              className="inline-flex items-center rounded-md border border-white/10 bg-white/5 px-2.5 py-1 text-xs font-semibold text-gray-300"
+            >
+              {p}
+            </span>
+          ))}
         </div>
 
         {/* Bottom Metadata */}

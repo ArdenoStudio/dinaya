@@ -71,13 +71,6 @@ const slides = [
   { type: "confirmation" as const, label: "Confirm", ariaLabel: "Booking confirmation message" },
 ];
 
-const industries = [
-  { icon: "scissors", label: "Salons" },
-  { icon: "hospital", label: "Clinics" },
-  { icon: "book-half", label: "Tuition" },
-  { icon: "heart-pulse", label: "Wellness" },
-];
-
 /** Visual scale for the landing demo carousel (~20% larger). */
 const DEMO_SCALE = 1.2;
 
@@ -610,25 +603,6 @@ function DemoFrame({ children }: { children: ReactNode }) {
   );
 }
 
-function AlsoWorksFor() {
-  return (
-    <div className="mt-7 text-center">
-      <p className="text-sm text-gray-400 dark:text-gray-500 mb-2.5">Also works for</p>
-      <div className="flex flex-wrap justify-center gap-3.5">
-        {industries.map((item) => (
-          <div
-            key={item.label}
-            className="inline-flex items-center gap-2 rounded-full border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 shadow-sm"
-          >
-            <Icon name={item.icon} className="text-blue-500 text-base" />
-            {item.label}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 function SlideLabels({
   current,
   onGoTo,
@@ -698,7 +672,6 @@ function SlideIndicators({
       <div className="mb-3.5 mt-3.5">
         <SlideDots current={current} onGoTo={onGoTo} />
       </div>
-      <AlsoWorksFor />
     </div>
   );
 }
@@ -815,7 +788,6 @@ export default function ProductMockup() {
             {navBtn(1, "Next", "")}
           </div>
         </div>
-        <AlsoWorksFor />
       </div>
 
       {/* Desktop */}
