@@ -409,7 +409,7 @@ export default function StepDateTime({
                   <div className="lg:hidden">
                     <TimeSlotGrid {...slotPanelProps} />
                   </div>
-                  <div className="hidden min-w-0 max-h-[min(28rem,calc(100vh-12rem))] overflow-y-auto overflow-x-hidden lg:block">
+                  <div className="scrollbar-hide hidden min-w-0 max-h-[min(28rem,calc(100vh-12rem))] overflow-y-auto overflow-x-hidden lg:block">
                     <SlotListPanel {...slotPanelProps} />
                   </div>
                 </>
