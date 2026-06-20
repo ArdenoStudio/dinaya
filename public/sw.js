@@ -20,5 +20,7 @@ self.addEventListener("fetch", (event) => {
   // Let the browser handle page navigations natively — SW passthrough causes
   // "Failed to fetch" network errors on navigate-mode requests in some envs.
   if (event.request.mode === "navigate") return;
+  // API routes must not be wrapped — passthrough failures break availability fetches.
+  if (url.pathname.startsWith("/api/")) return;
   event.respondWith(fetch(event.request).catch(() => Response.error()));
 });

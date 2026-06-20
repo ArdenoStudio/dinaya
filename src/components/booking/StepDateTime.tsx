@@ -114,7 +114,15 @@ export default function StepDateTime({
     if (locationId) query.set("locationId", locationId);
     if (dealId) query.set("dealId", dealId);
     if (sessionToken) query.set("sessionToken", sessionToken);
+    try {
     const res = await fetch(`/api/availability?${query.toString()}`);
+    if (!res.ok) {
+      setSlotEmptyState("full");
+      setSlots([]);
+      setLoadingSlots(false);
+      setHasFetched(true);
+      return;
+    }
     const data = await res.json();
     const fetchedSlots: SlotOption[] = data.slots ?? [];
     const fetchedEmptyState: SlotEmptyState =
@@ -129,6 +137,12 @@ export default function StepDateTime({
     setLoadingSlots(false);
     setHasFetched(true);
     onSlotsChange?.(fetchedSlots, false, fetchedEmptyState);
+    } catch {
+      setSlotEmptyState("full");
+      setSlots([]);
+      setLoadingSlots(false);
+      setHasFetched(true);
+    }
   }
 
   const loadMonthStatus = useCallback(
@@ -173,7 +187,7 @@ export default function StepDateTime({
       clearInterval(interval);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [businessId, staff?.id, service?.id, selectedDate, canLoad, dealId]);
+  }, [businessId, staff?.id, anyStaff, service?.id, selectedDate, canLoad, dealId, locationId]);
 
   useEffect(() => {
     if (!canLoad) {
