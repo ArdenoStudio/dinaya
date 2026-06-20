@@ -33,17 +33,17 @@ export default function DateQuickStrip({ selectedDate, minDate, maxDate, copy, o
             key={dateStr}
             type="button"
             onClick={() => onSelect(dateStr)}
-            className={`flex min-h-11 min-w-11 shrink-0 snap-start flex-col items-center justify-center rounded-xl border px-3.5 py-2.5 transition-all ${
+            className={`flex min-h-12 min-w-[3.25rem] shrink-0 snap-start flex-col items-center justify-center rounded-xl border px-4 py-3 transition-all ${
               isSelected
                 ? "booking-border-accent booking-bg-accent text-white shadow-md booking-shadow-accent"
                 : "border-border bg-card text-muted-foreground"
             }`}
           >
-            <span className={`text-[10px] font-medium ${isSelected ? "text-white/80" : "text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500"}`}>
+            <span className={`text-[10px] font-medium ${isSelected ? "text-white/80" : "text-muted-foreground"}`}>
               {isToday(d) ? copy.today : format(d, "EEE")}
             </span>
-            <span className="mt-0.5 text-base font-bold tabular-nums">{format(d, "d")}</span>
-            <span className={`text-[10px] ${isSelected ? "text-white/80" : "text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500"}`}>
+            <span className="mt-0.5 text-base font-semibold tabular-nums">{format(d, "d")}</span>
+            <span className={`text-[10px] ${isSelected ? "text-white/80" : "text-muted-foreground"}`}>
               {format(d, "MMM")}
             </span>
           </button>

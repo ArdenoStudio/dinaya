@@ -80,7 +80,7 @@ export function SlotListPanel({
 
   return (
     <div
-      className={`flex flex-col gap-4 transition-opacity ${refreshing ? "pointer-events-none opacity-50" : ""}`}
+      className={`relative flex flex-col gap-4 transition-opacity ${refreshing ? "pointer-events-none opacity-50" : ""}`}
       aria-busy={refreshing || undefined}
     >
       {PERIOD_ORDER.map((period) => {
@@ -136,6 +136,10 @@ export function SlotListPanel({
           </div>
         );
       })}
+      <div
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-card to-transparent"
+        aria-hidden
+      />
     </div>
   );
 }

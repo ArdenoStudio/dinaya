@@ -301,7 +301,7 @@ export default function StepDateTime({
 
   return (
       <div className="flex h-full min-w-0 w-full max-w-full flex-col">
-      <p className="mb-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground md:hidden">
+      <p className="mb-4 text-sm font-medium text-muted-foreground md:hidden">
         {copy.pickDateTime}
       </p>
 
@@ -442,7 +442,7 @@ export default function StepDateTime({
           {showContinue && selectedSlot && onContinue && (
             <Button
               type="button"
-              className="ml-auto bg-[var(--booking-accent)] text-white hover:bg-[var(--booking-accent)]/90"
+              className="ml-auto min-h-11 bg-[var(--booking-accent)] px-5 text-base text-white hover:bg-[var(--booking-accent)]/90 md:text-sm"
               onClick={onContinue}
             >
               {copy.continue}

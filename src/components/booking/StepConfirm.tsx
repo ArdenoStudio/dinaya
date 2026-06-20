@@ -16,6 +16,7 @@ import {
 } from "@/lib/payments/resolve";
 import type { DealListItem } from "@/lib/deals/queries";
 import { Icon } from "@/components/ui/Icon";
+import { BookingSubmitButton } from "./BookingSubmitButton";
 import {
   validateConfirmFields,
   type ConfirmFieldErrors,
@@ -44,9 +45,9 @@ interface Props {
 }
 
 const fieldBaseCls =
-  "mt-1.5 w-full rounded-xl border px-3 py-2.5 text-sm transition-shadow placeholder:text-gray-400 focus:outline-none focus:ring-2";
-const fieldOkCls = `${fieldBaseCls} border-gray-200 dark:border-neutral-800 focus:border-blue-400 focus:ring-blue-500/20`;
-const fieldErrCls = `${fieldBaseCls} border-red-300 bg-red-50/40 focus:border-red-400 focus:ring-red-500/20 dark:border-red-900/50 dark:bg-red-950/20`;
+  "mt-1.5 w-full min-h-11 rounded-xl border px-3 py-2.5 text-base transition-shadow placeholder:text-muted-foreground focus:outline-none focus:ring-2 md:text-sm";
+const fieldOkCls = `${fieldBaseCls} border-border bg-card focus:border-[var(--booking-accent)] focus:ring-[var(--booking-accent-soft)]`;
+const fieldErrCls = `${fieldBaseCls} border-destructive/50 bg-destructive/5 focus:border-destructive focus:ring-destructive/20`;
 
 function fieldErrorId(field: string) {
   return `confirm-error-${field}`;
@@ -71,7 +72,7 @@ function IntakeField({
 
   return (
     <div>
-      <label htmlFor={id} className="text-sm font-medium text-gray-800 dark:text-gray-200">
+      <label htmlFor={id} className="text-sm font-medium text-foreground">
         {question.label}{" "}
         {question.required ? (
           <span className="font-normal text-gray-400 dark:text-gray-500">*</span>
@@ -392,95 +393,27 @@ export default function StepConfirm({
 
   const summaryCards = (
     <div className="flex flex-col gap-2 md:gap-3">
-      <div className="rounded-2xl bg-white dark:bg-neutral-900 px-[15px] py-[13px] md:rounded-xl md:border md:border-gray-100 dark:border-neutral-800 md:p-4">
-        <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.08em] text-gray-400 dark:text-gray-500">
-          {copy.selectedService}
-        </p>
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="text-[15px] font-semibold leading-snug text-gray-900 dark:text-gray-100 md:text-base">
-              {service?.name}
-            </p>
-            <div className="mt-1 flex items-center gap-1 text-[11px] text-gray-400 dark:text-gray-500 md:text-xs">
-              <Icon name="clock" className="text-[10px] text-gray-300" />
-              {service?.durationMinutes} min
-              {state.staff && (
-                <>
-                  <span className="text-gray-300">·</span>
-                  {state.staff.name}
-                </>
-              )}
-            </div>
-          </div>
-          <p className="shrink-0 text-base font-bold tabular-nums booking-text-accent md:text-lg">
-            {service && service.priceLkr > 0 ? formatLkr(service.priceLkr) : "Free"}
-          </p>
-        </div>
-      </div>
-
-      <div className="rounded-2xl bg-white dark:bg-neutral-900 px-[15px] py-[13px] md:rounded-xl md:border md:border-gray-100 dark:border-neutral-800 md:p-4">
-        <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.08em] text-gray-400 dark:text-gray-500">
+      <div className="rounded-xl border border-border bg-card p-4">
+        <p className="mb-3 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
           {copy.appointment}
         </p>
-        <div className="mb-2 flex items-center gap-[11px]">
-          <div className="flex size-[34px] shrink-0 items-center justify-center rounded-[10px] booking-bg-accent-muted">
-            <Icon name="calendar3" className="text-[13px] booking-text-accent" />
-          </div>
-          <div>
-            <p className="text-[13px] font-semibold text-gray-900 dark:text-gray-100 md:text-sm">{dateLabel}</p>
-            <p className="text-[11px] text-gray-400 dark:text-gray-500 md:text-xs">{yearLabel}</p>
-          </div>
-        </div>
-        <div className="mb-2 h-px bg-gray-100 dark:bg-neutral-800" />
-        <div className="flex items-center gap-[11px]">
-          <div className="flex size-[34px] shrink-0 items-center justify-center rounded-[10px] bg-emerald-50 dark:bg-emerald-950/40">
-            <Icon name="clock" className="text-[13px] text-emerald-500" />
-          </div>
-          <div className="flex-1">
-            <p className="text-[13px] font-semibold text-gray-900 dark:text-gray-100 md:text-sm">{state.timeLabel}</p>
-            <p className="text-[11px] text-gray-400 dark:text-gray-500 md:text-xs">{service?.durationMinutes} min</p>
-          </div>
-          <span className="shrink-0 rounded-full border border-emerald-100 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 text-[11px] font-semibold text-emerald-600">
-            {copy.available}
-          </span>
-        </div>
+        <p className="text-xl font-semibold tabular-nums text-foreground">{state.timeLabel}</p>
+        <p className="mt-1 text-sm text-muted-foreground">{dateLabel}</p>
+        {yearLabel ? <p className="text-xs text-muted-foreground">{yearLabel}</p> : null}
+        <p className="mt-3 text-sm text-foreground">
+          {service?.name}
+          {state.staff ? <span className="text-muted-foreground"> · {state.staff.name}</span> : null}
+        </p>
       </div>
 
       {service && service.priceLkr > 0 && (
-        <div className="rounded-2xl bg-white dark:bg-neutral-900 px-[15px] py-[13px] md:rounded-xl md:border md:border-gray-100 dark:border-neutral-800 md:p-4">
-          <div className="flex items-center justify-between">
-            <p className="text-[12px] text-gray-500 dark:text-gray-400">{service.name}</p>
-            <p className="text-[12px] font-medium tabular-nums text-gray-700 dark:text-gray-300">
-              {formatLkr(service.priceLkr)}
-            </p>
-          </div>
-          {service.requiresPayment && service.depositPercent > 0 && (
-            <div className="mt-1 flex items-center justify-between">
-              <p className="text-[11px] text-gray-400 dark:text-gray-500">
-                {copy.depositDue} ({service.depositPercent}%)
-              </p>
-              <p className="text-[11px] font-semibold tabular-nums booking-text-accent">
-                {formatLkr(depositAmount)}
-              </p>
-            </div>
-          )}
-          <div className="my-2 h-px bg-gray-100 dark:bg-neutral-800" />
-          {selectedDeal && (
-            <div className="mb-2 flex items-center justify-between text-emerald-700">
-              <p className="text-[12px] font-medium">
-                Deal discount ({selectedDeal.discountPercent}%)
-              </p>
-              <p className="text-[12px] font-semibold tabular-nums">
-                −{formatLkr(service.priceLkr - discountedPrice)}
-              </p>
-            </div>
-          )}
-          <div className="flex items-center justify-between">
-            <p className="text-[13px] font-bold text-gray-900 dark:text-gray-100">{copy.fullAmount}</p>
-            <p className="text-[14px] font-bold tabular-nums text-gray-900 dark:text-gray-100">
+        <div className="rounded-xl border border-border bg-card p-4">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-sm text-muted-foreground">{copy.fullAmount}</p>
+            <p className="text-base font-semibold tabular-nums text-foreground">
               {selectedDeal ? (
                 <>
-                  <span className="mr-2 text-[12px] font-medium text-gray-400 dark:text-gray-500 line-through">
+                  <span className="mr-2 text-sm font-normal text-muted-foreground line-through">
                     {formatLkr(service.priceLkr)}
                   </span>
                   {formatLkr(discountedPrice)}
@@ -490,6 +423,14 @@ export default function StepConfirm({
               )}
             </p>
           </div>
+          {service.requiresPayment && service.depositPercent > 0 && (
+            <div className="mt-2 flex items-center justify-between text-sm">
+              <p className="text-muted-foreground">
+                {copy.depositDue} ({service.depositPercent}%)
+              </p>
+              <p className="font-medium tabular-nums booking-text-accent">{formatLkr(depositAmount)}</p>
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -500,12 +441,12 @@ export default function StepConfirm({
   const emailError = showFieldError("clientEmail");
 
   const contactForm = (
-    <div className="space-y-3 md:rounded-xl md:border md:border-gray-100 dark:border-neutral-800 md:bg-white dark:md:bg-neutral-900 md:p-5">
-      <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 md:mb-1">
+    <div className="space-y-3 md:rounded-xl md:border md:border-border md:bg-card md:p-5">
+      <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground md:mb-1">
         {copy.details}
       </p>
       <div>
-        <label htmlFor="clientName" className="text-sm font-medium text-gray-800 dark:text-gray-200">
+        <label htmlFor="clientName" className="text-sm font-medium text-foreground">
           Full name <span className="font-normal text-gray-400 dark:text-gray-500">*</span>
         </label>
         <input
@@ -529,7 +470,7 @@ export default function StepConfirm({
         ) : null}
       </div>
       <div>
-        <label htmlFor="clientPhone" className="text-sm font-medium text-gray-800 dark:text-gray-200">
+        <label htmlFor="clientPhone" className="text-sm font-medium text-foreground">
           Phone number <span className="font-normal text-gray-400 dark:text-gray-500">*</span>
         </label>
         <input
@@ -554,7 +495,7 @@ export default function StepConfirm({
         ) : null}
       </div>
       <div>
-        <label htmlFor="clientEmail" className="text-sm font-medium text-gray-800 dark:text-gray-200">
+        <label htmlFor="clientEmail" className="text-sm font-medium text-foreground">
           Email <span className="text-xs font-normal text-gray-400 dark:text-gray-500">(optional)</span>
         </label>
         <input
@@ -578,7 +519,7 @@ export default function StepConfirm({
         ) : null}
       </div>
       <div>
-        <label htmlFor="notes" className="text-sm font-medium text-gray-800 dark:text-gray-200">
+        <label htmlFor="notes" className="text-sm font-medium text-foreground">
           Notes <span className="text-xs font-normal text-gray-400 dark:text-gray-500">(optional)</span>
         </label>
         <textarea
@@ -692,18 +633,18 @@ export default function StepConfirm({
             <span>{error}</span>
           </div>
         )}
-        <button
-          type="button"
-          onClick={handleBook}
+        <BookingSubmitButton
+          className="mt-4"
+          loading={loading}
           disabled={!canSubmit}
-          className="mt-4 w-full rounded-xl bg-[var(--booking-accent)] py-3.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+          onClick={handleBook}
         >
-          {loading ? "Booking…" : payLabel}
-        </button>
+          {payLabel}
+        </BookingSubmitButton>
         <button
           type="button"
           onClick={onBack}
-          className="mt-3 text-sm text-muted-foreground transition-colors hover:text-foreground"
+          className="mt-3 flex min-h-11 items-center text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           {copy.back}
         </button>
@@ -732,27 +673,20 @@ export default function StepConfirm({
         </div>
       )}
 
-      <div className="sticky bottom-0 z-10 border-t border-gray-200 dark:border-neutral-800/80 booking-sticky-bar px-[14px] pb-[max(1rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-md md:relative md:mt-6 md:border-0 md:bg-transparent md:px-8 md:pb-0 md:pt-0">
-        <div className="mb-2 flex md:mb-4">
-          <button
-            type="button"
-            onClick={onBack}
-            className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 md:mr-4"
-          >
-            <Icon name="chevron-left" className="text-sm" /> {copy.back}
-          </button>
-        </div>
+      <div className="sticky bottom-0 z-10 border-t border-border booking-sticky-bar px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur-md md:relative md:mt-6 md:border-0 md:bg-transparent md:px-8 md:pb-0 md:pt-0">
         <button
           type="button"
-          onClick={handleBook}
-          disabled={!canSubmit}
-          className="w-full rounded-[14px] bg-gradient-to-r booking-gradient-accent py-[17px] text-[16px] font-bold text-white shadow-lg booking-shadow-accent transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 md:rounded-xl md:py-3.5 md:text-sm md:font-semibold"
+          onClick={onBack}
+          className="mb-3 flex min-h-11 items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
-          {loading ? "Booking…" : payLabel}
+          <Icon name="chevron-left" className="text-sm" /> {copy.back}
         </button>
+        <BookingSubmitButton loading={loading} disabled={!canSubmit} onClick={handleBook}>
+          {payLabel}
+        </BookingSubmitButton>
         <div className="mt-2 flex items-center justify-center gap-1 md:mt-3">
-          <Icon name="shield-check" className="text-[11px] text-gray-300" />
-          <span className="text-[11px] text-gray-400 dark:text-gray-500">{copy.paymentSecure}</span>
+          <Icon name="shield-check" className="text-[11px] text-muted-foreground" />
+          <span className="text-[11px] text-muted-foreground">{copy.paymentSecure}</span>
         </div>
       </div>
     </div>

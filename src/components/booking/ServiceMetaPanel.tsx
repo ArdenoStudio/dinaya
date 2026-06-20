@@ -10,7 +10,6 @@ import type { DealListItem } from "@/lib/deals/queries";
 import { formatLkr } from "@/lib/utils";
 import { Icon } from "@/components/ui/Icon";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { fadeInUp } from "@/lib/booking/booking-animations";
 import StaffPicker from "./StaffPicker";
@@ -148,15 +147,17 @@ export function ServiceMetaPanel({
             {service.description && (
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{service.description}</p>
             )}
-            <div className="mt-4 flex flex-wrap items-center gap-2">
-              <Badge variant="secondary" className="gap-1.5">
-                <Icon name="clock" />
+            <div className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
+              <span className="inline-flex items-center gap-1">
+                <Icon name="clock" className="text-xs" />
                 {formatDuration(service.durationMinutes)}
-              </Badge>
-              <Badge variant="outline" className="gap-1.5">
-                <Icon name="tag" />
+              </span>
+              <span aria-hidden className="text-muted-foreground/50">
+                ·
+              </span>
+              <span className="inline-flex items-center gap-1 font-medium text-foreground">
                 {service.priceLkr > 0 ? formatLkr(price) : "Free"}
-              </Badge>
+              </span>
             </div>
             {staffLabel && (
               <p className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">

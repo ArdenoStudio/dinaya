@@ -87,7 +87,7 @@ export default function MonthCalendar({
 
   return (
     <div
-      className={`min-w-0 w-full ${comfortable ? "" : "rounded-xl border border-gray-100 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-900/60 p-3.5"}`}
+      className={`min-w-0 w-full ${comfortable ? "" : "rounded-xl border border-border bg-muted/40 p-3.5"}`}
     >
       <div className={`flex items-center justify-between ${comfortable ? "mb-4" : "mb-3"}`}>
         <span className={`font-semibold text-foreground ${comfortable ? "text-lg" : "text-sm"}`}>
@@ -98,22 +98,18 @@ export default function MonthCalendar({
             type="button"
             disabled={!canGoPrev}
             onClick={() => setViewMonth((m) => subMonths(m, 1))}
-            className={`flex items-center justify-center rounded-lg text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 transition-all hover:bg-gray-100 dark:bg-neutral-800 hover:text-gray-700 dark:text-gray-300 disabled:cursor-not-allowed disabled:opacity-30 ${
-              comfortable ? "size-9" : "size-7"
-            }`}
+            className="flex size-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30"
             aria-label="Previous month"
           >
-            <Icon name="chevron-left" className={comfortable ? "text-sm" : "text-[10px]"} />
+            <Icon name="chevron-left" className={comfortable ? "text-sm" : "text-xs"} />
           </button>
           <button
             type="button"
             onClick={() => setViewMonth((m) => addMonths(m, 1))}
-            className={`flex items-center justify-center rounded-lg text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 transition-all hover:bg-gray-100 dark:bg-neutral-800 hover:text-gray-700 dark:text-gray-300 ${
-              comfortable ? "size-9" : "size-7"
-            }`}
+            className="flex size-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             aria-label="Next month"
           >
-            <Icon name="chevron-right" className={comfortable ? "text-sm" : "text-[10px]"} />
+            <Icon name="chevron-right" className={comfortable ? "text-sm" : "text-xs"} />
           </button>
         </div>
       </div>
@@ -123,7 +119,7 @@ export default function MonthCalendar({
         {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
           <div
             key={d}
-            className={`font-bold text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 ${comfortable ? "pb-3 text-[11px] tracking-wide" : "pb-1.5 text-[10px] tracking-wide"}`}
+            className={`font-semibold text-muted-foreground ${comfortable ? "pb-3 text-[11px] tracking-wide" : "pb-1.5 text-[10px] tracking-wide"}`}
           >
             {comfortable ? d : d.slice(0, 3)}
           </div>
@@ -147,19 +143,19 @@ export default function MonthCalendar({
               className={`relative min-w-0 font-medium transition-all ${
                 comfortable
                   ? "mx-auto flex size-11 items-center justify-center rounded-xl text-sm"
-                  : "mx-auto flex aspect-square w-full max-w-10 items-center justify-center rounded-lg text-xs"
+                  : "mx-auto flex size-11 min-h-11 min-w-11 max-w-none items-center justify-center rounded-lg text-xs"
               } ${
                 !inMonth
                   ? "pointer-events-none opacity-0"
                   : isSelected
                   ? "booking-bg-accent text-white shadow-md booking-shadow-accent"
                   : disabled
-                  ? "cursor-not-allowed text-gray-300"
+                  ? "cursor-not-allowed text-muted-foreground/40"
                   : showToday
                   ? "font-semibold booking-text-accent ring-2 ring-[var(--booking-accent-soft)]"
                   : isNextAvailable
                   ? "font-semibold booking-text-accent ring-2 ring-[var(--booking-accent)] ring-offset-1 ring-offset-background"
-                  : "text-gray-700 dark:text-gray-300 hover:booking-bg-accent-muted"
+                  : "text-foreground hover:booking-bg-accent-muted"
               }`}
             >
               {format(day, "d")}
@@ -172,14 +168,14 @@ export default function MonthCalendar({
               {inMonth && status === "full" && !isSelected && (
                 <span
                   aria-hidden
-                  className="absolute bottom-1 left-1/2 size-1 -translate-x-1/2 rounded-full bg-gray-300"
+                  className="absolute bottom-1 left-1/2 size-1 -translate-x-1/2 rounded-full bg-muted-foreground/30"
                 />
               )}
               {inMonth && personalBusyCount > 0 && !isSelected && (
                 <span
                   aria-hidden="true"
                   title={`${personalBusyCount} busy calendar period${personalBusyCount === 1 ? "" : "s"}`}
-                  className="absolute right-1 top-1 size-1.5 rounded-full bg-gray-500 ring-2 ring-white dark:bg-gray-400 dark:ring-neutral-900"
+                  className="absolute right-1 top-1 size-1.5 rounded-full bg-muted-foreground ring-2 ring-background"
                 />
               )}
             </button>

@@ -2,7 +2,7 @@
 
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import type { Location, Staff } from "@/db/schema";
 import type { IntakeQuestion } from "@/lib/intake";
@@ -20,6 +20,7 @@ import { trackBookingStart } from "@/lib/analytics/gtag";
 import { ServiceMetaPanel } from "./ServiceMetaPanel";
 import { BookingWizardSkeleton } from "./BookingWizardSkeleton";
 import BookingBranding from "./BookingBranding";
+import { BookingChoiceSummary } from "./BookingChoiceSummary";
 import { BookingBackPill } from "./BookingBackPill";
 import { BookingTeamSection } from "./BookingTeamSection";
 import { BookingAttributionCapture } from "./BookingAttributionCapture";
@@ -440,6 +441,10 @@ function BookingWizardInner({
     Boolean(state.service) &&
     (Boolean(hubHref) || (!lockServiceSelection && services.length > 1));
 
+  const choiceDateLabel = state.date
+    ? format(parseISO(state.date + "T12:00:00"), "EEE d MMM")
+    : null;
+
   return (
     <BookingTheme accentColor={business.accentColor} embed={embedMode}>
       {showBackPill && (
@@ -496,6 +501,22 @@ function BookingWizardInner({
               </div>
 
               <div className="min-w-0 lg:py-6">
+                {state.service ? (
+                  <div className="border-b border-border px-4 pb-3 pt-1 lg:hidden">
+                    <BookingChoiceSummary
+                      serviceName={state.service.name}
+                      dateLabel={choiceDateLabel}
+                      timeLabel={state.timeLabel || null}
+                      stepLabel={
+                        showContactForm
+                          ? copy.details
+                          : selectedSlot
+                            ? copy.details
+                            : copy.pickDateTime
+                      }
+                    />
+                  </div>
+                ) : null}
                 {canPickSlots ? (
                   showContactForm ? (
                     <div className="px-4 md:px-6 lg:px-8">
@@ -543,7 +564,7 @@ function BookingWizardInner({
           )}
         </div>
 
-        {state.service && teamMembers.length > 0 && !embedMode && (
+        {state.service && teamMembers.length > 0 && !embedMode && !hubHref && (
           <BookingTeamSection
             members={teamMembers}
             copy={copy}

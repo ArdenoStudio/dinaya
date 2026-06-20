@@ -144,6 +144,7 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
 
   const hideSidebarSections =
     mode === "embed" ? hideGallery !== false : Boolean(hideGallery);
+  const showSecondarySections = !hideSidebarSections && !(bookerFocus && !showHub);
 
   return (
     <BookingTheme accentColor={business.accentColor} embed={mode === "embed"}>
@@ -293,7 +294,7 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
             />
           )}
 
-          {centeredLayout && !showHub && !hideSidebarSections && hasTrustBlock && (
+          {centeredLayout && !showHub && showSecondarySections && hasTrustBlock && (
             <div className="mt-4 border-t border-border/60 px-4 pt-4 md:mt-5 md:rounded-xl md:border md:bg-card/50 md:px-5 md:py-4">
               <BookingPolicyAccordion
                 copy={copy}
@@ -304,7 +305,7 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
             </div>
           )}
 
-          {!showHub && !hideSidebarSections && hasAboutSection && (
+          {!showHub && showSecondarySections && hasAboutSection && (
             <Card
               className={`mt-0 overflow-hidden rounded-none border-x-0 shadow-none ${
                 centeredLayout
@@ -355,7 +356,7 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
             />
           )}
 
-          {!showHub && !hideSidebarSections && businessRating && (
+          {!showHub && showSecondarySections && businessRating && (
             <BookingReviewsSection
               businessSlug={business.slug}
               businessName={business.name}

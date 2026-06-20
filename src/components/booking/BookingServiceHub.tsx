@@ -11,10 +11,10 @@ import {
 } from "@/lib/booking-hub-present";
 import { Icon } from "@/components/ui/Icon";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { BlurFade } from "@/components/ui/blur-fade";
 import { BookingHubHeroImage } from "@/components/booking/BookingHubHeroImage";
+import { BookingHubCta } from "@/components/booking/BookingHubCta";
 import { BookingPolicyAccordion } from "@/components/booking/BookingPolicyAccordion";
 import { BusinessRating, getBusinessRating } from "./BusinessRating";
 import type { BookingCopy } from "@/lib/i18n";
@@ -107,6 +107,7 @@ export default function BookingServiceHub({
     businessSlug,
     primaryService.slug ?? primaryService.id,
   );
+  const primaryCtaLabel = `${copy.chooseTime} · ${primaryService.name}`;
   const tagline = hubTagline(businessDescription, copy.selectServiceHint);
   const locationLine = formatHubLocationLine(businessAddress, businessPhone);
   const showHeaderAvatar = !heroImageUrl;
@@ -115,7 +116,7 @@ export default function BookingServiceHub({
     "overflow-hidden rounded-none border-x-0 bg-card shadow-none md:rounded-2xl md:border md:border-border/80 md:shadow-[0_12px_40px_-24px_rgba(15,23,42,0.28)]";
 
   return (
-    <BlurFade className="w-full">
+    <BlurFade className="w-full pb-24 md:pb-0">
       <article className={cn("flex w-full flex-col", shell)}>
         {heroImageUrl ? (
           <div className="relative">
@@ -236,32 +237,14 @@ export default function BookingServiceHub({
                       {service.name}
                     </p>
                     {service.description ? (
-                      <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-muted-foreground dark:text-zinc-300">
+                      <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
                         {service.description}
                       </p>
                     ) : null}
-                    <div className="mt-2.5 flex flex-wrap items-center gap-2">
-                      <Badge
-                        variant="secondary"
-                        className="h-auto gap-1 px-2.5 py-1 text-xs font-normal"
-                      >
-                        <Icon name="clock" className="text-[0.8rem]" />
-                        {service.durationMinutes}m
-                      </Badge>
-                      {service.priceLkr > 0 ? (
-                        <Badge
-                          variant="outline"
-                          className="h-auto gap-1 border-border/80 px-2.5 py-1 text-xs font-medium"
-                        >
-                          <Icon name="cash-stack" className="text-[0.8rem]" />
-                          {formatLkr(service.priceLkr)}
-                        </Badge>
-                      ) : (
-                        <Badge variant="secondary" className="h-auto px-2.5 py-1 text-xs">
-                          Free
-                        </Badge>
-                      )}
-                    </div>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      {service.durationMinutes}m
+                      {service.priceLkr > 0 ? ` · ${formatLkr(service.priceLkr)}` : " · Free"}
+                    </p>
                   </div>
 
                   <Icon
@@ -293,6 +276,13 @@ export default function BookingServiceHub({
           <Link href={primaryHref}>{copy.chooseService}</Link>
         </div>
       </article>
+
+      <BookingHubCta
+        businessSlug={businessSlug}
+        serviceSlug={primaryService.slug ?? primaryService.id}
+        label={primaryCtaLabel}
+        variant="sticky"
+      />
     </BlurFade>
   );
 }
