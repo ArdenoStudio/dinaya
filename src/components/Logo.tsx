@@ -4,6 +4,8 @@ interface LogoProps {
   size?: "sm" | "md" | "lg";
   href?: string;
   className?: string;
+  /** Show "Dinaya" without the .lk suffix */
+  short?: boolean;
 }
 
 const ICON_SIZES = { sm: 18, md: 22, lg: 30 };
@@ -25,11 +27,11 @@ export function LogoIcon({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
   );
 }
 
-export function Logo({ size = "md", href = "/", className }: LogoProps) {
+export function Logo({ size = "md", href = "/", className, short = false }: LogoProps) {
   const inner = (
     <span className={`flex items-center gap-2 text-foreground ${TEXT_CLASSES[size]} ${className ?? ""}`}>
       <LogoIcon size={size} />
-      <span className="font-cal leading-none">Dinaya.lk</span>
+      <span className="font-cal leading-none">{short ? "Dinaya" : "Dinaya.lk"}</span>
     </span>
   );
 
