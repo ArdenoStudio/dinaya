@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
 import { AuthThemeToggle } from "@/components/AuthThemeToggle";
+import { AuthHalftonePanelArt } from "@/components/auth/AuthHalftonePanelArt";
 import { Icon } from "@/components/ui/Icon";
 
 const panelPerks = [
@@ -36,23 +37,8 @@ export function AuthSplitShell({ children }: Props) {
       </div>
 
       <div className="hidden p-4 lg:block lg:w-1/2">
-        <div className="relative flex h-full min-h-[calc(100vh-2rem)] w-full flex-col justify-between overflow-hidden rounded-[2rem] border border-white/10 bg-neutral-950 p-10 text-white">
-          <div
-            className="pointer-events-none absolute inset-0"
-            style={{
-              background:
-                "linear-gradient(145deg, rgba(37,99,235,0.35) 0%, rgba(5,13,31,0.95) 45%, rgba(9,8,15,1) 100%)",
-            }}
-          />
-          <div
-            className="pointer-events-none absolute inset-0 opacity-40"
-            style={{
-              backgroundImage: "radial-gradient(rgba(255,255,255,0.08) 1px, transparent 1px)",
-              backgroundSize: "22px 22px",
-            }}
-          />
-          <div className="pointer-events-none absolute -left-20 top-1/4 size-[420px] rounded-full bg-primary/25 blur-[100px]" />
-          <div className="pointer-events-none absolute -bottom-24 -right-16 size-80 rounded-full bg-violet-600/20 blur-[90px]" />
+        <div className="relative flex h-full min-h-[calc(100vh-2rem)] w-full flex-col justify-between overflow-hidden rounded-[2rem] border border-black/10 p-10 text-white">
+          <AuthHalftonePanelArt />
 
           <div className="relative z-10 pt-2">
             <p className="font-cal text-4xl leading-[1.12] tracking-tight text-balance">
