@@ -164,7 +164,7 @@ function LoginForm() {
       className="w-full max-w-[420px]"
     >
       <motion.div variants={itemVariants} className="mb-6 text-center lg:text-left">
-        <h1 className="mb-1 font-cal text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
+        <h1 className="mb-1 text-3xl font-medium tracking-tight text-foreground md:text-4xl">
           Welcome back
         </h1>
         <p className="text-sm text-muted-foreground">Sign in to your Dinaya dashboard</p>
