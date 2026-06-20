@@ -305,7 +305,7 @@ export default function StepDateTime({
         {copy.pickDateTime}
       </p>
 
-      <div className="flex min-w-0 flex-col md:grid md:min-h-[22rem] md:grid-cols-[minmax(20rem,1fr)_minmax(0,14rem)] md:divide-x md:divide-border lg:grid-cols-[minmax(22rem,1fr)_minmax(0,17rem)]">
+      <div className="flex min-w-0 flex-col md:grid md:min-h-[22rem] md:grid-cols-[minmax(18rem,1fr)_minmax(11rem,17rem)] md:divide-x md:divide-border">
         <section className="min-w-0 pb-4 md:px-6 md:pb-0 md:pt-0 lg:px-8">
           <div className="mb-3 flex items-center justify-between gap-2 md:mb-4">
             <p className="text-sm font-medium text-foreground md:sr-only">{copy.chooseDate}</p>
@@ -363,11 +363,10 @@ export default function StepDateTime({
           </div>
         </section>
 
-        {!hideSlots && (
-          <>
-            <Separator className="md:hidden" />
-            <section className="min-w-0 pt-4 md:flex md:flex-col md:px-4 md:pt-0 lg:px-5">
-              {compactDateHeading ? (
+        {!hideSlots ? (
+          <section className="min-w-0 pt-4 md:flex md:min-h-0 md:flex-col md:px-4 md:pt-0 lg:px-5">
+            <Separator className="mb-4 md:hidden" />
+            {compactDateHeading ? (
                 <div className="mb-3 flex items-baseline justify-between gap-2 md:mb-4">
                   <h3 className="text-sm font-semibold text-foreground md:text-base">{compactDateHeading}</h3>
                   <span className="hidden text-xs text-muted-foreground md:inline">{copy.availableTimes}</span>
@@ -406,9 +405,8 @@ export default function StepDateTime({
                   </div>
                 </>
               )}
-            </section>
-          </>
-        )}
+          </section>
+        ) : null}
       </div>
 
       {dateHeading && selectedSlot && (
