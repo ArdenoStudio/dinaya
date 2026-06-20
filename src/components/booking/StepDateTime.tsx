@@ -5,7 +5,6 @@ import { addDays, format, parseISO } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import { Icon } from "@/components/ui/Icon";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import type { Staff } from "@/db/schema";
 import { getBookingSessionToken } from "@/lib/booking-session";
 import type { BookingService } from "./BookingWizard";
@@ -258,9 +257,6 @@ export default function StepDateTime({
     [onDateChange, onSlotSelect],
   );
 
-  const dateHeading = selectedDate
-    ? format(parseISO(selectedDate + "T12:00:00"), "EEEE, d MMMM yyyy")
-    : null;
   const compactDateHeading = selectedDate
     ? format(parseISO(selectedDate + "T12:00:00"), "EEE d")
     : null;
@@ -310,7 +306,7 @@ export default function StepDateTime({
       ) : null}
 
       <div className="flex min-w-0 w-full max-w-full flex-col lg:grid lg:min-h-[22rem] lg:grid-cols-[minmax(0,1fr)_11.5rem] lg:divide-x lg:divide-border xl:grid-cols-[minmax(0,1fr)_12rem]">
-        <section className="min-w-0 pb-4 lg:px-4 lg:pb-0 lg:pt-0 xl:px-5">
+        <section className="min-w-0 pb-0 lg:px-4 lg:pb-0 lg:pt-0 xl:px-5">
           <div className="mb-3 flex items-center justify-between gap-2 md:mb-4">
             <p className="text-sm font-medium text-foreground md:sr-only">{copy.chooseDate}</p>
             <button
@@ -382,8 +378,7 @@ export default function StepDateTime({
         </section>
 
         {!hideSlots ? (
-          <section className="min-w-0 pt-4 lg:flex lg:min-h-0 lg:flex-col lg:px-4 lg:pt-0 xl:px-5">
-            <Separator className="mb-4 md:hidden" />
+          <section className="min-w-0 border-t border-border pt-3 lg:flex lg:min-h-0 lg:flex-col lg:border-t-0 lg:px-4 lg:pt-0 xl:px-5">
             {compactDateHeading ? (
                 <div className="mb-3 flex items-baseline justify-between gap-2 md:mb-4">
                   <h3 className="text-sm font-semibold text-foreground md:text-base">{compactDateHeading}</h3>
@@ -391,10 +386,6 @@ export default function StepDateTime({
                 </div>
               ) : (
                 <p className="mb-3 text-xs text-muted-foreground">{copy.selectDate}</p>
-              )}
-
-              {dateHeading && (
-                <p className="mb-3 text-sm font-semibold text-foreground md:hidden">{dateHeading}</p>
               )}
 
               {holdLabel && (
@@ -426,14 +417,6 @@ export default function StepDateTime({
           </section>
         ) : null}
       </div>
-
-      {dateHeading && selectedSlot && (
-        <div className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50 dark:bg-emerald-950/40 px-4 py-2.5 text-sm text-emerald-800 md:hidden">
-          <Icon name="check-circle" className="mr-1.5" />
-          <span className="font-medium">{selectedSlot.label}</span>
-          <span className="text-emerald-600"> · {dateHeading}</span>
-        </div>
-      )}
 
       {(onBack || showContinue) && (
         <div className="mt-4 flex items-center gap-3 border-t border-border pt-4 md:hidden">

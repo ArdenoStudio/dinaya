@@ -495,31 +495,24 @@ function BookingWizardInner({
               />
             </div>
           ) : (
-            <div className="grid w-full min-w-0 max-w-full gap-6 lg:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] lg:items-start lg:gap-0 lg:divide-x lg:divide-border xl:grid-cols-[minmax(0,16rem)_minmax(0,1fr)]">
-              <div className="border-b border-border pb-6 lg:sticky lg:top-6 lg:self-start lg:border-0 lg:px-4 lg:pb-6 lg:pt-6 xl:px-5">
+            <div className="grid w-full min-w-0 max-w-full gap-0 lg:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] lg:items-start lg:divide-x lg:divide-border xl:grid-cols-[minmax(0,16rem)_minmax(0,1fr)]">
+              <div className="border-b border-border pb-4 lg:sticky lg:top-6 lg:self-start lg:border-0 lg:px-4 lg:pb-6 lg:pt-6 xl:px-5">
                 <ServiceMetaPanel {...metaPanelProps} />
               </div>
 
               <div className="min-w-0 lg:py-6">
-                {state.service ? (
-                  <div className="border-b border-border px-4 pb-3 pt-1 lg:hidden">
+                {state.service && !showContactForm ? (
+                  <div className="border-b border-border py-3 lg:hidden">
                     <BookingChoiceSummary
-                      serviceName={state.service.name}
                       dateLabel={choiceDateLabel}
                       timeLabel={state.timeLabel || null}
-                      stepLabel={
-                        showContactForm
-                          ? copy.details
-                          : selectedSlot
-                            ? copy.details
-                            : copy.pickDateTime
-                      }
+                      stepLabel={selectedSlot ? copy.details : copy.pickDateTime}
                     />
                   </div>
                 ) : null}
                 {canPickSlots ? (
                   showContactForm ? (
-                    <div className="px-4 md:px-6 lg:px-8">
+                    <div className="md:px-6 lg:px-8">
                       <StepConfirm
                         variant="inline"
                         formId="booking-contact-form"

@@ -10,7 +10,6 @@ import type { DealListItem } from "@/lib/deals/queries";
 import { formatLkr } from "@/lib/utils";
 import { Icon } from "@/components/ui/Icon";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
 import { fadeInUp } from "@/lib/booking/booking-animations";
 import StaffPicker from "./StaffPicker";
 import StepLocation from "./StepLocation";
@@ -115,7 +114,7 @@ export function ServiceMetaPanel({
       </div>
 
       {needsLocationPicker && (
-        <div className="mt-5">
+        <div className="mt-6">
           <StepLocation
             locations={locations}
             selected={selectedLocation}
@@ -131,7 +130,7 @@ export function ServiceMetaPanel({
             key="service-info"
             {...fadeInUp}
             initial={lockServiceSelection ? false : fadeInUp.initial}
-            className="mt-5 border-t border-border/70 pt-5"
+            className="mt-6 border-t border-border/70 pt-4"
           >
             {!lockServiceSelection && onChangeService && (
               <button
@@ -147,9 +146,9 @@ export function ServiceMetaPanel({
             {service.description && (
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{service.description}</p>
             )}
-            <div className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
-              <span className="inline-flex items-center gap-1">
-                <Icon name="clock" className="text-xs" />
+            <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
+              <span className="inline-flex items-center gap-2">
+                <Icon name="clock" className="size-3.5 shrink-0" />
                 {formatDuration(service.durationMinutes)}
               </span>
               <span aria-hidden className="text-muted-foreground/50">
@@ -181,7 +180,7 @@ export function ServiceMetaPanel({
       </AnimatePresence>
 
       {service && needsStaffPicker && (
-        <div className="mt-5">
+        <div className="mt-6">
           <StaffPicker
             allStaff={allStaff}
             staffServiceMap={staffServiceMap}
@@ -203,21 +202,20 @@ export function ServiceMetaPanel({
       )}
 
       {service && timeLabel && (
-        <>
-          <Separator className="my-5" />
+        <div className="mt-6 hidden border-t border-border/70 pt-4 lg:block">
           <div className="space-y-2 text-sm">
             {dateLabel && (
-              <div className="flex items-center gap-2.5 text-muted-foreground">
-                <Icon name="calendar3" className="shrink-0" />
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Icon name="calendar3" className="size-3.5 shrink-0" />
                 <span className="text-foreground">{dateLabel}</span>
               </div>
             )}
-            <div className="flex items-center gap-2.5 text-muted-foreground">
-              <Icon name="clock" className="shrink-0 text-emerald-500" />
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Icon name="clock" className="size-3.5 shrink-0 text-[var(--booking-accent)]" />
               <span className="font-medium text-foreground">{timeLabel}</span>
             </div>
           </div>
-        </>
+        </div>
       )}
 
       <AnimatePresence>
@@ -225,10 +223,10 @@ export function ServiceMetaPanel({
           <m.div
             key="selected-time"
             {...fadeInUp}
-            className="mt-4 rounded-lg border border-emerald-200/80 bg-emerald-50/80 p-3 dark:border-emerald-900/40 dark:bg-emerald-950/40"
+            className="mt-4 hidden rounded-lg booking-bg-accent-muted px-3 py-2 lg:block"
           >
-            <p className="text-xs font-medium text-emerald-700 dark:text-emerald-300">
-              <Icon name="clock" className="mr-1" />
+            <p className="text-xs font-medium booking-text-accent">
+              <Icon name="clock" className="mr-1.5" />
               {holdLabel}
             </p>
           </m.div>
@@ -236,7 +234,7 @@ export function ServiceMetaPanel({
       </AnimatePresence>
 
       {slotUnavailable && (
-        <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:border-amber-800/50 dark:bg-amber-950/40 dark:text-amber-200">
+        <div className="mt-3 hidden rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:border-amber-800/50 dark:bg-amber-950/40 dark:text-amber-200 lg:block">
           <p className="font-medium">{copy.slotTaken}</p>
           <p className="mt-0.5">{copy.slotTakenAction}</p>
         </div>

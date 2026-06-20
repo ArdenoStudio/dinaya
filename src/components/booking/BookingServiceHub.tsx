@@ -116,7 +116,7 @@ export default function BookingServiceHub({
     "overflow-hidden rounded-none border-x-0 bg-card shadow-none md:rounded-2xl md:border md:border-border/80 md:shadow-[0_12px_40px_-24px_rgba(15,23,42,0.28)]";
 
   return (
-    <BlurFade className="w-full pb-24 md:pb-0">
+    <BlurFade className="w-full pb-28 md:pb-0">
       <article className={cn("flex w-full flex-col", shell)}>
         {heroImageUrl ? (
           <div className="relative">
@@ -131,7 +131,7 @@ export default function BookingServiceHub({
 
         <header
           className={cn(
-            "flex flex-col gap-4 px-4 pb-3 md:px-6",
+            "flex flex-col gap-4 px-4 pb-4 md:px-6",
             heroImageUrl ? "pt-4" : "pt-5 md:pt-6",
           )}
         >
@@ -195,9 +195,9 @@ export default function BookingServiceHub({
           </div>
         </header>
 
-        <Separator className="opacity-60" />
+        <Separator className="bg-border/50" />
 
-        <ul className="flex flex-col gap-1.5 p-2 md:gap-2 md:p-3">
+        <ul className="flex flex-col gap-2 px-4 md:gap-2 md:px-6 md:pb-2">
           {services.map((service) => {
             const href = buildServiceBookingPath(businessSlug, service.slug ?? service.id);
             const iconName = serviceIconName(service.name);
@@ -207,7 +207,7 @@ export default function BookingServiceHub({
                 <Link
                   href={href}
                   className={cn(
-                    "group flex min-h-[4.75rem] items-start gap-3.5 rounded-xl border border-transparent px-3 py-4 md:py-[1.125rem]",
+                    "group flex min-h-[4.75rem] items-start gap-3.5 rounded-xl border border-transparent py-4 md:py-[1.125rem]",
                     "transition-[background-color,transform,box-shadow,border-color] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]",
                     "hover:border-border/80 hover:bg-[var(--booking-accent-muted)] hover:shadow-sm",
                     "active:scale-[0.985] md:hover:translate-y-[-1px]",
@@ -259,8 +259,8 @@ export default function BookingServiceHub({
 
         {(cancellationPolicy || depositPolicy || bankTransferInstructions) && (
           <>
-            <Separator className="opacity-60" />
-            <div className="px-2 pb-2 md:px-3 md:pb-3">
+            <Separator className="bg-border/50" />
+            <div className="px-4 pb-2 md:px-6 md:pb-3">
               <BookingPolicyAccordion
                 copy={copy}
                 cancellationPolicy={cancellationPolicy}
