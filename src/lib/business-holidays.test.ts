@@ -34,6 +34,13 @@ describe("business holidays", () => {
     )).toEqual([]);
   });
 
+  it("returns slots unchanged when there is no holiday", () => {
+    const slots = [
+      { startUtc: new Date(), startLocal: "09:00", endLocal: "09:30", label: "9:00 AM" },
+    ];
+    expect(filterSlotsByBusinessHoliday(slots, null, TZ)).toEqual(slots);
+  });
+
   it("keeps slots inside partial holiday windows", () => {
     const localDate = parseISO("2026-06-16");
     const dayStart = startOfDay(localDate);
