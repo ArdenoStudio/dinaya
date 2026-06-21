@@ -83,7 +83,7 @@ function nextBookableDate(): string {
 }
 
 async function fetchWithRetry(
-  url: string,
+  url: string | URL,
   init?: RequestInit,
   attempts = 3,
 ): Promise<Response> {
