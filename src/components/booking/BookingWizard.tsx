@@ -99,6 +99,8 @@ export type BookingService = {
   requiresPayment: boolean;
   depositPercent: number;
   intakeQuestions: IntakeQuestion[];
+  categoryId?: string | null;
+  categoryName?: string | null;
 };
 
 export type BookingState = {

@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { isOptimizableRemoteImage, cn } from "@/lib/utils";
@@ -16,7 +17,14 @@ import { Separator } from "@/components/ui/separator";
 import { BlurFade } from "@/components/ui/blur-fade";
 import { BookingHubHeroImage } from "@/components/booking/BookingHubHeroImage";
 import { BookingHubCta } from "@/components/booking/BookingHubCta";
+import { BookingServiceSearch } from "@/components/booking/BookingServiceSearch";
 import { BookingPolicyAccordion } from "@/components/booking/BookingPolicyAccordion";
+import {
+  filterServices,
+  HUB_STICKY_CTA_MAX_SERVICES,
+  shouldShowServiceSearch,
+  uniqueServiceCategories,
+} from "@/lib/booking/service-list-filter";
 import { BusinessRating, getBusinessRating } from "./BusinessRating";
 import {
   BookingReviewsSection,
@@ -103,7 +111,22 @@ export default function BookingServiceHub({
   depositPolicy,
   bankTransferInstructions,
 }: Props) {
+  const [query, setQuery] = useState("");
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+
+  const categories = useMemo(() => uniqueServiceCategories(services), [services]);
+  const filteredServices = useMemo(
+    () => filterServices(services, query, activeCategory),
+    [services, query, activeCategory],
+  );
+
   if (services.length <= 1) return null;
+
+  const showSearch = shouldShowServiceSearch(services.length);
+  const showStickyCta = services.length <= HUB_STICKY_CTA_MAX_SERVICES;
+  const showingLabel = copy.showingServices
+    .replace("{count}", String(filteredServices.length))
+    .replace("{total}", String(services.length));
 
   const rating = getBusinessRating(avgRating, reviewCount);
   const primaryService = services[0]!;
@@ -124,7 +147,7 @@ export default function BookingServiceHub({
     : "flex flex-col";
 
   return (
-    <BlurFade className="w-full pb-28 md:pb-0">
+    <BlurFade className={cn("w-full", showStickyCta ? "pb-28 md:pb-0" : "pb-4")}>
       <article className={cn("flex w-full flex-col", shell)}>
         {heroImageUrl ? (
           <div className="relative">
@@ -196,8 +219,30 @@ export default function BookingServiceHub({
 
         <Separator className="bg-border/50" />
 
+        {showSearch ? (
+          <div className="px-4 pt-3 md:px-6">
+            <BookingServiceSearch
+              query={query}
+              onQueryChange={setQuery}
+              placeholder={copy.searchServices}
+              categories={categories}
+              activeCategory={activeCategory}
+              onCategoryChange={setActiveCategory}
+              allCategoriesLabel={copy.allCategories}
+              resultCount={filteredServices.length}
+              totalCount={services.length}
+              showingLabel={showingLabel}
+            />
+          </div>
+        ) : null}
+
         <ul className="flex flex-col gap-2.5 px-4 py-3 md:gap-2.5 md:px-6 md:pb-4">
-          {services.map((service) => {
+          {filteredServices.length === 0 ? (
+            <li className="rounded-xl border border-dashed border-border/70 px-4 py-10 text-center text-sm text-muted-foreground">
+              {copy.noServicesMatch}
+            </li>
+          ) : (
+            filteredServices.map((service) => {
             const href = buildServiceBookingPath(businessSlug, service.slug ?? service.id);
             const iconName = serviceIconName(service.name);
 
@@ -235,6 +280,11 @@ export default function BookingServiceHub({
                     <p className="text-base font-semibold leading-snug text-foreground transition-colors duration-200 group-hover:text-[var(--booking-accent)]">
                       {service.name}
                     </p>
+                    {service.categoryName ? (
+                      <p className="mt-0.5 text-xs font-medium text-muted-foreground">
+                        {service.categoryName}
+                      </p>
+                    ) : null}
                     {service.description ? (
                       <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
                         {service.description}
@@ -254,7 +304,8 @@ export default function BookingServiceHub({
                 </Link>
               </li>
             );
-          })}
+          })
+          )}
         </ul>
 
         {(cancellationPolicy || depositPolicy || bankTransferInstructions) && (
@@ -278,12 +329,14 @@ export default function BookingServiceHub({
         </div>
       </article>
 
-      <BookingHubCta
-        businessSlug={businessSlug}
-        serviceSlug={primaryService.slug ?? primaryService.id}
-        label={primaryCtaLabel}
-        variant="sticky"
-      />
+      {showStickyCta ? (
+        <BookingHubCta
+          businessSlug={businessSlug}
+          serviceSlug={primaryService.slug ?? primaryService.id}
+          label={primaryCtaLabel}
+          variant="sticky"
+        />
+      ) : null}
     </BlurFade>
   );
 }

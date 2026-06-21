@@ -1,9 +1,16 @@
 import Image from "next/image";
+import { useMemo, useState } from "react";
 import { formatLkr, isOptimizableRemoteImage, cn } from "@/lib/utils";
 import { BookingServiceArrow } from "@/components/booking/BookingServiceArrow";
 import { BookingServicePrice } from "@/components/booking/BookingServicePrice";
+import { BookingServiceSearch } from "@/components/booking/BookingServiceSearch";
 import { Icon } from "@/components/ui/Icon";
 import { Badge } from "@/components/ui/badge";
+import {
+  filterServices,
+  shouldShowServiceSearch,
+  uniqueServiceCategories,
+} from "@/lib/booking/service-list-filter";
 import type { BookingService } from "./BookingWizard";
 import type { BookingCopy } from "@/lib/i18n";
 import type { BookingRouter } from "@/lib/booking-router";
@@ -62,6 +69,9 @@ function ServiceRow({
         <p className={cn("font-medium transition-colors duration-200", selected ? "text-[var(--booking-accent)]" : "text-foreground group-hover:text-[var(--booking-accent)]")}>
           {service.name}
         </p>
+        {service.categoryName ? (
+          <p className="mt-0.5 text-[11px] font-medium text-muted-foreground">{service.categoryName}</p>
+        ) : null}
         {service.description ? (
           <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{service.description}</p>
         ) : null}
@@ -90,6 +100,19 @@ function ServiceRow({
 }
 
 export default function StepService({ services, selected, copy, bookingRouter, onSelect }: Props) {
+  const [query, setQuery] = useState("");
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+
+  const categories = useMemo(() => uniqueServiceCategories(services), [services]);
+  const filteredServices = useMemo(
+    () => filterServices(services, query, activeCategory),
+    [services, query, activeCategory],
+  );
+  const showSearch = shouldShowServiceSearch(services.length);
+  const showingLabel = copy.showingServices
+    .replace("{count}", String(filteredServices.length))
+    .replace("{total}", String(services.length));
+
   if (services.length === 0) {
     return (
       <div className="py-12 text-center text-sm text-muted-foreground">
@@ -137,8 +160,30 @@ export default function StepService({ services, selected, copy, bookingRouter, o
       <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
         {bookingRouter ? "Or choose a service" : copy.chooseService}
       </p>
+
+      {showSearch ? (
+        <BookingServiceSearch
+          query={query}
+          onQueryChange={setQuery}
+          placeholder={copy.searchServices}
+          categories={categories}
+          activeCategory={activeCategory}
+          onCategoryChange={setActiveCategory}
+          allCategoriesLabel={copy.allCategories}
+          resultCount={filteredServices.length}
+          totalCount={services.length}
+          showingLabel={showingLabel}
+          className="mb-4"
+        />
+      ) : null}
+
+      {filteredServices.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-border/70 px-4 py-10 text-center text-sm text-muted-foreground">
+          {copy.noServicesMatch}
+        </div>
+      ) : (
       <div className="space-y-2">
-        {services.map((service) => (
+        {filteredServices.map((service) => (
           <ServiceRow
             key={service.id}
             service={service}
@@ -148,6 +193,7 @@ export default function StepService({ services, selected, copy, bookingRouter, o
           />
         ))}
       </div>
+      )}
     </div>
   );
 }
