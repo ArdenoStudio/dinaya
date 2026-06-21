@@ -248,8 +248,6 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
               cancellationPolicy={business.cancellationPolicy}
               depositPolicy={business.depositPolicy}
               bankTransferInstructions={business.bankTransferInstructions}
-              hasTeam={!hideSidebarSections && staffWithBio.length > 0}
-              hasReviews={!hideSidebarSections && Boolean(businessRating)}
             />
           )}
 
@@ -320,32 +318,6 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
               </CardContent>
             </Card>
           )}
-
-          {showHub && !hideSidebarSections && (staffWithBio.length > 0 || businessRating) ? (
-            <footer className="mt-6 flex flex-col items-center gap-4 border-t border-border px-4 pt-6 pb-[calc(6rem+env(safe-area-inset-bottom))] md:pb-[max(1.5rem,env(safe-area-inset-bottom))]">
-              {staffWithBio.length > 0 ? (
-                <BookingTeamSection
-                  members={staffWithBio}
-                  copy={copy}
-                  variant="dialog"
-                  id="booking-hub-team"
-                />
-              ) : null}
-              {businessRating ? (
-                <BookingReviewsSection
-                  businessSlug={business.slug}
-                  businessName={business.name}
-                  avgRating={businessRating.avgRating}
-                  reviewCount={businessRating.reviewCount}
-                  reviewDistribution={reviewDistribution}
-                  initialReviews={initialReviews}
-                  copy={copy}
-                  id="booking-hub-reviews"
-                  className="pb-8"
-                />
-              ) : null}
-            </footer>
-          ) : null}
 
           {!centeredLayout && !hideSidebarSections && staffWithBio.length > 0 && (
             <BookingTeamSection

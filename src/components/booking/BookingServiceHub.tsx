@@ -37,50 +37,10 @@ interface Props {
   cancellationPolicy?: string | null;
   depositPolicy?: string | null;
   bankTransferInstructions?: string | null;
-  hasTeam?: boolean;
-  hasReviews?: boolean;
 }
 
 function serviceInitial(name: string) {
   return name.trim().charAt(0).toUpperCase() || "?";
-}
-
-function HubQuickLinks({
-  hasTeam,
-  hasReviews,
-  copy,
-}: {
-  hasTeam?: boolean;
-  hasReviews?: boolean;
-  copy: BookingCopy;
-}) {
-  if (!hasTeam && !hasReviews) return null;
-
-  const linkClass =
-    "text-sm font-medium text-[var(--booking-accent)] underline-offset-4 transition-opacity hover:underline";
-
-  return (
-    <nav
-      aria-label="Booking page sections"
-      className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm"
-    >
-      {hasReviews ? (
-        <a href="#booking-hub-reviews" className={linkClass}>
-          {copy.readReviews}
-        </a>
-      ) : null}
-      {hasTeam && hasReviews ? (
-        <span className="text-muted-foreground/60" aria-hidden>
-          ·
-        </span>
-      ) : null}
-      {hasTeam ? (
-        <a href="#booking-hub-team" className={linkClass}>
-          {copy.meetTeam}
-        </a>
-      ) : null}
-    </nav>
-  );
 }
 
 export default function BookingServiceHub({
@@ -98,8 +58,6 @@ export default function BookingServiceHub({
   cancellationPolicy,
   depositPolicy,
   bankTransferInstructions,
-  hasTeam,
-  hasReviews,
 }: Props) {
   if (services.length <= 1) return null;
 
@@ -113,16 +71,12 @@ export default function BookingServiceHub({
   const tagline = hubTagline(businessDescription, copy.selectServiceHint);
   const locationLine = formatHubLocationLine(businessAddress, businessPhone);
   const showHeaderAvatar = !heroImageUrl;
-  // A footer (team/reviews) renders after the hub whenever either exists. When it
-  // does, that footer owns the clearance for the fixed mobile CTA, so the hub
-  // skips its own bottom padding to avoid a large empty gap before the footer.
-  const footerFollows = Boolean(hasTeam || hasReviews);
 
   const shell =
     "overflow-hidden rounded-none border-x-0 bg-card shadow-none md:rounded-2xl md:border md:border-border/80 md:shadow-[0_12px_40px_-24px_rgba(15,23,42,0.28)] dark:md:shadow-none dark:md:ring-1 dark:md:ring-white/10";
 
   return (
-    <BlurFade className={cn("w-full md:pb-0", footerFollows ? "pb-0" : "pb-28")}>
+    <BlurFade className="w-full pb-28 md:pb-0">
       <article className={cn("flex w-full flex-col", shell)}>
         {heroImageUrl ? (
           <div className="relative">
@@ -187,9 +141,6 @@ export default function BookingServiceHub({
                   <span>{locationLine}</span>
                 </p>
               ) : null}
-              <div className="mt-3">
-                <HubQuickLinks hasTeam={hasTeam} hasReviews={hasReviews} copy={copy} />
-              </div>
             </div>
           </div>
 
