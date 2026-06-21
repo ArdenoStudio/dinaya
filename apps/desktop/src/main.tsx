@@ -5607,39 +5607,15 @@ function LoginScreen({
 
   return (
     <div className="login-screen">
-      <section className="login-story" aria-label="Dinaya">
+      <form className="login-card" onSubmit={submit}>
         <DinayaBrand />
 
-        <div className="login-story-copy">
-          <h1>
-            Your calendar,
-            <span>always full.</span>
-          </h1>
-          <p>Thousands of appointments managed. Zero phone calls needed.</p>
-
-          <ul>
-            <li><span className="story-icon calendar-icon" />Clients book 24/7 without calling you</li>
-            <li><span className="story-icon card-icon" />Accept online payments via PayHere</li>
-            <li><span className="story-icon grid-icon" />Manage everything from one dashboard</li>
-          </ul>
-
-          <div className="login-quote">
-            <p>&quot;I used to miss bookings because of WhatsApp messages I forgot to reply to. Now everything&apos;s in Dinaya and I haven&apos;t missed one since.&quot;</p>
-            <span>Kavinda Jayasuriya - Owner, The Barber Room - Kandy</span>
-          </div>
+        <div className="login-card-header">
+          <h2>Welcome back</h2>
+          <p>Sign in to your dashboard</p>
         </div>
 
-        <p className="login-copyright">© {new Date().getFullYear()} Dinaya by Ardeno Studio</p>
-      </section>
-
-      <section className="login-form-panel">
-        <form className="login-card" onSubmit={submit}>
-          <div>
-            <h2>Welcome back</h2>
-            <p>Sign in to your dashboard</p>
-          </div>
-
-          <label>
+        <label>
             Email
             <input
               ref={emailRef}
@@ -5680,8 +5656,7 @@ function LoginScreen({
             {loading ? "Signing in..." : "Sign in"}
           </button>
 
-          <div className="secure-line">Secure sign-in · Your data is encrypted</div>
-        </form>
+        <div className="secure-line">Secure sign-in · Your data is encrypted</div>
 
         <p className="register-line">
           No account?{" "}
@@ -5689,7 +5664,7 @@ function LoginScreen({
             Create one free
           </button>
         </p>
-      </section>
+      </form>
     </div>
   );
 }
