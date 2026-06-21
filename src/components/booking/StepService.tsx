@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { formatLkr, isOptimizableRemoteImage, cn } from "@/lib/utils";
 import { BookingServiceArrow } from "@/components/booking/BookingServiceArrow";
+import { BookingServicePrice } from "@/components/booking/BookingServicePrice";
 import { Icon } from "@/components/ui/Icon";
 import { Badge } from "@/components/ui/badge";
 import type { BookingService } from "./BookingWizard";
@@ -70,9 +71,13 @@ function ServiceRow({
             {service.durationMinutes}m
           </Badge>
           {service.priceLkr > 0 ? (
-            <Badge variant="outline">{formatLkr(service.priceLkr)}</Badge>
+            <Badge variant="secondary" className="border-[var(--booking-accent)]/20 bg-[var(--booking-accent-muted)] font-semibold tabular-nums booking-text-accent">
+              <BookingServicePrice priceLkr={service.priceLkr} />
+            </Badge>
           ) : (
-            <Badge variant="outline">Free</Badge>
+            <Badge variant="secondary" className="font-semibold">
+              Free
+            </Badge>
           )}
           {service.requiresPayment && service.priceLkr > 0 && service.depositPercent > 0 ? (
             <Badge variant="outline">

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { formatLkr, isOptimizableRemoteImage, cn } from "@/lib/utils";
+import { isOptimizableRemoteImage, cn } from "@/lib/utils";
 import { buildServiceBookingPath } from "@/lib/booking-url";
 import {
   formatHubLocationLine,
@@ -10,6 +10,7 @@ import {
   serviceIconName,
 } from "@/lib/booking-hub-present";
 import { BookingServiceArrow } from "@/components/booking/BookingServiceArrow";
+import { BookingServicePrice } from "@/components/booking/BookingServicePrice";
 import { Icon } from "@/components/ui/Icon";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
@@ -246,10 +247,13 @@ export default function BookingServiceHub({
                         {service.description}
                       </p>
                     ) : null}
-                    <p className="mt-2 text-sm text-muted-foreground">
-                      {service.durationMinutes}m
-                      {service.priceLkr > 0 ? ` · ${formatLkr(service.priceLkr)}` : " · Free"}
-                    </p>
+                    <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+                      <span className="text-muted-foreground">{service.durationMinutes}m</span>
+                      <span aria-hidden className="text-muted-foreground/40">
+                        ·
+                      </span>
+                      <BookingServicePrice priceLkr={service.priceLkr} className="text-base" />
+                    </div>
                   </div>
 
                   <BookingServiceArrow />
