@@ -8,6 +8,7 @@ import {
   type DashboardNavLabelKey,
   type DashboardRoute,
 } from "../../../src/lib/dashboard-route-map";
+import { slugify } from "../../../src/lib/utils";
 import { buildDesktopApiPath, desktopApiRequest } from "./desktop-api";
 import "./styles.css";
 
@@ -103,6 +104,29 @@ type LoginPayload = {
     role: "owner" | "staff";
   };
 };
+
+type AuthView = "login" | "register";
+
+type RegisterFormState = {
+  businessName: string;
+  businessType: string;
+  email: string;
+  language: string;
+  name: string;
+  password: string;
+  slug: string;
+};
+
+const REGISTER_BUSINESS_TYPES = [
+  { helper: "Seeds haircut, colouring, and grooming services.", label: "Salon / barber", value: "salon_barber" },
+  { helper: "Seeds consultation and follow-up appointment types.", label: "Clinic", value: "clinic" },
+  { helper: "Seeds one-to-one and group class sessions.", label: "Tuition / classes", value: "tuition" },
+  { helper: "Seeds inspection and workshop service slots.", label: "Vehicle service", value: "vehicle_service" },
+  { helper: "Seeds consultation and shoot session services.", label: "Photography", value: "photography" },
+  { helper: "Seeds therapy and treatment appointments.", label: "Spa / wellness", value: "spa_wellness" },
+  { helper: "Seeds discovery and paid consultation calls.", label: "Consulting", value: "consulting" },
+  { helper: "Seeds a clean generic appointment setup.", label: "Other", value: "other" },
+] as const;
 
 type DashboardMetrics = {
   activeToday: number;
@@ -2204,6 +2228,9 @@ class DesktopErrorBoundary extends React.Component<
 function App() {
   const [booting, setBooting] = useState(true);
   const [authReady, setAuthReady] = useState(false);
+  const [authView, setAuthView] = useState<AuthView>(() =>
+    typeof window !== "undefined" && window.location.hash === "#register" ? "register" : "login",
+  );
   const [business, setBusiness] = useState<Business | null>(null);
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const [view, setView] = useState<View>("overview");
@@ -4005,6 +4032,15 @@ function App() {
     }
   }
 
+  async function completeAuthSession(payload: LoginPayload) {
+    setBusiness(payload.business);
+    setAuthReady(true);
+    setAuthView("login");
+    setView("overview");
+    setTab("today");
+    await runSync("today");
+  }
+
   async function login(email: string, password: string) {
     setError("");
     const payload = await invoke<LoginPayload>("desktop_auth_login", {
@@ -4014,17 +4050,31 @@ function App() {
         password,
       },
     });
-    setBusiness(payload.business);
-    setAuthReady(true);
-    setView("overview");
-    setTab("today");
-    await runSync("today");
+    await completeAuthSession(payload);
+  }
+
+  async function register(form: RegisterFormState) {
+    setError("");
+    const payload = await invoke<LoginPayload>("desktop_auth_register", {
+      payload: {
+        businessName: form.businessName,
+        businessType: form.businessType,
+        deviceName: navigator.userAgent.includes("Windows") ? "Windows PC" : "Desktop",
+        email: form.email,
+        language: form.language,
+        name: form.name,
+        password: form.password,
+        slug: form.slug,
+      },
+    });
+    await completeAuthSession(payload);
   }
 
   async function logout() {
     await invoke("desktop_logout").catch(() => undefined);
     clearOfflineReadCache();
     setAuthReady(false);
+    setAuthView("login");
     setBusiness(null);
     setRows([]);
     setDetail(null);
@@ -4803,7 +4853,29 @@ function App() {
   }
 
   if (!authReady) {
-    return <LoginScreen error={error} onLogin={login} />;
+    if (authView === "register") {
+      return (
+        <RegisterScreen
+          error={error}
+          onRegister={register}
+          onSignIn={() => {
+            setError("");
+            setAuthView("login");
+          }}
+        />
+      );
+    }
+
+    return (
+      <LoginScreen
+        error={error}
+        onLogin={login}
+        onRegister={() => {
+          setError("");
+          setAuthView("register");
+        }}
+      />
+    );
   }
 
   return (
@@ -5577,9 +5649,11 @@ function DashboardSidebar({
 function LoginScreen({
   error,
   onLogin,
+  onRegister,
 }: {
   error: string;
   onLogin: (email: string, password: string) => Promise<void>;
+  onRegister: () => void;
 }) {
   const emailRef = useRef<HTMLInputElement>(null);
   const [email, setEmail] = useState("");
@@ -5689,11 +5763,7 @@ function LoginScreen({
 
         <p className="login-register-line">
           No account?{" "}
-          <button
-            className="login-register-link"
-            type="button"
-            onClick={() => void invoke("desktop_open_app_path", { path: "/register" })}
-          >
+          <button className="login-register-link" type="button" onClick={onRegister}>
             Create your booking page
           </button>
         </p>
@@ -5715,6 +5785,318 @@ function DinayaBrand() {
         <path d="M 819.949219 499.695312 L 563.980469 755.773438 C 513.210938 806.554688 513.210938 889.15625 563.980469 939.941406 C 614.75 990.777344 697.378906 990.726562 748.09375 939.941406 L 966.117188 721.851562 C 982.484375 705.480469 982.484375 678.953125 966.117188 662.582031 C 949.75 646.207031 923.230469 646.207031 906.863281 662.582031 L 688.84375 880.671875 C 670.753906 898.707031 641.375 898.761719 623.234375 880.671875 C 605.144531 862.578125 605.144531 833.132812 623.234375 815.042969 L 879.203125 558.96875 C 931.742188 506.464844 1017.1875 506.464844 1069.671875 558.96875 C 1095.097656 584.425781 1109.117188 618.265625 1109.117188 654.257812 C 1109.117188 690.226562 1095.097656 724.0625 1069.671875 749.523438 L 782.496094 1036.789062 C 740.375 1078.921875 684.367188 1102.117188 624.816406 1102.117188 C 565.261719 1102.117188 509.285156 1078.921875 467.164062 1036.789062 C 380.222656 949.820312 380.222656 808.328125 467.164062 721.359375 L 797.144531 391.253906 C 813.511719 374.878906 813.511719 348.355469 797.144531 331.980469 C 780.773438 315.609375 754.257812 315.609375 737.890625 331.980469 L 407.910156 662.089844 C 288.285156 781.722656 288.285156 976.425781 407.910156 1096.058594 C 465.828125 1154.019531 542.867188 1185.945312 624.816406 1185.945312 C 706.765625 1185.945312 783.804688 1154.019531 841.746094 1096.058594 L 1128.925781 808.792969 C 1214.121094 723.570312 1214.121094 584.917969 1128.925781 499.695312 C 1043.78125 414.558594 905.144531 414.445312 819.949219 499.695312 Z" />
       </svg>
       <span>Dinaya</span>
+    </div>
+  );
+}
+
+function getPasswordStrength(password: string): 0 | 1 | 2 | 3 {
+  if (password.length === 0) return 0;
+  let score = 0;
+  if (password.length >= 8) score++;
+  if (/[0-9]/.test(password)) score++;
+  if (/[^a-zA-Z0-9]/.test(password)) score++;
+  return score as 0 | 1 | 2 | 3;
+}
+
+const passwordStrengthLabel = ["", "Weak", "Fair", "Strong"];
+const passwordStrengthClass = ["", "is-weak", "is-fair", "is-strong"];
+
+function RegisterScreen({
+  error,
+  onRegister,
+  onSignIn,
+}: {
+  error: string;
+  onRegister: (form: RegisterFormState) => Promise<void>;
+  onSignIn: () => void;
+}) {
+  const step1Ref = useRef<HTMLInputElement>(null);
+  const step2Ref = useRef<HTMLInputElement>(null);
+  const slugTouched = useRef(false);
+  const [step, setStep] = useState<1 | 2>(1);
+  const [form, setForm] = useState<RegisterFormState>({
+    businessName: "",
+    businessType: "salon_barber",
+    email: "",
+    language: "en",
+    name: "",
+    password: "",
+    slug: "",
+  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [localError, setLocalError] = useState("");
+
+  useEffect(() => {
+    step1Ref.current?.focus();
+  }, []);
+
+  useEffect(() => {
+    if (step === 2) step2Ref.current?.focus();
+  }, [step]);
+
+  const strength = getPasswordStrength(form.password);
+  const displayError = localError || error;
+  const selectedBusinessType = REGISTER_BUSINESS_TYPES.find((type) => type.value === form.businessType);
+
+  function handleBusinessNameChange(value: string) {
+    setForm((current) => ({
+      ...current,
+      businessName: value,
+      slug: slugTouched.current ? current.slug : slugify(value),
+    }));
+  }
+
+  function handleSlugChange(value: string) {
+    slugTouched.current = true;
+    setForm((current) => ({ ...current, slug: slugify(value) }));
+  }
+
+  async function handleStep1(event: React.FormEvent) {
+    event.preventDefault();
+    setLocalError("");
+    if (form.password.length < 8) {
+      setLocalError("Password must be at least 8 characters.");
+      return;
+    }
+    setStep(2);
+  }
+
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    setLoading(true);
+    setLocalError("");
+    try {
+      await onRegister(form);
+    } catch (registerError) {
+      setLocalError(String(registerError));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="login-screen">
+      <div className="login-form-shell">
+        <DinayaBrand />
+
+        <div className="register-step-dots" aria-hidden="true">
+          <span className={step === 1 ? "is-active" : "is-complete"} />
+          <span className={step === 2 ? "is-active" : ""} />
+        </div>
+
+        {step === 1 ? (
+          <>
+            <header className="login-form-header">
+              <h1>Create your account</h1>
+              <p>Start your 14-day free trial. No credit card needed.</p>
+            </header>
+
+            <form className="login-form" onSubmit={handleStep1} noValidate>
+              <label className="login-field" htmlFor="desktop-register-name">
+                Your name
+                <input
+                  ref={step1Ref}
+                  autoComplete="name"
+                  className="login-input"
+                  id="desktop-register-name"
+                  name="name"
+                  placeholder="Amara Silva"
+                  required
+                  type="text"
+                  value={form.name}
+                  onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))}
+                />
+              </label>
+
+              <label className="login-field" htmlFor="desktop-register-email">
+                Email
+                <input
+                  autoComplete="email"
+                  className="login-input"
+                  id="desktop-register-email"
+                  inputMode="email"
+                  name="email"
+                  placeholder="you@example.com"
+                  required
+                  type="email"
+                  value={form.email}
+                  onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))}
+                />
+              </label>
+
+              <div className="login-field">
+                <label htmlFor="desktop-register-password">Password</label>
+                <div className="login-password-field">
+                  <input
+                    autoComplete="new-password"
+                    className="login-input"
+                    id="desktop-register-password"
+                    minLength={8}
+                    name="password"
+                    placeholder="Min. 8 characters"
+                    required
+                    type={showPassword ? "text" : "password"}
+                    value={form.password}
+                    onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))}
+                  />
+                  <button
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    className="login-password-toggle"
+                    tabIndex={-1}
+                    type="button"
+                    onClick={() => setShowPassword((current) => !current)}
+                  >
+                    {showPassword ? <LoginEyeSlashIcon /> : <LoginEyeIcon />}
+                  </button>
+                </div>
+                {form.password.length > 0 ? (
+                  <div className="register-password-strength">
+                    <div className="register-password-strength-bars">
+                      {[1, 2, 3].map((index) => (
+                        <span
+                          key={index}
+                          className={index <= strength ? passwordStrengthClass[strength] : ""}
+                        />
+                      ))}
+                    </div>
+                    <p className={`register-password-strength-label ${passwordStrengthClass[strength]}`}>
+                      {passwordStrengthLabel[strength]}
+                      {strength === 1 ? " — add numbers or symbols" : null}
+                      {strength === 2 ? " — add a symbol to strengthen" : null}
+                    </p>
+                  </div>
+                ) : null}
+              </div>
+
+              {displayError ? (
+                <div className="login-error" role="alert">
+                  <LoginAlertIcon />
+                  <span>{displayError}</span>
+                </div>
+              ) : null}
+
+              <button className="login-submit" type="submit">
+                Continue
+              </button>
+            </form>
+          </>
+        ) : (
+          <>
+            <button
+              className="register-back-button"
+              type="button"
+              onClick={() => {
+                setStep(1);
+                setLocalError("");
+              }}
+            >
+              Back
+            </button>
+
+            <header className="login-form-header">
+              <h1>Set up your booking page</h1>
+              <p>This is your public page that clients will visit.</p>
+            </header>
+
+            <form className="login-form" onSubmit={handleSubmit} noValidate>
+              <label className="login-field" htmlFor="desktop-register-business-name">
+                Business name
+                <input
+                  ref={step2Ref}
+                  autoComplete="organization"
+                  className="login-input"
+                  id="desktop-register-business-name"
+                  name="businessName"
+                  placeholder="e.g. Glow Beauty Studio"
+                  required
+                  type="text"
+                  value={form.businessName}
+                  onChange={(event) => handleBusinessNameChange(event.target.value)}
+                />
+              </label>
+
+              <div className="login-field">
+                <label htmlFor="desktop-register-slug">Your booking URL</label>
+                <div className="register-slug-field">
+                  <input
+                    className="login-input"
+                    id="desktop-register-slug"
+                    name="slug"
+                    placeholder="your-business"
+                    required
+                    value={form.slug}
+                    onChange={(event) => handleSlugChange(event.target.value)}
+                  />
+                  <span className="register-slug-suffix">.dinaya.lk</span>
+                </div>
+                {form.slug ? (
+                  <p className="register-slug-preview">
+                    Clients will book at <strong>{form.slug}.dinaya.lk</strong>
+                  </p>
+                ) : null}
+              </div>
+
+              <label className="login-field" htmlFor="desktop-register-business-type">
+                Business type
+                <select
+                  className="login-select"
+                  id="desktop-register-business-type"
+                  value={form.businessType}
+                  onChange={(event) => setForm((current) => ({ ...current, businessType: event.target.value }))}
+                >
+                  {REGISTER_BUSINESS_TYPES.map((type) => (
+                    <option key={type.value} value={type.value}>
+                      {type.label}
+                    </option>
+                  ))}
+                </select>
+                {selectedBusinessType ? (
+                  <p className="register-field-helper">{selectedBusinessType.helper}</p>
+                ) : null}
+              </label>
+
+              <label className="login-field" htmlFor="desktop-register-language">
+                Booking page language
+                <select
+                  className="login-select"
+                  id="desktop-register-language"
+                  value={form.language}
+                  onChange={(event) => setForm((current) => ({ ...current, language: event.target.value }))}
+                >
+                  <option value="en">English</option>
+                  <option value="si">Sinhala</option>
+                  <option value="ta">Tamil</option>
+                </select>
+                <p className="register-field-helper">You can change this later in Settings.</p>
+              </label>
+
+              {displayError ? (
+                <div className="login-error" role="alert">
+                  <LoginAlertIcon />
+                  <span>{displayError}</span>
+                </div>
+              ) : null}
+
+              <button className="login-submit" disabled={loading} type="submit">
+                {loading ? "Creating…" : "Create your booking page"}
+              </button>
+            </form>
+          </>
+        )}
+
+        <div className="login-secure-line">
+          <LoginLockIcon />
+          <span>Secure sign-up · No credit card required</span>
+        </div>
+
+        <p className="login-register-line">
+          Already have an account?{" "}
+          <button className="login-register-link" type="button" onClick={onSignIn}>
+            Sign in
+          </button>
+        </p>
+      </div>
     </div>
   );
 }
