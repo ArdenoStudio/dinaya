@@ -9,9 +9,15 @@ export default defineConfig({
   base: "./",
   plugins: [react()],
   resolve: {
+    dedupe: ["react", "react-dom", "motion"],
     alias: {
       "@": path.resolve(rootDir, "../../src"),
       "next/link": path.resolve(rootDir, "src/shims/next-link.tsx"),
+      react: path.resolve(rootDir, "node_modules/react"),
+      "react-dom": path.resolve(rootDir, "node_modules/react-dom"),
+      "react/jsx-runtime": path.resolve(rootDir, "node_modules/react/jsx-runtime"),
+      "react/jsx-dev-runtime": path.resolve(rootDir, "node_modules/react/jsx-dev-runtime"),
+      motion: path.resolve(rootDir, "node_modules/motion"),
     },
   },
   define: {
