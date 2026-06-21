@@ -12,7 +12,6 @@ import {
 import { BookingServiceArrow } from "@/components/booking/BookingServiceArrow";
 import { BookingServicePrice } from "@/components/booking/BookingServicePrice";
 import { Icon } from "@/components/ui/Icon";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { BlurFade } from "@/components/ui/blur-fade";
 import { BookingHubHeroImage } from "@/components/booking/BookingHubHeroImage";
@@ -43,6 +42,36 @@ function serviceInitial(name: string) {
   return name.trim().charAt(0).toUpperCase() || "?";
 }
 
+function HubBusinessLogo({
+  businessName,
+  logoUrl,
+}: {
+  businessName: string;
+  logoUrl?: string | null;
+}) {
+  return (
+    <div
+      className="mb-4 flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-dashed border-border/80 bg-muted/30 shadow-sm ring-1 ring-border/40 md:mb-5 md:size-[4.5rem]"
+      aria-hidden={logoUrl ? undefined : true}
+    >
+      {logoUrl ? (
+        <Image
+          src={logoUrl}
+          alt=""
+          width={72}
+          height={72}
+          className="size-full bg-white object-contain p-2"
+          unoptimized={!isOptimizableRemoteImage(logoUrl)}
+        />
+      ) : (
+        <span className="text-xl font-semibold text-[var(--booking-accent)] md:text-2xl">
+          {serviceInitial(businessName)}
+        </span>
+      )}
+    </div>
+  );
+}
+
 export default function BookingServiceHub({
   businessSlug,
   businessName,
@@ -70,7 +99,6 @@ export default function BookingServiceHub({
   const primaryCtaLabel = `${copy.chooseTime} · ${primaryService.name}`;
   const tagline = hubTagline(businessDescription, copy.selectServiceHint);
   const locationLine = formatHubLocationLine(businessAddress, businessPhone);
-  const showHeaderAvatar = !heroImageUrl;
 
   const shell =
     "overflow-hidden rounded-none border-x-0 bg-card shadow-none md:rounded-2xl md:border md:border-border/80 md:shadow-[0_12px_40px_-24px_rgba(15,23,42,0.28)] dark:md:shadow-none dark:md:ring-1 dark:md:ring-white/10";
@@ -81,70 +109,40 @@ export default function BookingServiceHub({
         {heroImageUrl ? (
           <div className="relative">
             <BookingHubHeroImage src={heroImageUrl} alt={businessName} />
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-card via-card/90 to-transparent px-4 pb-4 pt-20 md:px-6 md:pb-5">
-              <h1 className="text-2xl font-semibold leading-tight tracking-tight text-foreground md:text-3xl">
-                {businessName}
-              </h1>
-            </div>
           </div>
         ) : null}
 
         <header
           className={cn(
-            "flex flex-col gap-4 px-4 pb-4 md:px-6",
-            heroImageUrl ? "pt-4" : "pt-5 md:pt-6",
+            "flex flex-col items-center px-4 pb-4 text-center md:px-6",
+            heroImageUrl ? "pt-5" : "pt-6 md:pt-8",
           )}
         >
-          <div className={cn("flex gap-4", showHeaderAvatar ? "items-start" : "flex-col")}>
-            {showHeaderAvatar ? (
-              <Avatar className="size-12 shrink-0 ring-2 ring-border/80" data-size="lg">
-                {businessLogoUrl ? (
-                  <AvatarImage
-                    src={businessLogoUrl}
-                    alt=""
-                    className="bg-white object-contain p-1"
-                  />
-                ) : null}
-                <AvatarFallback className="bg-[var(--booking-accent-muted)] text-base font-semibold text-[var(--booking-accent)]">
-                  {serviceInitial(businessName)}
-                </AvatarFallback>
-              </Avatar>
-            ) : null}
+          <HubBusinessLogo businessName={businessName} logoUrl={businessLogoUrl} />
+          <h1 className="text-[1.625rem] font-bold leading-tight tracking-tight text-foreground md:text-3xl">
+            {businessName}
+          </h1>
+          <p className="mt-2 max-w-md text-[0.9375rem] leading-relaxed text-muted-foreground">
+            {tagline}
+          </p>
+          {rating ? (
+            <BusinessRating
+              avgRating={rating.avgRating}
+              reviewCount={rating.reviewCount}
+              copy={copy}
+              size="sm"
+              compactAttribution
+              className="mt-3 justify-center"
+            />
+          ) : null}
+          {locationLine ? (
+            <p className="mt-2 flex items-start justify-center gap-1.5 text-sm text-foreground/75">
+              <Icon name="geo-alt" className="mt-0.5 shrink-0 text-muted-foreground" />
+              <span>{locationLine}</span>
+            </p>
+          ) : null}
 
-            <div className="min-w-0 flex-1">
-              {!heroImageUrl ? (
-                <h1 className="text-2xl font-semibold leading-tight tracking-tight text-foreground md:text-3xl">
-                  {businessName}
-                </h1>
-              ) : null}
-              <p
-                className={cn(
-                  "text-[0.9375rem] leading-relaxed text-muted-foreground",
-                  heroImageUrl ? "" : "mt-2",
-                )}
-              >
-                {tagline}
-              </p>
-              {rating ? (
-                <BusinessRating
-                  avgRating={rating.avgRating}
-                  reviewCount={rating.reviewCount}
-                  copy={copy}
-                  size="sm"
-                  compactAttribution
-                  className="mt-3"
-                />
-              ) : null}
-              {locationLine ? (
-                <p className="mt-2 flex items-start gap-1.5 text-sm text-foreground/75">
-                  <Icon name="geo-alt" className="mt-0.5 shrink-0 text-muted-foreground" />
-                  <span>{locationLine}</span>
-                </p>
-              ) : null}
-            </div>
-          </div>
-
-          <div className="hidden border-t border-border/50 pt-4 md:block">
+          <div className="mt-5 hidden w-full border-t border-border/50 pt-4 md:block">
             <p className="text-sm text-muted-foreground">
               {copy.chooseServiceAndTime}
               <span className="ml-2 text-foreground/60">· {services.length} services</span>
