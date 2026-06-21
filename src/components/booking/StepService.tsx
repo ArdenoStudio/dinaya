@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { formatLkr, isOptimizableRemoteImage, cn } from "@/lib/utils";
+import { BookingServiceArrow } from "@/components/booking/BookingServiceArrow";
 import { Icon } from "@/components/ui/Icon";
 import { Badge } from "@/components/ui/badge";
 import type { BookingService } from "./BookingWizard";
@@ -35,10 +36,11 @@ function ServiceRow({
       type="button"
       onClick={onSelect}
       className={cn(
-        "flex w-full items-start gap-3 rounded-xl border p-3.5 text-left transition-all",
+        "group flex w-full items-start gap-3 rounded-xl border p-3.5 text-left transition-[background-color,box-shadow,border-color] duration-200",
+        "motion-reduce:transition-none active:scale-[0.99] motion-reduce:active:scale-100",
         selected
-          ? "border-[var(--booking-accent)] bg-[var(--booking-accent-muted)]/50 ring-2 ring-[var(--booking-accent-soft)]"
-          : "border-border hover:border-[var(--booking-accent)]/40 hover:bg-muted/40",
+          ? "border-[var(--booking-accent)] bg-[var(--booking-accent-muted)]/50 shadow-sm ring-2 ring-[var(--booking-accent-soft)]"
+          : "border-border/50 hover:border-[var(--booking-accent)]/25 hover:bg-[var(--booking-accent-muted)] hover:shadow-sm",
       )}
     >
       {service.imageUrl ? (
@@ -56,7 +58,7 @@ function ServiceRow({
         </div>
       )}
       <div className="min-w-0 flex-1">
-        <p className={cn("font-medium", selected ? "text-[var(--booking-accent)]" : "text-foreground")}>
+        <p className={cn("font-medium transition-colors duration-200", selected ? "text-[var(--booking-accent)]" : "text-foreground group-hover:text-[var(--booking-accent)]")}>
           {service.name}
         </p>
         {service.description ? (
@@ -79,10 +81,7 @@ function ServiceRow({
           ) : null}
         </div>
       </div>
-      <Icon
-        name="chevron-right"
-        className={cn("mt-1 shrink-0", selected ? "text-[var(--booking-accent)]" : "text-muted-foreground/50")}
-      />
+      <BookingServiceArrow selected={selected} />
     </button>
   );
 }
@@ -114,16 +113,17 @@ export default function StepService({ services, selected, copy, bookingRouter, o
                   type="button"
                   onClick={() => onSelect(target)}
                   className={cn(
-                    "flex w-full items-center justify-between rounded-xl border px-3.5 py-3 text-left transition-all",
+                    "group flex w-full items-center justify-between gap-3 rounded-xl border px-3.5 py-3 text-left transition-[background-color,box-shadow,border-color] duration-200",
+                    "motion-reduce:transition-none active:scale-[0.99] motion-reduce:active:scale-100",
                     isSelected
-                      ? "border-[var(--booking-accent)] bg-[var(--booking-accent-muted)]/50 ring-2 ring-[var(--booking-accent-soft)]"
-                      : "border-border hover:border-[var(--booking-accent)]/40 hover:bg-muted/40",
+                      ? "border-[var(--booking-accent)] bg-[var(--booking-accent-muted)]/50 shadow-sm ring-2 ring-[var(--booking-accent-soft)]"
+                      : "border-border/50 hover:border-[var(--booking-accent)]/25 hover:bg-[var(--booking-accent-muted)] hover:shadow-sm",
                   )}
                 >
-                  <span className={cn("text-sm font-medium", isSelected ? "text-[var(--booking-accent)]" : "text-foreground")}>
+                  <span className={cn("text-sm font-medium transition-colors duration-200", isSelected ? "text-[var(--booking-accent)]" : "text-foreground group-hover:text-[var(--booking-accent)]")}>
                     {o.label}
                   </span>
-                  <Icon name="chevron-right" className="text-xs text-muted-foreground" />
+                  <BookingServiceArrow selected={isSelected} />
                 </button>
               );
             })}
