@@ -116,19 +116,26 @@ export default function BookingServiceHub({
   const locationLine = formatHubLocationLine(businessAddress, businessPhone);
 
   const shell = heroImageUrl
-    ? "overflow-hidden rounded-none border-x-0 bg-transparent shadow-none md:rounded-2xl md:border-0"
+    ? "overflow-visible rounded-none border-x-0 bg-transparent shadow-none md:overflow-hidden md:rounded-2xl md:border-0"
     : "overflow-hidden rounded-2xl border-x-0 bg-card shadow-none md:border md:border-border/80 md:shadow-[0_12px_40px_-24px_rgba(15,23,42,0.28)] dark:md:shadow-none dark:md:ring-1 dark:md:ring-white/10";
 
   const contentShell = heroImageUrl
-    ? "relative z-10 -mt-5 flex flex-col overflow-hidden rounded-t-2xl bg-card md:-mt-6"
+    ? "relative z-10 -mt-6 flex flex-col rounded-t-2xl bg-card pt-12 md:pt-14"
     : "flex flex-col";
-
-  const logoOverlapClass = heroImageUrl ? "-mt-10 mb-3 md:-mt-12 md:mb-4" : "mb-4 md:mb-5";
 
   return (
     <BlurFade className="w-full pb-28 md:pb-0">
       <article className={cn("flex w-full flex-col", shell)}>
-        {heroImageUrl ? <BookingHubHeroImage src={heroImageUrl} alt={businessName} /> : null}
+        {heroImageUrl ? (
+          <div className="relative">
+            <BookingHubHeroImage src={heroImageUrl} alt={businessName} />
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex justify-center">
+              <div className="pointer-events-auto translate-y-1/2">
+                <HubBusinessLogo businessName={businessName} logoUrl={businessLogoUrl} />
+              </div>
+            </div>
+          </div>
+        ) : null}
 
         <div className={contentShell}>
         <header
@@ -137,11 +144,13 @@ export default function BookingServiceHub({
             heroImageUrl ? "pt-0" : "pt-6 md:pt-8",
           )}
         >
-          <HubBusinessLogo
-            businessName={businessName}
-            logoUrl={businessLogoUrl}
-            className={logoOverlapClass}
-          />
+          {!heroImageUrl ? (
+            <HubBusinessLogo
+              businessName={businessName}
+              logoUrl={businessLogoUrl}
+              className="mb-4 md:mb-5"
+            />
+          ) : null}
           <h1 className="text-[1.625rem] font-bold leading-tight tracking-tight text-foreground md:text-3xl">
             {businessName}
           </h1>
