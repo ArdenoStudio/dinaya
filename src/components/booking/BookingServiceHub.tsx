@@ -120,7 +120,7 @@ export default function BookingServiceHub({
     : "overflow-hidden rounded-2xl border-x-0 bg-card shadow-none md:border md:border-border/80 md:shadow-[0_12px_40px_-24px_rgba(15,23,42,0.28)] dark:md:shadow-none dark:md:ring-1 dark:md:ring-white/10";
 
   const contentShell = heroImageUrl
-    ? "relative z-10 -mt-6 flex flex-col rounded-t-2xl bg-card pt-11 md:pt-12"
+    ? "relative z-10 -mt-6 flex flex-col rounded-t-2xl bg-card pt-16 md:pt-[4.5rem]"
     : "flex flex-col";
 
   return (
@@ -151,7 +151,12 @@ export default function BookingServiceHub({
               className="mb-4 md:mb-5"
             />
           ) : null}
-          <h1 className="text-[1.625rem] font-bold leading-tight tracking-tight text-foreground md:text-3xl">
+          <h1
+            className={cn(
+              "text-[1.625rem] font-bold leading-tight tracking-tight text-foreground md:text-3xl",
+              heroImageUrl && "mt-1 md:mt-1.5",
+            )}
+          >
             {businessName}
           </h1>
           <p className="mt-2 max-w-md text-[0.9375rem] leading-relaxed text-muted-foreground">
