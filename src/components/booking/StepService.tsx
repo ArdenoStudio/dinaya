@@ -71,13 +71,11 @@ function ServiceRow({
             {service.durationMinutes}m
           </Badge>
           {service.priceLkr > 0 ? (
-            <Badge variant="secondary" className="border-[var(--booking-accent)]/20 bg-[var(--booking-accent-muted)] font-semibold tabular-nums booking-text-accent">
+            <Badge variant="outline" className="font-medium tabular-nums">
               <BookingServicePrice priceLkr={service.priceLkr} />
             </Badge>
           ) : (
-            <Badge variant="secondary" className="font-semibold">
-              Free
-            </Badge>
+            <Badge variant="outline">Free</Badge>
           )}
           {service.requiresPayment && service.priceLkr > 0 && service.depositPercent > 0 ? (
             <Badge variant="outline">

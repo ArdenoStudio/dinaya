@@ -4,61 +4,35 @@ type Props = {
   priceLkr: number;
   /** When set (e.g. deal discount), shown as the main price with original struck through. */
   displayPrice?: number;
-  variant?: "prominent" | "inline";
-  label?: string;
   className?: string;
 };
 
+/** Service price — readable, not louder than the service name. */
 export function BookingServicePrice({
   priceLkr,
   displayPrice,
-  variant = "inline",
-  label = "Service price",
   className,
 }: Props) {
   const price = displayPrice ?? priceLkr;
   const isFree = priceLkr <= 0;
   const hasDiscount = !isFree && displayPrice != null && displayPrice < priceLkr;
 
-  if (variant === "prominent") {
+  if (isFree) {
+    return <span className={cn("font-medium text-foreground", className)}>Free</span>;
+  }
+
+  if (hasDiscount) {
     return (
-      <div
-        className={cn(
-          "mt-4 flex items-center justify-between gap-3 rounded-xl border border-[var(--booking-accent)]/25 bg-[var(--booking-accent-muted)] px-3.5 py-3",
-          className,
-        )}
-      >
-        <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-          {label}
-        </span>
-        <div className="text-right">
-          {hasDiscount ? (
-            <span className="block text-xs tabular-nums text-muted-foreground line-through">
-              {formatLkr(priceLkr)}
-            </span>
-          ) : null}
-          <span
-            className={cn(
-              "text-xl font-semibold tabular-nums tracking-tight",
-              isFree ? "text-foreground" : "booking-text-accent",
-            )}
-          >
-            {isFree ? "Free" : formatLkr(price)}
-          </span>
-        </div>
-      </div>
+      <span className={cn("inline-flex items-baseline gap-1.5 tabular-nums", className)}>
+        <span className="text-muted-foreground line-through">{formatLkr(priceLkr)}</span>
+        <span className="font-medium text-foreground">{formatLkr(price)}</span>
+      </span>
     );
   }
 
   return (
-    <span
-      className={cn(
-        "font-semibold tabular-nums",
-        isFree ? "text-foreground" : "booking-text-accent",
-        className,
-      )}
-    >
-      {isFree ? "Free" : formatLkr(price)}
+    <span className={cn("font-medium tabular-nums text-foreground", className)}>
+      {formatLkr(price)}
     </span>
   );
 }

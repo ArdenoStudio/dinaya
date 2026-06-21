@@ -147,16 +147,19 @@ export function ServiceMetaPanel({
             {service.description && (
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{service.description}</p>
             )}
-            <div className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
-              <Icon name="clock" className="size-3.5 shrink-0" />
-              {formatDuration(service.durationMinutes)}
+            <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
+              <span className="inline-flex items-center gap-1.5">
+                <Icon name="clock" className="size-3.5 shrink-0" />
+                {formatDuration(service.durationMinutes)}
+              </span>
+              <span aria-hidden className="text-muted-foreground/50">
+                ·
+              </span>
+              <BookingServicePrice
+                priceLkr={service.priceLkr}
+                displayPrice={selectedDeal && service.priceLkr > 0 ? price : undefined}
+              />
             </div>
-            <BookingServicePrice
-              priceLkr={service.priceLkr}
-              displayPrice={selectedDeal && service.priceLkr > 0 ? price : undefined}
-              label={copy.servicePrice}
-              variant="prominent"
-            />
             {staffLabel && (
               <p className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
                 <Icon name="person" className="shrink-0 text-base" />

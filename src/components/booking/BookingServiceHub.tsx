@@ -247,13 +247,14 @@ export default function BookingServiceHub({
                         {service.description}
                       </p>
                     ) : null}
-                    <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
-                      <span className="text-muted-foreground">{service.durationMinutes}m</span>
-                      <span aria-hidden className="text-muted-foreground/40">
-                        ·
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      {service.durationMinutes}m
+                      <span aria-hidden className="text-muted-foreground/50">
+                        {" "}
+                        ·{" "}
                       </span>
-                      <BookingServicePrice priceLkr={service.priceLkr} className="text-base" />
-                    </div>
+                      <BookingServicePrice priceLkr={service.priceLkr} />
+                    </p>
                   </div>
 
                   <BookingServiceArrow />
