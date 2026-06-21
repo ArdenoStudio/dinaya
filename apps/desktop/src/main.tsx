@@ -5605,85 +5605,133 @@ function LoginScreen({
     }
   }
 
+  const displayError = localError || error;
+
   return (
     <div className="login-screen">
-      <form className="login-card" onSubmit={submit}>
-        <DinayaBrand />
+      <div className="login-form-shell">
+        <header className="login-form-header">
+          <h1>Welcome back</h1>
+          <p>Sign in to your Dinaya dashboard</p>
+        </header>
 
-        <div className="login-card-header">
-          <h2>Welcome back</h2>
-          <p>Sign in to your dashboard</p>
-        </div>
-
-        <label>
+        <form className="login-form" onSubmit={submit} noValidate>
+          <label className="login-field" htmlFor="desktop-email">
             Email
             <input
               ref={emailRef}
               autoComplete="email"
+              className="login-input"
+              id="desktop-email"
               inputMode="email"
+              name="email"
               placeholder="you@example.com"
+              required
               type="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
             />
           </label>
-          <label>
-            <span className="label-row">
-              Password
-              <button type="button" onClick={() => void invoke("desktop_open_app_path", { path: "/forgot-password" })}>
+
+          <div className="login-field">
+            <div className="login-label-row">
+              <label htmlFor="desktop-password">Password</label>
+              <button
+                className="login-link-button"
+                type="button"
+                onClick={() => void invoke("desktop_open_app_path", { path: "/forgot-password" })}
+              >
                 Forgot password?
               </button>
-            </span>
-            <span className="password-field">
+            </div>
+            <div className="login-password-field">
               <input
                 autoComplete="current-password"
-                placeholder="••••••••"
+                className="login-input"
+                id="desktop-password"
+                name="password"
+                placeholder="Enter your password"
+                required
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
               />
               <button
                 aria-label={showPassword ? "Hide password" : "Show password"}
+                className="login-password-toggle"
+                tabIndex={-1}
                 type="button"
                 onClick={() => setShowPassword((current) => !current)}
               >
-                {showPassword ? "Hide" : "Show"}
+                {showPassword ? <LoginEyeSlashIcon /> : <LoginEyeIcon />}
               </button>
-            </span>
-          </label>
-          {(localError || error) && <div className="error-banner inline">{localError || error}</div>}
-          <button className="primary login-submit" disabled={loading} type="submit">
-            {loading ? "Signing in..." : "Sign in"}
+            </div>
+          </div>
+
+          {displayError ? (
+            <div className="login-error" role="alert">
+              <LoginAlertIcon />
+              <span>{displayError}</span>
+            </div>
+          ) : null}
+
+          <button className="login-submit" disabled={loading} type="submit">
+            {loading ? "Signing in…" : "Sign in"}
           </button>
+        </form>
 
-        <div className="secure-line">Secure sign-in · Your data is encrypted</div>
+        <div className="login-secure-line">
+          <LoginLockIcon />
+          <span>Secure sign-in · Your data is encrypted</span>
+        </div>
 
-        <p className="register-line">
+        <p className="login-register-line">
           No account?{" "}
-          <button type="button" onClick={() => void invoke("desktop_open_app_path", { path: "/register" })}>
-            Create one free
+          <button
+            className="login-register-link"
+            type="button"
+            onClick={() => void invoke("desktop_open_app_path", { path: "/register" })}
+          >
+            Create your booking page
           </button>
         </p>
-      </form>
+      </div>
     </div>
   );
 }
 
-function DinayaBrand() {
+function LoginEyeIcon() {
   return (
-    <div className="login-brand">
-      <svg
-        aria-hidden="true"
-        fill="currentColor"
-        height="30"
-        viewBox="318 319 875 866"
-        width="30"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path d="M 819.949219 499.695312 L 563.980469 755.773438 C 513.210938 806.554688 513.210938 889.15625 563.980469 939.941406 C 614.75 990.777344 697.378906 990.726562 748.09375 939.941406 L 966.117188 721.851562 C 982.484375 705.480469 982.484375 678.953125 966.117188 662.582031 C 949.75 646.207031 923.230469 646.207031 906.863281 662.582031 L 688.84375 880.671875 C 670.753906 898.707031 641.375 898.761719 623.234375 880.671875 C 605.144531 862.578125 605.144531 833.132812 623.234375 815.042969 L 879.203125 558.96875 C 931.742188 506.464844 1017.1875 506.464844 1069.671875 558.96875 C 1095.097656 584.425781 1109.117188 618.265625 1109.117188 654.257812 C 1109.117188 690.226562 1095.097656 724.0625 1069.671875 749.523438 L 782.496094 1036.789062 C 740.375 1078.921875 684.367188 1102.117188 624.816406 1102.117188 C 565.261719 1102.117188 509.285156 1078.921875 467.164062 1036.789062 C 380.222656 949.820312 380.222656 808.328125 467.164062 721.359375 L 797.144531 391.253906 C 813.511719 374.878906 813.511719 348.355469 797.144531 331.980469 C 780.773438 315.609375 754.257812 315.609375 737.890625 331.980469 L 407.910156 662.089844 C 288.285156 781.722656 288.285156 976.425781 407.910156 1096.058594 C 465.828125 1154.019531 542.867188 1185.945312 624.816406 1185.945312 C 706.765625 1185.945312 783.804688 1154.019531 841.746094 1096.058594 L 1128.925781 808.792969 C 1214.121094 723.570312 1214.121094 584.917969 1128.925781 499.695312 C 1043.78125 414.558594 905.144531 414.445312 819.949219 499.695312 Z" />
-      </svg>
-      <strong>Dinaya.lk</strong>
-    </div>
+    <svg aria-hidden="true" fill="currentColor" height="16" viewBox="0 0 16 16" width="16">
+      <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.133 13.133 0 0 1 1.172 8z" />
+      <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z" />
+    </svg>
+  );
+}
+
+function LoginEyeSlashIcon() {
+  return (
+    <svg aria-hidden="true" fill="currentColor" height="16" viewBox="0 0 16 16" width="16">
+      <path d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a7.028 7.028 0 0 0-2.79.588l.77.771A6.001 6.001 0 0 1 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.134 13.134 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755-.165.165-.337.328-.517.491l1.716 1.716zm-2.828 2.828-1.716-1.716c-.23.179-.488.335-.775.48a3.5 3.5 0 0 1-4.474-4.474l-.823-.823A6.004 6.004 0 0 0 2 8s3 5.5 8 5.5c1.55 0 2.904-.33 4.031-.934z" />
+      <path d="M5.525 7.646a2.5 2.5 0 0 1 2.829 2.829l.686.686a6.002 6.002 0 0 0-3.515-3.515l.686.686zm4.396 4.396L4.11 6.131a.5.5 0 0 1 0-.707l.707-.707a.5.5 0 0 1 .707 0l7.071 7.071a.5.5 0 0 1 0 .707l-.707.707a.5.5 0 0 1-.707 0z" />
+    </svg>
+  );
+}
+
+function LoginLockIcon() {
+  return (
+    <svg aria-hidden="true" fill="currentColor" height="14" viewBox="0 0 16 16" width="14">
+      <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
+    </svg>
+  );
+}
+
+function LoginAlertIcon() {
+  return (
+    <svg aria-hidden="true" fill="currentColor" height="16" viewBox="0 0 16 16" width="16">
+      <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
+      <path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995z" />
+    </svg>
   );
 }
 
