@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import bcrypt from "bcryptjs";
 import { addDays } from "date-fns";
-import { eq, inArray, like } from "drizzle-orm";
+import { inArray, like } from "drizzle-orm";
 import { db } from "@/db";
 import {
   availability,

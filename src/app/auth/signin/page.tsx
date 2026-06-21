@@ -130,8 +130,7 @@ function LoginForm() {
         },
       };
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleSignIn() {
     setLoading(true);
     setError("");
 
@@ -154,6 +153,11 @@ function LoginForm() {
       setError("Something went wrong. Please try again.");
       setLoading(false);
     }
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    await handleSignIn();
   }
 
   return (
@@ -190,7 +194,13 @@ function LoginForm() {
         </motion.div>
       )}
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
+      <form
+        onSubmit={handleSubmit}
+        action="#"
+        method="post"
+        className="flex flex-col gap-4"
+        noValidate
+      >
         <motion.div variants={itemVariants} className="flex flex-col gap-2">
           <label htmlFor="email" className={authLabelClassName}>
             Email
@@ -258,7 +268,12 @@ function LoginForm() {
         )}
 
         <motion.div variants={itemVariants}>
-          <button type="submit" disabled={loading} className={authPrimaryButtonClassName}>
+          <button
+            type="button"
+            disabled={loading}
+            onClick={() => void handleSignIn()}
+            className={authPrimaryButtonClassName}
+          >
             <span className="inline-flex items-center justify-center gap-2">
               {loading && <Icon name="arrow-repeat" className="animate-spin text-sm" />}
               {loading ? "Signing in…" : "Sign in"}

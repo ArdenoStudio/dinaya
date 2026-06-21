@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { loginViaUi, nextBookableDate } from "./helpers/auth";
+import { loginViaApi, nextBookableDate } from "./helpers/auth";
 import type { PersonaRecord } from "../scripts/lib/persona-seed-core";
 
 const FIXTURE_PATH = path.join(process.cwd(), "e2e/fixtures/personas.json");
@@ -51,7 +51,7 @@ test.describe("Persona smoke — browser", () => {
     });
 
     test(`${persona.slug} (${persona.plan}) — owner login`, async ({ page }) => {
-      await loginViaUi(page, persona);
+      await loginViaApi(page, page.request, persona);
       await expect(page.getByRole("heading", { name: /Good day/i })).toBeVisible();
     });
   }

@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 
+vi.hoisted(() => {
+  process.env.NEXT_PUBLIC_APP_DOMAIN = "dinaya.lk";
+});
+
 const lookupCustomDomainSlugMock = vi.hoisted(() => vi.fn());
 
 vi.mock("next-auth", () => ({
@@ -88,13 +92,11 @@ describe("middleware docs markdown rewrites", () => {
   });
 
   it("preserves existing subdomain booking rewrites", async () => {
-    const req = new NextRequest("https://salon.dinaya.lk/docs", {
-      headers: {
-        host: "salon.dinaya.lk",
-      },
-    });
+    const req = new NextRequest("https://salon.dinaya.lk/docs");
     const res = await middleware(req);
 
-    expect(res.headers.get("x-middleware-rewrite")).toContain("/book/salon/docs");
+    const rewrite = res.headers.get("x-middleware-rewrite");
+    expect(rewrite).toBeTruthy();
+    expect(rewrite).toContain("/book/salon/docs");
   });
 });

@@ -79,7 +79,7 @@ export function makeAccount(label: string): TestAccount {
 }
 
 export function planDisplayLabel(plan: "pro" | "max"): string {
-  return plan === "pro" ? "Pro" : "Max";
+  return plan === "pro" ? "Pro" : "Growth";
 }
 
 export async function registerViaApi(
@@ -87,6 +87,9 @@ export async function registerViaApi(
   account: TestAccount
 ): Promise<void> {
   const res = await request.post("/api/auth/register", {
+    headers: {
+      "X-Forwarded-For": `10.100.${Math.floor(Math.random() * 200)}.${Math.floor(Math.random() * 200)}`,
+    },
     data: {
       name: account.name,
       email: account.email,
@@ -103,12 +106,56 @@ export async function registerViaApi(
   }
 }
 
+export async function loginViaApi(
+  page: Page,
+  _request: APIRequestContext,
+  account: TestAccount,
+  callbackUrl = "/dashboard"
+): Promise<void> {
+  const api = page.request;
+  const csrfRes = await api.get("/api/auth/csrf");
+  if (!csrfRes.ok()) {
+    throw new Error(`CSRF fetch failed (${csrfRes.status()})`);
+  }
+  const { csrfToken } = (await csrfRes.json()) as { csrfToken?: string };
+  if (!csrfToken) {
+    throw new Error("Missing CSRF token for sign-in");
+  }
+
+  const res = await api.post("/api/auth/callback/credentials", {
+    form: {
+      callbackUrl,
+      csrfToken,
+      email: account.email,
+      json: "true",
+      password: account.password,
+    },
+  });
+  const status = res.status();
+  if (status !== 200 && status !== 302) {
+    const body = await res.text();
+    throw new Error(`Login failed (${status}): ${body}`);
+  }
+
+  const cookies = await page.context().cookies();
+  const hasSession = cookies.some((cookie) => cookie.name.includes("session-token"));
+  if (!hasSession) {
+    throw new Error("Login did not set a session cookie");
+  }
+
+  await page.goto(callbackUrl);
+  await page.waitForURL(`**${callbackUrl}**`);
+}
+
 export async function loginViaUi(page: Page, account: TestAccount): Promise<void> {
   await page.goto("/auth/signin");
+  const signInButton = page.getByRole("button", { name: "Sign in" });
+  await expect(signInButton).toBeVisible();
+  await expect(signInButton).toHaveAttribute("type", "button");
   await page.getByLabel("Email").fill(account.email);
   await page.getByLabel("Password", { exact: true }).fill(account.password);
-  await page.getByRole("button", { name: "Sign in" }).click();
-  await page.waitForURL("**/dashboard**");
+  await signInButton.click();
+  await expect(page).toHaveURL(/\/dashboard/, { timeout: 30_000 });
 }
 
 export async function registerAndLogin(
@@ -117,7 +164,7 @@ export async function registerAndLogin(
   account: TestAccount
 ): Promise<void> {
   await registerViaApi(request, account);
-  await loginViaUi(page, account);
+  await loginViaApi(page, request, account);
 }
 
 /** Starter tier — use for tests that expect Free/Starter gates (not trial entitlements). */
@@ -128,7 +175,7 @@ export async function registerLoginAsStarter(
 ): Promise<void> {
   await registerViaApi(request, account);
   await setBusinessPlanByEmail(account.email, "starter");
-  await loginViaUi(page, account);
+  await loginViaApi(page, request, account);
 }
 
 function defaultPlanExpiresAt(plan: PlanTier): Date | null {
@@ -169,7 +216,7 @@ export async function registerLoginAndSetPlan(
 ): Promise<void> {
   await registerViaApi(request, account);
   await setBusinessPlanByEmail(account.email, plan);
-  await loginViaUi(page, account);
+  await loginViaApi(page, request, account);
 }
 
 export async function visitAndExpectUpgradeGate(
@@ -189,7 +236,7 @@ export async function visitAndExpectFeatureAccess(
 ): Promise<void> {
   await page.goto(path);
   await expect(page.getByRole("heading", { name: heading })).toBeVisible();
-  await expect(page.getByText(/Upgrade to (Pro|Max)/i)).not.toBeVisible();
+  await expect(page.getByText(/Upgrade to (Pro|Growth)/i)).not.toBeVisible();
 }
 
 export async function createServiceViaApi(

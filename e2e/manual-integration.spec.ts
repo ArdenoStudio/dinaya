@@ -43,7 +43,9 @@ test.describe("Integration API gates by plan", () => {
     expect(maxRes.status()).toBe(402);
 
     const voiceRes = await page.request.get("/api/dashboard/voice-receptionist");
-    expect(voiceRes.status()).toBe(402);
+    expect(voiceRes.status()).toBe(200);
+    const voiceBody = (await voiceRes.json()) as { available?: boolean };
+    expect(voiceBody.available).toBe(false);
   });
 
   test("Max plan allows voice receptionist API read", async ({ page, request }) => {

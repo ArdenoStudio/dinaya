@@ -5,13 +5,11 @@ import {
   PRO_GATED_ROUTES,
   addLocations,
   createServiceViaApi,
-  loginViaUi,
   makeAccount,
   registerLoginAsStarter,
   registerLoginAndSetPlan,
   registerViaApi,
   seedReviewByEmail,
-  setBusinessPlanByEmail,
   visitAndExpectFeatureAccess,
   visitAndExpectUpgradeGate,
 } from "./helpers/auth";
@@ -38,7 +36,7 @@ test.describe("Plan features — Starter plan", () => {
     test(`loads ${route.path} without upgrade gate`, async ({ page }) => {
       await page.goto(route.path);
       await expect(page.getByRole("heading", { name: route.heading })).toBeVisible();
-      await expect(page.getByText(/Upgrade to (Pro|Max)/i)).not.toBeVisible();
+      await expect(page.getByText(/Upgrade to (Pro|Growth)/i)).not.toBeVisible();
     });
   }
 
@@ -54,7 +52,7 @@ test.describe("Plan features — Starter plan", () => {
   test("reviews page hides AI reply generation on Free", async ({ page }) => {
     await page.goto("/dashboard/reviews");
     await expect(page.getByRole("heading", { name: "Reviews" })).toBeVisible();
-    await expect(page.getByText("Upgrade to Max to generate AI replies")).not.toBeVisible();
+    await expect(page.getByText(/Upgrade to Growth to generate AI replies/i)).not.toBeVisible();
   });
 
   test("public booking page loads without login", async ({ page, request }) => {
@@ -114,7 +112,7 @@ test.describe("Plan features — Pro plan", () => {
     await page.goto("/dashboard/reviews");
     await expect(page.getByText("E2E Reviewer")).toBeVisible();
     await page.getByRole("button", { name: "Your reply" }).click();
-    await expect(page.getByText("Upgrade to Max to generate AI replies")).toBeVisible();
+    await expect(page.getByText(/Upgrade to Growth to generate AI replies/i)).toBeVisible();
     await expect(page.getByRole("button", { name: "Generate with AI" })).not.toBeVisible();
   });
 });
