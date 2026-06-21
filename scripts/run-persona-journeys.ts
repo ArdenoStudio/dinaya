@@ -37,7 +37,7 @@ dotenv.config({ path: ".env" });
 
 const FIXTURE_PATH = path.join(process.cwd(), "e2e/fixtures/personas.json");
 const DEFAULT_BASE = process.env.BASE_URL ?? process.env.PLAYWRIGHT_BASE_URL ?? "http://127.0.0.1:3001";
-const CONCURRENCY = 4;
+const CONCURRENCY = 2;
 
 const ALL_PHASES = ["core", "reads", "gates", "pages", "limits", "crm", "growth"] as const;
 type Phase = (typeof ALL_PHASES)[number];
@@ -55,10 +55,12 @@ type JourneyResult = {
 function parseArgs() {
   const args = process.argv.slice(2);
   let sample: number | null = null;
+  let from = 0;
   let phases: Set<Phase> = new Set(ALL_PHASES);
 
   for (let i = 0; i < args.length; i++) {
     if (args[i] === "--sample" && args[i + 1]) sample = Number(args[++i]);
+    else if (args[i] === "--from" && args[i + 1]) from = Number(args[++i]);
     else if (args[i] === "--phases" && args[i + 1]) {
       phases = new Set(
         args[++i]
@@ -69,7 +71,7 @@ function parseArgs() {
     }
   }
 
-  return { sample, phases };
+  return { sample, from, phases };
 }
 
 function nextBookableDate(): string {
@@ -78,6 +80,24 @@ function nextBookableDate(): string {
     candidate.setDate(candidate.getDate() + 1);
   }
   return format(candidate, "yyyy-MM-dd");
+}
+
+async function fetchWithRetry(
+  url: string,
+  init?: RequestInit,
+  attempts = 3,
+): Promise<Response> {
+  let lastError: unknown;
+  for (let attempt = 0; attempt < attempts; attempt++) {
+    try {
+      const res = await fetch(url, init);
+      return res;
+    } catch (error) {
+      lastError = error;
+      await new Promise((r) => setTimeout(r, 500 * (attempt + 1)));
+    }
+  }
+  throw lastError;
 }
 
 function personaHeaders(persona: PersonaRecord): HeadersInit {
@@ -103,7 +123,7 @@ async function signIn(baseUrl: string, persona: PersonaRecord): Promise<string |
     }
   };
 
-  const csrfRes = await fetch(`${baseUrl}/api/auth/csrf`, { headers });
+  const csrfRes = await fetchWithRetry(`${baseUrl}/api/auth/csrf`, { headers });
   collect(csrfRes);
   if (!csrfRes.ok) return null;
   const { csrfToken } = (await csrfRes.json()) as { csrfToken?: string };
@@ -117,7 +137,7 @@ async function signIn(baseUrl: string, persona: PersonaRecord): Promise<string |
     password: persona.password,
   });
 
-  const res = await fetch(`${baseUrl}/api/auth/callback/credentials`, {
+  const res = await fetchWithRetry(`${baseUrl}/api/auth/callback/credentials`, {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
@@ -147,7 +167,7 @@ async function apiCall(
     (headers as Record<string, string>)["Content-Type"] = "application/json";
     init.body = JSON.stringify(probe.body);
   }
-  const res = await fetch(`${baseUrl}${probe.buildPath?.(persona) ?? probe.path}`, init);
+  const res = await fetchWithRetry(`${baseUrl}${probe.buildPath?.(persona) ?? probe.path}`, init);
   const body = await res.text();
   return { status: res.status, body };
 }
@@ -183,7 +203,7 @@ async function runCoreFunnel(
   const headers = personaHeaders(persona);
   let bookingId: string | undefined;
 
-  const bookRes = await fetch(`${baseUrl}/book/${persona.slug}`, { headers });
+  const bookRes = await fetchWithRetry(`${baseUrl}/book/${persona.slug}`, { headers });
   const bookHtml = await bookRes.text();
   steps.core_publicPage = {
     ok: bookRes.ok && bookHtml.includes(persona.serviceName),
@@ -197,7 +217,7 @@ async function runCoreFunnel(
   availUrl.searchParams.set("locationId", persona.locationId);
   availUrl.searchParams.set("date", date);
 
-  const availRes = await fetch(availUrl, { headers });
+  const availRes = await fetchWithRetry(availUrl, { headers });
   const availJson = (await availRes.json()) as { slots?: { startUtc: string; endUtc: string }[]; error?: string };
   const slots = availJson.slots ?? [];
   const slot = slots.length > 0 ? slots[persona.index % slots.length] : undefined;
@@ -208,7 +228,7 @@ async function runCoreFunnel(
 
   if (slot) {
     const tryBook = async (target: { startUtc: string; endUtc: string }) => {
-      const bookingRes = await fetch(`${baseUrl}/api/bookings`, {
+      const bookingRes = await fetchWithRetry(`${baseUrl}/api/bookings`, {
         method: "POST",
         headers: { "Content-Type": "application/json", ...headers },
         body: JSON.stringify({
@@ -262,7 +282,7 @@ async function runCoreFunnel(
   }
 
   if (session) {
-    const dashRes = await fetch(`${baseUrl}/dashboard`, {
+    const dashRes = await fetchWithRetry(`${baseUrl}/dashboard`, {
       headers: { Cookie: session, ...headers },
       redirect: "manual",
     });
@@ -285,7 +305,7 @@ async function runDashboardPages(
 ): Promise<boolean> {
   let allOk = true;
   for (const page of DASHBOARD_PAGE_PROBES) {
-    const res = await fetch(`${baseUrl}${page.path}`, {
+    const res = await fetchWithRetry(`${baseUrl}${page.path}`, {
       headers: { Cookie: session, ...personaHeaders(persona) },
       redirect: "manual",
     });
@@ -306,7 +326,7 @@ async function countDashboardRows(
   persona: PersonaRecord,
   path: string,
 ): Promise<number> {
-  const res = await fetch(`${baseUrl}${path}`, {
+  const res = await fetchWithRetry(`${baseUrl}${path}`, {
     headers: { Cookie: session, ...personaHeaders(persona) },
   });
   if (!res.ok) return 0;
@@ -465,7 +485,7 @@ async function runCrmLifecycle(
   if (!steps.crm_listBookings.ok) allOk = false;
 
   if (bookingId) {
-    const patchRes = await fetch(`${baseUrl}/api/dashboard/bookings/${bookingId}`, {
+    const patchRes = await fetchWithRetry(`${baseUrl}/api/dashboard/bookings/${bookingId}`, {
       method: "PATCH",
       headers: {
         Cookie: session,
@@ -482,7 +502,7 @@ async function runCrmLifecycle(
   }
 
   if (persona.clientId) {
-    const noteRes = await fetch(`${baseUrl}/api/dashboard/clients/${persona.clientId}/notes`, {
+    const noteRes = await fetchWithRetry(`${baseUrl}/api/dashboard/clients/${persona.clientId}/notes`, {
       method: "POST",
       headers: {
         Cookie: session,
@@ -524,7 +544,7 @@ async function runGrowthProbes(
   if (runs.status !== 200) allOk = false;
 
   if (persona.reviewId) {
-    const replyRes = await fetch(`${baseUrl}/api/dashboard/reviews/${persona.reviewId}/generate-reply`, {
+    const replyRes = await fetchWithRetry(`${baseUrl}/api/dashboard/reviews/${persona.reviewId}/generate-reply`, {
       method: "POST",
       headers: { Cookie: session, ...personaHeaders(persona) },
     });
@@ -631,11 +651,12 @@ async function main() {
   }
 
   const { personas } = JSON.parse(fs.readFileSync(FIXTURE_PATH, "utf8")) as { personas: PersonaRecord[] };
-  const { sample, phases } = parseArgs();
+  const { sample, from, phases } = parseArgs();
+  const filtered = personas.filter((p) => p.index >= from);
   const list =
-    sample && sample < personas.length
-      ? personas.filter((_, i) => i % Math.ceil(personas.length / sample) === 0).slice(0, sample)
-      : personas;
+    sample && sample < filtered.length
+      ? filtered.filter((_, i) => i % Math.ceil(filtered.length / sample) === 0).slice(0, sample)
+      : filtered;
 
   const baseUrl = DEFAULT_BASE.replace(/\/$/, "");
   console.log(`Running ${list.length} persona journeys against ${baseUrl}`);
@@ -651,6 +672,9 @@ async function main() {
     const done = Math.min(offset + CONCURRENCY, list.length);
     const passed = results.filter((r) => r.ok).length;
     console.log(`Progress ${done}/${list.length} — ${passed} passed`);
+    if (offset + CONCURRENCY < list.length) {
+      await new Promise((r) => setTimeout(r, 250));
+    }
   }
 
   const failed = results.filter((r) => !r.ok);
