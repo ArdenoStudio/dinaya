@@ -9,7 +9,10 @@ export type TestAccount = {
   slug: string;
 };
 
-export type PlanTier = "free" | "pro" | "max";
+export type PlanTier = "starter" | "pro" | "max";
+
+/** @deprecated Use "starter" — trial is the default at signup, not a gated tier. */
+export type LegacyPlanTier = PlanTier | "free";
 
 export type GatedRoute = {
   path: string;
@@ -117,27 +120,41 @@ export async function registerAndLogin(
   await loginViaUi(page, account);
 }
 
+/** Starter tier — use for tests that expect Free/Starter gates (not trial entitlements). */
+export async function registerLoginAsStarter(
+  page: Page,
+  request: APIRequestContext,
+  account: TestAccount
+): Promise<void> {
+  await registerViaApi(request, account);
+  await setBusinessPlanByEmail(account.email, "starter");
+  await loginViaUi(page, account);
+}
+
 function defaultPlanExpiresAt(plan: PlanTier): Date | null {
-  if (plan === "free") return null;
+  if (plan === "starter") return null;
   return new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 }
 
 export async function setBusinessPlanByEmail(
   email: string,
-  plan: PlanTier,
+  plan: PlanTier | "free",
   options?: { planExpiresAt?: Date | null }
 ): Promise<void> {
+  const normalizedPlan = plan === "free" ? "starter" : plan;
   const url = process.env.DATABASE_URL;
   if (!url) {
     throw new Error("DATABASE_URL is required to set business plan in E2E tests.");
   }
   const planExpiresAt =
-    options && "planExpiresAt" in options ? options.planExpiresAt : defaultPlanExpiresAt(plan);
+    options && "planExpiresAt" in options
+      ? options.planExpiresAt
+      : defaultPlanExpiresAt(normalizedPlan);
 
   const sql = neon(url);
   await sql`
     UPDATE businesses
-    SET plan = ${plan}, plan_expires_at = ${planExpiresAt}
+    SET plan = ${normalizedPlan}, plan_expires_at = ${planExpiresAt}
     WHERE id = (
       SELECT business_id FROM users WHERE email = ${email} LIMIT 1
     )

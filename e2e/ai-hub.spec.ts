@@ -1,14 +1,14 @@
 import { test, expect } from "@playwright/test";
 import {
   makeAccount,
-  registerAndLogin,
+  registerLoginAsStarter,
   registerLoginAndSetPlan,
 } from "./helpers/auth";
 
 test.describe("AI Hub — Free plan", () => {
   test("shows upgrade gate for Free users", async ({ page, request }) => {
     const account = makeAccount("ai-free");
-    await registerAndLogin(page, request, account);
+    await registerLoginAsStarter(page, request, account);
     await page.goto("/dashboard/ai");
     await expect(page.getByRole("heading", { name: /AI Growth Hub/i })).toBeVisible();
     await expect(page.getByText(/available on Dinaya Max/i)).toBeVisible();
@@ -17,7 +17,7 @@ test.describe("AI Hub — Free plan", () => {
 
   test("does not show per-branch AI toggles on Free", async ({ page, request }) => {
     const account = makeAccount("ai-free-toggles");
-    await registerAndLogin(page, request, account);
+    await registerLoginAsStarter(page, request, account);
     await page.goto("/dashboard/ai");
     await expect(page.getByText("AI Booking Autopilot")).not.toBeVisible();
   });

@@ -5,19 +5,21 @@ import {
   PRO_GATED_ROUTES,
   addLocations,
   createServiceViaApi,
+  loginViaUi,
   makeAccount,
-  registerAndLogin,
+  registerLoginAsStarter,
   registerLoginAndSetPlan,
   registerViaApi,
   seedReviewByEmail,
+  setBusinessPlanByEmail,
   visitAndExpectFeatureAccess,
   visitAndExpectUpgradeGate,
 } from "./helpers/auth";
 
-test.describe("Plan features — Free plan", () => {
+test.describe("Plan features — Starter plan", () => {
   test.beforeEach(async ({ page, request }) => {
-    const account = makeAccount("plan-free");
-    await registerAndLogin(page, request, account);
+    const account = makeAccount("plan-starter");
+    await registerLoginAsStarter(page, request, account);
   });
 
   for (const route of PRO_GATED_ROUTES) {

@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { makeAccount, registerAndLogin, registerLoginAndSetPlan } from "./helpers/auth";
+import { makeAccount, registerLoginAsStarter, registerLoginAndSetPlan } from "./helpers/auth";
 
 /**
  * API-level integration gates — verifies paid endpoints return 402 without third-party credentials.
@@ -7,9 +7,9 @@ import { makeAccount, registerAndLogin, registerLoginAndSetPlan } from "./helper
  * e2e/MANUAL_INTEGRATION_CHECKLIST.md.
  */
 test.describe("Integration API gates by plan", () => {
-  test("Free plan receives 402 from Pro and Max API routes", async ({ page, request }) => {
-    const account = makeAccount("api-gates-free");
-    await registerAndLogin(page, request, account);
+  test("Starter plan receives 402 from Pro and Max API routes", async ({ page, request }) => {
+    const account = makeAccount("api-gates-starter");
+    await registerLoginAsStarter(page, request, account);
 
     const proRoutes = [
       { method: "GET" as const, path: "/api/dashboard/export" },
@@ -26,7 +26,7 @@ test.describe("Integration API gates by plan", () => {
         route.method === "GET"
           ? await page.request.get(route.path)
           : await page.request.post(route.path, { data: route.body });
-      expect(res.status(), `${route.path} on Free`).toBe(402);
+      expect(res.status(), `${route.path} on Starter`).toBe(402);
     }
 
     const maxRes = await page.request.post("/api/dashboard/ai/content", { data: {} });

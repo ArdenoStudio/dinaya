@@ -1,14 +1,14 @@
 import { test, expect } from "@playwright/test";
 import {
   makeAccount,
-  registerAndLogin,
+  registerLoginAsStarter,
   registerLoginAndSetPlan,
 } from "./helpers/auth";
 
 test.describe("Locations — Free plan", () => {
   test.beforeEach(async ({ page, request }) => {
     const account = makeAccount("loc-free");
-    await registerAndLogin(page, request, account);
+    await registerLoginAsStarter(page, request, account);
     await page.goto("/dashboard/locations");
     await expect(page.getByRole("heading", { name: "Locations" })).toBeVisible();
   });

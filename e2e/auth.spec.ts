@@ -32,7 +32,7 @@ test.describe("Auth & registration", () => {
 
     await page.getByLabel("Business name").fill(account.businessName);
     await page.locator("#slug").fill(account.slug);
-    await page.getByRole("button", { name: /Create free account/i }).click();
+    await page.getByRole("button", { name: /Start free trial/i }).click();
 
     await page.waitForURL("**/auth/signin?registered=1**");
     await expect(page.getByText(/Account created/i)).toBeVisible();
