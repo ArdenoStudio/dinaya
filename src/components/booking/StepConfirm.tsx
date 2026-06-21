@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { format, parseISO } from "date-fns";
 import type { BookingBusiness, BookingState } from "./BookingWizard";
-import { formatLkr, isOptimizableRemoteImage } from "@/lib/utils";
+import { Icon } from "@/components/ui/Icon";
+import { cn, formatLkr, isOptimizableRemoteImage } from "@/lib/utils";
 import type { BookingCopy } from "@/lib/i18n";
 import { readStoredAttribution } from "@/lib/booking-attribution";
 import { getBookingSessionToken } from "@/lib/booking-session";
@@ -15,10 +16,10 @@ import {
   resolveDefaultPaymentMethod,
 } from "@/lib/payments/resolve";
 import type { DealListItem } from "@/lib/deals/queries";
-import { Icon } from "@/components/ui/Icon";
 import { BookingSubmitButton } from "./BookingSubmitButton";
 import {
   validateConfirmFields,
+  firstConfirmFieldId,
   type ConfirmFieldErrors,
 } from "./booking-confirm-validation";
 import type { IntakeQuestion } from "@/lib/intake";
@@ -42,8 +43,10 @@ interface Props {
   }) => void;
   variant?: "inline" | "full";
   formId?: string;
-  /** When the wizard shows BookingBackPill, hide the duplicate inline back link. */
+  /** When the wizard shows breadcrumbs, hide the duplicate inline back link. */
   hideInlineBack?: boolean;
+  /** When breadcrumbs already show the step name, hide the in-form heading. */
+  hideDetailsHeading?: boolean;
 }
 
 const fieldBaseCls =
@@ -149,6 +152,15 @@ function IntakeField({
   );
 }
 
+function focusFirstInvalidField(fieldId: string) {
+  requestAnimationFrame(() => {
+    const el = document.getElementById(fieldId);
+    if (!(el instanceof HTMLElement)) return;
+    el.focus({ preventScroll: true });
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+  });
+}
+
 export default function StepConfirm({
   state,
   business,
@@ -161,6 +173,7 @@ export default function StepConfirm({
   variant = "full",
   formId = "booking-contact-form",
   hideInlineBack = false,
+  hideDetailsHeading = false,
 }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -271,8 +284,6 @@ export default function StepConfirm({
       ? `${copy.confirmAndPay} — ${formatLkr(dueNow)}`
       : copy.confirmBooking;
 
-  const canSubmit = liveValidation.valid && !loading;
-
   useEffect(() => {
     if (!service || selectedDeal) {
       setUpsell(null);
@@ -329,6 +340,8 @@ export default function StepConfirm({
 
     if (!result.valid) {
       setError(result.firstError ?? copy.fieldRequired);
+      const fieldId = firstConfirmFieldId(result.errors, intakeQuestions);
+      if (fieldId) focusFirstInvalidField(fieldId);
       return;
     }
 
@@ -450,7 +463,11 @@ export default function StepConfirm({
 
   const contactForm = (
     <div className="space-y-4 md:rounded-xl md:border md:border-border md:bg-card md:p-6">
-      <p className="text-base font-semibold text-foreground">{copy.details}</p>
+      {hideDetailsHeading ? (
+        <h2 className="sr-only">{copy.details}</h2>
+      ) : (
+        <p className="text-base font-semibold text-foreground">{copy.details}</p>
+      )}
       <div>
         <label htmlFor="clientName" className="text-sm font-medium text-foreground">
           Full name <span className="font-normal text-muted-foreground">*</span>
@@ -557,96 +574,122 @@ export default function StepConfirm({
     </div>
   );
 
-  const paymentExtras = (
-    <>
-      {hasManualPaymentFallback && (
-        <div className="mb-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm dark:border-amber-800/50 dark:bg-amber-950/40 md:mb-4">
-          <p className="mb-2 font-medium text-amber-900 dark:text-amber-200">{copy.localPayment}</p>
-          {business.bankTransferInstructions && (
-            <p className="whitespace-pre-wrap text-amber-900 dark:text-amber-200/80">
-              {business.bankTransferInstructions}
-            </p>
-          )}
-          {business.lankaqrImageUrl && (
-            <div className="mt-3">
-              <Image
-                src={business.lankaqrImageUrl}
-                alt="LankaQR"
-                width={144}
-                height={144}
-                className="h-36 w-36 rounded-lg border border-border bg-card object-contain p-2"
-                unoptimized={!isOptimizableRemoteImage(business.lankaqrImageUrl)}
-              />
-            </div>
-          )}
-        </div>
-      )}
-      {upsell && (
-        <div className="mb-3 rounded-xl border border-blue-100 bg-[var(--booking-accent-muted)]/70 p-4 text-sm md:mb-4">
-          <p className="font-medium text-blue-950 dark:text-blue-100">Recommended add-on</p>
-          <p className="mt-1 text-[var(--booking-accent)]/80">
-            {upsell.reason} Ask about <span className="font-semibold">{upsell.name}</span>
-            {upsell.priceLkr > 0 ? ` (${formatLkr(upsell.priceLkr)})` : ""} during your visit.
+  const manualPaymentNotice =
+    hasManualPaymentFallback ? (
+      <div className="mb-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm dark:border-amber-800/50 dark:bg-amber-950/40 md:mb-4">
+        <p className="mb-2 font-medium text-amber-900 dark:text-amber-200">{copy.localPayment}</p>
+        {business.bankTransferInstructions && (
+          <p className="whitespace-pre-wrap text-amber-900 dark:text-amber-200/80">
+            {business.bankTransferInstructions}
           </p>
-        </div>
-      )}
-      {onlineMethods.length > 1 && service?.requiresPayment && dueNow > 0 && (
-        <div className="mb-3 space-y-2 rounded-xl border border-border bg-card p-4 md:mb-4">
-          <p className="text-sm font-medium text-foreground">{copy.paymentMethod}</p>
-          <label className="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground">
-            <input
-              type="radio"
-              name="paymentMethod"
-              checked={paymentMethod === "payhere"}
-              onChange={() => setPaymentMethod("payhere")}
+        )}
+        {business.lankaqrImageUrl && (
+          <div className="mt-3">
+            <Image
+              src={business.lankaqrImageUrl}
+              alt="LankaQR"
+              width={144}
+              height={144}
+              className="h-36 w-36 rounded-lg border border-border bg-card object-contain p-2"
+              unoptimized={!isOptimizableRemoteImage(business.lankaqrImageUrl)}
             />
-            {copy.paymentMethodPayhere}
-          </label>
-          <label className="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground">
-            <input
-              type="radio"
-              name="paymentMethod"
-              checked={paymentMethod === "paypal"}
-              onChange={() => setPaymentMethod("paypal")}
-            />
-            {copy.paymentMethodPaypal}
-          </label>
-        </div>
-      )}
+          </div>
+        )}
+      </div>
+    ) : null;
+
+  const upsellNotice =
+    upsell ? (
+      <div className="mt-4 rounded-xl border border-blue-100 bg-[var(--booking-accent-muted)]/70 p-4 text-sm">
+        <p className="font-medium text-blue-950 dark:text-blue-100">Recommended add-on</p>
+        <p className="mt-1 text-[var(--booking-accent)]/80">
+          {upsell.reason} Ask about <span className="font-semibold">{upsell.name}</span>
+          {upsell.priceLkr > 0 ? ` (${formatLkr(upsell.priceLkr)})` : ""} during your visit.
+        </p>
+      </div>
+    ) : null;
+
+  const paymentMethodSelector =
+    onlineMethods.length > 1 && service?.requiresPayment && dueNow > 0 ? (
+      <div className="mt-4 space-y-2 rounded-xl border border-border bg-card p-4">
+        <p className="text-sm font-medium text-foreground">{copy.paymentMethod}</p>
+        {(
+          [
+            { id: "payhere" as const, label: copy.paymentMethodPayhere },
+            { id: "paypal" as const, label: copy.paymentMethodPaypal },
+          ] as const
+        )
+          .filter((option) => onlineMethods.includes(option.id))
+          .map((option) => {
+            const selected = paymentMethod === option.id;
+            return (
+              <label
+                key={option.id}
+                className={cn(
+                  "flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border px-3 py-2.5 text-sm transition-colors",
+                  selected
+                    ? "border-[var(--booking-accent)] bg-[var(--booking-accent-muted)] text-foreground"
+                    : "border-border bg-card text-muted-foreground hover:bg-muted/50",
+                )}
+              >
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  checked={selected}
+                  onChange={() => setPaymentMethod(option.id)}
+                  className="size-4 shrink-0 accent-[var(--booking-accent)]"
+                />
+                {option.label}
+              </label>
+            );
+          })}
+      </div>
+    ) : null;
+
+  const submitError =
+    error ? (
+      <div className="mt-4 flex items-start gap-2 rounded-xl border border-destructive/30 bg-card px-3 py-2.5 text-sm text-destructive">
+        <Icon name="exclamation-circle" className="mt-0.5 shrink-0 text-sm" />
+        <span>{error}</span>
+      </div>
+    ) : null;
+
+  const trustStrip = (
+    <div className="mt-2 flex items-center justify-center gap-1 lg:mt-3">
+      <Icon name="shield-check" className="text-xs text-muted-foreground" />
+      <span className="text-xs text-muted-foreground">{copy.paymentSecure}</span>
+    </div>
+  );
+
+  const confirmActions = (
+    <>
+      <BookingSubmitButton loading={loading} disabled={loading} onClick={handleBook}>
+        {payLabel}
+      </BookingSubmitButton>
+      {trustStrip}
     </>
   );
 
   if (variant === "inline") {
     return (
-      <div id={formId}>
-        {paymentExtras}
+      <div id={formId} className="pb-28 lg:pb-0">
+        {manualPaymentNotice}
         {contactForm}
-        {error && (
-          <div className="mt-4 flex items-start gap-2 rounded-xl border border-destructive/30 bg-card px-3 py-2.5 text-sm text-destructive">
-            <Icon name="exclamation-circle" className="mt-0.5 shrink-0 text-sm" />
-            <span>{error}</span>
-          </div>
-        )}
-        <BookingSubmitButton
-          className="mt-6"
-          loading={loading}
-          disabled={!canSubmit}
-          onClick={handleBook}
-        >
-          {payLabel}
-        </BookingSubmitButton>
-        {!hideInlineBack ? (
-          <button
-            type="button"
-            onClick={onBack}
-            className="mt-4 flex min-h-11 items-center text-sm text-muted-foreground transition-colors hover:text-foreground"
-          >
-            {copy.back}
-          </button>
-        ) : null}
-        <div className={`flex items-center justify-center gap-1 ${hideInlineBack ? "mt-4" : "mt-3"}`}>
-          <Icon name="shield-check" className="text-[11px] text-muted-foreground" />
-          <span className="text-[11px] text-muted-foreground">{copy.paymentSecure}</span>
+        {paymentMethodSelector}
+        {upsellNotice}
+        {submitError}
+
+        <div className="sticky bottom-0 z-10 -mx-4 mt-6 border-t border-border bg-background px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 lg:relative lg:mx-0 lg:mt-6 lg:border-0 lg:px-0 lg:pb-0 lg:pt-0">
+          {!hideInlineBack ? (
+            <button
+              type="button"
+              onClick={onBack}
+              className="mb-3 flex min-h-11 items-center text-sm text-muted-foreground transition-colors hover:text-foreground"
+            >
+              {copy.back}
+            </button>
+          ) : null}
+          {confirmActions}
         </div>
       </div>
     );
@@ -654,22 +697,24 @@ export default function StepConfirm({
 
   return (
     <div className="flex flex-col">
-      <div className="flex flex-col gap-3 booking-panel-bg px-[14px] py-3 md:grid md:grid-cols-2 md:gap-8 md:bg-transparent md:px-8 md:py-7">
+      <div className="flex flex-col gap-3 booking-panel-bg px-4 py-3 md:grid md:grid-cols-2 md:gap-8 md:bg-transparent md:px-8 md:py-7">
         <div>{summaryCards}</div>
         <div>
-          {paymentExtras}
+          {manualPaymentNotice}
           {contactForm}
+          {paymentMethodSelector}
+          {upsellNotice}
         </div>
       </div>
 
       {error && (
-        <div className="mx-[14px] mb-2 flex items-start gap-2 rounded-xl border border-destructive/30 bg-card px-3 py-2.5 text-sm text-destructive md:mx-8">
+        <div className="mx-4 mb-2 flex items-start gap-2 rounded-xl border border-destructive/30 bg-card px-3 py-2.5 text-sm text-destructive md:mx-8">
           <Icon name="exclamation-circle" className="mt-0.5 shrink-0 text-sm" />
           <span>{error}</span>
         </div>
       )}
 
-      <div className="sticky bottom-0 z-10 border-t border-border booking-sticky-bar px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur-md md:relative md:mt-6 md:border-0 md:bg-transparent md:px-8 md:pb-0 md:pt-0">
+      <div className="sticky bottom-0 z-10 border-t border-border bg-background px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 md:relative md:mt-6 md:border-0 md:bg-transparent md:px-8 md:pb-0 md:pt-0">
         <button
           type="button"
           onClick={onBack}
@@ -677,13 +722,7 @@ export default function StepConfirm({
         >
           <Icon name="chevron-left" className="text-sm" /> {copy.back}
         </button>
-        <BookingSubmitButton loading={loading} disabled={!canSubmit} onClick={handleBook}>
-          {payLabel}
-        </BookingSubmitButton>
-        <div className="mt-2 flex items-center justify-center gap-1 md:mt-3">
-          <Icon name="shield-check" className="text-[11px] text-muted-foreground" />
-          <span className="text-[11px] text-muted-foreground">{copy.paymentSecure}</span>
-        </div>
+        {confirmActions}
       </div>
     </div>
   );

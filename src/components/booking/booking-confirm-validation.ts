@@ -76,3 +76,18 @@ export function validateConfirmFields(input: {
     firstError,
   };
 }
+
+/** DOM id of the first invalid field — for focus + scroll on submit. */
+export function firstConfirmFieldId(
+  errors: ConfirmFieldErrors,
+  intakeQuestions: IntakeQuestion[],
+): string | null {
+  if (errors.clientName) return "clientName";
+  if (errors.clientPhone) return "clientPhone";
+  if (errors.clientEmail) return "clientEmail";
+  if (errors.intake) {
+    const question = intakeQuestions.find((q) => errors.intake?.[q.id]);
+    if (question) return `intake-${question.id}`;
+  }
+  return null;
+}
