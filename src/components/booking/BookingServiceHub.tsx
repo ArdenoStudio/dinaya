@@ -82,7 +82,7 @@ export default function BookingServiceHub({
           <div className="relative">
             <BookingHubHeroImage src={heroImageUrl} alt={businessName} />
             <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-card via-card/90 to-transparent px-4 pb-4 pt-20 md:px-6 md:pb-5">
-              <h1 className="font-cal text-[2rem] font-semibold leading-[1.05] tracking-tight text-foreground md:text-4xl">
+              <h1 className="text-2xl font-semibold leading-tight tracking-tight text-foreground md:text-3xl">
                 {businessName}
               </h1>
             </div>
@@ -113,7 +113,7 @@ export default function BookingServiceHub({
 
             <div className="min-w-0 flex-1">
               {!heroImageUrl ? (
-                <h1 className="font-cal text-3xl font-semibold leading-[1.05] tracking-tight text-foreground md:text-4xl">
+                <h1 className="text-2xl font-semibold leading-tight tracking-tight text-foreground md:text-3xl">
                   {businessName}
                 </h1>
               ) : null}
