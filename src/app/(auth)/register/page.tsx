@@ -90,11 +90,17 @@ export default function RegisterPage() {
     slugTouched.current = true;
     setForm((f) => ({ ...f, slug: slugify(value) }));
   }
+  function handleStep1Continue() {
+    setError("");
+    if (form.password.length < 8) {
+      setError("Password must be at least 8 characters.");
+      return;
+    }
+    setStep(2);
+  }
   function handleStep1(e: React.FormEvent) {
     e.preventDefault();
-    setError("");
-    if (form.password.length < 8) { setError("Password must be at least 8 characters."); return; }
-    setStep(2);
+    handleStep1Continue();
   }
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -238,7 +244,7 @@ export default function RegisterPage() {
                 <h1 className="font-cal text-2xl mb-1">Create your account</h1>
                 <p className="text-muted-foreground text-sm mb-6">Start your 14-day free trial. No credit card needed.</p>
 
-                <form onSubmit={handleStep1} className="space-y-4" noValidate>
+                <form onSubmit={handleStep1} action="#" method="post" className="space-y-4" noValidate>
                   <div>
                     <label className="text-sm font-medium text-gray-700 dark:text-gray-300" htmlFor="name">Your name</label>
                     <input ref={step1Ref} id="name" name="name" required autoComplete="name"
@@ -293,7 +299,9 @@ export default function RegisterPage() {
                     </div>
                   )}
 
-                  <button type="submit"
+                  <button
+                    type="button"
+                    onClick={handleStep1Continue}
                     className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-b from-primary/90 to-primary text-primary-foreground py-3 rounded-lg text-sm font-medium border-b-2 border-primary/70 shadow-[0_0_0_2px_rgba(0,0,0,0.04),0_0_14px_0_rgba(99,102,241,0.2)] transition-all hover:shadow-primary/30 hover:shadow-md mt-1">
                     Continue <Icon name="arrow-right" className="text-sm" />
                   </button>

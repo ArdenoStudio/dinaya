@@ -9,6 +9,7 @@ import {
   hubTagline,
   serviceIconName,
 } from "@/lib/booking-hub-present";
+import { BookingServiceArrow } from "@/components/booking/BookingServiceArrow";
 import { Icon } from "@/components/ui/Icon";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
@@ -201,7 +202,7 @@ export default function BookingServiceHub({
 
         <Separator className="bg-border/50" />
 
-        <ul className="flex flex-col gap-2 px-4 md:gap-2 md:px-6 md:pb-2">
+        <ul className="flex flex-col gap-2.5 px-4 py-3 md:gap-2.5 md:px-6 md:pb-4">
           {services.map((service) => {
             const href = buildServiceBookingPath(businessSlug, service.slug ?? service.id);
             const iconName = serviceIconName(service.name);
@@ -211,10 +212,10 @@ export default function BookingServiceHub({
                 <Link
                   href={href}
                   className={cn(
-                    "group flex min-h-[4.75rem] items-start gap-3.5 rounded-xl border border-transparent py-4 md:py-[1.125rem]",
-                    "transition-[background-color,transform,box-shadow,border-color] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]",
-                    "hover:border-border/80 hover:bg-[var(--booking-accent-muted)] hover:shadow-sm",
-                    "active:scale-[0.985] md:hover:translate-y-[-1px]",
+                    "group flex min-h-[4.75rem] items-start gap-3.5 rounded-xl border border-border/50 px-3.5 py-4 md:px-4 md:py-[1.125rem]",
+                    "transition-[background-color,box-shadow,border-color] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]",
+                    "hover:border-[var(--booking-accent)]/25 hover:bg-[var(--booking-accent-muted)] hover:shadow-sm",
+                    "active:scale-[0.99] motion-reduce:active:scale-100",
                     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--booking-accent-soft)]",
                   )}
                 >
@@ -251,10 +252,7 @@ export default function BookingServiceHub({
                     </p>
                   </div>
 
-                  <Icon
-                    name="chevron-right"
-                    className="size-4 shrink-0 self-center text-muted-foreground/60 transition-[transform,color] duration-200 ease-out group-hover:translate-x-1 group-hover:text-[var(--booking-accent)]"
-                  />
+                  <BookingServiceArrow />
                 </Link>
               </li>
             );

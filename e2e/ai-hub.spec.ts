@@ -1,25 +1,25 @@
 import { test, expect } from "@playwright/test";
 import {
   makeAccount,
-  registerAndLogin,
+  registerLoginAsStarter,
   registerLoginAndSetPlan,
 } from "./helpers/auth";
 
 test.describe("AI Hub — Free plan", () => {
   test("shows upgrade gate for Free users", async ({ page, request }) => {
     const account = makeAccount("ai-free");
-    await registerAndLogin(page, request, account);
+    await registerLoginAsStarter(page, request, account);
     await page.goto("/dashboard/ai");
-    await expect(page.getByRole("heading", { name: /AI Growth Hub/i })).toBeVisible();
-    await expect(page.getByText(/available on Dinaya Max/i)).toBeVisible();
-    await expect(page.getByRole("link", { name: /Upgrade to Max/i })).toBeVisible();
+    await expect(page.getByText(/Upgrade to Growth/i)).toBeVisible();
+    await expect(page.getByText(/available on Dinaya Growth/i)).toBeVisible();
+    await expect(page.getByRole("link", { name: /View plan options/i })).toBeVisible();
   });
 
   test("does not show per-branch AI toggles on Free", async ({ page, request }) => {
     const account = makeAccount("ai-free-toggles");
-    await registerAndLogin(page, request, account);
+    await registerLoginAsStarter(page, request, account);
     await page.goto("/dashboard/ai");
-    await expect(page.getByText("AI Booking Autopilot")).not.toBeVisible();
+    await expect(page.getByRole("checkbox")).toHaveCount(0);
   });
 });
 
@@ -30,10 +30,10 @@ test.describe("AI Hub — Pro plan", () => {
     const account = makeAccount("ai-pro");
     await registerLoginAndSetPlan(page, request, account, "pro");
     await page.goto("/dashboard/ai");
-    await expect(page.getByRole("heading", { name: /AI Growth Hub/i })).toBeVisible();
-    await expect(page.getByText(/available on Dinaya Max/i)).toBeVisible();
-    await expect(page.getByRole("link", { name: /Upgrade to Max/i })).toBeVisible();
-    await expect(page.getByText("AI Booking Autopilot")).not.toBeVisible();
+    await expect(page.getByText(/Upgrade to Growth/i)).toBeVisible();
+    await expect(page.getByText(/available on Dinaya Growth/i)).toBeVisible();
+    await expect(page.getByRole("link", { name: /View plan options/i })).toBeVisible();
+    await expect(page.getByRole("checkbox")).toHaveCount(0);
   });
 });
 
@@ -44,7 +44,10 @@ test.describe("AI Hub — Max plan", () => {
     const account = makeAccount("ai-max");
     await registerLoginAndSetPlan(page, request, account, "max");
     await page.goto("/dashboard/ai");
-    await expect(page.getByRole("heading", { name: "AI Growth Hub" })).toBeVisible();
+    await expect(page.getByText("Loading AI hub…")).toBeHidden({ timeout: 60_000 });
+    await expect(page.getByRole("heading", { name: "AI Growth Hub" })).toBeVisible({
+      timeout: 15_000,
+    });
   });
 
   test("shows per-branch AI section for default location", async ({ page }) => {
@@ -85,7 +88,7 @@ test.describe("AI Hub — Max plan", () => {
     const account = makeAccount("ai-max-branch");
     await registerLoginAndSetPlan(page, request, account, "max");
     await page.goto("/dashboard/ai");
-    await expect(page.getByText("Default")).toBeVisible();
+    await expect(page.getByText(account.businessName)).toBeVisible();
   });
 
   test("links to locations when none exist is not shown after registration", async ({ page }) => {

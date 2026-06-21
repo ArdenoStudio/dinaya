@@ -21,7 +21,8 @@ import { ServiceMetaPanel } from "./ServiceMetaPanel";
 import { BookingWizardSkeleton } from "./BookingWizardSkeleton";
 import BookingBranding from "./BookingBranding";
 import { BookingChoiceSummary } from "./BookingChoiceSummary";
-import { BookingBackPill } from "./BookingBackPill";
+import { BookingBreadcrumb } from "./BookingBreadcrumb";
+import { buildBookingBreadcrumbItems } from "./booking-breadcrumb";
 import { BookingTeamSection } from "./BookingTeamSection";
 import { BookingAttributionCapture } from "./BookingAttributionCapture";
 import { BookingDealsSection } from "./BookingDealsSection";
@@ -440,24 +441,23 @@ function BookingWizardInner({
     onChangeService: !lockServiceSelection && !hubHref ? clearService : undefined,
   };
 
-  const showBackPill =
+  const showBreadcrumb =
     !embedMode &&
     Boolean(state.service) &&
     (Boolean(hubHref) || (!lockServiceSelection && services.length > 1));
 
-  const backPillLabel = showContactForm
-    ? copy.dateTime
-    : hubHref
-      ? copy.allServices
-      : copy.back;
-
-  const backPillHref = showContactForm ? undefined : hubHref ?? undefined;
-
-  const backPillOnClick = showContactForm
-    ? clearSlot
-    : !hubHref && !lockServiceSelection
-      ? clearService
-      : undefined;
+  const breadcrumbItems = state.service
+    ? buildBookingBreadcrumbItems({
+        copy,
+        service: state.service,
+        showContactForm,
+        hubHref,
+        lockServiceSelection,
+        multiService: services.length > 1,
+        onBackToServices: clearService,
+        onBackToDateTime: clearSlot,
+      })
+    : [];
 
   const choiceDateLabel = state.date
     ? format(parseISO(state.date + "T12:00:00"), "EEE d MMM")
@@ -465,13 +465,9 @@ function BookingWizardInner({
 
   return (
     <BookingTheme accentColor={business.accentColor} embed={embedMode}>
-      {showBackPill && (
+      {showBreadcrumb && (
         <div className="mb-3 flex justify-start px-4 md:mb-4 md:px-0">
-          <BookingBackPill
-            label={backPillLabel}
-            href={backPillHref}
-            onClick={backPillOnClick}
-          />
+          <BookingBreadcrumb items={breadcrumbItems} />
         </div>
       )}
       <div className="w-full min-w-0 max-w-full bg-card lg:overflow-visible lg:rounded-xl lg:border lg:border-border lg:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)] dark:lg:shadow-none dark:lg:ring-1 dark:lg:ring-white/10">
@@ -552,7 +548,7 @@ function BookingWizardInner({
                         onUpdate={update}
                         onBack={clearSlot}
                         onConfirmed={handleConfirmed}
-                        hideInlineBack={showBackPill}
+                        hideInlineBack={showBreadcrumb}
                       />
                     </div>
                   ) : (
