@@ -61,7 +61,7 @@ function HubBusinessLogo({
   return (
     <div
       className={cn(
-        "flex size-[4.5rem] shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-border/60 bg-muted/40 shadow-sm ring-1 ring-border/30 md:size-20",
+        "flex size-[4.5rem] shrink-0 items-center justify-center overflow-hidden rounded-full border border-border/60 bg-muted/40 shadow-md ring-2 ring-card md:size-20",
         logoUrl && "bg-card",
         className,
       )}
@@ -73,7 +73,7 @@ function HubBusinessLogo({
           alt=""
           width={72}
           height={72}
-          className="size-full bg-white object-contain p-2"
+          className="size-full bg-white object-cover"
           unoptimized={!isOptimizableRemoteImage(logoUrl)}
         />
       ) : (
@@ -120,7 +120,7 @@ export default function BookingServiceHub({
     : "overflow-hidden rounded-2xl border-x-0 bg-card shadow-none md:border md:border-border/80 md:shadow-[0_12px_40px_-24px_rgba(15,23,42,0.28)] dark:md:shadow-none dark:md:ring-1 dark:md:ring-white/10";
 
   const contentShell = heroImageUrl
-    ? "relative z-10 -mt-6 flex flex-col rounded-t-2xl bg-card pt-12 md:pt-14"
+    ? "relative z-10 -mt-6 flex flex-col rounded-t-2xl bg-card pt-11 md:pt-12"
     : "flex flex-col";
 
   return (
@@ -129,8 +129,8 @@ export default function BookingServiceHub({
         {heroImageUrl ? (
           <div className="relative">
             <BookingHubHeroImage src={heroImageUrl} alt={businessName} />
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex justify-center">
-              <div className="pointer-events-auto translate-y-1/2">
+            <div className="pointer-events-none absolute inset-x-0 bottom-3 z-20 flex justify-center md:bottom-4">
+              <div className="pointer-events-auto translate-y-1/3">
                 <HubBusinessLogo businessName={businessName} logoUrl={businessLogoUrl} />
               </div>
             </div>
