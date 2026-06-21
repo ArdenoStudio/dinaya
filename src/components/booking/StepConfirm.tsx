@@ -450,7 +450,11 @@ export default function StepConfirm({
 
   const contactForm = (
     <div className="space-y-4 md:rounded-xl md:border md:border-border md:bg-card md:p-6">
-      <p className="text-base font-semibold text-foreground">{copy.details}</p>
+      {hideInlineBack ? (
+        <p className="text-sm text-muted-foreground">{copy.detailsHint}</p>
+      ) : (
+        <p className="text-base font-semibold text-foreground">{copy.details}</p>
+      )}
       <div>
         <label htmlFor="clientName" className="text-sm font-medium text-foreground">
           Full name <span className="font-normal text-muted-foreground">*</span>
@@ -616,6 +620,35 @@ export default function StepConfirm({
     </>
   );
 
+  const inlinePaymentSummary =
+    service && service.priceLkr > 0 ? (
+      <div className="mt-6 space-y-2 rounded-xl border border-border bg-card p-4">
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-sm text-muted-foreground">{copy.fullAmount}</p>
+          <p className="text-base font-semibold tabular-nums text-foreground">
+            {selectedDeal ? (
+              <>
+                <span className="mr-2 text-sm font-normal text-muted-foreground line-through">
+                  {formatLkr(service.priceLkr)}
+                </span>
+                {formatLkr(discountedPrice)}
+              </>
+            ) : (
+              formatLkr(service.priceLkr)
+            )}
+          </p>
+        </div>
+        {service.requiresPayment && service.depositPercent > 0 && dueNow > 0 && (
+          <div className="flex items-center justify-between text-sm">
+            <p className="text-muted-foreground">
+              {copy.depositDue} ({service.depositPercent}%)
+            </p>
+            <p className="font-medium tabular-nums booking-text-accent">{formatLkr(dueNow)}</p>
+          </div>
+        )}
+      </div>
+    ) : null;
+
   if (variant === "inline") {
     return (
       <div id={formId}>
@@ -627,8 +660,9 @@ export default function StepConfirm({
             <span>{error}</span>
           </div>
         )}
+        {inlinePaymentSummary}
         <BookingSubmitButton
-          className="mt-6"
+          className={inlinePaymentSummary ? "mt-4" : "mt-6"}
           loading={loading}
           disabled={!canSubmit}
           onClick={handleBook}

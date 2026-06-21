@@ -88,6 +88,7 @@ export function ServiceMetaPanel({
 
   const staffLabel = staff && staff.name !== business.name ? staff.name : null;
   const rating = getBusinessRating(avgRating, reviewCount);
+  const showAppointmentTicket = Boolean(service && dateLabel && timeLabel);
 
   return (
     <div className="flex flex-col">
@@ -102,7 +103,7 @@ export function ServiceMetaPanel({
         </Avatar>
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-medium text-foreground">{business.name}</p>
-          {rating && (
+          {rating && !showAppointmentTicket && (
             <BusinessRating
               avgRating={rating.avgRating}
               reviewCount={rating.reviewCount}
@@ -126,7 +127,72 @@ export function ServiceMetaPanel({
       )}
 
       <AnimatePresence>
-        {service && (
+        {service && showAppointmentTicket && (
+          <m.div
+            key="appointment-ticket"
+            {...fadeInUp}
+            className="mt-6 rounded-xl border border-border bg-card p-4"
+          >
+            <p className="mb-3 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              {copy.appointment}
+            </p>
+            <p className="text-base font-semibold leading-snug text-foreground">{service.name}</p>
+            <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
+              <span className="inline-flex items-center gap-1.5">
+                <Icon name="clock" className="size-3.5 shrink-0" />
+                {formatDuration(service.durationMinutes)}
+              </span>
+              {service.priceLkr > 0 && (
+                <>
+                  <span aria-hidden className="text-muted-foreground/50">
+                    ·
+                  </span>
+                  <BookingServicePrice
+                    priceLkr={service.priceLkr}
+                    displayPrice={selectedDeal && service.priceLkr > 0 ? price : undefined}
+                  />
+                </>
+              )}
+            </div>
+            {staffLabel && (
+              <p className="mt-2.5 flex items-center gap-2 text-sm text-muted-foreground">
+                <Icon name="person" className="shrink-0 text-base" />
+                <span className="text-foreground">{staffLabel}</span>
+              </p>
+            )}
+            {anyStaff && !staff && (
+              <p className="mt-2.5 flex items-center gap-2 text-sm text-muted-foreground">
+                <Icon name="people" className="shrink-0 text-base" />
+                <span className="text-foreground">{copy.anyAvailableStaff}</span>
+              </p>
+            )}
+            <div className="mt-3 space-y-2 border-t border-border/70 pt-3 text-sm">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Icon name="calendar3" className="size-3.5 shrink-0" />
+                <span className="text-foreground">{dateLabel}</span>
+              </div>
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Icon name="clock" className="size-3.5 shrink-0 text-[var(--booking-accent)]" />
+                <span className="font-medium text-foreground">{timeLabel}</span>
+              </div>
+            </div>
+            {service.depositPercent > 0 && service.priceLkr > 0 && (
+              <p className="mt-3 text-xs text-[var(--booking-accent)]">
+                {copy.depositDue}: {formatLkr(Math.ceil((price * service.depositPercent) / 100))}
+              </p>
+            )}
+            {holdLabel && (
+              <p className="mt-3 rounded-lg booking-bg-accent-muted px-3 py-2 text-xs font-medium booking-text-accent">
+                <Icon name="clock" className="mr-1.5" />
+                {holdLabel}
+              </p>
+            )}
+          </m.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {service && !showAppointmentTicket && (
           <m.div
             key="service-info"
             {...fadeInUp}
@@ -202,38 +268,6 @@ export function ServiceMetaPanel({
       {service && !staff && !anyStaff && !needsStaffPicker && (
         <p className="mt-3 text-center text-sm text-amber-600">{copy.noStaff}</p>
       )}
-
-      {service && timeLabel && (
-        <div className="mt-6 hidden border-t border-border/70 pt-4 lg:block">
-          <div className="space-y-2 text-sm">
-            {dateLabel && (
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Icon name="calendar3" className="size-3.5 shrink-0" />
-                <span className="text-foreground">{dateLabel}</span>
-              </div>
-            )}
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Icon name="clock" className="size-3.5 shrink-0 text-[var(--booking-accent)]" />
-              <span className="font-medium text-foreground">{timeLabel}</span>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <AnimatePresence>
-        {holdLabel && dateLabel && timeLabel && (
-          <m.div
-            key="selected-time"
-            {...fadeInUp}
-            className="mt-4 hidden rounded-lg booking-bg-accent-muted px-3 py-2 lg:block"
-          >
-            <p className="text-xs font-medium booking-text-accent">
-              <Icon name="clock" className="mr-1.5" />
-              {holdLabel}
-            </p>
-          </m.div>
-        )}
-      </AnimatePresence>
 
       {slotUnavailable && (
         <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:border-amber-800/50 dark:bg-amber-950/40 dark:text-amber-200">
