@@ -27,6 +27,7 @@
     "test:e2e:full": "E2E_DISABLE_RATE_LIMIT=true playwright test",
     "seed:personas": "tsx scripts/seed-e2e-personas.ts",
     "seed:personas:clean": "tsx scripts/seed-e2e-personas.ts --clean",
+    "seed:personas:enrich": "tsx scripts/seed-e2e-personas.ts --enrich-rich",
     "seed:personas:manifest": "tsx scripts/rebuild-persona-manifest.ts",
     "test:personas": "E2E_DISABLE_RATE_LIMIT=true tsx scripts/run-persona-journeys.ts",
     "test:e2e:personas": "E2E_DISABLE_RATE_LIMIT=true playwright test e2e/personas.spec.ts",

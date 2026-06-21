@@ -1,13 +1,15 @@
 import { randomUUID } from "node:crypto";
 import bcrypt from "bcryptjs";
 import { addDays } from "date-fns";
-import { inArray, like } from "drizzle-orm";
+import { eq, inArray, like } from "drizzle-orm";
 import { db } from "@/db";
 import {
   availability,
   businesses,
+  clients,
   locations,
   messageTemplates,
+  reviews,
   services,
   staff,
   staffLocations,
@@ -16,6 +18,9 @@ import {
 } from "@/db/schema";
 import { TRIAL_LENGTH_DAYS } from "@/lib/plan";
 import type { RegisterInput } from "@/lib/schemas/register";
+import { isRichPersonaIndex, RICH_PERSONA_INTERVAL } from "./persona-journey-matrix";
+
+export { RICH_PERSONA_INTERVAL, isRichPersonaIndex };
 
 export const PERSONA_PASSWORD = "TestPass123!";
 export const PERSONA_SLUG_PREFIX = "e2e-persona-";
@@ -38,6 +43,10 @@ export type PersonaRecord = {
   locationId: string;
   serviceId: string;
   serviceName: string;
+  /** Every 50th persona gets CRM/review seed data for deeper journeys. */
+  rich?: boolean;
+  clientId?: string;
+  reviewId?: string;
 };
 
 const BUSINESS_TYPES: NonNullable<RegisterInput["businessType"]>[] = [
@@ -102,6 +111,64 @@ async function passwordHash(): Promise<string> {
     cachedPasswordHash = await bcrypt.hash(PERSONA_PASSWORD, 10);
   }
   return cachedPasswordHash;
+}
+
+/** CRM + review seed for limit/CRM/growth journey phases. */
+export async function enrichRichPersona(record: PersonaRecord): Promise<PersonaRecord> {
+  const phoneSuffix = String(record.index).padStart(7, "0").slice(-7);
+  const phone = `+9477${phoneSuffix}`;
+
+  const [existingClient] = await db
+    .select({ id: clients.id })
+    .from(clients)
+    .where(eq(clients.businessId, record.businessId))
+    .limit(1);
+  const [existingReview] = await db
+    .select({ id: reviews.id })
+    .from(reviews)
+    .where(eq(reviews.businessId, record.businessId))
+    .limit(1);
+
+  const clientId = existingClient?.id ?? randomUUID();
+  const reviewId = existingReview?.id ?? randomUUID();
+
+  await db
+    .update(businesses)
+    .set({
+      onboardingCompletedAt: new Date(),
+      onboardingStep: 4,
+    })
+    .where(eq(businesses.id, record.businessId));
+
+  if (!existingClient) {
+    await db.insert(clients).values({
+      id: clientId,
+      businessId: record.businessId,
+      name: `Rich Client ${record.index}`,
+      phone,
+      email: `rich-client-${record.index}@${PERSONA_EMAIL_DOMAIN}`,
+      stage: "active",
+      source: "persona-seed",
+    });
+  }
+
+  if (!existingReview) {
+    await db.insert(reviews).values({
+      id: reviewId,
+      businessId: record.businessId,
+      clientName: `Reviewer ${record.index}`,
+      rating: 5,
+      comment: "Great experience from persona seed.",
+      isPublished: true,
+    });
+  }
+
+  return {
+    ...record,
+    rich: true,
+    clientId,
+    reviewId,
+  };
 }
 
 export function buildPersonaMeta(index: number): Omit<
@@ -212,7 +279,7 @@ export async function seedPersona(index: number): Promise<PersonaRecord> {
     }),
   ]);
 
-  return {
+  let result: PersonaRecord = {
     ...meta,
     businessId,
     staffId,
@@ -220,6 +287,12 @@ export async function seedPersona(index: number): Promise<PersonaRecord> {
     serviceId,
     serviceName: preset.name,
   };
+
+  if (isRichPersonaIndex(index)) {
+    result = await enrichRichPersona(result);
+  }
+
+  return result;
 }
 
 export async function deletePersonasBySlugPrefix(prefix = PERSONA_SLUG_PREFIX): Promise<number> {

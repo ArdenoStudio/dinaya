@@ -99,10 +99,11 @@ test.describe("Plan features — Pro plan", () => {
     expect(sixth.ok).toBe(true);
   });
 
-  test("blocks a fourth location on Pro (3-location cap)", async ({ page }) => {
-    await addLocations(page, ["Branch Two", "Branch Three"]);
+  test("blocks a second location on Pro (1-location cap)", async ({ page }) => {
+    await page.goto("/dashboard/locations");
+    await expect(page.getByText(/1\/1 on Pro plan/i)).toBeVisible({ timeout: 15_000 });
     await expect(page.getByRole("button", { name: /Add location/i })).not.toBeVisible();
-    await expect(page.getByText(/reached your plan limit of 3 locations/i)).toBeVisible();
+    await expect(page.getByText(/reached your plan limit of 1 location/i)).toBeVisible();
   });
 
   test("reviews page still hides AI reply generation on Pro", async ({ page, request }) => {
@@ -155,10 +156,14 @@ test.describe("Plan features — Max plan", () => {
     );
   });
 
-  test("can add a fourth location on Max (beyond Pro cap)", async ({ page }) => {
-    await addLocations(page, ["Branch Two", "Branch Three", "Branch Four"]);
-    await expect(page.getByText("Branch Four")).toBeVisible();
-    await expect(page.getByRole("button", { name: /Add location/i })).toBeVisible();
+  test("can add two more locations on Max (3-location cap)", async ({ page }) => {
+    await page.goto("/dashboard/locations");
+    await expect(page.getByText(/1\/3 on Growth plan/i)).toBeVisible({ timeout: 15_000 });
+    await addLocations(page, ["Branch Two", "Branch Three"]);
+    await expect(page.getByText("Branch Three")).toBeVisible();
+    await expect(page.getByText(/3\/3 on Growth plan/i)).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByRole("button", { name: /Add location/i })).not.toBeVisible();
+    await expect(page.getByText(/reached your plan limit of 3 locations/i)).toBeVisible();
   });
 
   test("shows AI reply generation on Max when a review exists", async ({ page, request }) => {
