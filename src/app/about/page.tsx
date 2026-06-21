@@ -5,6 +5,7 @@ import { PublicNav } from "@/components/PublicNav";
 import { FadeContainer, FadeDiv, FadeSpan } from "@/components/Fade";
 import { LandingFooter } from "@/components/LandingFooter";
 import { Icon } from "@/components/ui/Icon";
+import { MARKETING_CTA_PRIMARY } from "@/lib/marketing-copy";
 
 export const metadata: Metadata = {
   title: "About Us — The Booking Tool Sri Lanka Needed | Dinaya",
@@ -198,7 +199,7 @@ export default function AboutPage() {
                   href="/register"
                   className="inline-flex items-center gap-2 bg-white text-blue-700 px-7 py-3.5 rounded-xl font-semibold shadow-lg hover:bg-blue-50 transition-colors"
                 >
-                  Create your page — it&apos;s free
+                  {MARKETING_CTA_PRIMARY}
                   <Icon name="arrow-right" className="text-sm" />
                 </Link>
                 <Link

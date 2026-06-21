@@ -9,7 +9,7 @@ const toneStyles = {
   },
   cobalt: {
     bar: "bg-primary",
-    icon: "bg-blue-50 dark:bg-blue-950/40 text-primary dark:bg-blue-950/50 dark:text-blue-300",
+    icon: "bg-blue-50 text-primary dark:bg-blue-950/40 dark:text-blue-300",
   },
   slate: {
     bar: "bg-slate-500",

@@ -7,6 +7,7 @@ import { FadeContainer, FadeDiv, FadeSpan } from "@/components/Fade";
 import { LandingFooter } from "@/components/LandingFooter";
 import { Icon } from "@/components/ui/Icon";
 import { getPublicSupportWhatsApp } from "@/lib/public-support";
+import { MARKETING_CTA_PRIMARY } from "@/lib/marketing-copy";
 
 const supportWhatsApp = getPublicSupportWhatsApp();
 
@@ -333,7 +334,7 @@ export default function ContactPage() {
                   href="/register"
                   className="inline-flex items-center gap-2 bg-white text-blue-700 px-7 py-3.5 rounded-xl font-semibold shadow-lg hover:bg-blue-50 transition-colors"
                 >
-                  Start free trial
+                  {MARKETING_CTA_PRIMARY}
                   <Icon name="arrow-right" className="text-sm" />
                 </Link>
                 <Link

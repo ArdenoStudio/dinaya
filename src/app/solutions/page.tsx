@@ -4,6 +4,7 @@ import { FadeContainer, FadeDiv, FadeSpan } from "@/components/Fade";
 import { PublicNav } from "@/components/PublicNav";
 import { LandingFooter } from "@/components/LandingFooter";
 import { Icon } from "@/components/ui/Icon";
+import { MARKETING_CTA_HERO, MARKETING_CTA_PRIMARY } from "@/lib/marketing-copy";
 
 export const metadata: Metadata = {
   title: "Solutions — Salons, Clinics, Tutors & More | Dinaya",
@@ -318,7 +319,7 @@ export default function SolutionsPage() {
                   href="/register"
                   className="inline-flex items-center justify-center gap-2 bg-gradient-to-b from-primary/90 to-primary text-primary-foreground px-4 py-2.5 rounded-lg text-sm font-medium border-b-2 border-primary/70 shadow-sm transition-all hover:shadow-primary/30 hover:shadow-md"
                 >
-                  Create your page
+                  {MARKETING_CTA_HERO}
                   <Icon name="arrow-right" className="text-sm" />
                 </Link>
               </div>
@@ -365,7 +366,7 @@ export default function SolutionsPage() {
                 href="/register"
                 className="inline-flex items-center gap-2 bg-white text-blue-700 px-7 py-3.5 rounded-xl font-semibold shadow-lg hover:bg-blue-50 transition-colors"
               >
-                Start free trial
+                {MARKETING_CTA_PRIMARY}
                 <Icon name="arrow-right" className="text-sm" />
               </Link>
             </div>

@@ -6,6 +6,7 @@ import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { slugify } from "@/lib/utils";
 import { trackSignup } from "@/lib/analytics/gtag";
+import { MARKETING_CTA_PRIMARY } from "@/lib/marketing-copy";
 import { Logo } from "@/components/Logo";
 import { AuthThemeToggle } from "@/components/AuthThemeToggle";
 import { Icon } from "@/components/ui/Icon";
@@ -319,18 +320,18 @@ export default function RegisterPage() {
                   <div>
                     <label className="text-sm font-medium text-gray-700 dark:text-gray-300" htmlFor="slug">Your booking URL</label>
                     <div className="mt-1.5 flex items-center border border-gray-200 dark:border-neutral-800 rounded-lg overflow-hidden bg-white dark:bg-neutral-900 focus-within:ring-2 focus-within:ring-primary/40 transition-all">
-                      <span className="bg-gray-50 dark:bg-neutral-900/60 text-gray-300 text-sm px-3 py-2.5 border-r border-gray-200 dark:border-neutral-800 whitespace-nowrap select-none">
-                        dinaya.lk/
-                      </span>
                       <input id="slug" name="slug" required value={form.slug}
                         onChange={(e) => handleSlugChange(e.target.value)}
                         className="flex-1 px-3 py-2.5 text-sm focus:outline-none placeholder:text-gray-300 dark:placeholder:text-neutral-600"
                         placeholder="your-business" />
+                      <span className="bg-gray-50 dark:bg-neutral-900/60 text-gray-500 text-sm px-3 py-2.5 border-l border-gray-200 dark:border-neutral-800 whitespace-nowrap select-none">
+                        .dinaya.lk
+                      </span>
                     </div>
                     {form.slug && (
-                      <p className="text-xs text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-1.5 flex items-center gap-1">
+                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-1.5 flex items-center gap-1">
                         <Icon name="check-circle" className="text-emerald-500" />
-                        Clients will book at <span className="font-medium text-gray-600 dark:text-gray-400">dinaya.lk/{form.slug}</span>
+                        Clients will book at <span className="font-medium text-gray-600 dark:text-gray-400">{form.slug}.dinaya.lk</span>
                       </p>
                     )}
                   </div>
@@ -378,7 +379,7 @@ export default function RegisterPage() {
                   <button type="submit" disabled={loading}
                     className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-b from-primary/90 to-primary text-primary-foreground py-3 rounded-lg text-sm font-medium border-b-2 border-primary/70 shadow-[0_0_0_2px_rgba(0,0,0,0.04),0_0_14px_0_rgba(99,102,241,0.2)] transition-all hover:shadow-primary/30 hover:shadow-md disabled:cursor-not-allowed mt-1">
                     {loading && <Icon name="arrow-repeat" className="text-sm animate-spin" />}
-                    {loading ? "Creating…" : "Start free trial"}
+                    {loading ? "Creating…" : MARKETING_CTA_PRIMARY}
                   </button>
                 </form>
               </>

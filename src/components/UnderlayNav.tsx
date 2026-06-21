@@ -8,6 +8,7 @@ import { LogoIcon } from "@/components/Logo";
 import { useNav } from "@/context/NavContext";
 import { GlassButton } from "@/components/ui/glass-button";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { MARKETING_CTA_NAV, MARKETING_CTA_PRIMARY } from "@/lib/marketing-copy";
 
 const WEBP_DISPLACEMENT_MAP = (GlassButton as typeof GlassButton & { displacementMap: string }).displacementMap;
 
@@ -19,6 +20,7 @@ const NAV_LINKS = [
   { label: "Pricing",   href: "/pricing"   },
   { label: "Solutions", href: "/solutions" },
   { label: "Discover",  href: "/discover", matchPrefix: true },
+  { label: "Docs",      href: "/docs"      },
   { label: "Help",      href: "/help"      },
   { label: "Our Story", href: "/our-story" },
   { label: "Contact",   href: "/contact"   },
@@ -210,7 +212,7 @@ export function UnderlayNav() {
               className="text-base font-semibold bg-primary text-white
                          px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors whitespace-nowrap"
             >
-              Get started
+              {MARKETING_CTA_NAV}
             </Link>
           </div>
         </div>
@@ -287,7 +289,7 @@ export function UnderlayNav() {
                     onClick={close}
                     className="block text-center py-3.5 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors"
                   >
-                    Get started free →
+                    {MARKETING_CTA_PRIMARY} →
                   </Link>
                 </motion.div>
 
@@ -412,13 +414,13 @@ export function UnderlayNav() {
                 >
                   <div className="flex flex-col gap-2">
                     <span className="self-start text-[0.6875rem] font-bold tracking-widest uppercase bg-primary text-white px-2.5 py-1 rounded-full">
-                      Get started
+                      {MARKETING_CTA_NAV}
                     </span>
                     <p className="text-gray-900 dark:text-gray-100 font-bold text-base leading-snug">
-                      Book your first session today
+                      Launch your booking page
                     </p>
                     <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
-                      Discover instructors near you and manage your bookings in one place.
+                      Set up services, share your link, and let clients book and pay without WhatsApp back-and-forth.
                     </p>
                   </div>
                   <Link
@@ -426,7 +428,7 @@ export function UnderlayNav() {
                     onClick={close}
                     className="block text-center text-sm font-semibold bg-primary text-white py-2.5 rounded-lg hover:bg-primary/90 transition-colors"
                   >
-                    Start free trial →
+                    {MARKETING_CTA_PRIMARY} →
                   </Link>
                 </motion.div>
 

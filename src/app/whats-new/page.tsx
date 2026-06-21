@@ -7,6 +7,7 @@ import { FadeContainer, FadeDiv } from "@/components/Fade";
 import { motion, AnimatePresence } from "motion/react";
 import { LandingFooter } from "@/components/LandingFooter";
 import { Icon } from "@/components/ui/Icon";
+import { MARKETING_CTA_PRIMARY } from "@/lib/marketing-copy";
 
 type FilterTag = "all" | "feature" | "improvement" | "fix";
 
@@ -287,7 +288,7 @@ export default function WhatsNewPage() {
                   href="/register"
                   className="inline-flex items-center gap-2 bg-primary text-white text-sm font-semibold px-5 py-2.5 rounded-lg hover:bg-primary/90 transition-colors shadow-sm shadow-primary/20"
                 >
-                  Get started free
+                  {MARKETING_CTA_PRIMARY}
                   <Icon name="arrow-right" className="text-xs" />
                 </Link>
                 <Link
@@ -492,7 +493,7 @@ export default function WhatsNewPage() {
                 href="/register"
                 className="inline-flex items-center gap-2 bg-primary text-white text-sm font-semibold px-4 py-2.5 rounded-lg hover:bg-primary/90 transition-colors shadow-sm shadow-primary/20"
               >
-                Get started free
+                {MARKETING_CTA_PRIMARY}
                 <Icon name="arrow-right" className="text-xs" />
               </Link>
             </div>

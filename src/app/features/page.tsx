@@ -5,6 +5,7 @@ import { PublicNav } from "@/components/PublicNav";
 import { CTAPrimaryButton } from "@/components/cta-primary-button";
 import { LandingFooter } from "@/components/LandingFooter";
 import { Icon } from "@/components/ui/Icon";
+import { MARKETING_CTA_HERO, MARKETING_CTA_PRIMARY } from "@/lib/marketing-copy";
 
 export const metadata: Metadata = {
   title: "Features — Booking, Payments & Client Engagement | Dinaya",
@@ -153,7 +154,7 @@ const highlights = [
 
 export default function FeaturesPage() {
   return (
-    <main className="min-h-screen bg-white dark:bg-neutral-950">
+    <div className="min-h-screen bg-white dark:bg-neutral-950">
       <PublicNav />
 
       {/* Hero */}
@@ -207,7 +208,7 @@ export default function FeaturesPage() {
       <section className="max-w-6xl mx-auto px-6 pb-20" id="booking">
         <div className="mb-10">
           <div className="inline-flex items-center gap-2 rounded-xl ring-1 ring-amber-100 dark:ring-amber-900/50 bg-amber-50 dark:bg-amber-950/40 px-3.5 py-2 mb-4">
-            <span className="flex h-6 w-6 items-center justify-center rounded-md bg-amber-50 dark:bg-amber-950/400 text-white">
+            <span className="flex h-6 w-6 items-center justify-center rounded-md bg-amber-600 text-white">
               <Icon name="calendar" className="text-xs" />
             </span>
             <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">Booking</span>
@@ -312,16 +313,16 @@ export default function FeaturesPage() {
             <span className="flex h-6 w-6 items-center justify-center rounded-md bg-amber-600 text-white">
               <Icon name="stars" className="text-xs" />
             </span>
-            <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">Max AI growth</span>
-            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-800">
-              Available on Max
+            <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">Growth AI</span>
+            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-800 dark:bg-amber-950/50 dark:text-amber-200">
+              Available on Growth
             </span>
           </div>
           <h2 className="font-cal text-3xl md:text-4xl tracking-tight mb-3">
             Growth on autopilot.
           </h2>
           <p className="text-muted-foreground max-w-xl">
-            Seven AI-powered Max tools that fill your calendar, win back clients, and keep your social presence active — without adding hours to your week.
+            Seven AI-powered Growth tools that fill your calendar, win back clients, and keep your social presence active — without adding hours to your week.
           </p>
         </div>
 
@@ -346,7 +347,7 @@ export default function FeaturesPage() {
             href="/pricing"
             className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
           >
-            See Max pricing
+            See Growth pricing
             <Icon name="arrow-right" className="text-sm" />
           </Link>
         </div>
@@ -371,7 +372,7 @@ export default function FeaturesPage() {
           {[
             {
               number: "1",
-              title: "Create your page",
+              title: MARKETING_CTA_HERO,
               desc: "Sign up, add your services, set your hours. Takes under five minutes. Your page is live immediately at yourname.dinaya.lk.",
             },
             {
@@ -458,7 +459,7 @@ export default function FeaturesPage() {
                 href="/register"
                 className="inline-flex items-center gap-2 bg-white text-blue-700 px-7 py-3.5 rounded-xl font-semibold shadow-lg hover:bg-blue-50 transition-colors"
               >
-                Create your page — it&apos;s free
+                {MARKETING_CTA_PRIMARY}
                 <Icon name="arrow-right" className="text-sm" />
               </Link>
             </div>
@@ -467,6 +468,6 @@ export default function FeaturesPage() {
       </section>
 
       <LandingFooter />
-    </main>
+    </div>
   );
 }
