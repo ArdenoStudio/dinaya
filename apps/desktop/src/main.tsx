@@ -10,6 +10,11 @@ import {
 } from "../../../src/lib/dashboard-route-map";
 import { slugify } from "../../../src/lib/utils";
 import { buildDesktopApiPath, desktopApiRequest } from "./desktop-api";
+import { findDashboardRouteByHref, hrefForView } from "./lib/routes";
+import { DesktopDashboardShell } from "./shell/DesktopDashboardShell";
+import { DesktopBookingsView } from "./views/DesktopBookingsView";
+import { DesktopOverviewView } from "./views/DesktopOverviewView";
+import "./globals.css";
 import "./styles.css";
 
 type Business = {
@@ -2232,6 +2237,7 @@ function App() {
     typeof window !== "undefined" && window.location.hash === "#register" ? "register" : "login",
   );
   const [business, setBusiness] = useState<Business | null>(null);
+  const [user, setUser] = useState<LoginPayload["user"] | null>(null);
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const [view, setView] = useState<View>("overview");
   const [tab, setTab] = useState<Tab>("today");
@@ -2408,6 +2414,31 @@ function App() {
   const initialNotificationSync = useRef(true);
 
   const route = findDashboardRoute(view) ?? findDashboardRoute("overview")!;
+
+  const refreshing =
+    syncing ||
+    moduleLoading ||
+    calendarLoading ||
+    availabilityLoading ||
+    clientsLoading ||
+    servicesLoading ||
+    staffLoading ||
+    locationsLoading ||
+    billingLoading ||
+    paymentsLoading ||
+    reviewsLoading ||
+    dealsLoading ||
+    broadcastsLoading ||
+    marketingLoading ||
+    aiRunsLoading ||
+    automationsLoading ||
+    integrationsLoading ||
+    reportsLoading;
+
+  function navigateByHref(href: string) {
+    const nextRoute = findDashboardRouteByHref(href);
+    if (nextRoute) openRoute(nextRoute);
+  }
 
   const visibleRows = useMemo(() => {
     if (view === "overview") return rows.filter((row) => isActiveDailyStatus(row.status));
@@ -4034,6 +4065,7 @@ function App() {
 
   async function completeAuthSession(payload: LoginPayload) {
     setBusiness(payload.business);
+    setUser(payload.user);
     setAuthReady(true);
     setAuthView("login");
     setView("overview");
@@ -4076,6 +4108,7 @@ function App() {
     setAuthReady(false);
     setAuthView("login");
     setBusiness(null);
+    setUser(null);
     setRows([]);
     setDetail(null);
     setSelectedId(null);
@@ -4879,57 +4912,68 @@ function App() {
   }
 
   return (
-    <div className="desktop-shell">
+    <>
       <a className="skip-link" href="#desktop-main">
         Skip to dashboard content
       </a>
-      <DashboardSidebar
-        business={business}
-        currentView={view}
-        onRoute={openRoute}
-      />
-
-      <main id="desktop-main" className="main-pane" tabIndex={-1}>
-        <header className="topbar glass-surface" aria-busy={syncing || moduleLoading || calendarLoading || availabilityLoading || clientsLoading || servicesLoading || staffLoading || locationsLoading || billingLoading || paymentsLoading || reviewsLoading || dealsLoading || broadcastsLoading || marketingLoading || aiRunsLoading || automationsLoading || integrationsLoading || reportsLoading}>
-          <div className="topbar-title">
-            <p className="eyebrow">{business?.name ?? "Dinaya"}</p>
-            <h1>{route.label}</h1>
-          </div>
-          <div className="command-bar">
-            <input
-              aria-label="Search dashboard"
-              placeholder="Search bookings, clients, services"
-              type="search"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") applyGlobalSearch();
-              }}
-            />
-            <button className="small" aria-haspopup="dialog" onClick={openCommandPalette}>
-              Command
-            </button>
-            <button className="primary small" disabled={syncing || moduleLoading || calendarLoading || availabilityLoading || clientsLoading || servicesLoading || staffLoading || locationsLoading || billingLoading || paymentsLoading || reviewsLoading || dealsLoading || broadcastsLoading || marketingLoading || aiRunsLoading || automationsLoading || integrationsLoading || reportsLoading} onClick={refreshCurrentView}>
-              {syncing || moduleLoading || calendarLoading || availabilityLoading || clientsLoading || servicesLoading || staffLoading || locationsLoading || billingLoading || paymentsLoading || reviewsLoading || dealsLoading || broadcastsLoading || marketingLoading || aiRunsLoading || automationsLoading || integrationsLoading || reportsLoading ? "Syncing..." : "Refresh"}
-            </button>
-          </div>
-        </header>
-
-        {error && <div className="error-banner" aria-live="assertive" role="alert">{error}</div>}
-        {offlineNotice && <div className="offline-banner" aria-live="polite" role="status">{offlineNotice}</div>}
-
+      <nav aria-current="page" aria-label="Current dashboard route" className="sr-only">
+        {route.label}
+      </nav>
+      <div aria-live="polite" className="sr-only">
+        {refreshing ? "Syncing dashboard data" : ""}
+      </div>
+      <DesktopDashboardShell
+        activeHref={hrefForView(view)}
+        businessName={business?.name ?? "Dinaya"}
+        error={error || null}
+        offlineNotice={offlineNotice || null}
+        plan={business?.plan ?? "trial"}
+        query={query}
+        refreshing={refreshing}
+        userEmail={user?.email ?? "Signed in"}
+        userName={user?.name ?? null}
+        onCommandPalette={openCommandPalette}
+        onNavigate={navigateByHref}
+        onQueryChange={setQuery}
+        onRefresh={() => void refreshCurrentView()}
+        onSearch={() => applyGlobalSearch()}
+        onSignOut={() => void logout()}
+      >
         {view === "overview" ? (
-          <OverviewView
-            business={business}
+          <DesktopOverviewView
+            businessName={business?.name ?? "Dinaya"}
             lastSync={lastSync}
             metrics={metrics}
             rows={visibleRows}
-            staff={staff}
+            staffCount={staff.length}
             onCopyBookingLink={() => void copyBookingLink()}
             onExportDaySheet={exportDaySheet}
             onOpenBooking={(id) => void openDetail(id)}
             onOpenBookings={() => setView("bookings")}
+            onOpenCalendar={() => setView("calendar")}
             onPrintDaySheet={printDaySheet}
+          />
+        ) : view === "bookings" ? (
+          <DesktopBookingsView
+            detail={detail}
+            rows={visibleRows}
+            selectedId={selectedId}
+            staff={staff}
+            staffFilter={staffFilter}
+            statusFilter={statusFilter}
+            tab={tab}
+            onApply={() => void runSync(tab)}
+            onExport={exportBookingsList}
+            onOpenBooking={(id) => void openDetail(id)}
+            onOpenWeb={(id) => void invoke("desktop_open_booking_web", { id })}
+            onPrint={printBookingsList}
+            onStaffFilter={setStaffFilter}
+            onStatus={(id, status) => void updateStatus(id, status)}
+            onStatusFilter={setStatusFilter}
+            onTab={(next) => {
+              setTab(next);
+              void runSync(next);
+            }}
           />
         ) : view === "calendar" ? (
           <CalendarWorkspace
@@ -4991,28 +5035,6 @@ function App() {
             onRefresh={() => void loadAvailability()}
             onSave={(staffId) => void updateAvailabilityWindows(staffId)}
             onSelectStaff={selectAvailabilityStaff}
-          />
-        ) : view === "bookings" ? (
-          <BookingsWorkspace
-            detail={detail}
-            rows={visibleRows}
-            selectedId={selectedId}
-            staff={staff}
-            staffFilter={staffFilter}
-            statusFilter={statusFilter}
-            tab={tab}
-            onApply={() => void runSync(tab)}
-            onExport={exportBookingsList}
-            onOpenBooking={(id) => void openDetail(id)}
-            onOpenWeb={(id) => void invoke("desktop_open_booking_web", { id })}
-            onPrint={printBookingsList}
-            onStaffFilter={setStaffFilter}
-            onStatus={(id, status) => void updateStatus(id, status)}
-            onStatusFilter={setStatusFilter}
-            onTab={(next) => {
-              setTab(next);
-              void runSync(next);
-            }}
           />
         ) : view === "clients" ? (
           <ClientsWorkspace
@@ -5482,21 +5504,21 @@ function App() {
             onLocationSave={(id) => void updateLocationDetail(id)}
           />
         )}
+      </DesktopDashboardShell>
 
-        {commandOpen && (
-          <CommandPalette
-            commands={filteredCommands}
-            inputRef={commandInputRef}
-            query={commandQuery}
-            selectedIndex={commandIndex}
-            onClose={() => setCommandOpen(false)}
-            onQuery={setCommandQuery}
-            onRun={runCommand}
-            onSelectIndex={setCommandIndex}
-          />
-        )}
-      </main>
-    </div>
+      {commandOpen && (
+        <CommandPalette
+          commands={filteredCommands}
+          inputRef={commandInputRef}
+          query={commandQuery}
+          selectedIndex={commandIndex}
+          onClose={() => setCommandOpen(false)}
+          onQuery={setCommandQuery}
+          onRun={runCommand}
+          onSelectIndex={setCommandIndex}
+        />
+      )}
+    </>
   );
 }
 
@@ -5599,50 +5621,6 @@ function CommandPalette({
         )}
       </section>
     </div>
-  );
-}
-
-function DashboardSidebar({
-  business,
-  currentView,
-  onRoute,
-}: {
-  business: Business | null;
-  currentView: View;
-  onRoute: (route: DashboardRoute) => void;
-}) {
-  return (
-    <aside className="sidebar glass-surface">
-      <div className="brand">
-        <div className="app-mark">D</div>
-        <div>
-          <strong>Dinaya</strong>
-          <span>{business?.plan ?? "Desktop"} dashboard</span>
-        </div>
-      </div>
-
-      <nav className="nav-groups" aria-label="Desktop dashboard">
-        {dashboardRouteGroups.map((group) => (
-          <section key={group.id} className="nav-group">
-            <p>{group.label}</p>
-            {group.routes.map((routeItem) => (
-              <button
-                key={routeItem.id}
-                aria-current={currentView === routeItem.id ? "page" : undefined}
-                aria-label={`${routeItem.label}. ${routeStateLabel(routeItem)} desktop screen.`}
-                className={currentView === routeItem.id ? "active" : ""}
-                onClick={() => onRoute(routeItem)}
-              >
-                <span>{routeItem.label}</span>
-                <span className={`route-state ${routeItem.nativeStatus}`}>
-                  {routeStateLabel(routeItem)}
-                </span>
-              </button>
-            ))}
-          </section>
-        ))}
-      </nav>
-    </aside>
   );
 }
 
@@ -6136,152 +6114,6 @@ function LoginAlertIcon() {
   );
 }
 
-function OverviewView({
-  business,
-  lastSync,
-  metrics,
-  rows,
-  staff,
-  onCopyBookingLink,
-  onExportDaySheet,
-  onOpenBooking,
-  onOpenBookings,
-  onPrintDaySheet,
-}: {
-  business: Business | null;
-  lastSync: string | null;
-  metrics: DashboardMetrics;
-  rows: BookingRow[];
-  staff: StaffMember[];
-  onCopyBookingLink: () => void;
-  onExportDaySheet: () => void;
-  onOpenBooking: (id: string) => void;
-  onOpenBookings: () => void;
-  onPrintDaySheet: () => void;
-}) {
-  const [clock, setClock] = useState(() => new Date());
-  const nextBooking = nextBookingForRows(rows, clock);
-
-  useEffect(() => {
-    const timer = window.setInterval(() => setClock(new Date()), 60_000);
-    return () => window.clearInterval(timer);
-  }, []);
-
-  return (
-    <section className="overview-layout">
-      <LivingDaySheet
-        business={business}
-        clock={clock}
-        lastSync={lastSync}
-        metrics={metrics}
-        nextBooking={nextBooking}
-        staff={staff}
-        onCopyBookingLink={onCopyBookingLink}
-        onExportDaySheet={onExportDaySheet}
-        onOpenBookings={onOpenBookings}
-        onPrintDaySheet={onPrintDaySheet}
-      />
-
-      <div className="overview-main">
-        <div className="metric-grid">
-          <MetricCard label="Active today" tone="cobalt" value={metrics.activeToday} />
-          <MetricCard label="Pending" tone="amber" value={metrics.pendingToday} />
-          <MetricCard label="Confirmed" tone="emerald" value={metrics.confirmedToday} />
-          <MetricCard label="Staff load" tone="slate" value={`${metrics.staffOnDeck}/${staff.length || 0}`} />
-        </div>
-
-        <section className="panel">
-          <div className="panel-head">
-            <div>
-              <p className="eyebrow">Bookings</p>
-              <h2>Today queue</h2>
-            </div>
-            <div className="panel-actions">
-              <button onClick={onPrintDaySheet}>Print</button>
-              <button onClick={onExportDaySheet}>Export CSV</button>
-              <button onClick={onOpenBookings}>Open inbox</button>
-            </div>
-          </div>
-          <BookingList rows={rows.slice(0, 8)} selectedId={null} onOpen={onOpenBooking} />
-        </section>
-      </div>
-    </section>
-  );
-}
-
-function LivingDaySheet({
-  business,
-  clock,
-  lastSync,
-  metrics,
-  nextBooking,
-  staff,
-  onCopyBookingLink,
-  onExportDaySheet,
-  onOpenBookings,
-  onPrintDaySheet,
-}: {
-  business: Business | null;
-  clock: Date;
-  lastSync: string | null;
-  metrics: DashboardMetrics;
-  nextBooking: BookingRow | null;
-  staff: StaffMember[];
-  onCopyBookingLink: () => void;
-  onExportDaySheet: () => void;
-  onOpenBookings: () => void;
-  onPrintDaySheet: () => void;
-}) {
-  return (
-    <aside className="living-day glass-surface">
-      <div>
-        <p className="eyebrow">Living Day Sheet</p>
-        <h2>{formatDate(clock.toISOString())}</h2>
-        <p>{clock.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
-      </div>
-
-      <div className="day-focus">
-        <span>Next</span>
-        {nextBooking ? (
-          <div>
-            <strong>{nextBooking.clientName}</strong>
-            <p>{formatTime(nextBooking.startsAt)} - {nextBooking.serviceName}</p>
-          </div>
-        ) : (
-          <div>
-            <strong>No active booking</strong>
-            <p>{business?.name ?? "Dinaya"} is clear for now.</p>
-          </div>
-        )}
-      </div>
-
-      <div className="day-stack">
-        <div>
-          <span>Pending</span>
-          <strong>{metrics.pendingToday}</strong>
-        </div>
-        <div>
-          <span>Confirmed</span>
-          <strong>{metrics.confirmedToday}</strong>
-        </div>
-        <div>
-          <span>Staff</span>
-          <strong>{metrics.staffOnDeck}/{staff.length || 0}</strong>
-        </div>
-      </div>
-
-      <div className="day-actions">
-        <button className="primary" onClick={onOpenBookings}>Review today</button>
-        <button onClick={onCopyBookingLink}>Copy booking link</button>
-        <button onClick={onPrintDaySheet}>Print</button>
-        <button onClick={onExportDaySheet}>Export CSV</button>
-      </div>
-
-      <p className="sync-line">{lastSync ? `Synced ${formatTime(lastSync)}` : "Waiting for first sync"}</p>
-    </aside>
-  );
-}
-
 function MetricCard({
   label,
   tone,
@@ -6749,129 +6581,6 @@ function AvailabilityDetailPanel({
         )}
       </section>
     </aside>
-  );
-}
-
-function BookingsWorkspace(props: {
-  detail: BookingDetail | null;
-  rows: BookingRow[];
-  selectedId: string | null;
-  staff: StaffMember[];
-  staffFilter: string;
-  statusFilter: string;
-  tab: Tab;
-  onApply: () => void;
-  onExport: () => void;
-  onOpenBooking: (id: string) => void;
-  onOpenWeb: (id: string) => void;
-  onPrint: () => void;
-  onStaffFilter: (value: string) => void;
-  onStatus: (id: string, status: BookingStatus) => void;
-  onStatusFilter: (value: string) => void;
-  onTab: (tab: Tab) => void;
-}) {
-  return (
-    <section className="workspace">
-      <div className="list-pane">
-        <Filters
-          staff={props.staff}
-          staffFilter={props.staffFilter}
-          statusFilter={props.statusFilter}
-          tab={props.tab}
-          onApply={props.onApply}
-          onStaffFilter={props.onStaffFilter}
-          onStatusFilter={props.onStatusFilter}
-          onTab={props.onTab}
-        />
-        <div className="export-row">
-          <span>{props.rows.length} bookings in this view</span>
-          <div>
-            <button onClick={props.onPrint}>Print</button>
-            <button onClick={props.onExport}>Export CSV</button>
-          </div>
-        </div>
-        <BookingList
-          rows={props.rows}
-          selectedId={props.selectedId}
-          onOpen={props.onOpenBooking}
-        />
-      </div>
-      <BookingDetailPanel
-        detail={props.detail}
-        selectedId={props.selectedId}
-        onOpenWeb={props.onOpenWeb}
-        onStatus={props.onStatus}
-      />
-    </section>
-  );
-}
-
-function Filters(props: {
-  staff: StaffMember[];
-  staffFilter: string;
-  statusFilter: string;
-  tab: Tab;
-  onApply: () => void;
-  onStaffFilter: (value: string) => void;
-  onStatusFilter: (value: string) => void;
-  onTab: (tab: Tab) => void;
-}) {
-  return (
-    <div className="filters">
-      <div className="tabs">
-        {(["today", "upcoming", "past"] as Tab[]).map((item) => (
-          <button key={item} className={props.tab === item ? "active" : ""} onClick={() => props.onTab(item)}>
-            {item[0].toUpperCase() + item.slice(1)}
-          </button>
-        ))}
-      </div>
-      <div className="filter-row">
-        <select value={props.staffFilter} onChange={(event) => props.onStaffFilter(event.target.value)}>
-          <option value="">All staff</option>
-          {props.staff.map((member) => (
-            <option key={member.id} value={member.id}>{member.name}</option>
-          ))}
-        </select>
-        <select value={props.statusFilter} onChange={(event) => props.onStatusFilter(event.target.value)}>
-          <option value="">All statuses</option>
-          {Object.entries(statusLabels).map(([value, label]) => (
-            <option key={value} value={value}>{label}</option>
-          ))}
-        </select>
-        <button onClick={props.onApply}>Apply</button>
-      </div>
-    </div>
-  );
-}
-
-function BookingList({
-  rows,
-  selectedId,
-  onOpen,
-}: {
-  rows: BookingRow[];
-  selectedId: string | null;
-  onOpen: (id: string) => void;
-}) {
-  if (rows.length === 0) {
-    return <div className="empty-state">No bookings in this view.</div>;
-  }
-
-  return (
-    <ul className="booking-list">
-      {rows.map((row) => (
-        <li key={row.id}>
-          <button className={selectedId === row.id ? "booking-row selected" : "booking-row"} onClick={() => onOpen(row.id)}>
-            <span className="time">{formatTime(row.startsAt)}</span>
-            <span className="booking-copy">
-              <strong>{row.clientName}</strong>
-              <span>{row.serviceName} with {row.staffName}</span>
-            </span>
-            <span className={`badge ${row.status}`}>{statusLabels[row.status]}</span>
-          </button>
-        </li>
-      ))}
-    </ul>
   );
 }
 

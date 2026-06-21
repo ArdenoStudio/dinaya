@@ -30,6 +30,8 @@ export interface MacOSSidebarProps {
   footer?: ReactNode;
   collapsedFooter?: ReactNode;
   onNavigate?: () => void;
+  /** When set, nav items render as buttons instead of Next.js links (desktop app). */
+  onItemSelect?: (href: string) => void;
 }
 
 function isItemActive(item: MacOSSidebarItem, activeHref: string): boolean {
@@ -37,6 +39,49 @@ function isItemActive(item: MacOSSidebarItem, activeHref: string): boolean {
     return activeHref === item.href;
   }
   return activeHref === item.href || activeHref.startsWith(`${item.href}/`);
+}
+
+function SidebarNavLink({
+  item,
+  active,
+  className,
+  onNavigate,
+  onItemSelect,
+  children,
+}: {
+  item: MacOSSidebarItem;
+  active: boolean;
+  className: string;
+  onNavigate?: () => void;
+  onItemSelect?: (href: string) => void;
+  children: ReactNode;
+}) {
+  if (onItemSelect) {
+    return (
+      <button
+        type="button"
+        aria-current={active ? "page" : undefined}
+        onClick={() => {
+          onItemSelect(item.href);
+          onNavigate?.();
+        }}
+        className={className}
+      >
+        {children}
+      </button>
+    );
+  }
+
+  return (
+    <Link
+      href={item.href}
+      aria-current={active ? "page" : undefined}
+      onClick={onNavigate}
+      className={className}
+    >
+      {children}
+    </Link>
+  );
 }
 
 export function MacOSSidebar({
@@ -49,6 +94,7 @@ export function MacOSSidebar({
   footer,
   collapsedFooter,
   onNavigate,
+  onItemSelect,
 }: MacOSSidebarProps) {
   const [hoveredKey, setHoveredKey] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(defaultOpen);
@@ -141,12 +187,13 @@ export function MacOSSidebar({
                             ) : null}
                           </AnimatePresence>
 
-                          <Link
-                            href={item.href}
-                            aria-current={active ? "page" : undefined}
-                            onClick={onNavigate}
+                          <SidebarNavLink
+                            item={item}
+                            active={active}
+                            onNavigate={onNavigate}
+                            onItemSelect={onItemSelect}
                             className={cn(
-                              "relative z-10 flex items-center gap-2.5 px-3 py-2.5 rounded-md tracking-tight transition-colors",
+                              "relative z-10 flex items-center gap-2.5 px-3 py-2.5 rounded-md tracking-tight transition-colors w-full text-left",
                               active
                                 ? "text-neutral-900 dark:text-neutral-100 font-medium"
                                 : "text-neutral-700 dark:text-neutral-200/70 hover:text-neutral-900 dark:hover:text-neutral-100",
@@ -156,7 +203,7 @@ export function MacOSSidebar({
                               <span className="shrink-0 opacity-80">{item.icon}</span>
                             ) : null}
                             <span className="truncate">{item.label}</span>
-                          </Link>
+                          </SidebarNavLink>
 
                           <AnimatePresence>
                             {hoveredKey === key && !active ? (
@@ -191,13 +238,12 @@ export function MacOSSidebar({
                   section.items.map((item) => {
                     const active = isItemActive(item, activeHref);
                     return (
-                      <Link
+                      <SidebarNavLink
                         key={item.href}
-                        href={item.href}
-                        aria-current={active ? "page" : undefined}
-                        aria-label={item.label}
-                        title={item.label}
-                        onClick={onNavigate}
+                        item={item}
+                        active={active}
+                        onNavigate={onNavigate}
+                        onItemSelect={onItemSelect}
                         className={cn(
                           "flex size-11 items-center justify-center rounded-md transition-colors",
                           active
@@ -206,7 +252,7 @@ export function MacOSSidebar({
                         )}
                       >
                         {item.icon}
-                      </Link>
+                      </SidebarNavLink>
                     );
                   }),
                 )}
