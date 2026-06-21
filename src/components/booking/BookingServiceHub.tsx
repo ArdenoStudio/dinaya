@@ -18,6 +18,11 @@ import { BookingHubHeroImage } from "@/components/booking/BookingHubHeroImage";
 import { BookingHubCta } from "@/components/booking/BookingHubCta";
 import { BookingPolicyAccordion } from "@/components/booking/BookingPolicyAccordion";
 import { BusinessRating, getBusinessRating } from "./BusinessRating";
+import {
+  BookingReviewsSection,
+  type SerializedPublicReview,
+} from "./BookingReviewsSection";
+import type { ReviewDistribution } from "@/lib/reviews-public";
 import type { BookingCopy } from "@/lib/i18n";
 import type { BookingService } from "./BookingWizard";
 
@@ -33,6 +38,8 @@ interface Props {
   copy: BookingCopy;
   avgRating?: number | null;
   reviewCount?: number;
+  reviewDistribution?: ReviewDistribution;
+  initialReviews?: SerializedPublicReview[];
   cancellationPolicy?: string | null;
   depositPolicy?: string | null;
   bankTransferInstructions?: string | null;
@@ -54,8 +61,8 @@ function HubBusinessLogo({
   return (
     <div
       className={cn(
-        "flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-dashed border-border/80 bg-card shadow-sm ring-1 ring-border/40 md:size-[4.5rem]",
-        !logoUrl && "bg-muted/30",
+        "flex size-[4.5rem] shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-border/60 bg-muted/40 shadow-sm ring-1 ring-border/30 md:size-20",
+        logoUrl && "bg-card",
         className,
       )}
       aria-hidden={logoUrl ? undefined : true}
@@ -90,6 +97,8 @@ export default function BookingServiceHub({
   copy,
   avgRating,
   reviewCount,
+  reviewDistribution,
+  initialReviews,
   cancellationPolicy,
   depositPolicy,
   bankTransferInstructions,
@@ -111,42 +120,47 @@ export default function BookingServiceHub({
     : "overflow-hidden rounded-2xl border-x-0 bg-card shadow-none md:border md:border-border/80 md:shadow-[0_12px_40px_-24px_rgba(15,23,42,0.28)] dark:md:shadow-none dark:md:ring-1 dark:md:ring-white/10";
 
   const contentShell = heroImageUrl
-    ? "relative z-10 -mt-5 flex flex-col overflow-hidden rounded-t-[1.25rem] bg-card md:-mt-6 md:rounded-t-2xl"
+    ? "relative z-10 -mt-5 flex flex-col overflow-hidden rounded-t-2xl bg-card md:-mt-6"
     : "flex flex-col";
+
+  const logoOverlapClass = heroImageUrl ? "-mt-10 mb-3 md:-mt-12 md:mb-4" : "mb-4 md:mb-5";
 
   return (
     <BlurFade className="w-full pb-28 md:pb-0">
       <article className={cn("flex w-full flex-col", shell)}>
-        {heroImageUrl ? (
-          <>
-            <div className="flex justify-center px-4 pt-6 pb-4 md:pt-8 md:pb-5">
-              <HubBusinessLogo businessName={businessName} logoUrl={businessLogoUrl} />
-            </div>
-            <BookingHubHeroImage src={heroImageUrl} alt={businessName} />
-          </>
-        ) : null}
+        {heroImageUrl ? <BookingHubHeroImage src={heroImageUrl} alt={businessName} /> : null}
 
         <div className={contentShell}>
         <header
           className={cn(
             "flex flex-col items-center px-4 pb-4 text-center md:px-6",
-            heroImageUrl ? "pt-5 md:pt-6" : "pt-6 md:pt-8",
+            heroImageUrl ? "pt-0" : "pt-6 md:pt-8",
           )}
         >
-          {!heroImageUrl ? (
-            <HubBusinessLogo
-              businessName={businessName}
-              logoUrl={businessLogoUrl}
-              className="mb-4 md:mb-5"
-            />
-          ) : null}
+          <HubBusinessLogo
+            businessName={businessName}
+            logoUrl={businessLogoUrl}
+            className={logoOverlapClass}
+          />
           <h1 className="text-[1.625rem] font-bold leading-tight tracking-tight text-foreground md:text-3xl">
             {businessName}
           </h1>
           <p className="mt-2 max-w-md text-[0.9375rem] leading-relaxed text-muted-foreground">
             {tagline}
           </p>
-          {rating ? (
+          {rating && reviewDistribution && initialReviews ? (
+            <BookingReviewsSection
+              businessSlug={businessSlug}
+              businessName={businessName}
+              avgRating={rating.avgRating}
+              reviewCount={rating.reviewCount}
+              reviewDistribution={reviewDistribution}
+              initialReviews={initialReviews}
+              copy={copy}
+              variant="rating"
+              className="mt-3"
+            />
+          ) : rating ? (
             <BusinessRating
               avgRating={rating.avgRating}
               reviewCount={rating.reviewCount}
@@ -163,7 +177,7 @@ export default function BookingServiceHub({
             </p>
           ) : null}
 
-          <div className="mt-5 hidden w-full border-t border-border/50 pt-4 md:block">
+          <div className="mt-4 w-full border-t border-border/50 pt-4">
             <p className="text-sm text-muted-foreground">
               {copy.chooseServiceAndTime}
               <span className="ml-2 text-foreground/60">· {services.length} services</span>

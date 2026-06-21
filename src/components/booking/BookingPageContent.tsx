@@ -245,6 +245,8 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
               copy={copy}
               avgRating={avgRating}
               reviewCount={reviewCount}
+              reviewDistribution={reviewDistribution}
+              initialReviews={initialReviews}
               cancellationPolicy={business.cancellationPolicy}
               depositPolicy={business.depositPolicy}
               bankTransferInstructions={business.bankTransferInstructions}

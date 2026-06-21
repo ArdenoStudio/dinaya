@@ -35,7 +35,7 @@ export function BookingHubCta({
     return (
       <div
         className={cn(
-          "pointer-events-none fixed inset-x-0 bottom-0 z-40 border-t border-border/50 bg-background/90 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-md md:hidden",
+          "pointer-events-none fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background p-4 pb-[max(1rem,env(safe-area-inset-bottom))] md:hidden",
           className,
         )}
       >
