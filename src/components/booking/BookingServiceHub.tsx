@@ -45,13 +45,18 @@ function serviceInitial(name: string) {
 function HubBusinessLogo({
   businessName,
   logoUrl,
+  overlapHero = false,
 }: {
   businessName: string;
   logoUrl?: string | null;
+  overlapHero?: boolean;
 }) {
   return (
     <div
-      className="mb-4 flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-dashed border-border/80 bg-muted/30 shadow-sm ring-1 ring-border/40 md:mb-5 md:size-[4.5rem]"
+      className={cn(
+        "mb-4 flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-dashed border-border/80 bg-card shadow-sm ring-1 ring-border/40 md:mb-5 md:size-[4.5rem]",
+        overlapHero ? "-mt-8 mb-3 md:-mt-10" : "bg-muted/30",
+      )}
       aria-hidden={logoUrl ? undefined : true}
     >
       {logoUrl ? (
@@ -100,8 +105,13 @@ export default function BookingServiceHub({
   const tagline = hubTagline(businessDescription, copy.selectServiceHint);
   const locationLine = formatHubLocationLine(businessAddress, businessPhone);
 
-  const shell =
-    "overflow-hidden rounded-none border-x-0 bg-card shadow-none md:rounded-2xl md:border md:border-border/80 md:shadow-[0_12px_40px_-24px_rgba(15,23,42,0.28)] dark:md:shadow-none dark:md:ring-1 dark:md:ring-white/10";
+  const shell = heroImageUrl
+    ? "overflow-hidden rounded-none border-x-0 bg-transparent shadow-none md:rounded-2xl md:border-0"
+    : "overflow-hidden rounded-2xl border-x-0 bg-card shadow-none md:border md:border-border/80 md:shadow-[0_12px_40px_-24px_rgba(15,23,42,0.28)] dark:md:shadow-none dark:md:ring-1 dark:md:ring-white/10";
+
+  const contentShell = heroImageUrl
+    ? "relative z-10 -mt-5 flex flex-col overflow-hidden rounded-t-[1.25rem] bg-card md:-mt-6 md:rounded-t-2xl"
+    : "flex flex-col";
 
   return (
     <BlurFade className="w-full pb-28 md:pb-0">
@@ -112,13 +122,18 @@ export default function BookingServiceHub({
           </div>
         ) : null}
 
+        <div className={contentShell}>
         <header
           className={cn(
             "flex flex-col items-center px-4 pb-4 text-center md:px-6",
-            heroImageUrl ? "pt-5" : "pt-6 md:pt-8",
+            heroImageUrl ? "pt-0" : "pt-6 md:pt-8",
           )}
         >
-          <HubBusinessLogo businessName={businessName} logoUrl={businessLogoUrl} />
+          <HubBusinessLogo
+            businessName={businessName}
+            logoUrl={businessLogoUrl}
+            overlapHero={Boolean(heroImageUrl)}
+          />
           <h1 className="text-[1.625rem] font-bold leading-tight tracking-tight text-foreground md:text-3xl">
             {businessName}
           </h1>
@@ -230,6 +245,7 @@ export default function BookingServiceHub({
 
         <div className="sr-only">
           <Link href={primaryHref}>{copy.chooseService}</Link>
+        </div>
         </div>
       </article>
 
