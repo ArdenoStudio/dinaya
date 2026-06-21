@@ -317,7 +317,7 @@ function BookingWizardInner({
         });
       });
     },
-    [slotHold, staff, state.staff],
+    [slotHold, staff, state.staff, setSelectedSlot, setAnyStaff],
   );
 
   const selectService = useCallback(
