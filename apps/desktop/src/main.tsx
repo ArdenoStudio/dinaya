@@ -11,9 +11,9 @@ import {
 import { slugify } from "../../../src/lib/utils";
 import { buildDesktopApiPath, desktopApiRequest } from "./desktop-api";
 import { findDashboardRouteByHref, hrefForView } from "./lib/routes";
-import { DesktopDashboardShell } from "./shell/DesktopDashboardShell";
-import { DesktopBookingsView } from "./views/DesktopBookingsView";
-import { DesktopOverviewView } from "./views/DesktopOverviewView";
+import { DesktopAppShell } from "./shell/DesktopAppShell";
+import { DashboardBookingsPage } from "./views/DashboardBookingsPage";
+import { DashboardOverviewPage, type DesktopShellMeta } from "./views/DashboardOverviewPage";
 import "./globals.css";
 import "./styles.css";
 
@@ -2248,8 +2248,9 @@ function App() {
   const [calendarError, setCalendarError] = useState("");
   const [calendarLoading, setCalendarLoading] = useState(false);
   const [query, setQuery] = useState("");
-  const [staffFilter, setStaffFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  const [shellMeta, setShellMeta] = useState<DesktopShellMeta | null>(null);
+  const [staffFilter] = useState("");
+  const [statusFilter] = useState("");
   const [rows, setRows] = useState<BookingRow[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [detail, setDetail] = useState<BookingDetail | null>(null);
@@ -4922,60 +4923,50 @@ function App() {
       <div aria-live="polite" className="sr-only">
         {refreshing ? "Syncing dashboard data" : ""}
       </div>
-      <DesktopDashboardShell
+      <DesktopAppShell
         activeHref={hrefForView(view)}
+        banner={
+          error || offlineNotice ? (
+            <>
+              {error ? (
+                <div
+                  aria-live="assertive"
+                  className="border-b border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300"
+                  role="alert"
+                >
+                  {error}
+                </div>
+              ) : null}
+              {offlineNotice ? (
+                <div
+                  className="border-b border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-200"
+                  role="status"
+                >
+                  {offlineNotice}
+                </div>
+              ) : null}
+            </>
+          ) : undefined
+        }
         businessName={business?.name ?? "Dinaya"}
-        error={error || null}
-        offlineNotice={offlineNotice || null}
         plan={business?.plan ?? "trial"}
-        query={query}
-        refreshing={refreshing}
+        searchQuery={query}
+        shellMeta={shellMeta}
         userEmail={user?.email ?? "Signed in"}
         userName={user?.name ?? null}
-        onCommandPalette={openCommandPalette}
+        userRole={user?.role ?? "owner"}
         onNavigate={navigateByHref}
-        onQueryChange={setQuery}
-        onRefresh={() => void refreshCurrentView()}
-        onSearch={() => applyGlobalSearch()}
+        onSearchQueryChange={setQuery}
+        onSearchSubmit={() => applyGlobalSearch()}
         onSignOut={() => void logout()}
       >
         {view === "overview" ? (
-          <DesktopOverviewView
-            businessName={business?.name ?? "Dinaya"}
-            lastSync={lastSync}
-            metrics={metrics}
-            rows={visibleRows}
-            staffCount={staff.length}
-            onCopyBookingLink={() => void copyBookingLink()}
-            onExportDaySheet={exportDaySheet}
-            onOpenBooking={(id) => void openDetail(id)}
-            onOpenBookings={() => setView("bookings")}
-            onOpenCalendar={() => setView("calendar")}
-            onPrintDaySheet={printDaySheet}
-          />
+          <DashboardOverviewPage onShellMeta={setShellMeta} />
         ) : view === "bookings" ? (
-          <DesktopBookingsView
-            detail={detail}
-            rows={visibleRows}
-            selectedId={selectedId}
-            staff={staff}
-            staffFilter={staffFilter}
-            statusFilter={statusFilter}
-            tab={tab}
-            onApply={() => void runSync(tab)}
-            onExport={exportBookingsList}
-            onOpenBooking={(id) => void openDetail(id)}
-            onOpenWeb={(id) => void invoke("desktop_open_booking_web", { id })}
-            onPrint={printBookingsList}
-            onStaffFilter={setStaffFilter}
-            onStatus={(id, status) => void updateStatus(id, status)}
-            onStatusFilter={setStatusFilter}
-            onTab={(next) => {
-              setTab(next);
-              void runSync(next);
-            }}
-          />
-        ) : view === "calendar" ? (
+          <DashboardBookingsPage />
+        ) : (
+          <div className="desktop-legacy">
+        {view === "calendar" ? (
           <CalendarWorkspace
             data={calendarData}
             date={calendarDate}
@@ -5504,7 +5495,9 @@ function App() {
             onLocationSave={(id) => void updateLocationDetail(id)}
           />
         )}
-      </DesktopDashboardShell>
+          </div>
+        )}
+      </DesktopAppShell>
 
       {commandOpen && (
         <CommandPalette

@@ -22,8 +22,6 @@
   --motion-panel: 260ms;
   --motion-soft: cubic-bezier(0.2, 0.8, 0.2, 1);
   color: var(--text);
-  font-family: Inter, "Segoe UI", system-ui, -apple-system, sans-serif;
-  background: var(--canvas);
   font-synthesis: none;
   letter-spacing: 0;
   text-rendering: optimizeLegibility;
@@ -44,7 +42,13 @@ body {
   min-width: 1040px;
   min-height: 700px;
   overflow: hidden;
+}
+
+.desktop-legacy {
+  color: var(--text);
+  font-family: Inter, "Segoe UI", system-ui, -apple-system, sans-serif;
   background: var(--canvas);
+  min-height: 100%;
 }
 
 button,

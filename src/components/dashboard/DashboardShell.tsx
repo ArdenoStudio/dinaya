@@ -8,6 +8,7 @@ import { BookOpen, LogOut, Menu, Search, ShieldCheck, UserCircle, X } from "luci
 import { Logo } from "@/components/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { DashboardToastProvider } from "@/components/dashboard/ToastProvider";
+import { useDashboardNavigationOptional } from "@/components/dashboard/DashboardNavigation";
 import { useDashboardCopy, useDashboardRole } from "@/components/dashboard/DashboardLocaleProvider";
 import { MacOSSidebar } from "@/components/ui/macos-sidebar";
 import { dashboardNavGroups } from "@/lib/dashboard-nav";
@@ -29,6 +30,7 @@ type DashboardShellProps = {
   planUsage?: PlanUsage;
   copy: DashboardCopy;
   minimalChrome?: boolean;
+  banner?: React.ReactNode;
   children: React.ReactNode;
 };
 
@@ -49,18 +51,21 @@ export function DashboardShell({
   planUsage,
   copy,
   minimalChrome = false,
+  banner,
   children,
 }: DashboardShellProps) {
+  const navigation = useDashboardNavigationOptional();
   const pathname = usePathname();
+  const activeHref = navigation?.activeHref ?? pathname;
   const navCopy = useDashboardCopy();
   const role = useDashboardRole();
   const isOwner = role === "owner";
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
-  const isSetupFlow = minimalChrome || pathname.startsWith("/dashboard/setup");
+  const isSetupFlow = minimalChrome || activeHref.startsWith("/dashboard/setup");
 
   useEffect(() => {
     setMobileNavOpen(false);
-  }, [pathname]);
+  }, [activeHref]);
 
   useEffect(() => {
     if (!mobileNavOpen) return;
@@ -115,7 +120,13 @@ export function DashboardShell({
     : [];
 
   const planLabel = planDisplayName(plan);
-  const handleSignOut = () => void signOut({ redirectTo: "/auth/signin" });
+  const handleSignOut = () => {
+    if (navigation?.signOut) {
+      navigation.signOut();
+      return;
+    }
+    void signOut({ redirectTo: "/auth/signin" });
+  };
 
   const accountFooter = (
     <div className="space-y-3 border-t border-neutral-200/80 px-2 pt-3 dark:border-neutral-700/80">
@@ -218,12 +229,13 @@ export function DashboardShell({
       ) : null}
 
       <MacOSSidebar
-        activeHref={pathname}
+        activeHref={activeHref}
         sections={sections}
         className="min-h-0 flex-1"
-        header={<Logo href="/dashboard" size="sm" />}
+        header={<Logo href={navigation ? null : "/dashboard"} size="sm" />}
         footer={accountFooter}
         collapsedFooter={collapsedAccountFooter}
+        onItemSelect={navigation?.navigate}
       >
         <header className="sticky top-0 z-20 border-b border-neutral-200/80 bg-white/90 backdrop-blur dark:border-neutral-800 dark:bg-neutral-950/90">
           <div className="flex h-16 items-center gap-3 px-4 sm:px-6 lg:px-8">
@@ -258,7 +270,7 @@ export function DashboardShell({
                         </p>
                         <div className="space-y-1">
                           {section.items.map((item) => {
-                            const active = isNavItemActive(item, pathname);
+                            const active = isNavItemActive(item, activeHref);
                             return (
                               <Link
                                 key={item.href}
@@ -308,7 +320,16 @@ export function DashboardShell({
               </p>
             </div>
 
-            <form action="/dashboard/search" method="get" className="relative min-w-0 flex-1">
+            <form
+              action={navigation?.onSearchSubmit ? undefined : "/dashboard/search"}
+              method={navigation?.onSearchSubmit ? undefined : "get"}
+              className="relative min-w-0 flex-1"
+              onSubmit={(event) => {
+                if (!navigation?.onSearchSubmit) return;
+                event.preventDefault();
+                navigation.onSearchSubmit();
+              }}
+            >
               <Search
                 className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-neutral-400"
                 aria-hidden="true"
@@ -319,6 +340,13 @@ export function DashboardShell({
                 aria-label="Search dashboard"
                 className="h-10 w-full rounded-md border border-neutral-200 bg-white pl-9 pr-3 text-sm outline-none transition-shadow placeholder:text-neutral-400 focus:ring-2 focus:ring-primary/30 dark:border-neutral-700 dark:bg-neutral-900"
                 placeholder={copy.layout.searchPlaceholder}
+                {...(navigation?.searchQuery !== undefined
+                  ? {
+                      value: navigation.searchQuery,
+                      onChange: (event: React.ChangeEvent<HTMLInputElement>) =>
+                        navigation.onSearchQueryChange?.(event.target.value),
+                    }
+                  : {})}
               />
             </form>
 
@@ -331,6 +359,8 @@ export function DashboardShell({
             </div>
           </div>
         </header>
+
+        {banner}
 
         <DashboardToastProvider>
           <main className="min-h-0 flex-1 overflow-auto bg-neutral-50 dark:bg-neutral-950">
