@@ -159,6 +159,8 @@ export default async function DashboardOverview() {
     { label: "Share booking link", done: Number(totalBookings) > 0, href: bookingUrl, description: "Post your link on WhatsApp Status, Instagram bio, or send it directly to clients." },
   ];
   const showOnboarding = onboarding.some((item) => !item.done);
+  const nextOnboardingStep = onboarding.find((item) => !item.done);
+  const showShareCard = !showOnboarding || nextOnboardingStep?.label === "Share booking link";
 
   const stats = [
     { label: "Today revenue", value: formatLkr(Number(todayRevenue ?? 0)), icon: Banknote, tone: "cobalt" as const, delta: undefined },
@@ -183,9 +185,9 @@ export default async function DashboardOverview() {
   const statusBadge: Record<string, string> = {
     confirmed: "bg-blue-50 dark:bg-blue-950/40 text-blue-700",
     pending: "bg-amber-50 dark:bg-amber-950/40 text-amber-700",
-    completed: "bg-green-50 text-green-700",
-    no_show: "bg-red-50 text-red-600",
-    cancelled: "bg-slate-100 text-slate-500",
+    completed: "bg-green-50 dark:bg-green-950/40 text-green-700 dark:text-green-300",
+    no_show: "bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-300",
+    cancelled: "bg-slate-100 dark:bg-neutral-800 text-slate-500 dark:text-slate-400",
   };
   const entityIconMap: Record<string, LucideIcon> = {
     booking: CalendarCheck,
@@ -295,6 +297,7 @@ export default async function DashboardOverview() {
         </div>
 
         <div className="space-y-6">
+          {showShareCard ? (
           <div className="rounded-xl border border-primary/15 bg-primary/[0.04] p-5">
             <div className="mb-3 flex items-center gap-2.5">
               <span className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -312,6 +315,7 @@ export default async function DashboardOverview() {
             </div>
             <textarea readOnly value={embedSnippet} className="mt-3 h-16 w-full resize-none rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-2 text-xs text-muted-foreground" />
           </div>
+          ) : null}
 
           <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
             <h2 className="mb-4 font-semibold">Recent activity</h2>

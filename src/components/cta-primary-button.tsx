@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { MARKETING_CTA_HERO } from "@/lib/marketing-copy";
 
 interface CTAPrimaryButtonProps {
   href?: string;
@@ -37,7 +38,7 @@ export function CTAPrimaryButton({
         className,
       ].join(" ")}
     >
-      <span>{children ?? "Create your booking page"}</span>
+      <span>{children ?? MARKETING_CTA_HERO}</span>
       <span
         aria-hidden="true"
         className="transition-transform duration-150 ease-out group-hover:translate-x-1 group-active:translate-x-0.5"

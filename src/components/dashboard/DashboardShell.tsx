@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { BookOpen, Menu, Search, ShieldCheck, UserCircle, X } from "lucide-react";
+import { BookOpen, LogOut, Menu, Search, ShieldCheck, UserCircle, X } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { DashboardToastProvider } from "@/components/dashboard/ToastProvider";
@@ -14,6 +14,7 @@ import { dashboardNavGroups } from "@/lib/dashboard-nav";
 import type { DashboardCopy } from "@/lib/dashboard-i18n";
 import type { PlanUsage } from "@/lib/dashboard-usage";
 import { formatPlanUsage, isNearPlanLimit } from "@/lib/dashboard-usage";
+import { planDisplayName } from "@/lib/plan-display";
 import { cn } from "@/lib/utils";
 
 type DashboardShellProps = {
@@ -113,6 +114,79 @@ export function DashboardShell({
       ].filter((item) => item.value !== null)
     : [];
 
+  const planLabel = planDisplayName(plan);
+  const handleSignOut = () => void signOut({ redirectTo: "/auth/signin" });
+
+  const accountFooter = (
+    <div className="space-y-3 border-t border-neutral-200/80 px-2 pt-3 dark:border-neutral-700/80">
+      <Link
+        href="/docs"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex min-h-11 items-center gap-2 rounded-md px-2 py-2 text-xs font-medium text-neutral-600 transition-colors hover:bg-neutral-200/70 hover:text-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-700/70 dark:hover:text-neutral-100"
+      >
+        <BookOpen className="size-3.5 shrink-0" aria-hidden="true" />
+        Help &amp; docs
+      </Link>
+      {showAdminLink ? (
+        <Link
+          href="/admin"
+          className="flex min-h-11 items-center gap-2 rounded-md border border-primary/20 bg-primary/[0.06] px-2 py-2 text-xs font-medium text-primary transition-colors hover:bg-primary/10"
+        >
+          <ShieldCheck className="size-3.5" aria-hidden="true" />
+          {copy.layout.platformAdmin}
+        </Link>
+      ) : null}
+      <div className="px-1">
+        <p className="truncate text-xs text-neutral-600 dark:text-neutral-300">{userEmail}</p>
+        <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+          {planLabel} {copy.layout.planSuffix}
+        </p>
+        {usageLines.length > 0 ? (
+          <div className="mt-2 space-y-1">
+            {usageLines.map((line) => {
+              const usageItem =
+                line.label === "Services"
+                  ? planUsage!.services
+                  : line.label === "Staff"
+                    ? planUsage!.staff
+                    : planUsage!.locations;
+              return (
+                <p
+                  key={line.label}
+                  className={cn(
+                    "text-[0.68rem] text-neutral-500 dark:text-neutral-400",
+                    isNearPlanLimit(usageItem) && "font-medium text-amber-700 dark:text-amber-400",
+                  )}
+                >
+                  {line.label}: {line.value}
+                </p>
+              );
+            })}
+          </div>
+        ) : null}
+      </div>
+      <button
+        type="button"
+        onClick={handleSignOut}
+        className="flex min-h-11 w-full items-center rounded-md px-2 text-xs font-medium text-neutral-500 hover:bg-neutral-200/70 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-700/70 dark:hover:text-neutral-100"
+      >
+        {copy.layout.signOut}
+      </button>
+    </div>
+  );
+
+  const collapsedAccountFooter = (
+    <button
+      type="button"
+      onClick={handleSignOut}
+      aria-label={copy.layout.signOut}
+      className="mx-auto flex size-11 items-center justify-center rounded-md text-neutral-600 transition-colors hover:bg-neutral-200/70 hover:text-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-700/70 dark:hover:text-neutral-100"
+    >
+      <LogOut className="size-4" aria-hidden="true" />
+    </button>
+  );
+
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-neutral-200 dark:bg-neutral-900">
       {readOnlyImpersonation ? (
@@ -148,70 +222,14 @@ export function DashboardShell({
         sections={sections}
         className="min-h-0 flex-1"
         header={<Logo href="/dashboard" size="sm" />}
-        footer={
-          <div className="space-y-3 border-t border-neutral-200/80 px-2 pt-3 dark:border-neutral-700/80">
-            <Link
-              href="/docs"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 rounded-md px-2 py-2 text-xs font-medium text-neutral-600 transition-colors hover:bg-neutral-200/70 hover:text-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-700/70 dark:hover:text-neutral-100"
-            >
-              <BookOpen className="size-3.5 shrink-0" aria-hidden="true" />
-              Help &amp; docs
-            </Link>
-            {showAdminLink ? (
-              <Link
-                href="/admin"
-                className="flex items-center gap-2 rounded-md border border-primary/20 bg-primary/[0.06] px-2 py-2 text-xs font-medium text-primary transition-colors hover:bg-primary/10"
-              >
-                <ShieldCheck className="size-3.5" aria-hidden="true" />
-                {copy.layout.platformAdmin}
-              </Link>
-            ) : null}
-            <div className="px-1">
-              <p className="truncate text-xs text-neutral-600 dark:text-neutral-300">{userEmail}</p>
-              <p className="mt-1 text-xs capitalize text-neutral-500 dark:text-neutral-400">
-                {plan} {copy.layout.planSuffix}
-              </p>
-              {usageLines.length > 0 ? (
-                <div className="mt-2 space-y-1">
-                  {usageLines.map((line) => {
-                    const usageItem =
-                      line.label === "Services"
-                        ? planUsage!.services
-                        : line.label === "Staff"
-                          ? planUsage!.staff
-                          : planUsage!.locations;
-                    return (
-                      <p
-                        key={line.label}
-                        className={cn(
-                          "text-[0.68rem] text-neutral-500 dark:text-neutral-400",
-                          isNearPlanLimit(usageItem) && "font-medium text-amber-700 dark:text-amber-400",
-                        )}
-                      >
-                        {line.label}: {line.value}
-                      </p>
-                    );
-                  })}
-                </div>
-              ) : null}
-            </div>
-            <button
-              type="button"
-              onClick={() => void signOut({ redirectTo: "/auth/signin" })}
-              className="px-1 text-xs text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
-            >
-              {copy.layout.signOut}
-            </button>
-          </div>
-        }
+        footer={accountFooter}
+        collapsedFooter={collapsedAccountFooter}
       >
         <header className="sticky top-0 z-20 border-b border-neutral-200/80 bg-white/90 backdrop-blur dark:border-neutral-800 dark:bg-neutral-950/90">
           <div className="flex h-16 items-center gap-3 px-4 sm:px-6 lg:px-8">
             <button
               type="button"
-              className="flex size-9 items-center justify-center rounded-md border border-neutral-200 text-neutral-600 transition-colors hover:bg-neutral-100 lg:hidden dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
+              className="flex size-11 items-center justify-center rounded-md border border-neutral-200 text-neutral-600 transition-colors hover:bg-neutral-100 lg:hidden dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
               aria-label={mobileNavOpen ? "Close navigation" : "Open navigation"}
               aria-expanded={mobileNavOpen}
               onClick={() => setMobileNavOpen((open) => !open)}
@@ -248,7 +266,7 @@ export function DashboardShell({
                                 aria-current={active ? "page" : undefined}
                                 onClick={() => setMobileNavOpen(false)}
                                 className={cn(
-                                  "flex items-center gap-2 rounded-md px-2 py-2 text-sm transition-colors",
+                                  "flex min-h-11 items-center gap-2 rounded-md px-2 py-2.5 text-sm transition-colors",
                                   active
                                     ? "bg-neutral-100 font-medium text-neutral-950 dark:bg-neutral-800 dark:text-neutral-50"
                                     : "text-neutral-700 hover:bg-neutral-100 dark:text-neutral-200 dark:hover:bg-neutral-800",
@@ -263,6 +281,23 @@ export function DashboardShell({
                       </div>
                     ))}
                   </nav>
+                  <div className="mt-2 border-t border-neutral-200 pt-2 dark:border-neutral-700">
+                    <p className="truncate px-2 text-xs text-neutral-600 dark:text-neutral-300">{userEmail}</p>
+                    <p className="mt-1 px-2 text-xs text-neutral-500 dark:text-neutral-400">
+                      {planLabel} {copy.layout.planSuffix}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMobileNavOpen(false);
+                        handleSignOut();
+                      }}
+                      className="mt-2 flex min-h-11 w-full items-center gap-2 rounded-md px-2 text-sm font-medium text-neutral-700 hover:bg-neutral-100 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                    >
+                      <LogOut className="size-4 shrink-0" aria-hidden="true" />
+                      {copy.layout.signOut}
+                    </button>
+                  </div>
                 </div>
               </>
             ) : null}

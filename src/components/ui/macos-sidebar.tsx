@@ -28,6 +28,7 @@ export interface MacOSSidebarProps {
   className?: string;
   header?: ReactNode;
   footer?: ReactNode;
+  collapsedFooter?: ReactNode;
   onNavigate?: () => void;
 }
 
@@ -46,6 +47,7 @@ export function MacOSSidebar({
   className,
   header,
   footer,
+  collapsedFooter,
   onNavigate,
 }: MacOSSidebarProps) {
   const [hoveredKey, setHoveredKey] = useState<string | null>(null);
@@ -91,7 +93,7 @@ export function MacOSSidebar({
             type="button"
             layout
             aria-label={isOpen ? "Collapse sidebar" : "Expand sidebar"}
-            className="shrink-0 flex items-center justify-center rounded-md p-1 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200/80 dark:hover:bg-neutral-700/80 transition-colors"
+            className="shrink-0 flex size-11 items-center justify-center rounded-md text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200/80 dark:hover:bg-neutral-700/80 transition-colors"
             onClick={() => setIsOpen((open) => !open)}
           >
             <SidebarToggleIcon isOpen={isOpen} strokeWidth={2} className="size-6" />
@@ -197,7 +199,7 @@ export function MacOSSidebar({
                         title={item.label}
                         onClick={onNavigate}
                         className={cn(
-                          "flex size-10 items-center justify-center rounded-md transition-colors",
+                          "flex size-11 items-center justify-center rounded-md transition-colors",
                           active
                             ? "bg-neutral-200 dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100"
                             : "text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200/70 dark:hover:bg-neutral-700/70",
@@ -216,6 +218,11 @@ export function MacOSSidebar({
         {footer ? (
           <div className={cn("w-full shrink-0 pt-3", !isOpen && "hidden")}>
             {footer}
+          </div>
+        ) : null}
+        {!isOpen && collapsedFooter ? (
+          <div className="w-full shrink-0 border-t border-neutral-200/80 pt-3 dark:border-neutral-700/80">
+            {collapsedFooter}
           </div>
         ) : null}
       </motion.aside>

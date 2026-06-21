@@ -46,7 +46,7 @@ export function OnboardingWizard({ steps, bookingUrl, whatsappShare }: Props) {
           <Link
             href={nextStep.href}
             target={nextStep.href.startsWith("http") ? "_blank" : undefined}
-            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary/90"
+            className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary/90"
           >
             Continue setup
             <Icon name="arrow-right" className="text-xs" />

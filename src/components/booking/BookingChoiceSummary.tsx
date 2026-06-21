@@ -1,5 +1,6 @@
 "use client";
 
+import { Icon } from "@/components/ui/Icon";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -7,6 +8,10 @@ type Props = {
   dateLabel?: string | null;
   timeLabel?: string | null;
   stepLabel?: string | null;
+  holdLabel?: string | null;
+  slotUnavailable?: boolean;
+  slotTaken?: string;
+  slotTakenAction?: string;
   className?: string;
 };
 
@@ -15,20 +20,38 @@ export function BookingChoiceSummary({
   dateLabel,
   timeLabel,
   stepLabel,
+  holdLabel,
+  slotUnavailable,
+  slotTaken,
+  slotTakenAction,
   className,
 }: Props) {
   const parts = [serviceName, dateLabel, timeLabel].filter(Boolean);
   const text = parts.length > 0 ? parts.join(" · ") : stepLabel;
 
-  if (!text) return null;
+  if (!text && !holdLabel && !slotUnavailable) return null;
 
   return (
-    <p
-      className={cn("truncate text-sm font-medium text-foreground", className)}
-      title={text}
-      aria-live="polite"
-    >
-      {text}
-    </p>
+    <div className={cn("min-w-0", className)}>
+      {text ? (
+        <p className="truncate text-sm font-medium text-foreground" title={text} aria-live="polite">
+          {text}
+        </p>
+      ) : null}
+      {holdLabel ? (
+        <p className="mt-2 rounded-lg booking-bg-accent-muted px-3 py-2 text-xs font-medium booking-text-accent lg:hidden">
+          <Icon name="clock" className="mr-1.5" />
+          {holdLabel}
+        </p>
+      ) : null}
+      {slotUnavailable && slotTaken ? (
+        <div className="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-xs text-amber-800 dark:border-amber-800/50 dark:bg-amber-950/40 dark:text-amber-200 lg:hidden">
+          <p className="font-medium">{slotTaken}</p>
+          {slotTakenAction ? (
+            <p className="mt-1 text-amber-700/90 dark:text-amber-300/90">{slotTakenAction}</p>
+          ) : null}
+        </div>
+      ) : null}
+    </div>
   );
 }

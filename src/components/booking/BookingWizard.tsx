@@ -14,7 +14,7 @@ import StepConfirm from "./StepConfirm";
 import { BookingTheme } from "./BookingTheme";
 import { useBookingUrlState, useBookingUrlSync, useStripBookingContactFromUrl } from "./useBookingUrlState";
 import { useSlotHold } from "./useSlotHold";
-import { getBookingCopy } from "@/lib/i18n";
+import { getBookingCopy, formatBookingCopy } from "@/lib/i18n";
 import { getEligibleStaff, pickDefaultStaff } from "@/lib/booking-staff";
 import { trackBookingStart } from "@/lib/analytics/gtag";
 import { ServiceMetaPanel } from "./ServiceMetaPanel";
@@ -194,6 +194,10 @@ function BookingWizardInner({
     staffId: state.staff?.id ?? null,
     locationId: state.location?.id ?? null,
     enabled: true,
+    formatHoldLabel: (minutes, seconds) =>
+      formatBookingCopy(copy.slotHoldActive, {
+        time: `${minutes}:${String(seconds).padStart(2, "0")}`,
+      }),
   });
 
   useBookingUrlSync({
@@ -527,6 +531,10 @@ function BookingWizardInner({
                             ? copy.details
                             : copy.pickDateTime
                       }
+                      holdLabel={slotHold.holdLabel}
+                      slotUnavailable={slotHold.slotUnavailable}
+                      slotTaken={copy.slotTaken}
+                      slotTakenAction={copy.slotTakenAction}
                     />
                   </div>
                 ) : null}
