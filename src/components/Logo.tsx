@@ -2,7 +2,7 @@ import Link from "next/link";
 
 interface LogoProps {
   size?: "sm" | "md" | "lg";
-  href?: string;
+  href?: string | null;
   className?: string;
   /** Show "Dinaya" without the .lk suffix */
   short?: boolean;
@@ -63,8 +63,12 @@ export function Logo({ size = "md", href = "/", className, short = false }: Logo
     </span>
   );
 
+  if (href === null) {
+    return <span className="inline-flex">{inner}</span>;
+  }
+
   return (
-    <Link href={href} className="inline-flex">
+    <Link href={href ?? "/"} className="inline-flex">
       {inner}
     </Link>
   );

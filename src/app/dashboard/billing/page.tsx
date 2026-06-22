@@ -13,7 +13,7 @@ import {
   resolveEffectivePlan,
   type PaidPlan,
 } from "@/lib/plan";
-import { UpgradeButton } from "./UpgradeButton";
+import { PlanPricingActions } from "./PlanPricingActions";
 import { CancelButton } from "./CancelButton";
 
 function formatRs(amount: number) {
@@ -59,15 +59,13 @@ function PlanPricing({
         </p>
       </div>
       {available ? (
-        <div className="mt-5 flex flex-wrap gap-3">
-          <UpgradeButton targetPlan={targetPlan} interval="monthly" />
-          <UpgradeButton
-            targetPlan={targetPlan}
-            interval="annual"
-            variant="secondary"
-            label={savings > 0 ? `Annual · save ${savings}%` : "Annual"}
-          />
-        </div>
+        <PlanPricingActions
+          monthlyLkr={monthlyLkr}
+          annualLkr={annualLkr}
+          targetPlan={targetPlan}
+          available={available}
+          savings={savings}
+        />
       ) : (
         <p className="mt-5 text-sm text-neutral-600">
           {targetLabel} checkout is not open yet. Contact support for early access.

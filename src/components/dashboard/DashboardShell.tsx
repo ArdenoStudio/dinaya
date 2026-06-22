@@ -8,6 +8,7 @@ import { BookOpen, LogOut, Menu, Search, ShieldCheck, UserCircle, X } from "luci
 import { Logo } from "@/components/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { DashboardToastProvider } from "@/components/dashboard/ToastProvider";
+import { useDashboardNavigationOptional } from "@/components/dashboard/DashboardNavigation";
 import { useDashboardCopy, useDashboardRole } from "@/components/dashboard/DashboardLocaleProvider";
 import { MacOSSidebar } from "@/components/ui/macos-sidebar";
 import { dashboardNavGroups } from "@/lib/dashboard-nav";
@@ -16,6 +17,7 @@ import type { PlanUsage } from "@/lib/dashboard-usage";
 import { formatPlanUsage, isNearPlanLimit } from "@/lib/dashboard-usage";
 import { planDisplayName } from "@/lib/plan-display";
 import { cn } from "@/lib/utils";
+import { shouldShowPlanBanner } from "@/lib/dashboard-ui";
 
 type DashboardShellProps = {
   businessName: string;
@@ -29,6 +31,7 @@ type DashboardShellProps = {
   planUsage?: PlanUsage;
   copy: DashboardCopy;
   minimalChrome?: boolean;
+  banner?: React.ReactNode;
   children: React.ReactNode;
 };
 
@@ -49,18 +52,21 @@ export function DashboardShell({
   planUsage,
   copy,
   minimalChrome = false,
+  banner,
   children,
 }: DashboardShellProps) {
+  const navigation = useDashboardNavigationOptional();
   const pathname = usePathname();
+  const activeHref = navigation?.activeHref ?? pathname;
   const navCopy = useDashboardCopy();
   const role = useDashboardRole();
   const isOwner = role === "owner";
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
-  const isSetupFlow = minimalChrome || pathname.startsWith("/dashboard/setup");
+  const isSetupFlow = minimalChrome || activeHref.startsWith("/dashboard/setup");
 
   useEffect(() => {
     setMobileNavOpen(false);
-  }, [pathname]);
+  }, [activeHref]);
 
   useEffect(() => {
     if (!mobileNavOpen) return;
@@ -115,7 +121,13 @@ export function DashboardShell({
     : [];
 
   const planLabel = planDisplayName(plan);
-  const handleSignOut = () => void signOut({ redirectTo: "/auth/signin" });
+  const handleSignOut = () => {
+    if (navigation?.signOut) {
+      navigation.signOut();
+      return;
+    }
+    void signOut({ redirectTo: "/auth/signin" });
+  };
 
   const accountFooter = (
     <div className="space-y-3 border-t border-neutral-200/80 px-2 pt-3 dark:border-neutral-700/80">
@@ -196,7 +208,7 @@ export function DashboardShell({
         </div>
       ) : null}
 
-      {plan === "trial" ? (
+      {shouldShowPlanBanner(activeHref, plan) && plan === "trial" ? (
         <Link
           href="/dashboard/billing"
           className="shrink-0 border-b border-blue-500/30 bg-blue-50 dark:bg-blue-950/40 px-4 py-2 text-center text-sm text-blue-900 dark:text-blue-100 transition-colors hover:bg-blue-100 dark:hover:bg-blue-950/60"
@@ -208,7 +220,7 @@ export function DashboardShell({
         </Link>
       ) : null}
 
-      {plan === "expired" ? (
+      {shouldShowPlanBanner(activeHref, plan) && plan === "expired" ? (
         <Link
           href="/dashboard/billing"
           className="shrink-0 border-b border-red-500/30 bg-red-50 px-4 py-2 text-center text-sm font-medium text-red-900 transition-colors hover:bg-red-100 dark:bg-red-950/40 dark:text-red-200 dark:hover:bg-red-950/60"
@@ -218,12 +230,13 @@ export function DashboardShell({
       ) : null}
 
       <MacOSSidebar
-        activeHref={pathname}
+        activeHref={activeHref}
         sections={sections}
         className="min-h-0 flex-1"
-        header={<Logo href="/dashboard" size="sm" />}
+        header={<Logo href={navigation ? null : "/dashboard"} size="sm" />}
         footer={accountFooter}
         collapsedFooter={collapsedAccountFooter}
+        onItemSelect={navigation?.navigate}
       >
         <header className="sticky top-0 z-20 border-b border-neutral-200/80 bg-white/90 backdrop-blur dark:border-neutral-800 dark:bg-neutral-950/90">
           <div className="flex h-16 items-center gap-3 px-4 sm:px-6 lg:px-8">
@@ -258,7 +271,7 @@ export function DashboardShell({
                         </p>
                         <div className="space-y-1">
                           {section.items.map((item) => {
-                            const active = isNavItemActive(item, pathname);
+                            const active = isNavItemActive(item, activeHref);
                             return (
                               <Link
                                 key={item.href}
@@ -308,7 +321,16 @@ export function DashboardShell({
               </p>
             </div>
 
-            <form action="/dashboard/search" method="get" className="relative min-w-0 flex-1">
+            <form
+              action={navigation?.onSearchSubmit ? undefined : "/dashboard/search"}
+              method={navigation?.onSearchSubmit ? undefined : "get"}
+              className="relative min-w-0 flex-1"
+              onSubmit={(event) => {
+                if (!navigation?.onSearchSubmit) return;
+                event.preventDefault();
+                navigation.onSearchSubmit();
+              }}
+            >
               <Search
                 className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-neutral-400"
                 aria-hidden="true"
@@ -317,20 +339,31 @@ export function DashboardShell({
                 name="q"
                 type="search"
                 aria-label="Search dashboard"
-                className="h-10 w-full rounded-md border border-neutral-200 bg-white pl-9 pr-3 text-sm outline-none transition-shadow placeholder:text-neutral-400 focus:ring-2 focus:ring-primary/30 dark:border-neutral-700 dark:bg-neutral-900"
+                className="h-11 w-full rounded-md border border-neutral-200 bg-white pl-9 pr-3 text-base outline-none transition-shadow placeholder:text-neutral-400 focus-visible:ring-2 focus-visible:ring-primary/30 sm:text-sm dark:border-neutral-700 dark:bg-neutral-900"
                 placeholder={copy.layout.searchPlaceholder}
+                {...(navigation?.searchQuery !== undefined
+                  ? {
+                      value: navigation.searchQuery,
+                      onChange: (event: React.ChangeEvent<HTMLInputElement>) =>
+                        navigation.onSearchQueryChange?.(event.target.value),
+                    }
+                  : {})}
               />
             </form>
 
-            <div className="hidden items-center gap-2 rounded-md border border-neutral-200 bg-white px-2.5 py-2 sm:flex dark:border-neutral-700 dark:bg-neutral-900">
+            <div className="flex items-center gap-2">
               <ThemeToggle />
-              <UserCircle className="size-4 text-neutral-400" aria-hidden="true" />
-              <span className="max-w-[10rem] truncate text-sm text-neutral-800 dark:text-neutral-100">
-                {userName ?? userEmail}
-              </span>
+              <div className="hidden items-center gap-2 rounded-md border border-neutral-200 bg-white px-2.5 py-2 sm:flex dark:border-neutral-700 dark:bg-neutral-900">
+                <UserCircle className="size-4 text-neutral-400" aria-hidden="true" />
+                <span className="max-w-[10rem] truncate text-sm text-neutral-800 dark:text-neutral-100">
+                  {userName ?? userEmail}
+                </span>
+              </div>
             </div>
           </div>
         </header>
+
+        {banner}
 
         <DashboardToastProvider>
           <main className="min-h-0 flex-1 overflow-auto bg-neutral-50 dark:bg-neutral-950">

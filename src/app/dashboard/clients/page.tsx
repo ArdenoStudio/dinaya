@@ -4,6 +4,9 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Icon } from "@/components/ui/Icon";
+import { buttonVariants } from "@/components/ui/button";
+import { dashboardFilterPillClass, dashboardPrimaryActionClass } from "@/lib/dashboard-ui";
+import { cn } from "@/lib/utils";
 
 type Stage = "lead" | "prospect" | "active" | "churned";
 
@@ -176,14 +179,14 @@ export default function ClientsPage() {
           <button
             onClick={exportCsv}
             disabled={clients.length === 0}
-            className="flex items-center gap-1.5 border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:border-gray-300 dark:border-neutral-700 hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className={cn(
+              buttonVariants({ variant: "outline" }),
+              "disabled:cursor-not-allowed disabled:opacity-40",
+            )}
           >
             <Icon name="download" className="text-xs" /> Export CSV
           </button>
-          <Link
-            href="/dashboard/clients/new"
-            className="flex items-center gap-1.5 bg-gradient-to-b from-primary/90 to-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium border-b-2 border-primary/70 shadow-sm transition-all hover:shadow-primary/30 hover:shadow-md"
-          >
+          <Link href="/dashboard/clients/new" className={cn(buttonVariants())}>
             <Icon name="plus" className="text-xs" /> Add customer
           </Link>
         </div>
@@ -227,7 +230,7 @@ export default function ClientsPage() {
             value={q}
             onChange={(e) => setQ(e.target.value)}
             aria-label="Search customers"
-            className="w-full bg-white dark:bg-neutral-900 border rounded-lg pl-9 pr-8 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 placeholder:text-muted-foreground/60 transition-shadow"
+            className="w-full rounded-lg border bg-background py-2.5 pl-9 pr-8 text-base transition-shadow placeholder:text-muted-foreground/60 focus-visible:border-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 sm:text-sm dark:bg-neutral-900"
           />
           {q && (
             <button
@@ -246,11 +249,7 @@ export default function ClientsPage() {
               role="tab"
               aria-selected={stage === s.key}
               onClick={() => setStage(s.key)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                stage === s.key
-                  ? "bg-primary text-primary-foreground shadow-sm"
-                  : "bg-white dark:bg-neutral-900 border text-muted-foreground hover:border-gray-300 dark:border-neutral-700 hover:text-foreground"
-              }`}
+              className={dashboardFilterPillClass(stage === s.key)}
             >
               {s.label}
             </button>
@@ -285,10 +284,7 @@ export default function ClientsPage() {
           <p className="text-sm text-muted-foreground mb-5 max-w-xs mx-auto">
             Start by adding your first customer, or share your booking page to collect them automatically.
           </p>
-          <Link
-            href="/dashboard/clients/new"
-            className="inline-flex items-center gap-1.5 bg-gradient-to-b from-primary/90 to-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium border-b-2 border-primary/70 shadow-sm hover:shadow-md hover:shadow-primary/30 transition-all"
-          >
+          <Link href="/dashboard/clients/new" className={dashboardPrimaryActionClass}>
             <Icon name="plus" className="text-xs" /> Add your first customer
           </Link>
         </div>
