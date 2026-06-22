@@ -166,9 +166,9 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
         </span>
       </div>
 
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid gap-6 lg:grid-cols-3">
         {/* Left: booking info + actions */}
-        <div className="col-span-1 space-y-4">
+        <div className="space-y-4 lg:col-span-1">
           <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-5 space-y-4">
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Appointment</p>
             <div className="flex items-start gap-2.5">
@@ -255,7 +255,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
         </div>
 
         {/* Right: client note + staff notes */}
-        <div className="col-span-2 space-y-5">
+        <div className="space-y-5 lg:col-span-2">
           {booking.notes && (
             <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-5">
               <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Client note</p>
