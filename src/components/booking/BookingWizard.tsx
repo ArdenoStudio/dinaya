@@ -549,6 +549,7 @@ function BookingWizardInner({
                         onBack={clearSlot}
                         onConfirmed={handleConfirmed}
                         hideInlineBack={showBreadcrumb}
+                        hideDetailsHeading={showBreadcrumb}
                       />
                     </div>
                   ) : (
