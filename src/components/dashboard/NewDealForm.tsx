@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { computeDiscountedPrice } from "@/lib/deals/pricing";
+import { dashboardInputClass } from "@/lib/dashboard-ui";
 import { formatLkr } from "@/lib/utils";
 
 type ServiceOption = { id: string; name: string; priceLkr: number };
@@ -125,7 +126,7 @@ export function NewDealForm() {
             required
             value={form.serviceId}
             onChange={(e) => setForm((prev) => ({ ...prev, serviceId: e.target.value }))}
-            className="mt-1 w-full border rounded-md px-3 py-2 text-sm"
+            className={dashboardInputClass}
           >
             <option value="">Select service</option>
             {services.map((service) => (
@@ -140,7 +141,7 @@ export function NewDealForm() {
             required
             value={form.locationId}
             onChange={(e) => setForm((prev) => ({ ...prev, locationId: e.target.value }))}
-            className="mt-1 w-full border rounded-md px-3 py-2 text-sm"
+            className={dashboardInputClass}
           >
             <option value="">Select location</option>
             {locations.map((location) => (
@@ -154,7 +155,7 @@ export function NewDealForm() {
           <select
             value={form.staffId}
             onChange={(e) => setForm((prev) => ({ ...prev, staffId: e.target.value }))}
-            className="mt-1 w-full border rounded-md px-3 py-2 text-sm"
+            className={dashboardInputClass}
           >
             <option value="">Any available staff</option>
             {staff.map((member) => (
@@ -185,7 +186,7 @@ export function NewDealForm() {
             required
             value={form.slotsTotal}
             onChange={(e) => setForm((prev) => ({ ...prev, slotsTotal: Number(e.target.value) }))}
-            className="mt-1 w-full border rounded-md px-3 py-2 text-sm"
+            className={dashboardInputClass}
           />
         </div>
 
@@ -197,7 +198,7 @@ export function NewDealForm() {
               required
               value={form.dealWindowStart}
               onChange={(e) => setForm((prev) => ({ ...prev, dealWindowStart: e.target.value }))}
-              className="mt-1 w-full border rounded-md px-3 py-2 text-sm"
+              className={dashboardInputClass}
             />
           </div>
           <div>
@@ -207,7 +208,7 @@ export function NewDealForm() {
               required
               value={form.dealWindowEnd}
               onChange={(e) => setForm((prev) => ({ ...prev, dealWindowEnd: e.target.value }))}
-              className="mt-1 w-full border rounded-md px-3 py-2 text-sm"
+              className={dashboardInputClass}
             />
           </div>
         </div>
@@ -220,7 +221,7 @@ export function NewDealForm() {
               required
               value={form.apptWindowStart}
               onChange={(e) => setForm((prev) => ({ ...prev, apptWindowStart: e.target.value }))}
-              className="mt-1 w-full border rounded-md px-3 py-2 text-sm"
+              className={dashboardInputClass}
             />
           </div>
           <div>
@@ -230,7 +231,7 @@ export function NewDealForm() {
               required
               value={form.apptWindowEnd}
               onChange={(e) => setForm((prev) => ({ ...prev, apptWindowEnd: e.target.value }))}
-              className="mt-1 w-full border rounded-md px-3 py-2 text-sm"
+              className={dashboardInputClass}
             />
           </div>
         </div>
