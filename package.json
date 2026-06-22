@@ -25,6 +25,7 @@
     "test:e2e:install": "playwright install --with-deps chromium",
     "test:e2e:live": "PLAYWRIGHT_BASE_URL=https://dinaya-lk.vercel.app playwright test e2e/live-vercel.spec.ts",
     "test:e2e:full": "E2E_DISABLE_RATE_LIMIT=true playwright test",
+    "seed:test-services": "tsx scripts/seed-test-services.ts",
     "seed:personas": "tsx scripts/seed-e2e-personas.ts",
     "seed:personas:clean": "tsx scripts/seed-e2e-personas.ts --clean",
     "seed:personas:enrich": "tsx scripts/seed-e2e-personas.ts --enrich-rich",
