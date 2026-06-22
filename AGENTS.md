@@ -123,3 +123,26 @@ Shared context: `.cursor/skills/_shared/` (brand, visual, product, stack, paths,
 Master plan: `docs/superpowers/plans/2026-06-22-dinaya-skill-pack-master-plan.md`
 
 Skills are not part of Dinaya production — never ship `@cursor/sdk` in the app bundle.
+
+## Cursor Cloud specific instructions
+
+The relevant service is the **root Next.js web app** (`npm run dev`, port **3002**). Commands are documented in [README.md](README.md) and `package.json` — `npm run lint`, `npm test`, `npm run build`, `npm run db:migrate`. Below are the non-obvious caveats for this environment.
+
+### Database: use a local Postgres, never the injected `DATABASE_URL`
+
+- The injected `DATABASE_URL` / `DATABASE_URL_DIRECT` secrets point at the **production Supabase pooler** (`*.pooler.supabase.com`). Do **not** run `npm run db:migrate`, `npm run build` (it auto-migrates when `DATABASE_URL` is set), seed scripts, or any write/test flow against it.
+- A local Postgres 16 is installed in the VM with a dev database. Start it each session (it is not auto-started by the snapshot) and override the connection string:
+  ```bash
+  sudo pg_ctlcluster 16 main start
+  export DATABASE_URL="postgresql://dinaya:dinaya@127.0.0.1:5432/dinaya"
+  export DATABASE_URL_DIRECT="postgresql://dinaya:dinaya@127.0.0.1:5432/dinaya"
+  ```
+  If the role/db is missing on a fresh VM, recreate them: `sudo -u postgres psql -c "CREATE ROLE dinaya LOGIN PASSWORD 'dinaya' CREATEDB;" -c "CREATE DATABASE dinaya OWNER dinaya;"` then `npm run db:migrate`.
+- **Gotcha:** Next.js and the dotenv-based scripts (`db-migrate.mjs`, `drizzle.config.ts`, `playwright.config.ts`) do **not** override variables already present in `process.env`. Because `DATABASE_URL` is injected as a real env var, putting a local value in `.env.local` has no effect — you must `export` the local URL in the shell that runs `npm run dev` / `npm run db:migrate`.
+
+### Running and testing
+
+- Dev server: `npm run dev` → `http://localhost:3002`. Playwright's local webserver uses port **3001** (`playwright.config.ts`); override the target with `PLAYWRIGHT_BASE_URL`.
+- No seed data is required for the core booking flow. Register a tenant via `POST /api/auth/register` (or `/register`); `registerBusinessAccount()` seeds services, staff, locations, and Mon–Sat availability. Default seeded services have `requiresPayment: false`, so public bookings reach `confirmed` status without PayHere.
+- Optional integrations (PayHere, Resend, Groq AI, Meta/Twilio messaging, Upstash, Google Calendar) are feature-gated — missing env vars degrade gracefully and do not crash the dev server.
+- Secondary apps under `apps/` (`desktop` Tauri, `mobile` Android, `mcp-dinaya`, `video` Remotion) are not needed to run or test the core web product.
