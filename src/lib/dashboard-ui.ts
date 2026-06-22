@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { buttonVariants } from "@/components/ui/button";
 
 /** Shared dashboard form + surface tokens (Apple HIG aligned). */
 export const dashboardInputClass = cn(
@@ -36,3 +37,13 @@ export function shouldShowPlanBanner(activeHref: string, plan: string): boolean 
     (path) => activeHref === path || activeHref.startsWith(`${path}/`),
   );
 }
+
+export const dashboardPrimaryActionClass = cn(
+  buttonVariants(),
+  "inline-flex min-h-11 items-center gap-1.5",
+);
+
+export const dashboardOutlineActionClass = cn(
+  buttonVariants({ variant: "outline" }),
+  "inline-flex min-h-11 items-center gap-1.5",
+);

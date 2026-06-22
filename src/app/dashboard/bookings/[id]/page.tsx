@@ -4,6 +4,10 @@ import { useEffect, useState, use } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { BookingReschedulePanel } from "@/components/dashboard/BookingReschedulePanel";
+import { DashboardConfirmDialog } from "@/components/dashboard/DashboardConfirmDialog";
+import { DashboardLoadingPanel } from "@/components/dashboard/DashboardLoadingPanel";
+import { Button } from "@/components/ui/button";
+import { dashboardInputClass } from "@/lib/dashboard-ui";
 import { bookingReminderText, whatsappUrl } from "@/lib/whatsapp";
 import { Icon } from "@/components/ui/Icon";
 import type { IntakeAnswer } from "@/lib/intake";
@@ -35,16 +39,44 @@ const STATUS_STYLES: Record<string, string> = {
   no_show: "bg-gray-100 dark:bg-neutral-800 text-gray-600 dark:text-gray-400",
 };
 
-const ACTIONS: Record<string, { label: string; next: string; style: string }[]> = {
+type BookingStatus = Booking["status"];
+
+type BookingAction = {
+  label: string;
+  next: BookingStatus;
+  variant?: "default" | "destructive" | "outline";
+};
+
+const ACTIONS: Record<string, BookingAction[]> = {
   pending: [
-    { label: "Confirm", next: "confirmed", style: "bg-gradient-to-b from-green-500 to-green-600 border-b-2 border-green-700 text-white shadow-sm hover:shadow-green-300/40 hover:shadow-md" },
-    { label: "Cancel", next: "cancelled", style: "bg-gradient-to-b from-red-400 to-red-500 border-b-2 border-red-600 text-white shadow-sm hover:shadow-red-300/40 hover:shadow-md" },
+    { label: "Confirm", next: "confirmed", variant: "default" },
+    { label: "Cancel", next: "cancelled", variant: "destructive" },
   ],
   confirmed: [
-    { label: "Mark complete", next: "completed", style: "bg-gradient-to-b from-blue-500 to-blue-600 border-b-2 border-blue-700 text-white shadow-sm hover:shadow-blue-300/40 hover:shadow-md" },
-    { label: "No-show", next: "no_show", style: "bg-gradient-to-b from-gray-400 to-gray-500 border-b-2 border-gray-600 text-white shadow-sm" },
-    { label: "Cancel", next: "cancelled", style: "bg-gradient-to-b from-red-400 to-red-500 border-b-2 border-red-600 text-white shadow-sm hover:shadow-red-300/40 hover:shadow-md" },
+    { label: "Mark complete", next: "completed", variant: "default" },
+    { label: "No-show", next: "no_show", variant: "outline" },
+    { label: "Cancel", next: "cancelled", variant: "destructive" },
   ],
+};
+
+const DESTRUCTIVE_ACTIONS = new Set<BookingStatus>(["cancelled", "no_show"]);
+
+const CONFIRM_COPY: Record<
+  string,
+  { title: string; description: string; confirmLabel: string; variant?: "destructive" | "default" }
+> = {
+  cancelled: {
+    title: "Cancel this booking?",
+    description: "The client will no longer have this appointment.",
+    confirmLabel: "Cancel booking",
+    variant: "destructive",
+  },
+  no_show: {
+    title: "Mark as no-show?",
+    description: "This records that the client did not attend.",
+    confirmLabel: "Mark no-show",
+    variant: "default",
+  },
 };
 
 export default function BookingDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -55,6 +87,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
   const [savingNotes, setSavingNotes] = useState(false);
   const [savedNotes, setSavedNotes] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [confirmStatus, setConfirmStatus] = useState<BookingStatus | null>(null);
 
   useEffect(() => {
     fetch(`/api/dashboard/bookings/${id}`)
@@ -66,7 +99,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
       });
   }, [id]);
 
-  async function updateStatus(status: string) {
+  async function updateStatus(status: BookingStatus) {
     setUpdatingStatus(true);
     const res = await fetch(`/api/dashboard/bookings/${id}`, {
       method: "PATCH",
@@ -75,9 +108,17 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
     });
     if (res.ok) {
       const updated = await res.json();
-      setBooking((b) => b ? { ...b, status: updated.status } : b);
+      setBooking((b) => (b ? { ...b, status: updated.status } : b));
     }
     setUpdatingStatus(false);
+  }
+
+  function handleStatusAction(status: BookingStatus) {
+    if (DESTRUCTIVE_ACTIONS.has(status)) {
+      setConfirmStatus(status);
+      return;
+    }
+    void updateStatus(status);
   }
 
   async function saveNotes() {
@@ -92,7 +133,13 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
     setTimeout(() => setSavedNotes(false), 2000);
   }
 
-  if (loading) return <div className="text-sm text-muted-foreground p-8">Loading…</div>;
+  if (loading) {
+    return (
+      <div className="p-2">
+        <DashboardLoadingPanel rows={3} />
+      </div>
+    );
+  }
   if (!booking) return <div className="text-sm text-muted-foreground p-8">Booking not found.</div>;
 
   const actions = ACTIONS[booking.status] ?? [];
@@ -192,14 +239,16 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
             <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-5 space-y-2">
               <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Actions</p>
               {actions.map((a) => (
-                <button
+                <Button
                   key={a.next}
-                  onClick={() => updateStatus(a.next)}
+                  type="button"
+                  variant={a.variant ?? "outline"}
+                  className="w-full min-h-11"
+                  onClick={() => handleStatusAction(a.next)}
                   disabled={updatingStatus}
-                  className={`w-full py-2.5 rounded-lg text-sm font-medium transition-all disabled:opacity-50 ${a.style}`}
                 >
                   {updatingStatus ? "Updating…" : a.label}
-                </button>
+                </Button>
               ))}
             </div>
           )}
@@ -240,16 +289,12 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
               value={staffNotes}
               onChange={(e) => setStaffNotes(e.target.value)}
               placeholder="Add internal notes about this appointment…"
-              className="w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none bg-white dark:bg-neutral-900 dark:border-neutral-800"
+              className={`${dashboardInputClass} mt-0 resize-none`}
             />
-            <div className="flex items-center gap-3 mt-2">
-              <button
-                onClick={saveNotes}
-                disabled={savingNotes}
-                className="bg-gradient-to-b from-primary/90 to-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium border-b-2 border-primary/70 shadow-sm transition-all hover:shadow-primary/30 hover:shadow-md disabled:opacity-60"
-              >
+            <div className="mt-2 flex items-center gap-3">
+              <Button type="button" onClick={saveNotes} disabled={savingNotes} className="min-h-11">
                 {savingNotes ? "Saving…" : "Save notes"}
-              </button>
+              </Button>
               {savedNotes && (
                 <span className="flex items-center gap-1.5 text-green-600 text-sm">
                   <Icon name="check-circle" className="text-sm" /> Saved
@@ -259,6 +304,20 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
           </div>
         </div>
       </div>
+
+      {confirmStatus && CONFIRM_COPY[confirmStatus] ? (
+        <DashboardConfirmDialog
+          open
+          onOpenChange={(open) => {
+            if (!open) setConfirmStatus(null);
+          }}
+          title={CONFIRM_COPY[confirmStatus].title}
+          description={CONFIRM_COPY[confirmStatus].description}
+          confirmLabel={CONFIRM_COPY[confirmStatus].confirmLabel}
+          variant={CONFIRM_COPY[confirmStatus].variant}
+          onConfirm={() => updateStatus(confirmStatus)}
+        />
+      ) : null}
     </div>
   );
 }

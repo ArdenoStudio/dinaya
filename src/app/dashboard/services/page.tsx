@@ -5,6 +5,7 @@ import { getServicesDashboardList } from "@/lib/dashboard/services";
 import { Icon } from "@/components/ui/Icon";
 import { EmptyState } from "@/components/dashboard/EmptyState";
 import { Scissors } from "lucide-react";
+import { dashboardOutlineActionClass, dashboardPrimaryActionClass } from "@/lib/dashboard-ui";
 
 export default async function ServicesPage() {
   const { businessId } = await requireOwner();
@@ -15,16 +16,10 @@ export default async function ServicesPage() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-cal text-2xl">Services</h1>
         <div className="flex items-center gap-2">
-          <Link
-            href="/dashboard/services/router"
-            className="flex items-center gap-1.5 border px-4 py-2 rounded-md text-sm font-medium text-foreground hover:bg-muted/50 transition-colors"
-          >
+          <Link href="/dashboard/services/router" className={dashboardOutlineActionClass}>
             Booking router
           </Link>
-          <Link
-            href="/dashboard/services/new"
-            className="flex items-center gap-1.5 bg-gradient-to-b from-primary/90 to-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium border-b-2 border-primary/70 shadow-sm transition-all hover:shadow-primary/30 hover:shadow-md"
-          >
+          <Link href="/dashboard/services/new" className={dashboardPrimaryActionClass}>
             <Icon name="plus" className="text-xs" /> Add service
           </Link>
         </div>

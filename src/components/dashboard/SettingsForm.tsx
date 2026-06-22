@@ -8,6 +8,7 @@ import { buildPublicBookingUrl } from "@/lib/booking-url";
 import { isOptimizableRemoteImage } from "@/lib/utils";
 import { Icon } from "@/components/ui/Icon";
 import { Button } from "@/components/ui/button";
+import { dashboardInputClass } from "@/lib/dashboard-ui";
 
 type SettingsBusiness = {
   address: string | null;
@@ -126,8 +127,7 @@ export default function SettingsForm({ business }: Props) {
     setGalleryImages((prev) => prev.filter((u) => u !== url));
   }
 
-  const inputCls =
-    "mt-1 w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 bg-white dark:border-neutral-700 dark:bg-neutral-900";
+  const inputCls = `${dashboardInputClass} mt-0`;
 
   return (
     <div className="space-y-5">

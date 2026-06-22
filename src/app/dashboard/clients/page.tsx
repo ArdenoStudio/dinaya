@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Icon } from "@/components/ui/Icon";
 import { buttonVariants } from "@/components/ui/button";
-import { dashboardFilterPillClass } from "@/lib/dashboard-ui";
+import { dashboardFilterPillClass, dashboardPrimaryActionClass } from "@/lib/dashboard-ui";
 import { cn } from "@/lib/utils";
 
 type Stage = "lead" | "prospect" | "active" | "churned";
@@ -284,10 +284,7 @@ export default function ClientsPage() {
           <p className="text-sm text-muted-foreground mb-5 max-w-xs mx-auto">
             Start by adding your first customer, or share your booking page to collect them automatically.
           </p>
-          <Link
-            href="/dashboard/clients/new"
-            className="inline-flex items-center gap-1.5 bg-gradient-to-b from-primary/90 to-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium border-b-2 border-primary/70 shadow-sm hover:shadow-md hover:shadow-primary/30 transition-all"
-          >
+          <Link href="/dashboard/clients/new" className={dashboardPrimaryActionClass}>
             <Icon name="plus" className="text-xs" /> Add your first customer
           </Link>
         </div>

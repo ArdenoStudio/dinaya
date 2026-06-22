@@ -9,6 +9,7 @@ import { DealsClient } from "@/components/dashboard/DealsClient";
 import { DealSuggestionsCard } from "@/components/dashboard/DealSuggestionsCard";
 import { EmptyState } from "@/components/dashboard/EmptyState";
 import { Icon } from "@/components/ui/Icon";
+import { dashboardPrimaryActionClass } from "@/lib/dashboard-ui";
 import { Tag } from "lucide-react";
 
 export default async function DealsPage() {
@@ -35,10 +36,7 @@ export default async function DealsPage() {
               Post flash discounts on slow slots. Clients discover deals on Dinaya and book at the discounted price.
             </p>
           </div>
-          <Link
-            href="/dashboard/deals/new"
-            className="flex items-center gap-1.5 bg-gradient-to-b from-primary/90 to-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium border-b-2 border-primary/70 shadow-sm"
-          >
+          <Link href="/dashboard/deals/new" className={dashboardPrimaryActionClass}>
             <Icon name="plus" className="text-xs" /> New deal
           </Link>
         </div>
