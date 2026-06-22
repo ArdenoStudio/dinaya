@@ -17,6 +17,7 @@ import type { PlanUsage } from "@/lib/dashboard-usage";
 import { formatPlanUsage, isNearPlanLimit } from "@/lib/dashboard-usage";
 import { planDisplayName } from "@/lib/plan-display";
 import { cn } from "@/lib/utils";
+import { shouldShowPlanBanner } from "@/lib/dashboard-ui";
 
 type DashboardShellProps = {
   businessName: string;
@@ -207,7 +208,7 @@ export function DashboardShell({
         </div>
       ) : null}
 
-      {plan === "trial" ? (
+      {shouldShowPlanBanner(activeHref, plan) && plan === "trial" ? (
         <Link
           href="/dashboard/billing"
           className="shrink-0 border-b border-blue-500/30 bg-blue-50 dark:bg-blue-950/40 px-4 py-2 text-center text-sm text-blue-900 dark:text-blue-100 transition-colors hover:bg-blue-100 dark:hover:bg-blue-950/60"
@@ -219,7 +220,7 @@ export function DashboardShell({
         </Link>
       ) : null}
 
-      {plan === "expired" ? (
+      {shouldShowPlanBanner(activeHref, plan) && plan === "expired" ? (
         <Link
           href="/dashboard/billing"
           className="shrink-0 border-b border-red-500/30 bg-red-50 px-4 py-2 text-center text-sm font-medium text-red-900 transition-colors hover:bg-red-100 dark:bg-red-950/40 dark:text-red-200 dark:hover:bg-red-950/60"
@@ -338,7 +339,7 @@ export function DashboardShell({
                 name="q"
                 type="search"
                 aria-label="Search dashboard"
-                className="h-10 w-full rounded-md border border-neutral-200 bg-white pl-9 pr-3 text-sm outline-none transition-shadow placeholder:text-neutral-400 focus:ring-2 focus:ring-primary/30 dark:border-neutral-700 dark:bg-neutral-900"
+                className="h-11 w-full rounded-md border border-neutral-200 bg-white pl-9 pr-3 text-base outline-none transition-shadow placeholder:text-neutral-400 focus-visible:ring-2 focus-visible:ring-primary/30 sm:text-sm dark:border-neutral-700 dark:bg-neutral-900"
                 placeholder={copy.layout.searchPlaceholder}
                 {...(navigation?.searchQuery !== undefined
                   ? {
@@ -350,12 +351,14 @@ export function DashboardShell({
               />
             </form>
 
-            <div className="hidden items-center gap-2 rounded-md border border-neutral-200 bg-white px-2.5 py-2 sm:flex dark:border-neutral-700 dark:bg-neutral-900">
+            <div className="flex items-center gap-2">
               <ThemeToggle />
-              <UserCircle className="size-4 text-neutral-400" aria-hidden="true" />
-              <span className="max-w-[10rem] truncate text-sm text-neutral-800 dark:text-neutral-100">
-                {userName ?? userEmail}
-              </span>
+              <div className="hidden items-center gap-2 rounded-md border border-neutral-200 bg-white px-2.5 py-2 sm:flex dark:border-neutral-700 dark:bg-neutral-900">
+                <UserCircle className="size-4 text-neutral-400" aria-hidden="true" />
+                <span className="max-w-[10rem] truncate text-sm text-neutral-800 dark:text-neutral-100">
+                  {userName ?? userEmail}
+                </span>
+              </div>
             </div>
           </div>
         </header>

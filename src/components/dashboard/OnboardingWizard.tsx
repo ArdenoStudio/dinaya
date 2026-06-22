@@ -20,7 +20,7 @@ export function OnboardingWizard({ steps, bookingUrl, whatsappShare }: Props) {
   const progress = Math.round((completed / steps.length) * 100);
 
   return (
-    <div className="overflow-hidden rounded-2xl border bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-6 shadow-sm dark:border-neutral-800 dark:from-blue-950/40 dark:via-neutral-900 dark:to-indigo-950/30">
+    <div className="overflow-hidden rounded-2xl border bg-card p-6 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
       <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-widest text-primary">Get live in 5 minutes</p>

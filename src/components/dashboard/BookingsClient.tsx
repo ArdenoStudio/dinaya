@@ -5,7 +5,14 @@ import Link from "next/link";
 import { format } from "date-fns";
 import { CalendarPlus, Download } from "lucide-react";
 import { DataTable } from "@/components/dashboard/DataTable";
+import { DashboardConfirmDialog } from "@/components/dashboard/DashboardConfirmDialog";
+import { DashboardLoadingPanel, DashboardTableSkeleton } from "@/components/dashboard/DashboardLoadingPanel";
+import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
 import { EmptyState } from "@/components/dashboard/EmptyState";
+import { useDashboardToast } from "@/components/dashboard/ToastProvider";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { dashboardFilterPillClass } from "@/lib/dashboard-ui";
+import { cn } from "@/lib/utils";
 import { bookingReminderText, whatsappUrl } from "@/lib/whatsapp";
 
 export type BookingRow = {
@@ -23,11 +30,11 @@ export type BookingRow = {
 };
 
 const STATUS_STYLES: Record<string, string> = {
-  pending: "bg-yellow-100 text-yellow-800",
-  confirmed: "bg-green-100 text-green-800",
-  cancelled: "bg-red-100 text-red-800",
-  completed: "bg-blue-100 text-blue-800",
-  no_show: "bg-gray-100 dark:bg-neutral-800 text-gray-600 dark:text-gray-400",
+  pending: "bg-yellow-100 text-yellow-800 dark:bg-yellow-950/40 dark:text-yellow-200",
+  confirmed: "bg-green-100 text-green-800 dark:bg-green-950/40 dark:text-green-200",
+  cancelled: "bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-200",
+  completed: "bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-200",
+  no_show: "bg-gray-100 text-gray-600 dark:bg-neutral-800 dark:text-gray-400",
 };
 
 const TABS = [
@@ -39,24 +46,42 @@ const TABS = [
 
 export type BookingsTab = (typeof TABS)[number]["key"];
 
-const ACTIONS: Record<string, { label: string; next: string; style: string }[]> = {
+type BookingAction = {
+  label: string;
+  next: BookingRow["status"];
+  variant?: "default" | "destructive" | "outline";
+};
+
+const ACTIONS: Record<string, BookingAction[]> = {
   pending: [
-    { label: "Confirm", next: "confirmed", style: "text-green-700 hover:bg-green-50 border-green-200" },
-    { label: "Cancel", next: "cancelled", style: "text-red-600 hover:bg-red-50 border-red-200" },
+    { label: "Confirm", next: "confirmed", variant: "default" },
+    { label: "Cancel", next: "cancelled", variant: "destructive" },
   ],
   confirmed: [
-    {
-      label: "Complete",
-      next: "completed",
-      style: "text-blue-700 hover:bg-blue-50 dark:bg-blue-950/40 border-blue-200",
-    },
-    {
-      label: "No-show",
-      next: "no_show",
-      style: "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:bg-neutral-900/60 border-gray-200 dark:border-neutral-800",
-    },
-    { label: "Cancel", next: "cancelled", style: "text-red-600 hover:bg-red-50 border-red-200" },
+    { label: "Complete", next: "completed", variant: "default" },
+    { label: "No-show", next: "no_show", variant: "outline" },
+    { label: "Cancel", next: "cancelled", variant: "destructive" },
   ],
+};
+
+const DESTRUCTIVE_ACTIONS = new Set<BookingRow["status"]>(["cancelled", "no_show"]);
+
+const CONFIRM_COPY: Record<
+  string,
+  { title: string; description: string; confirmLabel: string; variant?: "destructive" | "default" }
+> = {
+  cancelled: {
+    title: "Cancel this booking?",
+    description: "The client will no longer have this appointment. You can still view it under Cancelled.",
+    confirmLabel: "Cancel booking",
+    variant: "destructive",
+  },
+  no_show: {
+    title: "Mark as no-show?",
+    description: "This records that the client did not attend. The booking stays in your history.",
+    confirmLabel: "Mark no-show",
+    variant: "default",
+  },
 };
 
 export type BookingsApi = {
@@ -65,57 +90,150 @@ export type BookingsApi = {
   exportUrl: (tab: BookingsTab) => string;
 };
 
+function StatusBadge({ status }: { status: BookingRow["status"] }) {
+  return (
+    <span
+      className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium capitalize ${STATUS_STYLES[status] ?? ""}`}
+    >
+      {status.replace("_", " ")}
+    </span>
+  );
+}
+
+function BookingActions({
+  row,
+  updating,
+  onAction,
+}: {
+  row: BookingRow;
+  updating: string | null;
+  onAction: (bookingId: string, status: BookingRow["status"]) => void;
+}) {
+  const actions = ACTIONS[row.status] ?? [];
+  const isUpdating = updating === row.id;
+
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <Link
+        href={`/dashboard/bookings/${row.id}`}
+        className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+      >
+        View
+      </Link>
+      <a
+        href={whatsappUrl(
+          row.clientPhone,
+          bookingReminderText({
+            clientName: row.clientName,
+            serviceName: row.serviceName,
+            startsAt: row.startsAt,
+          }),
+        )}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+      >
+        WhatsApp
+      </a>
+      {actions.map((action) => (
+        <Button
+          key={action.next}
+          type="button"
+          size="sm"
+          variant={action.variant ?? "outline"}
+          disabled={isUpdating}
+          onClick={() => onAction(row.id, action.next)}
+        >
+          {isUpdating ? "Updating…" : action.label}
+        </Button>
+      ))}
+    </div>
+  );
+}
+
 export function BookingsClient({ api }: { api: BookingsApi }) {
+  const { showToast } = useDashboardToast();
   const [tab, setTab] = useState<BookingsTab>("upcoming");
   const [rows, setRows] = useState<BookingRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
+  const [confirmState, setConfirmState] = useState<{
+    bookingId: string;
+    status: BookingRow["status"];
+  } | null>(null);
 
   useEffect(() => {
     setLoading(true);
-    void api.list(tab).then((data) => {
-      setRows(data);
-      setLoading(false);
-    });
-  }, [api, tab]);
+    void api
+      .list(tab)
+      .then((data) => {
+        setRows(data);
+        setLoading(false);
+      })
+      .catch(() => {
+        setRows([]);
+        setLoading(false);
+        showToast({
+          title: "Could not load bookings",
+          description: "Check your connection and try again.",
+        });
+      });
+  }, [api, tab, showToast]);
 
-  async function updateStatus(bookingId: string, status: string) {
+  async function updateStatus(bookingId: string, status: BookingRow["status"]) {
     setUpdating(bookingId);
-    const updated = await api.updateStatus(bookingId, status);
-    if (updated) {
-      setRows((prev) => prev.map((b) => (b.id === bookingId ? { ...b, status: updated.status } : b)));
+    try {
+      const updated = await api.updateStatus(bookingId, status);
+      if (updated) {
+        setRows((prev) => prev.map((b) => (b.id === bookingId ? { ...b, status: updated.status } : b)));
+        showToast({ title: "Booking updated" });
+      } else {
+        showToast({
+          title: "Could not update booking",
+          description: "Try again or refresh the page.",
+        });
+      }
+    } catch {
+      showToast({
+        title: "Could not update booking",
+        description: "Check your connection and try again.",
+      });
+    } finally {
+      setUpdating(null);
     }
-    setUpdating(null);
   }
+
+  function handleAction(bookingId: string, status: BookingRow["status"]) {
+    if (DESTRUCTIVE_ACTIONS.has(status)) {
+      setConfirmState({ bookingId, status });
+      return;
+    }
+    void updateStatus(bookingId, status);
+  }
+
+  const confirmCopy = confirmState ? CONFIRM_COPY[confirmState.status] : null;
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="font-cal text-2xl">Bookings</h1>
-        <div className="flex gap-2">
-          <a
-            href={api.exportUrl(tab)}
-            className="flex items-center gap-1.5 rounded-md border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground"
-          >
-            <Download className="size-3.5" aria-hidden="true" />
-            Export CSV
-          </a>
-          <Link
-            href="/dashboard/calendar"
-            className="flex items-center gap-1.5 rounded-md border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground"
-          >
-            Calendar
-          </Link>
-          <Link
-            href="/dashboard/bookings/new"
-            className="flex items-center gap-1.5 rounded-md border-b-2 border-primary/70 bg-gradient-to-b from-primary/90 to-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-all hover:shadow-md hover:shadow-primary/30"
-          >
-            + New booking
-          </Link>
-        </div>
-      </div>
+      <DashboardPageHeader
+        title="Bookings"
+        actions={
+          <div className="flex flex-wrap gap-2">
+            <a href={api.exportUrl(tab)} className={cn(buttonVariants({ variant: "outline" }))}>
+              <Download className="size-3.5" aria-hidden="true" />
+              Export CSV
+            </a>
+            <Link href="/dashboard/calendar" className={cn(buttonVariants({ variant: "outline" }))}>
+              Calendar
+            </Link>
+            <Link href="/dashboard/bookings/new" className={cn(buttonVariants())}>
+              New booking
+            </Link>
+          </div>
+        }
+      />
 
-      <div className="mb-5 flex gap-1 border-b" role="tablist" aria-label="Booking filters">
+      <div className="mb-5 flex flex-wrap gap-2" role="tablist" aria-label="Booking filters">
         {TABS.map((t) => (
           <button
             key={t.key}
@@ -123,11 +241,7 @@ export function BookingsClient({ api }: { api: BookingsApi }) {
             role="tab"
             aria-selected={tab === t.key}
             onClick={() => setTab(t.key)}
-            className={`border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
-              tab === t.key
-                ? "border-primary text-primary"
-                : "border-transparent text-muted-foreground hover:text-foreground"
-            }`}
+            className={dashboardFilterPillClass(tab === t.key)}
           >
             {t.label}
           </button>
@@ -135,23 +249,72 @@ export function BookingsClient({ api }: { api: BookingsApi }) {
       </div>
 
       {loading ? (
-        <div className="rounded-xl border bg-white p-12 text-center text-sm text-muted-foreground dark:border-neutral-800 dark:bg-neutral-900">
-          Loading…
-        </div>
+        <>
+          <DashboardLoadingPanel className="md:hidden" rows={4} />
+          <div className="hidden md:block">
+            <DashboardTableSkeleton />
+          </div>
+        </>
       ) : (
         <DataTable
           rows={rows}
           getRowId={(row) => row.id}
+          mobileCard={(row) => (
+            <article
+              key={row.id}
+              className="rounded-xl border border-border bg-card p-4 dark:border-neutral-800 dark:bg-neutral-900"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  {row.clientId ? (
+                    <Link
+                      href={`/dashboard/clients/${row.clientId}`}
+                      className="font-medium hover:text-primary hover:underline"
+                    >
+                      {row.clientName}
+                    </Link>
+                  ) : (
+                    <p className="font-medium">{row.clientName}</p>
+                  )}
+                  <p className="text-sm text-muted-foreground">{row.clientPhone}</p>
+                </div>
+                <StatusBadge status={row.status} />
+              </div>
+              <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                <div>
+                  <dt className="text-xs text-muted-foreground">Service</dt>
+                  <dd>{row.serviceName}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-muted-foreground">Staff</dt>
+                  <dd>{row.staffName}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-muted-foreground">When</dt>
+                  <dd>{format(new Date(row.startsAt), "d MMM yyyy, h:mm a")}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-muted-foreground">Payment</dt>
+                  <dd>
+                    {row.amountLkr ? `LKR ${row.amountLkr.toLocaleString()}` : "—"}
+                    {row.paymentStatus ? (
+                      <span className="block text-xs capitalize text-muted-foreground">{row.paymentStatus}</span>
+                    ) : null}
+                  </dd>
+                </div>
+              </dl>
+              <div className="mt-4 border-t pt-4">
+                <BookingActions row={row} updating={updating} onAction={handleAction} />
+              </div>
+            </article>
+          )}
           empty={
             <EmptyState
               icon={CalendarPlus}
               title="No bookings here yet"
               description="New bookings from your booking page or manual entries will appear here."
               action={
-                <Link
-                  href="/dashboard/bookings/new"
-                  className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-                >
+                <Link href="/dashboard/bookings/new" className={cn(buttonVariants())}>
                   Create booking
                 </Link>
               }
@@ -192,13 +355,7 @@ export function BookingsClient({ api }: { api: BookingsApi }) {
             {
               key: "status",
               header: "Status",
-              render: (row) => (
-                <span
-                  className={`rounded-full px-2 py-0.5 text-xs font-medium capitalize ${STATUS_STYLES[row.status] ?? ""}`}
-                >
-                  {row.status.replace("_", " ")}
-                </span>
-              ),
+              render: (row) => <StatusBadge status={row.status} />,
             },
             {
               key: "payment",
@@ -222,51 +379,27 @@ export function BookingsClient({ api }: { api: BookingsApi }) {
               key: "actions",
               header: "",
               align: "right",
-              render: (row) => {
-                const actions = ACTIONS[row.status] ?? [];
-                const isUpdating = updating === row.id;
-                return (
-                  <div className="flex items-center justify-end gap-1.5">
-                    <Link
-                      href={`/dashboard/bookings/${row.id}`}
-                      className="rounded border border-gray-200 px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/50 dark:border-neutral-800"
-                    >
-                      View
-                    </Link>
-                    <a
-                      href={whatsappUrl(
-                        row.clientPhone,
-                        bookingReminderText({
-                          clientName: row.clientName,
-                          serviceName: row.serviceName,
-                          startsAt: row.startsAt,
-                        }),
-                      )}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="rounded border border-green-200 px-2.5 py-1 text-xs font-medium text-green-700 transition-colors hover:bg-green-50"
-                      title="Message on WhatsApp"
-                    >
-                      WhatsApp
-                    </a>
-                    {actions.map((a) => (
-                      <button
-                        key={a.next}
-                        type="button"
-                        disabled={isUpdating}
-                        onClick={() => void updateStatus(row.id, a.next)}
-                        className={`rounded border px-2.5 py-1 text-xs font-medium transition-colors disabled:opacity-40 ${a.style}`}
-                      >
-                        {isUpdating ? "…" : a.label}
-                      </button>
-                    ))}
-                  </div>
-                );
-              },
+              render: (row) => (
+                <BookingActions row={row} updating={updating} onAction={handleAction} />
+              ),
             },
           ]}
         />
       )}
+
+      {confirmState && confirmCopy ? (
+        <DashboardConfirmDialog
+          open
+          onOpenChange={(open) => {
+            if (!open) setConfirmState(null);
+          }}
+          title={confirmCopy.title}
+          description={confirmCopy.description}
+          confirmLabel={confirmCopy.confirmLabel}
+          variant={confirmCopy.variant}
+          onConfirm={() => updateStatus(confirmState.bookingId, confirmState.status)}
+        />
+      ) : null}
     </div>
   );
 }

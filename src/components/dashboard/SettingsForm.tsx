@@ -7,6 +7,7 @@ import { useDashboardCopy } from "@/components/dashboard/DashboardLocaleProvider
 import { buildPublicBookingUrl } from "@/lib/booking-url";
 import { isOptimizableRemoteImage } from "@/lib/utils";
 import { Icon } from "@/components/ui/Icon";
+import { Button } from "@/components/ui/button";
 
 type SettingsBusiness = {
   address: string | null;
@@ -621,14 +622,10 @@ export default function SettingsForm({ business }: Props) {
 
         {error && <p className="text-destructive text-sm xl:col-span-2">{error}</p>}
 
-        <div className="flex items-center gap-3 xl:col-span-2 sticky bottom-0 -mx-1 border-t border-neutral-200/80 bg-neutral-50/95 px-1 py-4 backdrop-blur-sm dark:border-neutral-800 dark:bg-neutral-950/95">
-          <button
-            type="submit"
-            disabled={saving}
-            className="bg-gradient-to-b from-primary/90 to-primary text-primary-foreground px-5 py-2.5 rounded-lg text-sm font-medium border-b-2 border-primary/70 shadow-sm transition-all hover:shadow-primary/30 hover:shadow-md disabled:opacity-50"
-          >
+        <div className="sticky bottom-0 -mx-1 flex items-center gap-3 border-t border-neutral-200 bg-neutral-50 px-1 py-4 xl:col-span-2 dark:border-neutral-800 dark:bg-neutral-950">
+          <Button type="submit" disabled={saving} className="min-h-11">
             {saving ? "Saving…" : "Save changes"}
-          </button>
+          </Button>
           {saved && (
             <span className="flex items-center gap-1.5 text-green-600 text-sm">
               <Icon name="check-circle" className="text-sm" /> Saved

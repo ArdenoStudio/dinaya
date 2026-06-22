@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { useState, type ReactNode } from "react";
 import { SidebarToggleIcon } from "@/components/unlumen-ui/sidebar-toggle-icon";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { cn } from "@/lib/utils";
 
 export interface MacOSSidebarItem {
@@ -48,6 +49,7 @@ function SidebarNavLink({
   onNavigate,
   onItemSelect,
   children,
+  collapsed = false,
 }: {
   item: MacOSSidebarItem;
   active: boolean;
@@ -55,7 +57,12 @@ function SidebarNavLink({
   onNavigate?: () => void;
   onItemSelect?: (href: string) => void;
   children: ReactNode;
+  collapsed?: boolean;
 }) {
+  const labelProps = collapsed
+    ? { "aria-label": item.label, title: item.label }
+    : {};
+
   if (onItemSelect) {
     return (
       <button
@@ -66,6 +73,7 @@ function SidebarNavLink({
           onNavigate?.();
         }}
         className={className}
+        {...labelProps}
       >
         {children}
       </button>
@@ -78,6 +86,7 @@ function SidebarNavLink({
       aria-current={active ? "page" : undefined}
       onClick={onNavigate}
       className={className}
+      {...labelProps}
     >
       {children}
     </Link>
@@ -98,6 +107,10 @@ export function MacOSSidebar({
 }: MacOSSidebarProps) {
   const [hoveredKey, setHoveredKey] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(defaultOpen);
+  const reducedMotion = useReducedMotion();
+  const sidebarTransition = reducedMotion
+    ? { duration: 0 }
+    : { type: "spring" as const, bounce: 0.15, duration: 0.35 };
 
   return (
     <div
@@ -108,7 +121,7 @@ export function MacOSSidebar({
     >
       <motion.aside
         animate={{ width: isOpen ? 240 : 64 }}
-        transition={{ type: "spring", bounce: 0.4, duration: 0.8 }}
+        transition={sidebarTransition}
         className={cn(
           "hidden lg:flex lg:h-full lg:max-h-full p-2 shrink-0 flex-col items-start transition-colors duration-300 ease-out",
           isOpen ? "bg-neutral-100 dark:bg-neutral-800" : "bg-transparent",
@@ -242,6 +255,7 @@ export function MacOSSidebar({
                         key={item.href}
                         item={item}
                         active={active}
+                        collapsed
                         onNavigate={onNavigate}
                         onItemSelect={onItemSelect}
                         className={cn(
