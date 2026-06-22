@@ -1,23 +1,45 @@
-import { neon } from "@neondatabase/serverless";
-import { drizzle, type NeonHttpDatabase } from "drizzle-orm/neon-http";
+import postgres from "postgres";
+import { drizzle, type PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import * as schema from "./schema";
 
-// Lazy singleton — avoids crashing at build time when DATABASE_URL isn't set
-let _db: NeonHttpDatabase<typeof schema> | null = null;
+type Db = PostgresJsDatabase<typeof schema>;
 
-function getDb(): NeonHttpDatabase<typeof schema> {
+// ── Primary database (Supabase) — all writes and default reads ──────────
+let _db: Db | null = null;
+
+function getDb(): Db {
   if (!_db) {
-    const sql = neon(process.env.DATABASE_URL!);
-    _db = drizzle(sql, { schema });
+    const client = postgres(process.env.DATABASE_URL!, { prepare: false });
+    _db = drizzle(client, { schema });
   }
   return _db;
 }
 
-export const db: NeonHttpDatabase<typeof schema> = new Proxy(
-  {} as NeonHttpDatabase<typeof schema>,
-  {
-    get(_, prop: string | symbol) {
-      return getDb()[prop as keyof NeonHttpDatabase<typeof schema>];
-    },
+export const db: Db = new Proxy({} as Db, {
+  get(_, prop: string | symbol) {
+    return getDb()[prop as keyof Db];
+  },
+});
+
+// ── Read replica (Neon) — opt-in for read-heavy queries ─────────────────
+// Falls back to the primary DB when DATABASE_URL_READ is not set.
+let _readDb: Db | null = null;
+
+function getReadDb(): Db {
+  if (!_readDb) {
+    const readUrl = process.env.DATABASE_URL_READ;
+    if (readUrl) {
+      const client = postgres(readUrl, { prepare: false });
+      _readDb = drizzle(client, { schema });
+    } else {
+      _readDb = getDb();
+    }
   }
-);
+  return _readDb;
+}
+
+export const readDb: Db = new Proxy({} as Db, {
+  get(_, prop: string | symbol) {
+    return getReadDb()[prop as keyof Db];
+  },
+});

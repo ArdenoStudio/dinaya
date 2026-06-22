@@ -7,10 +7,10 @@ import { DiscoverListings } from "@/components/discover/DiscoverListings";
 import {
   categoryLabel,
   isValidDirectoryCategory,
-  listDirectoryBusinesses,
   slugToCity,
   type DirectoryCategory,
 } from "@/lib/directory";
+import { listDirectoryBusinesses } from "@/lib/directory-server";
 
 interface Props {
   params: Promise<{ city: string }>;

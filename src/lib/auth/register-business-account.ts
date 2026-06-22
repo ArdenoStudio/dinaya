@@ -136,8 +136,8 @@ export async function registerBusinessAccount(input: RegisterInput): Promise<{ b
   }));
 
   try {
-    await db.batch([
-      db.insert(businesses).values({
+    await db.transaction(async (tx) => {
+      await tx.insert(businesses).values({
         id: businessId,
         slug,
         name: businessName,
@@ -150,37 +150,37 @@ export async function registerBusinessAccount(input: RegisterInput): Promise<{ b
         planExpiresAt: addDays(new Date(), TRIAL_LENGTH_DAYS),
         cancellationPolicy: "Please contact the business as early as possible if you need to cancel or reschedule.",
         depositPolicy: "Some services may require a deposit to reduce no-shows.",
-      }),
-      db.insert(users).values({
+      });
+      await tx.insert(users).values({
         businessId,
         name,
         email,
         passwordHash,
         role: "owner",
-      }),
-      db.insert(staff).values({
+      });
+      await tx.insert(staff).values({
         id: staffId,
         businessId,
         name,
         bio: "Owner",
         isActive: true,
-      }),
-      db.insert(services).values(presetServices),
-      db.insert(staffServices).values(
+      });
+      await tx.insert(services).values(presetServices);
+      await tx.insert(staffServices).values(
         presetServices.map((service) => ({
           staffId,
           serviceId: service.id,
         })),
-      ),
-      db.insert(availability).values(
+      );
+      await tx.insert(availability).values(
         [1, 2, 3, 4, 5, 6].map((dayOfWeek) => ({
           staffId,
           dayOfWeek,
           startTime: "09:00",
           endTime: "17:00",
         })),
-      ),
-      db.insert(locations).values({
+      );
+      await tx.insert(locations).values({
         id: locationId,
         businessId,
         name: businessName,
@@ -189,13 +189,13 @@ export async function registerBusinessAccount(input: RegisterInput): Promise<{ b
         isDefault: true,
         isActive: true,
         sortOrder: 0,
-      }),
-      db.insert(staffLocations).values({
+      });
+      await tx.insert(staffLocations).values({
         staffId,
         locationId,
         isPrimary: true,
-      }),
-      db.insert(messageTemplates).values([
+      });
+      await tx.insert(messageTemplates).values([
         {
           businessId,
           channel: "whatsapp",
@@ -210,8 +210,8 @@ export async function registerBusinessAccount(input: RegisterInput): Promise<{ b
           body: "Hi {{clientName}}, reminder: your {{serviceName}} booking at {{businessName}} is on {{appointmentTime}}.",
           variables: ["clientName", "serviceName", "businessName", "appointmentTime"],
         },
-      ]),
-    ]);
+      ]);
+    });
   } catch (error) {
     if (isUniqueViolation(error)) {
       throw new RegisterAccountError("That URL or email is already taken. Please try again.", 409);

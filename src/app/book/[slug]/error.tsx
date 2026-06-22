@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
-import { isTransientDbConnectionError } from "@/lib/dashboard/db-compat";
+import { isTransientDbConnectionError } from "@/lib/dashboard/db-errors";
 
 export default function BookingError({
   error,
