@@ -224,6 +224,34 @@ If the repo lacks design documentation, extract on first review:
 
 ---
 
+## Dinaya repo — scoped review paths
+
+When reviewing **dinaya.lk** (this monorepo), read `.cursor/skills/_shared/VISUAL.md` and `BRAND.md` first.
+
+| Surface | Routes | Key files | Mental model |
+|---------|--------|-----------|--------------|
+| Booking hub | `/book/[slug]` | `src/app/book/[slug]/page.tsx`, `src/components/booking/` | Cal.com-style state machine — not a marketing page |
+| Service booking | `/book/[slug]/[serviceSlug]` | `booking-ui-v2` panels, `src/lib/availability.ts` | Genius Bar scheduling — slot before PII |
+| PayHere redirect | `/book/[slug]/pay` | `PayHereRedirect.tsx`, `src/lib/payhere.ts` | Confirm before external redirect |
+| Confirmed | `/book/[slug]/confirmed` | `AddToCalendar.tsx`, `PaymentStatusPoller.tsx` | Wallet pass + next actions |
+| Dashboard | `/dashboard/*` | `src/components/dashboard/` | Data-first; chrome recedes |
+| Pricing | `/pricing` | `PricingPlansShowcase.tsx` | One recommended tier (Pro) |
+| Embed | `/embed/book/[slug]` | embed layout | F7 — sticky CTA, no double scroll |
+
+**Dinaya token sources:** `src/app/globals.css`, `src/lib/booking-hub-brand.ts`  
+**Typography:** `font-cal` (Cal Sans) headings, Inter body  
+**Palette:** cobalt `#2563eb`, violet, amber pending, emerald confirmed — **no pink on booking**
+
+**Dinaya-specific grep (booking):**
+```bash
+rg 'pink|rose-' --glob 'src/components/booking/**'
+rg 'backdrop-blur' --glob 'src/components/booking/**'
+```
+
+**Related skills:** `dinaya-visual-system`, `dinaya-brand-voice`, `dinaya-booking-engine`, `dinaya-hub`
+
+---
+
 ## Sources
 
 - [Apple HIG](https://developer.apple.com/design/human-interface-guidelines)
