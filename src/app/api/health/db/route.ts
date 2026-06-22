@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { checkDatabaseHealth } from "@/lib/platform-health";
 import { requireHealthAuth } from "@/lib/health-auth";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
     {
       status: ok ? "ok" : "degraded",
       service: "database",
-      provider: check.provider ?? "neon",
+      provider: check.provider ?? "supabase",
       latencyMs: check.latencyMs,
       error: check.error ?? null,
       responseTimeMs: Date.now() - startedAt,

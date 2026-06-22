@@ -5,13 +5,20 @@ const POSITIVE_CACHE_MS = 5 * 60 * 1000;
 const NEGATIVE_CACHE_MS = 60 * 1000;
 let sqlClient: NeonQueryFunction<false, false> | null = null;
 
-function getSqlClient(): NeonQueryFunction<false, false> {
-  sqlClient ??= neon(process.env.DATABASE_URL!);
+// Edge-compatible: uses Neon HTTP driver (works in middleware).
+// Reads from DATABASE_URL_READ (Neon read replica) or falls back to DATABASE_URL
+// if it's a Neon URL.
+function getSqlClient(): NeonQueryFunction<false, false> | null {
+  if (sqlClient) return sqlClient;
+  const url = process.env.DATABASE_URL_READ ?? process.env.DATABASE_URL;
+  if (!url || !url.includes("neon.tech")) return null;
+  sqlClient = neon(url);
   return sqlClient;
 }
 
 export async function lookupCustomDomainSlug(host: string): Promise<string | null> {
-  if (!process.env.DATABASE_URL) return null;
+  const sql = getSqlClient();
+  if (!sql) return null;
 
   const normalized = host.toLowerCase().split(":")[0];
   const cached = slugCache.get(normalized);
@@ -20,7 +27,6 @@ export async function lookupCustomDomainSlug(host: string): Promise<string | nul
   }
 
   try {
-    const sql = getSqlClient();
     const rows = await sql`
       SELECT slug FROM businesses
       WHERE lower(custom_domain) = ${normalized}

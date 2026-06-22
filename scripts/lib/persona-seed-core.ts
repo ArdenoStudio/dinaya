@@ -205,8 +205,8 @@ export async function seedPersona(index: number): Promise<PersonaRecord> {
       ? addDays(new Date(), TRIAL_LENGTH_DAYS)
       : addDays(new Date(), 30);
 
-  await db.batch([
-    db.insert(businesses).values({
+  await db.transaction(async (tx) => {
+    await tx.insert(businesses).values({
       id: businessId,
       slug: meta.slug,
       name: meta.businessName,
@@ -218,22 +218,22 @@ export async function seedPersona(index: number): Promise<PersonaRecord> {
       planExpiresAt,
       cancellationPolicy: "Contact the business to cancel or reschedule.",
       depositPolicy: "Deposits may apply for some services.",
-    }),
-    db.insert(users).values({
+    });
+    await tx.insert(users).values({
       businessId,
       name: meta.name,
       email: meta.email,
       passwordHash: hash,
       role: "owner",
-    }),
-    db.insert(staff).values({
+    });
+    await tx.insert(staff).values({
       id: staffId,
       businessId,
       name: meta.name,
       bio: "Owner",
       isActive: true,
-    }),
-    db.insert(services).values({
+    });
+    await tx.insert(services).values({
       id: serviceId,
       businessId,
       name: preset.name,
@@ -245,17 +245,17 @@ export async function seedPersona(index: number): Promise<PersonaRecord> {
       beforeBuffer: 0,
       afterBuffer: 0,
       minimumNoticeHours: 0,
-    }),
-    db.insert(staffServices).values({ staffId, serviceId }),
-    db.insert(availability).values(
+    });
+    await tx.insert(staffServices).values({ staffId, serviceId });
+    await tx.insert(availability).values(
       [1, 2, 3, 4, 5, 6].map((dayOfWeek) => ({
         staffId,
         dayOfWeek,
         startTime: "09:00",
         endTime: "17:00",
       })),
-    ),
-    db.insert(locations).values({
+    );
+    await tx.insert(locations).values({
       id: locationId,
       businessId,
       name: meta.businessName,
@@ -264,20 +264,20 @@ export async function seedPersona(index: number): Promise<PersonaRecord> {
       isDefault: true,
       isActive: true,
       sortOrder: 0,
-    }),
-    db.insert(staffLocations).values({
+    });
+    await tx.insert(staffLocations).values({
       staffId,
       locationId,
       isPrimary: true,
-    }),
-    db.insert(messageTemplates).values({
+    });
+    await tx.insert(messageTemplates).values({
       businessId,
       channel: "whatsapp",
       name: "Booking confirmation",
       body: "Hi {{clientName}}, your {{serviceName}} booking is confirmed for {{appointmentTime}}.",
       variables: ["clientName", "serviceName", "appointmentTime"],
-    }),
-  ]);
+    });
+  });
 
   let result: PersonaRecord = {
     ...meta,
