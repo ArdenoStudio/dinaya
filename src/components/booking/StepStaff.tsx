@@ -1,56 +1,100 @@
+"use client";
+
 import Image from "next/image";
 import type { Staff } from "@/db/schema";
 import type { BookingCopy } from "@/lib/i18n";
-import { isOptimizableRemoteImage } from "@/lib/utils";
+import { getEligibleStaff } from "@/lib/booking-staff";
+import { isOptimizableRemoteImage, cn } from "@/lib/utils";
 import { Icon } from "@/components/ui/Icon";
+
+const rowFocus =
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--booking-accent-soft)] focus-visible:ring-offset-2";
 
 interface Props {
   allStaff: Staff[];
   staffServiceMap: { staffId: string; serviceId: string }[];
+  staffLocationMap?: { staffId: string; locationId: string }[];
+  locationId?: string | null;
   serviceId: string;
   selected: Staff | null;
+  anyStaffSelected?: boolean;
   copy: BookingCopy;
   onSelect: (staff: Staff) => void;
-  onBack: () => void;
+  onSelectAny?: () => void;
 }
 
 export default function StepStaff({
   allStaff,
   staffServiceMap,
+  staffLocationMap,
+  locationId,
   serviceId,
   selected,
+  anyStaffSelected,
   copy,
   onSelect,
-  onBack,
+  onSelectAny,
 }: Props) {
-  const eligibleIds = new Set(
-    staffServiceMap.filter((m) => m.serviceId === serviceId).map((m) => m.staffId)
-  );
-  const eligible = allStaff.filter((s) => eligibleIds.has(s.id));
+  const eligible = getEligibleStaff(allStaff, staffServiceMap, serviceId, staffLocationMap, locationId);
 
   return (
-    <div>
-      <h2 className="font-cal text-lg mb-4 text-balance">{copy.chooseTeam}</h2>
+    <div className="px-4 md:px-6 lg:px-8">
+      <h2 className="mb-1 font-cal text-lg text-balance text-foreground md:text-xl">{copy.chooseTeam}</h2>
+      <p className="mb-5 text-base text-muted-foreground md:text-sm">{copy.chooseTeamHint}</p>
 
       {eligible.length === 0 ? (
-        <p className="text-muted-foreground text-sm text-center py-8">
-          {copy.noStaff}
-        </p>
+        <p className="py-8 text-center text-base text-muted-foreground md:text-sm">{copy.noStaff}</p>
       ) : (
         <div className="space-y-2">
+          {onSelectAny && (
+            <button
+              type="button"
+              onClick={onSelectAny}
+              aria-pressed={anyStaffSelected}
+              className={cn(
+                "flex w-full min-h-11 items-center gap-3 rounded-xl border px-4 py-3.5 text-left transition-all",
+                rowFocus,
+                anyStaffSelected
+                  ? "booking-border-accent booking-bg-accent-muted ring-2 booking-ring-accent"
+                  : "border-border hover:border-[var(--booking-accent)]/50 hover:bg-muted/30",
+              )}
+            >
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-full booking-bg-accent-muted booking-text-accent">
+                <Icon name="lightning-charge-fill" className="text-sm" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-base font-medium text-foreground md:text-sm">{copy.anyAvailableStaff}</p>
+                <p className="mt-0.5 text-sm text-muted-foreground md:text-xs">{copy.anyAvailableStaffHint}</p>
+              </div>
+              <div
+                className={cn(
+                  "flex size-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
+                  anyStaffSelected
+                    ? "border-[var(--booking-accent)] bg-[var(--booking-accent)]"
+                    : "border-muted-foreground/30",
+                )}
+              >
+                {anyStaffSelected && <Icon name="check" className="text-white" style={{ fontSize: "0.75rem" }} />}
+              </div>
+            </button>
+          )}
           {eligible.map((s) => {
-            const isSelected = selected?.id === s.id;
+            const isSelected = !anyStaffSelected && selected?.id === s.id;
             return (
               <button
                 key={s.id}
+                type="button"
                 onClick={() => onSelect(s)}
-                className={`w-full text-left rounded-lg px-4 py-3.5 border flex items-center gap-3 transition-all ${
+                aria-pressed={isSelected}
+                className={cn(
+                  "flex w-full min-h-11 items-center gap-3 rounded-xl border px-4 py-3.5 text-left transition-all",
+                  rowFocus,
                   isSelected
-                    ? "border-primary ring-2 ring-primary/20 bg-primary/[0.03]"
-                    : "hover:border-primary/50 hover:bg-muted/30"
-                }`}
+                    ? "booking-border-accent booking-bg-accent-muted ring-2 booking-ring-accent"
+                    : "border-border hover:border-[var(--booking-accent)]/50 hover:bg-muted/30",
+                )}
               >
-                <div className="size-10 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center text-sm shrink-0 overflow-hidden">
+                <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full booking-bg-accent-muted text-sm font-bold booking-text-accent">
                   {s.avatarUrl ? (
                     <Image
                       src={s.avatarUrl}
@@ -64,33 +108,27 @@ export default function StepStaff({
                     s.name.charAt(0).toUpperCase()
                   )}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm">{s.name}</p>
-                  {s.bio && (
-                    <p className="text-xs text-muted-foreground mt-0.5 truncate">{s.bio}</p>
-                  )}
+                <div className="min-w-0 flex-1">
+                  <p className="text-base font-medium text-foreground md:text-sm">{s.name}</p>
+                  {s.bio ? (
+                    <p className="mt-0.5 truncate text-sm text-muted-foreground md:text-xs">{s.bio}</p>
+                  ) : null}
                 </div>
                 <div
-                  className={`size-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${
+                  className={cn(
+                    "flex size-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
                     isSelected
-                      ? "border-primary bg-primary"
-                      : "border-muted-foreground/30"
-                  }`}
+                      ? "border-[var(--booking-accent)] bg-[var(--booking-accent)]"
+                      : "border-muted-foreground/30",
+                  )}
                 >
-                  {isSelected && <Icon name="check" className="text-white" style={{ fontSize: '0.75rem' }} />}
+                  {isSelected && <Icon name="check" className="text-white" style={{ fontSize: "0.75rem" }} />}
                 </div>
               </button>
             );
           })}
         </div>
       )}
-
-      <button
-        onClick={onBack}
-        className="mt-5 flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
-      >
-        <Icon name="chevron-left" className="text-sm" /> {copy.back}
-      </button>
     </div>
   );
 }

@@ -9,6 +9,7 @@ import type { IntakeQuestion } from "@/lib/intake";
 import type { BookingRouter } from "@/lib/booking-router";
 import StepService from "./StepService";
 import StepLocation from "./StepLocation";
+import StepStaff from "./StepStaff";
 import StepDateTime from "./StepDateTime";
 import StepConfirm from "./StepConfirm";
 import { BookingTheme } from "./BookingTheme";
@@ -393,9 +394,11 @@ function BookingWizardInner({
     void slotHold.releaseHold();
   }, [clearSlot, slotHold]);
 
-  const canPickSlots = Boolean(
-    state.service && (state.staff || anyStaff || !needsStaffPicker),
-  );
+  const clearStaffSelection = useCallback(() => {
+    clearSlot();
+    setAnyStaff(false);
+    update({ staff: null });
+  }, [clearSlot]);
 
   const showContactForm = Boolean(
     selectedSlot &&
@@ -404,6 +407,24 @@ function BookingWizardInner({
       !slotHold.slotUnavailable &&
       (!needsLocationPicker || state.location),
   );
+
+  const showStaffStep = Boolean(
+    state.service &&
+      needsStaffPicker &&
+      !state.staff &&
+      !anyStaff &&
+      !showContactForm,
+  );
+
+  const canPickSlots = Boolean(
+    state.service && (state.staff || anyStaff || !needsStaffPicker),
+  );
+
+  const staffSummaryLabel = anyStaff
+    ? copy.anyAvailableStaff
+    : state.staff && state.staff.name !== business.name
+      ? state.staff.name
+      : null;
 
   const metaPanelProps = {
     business,
@@ -453,10 +474,13 @@ function BookingWizardInner({
         copy,
         service: state.service,
         showContactForm,
+        showStaffStep,
+        needsStaffPicker,
         hubHref,
         lockServiceSelection,
         multiService: services.length > 1,
         onBackToServices: clearService,
+        onBackToStaff: clearStaffSelection,
         onBackToDateTime: clearSlot,
       })
     : [];
@@ -520,14 +544,18 @@ function BookingWizardInner({
                 {state.service ? (
                   <div className="border-b border-border py-3 lg:hidden">
                     <BookingChoiceSummary
+                      serviceName={state.service?.name}
+                      staffLabel={staffSummaryLabel}
                       dateLabel={choiceDateLabel}
                       timeLabel={state.timeLabel || null}
                       stepLabel={
-                        showContactForm
-                          ? copy.details
-                          : selectedSlot
+                        showStaffStep
+                          ? copy.chooseTeam
+                          : showContactForm
                             ? copy.details
-                            : copy.pickDateTime
+                            : selectedSlot
+                              ? copy.details
+                              : copy.pickDateTime
                       }
                       holdLabel={slotHold.holdLabel}
                       slotUnavailable={slotHold.slotUnavailable}
@@ -536,7 +564,26 @@ function BookingWizardInner({
                     />
                   </div>
                 ) : null}
-                {canPickSlots ? (
+                {showStaffStep ? (
+                  <StepStaff
+                    allStaff={staff}
+                    staffServiceMap={staffServiceMap}
+                    staffLocationMap={staffLocationMap}
+                    locationId={state.location?.id}
+                    serviceId={state.service!.id}
+                    selected={state.staff}
+                    anyStaffSelected={anyStaff}
+                    copy={copy}
+                    onSelect={(s) => {
+                      setAnyStaff(false);
+                      update({ staff: s });
+                    }}
+                    onSelectAny={() => {
+                      setAnyStaff(true);
+                      update({ staff: null });
+                    }}
+                  />
+                ) : canPickSlots ? (
                   showContactForm ? (
                     <div className="md:px-6 lg:px-8">
                       <StepConfirm

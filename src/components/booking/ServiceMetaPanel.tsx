@@ -145,7 +145,7 @@ export function ServiceMetaPanel({
             )}
             <h2 className="text-xl font-semibold leading-tight text-foreground md:text-2xl">{service.name}</h2>
             {service.description && (
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{service.description}</p>
+              <p className="mt-2 text-base leading-relaxed text-muted-foreground md:text-sm">{service.description}</p>
             )}
             <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
               <span className="inline-flex items-center gap-1.5">
@@ -181,8 +181,8 @@ export function ServiceMetaPanel({
         )}
       </AnimatePresence>
 
-      {service && needsStaffPicker && (
-        <div className="mt-6">
+      {service && needsStaffPicker && (staff || anyStaff) && (
+        <div className="mt-6 hidden lg:block">
           <StaffPicker
             allStaff={allStaff}
             staffServiceMap={staffServiceMap}

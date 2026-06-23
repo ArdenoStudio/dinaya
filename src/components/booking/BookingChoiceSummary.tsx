@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 
 type Props = {
   serviceName?: string | null;
+  staffLabel?: string | null;
   dateLabel?: string | null;
   timeLabel?: string | null;
   stepLabel?: string | null;
@@ -17,6 +18,7 @@ type Props = {
 
 export function BookingChoiceSummary({
   serviceName,
+  staffLabel,
   dateLabel,
   timeLabel,
   stepLabel,
@@ -26,7 +28,7 @@ export function BookingChoiceSummary({
   slotTakenAction,
   className,
 }: Props) {
-  const parts = [serviceName, dateLabel, timeLabel].filter(Boolean);
+  const parts = [serviceName, staffLabel, dateLabel, timeLabel].filter(Boolean);
   const text = parts.length > 0 ? parts.join(" · ") : stepLabel;
 
   if (!text && !holdLabel && !slotUnavailable) return null;
@@ -34,7 +36,7 @@ export function BookingChoiceSummary({
   return (
     <div className={cn("min-w-0", className)}>
       {text ? (
-        <p className="truncate text-sm font-medium text-foreground" title={text} aria-live="polite">
+        <p className="truncate text-base font-medium text-foreground md:text-sm" title={text} aria-live="polite">
           {text}
         </p>
       ) : null}
