@@ -1,6 +1,6 @@
 import {
-  dashboardRouteGroups,
   findDashboardRoute,
+  typedDashboardRouteGroups,
   type DashboardNavLabelKey,
   type DashboardRoute,
 } from "@/lib/dashboard-route-map";
@@ -10,7 +10,7 @@ export function hrefForView(view: DashboardNavLabelKey): string {
 }
 
 export function findDashboardRouteByHref(href: string): DashboardRoute | undefined {
-  for (const group of dashboardRouteGroups) {
+  for (const group of typedDashboardRouteGroups) {
     for (const route of group.routes) {
       if (route.exact) {
         if (route.href === href) return route;
