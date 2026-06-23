@@ -28,6 +28,7 @@ import { BookingAttributionCapture } from "./BookingAttributionCapture";
 import { BookingDealsSection } from "./BookingDealsSection";
 import type { DealListItem } from "@/lib/deals/queries";
 import { useBookingContactStorage } from "./useBookingContactStorage";
+import { useEmbedContactPrefill } from "./useEmbedContactPrefill";
 import {
   applyEmbedThemeFromQuery,
   createBookingCompletedEmbedEvent,
@@ -212,6 +213,17 @@ function BookingWizardInner({
   });
 
   useStripBookingContactFromUrl();
+
+  const applyEmbedPrefill = useCallback((contact: { name?: string; email?: string; phone?: string }) => {
+    setState((s) => ({
+      ...s,
+      clientName: contact.name?.trim() || s.clientName,
+      clientEmail: contact.email?.trim() || s.clientEmail,
+      clientPhone: contact.phone?.trim() || s.clientPhone,
+    }));
+  }, []);
+
+  useEmbedContactPrefill(embedMode, applyEmbedPrefill);
 
   useEffect(() => {
     if (!embedMode) return;

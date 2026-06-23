@@ -27,6 +27,14 @@ if (process.env.DATABASE_URL) {
     shell: process.platform === "win32",
   });
   if (migrateResult.status !== 0) {
+    const isProductionBuild =
+      process.env.NODE_ENV === "production" && process.env.VERCEL_ENV !== "preview";
+    if (isProductionBuild) {
+      console.error(
+        "[build] db:migrate failed — aborting production build. Fix migrations before deploying.",
+      );
+      process.exit(migrateResult.status ?? 1);
+    }
     console.warn(
       "[build] db:migrate failed — continuing build. Run migrations manually or via the DB Migrate workflow.",
     );
