@@ -11,12 +11,14 @@ import {
 import { getDealById } from "@/lib/deals/queries";
 import { eq, and, gte, lt, count, inArray } from "drizzle-orm";
 import { getAvailableSlots, isStaffClosedOnDate } from "@/lib/availability";
-import { getActiveReservationsForStaff } from "@/lib/slot-reservations";
+import { getMergedSlotsForStaff, listEligibleStaffIdsForService } from "@/lib/availability-staff";
 import {
   filterSlotsByBusinessHoliday,
   getBusinessHolidaysForDates,
   isBusinessHolidayClosed,
 } from "@/lib/business-holidays";
+import { ANY_STAFF_ID } from "@/lib/booking-staff";
+import { getActiveReservationsForStaff } from "@/lib/slot-reservations";
 import { withRateLimit } from "@/lib/rate-limit";
 import {
   addDays,
@@ -71,11 +73,13 @@ export async function GET(req: NextRequest) {
   if (!service) return NextResponse.json({ days: {} });
 
   const [[staffMember], [business]] = await Promise.all([
-    db
-      .select({ businessId: staff.businessId, isActive: staff.isActive })
-      .from(staff)
-      .where(eq(staff.id, staffId))
-      .limit(1),
+    staffId === ANY_STAFF_ID
+      ? Promise.resolve([{ businessId: service.businessId, isActive: true }])
+      : db
+          .select({ businessId: staff.businessId, isActive: staff.isActive })
+          .from(staff)
+          .where(eq(staff.id, staffId))
+          .limit(1),
     db
       .select({ timezone: businesses.timezone })
       .from(businesses)
@@ -110,8 +114,58 @@ export async function GET(req: NextRequest) {
 
   const daysInRange = eachDayOfInterval({ start: rangeStart, end: rangeEnd });
   const dateStrings = daysInRange.map((d) => format(d, "yyyy-MM-dd"));
+  const holidaysByDate = await getBusinessHolidaysForDates({
+    businessId: service.businessId,
+    dates: dateStrings,
+    locationId,
+  });
+  const deal = dealId ? await getDealById(dealId) : null;
+  const days: Record<string, MonthDayStatus> = {};
 
-  const [staffAvailability, monthOverrides, deal] = await Promise.all([
+  if (staffId === ANY_STAFF_ID) {
+    const eligibleIds = await listEligibleStaffIdsForService(
+      service.businessId,
+      serviceId,
+      locationId,
+    );
+
+    for (const date of dateStrings) {
+      const holiday = holidaysByDate.get(date) ?? null;
+      if (isBusinessHolidayClosed(holiday)) {
+        days[date] = "closed";
+        continue;
+      }
+
+      const merged = await getMergedSlotsForStaff({
+        staffIds: eligibleIds,
+        businessId: service.businessId,
+        serviceId,
+        date,
+        durationMinutes: service.durationMinutes,
+        beforeBuffer: service.beforeBuffer ?? 0,
+        afterBuffer: service.afterBuffer ?? 0,
+        minimumNoticeHours: service.minimumNoticeHours ?? 0,
+        maximumAdvanceDays: service.maximumAdvanceDays ?? 0,
+        dailyCapacity: service.dailyCapacity,
+        timezone,
+        locationId,
+        sessionToken: sessionToken ?? undefined,
+      });
+
+      let slots = merged.slots;
+      if (deal) {
+        slots = slots.filter(
+          (slot) => slot.startUtc >= deal.apptWindowStart && slot.startUtc <= deal.apptWindowEnd,
+        );
+      }
+
+      days[date] = slots.length > 0 ? "available" : merged.closed ? "closed" : "full";
+    }
+
+    return NextResponse.json({ days });
+  }
+
+  const [staffAvailability, monthOverrides] = await Promise.all([
     db.select().from(availability).where(eq(availability.staffId, staffId)),
     db
       .select()
@@ -122,16 +176,9 @@ export async function GET(req: NextRequest) {
           inArray(availabilityOverrides.date, dateStrings),
         ),
       ),
-    dealId ? getDealById(dealId) : Promise.resolve(null),
   ]);
 
   const overridesByDate = new Map(monthOverrides.map((o) => [o.date, o]));
-  const holidaysByDate = await getBusinessHolidaysForDates({
-    businessId: service.businessId,
-    dates: dateStrings,
-    locationId,
-  });
-  const days: Record<string, MonthDayStatus> = {};
 
   for (const date of dateStrings) {
     const holiday = holidaysByDate.get(date) ?? null;

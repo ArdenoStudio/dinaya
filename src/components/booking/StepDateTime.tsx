@@ -162,6 +162,7 @@ export default function StepDateTime({
       if (dealId) query.set("dealId", dealId);
       if (sessionToken) query.set("sessionToken", sessionToken);
       const res = await fetch(`/api/availability/month?${query.toString()}`);
+      if (!res.ok) return;
       const data = await res.json();
       setMonthDayStatus((prev) => ({ ...prev, ...(data.days ?? {}) }));
     },
@@ -209,6 +210,10 @@ export default function StepDateTime({
       if (locationId) query.set("locationId", locationId);
       if (sessionToken) query.set("sessionToken", sessionToken);
       const res = await fetch(`/api/availability/next?${query.toString()}`);
+      if (!res.ok) {
+        if (!cancelled) setNextAvailable(null);
+        return;
+      }
       const data = await res.json();
       if (!cancelled) setNextAvailable(data.next ?? null);
     })();
