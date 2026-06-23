@@ -123,3 +123,16 @@ Shared context: `.cursor/skills/_shared/` (brand, visual, product, stack, paths,
 Master plan: `docs/superpowers/plans/2026-06-22-dinaya-skill-pack-master-plan.md`
 
 Skills are not part of Dinaya production — never ship `@cursor/sdk` in the app bundle.
+
+## Cursor Cloud specific instructions
+
+Scope: the primary product is the root **Next.js web app** (booking platform). The sub-apps under `apps/` (`desktop` is Tauri/Windows-only, `mcp-dinaya`, `video`) are secondary and have their own `package-lock.json`; install them separately only when working on them.
+
+Startup/run caveats (commands themselves are in `README.md` / `package.json`):
+
+- **Dev server runs on port 3002** (`npm run dev` → `next dev -p 3002`), not 3000. Playwright's local webServer uses port 3001.
+- **Secrets are injected as environment variables** (`DATABASE_URL`, `DATABASE_URL_DIRECT`, `AUTH_SECRET`, `NEXT_PUBLIC_SUPABASE_*`, etc.); there is no committed `.env.local`. Next.js, `db:migrate`, and Playwright read `process.env` directly, so no extra setup is needed.
+- **`DATABASE_URL_DIRECT` is IPv6-only here and unreachable** (the VM has no IPv6 route). The pooler `DATABASE_URL` (Supabase `...pooler.supabase.com:6543`) works over IPv4. `db:migrate` and `drizzle.config.ts` prefer `DATABASE_URL_DIRECT`, so run migrations with it overridden to the pooler: `DATABASE_URL_DIRECT="$DATABASE_URL" npm run db:migrate`. Same override for `npm run build` if you want its auto-migrate step to succeed (the build tolerates a migrate failure and continues regardless).
+- The database is already provisioned — `db:migrate` baselines existing history and is normally a no-op.
+- `users` exists in both `public` and Supabase's `auth` schema; always qualify with `public.users` when querying directly.
+- Hello-world / smoke check: register a business at `/register` (two-step form → auto sign-in → `/dashboard/setup`), which exercises account + business creation against Postgres.
