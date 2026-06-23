@@ -1,21 +1,11 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { getSupabaseServerClient } from "@/lib/supabase-server";
 
 const slugCache = new Map<string, { slug: string | null; expiresAt: number }>();
 const POSITIVE_CACHE_MS = 5 * 60 * 1000;
 const NEGATIVE_CACHE_MS = 60 * 1000;
-let supabase: SupabaseClient | null = null;
-
-function getSupabaseClient(): SupabaseClient | null {
-  if (supabase) return supabase;
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !key) return null;
-  supabase = createClient(url, key, { auth: { persistSession: false } });
-  return supabase;
-}
 
 export async function lookupCustomDomainSlug(host: string): Promise<string | null> {
-  const client = getSupabaseClient();
+  const client = getSupabaseServerClient();
   if (!client) return null;
 
   const normalized = host.toLowerCase().split(":")[0];
