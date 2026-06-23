@@ -19,6 +19,8 @@ import { BookingHubHeroImage } from "@/components/booking/BookingHubHeroImage";
 import { BookingHubCta } from "@/components/booking/BookingHubCta";
 import { BookingServiceSearch } from "@/components/booking/BookingServiceSearch";
 import { BookingPolicyAccordion } from "@/components/booking/BookingPolicyAccordion";
+import { BookingServiceListFooter } from "@/components/booking/BookingServiceListFooter";
+import { useServiceListWindow } from "@/components/booking/useServiceListWindow";
 import {
   filterServices,
   HUB_STICKY_CTA_MAX_SERVICES,
@@ -119,11 +121,19 @@ export default function BookingServiceHub({
     () => filterServices(services, query, activeCategory),
     [services, query, activeCategory],
   );
+  const listWindow = useServiceListWindow({
+    filteredServices,
+    categories,
+    query,
+    activeCategory,
+    uncategorizedLabel: copy.allServices,
+  });
 
   if (services.length <= 1) return null;
 
-  const showSearch = shouldShowServiceSearch(services.length);
-  const showStickyCta = services.length <= HUB_STICKY_CTA_MAX_SERVICES;
+  const showSearch = shouldShowServiceSearch(services.length, "hub");
+  const showStickyBrowse = services.length > HUB_STICKY_CTA_MAX_SERVICES;
+  const showStickyCta = true;
   const showingLabel = copy.showingServices
     .replace("{count}", String(filteredServices.length))
     .replace("{total}", String(services.length));
@@ -134,7 +144,69 @@ export default function BookingServiceHub({
     businessSlug,
     primaryService.slug ?? primaryService.id,
   );
-  const primaryCtaLabel = `${copy.chooseTime} · ${primaryService.name}`;
+  const primaryCtaLabel = showStickyBrowse
+    ? copy.browseServices
+    : `${copy.chooseTime} · ${primaryService.name}`;
+
+  function renderHubService(service: BookingService) {
+    const href = buildServiceBookingPath(businessSlug, service.slug ?? service.id);
+    const iconName = serviceIconName(service.name);
+
+    return (
+      <li key={service.id}>
+        <Link
+          href={href}
+          className={cn(
+            "group flex min-h-[4.75rem] items-start gap-3.5 rounded-xl border border-border/50 px-3.5 py-4 md:px-4 md:py-[1.125rem]",
+            "transition-[background-color,box-shadow,border-color] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]",
+            "hover:border-[var(--booking-accent)]/25 hover:bg-[var(--booking-accent-muted)] hover:shadow-sm",
+            "active:scale-[0.99] motion-reduce:active:scale-100",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--booking-accent-soft)]",
+          )}
+        >
+          {service.imageUrl ? (
+            <Image
+              src={service.imageUrl}
+              alt=""
+              width={48}
+              height={48}
+              className="size-12 shrink-0 rounded-xl object-cover ring-1 ring-border/50"
+              unoptimized={!isOptimizableRemoteImage(service.imageUrl)}
+            />
+          ) : (
+            <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-[var(--booking-accent-muted)] ring-1 ring-border/40">
+              <Icon name={iconName} className="text-lg text-[var(--booking-accent)]" />
+            </div>
+          )}
+
+          <div className="min-w-0 flex-1">
+            <p className="text-base font-semibold leading-snug text-foreground transition-colors duration-200 group-hover:text-[var(--booking-accent)]">
+              {service.name}
+            </p>
+            {service.categoryName ? (
+              <p className="mt-0.5 text-xs font-medium text-muted-foreground">{service.categoryName}</p>
+            ) : null}
+            {service.description ? (
+              <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
+                {service.description}
+              </p>
+            ) : null}
+            <p className="mt-2 text-sm text-muted-foreground">
+              {service.durationMinutes}m
+              <span aria-hidden className="text-muted-foreground/50">
+                {" "}
+                ·{" "}
+              </span>
+              <BookingServicePrice priceLkr={service.priceLkr} />
+            </p>
+          </div>
+
+          <BookingServiceArrow />
+        </Link>
+      </li>
+    );
+  }
+
   const tagline = hubTagline(businessDescription, copy.selectServiceHint);
   const locationLine = formatHubLocationLine(businessAddress, businessPhone);
 
@@ -241,77 +313,46 @@ export default function BookingServiceHub({
           </div>
         ) : null}
 
-        <ul className="flex flex-col gap-2.5 px-4 py-3 md:gap-2.5 md:px-6 md:pb-4">
+        <ul
+          id="hub-services"
+          className="flex flex-col gap-2.5 px-4 py-3 md:gap-2.5 md:px-6 md:pb-4"
+        >
           {filteredServices.length === 0 ? (
             <li className="rounded-xl border border-dashed border-border/70 px-4 py-10 text-center text-sm text-muted-foreground">
               {copy.noServicesMatch}
             </li>
-          ) : (
-            filteredServices.map((service) => {
-            const href = buildServiceBookingPath(businessSlug, service.slug ?? service.id);
-            const iconName = serviceIconName(service.name);
-
-            return (
-              <li key={service.id}>
-                <Link
-                  href={href}
-                  className={cn(
-                    "group flex min-h-[4.75rem] items-start gap-3.5 rounded-xl border border-border/50 px-3.5 py-4 md:px-4 md:py-[1.125rem]",
-                    "transition-[background-color,box-shadow,border-color] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]",
-                    "hover:border-[var(--booking-accent)]/25 hover:bg-[var(--booking-accent-muted)] hover:shadow-sm",
-                    "active:scale-[0.99] motion-reduce:active:scale-100",
-                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--booking-accent-soft)]",
-                  )}
-                >
-                  {service.imageUrl ? (
-                    <Image
-                      src={service.imageUrl}
-                      alt=""
-                      width={48}
-                      height={48}
-                      className="size-12 shrink-0 rounded-xl object-cover ring-1 ring-border/50"
-                      unoptimized={!isOptimizableRemoteImage(service.imageUrl)}
-                    />
-                  ) : (
-                    <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-[var(--booking-accent-muted)] ring-1 ring-border/40">
-                      <Icon
-                        name={iconName}
-                        className="text-lg text-[var(--booking-accent)]"
-                      />
-                    </div>
-                  )}
-
-                  <div className="min-w-0 flex-1">
-                    <p className="text-base font-semibold leading-snug text-foreground transition-colors duration-200 group-hover:text-[var(--booking-accent)]">
-                      {service.name}
-                    </p>
-                    {service.categoryName ? (
-                      <p className="mt-0.5 text-xs font-medium text-muted-foreground">
-                        {service.categoryName}
-                      </p>
-                    ) : null}
-                    {service.description ? (
-                      <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
-                        {service.description}
-                      </p>
-                    ) : null}
-                    <p className="mt-2 text-sm text-muted-foreground">
-                      {service.durationMinutes}m
-                      <span aria-hidden className="text-muted-foreground/50">
-                        {" "}
-                        ·{" "}
-                      </span>
-                      <BookingServicePrice priceLkr={service.priceLkr} />
-                    </p>
-                  </div>
-
-                  <BookingServiceArrow />
-                </Link>
+          ) : listWindow.mode === "grouped" && listWindow.groupedServices ? (
+            listWindow.groupedServices.map((group) => (
+              <li key={group.category} className="space-y-2.5">
+                <h2 className="sticky top-0 z-10 -mx-1 bg-card px-1 py-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  {group.category}
+                </h2>
+                <ul className="flex flex-col gap-2.5">
+                  {group.services.map((service) => renderHubService(service as BookingService))}
+                </ul>
               </li>
-            );
-          })
+            ))
+          ) : (
+            (listWindow.flatServices ?? []).map((service) =>
+              renderHubService(service as BookingService),
+            )
           )}
         </ul>
+
+        {filteredServices.length > 0 ? (
+          <div className="px-4 pb-2 md:px-6">
+            <BookingServiceListFooter
+              copy={copy}
+              showMore={listWindow.showMore}
+              remaining={listWindow.remaining}
+              onShowMore={listWindow.onShowMore}
+              usePagination={listWindow.usePagination}
+              searchPage={listWindow.searchPage}
+              totalPages={listWindow.totalPages}
+              onSearchPageChange={listWindow.onSearchPageChange}
+            />
+          </div>
+        ) : null}
 
         {(cancellationPolicy || depositPolicy || bankTransferInstructions) && (
           <>
@@ -340,6 +381,8 @@ export default function BookingServiceHub({
           serviceSlug={primaryService.slug ?? primaryService.id}
           label={primaryCtaLabel}
           variant="sticky"
+          emphasis={showStickyBrowse ? "secondary" : "primary"}
+          scrollToId={showStickyBrowse ? "hub-services" : undefined}
         />
       ) : null}
     </BlurFade>

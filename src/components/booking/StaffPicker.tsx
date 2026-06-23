@@ -48,7 +48,7 @@ export default function StaffPicker({
             type="button"
             onClick={onSelectAny}
             aria-pressed={anyStaffSelected}
-            className={`inline-flex max-w-full flex-col items-start gap-0.5 rounded-2xl border px-3 py-2 text-left text-xs font-medium transition-all sm:flex-row sm:items-center sm:gap-2 sm:rounded-full sm:py-1.5 ${
+            className={`inline-flex min-h-11 max-w-full flex-col items-start justify-center gap-0.5 rounded-2xl border px-3 py-2 text-left text-xs font-medium transition-all sm:flex-row sm:items-center sm:gap-2 sm:rounded-full sm:py-2 ${
               anyStaffSelected
                 ? "booking-border-accent booking-bg-accent-muted booking-text-accent ring-2 booking-ring-accent"
                 : "border-border bg-secondary/50 text-muted-foreground hover:border-[var(--booking-accent)]"
@@ -71,7 +71,7 @@ export default function StaffPicker({
               type="button"
               onClick={() => onSelect(s)}
               aria-pressed={isSelected}
-              className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
+              className={`inline-flex min-h-11 items-center gap-2 rounded-full border px-3 py-2 text-xs font-medium transition-all ${
                 isSelected
                   ? "booking-border-accent booking-bg-accent-muted booking-text-accent ring-2 booking-ring-accent"
                   : "border-border bg-secondary/50 text-muted-foreground hover:border-[var(--booking-accent)]"

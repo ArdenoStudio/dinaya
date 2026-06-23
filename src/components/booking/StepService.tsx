@@ -4,6 +4,8 @@ import { formatLkr, isOptimizableRemoteImage, cn } from "@/lib/utils";
 import { BookingServiceArrow } from "@/components/booking/BookingServiceArrow";
 import { BookingServicePrice } from "@/components/booking/BookingServicePrice";
 import { BookingServiceSearch } from "@/components/booking/BookingServiceSearch";
+import { BookingServiceListFooter } from "@/components/booking/BookingServiceListFooter";
+import { useServiceListWindow } from "@/components/booking/useServiceListWindow";
 import { Icon } from "@/components/ui/Icon";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -28,11 +30,13 @@ function ServiceRow({
   selected,
   copy,
   onSelect,
+  showCategory,
 }: {
   service: BookingService;
   selected: boolean;
   copy: BookingCopy;
   onSelect: () => void;
+  showCategory?: boolean;
 }) {
   const depositAmount =
     service.depositPercent > 0
@@ -69,7 +73,7 @@ function ServiceRow({
         <p className={cn("font-medium transition-colors duration-200", selected ? "text-[var(--booking-accent)]" : "text-foreground group-hover:text-[var(--booking-accent)]")}>
           {service.name}
         </p>
-        {service.categoryName ? (
+        {showCategory && service.categoryName ? (
           <p className="mt-0.5 text-[11px] font-medium text-muted-foreground">{service.categoryName}</p>
         ) : null}
         {service.description ? (
@@ -108,7 +112,14 @@ export default function StepService({ services, selected, copy, bookingRouter, o
     () => filterServices(services, query, activeCategory),
     [services, query, activeCategory],
   );
-  const showSearch = shouldShowServiceSearch(services.length);
+  const listWindow = useServiceListWindow({
+    filteredServices,
+    categories,
+    query,
+    activeCategory,
+    uncategorizedLabel: copy.allServices,
+  });
+  const showSearch = shouldShowServiceSearch(services.length, "wizard");
   const showingLabel = copy.showingServices
     .replace("{count}", String(filteredServices.length))
     .replace("{total}", String(services.length));
@@ -120,6 +131,9 @@ export default function StepService({ services, selected, copy, bookingRouter, o
       </div>
     );
   }
+
+  const grouped = listWindow.mode === "grouped" && listWindow.groupedServices;
+  const flatServices = (listWindow.flatServices ?? []) as BookingService[];
 
   return (
     <div>
@@ -181,19 +195,55 @@ export default function StepService({ services, selected, copy, bookingRouter, o
         <div className="rounded-xl border border-dashed border-border/70 px-4 py-10 text-center text-sm text-muted-foreground">
           {copy.noServicesMatch}
         </div>
+      ) : grouped ? (
+        <div className="space-y-5">
+          {listWindow.groupedServices!.map((group) => (
+            <section key={group.category}>
+              <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                {group.category}
+              </h2>
+              <div className="space-y-2">
+                {group.services.map((service) => (
+                  <ServiceRow
+                    key={(service as BookingService).id}
+                    service={service as BookingService}
+                    selected={selected?.id === (service as BookingService).id}
+                    copy={copy}
+                    onSelect={() => onSelect(service as BookingService)}
+                  />
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
       ) : (
-      <div className="space-y-2">
-        {filteredServices.map((service) => (
-          <ServiceRow
-            key={service.id}
-            service={service}
-            selected={selected?.id === service.id}
-            copy={copy}
-            onSelect={() => onSelect(service)}
-          />
-        ))}
-      </div>
+        <div className="space-y-2">
+          {flatServices.map((service) => (
+            <ServiceRow
+              key={service.id}
+              service={service}
+              selected={selected?.id === service.id}
+              copy={copy}
+              onSelect={() => onSelect(service)}
+              showCategory
+            />
+          ))}
+        </div>
       )}
+
+      {filteredServices.length > 0 ? (
+        <BookingServiceListFooter
+          copy={copy}
+          showMore={listWindow.showMore}
+          remaining={listWindow.remaining}
+          onShowMore={listWindow.onShowMore}
+          usePagination={listWindow.usePagination}
+          searchPage={listWindow.searchPage}
+          totalPages={listWindow.totalPages}
+          onSearchPageChange={listWindow.onSearchPageChange}
+          className="mt-4"
+        />
+      ) : null}
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { addDays, format, parseISO } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import { Icon } from "@/components/ui/Icon";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import type { Staff } from "@/db/schema";
 import { getBookingSessionToken } from "@/lib/booking-session";
 import type { BookingService } from "./BookingWizard";
@@ -13,6 +14,7 @@ import MonthCalendar, { type MonthDayStatus } from "./MonthCalendar";
 import DateQuickStrip from "./DateQuickStrip";
 import TimeSlotGrid, { type SlotEmptyState, type SlotOption } from "./TimeSlotGrid";
 import { SlotListPanel } from "./SlotListPanel";
+import { SlotPickerSheet } from "./SlotPickerSheet";
 import type { NextAvailableSlot } from "./SlotsEmptyView";
 import { CalendarOverlayControl } from "./CalendarOverlayControl";
 import type { GoogleCalendarOverlay } from "./useGoogleCalendarOverlay";
@@ -82,6 +84,7 @@ export default function StepDateTime({
   const slotCacheRef = useRef<Record<string, { slots: SlotOption[]; emptyState: SlotEmptyState }>>({});
   const [nextAvailable, setNextAvailable] = useState<NextAvailableSlot | null>(null);
   const [showMobileCalendar, setShowMobileCalendar] = useState(false);
+  const [slotSheetOpen, setSlotSheetOpen] = useState(false);
   const [monthDayStatus, setMonthDayStatus] = useState<Record<string, MonthDayStatus>>({});
   const [calendarMonth, setCalendarMonth] = useState(() => format(today, "yyyy-MM"));
   const autoAdvancedDateRef = useRef(false);
@@ -253,8 +256,17 @@ export default function StepDateTime({
         endUtc: slot.endUtc,
         label: slot.label,
       });
+      setSlotSheetOpen(false);
     },
     [onDateChange, onSlotSelect],
+  );
+
+  const handleMobileSlotSelect = useCallback(
+    (slot: SlotOption) => {
+      onSlotSelect(slot);
+      setSlotSheetOpen(false);
+    },
+    [onSlotSelect],
   );
 
   const compactDateHeading = selectedDate
@@ -296,6 +308,10 @@ export default function StepDateTime({
     nextAvailable: showNextAvailable ? nextAvailable : null,
     onNextAvailable: handleNextAvailable,
   };
+
+  const mobileTimeLabel = selectedSlot
+    ? `${selectedSlot.label} · ${copy.changeTime}`
+    : copy.availableTimes;
 
   return (
       <div className="flex h-full min-w-0 w-full max-w-full flex-col">
@@ -407,7 +423,23 @@ export default function StepDateTime({
               ) : (
                 <>
                   <div className="lg:hidden">
-                    <TimeSlotGrid {...slotPanelProps} />
+                    {showSlotSkeleton ? (
+                      <TimeSlotGrid {...slotPanelProps} loading />
+                    ) : hasFetched ? (
+                      <button
+                        type="button"
+                        onClick={() => setSlotSheetOpen(true)}
+                        className={cn(
+                          "flex min-h-11 w-full items-center justify-between gap-3 rounded-xl border px-4 py-3 text-left text-sm font-semibold transition-colors",
+                          selectedSlot
+                            ? "border-[var(--booking-accent)] bg-[var(--booking-accent-muted)]/50 text-[var(--booking-accent)]"
+                            : "border-border bg-card text-foreground hover:bg-muted/40",
+                        )}
+                      >
+                        <span className="truncate">{mobileTimeLabel}</span>
+                        <Icon name="chevron-right" className="shrink-0 text-xs text-muted-foreground" />
+                      </button>
+                    ) : null}
                   </div>
                   <div className="scrollbar-hide hidden min-w-0 max-h-[min(28rem,calc(100vh-12rem))] overflow-y-auto overflow-x-hidden lg:block">
                     <SlotListPanel {...slotPanelProps} />
@@ -437,6 +469,20 @@ export default function StepDateTime({
           )}
         </div>
       )}
+
+      <SlotPickerSheet
+        open={slotSheetOpen}
+        onClose={() => setSlotSheetOpen(false)}
+        selectedDate={selectedDate}
+        slots={slots}
+        selectedStartUtc={selectedSlot?.startUtc ?? null}
+        copy={copy}
+        onSelect={handleMobileSlotSelect}
+        loading={showSlotSkeleton}
+        emptyState={slotEmptyState}
+        timezone={timezone}
+        calendarOverlay={calendarOverlay}
+      />
     </div>
   );
 }
