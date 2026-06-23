@@ -9,6 +9,7 @@ import type { IntakeQuestion } from "@/lib/intake";
 import type { BookingRouter } from "@/lib/booking-router";
 import StepService from "./StepService";
 import StepLocation from "./StepLocation";
+import StepStaff from "./StepStaff";
 import StepDateTime from "./StepDateTime";
 import StepConfirm from "./StepConfirm";
 import { BookingTheme } from "./BookingTheme";
@@ -393,9 +394,11 @@ function BookingWizardInner({
     void slotHold.releaseHold();
   }, [clearSlot, slotHold]);
 
-  const canPickSlots = Boolean(
-    state.service && (state.staff || anyStaff || !needsStaffPicker),
-  );
+  const clearStaffSelection = useCallback(() => {
+    clearSlot();
+    setAnyStaff(false);
+    update({ staff: null });
+  }, [clearSlot]);
 
   const showContactForm = Boolean(
     selectedSlot &&
@@ -405,14 +408,29 @@ function BookingWizardInner({
       (!needsLocationPicker || state.location),
   );
 
+  const showStaffStep = Boolean(
+    state.service &&
+      needsStaffPicker &&
+      !state.staff &&
+      !anyStaff &&
+      !showContactForm,
+  );
+
+  const canPickSlots = Boolean(
+    state.service && (state.staff || anyStaff || !needsStaffPicker),
+  );
+
+  const staffSummaryLabel = anyStaff
+    ? copy.anyAvailableStaff
+    : state.staff && state.staff.name !== business.name
+      ? state.staff.name
+      : null;
+
   const metaPanelProps = {
     business,
     service: state.service,
     staff: state.staff,
     anyStaff,
-    allStaff: staff,
-    staffServiceMap,
-    staffLocationMap,
     locations,
     needsLocationPicker,
     selectedLocation: state.location,
@@ -426,18 +444,10 @@ function BookingWizardInner({
     lockServiceSelection,
     avgRating,
     reviewCount,
-    onSelectStaff: (s: Staff) => {
-      setAnyStaff(false);
-      clearSlot();
-      update({ staff: s });
-    },
-    onSelectAnyStaff: () => {
-      setAnyStaff(true);
-      clearSlot();
-      update({ staff: null });
-    },
+    onChangeStaff: needsStaffPicker && !showStaffStep ? clearStaffSelection : undefined,
     onSelectLocation: (location: Pick<Location, "id" | "name" | "address">) => {
       clearSlot();
+      setAnyStaff(false);
       update({ location, staff: null });
     },
     onChangeService: !lockServiceSelection && !hubHref ? clearService : undefined,
@@ -453,10 +463,13 @@ function BookingWizardInner({
         copy,
         service: state.service,
         showContactForm,
+        showStaffStep,
+        needsStaffPicker,
         hubHref,
         lockServiceSelection,
         multiService: services.length > 1,
         onBackToServices: clearService,
+        onBackToStaff: clearStaffSelection,
         onBackToDateTime: clearSlot,
       })
     : [];
@@ -510,9 +523,36 @@ function BookingWizardInner({
                 onSelect={selectService}
               />
             </div>
+          ) : showStaffStep ? (
+            <>
+              <div className="border-b border-border py-3 lg:hidden">
+                <BookingChoiceSummary
+                  serviceName={state.service?.name}
+                  stepLabel={copy.chooseTeam}
+                />
+              </div>
+              <StepStaff
+                service={state.service!}
+                allStaff={staff}
+                staffServiceMap={staffServiceMap}
+                staffLocationMap={staffLocationMap}
+                locationId={state.location?.id}
+                selected={state.staff}
+                anyStaffSelected={anyStaff}
+                copy={copy}
+                onSelect={(s) => {
+                  setAnyStaff(false);
+                  update({ staff: s });
+                }}
+                onSelectAny={() => {
+                  setAnyStaff(true);
+                  update({ staff: null });
+                }}
+              />
+            </>
           ) : (
             <div className="grid w-full min-w-0 max-w-full gap-0 lg:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] lg:items-start lg:divide-x lg:divide-border xl:grid-cols-[minmax(0,16rem)_minmax(0,1fr)]">
-              <div className="border-b border-border pb-4 lg:sticky lg:top-6 lg:self-start lg:border-0 lg:px-4 lg:pb-6 lg:pt-6 xl:px-5">
+              <div className="border-b border-border bg-muted/15 pb-4 lg:sticky lg:top-6 lg:self-start lg:rounded-l-xl lg:border-0 lg:px-4 lg:pb-6 lg:pt-6 xl:px-5">
                 <ServiceMetaPanel {...metaPanelProps} />
               </div>
 
@@ -520,6 +560,8 @@ function BookingWizardInner({
                 {state.service ? (
                   <div className="border-b border-border py-3 lg:hidden">
                     <BookingChoiceSummary
+                      serviceName={state.service?.name}
+                      staffLabel={staffSummaryLabel}
                       dateLabel={choiceDateLabel}
                       timeLabel={state.timeLabel || null}
                       stepLabel={
@@ -586,7 +628,7 @@ function BookingWizardInner({
           )}
         </div>
 
-        {state.service && teamMembers.length > 0 && !embedMode && !hubHref && (
+        {state.service && teamMembers.length > 0 && !embedMode && !hubHref && !showStaffStep && (
           <BookingTeamSection
             members={teamMembers}
             copy={copy}

@@ -66,9 +66,9 @@ export function SlotsEmptyView({
   }
 
   return (
-    <div className="flex min-h-[12rem] flex-col items-center justify-center gap-3 px-3 py-8 text-center">
-      <Icon name={emptyIcon(emptyState)} className="text-xl text-muted-foreground/50" />
-      <p className="text-xs leading-relaxed text-muted-foreground">{message}</p>
+    <div className="flex min-h-[12rem] flex-col items-center justify-center gap-3 px-4 py-8 text-center">
+      <Icon name={emptyIcon(emptyState)} className="text-2xl text-muted-foreground/50" />
+      <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">{message}</p>
       {showNext && nextLabel && (
         <button
           type="button"

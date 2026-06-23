@@ -20,7 +20,7 @@ export function BookingBreadcrumb({ items, className }: Props) {
 
   return (
     <nav aria-label="Booking progress" className={cn("min-w-0", className)}>
-      <ol className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-sm">
+      <ol className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
         {items.map((item, index) => {
           const isLast = index === items.length - 1;
           const isCurrent = item.current ?? isLast;
@@ -58,7 +58,7 @@ export function BookingBreadcrumb({ items, className }: Props) {
           }
 
           return (
-            <li key={`${item.label}-${index}`} className="flex min-w-0 items-center gap-1.5">
+            <li key={`${item.label}-${index}`} className="flex min-w-0 items-center gap-2">
               {index > 0 ? (
                 <span aria-hidden className="text-muted-foreground/45 select-none">
                   /
