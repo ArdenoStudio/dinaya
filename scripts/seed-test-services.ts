@@ -180,6 +180,7 @@ async function main() {
   console.log(
     `\nDone — ${business.name} (${business.slug}): added ${added}, skipped ${skipped} (already present). Active services: ${existing.length + added}.`,
   );
+  process.exit(0);
 }
 
 main().catch((error) => {
