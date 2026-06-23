@@ -275,45 +275,46 @@ export async function getDashboardOverviewData(businessId: string): Promise<Dash
 
   const onboarding: DashboardOverviewOnboardingStep[] = [
     {
-      label: "Add business info",
+      label: "Add your page details",
       done: Boolean(business.description && business.phone && business.address),
       href: "/dashboard/settings",
-      description: "Add your phone, address, and a short description clients will see.",
+      description: "WhatsApp, address, and a one-line intro — shown on your booking link.",
     },
     {
-      label: "Create first service",
+      label: "Add what clients can book",
       done: Number(servicesCount) > 0,
       href: "/dashboard/services/new",
-      description: "List what clients can book — price, duration, and deposit rules.",
+      description: "Add what clients can book — name, price in LKR, and duration.",
     },
     {
-      label: "Add staff",
+      label: "Who takes bookings",
       done: Number(staffCount) > 0,
       href: "/dashboard/staff/new",
-      description: "Add yourself or your team so bookings can be assigned.",
+      description: "Add yourself (or your team) so appointments land on the right person.",
     },
     {
-      label: "Set availability",
+      label: "Set booking hours",
       done: Number(availabilityCount) > 0,
       href: "/dashboard/availability",
-      description: "Choose the days and hours clients can book online.",
+      description: "Set the days and times clients can pick online — same as your shop hours.",
     },
     {
       label: "Connect PayHere",
       done: Boolean(business.payhereEnabled && business.payhereMerchantId),
       href: "/dashboard/settings",
-      description: "Accept card payments online via PayHere, or take bank transfers and LankaQR.",
+      description: "Optional: turn on PayHere when you're ready for card payments.",
     },
     {
-      label: "Share booking link",
+      label: "Share your booking link",
       done: Number(totalBookings) > 0,
       href: bookingUrl,
-      description: "Post your link on WhatsApp Status, Instagram bio, or send it directly to clients.",
+      description:
+        "Send your link on WhatsApp Status, drop it in your Instagram bio, or share it in a chat — so bookings don't get lost in DMs.",
     },
   ];
   const showOnboarding = onboarding.some((item) => !item.done);
   const nextOnboardingStep = onboarding.find((item) => !item.done);
-  const showShareCard = !showOnboarding || nextOnboardingStep?.label === "Share booking link";
+  const showShareCard = !showOnboarding || nextOnboardingStep?.label === "Share your booking link";
 
   const stats: DashboardOverviewStat[] = [
     {

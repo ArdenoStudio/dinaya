@@ -45,7 +45,10 @@ export async function GET(req: NextRequest) {
     .limit(1);
 
   if (!business) {
-    return NextResponse.json({ error: "Business not found." }, { status: 404 });
+    return NextResponse.json(
+      { error: "We couldn't load your business. Sign out and sign back in, or contact support if this keeps happening." },
+      { status: 404 },
+    );
   }
 
   const [firstService] = await db
@@ -104,7 +107,7 @@ export async function PATCH(req: NextRequest) {
 
   const parsed = stepSchema.safeParse(await req.json());
   if (!parsed.success) {
-    return NextResponse.json({ error: "Invalid step." }, { status: 400 });
+    return NextResponse.json({ error: "Something went wrong saving your progress. Refresh and try again." }, { status: 400 });
   }
 
   await db
@@ -132,7 +135,10 @@ export async function POST(req: NextRequest) {
     .limit(1);
 
   if (!business) {
-    return NextResponse.json({ error: "Business not found." }, { status: 404 });
+    return NextResponse.json(
+      { error: "We couldn't load your business. Sign out and sign back in, or contact support if this keeps happening." },
+      { status: 404 },
+    );
   }
 
   const directoryCategory = inferDirectoryCategory(business.businessType);

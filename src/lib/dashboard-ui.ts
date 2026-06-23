@@ -47,3 +47,7 @@ export const dashboardOutlineActionClass = cn(
   buttonVariants({ variant: "outline" }),
   "inline-flex min-h-11 items-center gap-1.5",
 );
+
+/** Inline form errors — readable on light and dark surfaces (WCAG AA body text). */
+export const dashboardErrorAlertClass =
+  "text-sm text-red-700 dark:text-red-400";

@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { SetupWizardSkeleton } from "@/components/dashboard/SetupWizardSkeleton";
 
 export function OnboardingGate({
   completed,
@@ -17,10 +18,20 @@ export function OnboardingGate({
   useEffect(() => {
     if (!completed && !onSetup) {
       router.replace("/dashboard/setup");
-    } else if (completed && onSetup) {
+      return;
+    }
+    if (completed && onSetup) {
       router.replace("/dashboard");
     }
   }, [completed, onSetup, router]);
+
+  if (!completed && !onSetup) {
+    return <SetupWizardSkeleton />;
+  }
+
+  if (completed && onSetup) {
+    return null;
+  }
 
   return <>{children}</>;
 }
