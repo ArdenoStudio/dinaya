@@ -397,7 +397,7 @@ export function SetupWizard() {
         <div className={cn(dashboardSectionClass, "px-6 py-8")}>
           {step === 1 && (
             <form onSubmit={handleStep1} className="space-y-4" aria-busy={saving}>
-              <p className="text-base text-muted-foreground sm:text-sm">
+              <p className="text-[17px] leading-snug text-muted-foreground sm:text-sm">
                 Add your WhatsApp number, address, and a short intro. These show on your booking link — so
                 clients can reach you without another DM.
               </p>
@@ -468,7 +468,7 @@ export function SetupWizard() {
 
           {step === 2 && (
             <form onSubmit={handleStep2} className="space-y-4" aria-busy={saving}>
-              <p className="text-base text-muted-foreground sm:text-sm">
+              <p className="text-[17px] leading-snug text-muted-foreground sm:text-sm">
                 We added a starter service for you. Change the name, LKR price, and duration to match what you
                 actually offer.
               </p>
@@ -532,7 +532,7 @@ export function SetupWizard() {
 
           {step === 3 && (
             <form onSubmit={handleStep3} className="space-y-4" aria-busy={saving}>
-              <p className="text-base text-muted-foreground sm:text-sm">
+              <p className="text-[17px] leading-snug text-muted-foreground sm:text-sm">
                 Set when clients can book online. You can change this later from Booking hours.
               </p>
               <div className="flex flex-wrap gap-2">
