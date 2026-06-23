@@ -431,9 +431,6 @@ function BookingWizardInner({
     service: state.service,
     staff: state.staff,
     anyStaff,
-    allStaff: staff,
-    staffServiceMap,
-    staffLocationMap,
     locations,
     needsLocationPicker,
     selectedLocation: state.location,
@@ -447,18 +444,10 @@ function BookingWizardInner({
     lockServiceSelection,
     avgRating,
     reviewCount,
-    onSelectStaff: (s: Staff) => {
-      setAnyStaff(false);
-      clearSlot();
-      update({ staff: s });
-    },
-    onSelectAnyStaff: () => {
-      setAnyStaff(true);
-      clearSlot();
-      update({ staff: null });
-    },
+    onChangeStaff: needsStaffPicker && !showStaffStep ? clearStaffSelection : undefined,
     onSelectLocation: (location: Pick<Location, "id" | "name" | "address">) => {
       clearSlot();
+      setAnyStaff(false);
       update({ location, staff: null });
     },
     onChangeService: !lockServiceSelection && !hubHref ? clearService : undefined,
@@ -534,9 +523,36 @@ function BookingWizardInner({
                 onSelect={selectService}
               />
             </div>
+          ) : showStaffStep ? (
+            <>
+              <div className="border-b border-border py-3 lg:hidden">
+                <BookingChoiceSummary
+                  serviceName={state.service?.name}
+                  stepLabel={copy.chooseTeam}
+                />
+              </div>
+              <StepStaff
+                service={state.service!}
+                allStaff={staff}
+                staffServiceMap={staffServiceMap}
+                staffLocationMap={staffLocationMap}
+                locationId={state.location?.id}
+                selected={state.staff}
+                anyStaffSelected={anyStaff}
+                copy={copy}
+                onSelect={(s) => {
+                  setAnyStaff(false);
+                  update({ staff: s });
+                }}
+                onSelectAny={() => {
+                  setAnyStaff(true);
+                  update({ staff: null });
+                }}
+              />
+            </>
           ) : (
             <div className="grid w-full min-w-0 max-w-full gap-0 lg:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] lg:items-start lg:divide-x lg:divide-border xl:grid-cols-[minmax(0,16rem)_minmax(0,1fr)]">
-              <div className="border-b border-border pb-4 lg:sticky lg:top-6 lg:self-start lg:border-0 lg:px-4 lg:pb-6 lg:pt-6 xl:px-5">
+              <div className="border-b border-border bg-muted/15 pb-4 lg:sticky lg:top-6 lg:self-start lg:rounded-l-xl lg:border-0 lg:px-4 lg:pb-6 lg:pt-6 xl:px-5">
                 <ServiceMetaPanel {...metaPanelProps} />
               </div>
 
@@ -549,13 +565,11 @@ function BookingWizardInner({
                       dateLabel={choiceDateLabel}
                       timeLabel={state.timeLabel || null}
                       stepLabel={
-                        showStaffStep
-                          ? copy.chooseTeam
-                          : showContactForm
+                        showContactForm
+                          ? copy.details
+                          : selectedSlot
                             ? copy.details
-                            : selectedSlot
-                              ? copy.details
-                              : copy.pickDateTime
+                            : copy.pickDateTime
                       }
                       holdLabel={slotHold.holdLabel}
                       slotUnavailable={slotHold.slotUnavailable}
@@ -564,26 +578,7 @@ function BookingWizardInner({
                     />
                   </div>
                 ) : null}
-                {showStaffStep ? (
-                  <StepStaff
-                    allStaff={staff}
-                    staffServiceMap={staffServiceMap}
-                    staffLocationMap={staffLocationMap}
-                    locationId={state.location?.id}
-                    serviceId={state.service!.id}
-                    selected={state.staff}
-                    anyStaffSelected={anyStaff}
-                    copy={copy}
-                    onSelect={(s) => {
-                      setAnyStaff(false);
-                      update({ staff: s });
-                    }}
-                    onSelectAny={() => {
-                      setAnyStaff(true);
-                      update({ staff: null });
-                    }}
-                  />
-                ) : canPickSlots ? (
+                {canPickSlots ? (
                   showContactForm ? (
                     <div className="md:px-6 lg:px-8">
                       <StepConfirm
@@ -633,7 +628,7 @@ function BookingWizardInner({
           )}
         </div>
 
-        {state.service && teamMembers.length > 0 && !embedMode && !hubHref && (
+        {state.service && teamMembers.length > 0 && !embedMode && !hubHref && !showStaffStep && (
           <BookingTeamSection
             members={teamMembers}
             copy={copy}
