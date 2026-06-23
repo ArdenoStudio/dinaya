@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, eq, count } from "drizzle-orm";
 import { db } from "@/db";
 import { availability, businesses, locations, services, staff } from "@/db/schema";
 import { requireApiBusiness } from "@/lib/api-auth";
@@ -127,6 +127,8 @@ export async function POST(req: NextRequest) {
     .select({
       businessType: businesses.businessType,
       address: businesses.address,
+      phone: businesses.phone,
+      description: businesses.description,
       onboardingCompletedAt: businesses.onboardingCompletedAt,
       directoryListed: businesses.directoryListed,
     })
@@ -156,6 +158,25 @@ export async function POST(req: NextRequest) {
         .where(eq(businesses.id, businessId));
     }
     return NextResponse.json({ ok: true, alreadyCompleted: true });
+  }
+
+  if (!business.phone?.trim() || !business.address?.trim() || !business.description?.trim()) {
+    return NextResponse.json(
+      { error: "Add your WhatsApp number, address, and a short description before finishing setup." },
+      { status: 400 },
+    );
+  }
+
+  const [serviceRow] = await db
+    .select({ count: count() })
+    .from(services)
+    .where(and(eq(services.businessId, businessId), eq(services.isActive, true)));
+
+  if (Number(serviceRow?.count ?? 0) === 0) {
+    return NextResponse.json(
+      { error: "Add at least one bookable service before finishing setup." },
+      { status: 400 },
+    );
   }
 
   await db

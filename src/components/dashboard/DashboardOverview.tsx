@@ -1,7 +1,9 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { Activity } from "lucide-react";
 import { OnboardingWizard } from "@/components/dashboard/OnboardingWizard";
+import { OnboardingCelebration } from "@/components/dashboard/OnboardingCelebration";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { Icon } from "@/components/ui/Icon";
 import {
@@ -45,6 +47,10 @@ export function DashboardOverview({ data }: DashboardOverviewProps) {
           ))}
         </div>
       ) : null}
+
+      <Suspense fallback={null}>
+        <OnboardingCelebration bookingUrl={data.bookingUrl} bookingDisplayUrl={data.bookingDisplayUrl} />
+      </Suspense>
 
       {data.showOnboarding ? (
         <OnboardingWizard

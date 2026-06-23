@@ -46,8 +46,8 @@ const settingsSchema = z.object({
   description: z.string().trim().max(2000).optional().nullable(),
   phone: z.string().trim().max(20).optional().nullable(),
   address: z.string().trim().max(1000).optional().nullable(),
-  timezone: z.string().trim().min(1).max(80).default("Asia/Colombo"),
-  language: z.enum(["en", "si", "ta"]).default("en"),
+  timezone: z.string().trim().min(1).max(80).optional(),
+  language: z.enum(["en", "si", "ta"]).optional(),
   businessType: z.string().trim().max(80).optional().nullable(),
   cancellationPolicy: z.string().trim().max(2000).optional().nullable(),
   depositPolicy: z.string().trim().max(2000).optional().nullable(),
@@ -159,8 +159,8 @@ export async function PATCH(req: NextRequest) {
       description: description || null,
       phone: phone || null,
       address: address || null,
-      timezone,
-      language,
+      ...(timezone !== undefined && { timezone }),
+      ...(language !== undefined && { language }),
       businessType: businessType || null,
       cancellationPolicy: cancellationPolicy || null,
       depositPolicy: depositPolicy || null,
@@ -194,7 +194,7 @@ export async function PATCH(req: NextRequest) {
     name,
     address: address || null,
     phone: phone || null,
-    timezone,
+    ...(timezone !== undefined && { timezone }),
   });
 
   void logActivity({

@@ -6,26 +6,29 @@ import { SetupWizardSkeleton } from "@/components/dashboard/SetupWizardSkeleton"
 
 export function OnboardingGate({
   completed,
+  role,
   children,
 }: {
   completed: boolean;
+  role: string;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
   const router = useRouter();
   const onSetup = pathname.startsWith("/dashboard/setup");
+  const isOwner = role === "owner";
 
   useEffect(() => {
-    if (!completed && !onSetup) {
+    if (!completed && isOwner && !onSetup) {
       router.replace("/dashboard/setup");
       return;
     }
     if (completed && onSetup) {
       router.replace("/dashboard");
     }
-  }, [completed, onSetup, router]);
+  }, [completed, isOwner, onSetup, router]);
 
-  if (!completed && !onSetup) {
+  if (!completed && isOwner && !onSetup) {
     return <SetupWizardSkeleton />;
   }
 

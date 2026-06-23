@@ -13,7 +13,7 @@ import { Icon } from "@/components/ui/Icon";
 
 const perks = [
   "Your own booking page at yourname.dinaya.lk",
-  "Online payments with PayHere — no no-shows",
+  "Online payments with PayHere when you're ready",
   "Staff scheduling & availability management",
   "14-day free trial — no credit card needed",
 ];
@@ -25,14 +25,14 @@ const testimonial = {
 };
 
 const businessTypes = [
-  { value: "salon_barber", label: "Salon / barber", helper: "Seeds haircut, colouring, and grooming services." },
-  { value: "clinic", label: "Clinic", helper: "Seeds consultation and follow-up appointment types." },
-  { value: "tuition", label: "Tuition / classes", helper: "Seeds one-to-one and group class sessions." },
-  { value: "vehicle_service", label: "Vehicle service", helper: "Seeds inspection and workshop service slots." },
-  { value: "photography", label: "Photography", helper: "Seeds consultation and shoot session services." },
-  { value: "spa_wellness", label: "Spa / wellness", helper: "Seeds therapy and treatment appointments." },
-  { value: "consulting", label: "Consulting", helper: "Seeds discovery and paid consultation calls." },
-  { value: "other", label: "Other", helper: "Seeds a clean generic appointment setup." },
+  { value: "salon_barber", label: "Salon / barber", helper: "Starts with haircut, colour, and grooming services." },
+  { value: "clinic", label: "Clinic", helper: "Starts with consultation and follow-up visits." },
+  { value: "tuition", label: "Tuition / classes", helper: "Starts with one-to-one and group class sessions." },
+  { value: "vehicle_service", label: "Vehicle service", helper: "Starts with inspection and workshop bookings." },
+  { value: "photography", label: "Photography", helper: "Starts with consultation and portrait sessions." },
+  { value: "spa_wellness", label: "Spa / wellness", helper: "Starts with massage and treatment appointments." },
+  { value: "consulting", label: "Consulting", helper: "Starts with discovery and paid consultation calls." },
+  { value: "other", label: "Other", helper: "Starts with a simple consultation and appointment setup." },
 ];
 
 const inputCls =

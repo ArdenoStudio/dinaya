@@ -153,7 +153,10 @@ export function SetupWizard() {
 
   useEffect(() => {
     fetch("/api/dashboard/onboarding")
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error("load failed");
+        return r.json();
+      })
       .then((data: SetupData) => {
         if (data.completed) {
           router.replace("/dashboard");
@@ -620,6 +623,15 @@ export function SetupWizard() {
                 >
                   <Icon name="box-arrow-up-right" className="text-xs" />
                   Preview booking page
+                </a>
+                <a
+                  href={bookingUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={cn(dashboardOutlineActionClass, "min-h-11")}
+                >
+                  <Icon name="calendar-check" className="text-xs" />
+                  Book yourself (test)
                 </a>
                 <a
                   href={whatsappShare}

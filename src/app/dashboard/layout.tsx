@@ -80,7 +80,7 @@ export default async function DashboardLayout({
   return (
     <AuthProvider>
       <DashboardLocaleProvider language={language} role={role}>
-        <OnboardingGate completed={onboardingCompleted}>
+        <OnboardingGate completed={onboardingCompleted} role={role}>
           <DashboardShell
             businessName={business.name}
             userEmail={user.email ?? ""}

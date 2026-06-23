@@ -142,6 +142,7 @@ export async function getDashboardOverviewData(businessId: string): Promise<Dash
       slug: businesses.slug,
       customDomain: businesses.customDomain,
       customDomainVerified: businesses.customDomainVerified,
+      onboardingCompletedAt: businesses.onboardingCompletedAt,
     })
     .from(businesses)
     .where(eq(businesses.id, businessId))
@@ -262,7 +263,7 @@ export async function getDashboardOverviewData(businessId: string): Promise<Dash
     customDomain: business.customDomain,
     customDomainVerified: business.customDomainVerified,
   });
-  const whatsappShare = `https://wa.me/?text=${encodeURIComponent(`Book online with ${business.name}: ${bookingUrl}`)}`;
+  const whatsappShare = `https://wa.me/?text=${encodeURIComponent(`Book ${business.name} online — pick a time here: ${bookingUrl}`)}`;
   const embedSnippet = `<iframe src="${bookingUrl}" width="100%" height="720" style="border:0;border-radius:8px"></iframe>`;
   const currentWeekRevenue = Number(weekRevenue ?? 0);
   const previousRevenue = Number(previousWeekRevenue ?? 0);
@@ -306,7 +307,7 @@ export async function getDashboardOverviewData(businessId: string): Promise<Dash
     },
     {
       label: "Share your booking link",
-      done: Number(totalBookings) > 0,
+      done: Number(totalBookings) > 0 || Boolean(business.onboardingCompletedAt),
       href: bookingUrl,
       description:
         "Send your link on WhatsApp Status, drop it in your Instagram bio, or share it in a chat — so bookings don't get lost in DMs.",

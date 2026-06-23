@@ -47,7 +47,7 @@ export function OnboardingWizard({ steps, bookingUrl, whatsappShare }: Props) {
           <p className="text-xs font-semibold uppercase tracking-widest text-primary">
             Your booking page in 5 minutes
           </p>
-          <h2 className="mt-1 font-cal text-2xl tracking-tight">Grow your bookings</h2>
+          <h2 className="mt-1 font-cal text-2xl tracking-tight">Get more bookings</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             {completed} of {steps.length} done — your link is almost ready to share
           </p>
