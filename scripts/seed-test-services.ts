@@ -180,6 +180,37 @@ async function main() {
   console.log(
     `\nDone — ${business.name} (${business.slug}): added ${added}, skipped ${skipped} (already present). Active services: ${existing.length + added}.`,
   );
+
+  const allServices = await db
+    .select({ id: services.id, name: services.name })
+    .from(services)
+    .where(and(eq(services.businessId, business.id), eq(services.isActive, true)));
+
+  const existingLinks = await db
+    .select({ serviceId: staffServices.serviceId })
+    .from(staffServices)
+    .innerJoin(services, eq(services.id, staffServices.serviceId))
+    .where(eq(services.businessId, business.id));
+
+  const linkedServiceIds = new Set(existingLinks.map((row) => row.serviceId));
+  let backfilled = 0;
+
+  for (const service of allServices) {
+    if (linkedServiceIds.has(service.id)) continue;
+    await db.insert(staffServices).values(
+      members.map((member) => ({
+        staffId: member.id,
+        serviceId: service.id,
+      })),
+    );
+    backfilled += 1;
+    console.log(`↺ linked staff → ${service.name}`);
+  }
+
+  if (backfilled > 0) {
+    console.log(`Backfilled staff links for ${backfilled} service(s).`);
+  }
+
   process.exit(0);
 }
 

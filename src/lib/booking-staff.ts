@@ -47,3 +47,32 @@ export function pickDefaultStaff(
   );
   return eligible.length === 1 ? eligible[0]! : null;
 }
+
+/** Pick staff + any-staff flag when entering a service (defaults to any when 2+ eligible). */
+export function resolveBookingStaffSelection(
+  allStaff: Staff[],
+  staffServiceMap: { staffId: string; serviceId: string }[],
+  serviceId: string,
+  staffLocationMap?: { staffId: string; locationId: string }[],
+  locationId?: string | null,
+): { staff: Staff | null; anyStaff: boolean; eligibleCount: number } {
+  const eligible = getEligibleStaff(
+    allStaff,
+    staffServiceMap,
+    serviceId,
+    staffLocationMap,
+    locationId,
+  );
+  const staff = pickDefaultStaff(
+    allStaff,
+    staffServiceMap,
+    serviceId,
+    staffLocationMap,
+    locationId,
+  );
+  return {
+    staff,
+    anyStaff: !staff && eligible.length > 1,
+    eligibleCount: eligible.length,
+  };
+}

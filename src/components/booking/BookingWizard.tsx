@@ -15,7 +15,7 @@ import { BookingTheme } from "./BookingTheme";
 import { useBookingUrlState, useBookingUrlSync, useStripBookingContactFromUrl } from "./useBookingUrlState";
 import { useSlotHold } from "./useSlotHold";
 import { getBookingCopy, formatBookingCopy } from "@/lib/i18n";
-import { getEligibleStaff, pickDefaultStaff } from "@/lib/booking-staff";
+import { getEligibleStaff, resolveBookingStaffSelection } from "@/lib/booking-staff";
 import { trackBookingStart } from "@/lib/analytics/gtag";
 import { ServiceMetaPanel } from "./ServiceMetaPanel";
 import { BookingWizardSkeleton } from "./BookingWizardSkeleton";
@@ -152,12 +152,18 @@ function BookingWizardInner({
 
   const [state, setState] = useState<BookingState>(() => {
     const preselected = initialService ?? null;
-    const preStaff = preselected
-      ? pickDefaultStaff(staff, staffServiceMap, preselected.id, staffLocationMap, defaultLocation?.id)
+    const resolved = preselected
+      ? resolveBookingStaffSelection(
+          staff,
+          staffServiceMap,
+          preselected.id,
+          staffLocationMap,
+          defaultLocation?.id,
+        )
       : null;
     const matchedStaff = urlState.staffId
-      ? staff.find((s) => s.id === urlState.staffId) ?? preStaff
-      : preStaff;
+      ? staff.find((s) => s.id === urlState.staffId) ?? resolved?.staff ?? null
+      : resolved?.staff ?? null;
 
     return {
       location: defaultLocation,
@@ -182,7 +188,18 @@ function BookingWizardInner({
     initialDealId ?? urlState.dealId ?? null,
   );
 
-  const [anyStaff, setAnyStaff] = useState(false);
+  const [anyStaff, setAnyStaff] = useState(() => {
+    const preselected = initialService ?? null;
+    if (!preselected) return false;
+    const resolved = resolveBookingStaffSelection(
+      staff,
+      staffServiceMap,
+      preselected.id,
+      staffLocationMap,
+      defaultLocation?.id,
+    );
+    return resolved.anyStaff;
+  });
   const [calendarViewMonth, setCalendarViewMonth] = useState(() =>
     format(toZonedTime(new Date(), timezone), "yyyy-MM"),
   );
@@ -273,6 +290,17 @@ function BookingWizardInner({
     return getEligibleStaff(staff, staffServiceMap, state.service.id, staffLocationMap, state.location?.id).length > 1;
   }, [state.service, state.location?.id, staff, staffServiceMap, staffLocationMap]);
 
+  const eligibleStaffCount = useMemo(() => {
+    if (!state.service) return 0;
+    return getEligibleStaff(
+      staff,
+      staffServiceMap,
+      state.service.id,
+      staffLocationMap,
+      state.location?.id,
+    ).length;
+  }, [state.service, state.location?.id, staff, staffServiceMap, staffLocationMap]);
+
   function update(partial: Partial<BookingState>) {
     setState((s) => ({ ...s, ...partial }));
   }
@@ -327,17 +355,23 @@ function BookingWizardInner({
   const selectService = useCallback(
     (service: BookingService) => {
       markBookingStart(false, service.id);
-      const defaultStaff = pickDefaultStaff(staff, staffServiceMap, service.id, staffLocationMap, state.location?.id);
+      const resolved = resolveBookingStaffSelection(
+        staff,
+        staffServiceMap,
+        service.id,
+        staffLocationMap,
+        state.location?.id,
+      );
       update({
         service,
-        staff: defaultStaff,
+        staff: resolved.staff,
         date: todayStr,
         timeSlot: "",
         timeSlotEnd: "",
         timeLabel: "",
       });
       setSelectedSlot(null);
-      setAnyStaff(false);
+      setAnyStaff(resolved.anyStaff);
       void slotHold.releaseHold();
       setSelectedDealId(null);
     },
@@ -357,7 +391,23 @@ function BookingWizardInner({
         : [];
       const dealStaff = deal.staffId
         ? eligibleStaff.find((member) => member.id === deal.staffId) ?? null
-        : pickDefaultStaff(staff, staffServiceMap, deal.serviceId, staffLocationMap, location?.id);
+        : resolveBookingStaffSelection(
+            staff,
+            staffServiceMap,
+            deal.serviceId,
+            staffLocationMap,
+            location?.id,
+          ).staff;
+
+      const resolved = service
+        ? resolveBookingStaffSelection(
+            staff,
+            staffServiceMap,
+            service.id,
+            staffLocationMap,
+            location?.id,
+          )
+        : null;
 
       update({
         location: location ?? null,
@@ -369,7 +419,7 @@ function BookingWizardInner({
         timeLabel: "",
       });
       setSelectedSlot(null);
-      setAnyStaff(false);
+      setAnyStaff(deal.staffId ? false : resolved?.anyStaff ?? false);
       void slotHold.releaseHold();
     },
     [locations, services, staff, staffServiceMap, staffLocationMap, state.location, todayStr, slotHold, markBookingStart],
@@ -396,7 +446,9 @@ function BookingWizardInner({
   }, [clearSlot, slotHold]);
 
   const canPickSlots = Boolean(
-    state.service && (state.staff || anyStaff || !needsStaffPicker),
+    state.service &&
+      eligibleStaffCount > 0 &&
+      (state.staff || anyStaff),
   );
 
   const showContactForm = Boolean(
@@ -440,7 +492,20 @@ function BookingWizardInner({
     },
     onSelectLocation: (location: Pick<Location, "id" | "name" | "address">) => {
       clearSlot();
-      update({ location, staff: null });
+      if (state.service) {
+        const resolved = resolveBookingStaffSelection(
+          staff,
+          staffServiceMap,
+          state.service.id,
+          staffLocationMap,
+          location.id,
+        );
+        update({ location, staff: resolved.staff });
+        setAnyStaff(resolved.anyStaff);
+      } else {
+        update({ location, staff: null });
+        setAnyStaff(false);
+      }
     },
     onChangeService: !lockServiceSelection && !hubHref ? clearService : undefined,
   };
@@ -586,7 +651,9 @@ function BookingWizardInner({
                     />
                   )
                 ) : (
-                  <p className="py-12 text-center text-sm text-amber-600">{copy.noStaff}</p>
+                  <p className="py-12 text-center text-sm text-amber-600">
+                    {eligibleStaffCount === 0 ? copy.noStaff : copy.chooseTeamToSeeTimes}
+                  </p>
                 )}
               </BookingPanel>
             </div>
