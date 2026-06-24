@@ -17,7 +17,7 @@ import { BookingTheme } from "./BookingTheme";
 import { useBookingUrlState, useBookingUrlSync, useStripBookingContactFromUrl } from "./useBookingUrlState";
 import { useSlotHold } from "./useSlotHold";
 import { getBookingCopy, formatBookingCopy } from "@/lib/i18n";
-import { getEligibleStaff, pickDefaultStaff } from "@/lib/booking-staff";
+import { getEligibleStaff, resolveBookingStaffSelection } from "@/lib/booking-staff";
 import { trackBookingStart } from "@/lib/analytics/gtag";
 import { ServiceMetaPanel } from "./ServiceMetaPanel";
 import { BookingWizardSkeleton } from "./BookingWizardSkeleton";
@@ -162,12 +162,18 @@ function BookingWizardInner({
 
   const [state, setState] = useState<BookingState>(() => {
     const preselected = initialService ?? null;
-    const preStaff = preselected
-      ? pickDefaultStaff(staff, staffServiceMap, preselected.id, staffLocationMap, defaultLocation?.id)
-      : null;
+    const staffSelection = preselected
+      ? resolveBookingStaffSelection(
+          staff,
+          staffServiceMap,
+          preselected.id,
+          staffLocationMap,
+          defaultLocation?.id,
+        )
+      : { staff: null as Staff | null, anyStaff: false, eligibleCount: 0 };
     const matchedStaff = urlState.staffId
-      ? staff.find((s) => s.id === urlState.staffId) ?? preStaff
-      : preStaff;
+      ? staff.find((s) => s.id === urlState.staffId) ?? staffSelection.staff
+      : staffSelection.staff;
 
     return {
       location: defaultLocation,
@@ -185,6 +191,18 @@ function BookingWizardInner({
     };
   });
 
+  const [anyStaff, setAnyStaff] = useState(() => {
+    if (!initialService) return false;
+    const selection = resolveBookingStaffSelection(
+      staff,
+      staffServiceMap,
+      initialService.id,
+      staffLocationMap,
+      defaultLocation?.id,
+    );
+    return selection.anyStaff;
+  });
+
   const [selectedSlot, setSelectedSlot] = useState<SlotData | null>(() =>
     urlState.slot ? { startUtc: urlState.slot, endUtc: "", label: "" } : null,
   );
@@ -192,7 +210,6 @@ function BookingWizardInner({
     initialDealId ?? urlState.dealId ?? null,
   );
 
-  const [anyStaff, setAnyStaff] = useState(false);
   const [calendarViewMonth, setCalendarViewMonth] = useState(() =>
     format(toZonedTime(new Date(), timezone), "yyyy-MM"),
   );
@@ -359,7 +376,7 @@ function BookingWizardInner({
   const selectService = useCallback(
     (service: BookingService) => {
       markBookingStart(false, service.id);
-      const defaultStaff = pickDefaultStaff(
+      const staffSelection = resolveBookingStaffSelection(
         staff,
         staffServiceMap,
         service.id,
@@ -368,14 +385,14 @@ function BookingWizardInner({
       );
       update({
         service,
-        staff: defaultStaff,
+        staff: staffSelection.staff,
         date: todayStr,
         timeSlot: "",
         timeSlotEnd: "",
         timeLabel: "",
       });
       setSelectedSlot(null);
-      setAnyStaff(false);
+      setAnyStaff(staffSelection.anyStaff);
       void slotHold.releaseHold();
       setSelectedDealId(null);
     },
@@ -393,21 +410,30 @@ function BookingWizardInner({
       const eligibleStaff = service
         ? getEligibleStaff(staff, staffServiceMap, service.id, staffLocationMap, location?.id)
         : [];
-      const dealStaff = deal.staffId
-        ? eligibleStaff.find((member) => member.id === deal.staffId) ?? null
-        : pickDefaultStaff(staff, staffServiceMap, deal.serviceId, staffLocationMap, location?.id);
+      const staffSelection = deal.staffId
+        ? {
+            staff: eligibleStaff.find((member) => member.id === deal.staffId) ?? null,
+            anyStaff: false,
+          }
+        : resolveBookingStaffSelection(
+            staff,
+            staffServiceMap,
+            deal.serviceId,
+            staffLocationMap,
+            location?.id,
+          );
 
       update({
         location: location ?? null,
         service,
-        staff: dealStaff,
+        staff: staffSelection.staff,
         date: todayStr,
         timeSlot: "",
         timeSlotEnd: "",
         timeLabel: "",
       });
       setSelectedSlot(null);
-      setAnyStaff(false);
+      setAnyStaff(staffSelection.anyStaff);
       void slotHold.releaseHold();
     },
     [locations, services, staff, staffServiceMap, staffLocationMap, state.location, todayStr, slotHold, markBookingStart],
@@ -519,6 +545,9 @@ function BookingWizardInner({
     ? format(parseISO(state.date + "T12:00:00"), "EEE d MMM")
     : null;
 
+  const skipPanelMotion = lockServiceSelection || Boolean(initialService);
+  const panelMotion = skipPanelMotion ? { initial: false as const } : fadeInUp;
+
   return (
     <BookingTheme theme={theme} embed={embedMode}>
       {showBreadcrumb && (
@@ -596,12 +625,12 @@ function BookingWizardInner({
               <BookingPanel
                 area="meta"
                 className="border-b border-border bg-muted/15 pb-4 lg:sticky lg:top-6 lg:self-start lg:rounded-l-xl lg:border-0 lg:px-4 lg:pb-6 lg:pt-6 xl:px-5"
-                {...fadeInUp}
+                {...panelMotion}
               >
                 <ServiceMetaPanel {...metaPanelProps} />
               </BookingPanel>
 
-              <BookingPanel area="main" className="min-w-0 lg:py-6" {...fadeInUp}>
+              <BookingPanel area="main" className="min-w-0 lg:py-6" {...panelMotion}>
                 {state.service ? (
                   <div className="border-b border-border py-3 lg:hidden">
                     <BookingChoiceSummary
@@ -642,31 +671,33 @@ function BookingWizardInner({
                       />
                     </div>
                   ) : (
-                    <StepDateTime
-                      businessId={business.id}
-                      copy={copy}
-                      service={state.service}
-                      staff={state.staff}
-                      anyStaff={anyStaff}
-                      locationId={state.location?.id}
-                      timezone={timezone}
-                      selectedDate={state.date}
-                      selectedSlot={selectedSlot}
-                      dealId={selectedDealId}
-                      holdLabel={slotHold.holdLabel}
-                      slotUnavailable={slotHold.slotUnavailable}
-                      onDateChange={(date) => {
-                        clearSlot();
-                        update({ date });
-                      }}
-                      onSlotSelect={selectSlot}
-                      onCalendarMonthChange={setCalendarViewMonth}
-                      calendarOverlay={calendarOverlay}
-                      hideHeading
-                    />
+                    <div className="px-4 md:px-6 lg:px-8">
+                      <StepDateTime
+                        businessId={business.id}
+                        copy={copy}
+                        service={state.service}
+                        staff={state.staff}
+                        anyStaff={anyStaff}
+                        locationId={state.location?.id}
+                        timezone={timezone}
+                        selectedDate={state.date}
+                        selectedSlot={selectedSlot}
+                        dealId={selectedDealId}
+                        holdLabel={slotHold.holdLabel}
+                        slotUnavailable={slotHold.slotUnavailable}
+                        onDateChange={(date) => {
+                          clearSlot();
+                          update({ date });
+                        }}
+                        onSlotSelect={selectSlot}
+                        onCalendarMonthChange={setCalendarViewMonth}
+                        calendarOverlay={calendarOverlay}
+                        hideHeading
+                      />
+                    </div>
                   )
                 ) : (
-                  <p className="py-12 text-center text-sm text-amber-600">
+                  <p className="px-4 py-12 text-center text-sm text-amber-600 md:px-6 lg:px-8">
                     {eligibleStaffCount === 0 ? copy.noStaff : copy.chooseTeamToSeeTimes}
                   </p>
                 )}

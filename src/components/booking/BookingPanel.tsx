@@ -23,7 +23,7 @@ const AREA_CLASS: Record<GridArea, string> = {
 export function BookingPanel({ area, visible, className, children, ...motionProps }: BookingPanelProps) {
   if (visible === false) return null;
   return (
-    <m.div className={cn(AREA_CLASS[area], className)} layout {...motionProps}>
+    <m.div className={cn(AREA_CLASS[area], className)} {...motionProps}>
       {children}
     </m.div>
   );
