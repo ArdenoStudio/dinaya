@@ -227,6 +227,7 @@ export function BookingHubFlow({
       transition={bookingTransition(reduceMotion)}
       className={cn(
         "w-full px-0 md:px-4",
+        centeredLayout && "mx-auto",
         layoutMaxWidth,
         !reduceMotion && "transition-[max-width] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
       )}

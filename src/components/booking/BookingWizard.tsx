@@ -568,7 +568,7 @@ function BookingWizardInner({
   const showBreadcrumb =
     !embedMode &&
     Boolean(state.service) &&
-    (Boolean(hubHref) || (!lockServiceSelection && services.length > 1));
+    (Boolean(hubHref) || Boolean(onBackToHub) || (!lockServiceSelection && services.length > 1));
 
   const breadcrumbItems = state.service
     ? buildBookingBreadcrumbItems({
