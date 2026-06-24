@@ -10,10 +10,15 @@ import { backfillServiceSlugsForBusiness } from "@/lib/slot-reservations";
 import { resolveServiceSlug } from "@/lib/service-slug";
 import { getReviewDistribution } from "@/lib/reviews-public";
 import { hasPublicColumn, withTransientDbRetry } from "@/lib/dashboard/db-compat";
+import { loadBookingPageDataViaSupabase } from "@/lib/booking/load-page-data-rest";
+import { canUseSupabaseRestDataSource } from "@/lib/supabase-server";
 
 export type BookingPageData = NonNullable<Awaited<ReturnType<typeof loadBookingPageData>>>;
 
 export async function loadBookingPageData(slug: string, serviceSlug?: string) {
+  if (canUseSupabaseRestDataSource()) {
+    return loadBookingPageDataViaSupabase(slug, serviceSlug);
+  }
   return withTransientDbRetry(() => loadBookingPageDataInner(slug, serviceSlug));
 }
 

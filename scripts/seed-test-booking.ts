@@ -27,7 +27,7 @@ console.log(`Seeding test booking page for slug "${slug}"...\n`);
 
 run("seed-test-branding.ts");
 run("seed-test-reviews.ts", ["--avg", "4.7", "--count", "1500"]);
-run("seed-test-services.ts", ["--count", "25"]);
+run("seed-test-services.ts", ["--count", "30"]);
 run("seed-test-availability.ts");
 
 console.log("\nAll test booking seeds complete.");

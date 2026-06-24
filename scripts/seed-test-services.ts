@@ -1,10 +1,10 @@
 /**
- * Adds salon-style services (default 25) to the test business for hub/list QA.
+ * Adds salon-style services (default 30) to the test business for hub/list QA.
  *
  * Usage:
  *   npx tsx scripts/seed-test-services.ts
  *   npx tsx scripts/seed-test-services.ts my-slug
- *   npx tsx scripts/seed-test-services.ts test --count 25
+ *   npx tsx scripts/seed-test-services.ts test --count 30
  */
 import { randomUUID } from "node:crypto";
 import * as dotenv from "dotenv";
@@ -56,6 +56,11 @@ const CATALOG: SeedService[] = [
   { category: "Styling", name: "Curls & waves", durationMinutes: 45, priceLkr: 2800, description: "Iron or wand styling for texture." },
   { category: "Consultations", name: "Colour consultation", durationMinutes: 20, priceLkr: 0, description: "Discuss colour goals before booking." },
   { category: "Consultations", name: "Bridal trial", durationMinutes: 90, priceLkr: 7500, description: "Wedding hair trial with style notes." },
+  { category: "Haircuts", name: "Men's classic cut", durationMinutes: 35, priceLkr: 1500, description: "Scissor or clipper cut with wash and style." },
+  { category: "Colour", name: "Ombre colour", durationMinutes: 120, priceLkr: 11000, description: "Gradual light-to-dark or dark-to-light blend." },
+  { category: "Treatments", name: "Perm & set", durationMinutes: 90, priceLkr: 9500, description: "Body wave or curl perm with neutralising finish." },
+  { category: "Grooming", name: "Eyebrow shaping", durationMinutes: 15, priceLkr: 900, description: "Thread or wax tidy for brows." },
+  { category: "Styling", name: "Express blow dry", durationMinutes: 20, priceLkr: 1500, description: "Quick wash and blow-dry for everyday polish." },
 ];
 
 function parseCount(argv: string[]): number {
