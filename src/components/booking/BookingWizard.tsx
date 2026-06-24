@@ -203,9 +203,7 @@ function BookingWizardInner({
     return selection.anyStaff;
   });
 
-  const [selectedSlot, setSelectedSlot] = useState<SlotData | null>(() =>
-    urlState.slot ? { startUtc: urlState.slot, endUtc: "", label: "" } : null,
-  );
+  const [selectedSlot, setSelectedSlot] = useState<SlotData | null>(null);
   const [selectedDealId, setSelectedDealId] = useState<string | null>(
     initialDealId ?? urlState.dealId ?? null,
   );
@@ -465,6 +463,12 @@ function BookingWizardInner({
     update({ staff: null });
   }, [clearSlot]);
 
+  useEffect(() => {
+    if (state.timeSlot && !state.timeLabel) {
+      clearSlot();
+    }
+  }, [state.timeSlot, state.timeLabel, clearSlot]);
+
   const showContactForm = Boolean(
     selectedSlot &&
       state.timeLabel &&
@@ -504,7 +508,7 @@ function BookingWizardInner({
     needsStaffPicker,
     selectedDate: state.date,
     timeLabel: state.timeLabel,
-    holdLabel: slotHold.holdLabel,
+    holdLabel: state.timeLabel ? slotHold.holdLabel : null,
     slotUnavailable: slotHold.slotUnavailable,
     selectedDeal,
     copy,
@@ -546,7 +550,7 @@ function BookingWizardInner({
     : null;
 
   const skipPanelMotion = lockServiceSelection || Boolean(initialService);
-  const panelMotion = skipPanelMotion ? { initial: false as const } : fadeInUp;
+  const panelMotion = skipPanelMotion ? {} : fadeInUp;
 
   return (
     <BookingTheme theme={theme} embed={embedMode}>
@@ -621,16 +625,16 @@ function BookingWizardInner({
               />
             </>
           ) : (
-            <div className="grid w-full min-w-0 max-w-full gap-0 lg:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] lg:items-start lg:divide-x lg:divide-border xl:grid-cols-[minmax(0,16rem)_minmax(0,1fr)]">
+            <div className="grid w-full min-w-0 max-w-full grid-cols-1 gap-0 lg:grid-cols-[15rem_minmax(0,1fr)] lg:items-start lg:divide-x lg:divide-border xl:grid-cols-[16rem_minmax(0,1fr)]">
               <BookingPanel
                 area="meta"
-                className="border-b border-border bg-muted/15 pb-4 lg:sticky lg:top-6 lg:self-start lg:rounded-l-xl lg:border-0 lg:px-4 lg:pb-6 lg:pt-6 xl:px-5"
+                className="border-b border-border bg-muted/15 pb-4 lg:sticky lg:top-6 lg:z-[1] lg:self-start lg:overflow-hidden lg:rounded-l-xl lg:border-0 lg:px-4 lg:pb-6 lg:pt-6 xl:px-5"
                 {...panelMotion}
               >
                 <ServiceMetaPanel {...metaPanelProps} />
               </BookingPanel>
 
-              <BookingPanel area="main" className="min-w-0 lg:py-6" {...panelMotion}>
+              <BookingPanel area="main" className="relative z-0 min-w-0 lg:py-6" {...panelMotion}>
                 {state.service ? (
                   <div className="border-b border-border py-3 lg:hidden">
                     <BookingChoiceSummary
@@ -645,7 +649,7 @@ function BookingWizardInner({
                             ? copy.details
                             : copy.pickDateTime
                       }
-                      holdLabel={slotHold.holdLabel}
+                      holdLabel={state.timeLabel ? slotHold.holdLabel : null}
                       slotUnavailable={slotHold.slotUnavailable}
                       slotTaken={copy.slotTaken}
                       slotTakenAction={copy.slotTakenAction}
@@ -683,7 +687,7 @@ function BookingWizardInner({
                         selectedDate={state.date}
                         selectedSlot={selectedSlot}
                         dealId={selectedDealId}
-                        holdLabel={slotHold.holdLabel}
+                        holdLabel={state.timeLabel ? slotHold.holdLabel : null}
                         slotUnavailable={slotHold.slotUnavailable}
                         onDateChange={(date) => {
                           clearSlot();

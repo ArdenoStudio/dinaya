@@ -81,7 +81,7 @@ export function ServiceMetaPanel({
   const rating = getBusinessRating(avgRating, reviewCount);
 
   return (
-    <div className="flex flex-col">
+    <div className="flex min-w-0 flex-col">
       <div className="flex items-start gap-3">
         <Avatar className="size-10 shrink-0" data-size="lg">
           {business.logoUrl ? (
@@ -122,7 +122,7 @@ export function ServiceMetaPanel({
             key="service-info"
             {...fadeInUp}
             initial={lockServiceSelection ? false : fadeInUp.initial}
-            className="mt-6 border-t border-border/70 pt-4"
+            className="mt-6 min-w-0 border-t border-border/70 pt-4"
           >
             {!lockServiceSelection && onChangeService && (
               <button

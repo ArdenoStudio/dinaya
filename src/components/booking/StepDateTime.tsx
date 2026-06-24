@@ -173,6 +173,7 @@ export default function StepDateTime({
     if (!canLoad || !selectedDate) {
       setSlots([]);
       setHasFetched(false);
+      setLoadingSlots(false);
       slotCacheRef.current = {};
       return;
     }
@@ -409,7 +410,7 @@ export default function StepDateTime({
                 <p className="mb-3 text-xs text-muted-foreground">{copy.selectDate}</p>
               )}
 
-              {holdLabel && (
+              {holdLabel && selectedSlot && (
                 <p className="mb-3 rounded-lg booking-bg-accent-muted px-3 py-2 text-xs font-medium booking-text-accent">
                   <Icon name="clock" className="mr-1.5" />
                   {holdLabel}
