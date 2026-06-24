@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useReducedMotion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { format, parseISO } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
@@ -26,7 +27,12 @@ import { BookingChoiceSummary } from "./BookingChoiceSummary";
 import { BookingBreadcrumb } from "./BookingBreadcrumb";
 import { BookingPanel } from "./BookingPanel";
 import { buildBookingBreadcrumbItems } from "./booking-breadcrumb";
-import { fadeInUp } from "@/lib/booking/booking-animations";
+import { bookingPanelMotion } from "@/lib/booking/booking-motion";
+import {
+  BookingMainStepTransition,
+  BookingStepTransition,
+  type WizardStep,
+} from "./BookingStepTransition";
 import { BookingTeamSection } from "./BookingTeamSection";
 import { BookingAttributionCapture } from "./BookingAttributionCapture";
 import { BookingDealsSection } from "./BookingDealsSection";
@@ -549,8 +555,14 @@ function BookingWizardInner({
     ? format(parseISO(state.date + "T12:00:00"), "EEE d MMM")
     : null;
 
-  const skipPanelMotion = lockServiceSelection || Boolean(initialService);
-  const panelMotion = skipPanelMotion ? {} : fadeInUp;
+  const reduceMotion = useReducedMotion() ?? false;
+  const panelMotion = bookingPanelMotion(reduceMotion, true);
+
+  const wizardStep: WizardStep = !state.service
+    ? "service"
+    : showStaffStep
+      ? "staff"
+      : "dateTime";
 
   return (
     <BookingTheme theme={theme} embed={embedMode}>
@@ -568,6 +580,7 @@ function BookingWizardInner({
         />
 
         <div className="px-4 py-4 md:px-0 md:py-0">
+          <BookingStepTransition step={wizardStep}>
           {!state.service ? (
             <div className="mx-auto w-full max-w-lg">
               {needsLocationPicker && (
@@ -656,6 +669,7 @@ function BookingWizardInner({
                     />
                   </div>
                 ) : null}
+                <BookingMainStepTransition stepKey={showContactForm ? "confirm" : "dateTime"}>
                 {canPickSlots ? (
                   showContactForm ? (
                     <div className="md:px-6 lg:px-8">
@@ -705,9 +719,11 @@ function BookingWizardInner({
                     {eligibleStaffCount === 0 ? copy.noStaff : copy.chooseTeamToSeeTimes}
                   </p>
                 )}
+                </BookingMainStepTransition>
               </BookingPanel>
             </div>
           )}
+          </BookingStepTransition>
         </div>
 
         {state.service && teamMembers.length > 0 && !embedMode && !hubHref && !showStaffStep && (

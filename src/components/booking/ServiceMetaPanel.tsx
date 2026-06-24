@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, m } from "motion/react";
+import { AnimatePresence, m, useReducedMotion } from "motion/react";
 import { format, parseISO } from "date-fns";
 import type { Staff } from "@/db/schema";
 import type { Location } from "@/db/schema";
@@ -10,7 +10,7 @@ import type { DealListItem } from "@/lib/deals/queries";
 import { formatLkr } from "@/lib/utils";
 import { Icon } from "@/components/ui/Icon";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { fadeInUp } from "@/lib/booking/booking-animations";
+import { bookingPanelMotion } from "@/lib/booking/booking-motion";
 import StepLocation from "./StepLocation";
 import { computeDiscountedPrice } from "@/lib/deals/pricing";
 import { BusinessRating, getBusinessRating } from "./BusinessRating";
@@ -68,6 +68,8 @@ export function ServiceMetaPanel({
   onSelectLocation,
   onChangeService,
 }: ServiceMetaPanelProps) {
+  const reduceMotion = useReducedMotion() ?? false;
+  const serviceMotion = bookingPanelMotion(reduceMotion, !lockServiceSelection);
   const dateLabel = selectedDate
     ? format(parseISO(selectedDate + "T12:00:00"), "EEE, d MMM yyyy")
     : null;
@@ -120,8 +122,7 @@ export function ServiceMetaPanel({
         {service && (
           <m.div
             key="service-info"
-            {...fadeInUp}
-            initial={lockServiceSelection ? false : fadeInUp.initial}
+            {...serviceMotion}
             className="mt-6 min-w-0 border-t border-border/70 pt-4"
           >
             {!lockServiceSelection && onChangeService && (
@@ -204,7 +205,7 @@ export function ServiceMetaPanel({
         {holdLabel && dateLabel && timeLabel && (
           <m.div
             key="selected-time"
-            {...fadeInUp}
+            {...bookingPanelMotion(reduceMotion, true)}
             className="mt-4 hidden rounded-lg booking-bg-accent-muted px-3 py-2 lg:block"
           >
             <p className="text-xs font-medium booking-text-accent">

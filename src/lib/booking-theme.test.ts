@@ -5,6 +5,7 @@ import {
   contrastRatio,
   normalizeAccentColor,
   resolveBookingTheme,
+  BOOKING_THEME_PRESETS,
 } from "@/lib/booking-theme";
 import { slugifyServiceName } from "@/lib/service-slug";
 
@@ -69,6 +70,38 @@ describe("booking-theme", () => {
   it("warns on low contrast accents", () => {
     expect(accentContrastWarning("#ffffff", "#ffffff")).toContain("hard to read");
     expect(contrastRatio("#111111", "#ffffff")).toBeGreaterThan(10);
+  });
+
+  it("resolves salon preset colors for Wax-style branding", () => {
+    const salon = BOOKING_THEME_PRESETS.salon;
+    expect(salon.accentColor).toBe("#ff6699");
+    expect(salon.pageBackground).toBe("custom");
+    expect(salon.pageBackgroundColor).toBe("#fff6f8");
+  });
+
+  it("uses dark canvas for custom page background in dark mode", () => {
+    const theme = resolveBookingTheme(
+      {
+        accentColor: "#ff6699",
+        bookingPageBackground: "custom",
+        bookingPageBackgroundColor: "#fff6f8",
+        bookingThemePreset: "salon",
+      },
+      { canUseExtendedTheme: true },
+    );
+    const light = buildBookingThemeStyle(theme, { isDark: false });
+    const dark = buildBookingThemeStyle(theme, { isDark: true });
+    expect(light["--booking-page-bg"]).toBe("#fff6f8");
+    expect(dark["--booking-page-bg"]).toBe("#0a0909");
+    expect(light["--booking-accent"]).toBe("#ff6699");
+  });
+
+  it("resolves all theme presets with valid accent colors", () => {
+    for (const [name, preset] of Object.entries(BOOKING_THEME_PRESETS)) {
+      expect(preset.accentColor).toMatch(/^#[0-9a-f]{6}$/);
+      expect(["white", "grouped", "custom"]).toContain(preset.pageBackground);
+      expect(name).toBeTruthy();
+    }
   });
 });
 

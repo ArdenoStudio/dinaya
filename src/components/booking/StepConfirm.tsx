@@ -600,9 +600,9 @@ export default function StepConfirm({
 
   const upsellNotice =
     upsell ? (
-      <div className="mt-4 rounded-xl border border-blue-100 bg-[var(--booking-accent-muted)]/70 p-4 text-sm">
-        <p className="font-medium text-blue-950 dark:text-blue-100">Recommended add-on</p>
-        <p className="mt-1 text-[var(--booking-accent)]/80">
+      <div className="mt-4 rounded-xl border border-[var(--booking-accent-soft)] bg-[var(--booking-accent-muted)]/70 p-4 text-sm">
+        <p className="font-medium text-foreground">Recommended add-on</p>
+        <p className="mt-1 booking-text-accent">
           {upsell.reason} Ask about <span className="font-semibold">{upsell.name}</span>
           {upsell.priceLkr > 0 ? ` (${formatLkr(upsell.priceLkr)})` : ""} during your visit.
         </p>

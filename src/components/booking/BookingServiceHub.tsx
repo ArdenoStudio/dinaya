@@ -83,7 +83,7 @@ function HubBusinessLogo({
           alt=""
           width={72}
           height={72}
-          className="size-full bg-white object-cover"
+          className="size-full bg-white object-contain p-1"
           unoptimized={!isOptimizableRemoteImage(logoUrl)}
         />
       ) : (

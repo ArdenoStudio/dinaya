@@ -162,7 +162,7 @@ export function resolveBookingTheme(
   };
 }
 
-function resolvePageBackgroundColor(theme: ResolvedBookingTheme): string {
+export function resolvePageBackgroundColor(theme: ResolvedBookingTheme): string {
   if (theme.pageBackground === "custom" && theme.pageBackgroundColor) {
     return theme.pageBackgroundColor;
   }
@@ -170,6 +170,18 @@ function resolvePageBackgroundColor(theme: ResolvedBookingTheme): string {
     return "#f2f2f7";
   }
   return "#ffffff";
+}
+
+/** Apple-style dark canvas — keeps accent on chrome, not washed-out blush. */
+export function resolveDarkPageBackgroundColor(theme: ResolvedBookingTheme): string {
+  if (theme.pageBackground === "custom" && theme.pageBackgroundColor) {
+    return "#0a0909";
+  }
+  return "#000000";
+}
+
+function resolvePageBackgroundColorForMode(theme: ResolvedBookingTheme, isDark: boolean): string {
+  return isDark ? resolveDarkPageBackgroundColor(theme) : resolvePageBackgroundColor(theme);
 }
 
 function resolveHeroOverlayColor(theme: ResolvedBookingTheme): string {
@@ -187,11 +199,15 @@ function resolveHeroOverlayColor(theme: ResolvedBookingTheme): string {
 }
 
 /** CSS custom properties for tenant-branded booking surfaces. */
-export function buildBookingThemeStyle(theme: ResolvedBookingTheme): CSSProperties {
+export function buildBookingThemeStyle(
+  theme: ResolvedBookingTheme,
+  options?: { isDark?: boolean },
+): CSSProperties {
   const opacity = theme.heroOverlayOpacity / 100;
+  const isDark = options?.isDark ?? false;
   return {
     "--booking-accent": theme.accentColor,
-    "--booking-page-bg": resolvePageBackgroundColor(theme),
+    "--booking-page-bg": resolvePageBackgroundColorForMode(theme, isDark),
     "--booking-hero-overlay": resolveHeroOverlayColor(theme),
     "--booking-hero-overlay-opacity": String(opacity),
   } as CSSProperties;
