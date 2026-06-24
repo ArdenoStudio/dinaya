@@ -48,6 +48,7 @@ import {
   useGoogleCalendarOverlay,
   type CalendarOverlayConfig,
 } from "./useGoogleCalendarOverlay";
+import { shouldShowBookingContactForm } from "@/lib/booking/wizard-contact-step";
 
 const COLOMBO_TZ = "Asia/Colombo";
 
@@ -475,13 +476,14 @@ function BookingWizardInner({
     }
   }, [state.timeSlot, state.timeLabel, clearSlot]);
 
-  const showContactForm = Boolean(
-    selectedSlot &&
-      state.timeLabel &&
-      (state.staff || anyStaff) &&
-      !slotHold.slotUnavailable &&
-      (!needsLocationPicker || state.location),
-  );
+  const showContactForm = shouldShowBookingContactForm({
+    selectedSlot,
+    timeLabel: state.timeLabel,
+    staff: state.staff,
+    anyStaff,
+    needsLocationPicker,
+    location: state.location,
+  });
 
   const showStaffStep = Boolean(
     state.service &&
@@ -681,6 +683,7 @@ function BookingWizardInner({
                         copy={copy}
                         selectedDeal={selectedDeal}
                         sessionToken={slotHold.sessionToken}
+                        slotUnavailable={slotHold.slotUnavailable}
                         onUpdate={update}
                         onBack={clearSlot}
                         onConfirmed={handleConfirmed}
