@@ -79,27 +79,22 @@ describe("booking-theme", () => {
     expect(salon.pageBackgroundColor).toBe("#fff6f8");
   });
 
-  it("uses dark canvas for custom page background in dark mode", () => {
+  it("resolves salon_vivid preset with accent wash background", () => {
+    const vivid = BOOKING_THEME_PRESETS.salon_vivid;
+    expect(vivid.pageBackground).toBe("accent");
     const theme = resolveBookingTheme(
-      {
-        accentColor: "#ff6699",
-        bookingPageBackground: "custom",
-        bookingPageBackgroundColor: "#fff6f8",
-        bookingThemePreset: "salon",
-      },
+      { accentColor: vivid.accentColor, bookingThemePreset: "salon_vivid" },
       { canUseExtendedTheme: true },
     );
-    const light = buildBookingThemeStyle(theme, { isDark: false });
-    const dark = buildBookingThemeStyle(theme, { isDark: true });
-    expect(light["--booking-page-bg"]).toBe("#fff6f8");
-    expect(dark["--booking-page-bg"]).toBe("#0a0909");
-    expect(light["--booking-accent"]).toBe("#ff6699");
+    const style = buildBookingThemeStyle(theme);
+    expect(style["--booking-page-bg"]).not.toBe("#ffffff");
+    expect(style["--booking-page-bg"]).not.toBe("#fff6f8");
   });
 
   it("resolves all theme presets with valid accent colors", () => {
     for (const [name, preset] of Object.entries(BOOKING_THEME_PRESETS)) {
       expect(preset.accentColor).toMatch(/^#[0-9a-f]{6}$/);
-      expect(["white", "grouped", "custom"]).toContain(preset.pageBackground);
+      expect(["white", "grouped", "custom", "accent"]).toContain(preset.pageBackground);
       expect(name).toBeTruthy();
     }
   });

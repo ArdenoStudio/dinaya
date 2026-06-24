@@ -49,6 +49,7 @@ import {
   type CalendarOverlayConfig,
 } from "./useGoogleCalendarOverlay";
 import { shouldShowBookingContactForm } from "@/lib/booking/wizard-contact-step";
+import { useBookingInstantUrlSync } from "@/lib/booking/use-booking-instant-url-sync";
 
 const COLOMBO_TZ = "Asia/Colombo";
 
@@ -142,24 +143,6 @@ type BookingWizardInnerProps = Props & {
   urlState: BookingUrlState;
   setUrlParams: (updates: Partial<BookingUrlState>, options?: { replace?: boolean }) => void;
 };
-
-function BookingWizardUrlSyncBridge({
-  date,
-  slotStartUtc,
-  staffId,
-  dealId,
-  enabled,
-}: {
-  date: string;
-  slotStartUtc: string;
-  staffId: string | null;
-  dealId: string | null;
-  enabled: boolean;
-}) {
-  const { setParams } = useBookingUrlState();
-  useBookingUrlSync({ date, slotStartUtc, staffId, dealId, enabled, setParams });
-  return null;
-}
 
 function BookingWizardWithUrl(props: Props) {
   const { state: urlState, setParams } = useBookingUrlState();
@@ -281,6 +264,14 @@ function BookingWizardInner({
     dealId: selectedDealId,
     enabled: !embedMode && !instantNav,
     setParams: setUrlParams,
+  });
+
+  useBookingInstantUrlSync({
+    date: state.date,
+    slotStartUtc: state.timeSlot,
+    staffId: state.staff?.id ?? null,
+    dealId: selectedDealId,
+    enabled: instantNav && !embedMode,
   });
 
   const applyEmbedPrefill = useCallback((contact: { name?: string; email?: string; phone?: string }) => {
@@ -787,18 +778,6 @@ function BookingWizardInner({
           <BookingBranding copy={copy} hideBranding={business.hideBranding} />
         </div>
       )}
-
-      {instantNav && !embedMode ? (
-        <Suspense fallback={null}>
-          <BookingWizardUrlSyncBridge
-            date={state.date}
-            slotStartUtc={state.timeSlot}
-            staffId={state.staff?.id ?? null}
-            dealId={selectedDealId}
-            enabled
-          />
-        </Suspense>
-      ) : null}
     </BookingTheme>
   );
 }

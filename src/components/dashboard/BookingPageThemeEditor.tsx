@@ -7,6 +7,7 @@ import { buildPublicBookingUrl } from "@/lib/booking-url";
 import {
   BOOKING_THEME_PRESETS,
   accentContrastWarning,
+  tintAccentBackground,
   type BookingHeroOverlay,
   type BookingPageBackground,
   type BookingThemePreset,
@@ -42,7 +43,8 @@ interface Props {
 
 const PRESET_LABELS: Record<Exclude<BookingThemePreset, "custom">, string> = {
   classic: "Classic",
-  salon: "Salon",
+  salon: "Salon (soft blush)",
+  salon_vivid: "Salon (vivid pink)",
   spa: "Spa calm",
   bold: "Bold",
 };
@@ -57,7 +59,8 @@ const HERO_OVERLAY_OPTIONS: { value: BookingHeroOverlay; label: string }[] = [
 const PAGE_BACKGROUND_OPTIONS: { value: BookingPageBackground; label: string }[] = [
   { value: "white", label: "White" },
   { value: "grouped", label: "Soft gray" },
-  { value: "custom", label: "Custom" },
+  { value: "custom", label: "Custom color" },
+  { value: "accent", label: "Accent wash (brand pink)" },
 ];
 
 function buildPreviewUrl(
@@ -114,7 +117,9 @@ export function BookingPageThemeEditor({ business, onPreviewChange }: Props) {
       ? form.bookingPageBackgroundColor
       : form.bookingPageBackground === "grouped"
         ? "#f2f2f7"
-        : "#ffffff",
+        : form.bookingPageBackground === "accent"
+          ? tintAccentBackground(form.accentColor, 0.38)
+          : "#ffffff",
   );
 
   useEffect(() => {

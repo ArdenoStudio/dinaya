@@ -4,9 +4,9 @@ export const DEFAULT_BOOKING_ACCENT = "#2563eb";
 
 const HEX_COLOR = /^#[0-9a-fA-F]{6}$/;
 
-export type BookingPageBackground = "white" | "grouped" | "custom";
+export type BookingPageBackground = "white" | "grouped" | "custom" | "accent";
 export type BookingHeroOverlay = "light" | "dark" | "brand" | "none";
-export type BookingThemePreset = "classic" | "salon" | "spa" | "bold" | "custom";
+export type BookingThemePreset = "classic" | "salon" | "salon_vivid" | "spa" | "bold" | "custom";
 
 export type BookingThemeSource = {
   accentColor?: string | null;
@@ -52,6 +52,13 @@ export const BOOKING_THEME_PRESETS: Record<
     heroOverlay: "brand",
     heroOverlayOpacity: 55,
   },
+  salon_vivid: {
+    accentColor: "#ff6699",
+    pageBackground: "accent",
+    pageBackgroundColor: null,
+    heroOverlay: "brand",
+    heroOverlayOpacity: 55,
+  },
   spa: {
     accentColor: "#5a7a6a",
     pageBackground: "white",
@@ -68,9 +75,16 @@ export const BOOKING_THEME_PRESETS: Record<
   },
 };
 
-const PAGE_BACKGROUNDS = new Set<BookingPageBackground>(["white", "grouped", "custom"]);
+const PAGE_BACKGROUNDS = new Set<BookingPageBackground>(["white", "grouped", "custom", "accent"]);
 const HERO_OVERLAYS = new Set<BookingHeroOverlay>(["light", "dark", "brand", "none"]);
-const THEME_PRESETS = new Set<BookingThemePreset>(["classic", "salon", "spa", "bold", "custom"]);
+const THEME_PRESETS = new Set<BookingThemePreset>([
+  "classic",
+  "salon",
+  "salon_vivid",
+  "spa",
+  "bold",
+  "custom",
+]);
 
 export function normalizeAccentColor(input: string | null | undefined): string {
   if (!input) return DEFAULT_BOOKING_ACCENT;
@@ -163,6 +177,9 @@ export function resolveBookingTheme(
 }
 
 export function resolvePageBackgroundColor(theme: ResolvedBookingTheme): string {
+  if (theme.pageBackground === "accent") {
+    return tintAccentBackground(theme.accentColor, 0.38);
+  }
   if (theme.pageBackground === "custom" && theme.pageBackgroundColor) {
     return theme.pageBackgroundColor;
   }
@@ -174,10 +191,24 @@ export function resolvePageBackgroundColor(theme: ResolvedBookingTheme): string 
 
 /** Apple-style dark canvas — keeps accent on chrome, not washed-out blush. */
 export function resolveDarkPageBackgroundColor(theme: ResolvedBookingTheme): string {
+  if (theme.pageBackground === "accent") {
+    return tintAccentBackground(theme.accentColor, 0.12);
+  }
   if (theme.pageBackground === "custom" && theme.pageBackgroundColor) {
     return "#0a0909";
   }
   return "#000000";
+}
+
+/** Blend accent into white for page canvas (strength 0–1 = more pink). */
+export function tintAccentBackground(accentHex: string, strength: number): string {
+  const rgb = hexToRgb(accentHex);
+  if (!rgb) return "#fff6f8";
+  const clamped = Math.min(1, Math.max(0, strength));
+  const mix = (channel: number) =>
+    Math.round(channel * clamped + 255 * (1 - clamped));
+  const toHex = (value: number) => value.toString(16).padStart(2, "0");
+  return `#${toHex(mix(rgb.r))}${toHex(mix(rgb.g))}${toHex(mix(rgb.b))}`;
 }
 
 function resolvePageBackgroundColorForMode(theme: ResolvedBookingTheme, isDark: boolean): string {

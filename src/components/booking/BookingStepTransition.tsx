@@ -62,7 +62,7 @@ export function BookingMainStepTransition({ stepKey, children, className }: Inne
       <m.div
         key={stepKey}
         className={className}
-        initial={{ opacity: 0, x: 12 }}
+        initial={false}
         animate={{ opacity: 1, x: 0 }}
         exit={{ opacity: 0, x: -8 }}
         transition={bookingTransition(reduceMotion)}

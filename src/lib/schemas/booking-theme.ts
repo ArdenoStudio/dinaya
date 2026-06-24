@@ -1,8 +1,15 @@
 import { z } from "@/lib/validation";
 
-export const bookingPageBackgroundSchema = z.enum(["white", "grouped", "custom"]);
+export const bookingPageBackgroundSchema = z.enum(["white", "grouped", "custom", "accent"]);
 export const bookingHeroOverlaySchema = z.enum(["light", "dark", "brand", "none"]);
-export const bookingThemePresetSchema = z.enum(["classic", "salon", "spa", "bold", "custom"]);
+export const bookingThemePresetSchema = z.enum([
+  "classic",
+  "salon",
+  "salon_vivid",
+  "spa",
+  "bold",
+  "custom",
+]);
 
 export const bookingThemeFieldsSchema = z.object({
   accentColor: z
