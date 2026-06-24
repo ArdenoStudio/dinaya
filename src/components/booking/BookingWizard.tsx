@@ -23,7 +23,9 @@ import { BookingWizardSkeleton } from "./BookingWizardSkeleton";
 import BookingBranding from "./BookingBranding";
 import { BookingChoiceSummary } from "./BookingChoiceSummary";
 import { BookingBreadcrumb } from "./BookingBreadcrumb";
+import { BookingPanel } from "./BookingPanel";
 import { buildBookingBreadcrumbItems } from "./booking-breadcrumb";
+import { fadeInUp } from "@/lib/booking/booking-animations";
 import { BookingTeamSection } from "./BookingTeamSection";
 import { BookingAttributionCapture } from "./BookingAttributionCapture";
 import { BookingDealsSection } from "./BookingDealsSection";
@@ -272,6 +274,17 @@ function BookingWizardInner({
     return getEligibleStaff(staff, staffServiceMap, state.service.id, staffLocationMap, state.location?.id).length > 1;
   }, [state.service, state.location?.id, staff, staffServiceMap, staffLocationMap]);
 
+  const eligibleStaffCount = useMemo(() => {
+    if (!state.service) return 0;
+    return getEligibleStaff(
+      staff,
+      staffServiceMap,
+      state.service.id,
+      staffLocationMap,
+      state.location?.id,
+    ).length;
+  }, [state.service, state.location?.id, staff, staffServiceMap, staffLocationMap]);
+
   function update(partial: Partial<BookingState>) {
     setState((s) => ({ ...s, ...partial }));
   }
@@ -326,7 +339,13 @@ function BookingWizardInner({
   const selectService = useCallback(
     (service: BookingService) => {
       markBookingStart(false, service.id);
-      const defaultStaff = pickDefaultStaff(staff, staffServiceMap, service.id, staffLocationMap, state.location?.id);
+      const defaultStaff = pickDefaultStaff(
+        staff,
+        staffServiceMap,
+        service.id,
+        staffLocationMap,
+        state.location?.id,
+      );
       update({
         service,
         staff: defaultStaff,
@@ -417,7 +436,9 @@ function BookingWizardInner({
   );
 
   const canPickSlots = Boolean(
-    state.service && (state.staff || anyStaff || !needsStaffPicker),
+    state.service &&
+      eligibleStaffCount > 0 &&
+      (state.staff || anyStaff || !needsStaffPicker),
   );
 
   const staffSummaryLabel = anyStaff
@@ -552,11 +573,15 @@ function BookingWizardInner({
             </>
           ) : (
             <div className="grid w-full min-w-0 max-w-full gap-0 lg:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] lg:items-start lg:divide-x lg:divide-border xl:grid-cols-[minmax(0,16rem)_minmax(0,1fr)]">
-              <div className="border-b border-border bg-muted/15 pb-4 lg:sticky lg:top-6 lg:self-start lg:rounded-l-xl lg:border-0 lg:px-4 lg:pb-6 lg:pt-6 xl:px-5">
+              <BookingPanel
+                area="meta"
+                className="border-b border-border bg-muted/15 pb-4 lg:sticky lg:top-6 lg:self-start lg:rounded-l-xl lg:border-0 lg:px-4 lg:pb-6 lg:pt-6 xl:px-5"
+                {...fadeInUp}
+              >
                 <ServiceMetaPanel {...metaPanelProps} />
-              </div>
+              </BookingPanel>
 
-              <div className="min-w-0 lg:py-6">
+              <BookingPanel area="main" className="min-w-0 lg:py-6" {...fadeInUp}>
                 {state.service ? (
                   <div className="border-b border-border py-3 lg:hidden">
                     <BookingChoiceSummary
@@ -621,9 +646,11 @@ function BookingWizardInner({
                     />
                   )
                 ) : (
-                  <p className="py-12 text-center text-sm text-amber-600">{copy.noStaff}</p>
+                  <p className="py-12 text-center text-sm text-amber-600">
+                    {eligibleStaffCount === 0 ? copy.noStaff : copy.chooseTeamToSeeTimes}
+                  </p>
                 )}
-              </div>
+              </BookingPanel>
             </div>
           )}
         </div>
