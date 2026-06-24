@@ -15,7 +15,7 @@ import StepDateTime from "./StepDateTime";
 import StepConfirm from "./StepConfirm";
 import { resolveBookingTheme, type ResolvedBookingTheme } from "@/lib/booking-theme";
 import { BookingTheme } from "./BookingTheme";
-import { useBookingUrlState, useBookingUrlSync, useStripBookingContactFromUrl } from "./useBookingUrlState";
+import { useBookingUrlState, useBookingUrlSync, useStripBookingContactFromUrl, type BookingUrlState } from "./useBookingUrlState";
 import { useSlotHold } from "./useSlotHold";
 import { getBookingCopy, formatBookingCopy } from "@/lib/i18n";
 import { getEligibleStaff, resolveBookingStaffSelection } from "@/lib/booking-staff";
@@ -75,6 +75,8 @@ interface Props {
   hubHref?: string | null;
   onBackToHub?: () => void;
   bookingTheme?: ResolvedBookingTheme;
+  /** Hub instant navigation — skip Suspense while search params hydrate. */
+  instantNav?: boolean;
 }
 
 export type BookingBusiness = {
@@ -134,6 +136,37 @@ export type BookingState = {
 
 type SlotData = { startUtc: string; endUtc: string; label: string; staffId?: string };
 
+const EMPTY_BOOKING_URL_STATE = {};
+
+type BookingWizardInnerProps = Props & {
+  urlState: BookingUrlState;
+  setUrlParams: (updates: Partial<BookingUrlState>, options?: { replace?: boolean }) => void;
+};
+
+function BookingWizardUrlSyncBridge({
+  date,
+  slotStartUtc,
+  staffId,
+  dealId,
+  enabled,
+}: {
+  date: string;
+  slotStartUtc: string;
+  staffId: string | null;
+  dealId: string | null;
+  enabled: boolean;
+}) {
+  const { setParams } = useBookingUrlState();
+  useBookingUrlSync({ date, slotStartUtc, staffId, dealId, enabled, setParams });
+  return null;
+}
+
+function BookingWizardWithUrl(props: Props) {
+  const { state: urlState, setParams } = useBookingUrlState();
+  useStripBookingContactFromUrl();
+  return <BookingWizardInner {...props} urlState={urlState} setUrlParams={setParams} instantNav={false} />;
+}
+
 function BookingWizardInner({
   business,
   services,
@@ -155,7 +188,10 @@ function BookingWizardInner({
   hubHref = null,
   onBackToHub,
   bookingTheme,
-}: Props) {
+  instantNav = false,
+  urlState,
+  setUrlParams,
+}: BookingWizardInnerProps) {
   const theme =
     bookingTheme ??
     resolveBookingTheme({
@@ -164,7 +200,6 @@ function BookingWizardInner({
   const copy = getBookingCopy(business.language);
   const router = useRouter();
   const timezone = business.timezone ?? COLOMBO_TZ;
-  const { state: urlState } = useBookingUrlState();
   const needsLocationPicker = locations.length > 1;
   const defaultLocation = locations.length === 1 ? locations[0]! : null;
   const todayStr = format(toZonedTime(new Date(), timezone), "yyyy-MM-dd");
@@ -244,10 +279,9 @@ function BookingWizardInner({
     slotStartUtc: state.timeSlot,
     staffId: state.staff?.id ?? null,
     dealId: selectedDealId,
-    enabled: !embedMode,
+    enabled: !embedMode && !instantNav,
+    setParams: setUrlParams,
   });
-
-  useStripBookingContactFromUrl();
 
   const applyEmbedPrefill = useCallback((contact: { name?: string; email?: string; phone?: string }) => {
     setState((s) => ({
@@ -451,6 +485,12 @@ function BookingWizardInner({
     const deal = activeDeals.find((item) => item.id === initialDealId);
     if (deal) applyDeal(deal);
   }, [initialDealId, activeDeals, applyDeal]);
+
+  useEffect(() => {
+    if (!initialService || !lockServiceSelection) return;
+    if (state.service?.id === initialService.id) return;
+    selectService(initialService);
+  }, [initialService, lockServiceSelection, state.service?.id, selectService]);
 
   const clearSlot = useCallback(() => {
     update({ timeSlot: "", timeSlotEnd: "", timeLabel: "" });
@@ -747,14 +787,36 @@ function BookingWizardInner({
           <BookingBranding copy={copy} hideBranding={business.hideBranding} />
         </div>
       )}
+
+      {instantNav && !embedMode ? (
+        <Suspense fallback={null}>
+          <BookingWizardUrlSyncBridge
+            date={state.date}
+            slotStartUtc={state.timeSlot}
+            staffId={state.staff?.id ?? null}
+            dealId={selectedDealId}
+            enabled
+          />
+        </Suspense>
+      ) : null}
     </BookingTheme>
   );
 }
 
 export default function BookingWizard(props: Props) {
+  if (props.instantNav) {
+    return (
+      <BookingWizardInner
+        {...props}
+        urlState={EMPTY_BOOKING_URL_STATE}
+        setUrlParams={() => {}}
+      />
+    );
+  }
+
   return (
     <Suspense fallback={<BookingWizardSkeleton />}>
-      <BookingWizardInner {...props} />
+      <BookingWizardWithUrl {...props} />
     </Suspense>
   );
 }

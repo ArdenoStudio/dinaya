@@ -282,6 +282,7 @@ export function BookingHubFlow({
             teamMembers={staffWithBio}
             hubHref={onBackToHub ? null : hubBackHref}
             onBackToHub={onBackToHub}
+            instantNav={enableInstantNavigation}
             bookingTheme={resolvedTheme}
           />
         ) : null}
