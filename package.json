@@ -30,7 +30,7 @@
     "seed:test-reviews": "tsx scripts/seed-test-reviews.ts --avg 4.7 --count 1500",
     "seed:test-booking": "tsx scripts/seed-test-booking.ts",
     "seed:pilot-wax": "tsx scripts/seed-pilot-wax.ts",
-    "setup:wax": "npm run db:migrate && npm run seed:pilot-wax",
+    "setup:wax": "node scripts/setup-wax.mjs",
     "seed:personas": "tsx scripts/seed-e2e-personas.ts",
     "seed:personas:clean": "tsx scripts/seed-e2e-personas.ts --clean",
     "seed:personas:enrich": "tsx scripts/seed-e2e-personas.ts --enrich-rich",
