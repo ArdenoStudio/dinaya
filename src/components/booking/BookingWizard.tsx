@@ -78,6 +78,8 @@ interface Props {
   bookingTheme?: ResolvedBookingTheme;
   /** Hub instant navigation — skip Suspense while search params hydrate. */
   instantNav?: boolean;
+  /** Center the white card in the viewport; breadcrumb stays above. */
+  centeredBookerLayout?: boolean;
 }
 
 export type BookingBusiness = {
@@ -172,6 +174,7 @@ function BookingWizardInner({
   onBackToHub,
   bookingTheme,
   instantNav = false,
+  centeredBookerLayout = false,
   urlState,
   setUrlParams,
 }: BookingWizardInnerProps) {
@@ -600,13 +603,20 @@ function BookingWizardInner({
       ? "staff"
       : "dateTime";
 
-  return (
-    <BookingTheme theme={theme} embed={embedMode}>
-      {showBreadcrumb && (
-        <div className="mb-3 flex justify-start px-4 md:mb-4 md:px-0">
-          <BookingBreadcrumb items={breadcrumbItems} />
-        </div>
-      )}
+  const breadcrumbBlock =
+    showBreadcrumb ? (
+      <div
+        className={
+          centeredBookerLayout
+            ? "shrink-0 pt-2 md:pt-4"
+            : "mb-3 flex justify-start px-4 md:mb-4 md:px-0"
+        }
+      >
+        <BookingBreadcrumb items={breadcrumbItems} />
+      </div>
+    ) : null;
+
+  const bookerCard = (
       <div className="w-full min-w-0 max-w-full bg-card lg:overflow-visible lg:rounded-xl lg:border lg:border-border lg:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)] dark:lg:shadow-none dark:lg:ring-1 dark:lg:ring-white/10">
         <BookingAttributionCapture businessId={business.id} />
         <BookingDealsSection
@@ -763,7 +773,7 @@ function BookingWizardInner({
           </BookingStepTransition>
         </div>
 
-        {state.service && teamMembers.length > 0 && !embedMode && !hubHref && !showStaffStep && (
+        {state.service && teamMembers.length > 0 && !embedMode && !hubHref && !onBackToHub && !showStaffStep && (
           <BookingTeamSection
             members={teamMembers}
             copy={copy}
@@ -772,12 +782,36 @@ function BookingWizardInner({
           />
         )}
       </div>
+  );
 
-      {showBranding && (
-        <div className="mt-3 flex justify-center px-4 md:mt-4 md:px-0">
-          <BookingBranding copy={copy} hideBranding={business.hideBranding} />
+  const brandingBlock =
+    showBranding ? (
+      <div className="mt-3 flex justify-center px-4 md:mt-4 md:px-0">
+        <BookingBranding copy={copy} hideBranding={business.hideBranding} />
+      </div>
+    ) : null;
+
+  if (centeredBookerLayout) {
+    return (
+      <BookingTheme
+        theme={theme}
+        embed={embedMode}
+        className="flex min-h-0 w-full flex-1 flex-col"
+      >
+        {breadcrumbBlock}
+        <div className="flex min-h-0 flex-1 items-center justify-center overflow-y-auto pb-4 md:pb-6">
+          <div className="w-full">{bookerCard}</div>
         </div>
-      )}
+        {brandingBlock}
+      </BookingTheme>
+    );
+  }
+
+  return (
+    <BookingTheme theme={theme} embed={embedMode}>
+      {breadcrumbBlock}
+      {bookerCard}
+      {brandingBlock}
     </BookingTheme>
   );
 }

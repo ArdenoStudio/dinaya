@@ -148,14 +148,16 @@ export default async function BookingPageContent({
   const useHubFlow = mode !== "embed";
 
   return (
-    <BookingTheme theme={resolvedTheme} embed={mode === "embed"}>
+    <BookingTheme theme={resolvedTheme} embed={mode === "embed"} className="min-h-dvh w-full">
       <div
         className={
-          centeredLayout
-            ? hubHasHero
-              ? "booking-page-bg flex min-h-dvh flex-col items-center pt-0 md:pt-4"
-              : "booking-page-bg flex min-h-dvh flex-col items-center md:justify-center md:py-10"
-            : "booking-page-bg min-h-dvh"
+          useHubFlow
+            ? "booking-page-bg min-h-dvh w-full"
+            : centeredLayout
+              ? hubHasHero
+                ? "booking-page-bg flex min-h-dvh w-full flex-col items-center pt-0 md:pt-4"
+                : "booking-page-bg flex min-h-dvh w-full flex-col items-center md:justify-center md:py-10"
+              : "booking-page-bg min-h-dvh w-full"
         }
         data-booking-embed-root={mode === "embed" ? "" : undefined}
       >

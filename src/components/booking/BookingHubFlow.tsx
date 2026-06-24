@@ -1,8 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { m, useReducedMotion } from "motion/react";
 import BookingWizard from "@/components/booking/BookingWizard";
+import BookingBranding from "@/components/booking/BookingBranding";
 import BookingServiceHub from "@/components/booking/BookingServiceHub";
 import { BookingPolicyAccordion } from "@/components/booking/BookingPolicyAccordion";
 import { BookingTeamSection } from "@/components/booking/BookingTeamSection";
@@ -18,7 +18,6 @@ import type { BookingRouter } from "@/lib/booking-router";
 import type { Staff, Location } from "@/db/schema";
 import type { CalendarOverlayConfig } from "@/components/booking/useGoogleCalendarOverlay";
 import { useBookingHubNavigation } from "@/lib/booking/use-booking-hub-navigation";
-import { bookingTransition } from "@/lib/booking/booking-motion";
 import { isOptimizableRemoteImage, cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { getBusinessRating } from "@/components/booking/BusinessRating";
@@ -98,7 +97,6 @@ export function BookingHubFlow({
   hasAboutSection,
   hideSidebarSections,
 }: BookingHubFlowProps) {
-  const reduceMotion = useReducedMotion() ?? false;
   const enableInstantNavigation = mode === "hub" && services.length > 1;
   const initialService =
     mode === "service"
@@ -189,7 +187,7 @@ export function BookingHubFlow({
         staffServiceMap={staffServiceMap}
         staffLocationMap={staffLocationMap}
         locations={locations}
-        showBranding
+        showBranding={!bookerFocus}
         activeDeals={activeDeals}
         initialDealId={dealId ?? null}
         initialService={wizardService}
@@ -205,6 +203,7 @@ export function BookingHubFlow({
         hubHref={onBackToHub ? null : hubBackHref}
         onBackToHub={onBackToHub}
         instantNav={enableInstantNavigation}
+        centeredBookerLayout={bookerFocus}
         bookingTheme={resolvedTheme}
       />
     ) : null;
@@ -221,17 +220,11 @@ export function BookingHubFlow({
     </BookingStepTransition>
   );
 
-  return (
-    <m.div
-      layout={!reduceMotion && !enableInstantNavigation}
-      transition={bookingTransition(reduceMotion)}
-      className={cn(
-        "w-full px-0 md:px-4",
-        centeredLayout && "mx-auto",
-        layoutMaxWidth,
-        !reduceMotion && "transition-[max-width] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
-      )}
-    >
+  /** Booker + hub-without-hero: center in viewport. Hub-with-hero stays top-aligned. */
+  const viewportCentered = bookerFocus || (showHub && !heroImageUrl);
+
+  const flowBody = (
+    <>
       {!centeredLayout && !hideSidebarSections && gallery.length > 0 && (
         <Card className="overflow-hidden rounded-none border-x-0 border-t-0 shadow-none md:mb-6 md:rounded-xl md:border-x md:shadow-sm">
           <div
@@ -351,6 +344,40 @@ export function BookingHubFlow({
           className={`flex justify-center pb-8 ${centeredLayout ? "mt-4" : "mt-6"}`}
         />
       )}
-    </m.div>
+    </>
+  );
+
+  if (bookerFocus) {
+    return (
+      <div className="flex min-h-dvh w-full flex-col">
+        <div
+          className={cn(
+            "mx-auto flex min-h-0 w-full flex-1 flex-col px-4 md:px-6",
+            layoutMaxWidth,
+          )}
+        >
+          {flowBody}
+        </div>
+        {!hideBranding ? (
+          <div className="flex shrink-0 justify-center px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-2">
+            <BookingBranding copy={copy} />
+          </div>
+        ) : null}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={cn(
+        "w-full",
+        viewportCentered && "grid min-h-dvh w-full place-items-center px-4 py-6 md:px-6",
+        showHub && heroImageUrl && "block pt-0",
+      )}
+    >
+      <div className={cn("w-full", layoutMaxWidth, viewportCentered && "justify-self-center")}>
+        {flowBody}
+      </div>
+    </div>
   );
 }
