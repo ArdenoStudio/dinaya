@@ -34,6 +34,7 @@ const BUSINESS_NAME = "Wax in the City";
 
 /** Served from public/demo/ — works on localhost and dinaya.lk. */
 export const WAX_LOGO_PATH = "/demo/wax-in-the-city-logo.webp";
+export const WAX_BANNER_PATH = "/demo/wax-in-the-city-banner.webp";
 /** Maroon burgundy from the Wax in the City brand mark. */
 export const WAX_ACCENT_COLOR = "#5c1f2e";
 
@@ -278,7 +279,7 @@ async function updateBusinessProfile(businessId: string) {
       businessType: "spa_wellness",
       logoUrl: WAX_LOGO_PATH,
       accentColor: WAX_ACCENT_COLOR,
-      galleryImages: [WAX_LOGO_PATH],
+      galleryImages: [WAX_BANNER_PATH],
       onboardingCompletedAt: new Date(),
       onboardingStep: 4,
       phone: process.env.WAX_PHONE ?? "+94770000000",
