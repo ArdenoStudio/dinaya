@@ -2,7 +2,6 @@
 
 import { AnimatePresence, m, useReducedMotion } from "motion/react";
 import {
-  bookingStepInitial,
   bookingStepVariants,
   bookingTransition,
 } from "@/lib/booking/booking-motion";
@@ -31,7 +30,7 @@ export function BookingStepTransition({ step, children, className }: Props) {
       <m.div
         key={step}
         className={className}
-        initial={bookingStepInitial(reduceMotion)}
+        initial={false}
         animate="enter"
         exit="exit"
         variants={bookingStepVariants(reduceMotion)}

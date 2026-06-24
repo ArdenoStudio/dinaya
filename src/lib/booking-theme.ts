@@ -178,7 +178,7 @@ export function resolveBookingTheme(
 
 export function resolvePageBackgroundColor(theme: ResolvedBookingTheme): string {
   if (theme.pageBackground === "accent") {
-    return tintAccentBackground(theme.accentColor, 0.38);
+    return tintAccentBackground(theme.accentColor, theme.themePreset === "salon_vivid" ? 0.48 : 0.38);
   }
   if (theme.pageBackground === "custom" && theme.pageBackgroundColor) {
     return theme.pageBackgroundColor;

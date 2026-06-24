@@ -592,7 +592,7 @@ function BookingWizardInner({
     : null;
 
   const reduceMotion = useReducedMotion() ?? false;
-  const panelMotion = bookingPanelMotion(reduceMotion, true);
+  const panelMotion = bookingPanelMotion(reduceMotion, !instantNav);
 
   const wizardStep: WizardStep = !state.service
     ? "service"

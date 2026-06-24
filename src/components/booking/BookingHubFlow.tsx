@@ -141,9 +141,89 @@ export function BookingHubFlow({
 
   const flowStep = showHub ? "hub" : "booker";
 
+  const hubPanel = showHub ? (
+    <BookingServiceHub
+      businessSlug={business.slug}
+      businessName={business.name}
+      businessLogoUrl={business.logoUrl}
+      businessDescription={business.description}
+      businessAddress={business.address}
+      businessPhone={business.phone}
+      heroImageUrl={heroImageUrl}
+      services={services}
+      copy={copy}
+      avgRating={avgRating}
+      reviewCount={reviewCount}
+      reviewDistribution={reviewDistribution}
+      initialReviews={initialReviews}
+      cancellationPolicy={business.cancellationPolicy}
+      depositPolicy={business.depositPolicy}
+      bankTransferInstructions={business.bankTransferInstructions}
+      onSelectService={selectService}
+    />
+  ) : null;
+
+  const wizardPanel =
+    showWizard && wizardService ? (
+      <BookingWizard
+        key={wizardService.id}
+        business={{
+          id: business.id,
+          accentColor: resolvedTheme.accentColor,
+          bankTransferInstructions: business.bankTransferInstructions,
+          cancellationPolicy: business.cancellationPolicy,
+          depositPolicy: business.depositPolicy,
+          language: business.language,
+          timezone: business.timezone,
+          lankaqrImageUrl: business.lankaqrImageUrl,
+          name: business.name,
+          payhereEnabled: business.payhereEnabled,
+          paypalEnabled: business.paypalEnabled,
+          slug: business.slug,
+          logoUrl: business.logoUrl,
+          hideBranding,
+        }}
+        services={services}
+        bookingRouter={bookingRouter}
+        staff={staff}
+        staffServiceMap={staffServiceMap}
+        staffLocationMap={staffLocationMap}
+        locations={locations}
+        showBranding
+        activeDeals={activeDeals}
+        initialDealId={dealId ?? null}
+        initialService={wizardService}
+        lockServiceSelection={
+          (mode === "service" && Boolean(serviceSlug)) ||
+          (enableInstantNavigation && Boolean(activeService))
+        }
+        calendarOverlayConfig={calendarOverlayConfig}
+        avgRating={avgRating}
+        reviewCount={reviewCount}
+        businessDescription={business.description}
+        teamMembers={staffWithBio}
+        hubHref={onBackToHub ? null : hubBackHref}
+        onBackToHub={onBackToHub}
+        instantNav={enableInstantNavigation}
+        bookingTheme={resolvedTheme}
+      />
+    ) : null;
+
+  const hubFlowPanels = enableInstantNavigation ? (
+    <>
+      {hubPanel}
+      {wizardPanel}
+    </>
+  ) : (
+    <BookingStepTransition step={flowStep}>
+      {hubPanel}
+      {wizardPanel}
+    </BookingStepTransition>
+  );
+
   return (
     <m.div
-      layout={!reduceMotion}
+      layout={!reduceMotion && !enableInstantNavigation}
       transition={bookingTransition(reduceMotion)}
       className={cn(
         "w-full px-0 md:px-4",
@@ -220,73 +300,7 @@ export function BookingHubFlow({
         </>
       )}
 
-      <BookingStepTransition step={flowStep}>
-        {showHub ? (
-          <BookingServiceHub
-            businessSlug={business.slug}
-            businessName={business.name}
-            businessLogoUrl={business.logoUrl}
-            businessDescription={business.description}
-            businessAddress={business.address}
-            businessPhone={business.phone}
-            heroImageUrl={heroImageUrl}
-            services={services}
-            copy={copy}
-            avgRating={avgRating}
-            reviewCount={reviewCount}
-            reviewDistribution={reviewDistribution}
-            initialReviews={initialReviews}
-            cancellationPolicy={business.cancellationPolicy}
-            depositPolicy={business.depositPolicy}
-            bankTransferInstructions={business.bankTransferInstructions}
-            onSelectService={selectService}
-          />
-        ) : null}
-
-        {showWizard && wizardService ? (
-          <BookingWizard
-            business={{
-              id: business.id,
-              accentColor: resolvedTheme.accentColor,
-              bankTransferInstructions: business.bankTransferInstructions,
-              cancellationPolicy: business.cancellationPolicy,
-              depositPolicy: business.depositPolicy,
-              language: business.language,
-              timezone: business.timezone,
-              lankaqrImageUrl: business.lankaqrImageUrl,
-              name: business.name,
-              payhereEnabled: business.payhereEnabled,
-              paypalEnabled: business.paypalEnabled,
-              slug: business.slug,
-              logoUrl: business.logoUrl,
-              hideBranding,
-            }}
-            services={services}
-            bookingRouter={bookingRouter}
-            staff={staff}
-            staffServiceMap={staffServiceMap}
-            staffLocationMap={staffLocationMap}
-            locations={locations}
-            showBranding
-            activeDeals={activeDeals}
-            initialDealId={dealId ?? null}
-            initialService={wizardService}
-            lockServiceSelection={
-              (mode === "service" && Boolean(serviceSlug)) ||
-              (enableInstantNavigation && Boolean(activeService))
-            }
-            calendarOverlayConfig={calendarOverlayConfig}
-            avgRating={avgRating}
-            reviewCount={reviewCount}
-            businessDescription={business.description}
-            teamMembers={staffWithBio}
-            hubHref={onBackToHub ? null : hubBackHref}
-            onBackToHub={onBackToHub}
-            instantNav={enableInstantNavigation}
-            bookingTheme={resolvedTheme}
-          />
-        ) : null}
-      </BookingStepTransition>
+      {hubFlowPanels}
 
       {centeredLayout && !showHub && showSecondarySections && hasTrustBlock && (
         <div className="mt-4 border-t border-border/60 px-4 pt-4 md:mt-5 md:rounded-xl md:border md:bg-card/50 md:px-5 md:py-4">

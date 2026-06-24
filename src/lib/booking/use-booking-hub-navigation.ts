@@ -34,8 +34,10 @@ export function useBookingHubNavigation(input: {
   const [activeService, setActiveService] = useState<BookingService | null>(input.initialService);
 
   useEffect(() => {
+    // Hub instant-nav owns activeService via selectService / popstate — never reset from parent.
+    if (input.enabled) return;
     setActiveService(input.initialService);
-  }, [input.initialService]);
+  }, [input.enabled, input.initialService]);
 
   const selectService = useCallback(
     (service: BookingService) => {
