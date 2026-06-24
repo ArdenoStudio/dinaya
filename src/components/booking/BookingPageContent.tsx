@@ -14,6 +14,8 @@ import { BookingTeamSection } from "@/components/booking/BookingTeamSection";
 import { BookingReviewsSection } from "@/components/booking/BookingReviewsSection";
 import { getBusinessRating } from "@/components/booking/BusinessRating";
 import type { BookingPageData } from "@/lib/booking/load-page-data";
+import { resolveBookingTheme, type BookingThemeOverrides } from "@/lib/booking-theme";
+import { canUseFeature } from "@/lib/plan";
 import {
   createCalendarOverlayTicket,
   isCalendarOverlayOriginAllowed,
@@ -26,6 +28,7 @@ type Props = {
   mode: "hub" | "service" | "embed";
   serviceSlug?: string;
   hideGallery?: boolean;
+  themePreview?: BookingThemeOverrides | null;
 };
 
 async function buildCalendarOverlayConfig(
@@ -68,7 +71,14 @@ async function buildCalendarOverlayConfig(
   }
 }
 
-export default async function BookingPageContent({ data, dealId, mode, serviceSlug, hideGallery }: Props) {
+export default async function BookingPageContent({
+  data,
+  dealId,
+  mode,
+  serviceSlug,
+  hideGallery,
+  themePreview,
+}: Props) {
   const {
     business,
     services,
@@ -84,7 +94,13 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
     bookingRouter,
     hideBranding,
     initialService,
+    effectivePlan,
   } = data;
+
+  const resolvedTheme = resolveBookingTheme(business, {
+    canUseExtendedTheme: canUseFeature(effectivePlan, "bookingPageTheme"),
+    overrides: themePreview ?? undefined,
+  });
 
   const copy = getBookingCopy(business.language);
   const calendarOverlayConfig = await buildCalendarOverlayConfig(mode, business.language);
@@ -149,7 +165,7 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
   const hubHasHero = showHub && Boolean(heroImageUrl);
 
   return (
-    <BookingTheme accentColor={business.accentColor} embed={mode === "embed"}>
+    <BookingTheme theme={resolvedTheme} embed={mode === "embed"}>
       <div
         className={
           centeredLayout
@@ -261,7 +277,7 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
             <BookingWizard
               business={{
                 id: business.id,
-                accentColor: business.accentColor,
+                accentColor: resolvedTheme.accentColor,
                 bankTransferInstructions: business.bankTransferInstructions,
                 cancellationPolicy: business.cancellationPolicy,
                 depositPolicy: business.depositPolicy,
@@ -295,6 +311,7 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
               hubHref={
                 mode === "service" && services.length > 1 ? `/book/${business.slug}` : null
               }
+              bookingTheme={resolvedTheme}
             />
           )}
 

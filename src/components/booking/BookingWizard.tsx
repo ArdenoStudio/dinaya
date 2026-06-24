@@ -12,6 +12,7 @@ import StepLocation from "./StepLocation";
 import StepStaff from "./StepStaff";
 import StepDateTime from "./StepDateTime";
 import StepConfirm from "./StepConfirm";
+import { resolveBookingTheme, type ResolvedBookingTheme } from "@/lib/booking-theme";
 import { BookingTheme } from "./BookingTheme";
 import { useBookingUrlState, useBookingUrlSync, useStripBookingContactFromUrl } from "./useBookingUrlState";
 import { useSlotHold } from "./useSlotHold";
@@ -65,6 +66,7 @@ interface Props {
   businessDescription?: string | null;
   teamMembers?: Pick<Staff, "id" | "name" | "bio" | "avatarUrl">[];
   hubHref?: string | null;
+  bookingTheme?: ResolvedBookingTheme;
 }
 
 export type BookingBusiness = {
@@ -143,7 +145,13 @@ function BookingWizardInner({
   reviewCount,
   teamMembers = [],
   hubHref = null,
+  bookingTheme,
 }: Props) {
+  const theme =
+    bookingTheme ??
+    resolveBookingTheme({
+      accentColor: business.accentColor,
+    });
   const copy = getBookingCopy(business.language);
   const router = useRouter();
   const timezone = business.timezone ?? COLOMBO_TZ;
@@ -512,7 +520,7 @@ function BookingWizardInner({
     : null;
 
   return (
-    <BookingTheme accentColor={business.accentColor} embed={embedMode}>
+    <BookingTheme theme={theme} embed={embedMode}>
       {showBreadcrumb && (
         <div className="mb-3 flex justify-start px-4 md:mb-4 md:px-0">
           <BookingBreadcrumb items={breadcrumbItems} />

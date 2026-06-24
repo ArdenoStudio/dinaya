@@ -107,6 +107,14 @@ describe("plan entitlements", () => {
     expect(canUseFeature("max", "publicBookingPageCustomization")).toBe(true);
   });
 
+  it("reserves extended booking page theme for Pro and Growth", () => {
+    expect(minimumPlanForFeature("bookingPageTheme")).toBe("pro");
+    expect(canUseFeature("trial", "bookingPageTheme")).toBe(false);
+    expect(canUseFeature("starter", "bookingPageTheme")).toBe(false);
+    expect(canUseFeature("pro", "bookingPageTheme")).toBe(true);
+    expect(canUseFeature("max", "bookingPageTheme")).toBe(true);
+  });
+
   it("reserves AI review replies for Growth", () => {
     expect(minimumPlanForFeature("reviewReplies")).toBe("max");
     expect(canUseFeature("trial", "reviewReplies")).toBe(false);
