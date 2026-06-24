@@ -11,7 +11,6 @@ import { formatLkr } from "@/lib/utils";
 import { Icon } from "@/components/ui/Icon";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { fadeInUp } from "@/lib/booking/booking-animations";
-import StaffPicker from "./StaffPicker";
 import StepLocation from "./StepLocation";
 import { computeDiscountedPrice } from "@/lib/deals/pricing";
 import { BusinessRating, getBusinessRating } from "./BusinessRating";
@@ -22,9 +21,6 @@ interface ServiceMetaPanelProps {
   service: BookingService | null;
   staff: Staff | null;
   anyStaff: boolean;
-  allStaff: Staff[];
-  staffServiceMap: { staffId: string; serviceId: string }[];
-  staffLocationMap: { staffId: string; locationId: string }[];
   locations: Pick<Location, "id" | "name" | "address">[];
   needsLocationPicker: boolean;
   selectedLocation: Pick<Location, "id" | "name" | "address"> | null;
@@ -38,8 +34,7 @@ interface ServiceMetaPanelProps {
   lockServiceSelection: boolean;
   avgRating?: number | null;
   reviewCount?: number;
-  onSelectStaff: (staff: Staff) => void;
-  onSelectAnyStaff: () => void;
+  onChangeStaff?: () => void;
   onSelectLocation: (location: Pick<Location, "id" | "name" | "address">) => void;
   onChangeService?: () => void;
 }
@@ -56,9 +51,6 @@ export function ServiceMetaPanel({
   service,
   staff,
   anyStaff,
-  allStaff,
-  staffServiceMap,
-  staffLocationMap,
   locations,
   needsLocationPicker,
   selectedLocation,
@@ -72,8 +64,7 @@ export function ServiceMetaPanel({
   lockServiceSelection,
   avgRating,
   reviewCount,
-  onSelectStaff,
-  onSelectAnyStaff,
+  onChangeStaff,
   onSelectLocation,
   onChangeService,
 }: ServiceMetaPanelProps) {
@@ -145,7 +136,7 @@ export function ServiceMetaPanel({
             )}
             <h2 className="text-xl font-semibold leading-tight text-foreground md:text-2xl">{service.name}</h2>
             {service.description && (
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{service.description}</p>
+              <p className="mt-2 text-base leading-relaxed text-muted-foreground md:text-sm">{service.description}</p>
             )}
             <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
               <span className="inline-flex items-center gap-1.5">
@@ -160,17 +151,24 @@ export function ServiceMetaPanel({
                 displayPrice={selectedDeal && service.priceLkr > 0 ? price : undefined}
               />
             </div>
-            {staffLabel && (
-              <p className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
-                <Icon name="person" className="shrink-0 text-base" />
-                <span className="text-foreground">{staffLabel}</span>
-              </p>
-            )}
-            {anyStaff && !staff && (
-              <p className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
-                <Icon name="people" className="shrink-0 text-base" />
-                <span className="text-foreground">{copy.anyAvailableStaff}</span>
-              </p>
+            {(staffLabel || anyStaff) && (
+              <div className="mt-3 flex items-start justify-between gap-3">
+                <p className="flex min-w-0 items-center gap-2 text-sm text-muted-foreground">
+                  <Icon name={anyStaff ? "people" : "person"} className="shrink-0 text-base" />
+                  <span className="text-foreground">
+                    {anyStaff ? copy.anyAvailableStaff : staffLabel}
+                  </span>
+                </p>
+                {onChangeStaff && needsStaffPicker ? (
+                  <button
+                    type="button"
+                    onClick={onChangeStaff}
+                    className="shrink-0 text-xs font-medium booking-text-accent hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--booking-accent-soft)] focus-visible:ring-offset-2"
+                  >
+                    {copy.changeStaff}
+                  </button>
+                ) : null}
+              </div>
             )}
             {service.depositPercent > 0 && service.priceLkr > 0 && (
               <p className="mt-3 text-xs text-[var(--booking-accent)]">
@@ -180,24 +178,6 @@ export function ServiceMetaPanel({
           </m.div>
         )}
       </AnimatePresence>
-
-      {service && needsStaffPicker && (
-        <div className="mt-6">
-          <StaffPicker
-            allStaff={allStaff}
-            staffServiceMap={staffServiceMap}
-            staffLocationMap={staffLocationMap}
-            locationId={selectedLocation?.id}
-            serviceId={service.id}
-            selected={staff}
-            anyStaffSelected={anyStaff}
-            copy={copy}
-            onSelect={onSelectStaff}
-            onSelectAny={onSelectAnyStaff}
-            compact
-          />
-        </div>
-      )}
 
       {service && !staff && !anyStaff && !needsStaffPicker && (
         <p className="mt-3 text-center text-sm text-amber-600">{copy.noStaff}</p>

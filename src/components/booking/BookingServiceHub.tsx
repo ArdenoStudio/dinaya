@@ -211,11 +211,11 @@ export default function BookingServiceHub({
   const locationLine = formatHubLocationLine(businessAddress, businessPhone);
 
   const shell = heroImageUrl
-    ? "overflow-visible rounded-none border-x-0 bg-transparent shadow-none md:overflow-hidden md:rounded-2xl md:border-0"
+    ? "overflow-hidden rounded-none border-x-0 bg-transparent shadow-none md:rounded-2xl md:border-0"
     : "overflow-hidden rounded-2xl border-x-0 bg-card shadow-none md:border md:border-border/80 md:shadow-[0_12px_40px_-24px_rgba(15,23,42,0.28)] dark:md:shadow-none dark:md:ring-1 dark:md:ring-white/10";
 
   const contentShell = heroImageUrl
-    ? "relative z-10 -mt-6 flex flex-col rounded-t-2xl bg-card pt-16 md:pt-[4.5rem]"
+    ? "relative z-10 -mt-5 flex flex-col rounded-t-2xl bg-card pt-14 md:-mt-6 md:pt-[4.25rem]"
     : "flex flex-col";
 
   return (

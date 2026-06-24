@@ -77,7 +77,7 @@ function ServiceRow({
           <p className="mt-0.5 text-[11px] font-medium text-muted-foreground">{service.categoryName}</p>
         ) : null}
         {service.description ? (
-          <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{service.description}</p>
+          <p className="mt-1 line-clamp-2 text-base text-muted-foreground md:text-xs">{service.description}</p>
         ) : null}
         <div className="mt-2 flex flex-wrap items-center gap-2">
           <Badge variant="secondary">

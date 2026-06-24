@@ -403,7 +403,7 @@ export default function StepDateTime({
             {compactDateHeading ? (
                 <div className="mb-3 flex items-baseline justify-between gap-2 md:mb-4">
                   <h3 className="text-sm font-semibold text-foreground md:text-base">{compactDateHeading}</h3>
-                  <span className="hidden text-xs text-muted-foreground md:inline">{copy.availableTimes}</span>
+                  <span className="text-xs font-medium text-muted-foreground">{copy.availableTimes}</span>
                 </div>
               ) : (
                 <p className="mb-3 text-xs text-muted-foreground">{copy.selectDate}</p>

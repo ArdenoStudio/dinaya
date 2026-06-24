@@ -146,12 +146,16 @@ export default async function BookingPageContent({ data, dealId, mode, serviceSl
     mode === "embed" ? hideGallery !== false : Boolean(hideGallery);
   const showSecondarySections = !hideSidebarSections && !(bookerFocus && !showHub);
 
+  const hubHasHero = showHub && Boolean(heroImageUrl);
+
   return (
     <BookingTheme accentColor={business.accentColor} embed={mode === "embed"}>
       <div
         className={
           centeredLayout
-            ? "booking-page-bg flex min-h-dvh flex-col items-center md:justify-center md:py-10"
+            ? hubHasHero
+              ? "booking-page-bg flex min-h-dvh flex-col items-center pt-0 md:pt-4"
+              : "booking-page-bg flex min-h-dvh flex-col items-center md:justify-center md:py-10"
             : "booking-page-bg min-h-dvh"
         }
         data-booking-embed-root={mode === "embed" ? "" : undefined}

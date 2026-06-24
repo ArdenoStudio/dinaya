@@ -12,17 +12,24 @@ const service = {
   priceLkr: 1500,
 } as BookingService;
 
+const base = {
+  copy,
+  service,
+  hubHref: "/book/test",
+  lockServiceSelection: true,
+  multiService: true,
+  needsStaffPicker: false,
+  showStaffStep: false,
+  onBackToServices: () => {},
+  onBackToStaff: () => {},
+  onBackToDateTime: () => {},
+};
+
 describe("buildBookingBreadcrumbItems", () => {
   it("shows All services / service name when picking a time from the hub", () => {
     const items = buildBookingBreadcrumbItems({
-      copy,
-      service,
+      ...base,
       showContactForm: false,
-      hubHref: "/book/test",
-      lockServiceSelection: true,
-      multiService: true,
-      onBackToServices: () => {},
-      onBackToDateTime: () => {},
     });
 
     expect(items).toEqual([
@@ -31,16 +38,26 @@ describe("buildBookingBreadcrumbItems", () => {
     ]);
   });
 
+  it("shows full staff trail on the contact step when multiple staff exist", () => {
+    const items = buildBookingBreadcrumbItems({
+      ...base,
+      showContactForm: true,
+      needsStaffPicker: true,
+    });
+
+    expect(items).toEqual([
+      { label: "All services", href: "/book/test" },
+      { label: "Haircut", onClick: expect.any(Function) },
+      { label: "Choose a team member", onClick: expect.any(Function) },
+      { label: "Date & Time", onClick: expect.any(Function) },
+      { label: "Your details", current: true },
+    ]);
+  });
+
   it("shows All services / Date & time / Your details on the contact step", () => {
     const items = buildBookingBreadcrumbItems({
-      copy,
-      service,
+      ...base,
       showContactForm: true,
-      hubHref: "/book/test",
-      lockServiceSelection: true,
-      multiService: true,
-      onBackToServices: () => {},
-      onBackToDateTime: () => {},
     });
 
     expect(items).toEqual([
@@ -50,16 +67,43 @@ describe("buildBookingBreadcrumbItems", () => {
     ]);
   });
 
+  it("shows staff step crumbs when choosing a team member", () => {
+    const items = buildBookingBreadcrumbItems({
+      ...base,
+      showContactForm: false,
+      needsStaffPicker: true,
+      showStaffStep: true,
+    });
+
+    expect(items).toEqual([
+      { label: "All services", href: "/book/test" },
+      { label: "Haircut", onClick: expect.any(Function) },
+      { label: "Choose a team member", current: true },
+    ]);
+  });
+
+  it("shows stylist step before date and time when staff is required", () => {
+    const items = buildBookingBreadcrumbItems({
+      ...base,
+      showContactForm: false,
+      needsStaffPicker: true,
+      showStaffStep: false,
+    });
+
+    expect(items).toEqual([
+      { label: "All services", href: "/book/test" },
+      { label: "Haircut", onClick: expect.any(Function) },
+      { label: "Choose a team member", onClick: expect.any(Function) },
+      { label: "Date & Time", current: true },
+    ]);
+  });
+
   it("uses Choose a service when there is no hub link", () => {
     const items = buildBookingBreadcrumbItems({
-      copy,
-      service,
+      ...base,
       showContactForm: false,
       hubHref: null,
       lockServiceSelection: false,
-      multiService: true,
-      onBackToServices: () => {},
-      onBackToDateTime: () => {},
     });
 
     expect(items[0]).toEqual({ label: "Choose a service", onClick: expect.any(Function) });
