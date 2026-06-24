@@ -46,11 +46,11 @@ export const BOOKING_THEME_PRESETS: Record<
     heroOverlayOpacity: 60,
   },
   salon: {
-    accentColor: "#f86888",
-    pageBackground: "grouped",
-    pageBackgroundColor: null,
+    accentColor: "#ff6699",
+    pageBackground: "custom",
+    pageBackgroundColor: "#fff6f8",
     heroOverlay: "brand",
-    heroOverlayOpacity: 65,
+    heroOverlayOpacity: 55,
   },
   spa: {
     accentColor: "#5a7a6a",

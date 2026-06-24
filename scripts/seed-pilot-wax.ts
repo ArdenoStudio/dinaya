@@ -12,6 +12,7 @@
  *   WAX_OWNER_PASSWORD="WaxPilot2026!"
  */
 import { randomUUID } from "node:crypto";
+import { addDays } from "date-fns";
 import * as dotenv from "dotenv";
 import { and, eq, inArray } from "drizzle-orm";
 import { db } from "../src/db";
@@ -35,8 +36,10 @@ const BUSINESS_NAME = "Wax in the City";
 /** Served from public/demo/ — Wax In The City SL Facebook profile logo. */
 export const WAX_LOGO_PATH = "/demo/wax-in-the-city-logo.webp";
 export const WAX_BANNER_PATH = "/demo/wax-in-the-city-banner.webp";
-/** Pink coral from the Wax in the City brand mark. */
-export const WAX_ACCENT_COLOR = "#f86888";
+/** Pink from the Wax in the City brand mark (logo background). */
+export const WAX_ACCENT_COLOR = "#ff6699";
+/** Soft blush page background — pairs with the salon preset. */
+export const WAX_PAGE_BACKGROUND_COLOR = "#fff6f8";
 
 const BUSINESS_DESCRIPTION =
   "Ladies waxing and beauty studio in Colombo — root-clean hair removal, facials, Moroccan rituals, and HydraFacial treatments. Book online and pay your balance at the salon.";
@@ -279,11 +282,14 @@ async function updateBusinessProfile(businessId: string) {
       businessType: "spa_wellness",
       logoUrl: WAX_LOGO_PATH,
       accentColor: WAX_ACCENT_COLOR,
-      bookingPageBackground: "grouped",
+      bookingPageBackground: "custom",
+      bookingPageBackgroundColor: WAX_PAGE_BACKGROUND_COLOR,
       bookingHeroOverlay: "brand",
-      bookingHeroOverlayOpacity: 65,
+      bookingHeroOverlayOpacity: 55,
       bookingThemePreset: "salon",
       galleryImages: [WAX_BANNER_PATH],
+      plan: "pro",
+      planExpiresAt: addDays(new Date(), 365),
       onboardingCompletedAt: new Date(),
       onboardingStep: 4,
       phone: process.env.WAX_PHONE ?? "+94770000000",

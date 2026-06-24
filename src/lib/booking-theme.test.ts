@@ -36,14 +36,14 @@ describe("booking-theme", () => {
   it("applies accent on all plans but gates extended theme on trial", () => {
     const trialTheme = resolveBookingTheme(
       {
-        accentColor: "#f86888",
+        accentColor: "#ff6699",
         bookingPageBackground: "grouped",
         bookingHeroOverlay: "brand",
         bookingHeroOverlayOpacity: 80,
       },
       { canUseExtendedTheme: false },
     );
-    expect(trialTheme.accentColor).toBe("#f86888");
+    expect(trialTheme.accentColor).toBe("#ff6699");
     expect(trialTheme.pageBackground).toBe("white");
     expect(trialTheme.heroOverlay).toBe("light");
   });
@@ -51,14 +51,17 @@ describe("booking-theme", () => {
   it("allows extended theme on pro", () => {
     const proTheme = resolveBookingTheme(
       {
-        accentColor: "#f86888",
-        bookingPageBackground: "grouped",
+        accentColor: "#ff6699",
+        bookingPageBackground: "custom",
+        bookingPageBackgroundColor: "#fff6f8",
         bookingHeroOverlay: "brand",
         bookingHeroOverlayOpacity: 80,
+        bookingThemePreset: "salon",
       },
       { canUseExtendedTheme: true },
     );
-    expect(proTheme.pageBackground).toBe("grouped");
+    expect(proTheme.pageBackground).toBe("custom");
+    expect(proTheme.pageBackgroundColor).toBe("#fff6f8");
     expect(proTheme.heroOverlay).toBe("brand");
     expect(proTheme.heroOverlayOpacity).toBe(80);
   });
