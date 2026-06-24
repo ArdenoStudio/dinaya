@@ -23,10 +23,11 @@ export async function loadBookingPageData(slug: string, serviceSlug?: string) {
 }
 
 async function loadBookingPageDataInner(slug: string, serviceSlug?: string) {
-  const [includePaypal, includeAccentColor, includeBookingRouter, includeServiceSlug, includeServiceImage] =
+  const [includePaypal, includeAccentColor, includeBookingTheme, includeBookingRouter, includeServiceSlug, includeServiceImage] =
     await Promise.all([
       hasPublicColumn("businesses", "paypal_enabled"),
       hasPublicColumn("businesses", "accent_color"),
+      hasPublicColumn("businesses", "booking_page_background"),
       hasPublicColumn("businesses", "booking_router"),
       hasPublicColumn("services", "slug"),
       hasPublicColumn("services", "image_url"),
@@ -60,6 +61,15 @@ async function loadBookingPageDataInner(slug: string, serviceSlug?: string) {
       websiteUrl: businesses.websiteUrl,
       hideDinayaBranding: businesses.hideDinayaBranding,
       ...(includeAccentColor ? { accentColor: businesses.accentColor } : {}),
+      ...(includeBookingTheme
+        ? {
+            bookingPageBackground: businesses.bookingPageBackground,
+            bookingPageBackgroundColor: businesses.bookingPageBackgroundColor,
+            bookingHeroOverlay: businesses.bookingHeroOverlay,
+            bookingHeroOverlayOpacity: businesses.bookingHeroOverlayOpacity,
+            bookingThemePreset: businesses.bookingThemePreset,
+          }
+        : {}),
       customDomain: businesses.customDomain,
       customDomainVerified: businesses.customDomainVerified,
     })
@@ -75,6 +85,21 @@ async function loadBookingPageDataInner(slug: string, serviceSlug?: string) {
           : null,
         accentColor: includeAccentColor
           ? (businessRow as { accentColor?: string | null }).accentColor ?? null
+          : null,
+        bookingPageBackground: includeBookingTheme
+          ? (businessRow as { bookingPageBackground?: string | null }).bookingPageBackground ?? "white"
+          : "white",
+        bookingPageBackgroundColor: includeBookingTheme
+          ? (businessRow as { bookingPageBackgroundColor?: string | null }).bookingPageBackgroundColor ?? null
+          : null,
+        bookingHeroOverlay: includeBookingTheme
+          ? (businessRow as { bookingHeroOverlay?: string | null }).bookingHeroOverlay ?? "light"
+          : "light",
+        bookingHeroOverlayOpacity: includeBookingTheme
+          ? (businessRow as { bookingHeroOverlayOpacity?: number | null }).bookingHeroOverlayOpacity ?? 60
+          : 60,
+        bookingThemePreset: includeBookingTheme
+          ? (businessRow as { bookingThemePreset?: string | null }).bookingThemePreset ?? null
           : null,
         paypalEnabled: includePaypal
           ? Boolean((businessRow as { paypalEnabled?: boolean }).paypalEnabled)

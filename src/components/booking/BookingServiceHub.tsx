@@ -53,6 +53,7 @@ interface Props {
   cancellationPolicy?: string | null;
   depositPolicy?: string | null;
   bankTransferInstructions?: string | null;
+  onSelectService?: (service: BookingService) => void;
 }
 
 function serviceInitial(name: string) {
@@ -83,7 +84,7 @@ function HubBusinessLogo({
           alt=""
           width={72}
           height={72}
-          className="size-full bg-white object-cover"
+          className="size-full bg-white object-contain p-1"
           unoptimized={!isOptimizableRemoteImage(logoUrl)}
         />
       ) : (
@@ -112,6 +113,7 @@ export default function BookingServiceHub({
   cancellationPolicy,
   depositPolicy,
   bankTransferInstructions,
+  onSelectService,
 }: Props) {
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
@@ -151,19 +153,15 @@ export default function BookingServiceHub({
   function renderHubService(service: BookingService) {
     const href = buildServiceBookingPath(businessSlug, service.slug ?? service.id);
     const iconName = serviceIconName(service.name);
-
-    return (
-      <li key={service.id}>
-        <Link
-          href={href}
-          className={cn(
-            "group flex min-h-[4.75rem] items-start gap-3.5 rounded-xl border border-border/50 px-3.5 py-4 md:px-4 md:py-[1.125rem]",
-            "transition-[background-color,box-shadow,border-color] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]",
-            "hover:border-[var(--booking-accent)]/25 hover:bg-[var(--booking-accent-muted)] hover:shadow-sm",
-            "active:scale-[0.99] motion-reduce:active:scale-100",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--booking-accent-soft)]",
-          )}
-        >
+    const rowClassName = cn(
+      "group flex min-h-[4.75rem] w-full items-start gap-3.5 rounded-xl border border-border/50 px-3.5 py-4 text-left md:px-4 md:py-[1.125rem]",
+      "transition-[background-color,box-shadow,border-color] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]",
+      "hover:border-[var(--booking-accent)]/25 hover:bg-[var(--booking-accent-muted)] hover:shadow-sm",
+      "active:scale-[0.99] motion-reduce:active:scale-100",
+      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--booking-accent-soft)]",
+    );
+    const rowContent = (
+      <>
           {service.imageUrl ? (
             <Image
               src={service.imageUrl}
@@ -202,7 +200,20 @@ export default function BookingServiceHub({
           </div>
 
           <BookingServiceArrow />
-        </Link>
+      </>
+    );
+
+    return (
+      <li key={service.id}>
+        {onSelectService ? (
+          <button type="button" onClick={() => onSelectService(service)} className={rowClassName}>
+            {rowContent}
+          </button>
+        ) : (
+          <Link href={href} className={rowClassName}>
+            {rowContent}
+          </Link>
+        )}
       </li>
     );
   }
@@ -383,6 +394,11 @@ export default function BookingServiceHub({
           variant="sticky"
           emphasis={showStickyBrowse ? "secondary" : "primary"}
           scrollToId={showStickyBrowse ? "hub-services" : undefined}
+          onSelect={
+            onSelectService && !showStickyBrowse
+              ? () => onSelectService(primaryService)
+              : undefined
+          }
         />
       ) : null}
     </BlurFade>

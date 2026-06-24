@@ -142,6 +142,11 @@ export const businesses = pgTable("businesses", {
   hideDinayaBranding: boolean("hide_dinaya_branding").default(false).notNull(),
   // Hex accent for public booking page theming (e.g. #2563eb). Pro+ customization.
   accentColor: varchar("accent_color", { length: 7 }),
+  bookingPageBackground: varchar("booking_page_background", { length: 20 }).default("white").notNull(),
+  bookingPageBackgroundColor: varchar("booking_page_background_color", { length: 7 }),
+  bookingHeroOverlay: varchar("booking_hero_overlay", { length: 20 }).default("light").notNull(),
+  bookingHeroOverlayOpacity: integer("booking_hero_overlay_opacity").default(60).notNull(),
+  bookingThemePreset: varchar("booking_theme_preset", { length: 40 }),
   directoryListed: boolean("directory_listed").default(false).notNull(),
   directoryCity: varchar("directory_city", { length: 80 }),
   directoryDistrict: varchar("directory_district", { length: 80 }),

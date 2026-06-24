@@ -33,6 +33,7 @@ const FEATURE_LABELS: Record<PlanFeature, string> = {
   payments: "PayHere payments",
   publicBookingPage: "Public booking page",
   publicBookingPageCustomization: "Booking page customization",
+  bookingPageTheme: "Booking page colors & hero",
   reports: "Reports",
   reviewEngine: "Review engine",
   reviews: "Reviews",

@@ -27,10 +27,7 @@ export function BookingHubHeroImage({ src, alt }: Props) {
           unoptimized={!isOptimizableRemoteImage(src)}
           onError={() => setHidden(true)}
         />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 bg-gradient-to-t from-card/85 via-card/10 to-transparent"
-        />
+        <div aria-hidden className="booking-hero-overlay pointer-events-none absolute inset-0" />
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 import BookingPageContent from "@/components/booking/BookingPageContent";
 import { loadBookingPageData } from "@/lib/booking/load-page-data";
+import { parseBookingThemePreviewParams } from "@/lib/booking-theme";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -10,13 +11,26 @@ interface Props {
     email?: string;
     phone?: string;
     hideGallery?: string;
+    previewAccent?: string;
+    previewPageBg?: string;
+    previewPageBgColor?: string;
+    previewHeroOverlay?: string;
+    previewHeroOpacity?: string;
   }>;
 }
 
 export default async function EmbedBookingPage({ params, searchParams }: Props) {
   const { slug } = await params;
-  const { dealId, service: serviceSlug, hideGallery: hideGalleryParam } = await searchParams;
+  const query = await searchParams;
+  const { dealId, service: serviceSlug, hideGallery: hideGalleryParam } = query;
   const hideGallery = hideGalleryParam === "1" || hideGalleryParam === "true";
+  const previewParams = new URLSearchParams();
+  for (const [key, value] of Object.entries(query)) {
+    if (typeof value === "string" && value.length > 0) {
+      previewParams.set(key, value);
+    }
+  }
+  const themePreview = parseBookingThemePreviewParams(previewParams);
   const data = await loadBookingPageData(slug, serviceSlug);
 
   if (data.status !== "ok") {
@@ -34,6 +48,7 @@ export default async function EmbedBookingPage({ params, searchParams }: Props) 
       mode="embed"
       serviceSlug={serviceSlug}
       hideGallery={hideGallery}
+      themePreview={themePreview}
     />
   );
 }

@@ -5,9 +5,16 @@ export { isMissingSchemaError, isTransientDbConnectionError } from "./db-errors"
 const tableCache = new Map<string, Promise<boolean>>();
 const columnCache = new Map<string, Promise<boolean>>();
 
-function existsFromResult(result: unknown): boolean {
-  const rows = (result as { rows?: Array<{ exists?: boolean }> }).rows ?? [];
+/** Normalize drizzle execute() shape — postgres-js returns an array; Neon HTTP uses `.rows`. */
+export function schemaExistsFromExecuteResult(result: unknown): boolean {
+  const rows = Array.isArray(result)
+    ? (result as Array<{ exists?: boolean }>)
+    : ((result as { rows?: Array<{ exists?: boolean }> }).rows ?? []);
   return Boolean(rows[0]?.exists);
+}
+
+function existsFromResult(result: unknown): boolean {
+  return schemaExistsFromExecuteResult(result);
 }
 
 export async function withTransientDbRetry<T>(

@@ -146,6 +146,12 @@ export function useSlotHold(input: {
     ? Math.max(0, Math.floor((hold.expiresAt.getTime() - now) / 1000))
     : 0;
 
+  useEffect(() => {
+    if (hold && secondsRemaining === 0) {
+      setSlotUnavailable(true);
+    }
+  }, [hold, secondsRemaining]);
+
   const holdLabel =
     hold && secondsRemaining > 0
       ? input.formatHoldLabel

@@ -12,6 +12,7 @@ type Props = {
   variant: "inline" | "sticky";
   emphasis?: "primary" | "secondary";
   scrollToId?: string;
+  onSelect?: () => void;
   className?: string;
 };
 
@@ -33,6 +34,7 @@ export function BookingHubCta({
   variant,
   emphasis = "primary",
   scrollToId,
+  onSelect,
   className,
 }: Props) {
   const href = buildServiceBookingPath(businessSlug, serviceSlug);
@@ -47,6 +49,11 @@ export function BookingHubCta({
       >
         {label}
         <Icon name="chevron-down" className="text-sm" />
+      </button>
+    ) : onSelect ? (
+      <button type="button" onClick={onSelect} className={cn("pointer-events-auto mx-auto flex w-full max-w-md", ctaClass)}>
+        {label}
+        <Icon name="arrow-right" className="text-sm" />
       </button>
     ) : (
       <Link href={href} className={cn("pointer-events-auto mx-auto flex w-full max-w-md", ctaClass)}>
@@ -76,6 +83,15 @@ export function BookingHubCta({
       >
         {label}
         <Icon name="chevron-down" className="text-sm" />
+      </button>
+    );
+  }
+
+  if (onSelect) {
+    return (
+      <button type="button" onClick={onSelect} className={cn(ctaClass, className)}>
+        {label}
+        <Icon name="arrow-right" className="text-sm" />
       </button>
     );
   }

@@ -30,6 +30,7 @@ interface Props {
   copy: BookingCopy;
   selectedDeal?: DealListItem | null;
   sessionToken?: string;
+  slotUnavailable?: boolean;
   onUpdate: (partial: Partial<BookingState>) => void;
   onBack: () => void;
   onConfirmed: (data: {
@@ -167,6 +168,7 @@ export default function StepConfirm({
   copy,
   selectedDeal,
   sessionToken,
+  slotUnavailable = false,
   onUpdate,
   onBack,
   onConfirmed,
@@ -321,6 +323,11 @@ export default function StepConfirm({
   }
 
   async function handleBook() {
+    if (slotUnavailable) {
+      setError(copy.slotTakenAction);
+      return;
+    }
+
     const result = validateConfirmFields({
       clientName: state.clientName,
       clientPhone: state.clientPhone,
@@ -600,9 +607,9 @@ export default function StepConfirm({
 
   const upsellNotice =
     upsell ? (
-      <div className="mt-4 rounded-xl border border-blue-100 bg-[var(--booking-accent-muted)]/70 p-4 text-sm">
-        <p className="font-medium text-blue-950 dark:text-blue-100">Recommended add-on</p>
-        <p className="mt-1 text-[var(--booking-accent)]/80">
+      <div className="mt-4 rounded-xl border border-[var(--booking-accent-soft)] bg-[var(--booking-accent-muted)]/70 p-4 text-sm">
+        <p className="font-medium text-foreground">Recommended add-on</p>
+        <p className="mt-1 booking-text-accent">
           {upsell.reason} Ask about <span className="font-semibold">{upsell.name}</span>
           {upsell.priceLkr > 0 ? ` (${formatLkr(upsell.priceLkr)})` : ""} during your visit.
         </p>
@@ -661,9 +668,31 @@ export default function StepConfirm({
     </div>
   );
 
+  const slotUnavailableNotice =
+    slotUnavailable ? (
+      <div
+        className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800/50 dark:bg-amber-950/40 dark:text-amber-200"
+        role="alert"
+      >
+        <p className="font-medium">{copy.slotTaken}</p>
+        <p className="mt-1">{copy.slotTakenAction}</p>
+        <button
+          type="button"
+          onClick={onBack}
+          className="mt-3 min-h-11 text-sm font-medium booking-text-accent hover:underline"
+        >
+          {copy.pickDateTime}
+        </button>
+      </div>
+    ) : null;
+
   const confirmActions = (
     <>
-      <BookingSubmitButton loading={loading} disabled={loading} onClick={handleBook}>
+      <BookingSubmitButton
+        loading={loading}
+        disabled={loading || slotUnavailable}
+        onClick={handleBook}
+      >
         {payLabel}
       </BookingSubmitButton>
       {trustStrip}
@@ -673,6 +702,7 @@ export default function StepConfirm({
   if (variant === "inline") {
     return (
       <div id={formId} className="pb-28 lg:pb-0">
+        {slotUnavailableNotice}
         {manualPaymentNotice}
         {contactForm}
         {paymentMethodSelector}
@@ -700,6 +730,7 @@ export default function StepConfirm({
       <div className="flex flex-col gap-3 booking-panel-bg px-4 py-3 md:grid md:grid-cols-2 md:gap-8 md:bg-transparent md:px-8 md:py-7">
         <div>{summaryCards}</div>
         <div>
+          {slotUnavailableNotice}
           {manualPaymentNotice}
           {contactForm}
           {paymentMethodSelector}
