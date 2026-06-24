@@ -109,4 +109,16 @@ describe("buildBookingBreadcrumbItems", () => {
     expect(items[0]).toEqual({ label: "Choose a service", onClick: expect.any(Function) });
     expect(items[1]).toEqual({ label: "Haircut", current: true });
   });
+
+  it("uses onBackToHub click when provided", () => {
+    const items = buildBookingBreadcrumbItems({
+      ...base,
+      hubHref: "/book/test",
+      onBackToHub: () => undefined,
+      showContactForm: false,
+      showStaffStep: false,
+      needsStaffPicker: false,
+    });
+    expect(items[0]).toEqual({ label: "All services", onClick: expect.any(Function) });
+  });
 });

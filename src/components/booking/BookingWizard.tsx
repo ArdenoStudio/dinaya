@@ -73,6 +73,7 @@ interface Props {
   businessDescription?: string | null;
   teamMembers?: Pick<Staff, "id" | "name" | "bio" | "avatarUrl">[];
   hubHref?: string | null;
+  onBackToHub?: () => void;
   bookingTheme?: ResolvedBookingTheme;
 }
 
@@ -152,6 +153,7 @@ function BookingWizardInner({
   reviewCount,
   teamMembers = [],
   hubHref = null,
+  onBackToHub,
   bookingTheme,
 }: Props) {
   const theme =
@@ -545,6 +547,7 @@ function BookingWizardInner({
         showStaffStep,
         needsStaffPicker,
         hubHref,
+        onBackToHub,
         lockServiceSelection,
         multiService: services.length > 1,
         onBackToServices: clearService,

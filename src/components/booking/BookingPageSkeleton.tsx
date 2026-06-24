@@ -1,31 +1,31 @@
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function BookingPageSkeleton() {
   return (
-    <div className="flex min-h-dvh flex-col items-center bg-muted/20 md:justify-center md:py-10">
-      <div className="w-full max-w-5xl px-0 md:px-4">
-        <Card className="rounded-none border-x-0 md:rounded-xl md:border-x">
-          <CardHeader className="flex flex-row items-center gap-4 space-y-0">
-            <Skeleton className="size-14 rounded-full" />
-            <div className="flex-1 space-y-2">
-              <Skeleton className="h-5 w-40" />
-              <Skeleton className="h-4 w-56" />
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-0 p-0">
-            {Array.from({ length: 3 }).map((_, index) => (
-              <div key={index} className="border-t border-border px-5 py-4">
-                <Skeleton className="h-5 w-48" />
-                <Skeleton className="mt-2 h-4 w-full max-w-sm" />
-                <div className="mt-3 flex gap-2">
-                  <Skeleton className="h-5 w-16 rounded-full" />
-                  <Skeleton className="h-5 w-20 rounded-full" />
-                </div>
+    <div className="w-full overflow-hidden rounded-2xl border border-border/80 bg-card shadow-none dark:ring-1 dark:ring-white/10">
+      <div className="relative">
+        <Skeleton className="aspect-[16/7] w-full rounded-none md:rounded-t-2xl" />
+        <div className="absolute inset-x-0 bottom-0 flex justify-center pb-4">
+          <Skeleton className="size-20 rounded-full ring-2 ring-card" />
+        </div>
+      </div>
+      <div className="space-y-0 px-4 pb-4 pt-16 md:px-6">
+        <div className="space-y-2 text-center">
+          <Skeleton className="mx-auto h-7 w-48" />
+          <Skeleton className="mx-auto h-4 w-64 max-w-full" />
+        </div>
+        {Array.from({ length: 4 }).map((_, index) => (
+          <div key={index} className="mt-3 rounded-xl border border-border/50 px-4 py-4">
+            <div className="flex items-start gap-3">
+              <Skeleton className="size-12 shrink-0 rounded-xl" />
+              <div className="min-w-0 flex-1 space-y-2">
+                <Skeleton className="h-5 w-40" />
+                <Skeleton className="h-4 w-full max-w-sm" />
+                <Skeleton className="h-4 w-24" />
               </div>
-            ))}
-          </CardContent>
-        </Card>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
