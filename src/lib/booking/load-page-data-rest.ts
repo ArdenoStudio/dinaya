@@ -4,6 +4,7 @@ import { resolveActiveRouter, type BookingRouter } from "@/lib/booking-router";
 import { resolveServiceSlug } from "@/lib/service-slug";
 import { emptyReviewDistribution } from "@/lib/reviews-public";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
+import type { IntakeQuestion } from "@/lib/intake";
 
 type JsonRow = Record<string, unknown>;
 
@@ -68,7 +69,7 @@ function mapService(row: JsonRow, intakeEnabled: boolean) {
     minimumNoticeHours: Number(row.minimum_notice_hours ?? 0),
     dailyCapacity: (row.daily_capacity as number | null) ?? null,
     maximumAdvanceDays: (row.maximum_advance_days as number | null) ?? null,
-    intakeQuestions: intakeEnabled ? ((row.intake_questions as unknown[]) ?? []) : [],
+    intakeQuestions: intakeEnabled ? ((row.intake_questions as IntakeQuestion[] | null) ?? []) : [],
     createdAt: asDate(row.created_at) ?? new Date(),
     categoryId: (row.category_id as string | null) ?? null,
     categoryName: category?.name ?? null,
