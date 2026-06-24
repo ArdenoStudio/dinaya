@@ -32,11 +32,11 @@ dotenv.config({ path: ".env" });
 const DEFAULT_SLUG = "wax-in-the-city";
 const BUSINESS_NAME = "Wax in the City";
 
-/** Served from public/demo/ — works on localhost and dinaya.lk. */
+/** Served from public/demo/ — Wax In The City SL Facebook profile logo. */
 export const WAX_LOGO_PATH = "/demo/wax-in-the-city-logo.webp";
 export const WAX_BANNER_PATH = "/demo/wax-in-the-city-banner.webp";
-/** Maroon burgundy from the Wax in the City brand mark. */
-export const WAX_ACCENT_COLOR = "#5c1f2e";
+/** Pink coral from the Wax in the City brand mark. */
+export const WAX_ACCENT_COLOR = "#f86888";
 
 const BUSINESS_DESCRIPTION =
   "Ladies waxing and beauty studio in Colombo — root-clean hair removal, facials, Moroccan rituals, and HydraFacial treatments. Book online and pay your balance at the salon.";
