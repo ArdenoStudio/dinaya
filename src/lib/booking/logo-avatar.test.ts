@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
   bookingLogoHasIntrinsicPadding,
-  bookingLogoImageScale,
+  bookingLogoHubImageScale,
+  BOOKING_LOGO_HUB_RASTER_SCALE,
   BOOKING_LOGO_PADDED_SCALE,
-  BOOKING_LOGO_RASTER_SCALE,
 } from "./logo-avatar";
 
 describe("bookingLogoHasIntrinsicPadding", () => {
@@ -17,9 +17,13 @@ describe("bookingLogoHasIntrinsicPadding", () => {
   });
 });
 
-describe("bookingLogoImageScale", () => {
-  it("uses a stronger zoom for padded svg logos", () => {
-    expect(bookingLogoImageScale("https://cdn.example.com/logo.svg")).toBe(BOOKING_LOGO_PADDED_SCALE);
-    expect(bookingLogoImageScale("https://cdn.example.com/logo.webp")).toBe(BOOKING_LOGO_RASTER_SCALE);
+describe("bookingLogoHubImageScale", () => {
+  it("uses a softer hub zoom for raster logos", () => {
+    expect(bookingLogoHubImageScale("https://cdn.example.com/logo.svg")).toBe(
+      BOOKING_LOGO_PADDED_SCALE,
+    );
+    expect(bookingLogoHubImageScale("https://cdn.example.com/logo.webp")).toBe(
+      BOOKING_LOGO_HUB_RASTER_SCALE,
+    );
   });
 });

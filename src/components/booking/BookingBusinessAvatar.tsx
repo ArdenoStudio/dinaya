@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useState } from "react";
 import {
   bookingLogoHasIntrinsicPadding,
-  bookingLogoImageScale,
+  bookingLogoHubImageScale,
 } from "@/lib/booking/logo-avatar";
 import { cn, isOptimizableRemoteImage } from "@/lib/utils";
 
@@ -57,7 +57,7 @@ export function BookingBusinessAvatar({
             sizes={`${dims.pixels}px`}
             className="bg-white object-cover object-center"
             style={{
-              transform: `scale(${bookingLogoImageScale(resolvedLogo)})`,
+              transform: `scale(${bookingLogoHubImageScale(resolvedLogo)})`,
             }}
             unoptimized={!isOptimizableRemoteImage(resolvedLogo)}
             onError={() => setImageFailed(true)}
