@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
     return WEBHOOK_REJECTED;
   }
 
-  if (business.payhereMerchantId && business.payhereMerchantId !== merchantId) {
+  if (!business.payhereMerchantId || business.payhereMerchantId !== merchantId) {
     return WEBHOOK_REJECTED;
   }
 
@@ -169,12 +169,18 @@ export async function POST(req: NextRequest) {
       meta: { orderId, amount: payhereAmount, currency: payhereCurrency },
     });
 
-    const [service] = await db
-      .select({ name: services.name })
-      .from(services)
-      .where(eq(services.id, booking.serviceId))
-      .limit(1);
-    const [staffMember] = await db.select().from(staff).where(eq(staff.id, booking.staffId)).limit(1);
+    const [[service], [staffMember]] = await Promise.all([
+      booking.serviceId
+        ? db
+            .select({ name: services.name })
+            .from(services)
+            .where(eq(services.id, booking.serviceId))
+            .limit(1)
+        : Promise.resolve([]),
+      booking.staffId
+        ? db.select().from(staff).where(eq(staff.id, booking.staffId)).limit(1)
+        : Promise.resolve([]),
+    ]);
 
     runAfterResponse("PayHere booking notifications", async () => {
       const manageUrl = buildClientBookingUrl({
@@ -252,7 +258,19 @@ export async function POST(req: NextRequest) {
       .where(and(eq(payments.id, payment.id), eq(payments.status, "pending")))
       .returning({ id: payments.id });
 
-    if (failedPayment && booking.status === "pending") {
+    const [cancelledBooking] = failedPayment
+      ? await db
+          .update(bookings)
+          .set({
+            status: "cancelled",
+            cancelledAt: new Date(),
+            cancellationReason: "Payment not completed in time.",
+          })
+          .where(and(eq(bookings.id, booking.id), eq(bookings.status, "pending")))
+          .returning({ id: bookings.id })
+      : [];
+
+    if (failedPayment && cancelledBooking) {
       void releaseDealSlotForBooking(booking.id, "pending").catch((error) => {
         console.error("Deal slot release failed:", error);
       });

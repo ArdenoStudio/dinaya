@@ -1,5 +1,6 @@
 import { desc, eq } from "drizzle-orm";
 import { db } from "@/db";
+import type { WebhookDelivery } from "@/db/schema";
 import { businesses, webhookDeliveries, webhooks } from "@/db/schema";
 import { safeAdminQuery } from "@/lib/admin-db";
 import { requirePlatformAdmin } from "@/lib/platform-admin";
@@ -30,7 +31,7 @@ export default async function AdminWebhooksPage() {
       .limit(100),
     [] as {
       id: string;
-      event: string;
+      event: WebhookDelivery["event"];
       status: string;
       attempts: number;
       error: string | null;

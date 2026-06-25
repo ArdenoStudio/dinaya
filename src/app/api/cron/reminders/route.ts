@@ -52,8 +52,12 @@ export async function GET(req: NextRequest) {
 
   const bookingIds = upcoming.map((booking) => booking.id);
   const businessIds = [...new Set(upcoming.map((booking) => booking.businessId))];
-  const serviceIds = [...new Set(upcoming.map((booking) => booking.serviceId))];
-  const staffIds = [...new Set(upcoming.map((booking) => booking.staffId))];
+  const serviceIds = [
+    ...new Set(upcoming.map((booking) => booking.serviceId).filter((id): id is string => Boolean(id))),
+  ];
+  const staffIds = [
+    ...new Set(upcoming.map((booking) => booking.staffId).filter((id): id is string => Boolean(id))),
+  ];
   const locationIds = [
     ...new Set(
       upcoming
@@ -109,6 +113,11 @@ export async function GET(req: NextRequest) {
   let skipped = 0;
 
   for (const booking of upcoming) {
+    if (!booking.serviceId || !booking.staffId) {
+      skipped++;
+      continue;
+    }
+
     const business = businessById.get(booking.businessId);
     const service = serviceById.get(booking.serviceId);
     const member = staffById.get(booking.staffId);
