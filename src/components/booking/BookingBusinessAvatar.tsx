@@ -3,18 +3,17 @@
 import Image from "next/image";
 import { useState } from "react";
 import {
+  bookingLogoHasIntrinsicPadding,
   bookingLogoImageScale,
 } from "@/lib/booking/logo-avatar";
 import { cn, isOptimizableRemoteImage } from "@/lib/utils";
 
-type AvatarSize = "sm" | "md" | "lg" | "hub" | "hubHero";
+type AvatarSize = "sm" | "md" | "lg";
 
 const sizeClasses: Record<AvatarSize, { box: string; text: string; pixels: number }> = {
   sm: { box: "size-10", text: "text-sm", pixels: 40 },
   md: { box: "size-12", text: "text-base", pixels: 48 },
   lg: { box: "size-14", text: "text-lg", pixels: 56 },
-  hub: { box: "size-[5.5rem] md:size-24", text: "text-2xl", pixels: 96 },
-  hubHero: { box: "size-20 md:size-[5.5rem]", text: "text-xl", pixels: 88 },
 };
 
 interface BookingBusinessAvatarProps {
@@ -36,7 +35,7 @@ export function BookingBusinessAvatar({
   const resolvedLogo = logoUrl?.trim() ?? "";
   const showImage = Boolean(resolvedLogo) && !imageFailed;
   const dims = sizeClasses[size];
-  const logoScale = bookingLogoImageScale(resolvedLogo);
+  const paddedLogo = bookingLogoHasIntrinsicPadding(resolvedLogo);
 
   if (showImage) {
     return (
@@ -47,16 +46,30 @@ export function BookingBusinessAvatar({
           className,
         )}
       >
-        <Image
-          src={resolvedLogo}
-          alt={name}
-          fill
-          sizes={`${dims.pixels}px`}
-          className="object-cover object-center"
-          style={{ transform: `scale(${logoScale})` }}
-          unoptimized={!isOptimizableRemoteImage(resolvedLogo)}
-          onError={() => setImageFailed(true)}
-        />
+        {paddedLogo ? (
+          <Image
+            src={resolvedLogo}
+            alt={name}
+            fill
+            sizes={`${dims.pixels}px`}
+            className="object-cover object-center"
+            style={{ transform: `scale(${bookingLogoImageScale(resolvedLogo)})` }}
+            unoptimized={!isOptimizableRemoteImage(resolvedLogo)}
+            onError={() => setImageFailed(true)}
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center bg-white p-0.5">
+            <Image
+              src={resolvedLogo}
+              alt={name}
+              width={Math.round(dims.pixels * 0.9)}
+              height={Math.round(dims.pixels * 0.9)}
+              className="max-h-full max-w-full object-contain"
+              unoptimized={!isOptimizableRemoteImage(resolvedLogo)}
+              onError={() => setImageFailed(true)}
+            />
+          </div>
+        )}
       </div>
     );
   }

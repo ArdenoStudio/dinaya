@@ -60,23 +60,18 @@ interface Props {
 function HubBusinessLogo({
   businessName,
   logoUrl,
-  variant = "header",
   className,
 }: {
   businessName: string;
   logoUrl?: string | null;
-  variant?: "header" | "hero";
   className?: string;
 }) {
   return (
     <BookingBusinessAvatar
       name={businessName}
       logoUrl={logoUrl}
-      size={variant === "hero" ? "hubHero" : "hub"}
-      className={cn(
-        "border border-border/60 bg-card shadow-md ring-2 ring-card",
-        className,
-      )}
+      size="sm"
+      className={cn("border border-border/60 bg-card shadow-sm ring-2 ring-card", className)}
     />
   );
 }
@@ -233,11 +228,7 @@ export default function BookingServiceHub({
             />
             <div className="pointer-events-none absolute inset-x-0 bottom-3 z-20 flex justify-center md:bottom-4">
               <div className="pointer-events-auto translate-y-1/3">
-                <HubBusinessLogo
-                  businessName={businessName}
-                  logoUrl={businessLogoUrl}
-                  variant="hero"
-                />
+                <HubBusinessLogo businessName={businessName} logoUrl={businessLogoUrl} />
               </div>
             </div>
           </div>
@@ -254,8 +245,7 @@ export default function BookingServiceHub({
             <HubBusinessLogo
               businessName={businessName}
               logoUrl={businessLogoUrl}
-              variant="header"
-              className="mb-4 md:mb-5"
+              className="mb-3 md:mb-4"
             />
           ) : null}
           <h1
