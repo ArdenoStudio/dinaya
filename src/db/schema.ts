@@ -153,7 +153,9 @@ export const businesses = pgTable("businesses", {
   directoryDistrict: varchar("directory_district", { length: 80 }),
   directoryCategory: varchar("directory_category", { length: 80 }),
   referralCode: varchar("referral_code", { length: 40 }),
-  referredByBusinessId: uuid("referred_by_business_id"),
+  referredByBusinessId: uuid("referred_by_business_id").references(() => businesses.id, {
+    onDelete: "set null",
+  }),
   onboardingCompletedAt: timestamp("onboarding_completed_at"),
   onboardingStep: integer("onboarding_step").default(0).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -320,7 +322,11 @@ export const services = pgTable("services", {
   // Optional post-booking redirect (https URL or same-site path).
   successRedirectUrl: text("success_redirect_url"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (table) => ({
+  businessSlugUnique: uniqueIndex("services_business_slug_unique")
+    .on(table.businessId, table.slug)
+    .where(sql`${table.slug} IS NOT NULL`),
+}));
 
 // ─── Staff ────────────────────────────────────────────────────────────────────
 
@@ -363,7 +369,9 @@ export const availability = pgTable("availability", {
   dayOfWeek: smallint("day_of_week").notNull(),
   startTime: time("start_time").notNull(),
   endTime: time("end_time").notNull(),
-});
+}, (table) => ({
+  staffIdx: index("availability_staff_idx").on(table.staffId),
+}));
 
 // ─── Availability Overrides (holidays, one-off changes) ───────────────────────
 
@@ -377,7 +385,9 @@ export const availabilityOverrides = pgTable("availability_overrides", {
   startTime: time("start_time"),
   endTime: time("end_time"),
   reason: varchar("reason", { length: 200 }),
-});
+}, (table) => ({
+  staffIdx: index("availability_overrides_staff_idx").on(table.staffId),
+}));
 
 export const businessHolidays = pgTable("business_holidays", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -399,7 +409,7 @@ export const businessHolidays = pgTable("business_holidays", {
     // the COALESCE sentinel in migration 0009 ensures those are still unique per date.
     businessLocationDateUnique: uniqueIndex("business_holidays_business_id_location_id_date_unique").on(
       table.businessId,
-      table.locationId,
+      sql`COALESCE(${table.locationId}, '00000000-0000-0000-0000-000000000000'::uuid)`,
       table.date
     ),
   };
@@ -529,12 +539,12 @@ export const bookings = pgTable("bookings", {
   businessId: uuid("business_id")
     .notNull()
     .references(() => businesses.id, { onDelete: "cascade" }),
-  serviceId: uuid("service_id")
-    .notNull()
-    .references(() => services.id),
-  staffId: uuid("staff_id")
-    .notNull()
-    .references(() => staff.id),
+  serviceId: uuid("service_id").references(() => services.id, {
+    onDelete: "set null",
+  }),
+  staffId: uuid("staff_id").references(() => staff.id, {
+    onDelete: "set null",
+  }),
   locationId: uuid("location_id").references(() => locations.id, {
     onDelete: "set null",
   }),
@@ -573,6 +583,8 @@ export const bookings = pgTable("bookings", {
     table.staffId,
     table.startsAt,
   ),
+  locationIdIdx: index("bookings_location_id_idx").on(table.locationId),
+  clientIdIdx: index("bookings_client_id_idx").on(table.clientId),
   dealIdIdx: index("bookings_deal_id_idx").on(table.dealId),
 }));
 
@@ -671,7 +683,8 @@ export const payments = pgTable("payments", {
   bookingIdIdx: index("payments_booking_id_idx").on(table.bookingId),
   statusCreatedAtIdx: index("payments_status_created_at_idx").on(table.status, table.createdAt),
   providerOrderUnique: uniqueIndex("payments_provider_order_unique")
-    .on(table.provider, table.providerOrderId),
+    .on(table.provider, table.providerOrderId)
+    .where(sql`${table.providerOrderId} IS NOT NULL`),
 }));
 
 // ─── Automations / Messaging ─────────────────────────────────────────────────
