@@ -24,6 +24,7 @@ export function BookingTheme({ theme, children, className = "", embed }: Props) 
   return (
     <div
       data-booking-theme=""
+      data-booking-panel={theme.panelBackground}
       data-booking-embed={embed ? "true" : undefined}
       className={className}
       style={buildBookingThemeStyle(theme, { isDark })}

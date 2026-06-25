@@ -172,8 +172,11 @@ export function ServiceMetaPanel({
               </div>
             )}
             {service.depositPercent > 0 && service.priceLkr > 0 && (
-              <p className="mt-3 text-xs text-[var(--booking-accent)]">
-                {copy.depositDue}: {formatLkr(Math.ceil((price * service.depositPercent) / 100))}
+              <p className="mt-3 text-xs font-medium text-foreground">
+                <span className="text-muted-foreground">{copy.depositDue}: </span>
+                <span className="booking-text-accent">
+                  {formatLkr(Math.ceil((price * service.depositPercent) / 100))}
+                </span>
               </p>
             )}
           </m.div>

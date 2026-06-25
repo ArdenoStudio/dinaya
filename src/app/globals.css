@@ -219,6 +219,36 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
     background-color: var(--booking-panel-bg);
   }
 
+  /* Pink frame + white interior for datetime/details booker on accent panels */
+  [data-booking-theme][data-booking-panel="accent"] .booking-booker-inset {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 12%;
+    --secondary: 240 5% 96%;
+    --secondary-foreground: 240 10% 12%;
+    --muted: 240 5% 96%;
+    --muted-foreground: 240 4% 42%;
+    --accent: 240 5% 96%;
+    --accent-foreground: 240 10% 12%;
+    --border: 240 6% 88%;
+    --input: 240 6% 88%;
+    background-color: #ffffff;
+    color: hsl(var(--foreground));
+  }
+
+  [data-booking-theme][data-booking-panel="accent"] .booking-booker-frame {
+    padding: 0.375rem;
+  }
+
+  @media (min-width: 1024px) {
+    [data-booking-theme][data-booking-panel="accent"] .booking-booker-frame {
+      padding: 0.5rem;
+    }
+  }
+
   .booking-hero-overlay {
     background-color: color-mix(
       in srgb,

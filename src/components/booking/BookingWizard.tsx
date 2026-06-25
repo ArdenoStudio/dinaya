@@ -50,6 +50,7 @@ import {
 } from "./useGoogleCalendarOverlay";
 import { shouldShowBookingContactForm } from "@/lib/booking/wizard-contact-step";
 import { useBookingInstantUrlSync } from "@/lib/booking/use-booking-instant-url-sync";
+import { cn } from "@/lib/utils";
 
 const COLOMBO_TZ = "Asia/Colombo";
 
@@ -603,6 +604,8 @@ function BookingWizardInner({
       ? "staff"
       : "dateTime";
 
+  const accentPanel = theme.panelBackground === "accent";
+
   const breadcrumbBlock =
     showBreadcrumb ? (
       <div
@@ -617,7 +620,18 @@ function BookingWizardInner({
     ) : null;
 
   const bookerCard = (
-      <div className="w-full min-w-0 max-w-full booking-panel-surface lg:overflow-visible lg:rounded-xl lg:border lg:border-border lg:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)] dark:lg:shadow-none dark:lg:ring-1 dark:lg:ring-white/10">
+      <div
+        className={cn(
+          "w-full min-w-0 max-w-full booking-panel-surface lg:overflow-visible lg:rounded-xl lg:border lg:border-border lg:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)] dark:lg:shadow-none dark:lg:ring-1 dark:lg:ring-white/10",
+          accentPanel && "booking-booker-frame",
+        )}
+      >
+        <div
+          className={cn(
+            "w-full min-w-0 overflow-hidden",
+            accentPanel && "booking-booker-inset rounded-[10px] lg:rounded-[11px]",
+          )}
+        >
         <BookingAttributionCapture businessId={business.id} />
         <BookingDealsSection
           deals={activeDeals}
@@ -684,16 +698,19 @@ function BookingWizardInner({
               />
             </>
           ) : (
-            <div className="grid w-full min-w-0 max-w-full grid-cols-1 gap-0 lg:grid-cols-[15rem_minmax(0,1fr)] lg:items-start lg:divide-x lg:divide-border xl:grid-cols-[16rem_minmax(0,1fr)]">
+            <div className="grid w-full min-w-0 max-w-full grid-cols-1 gap-0 lg:grid-cols-[minmax(14rem,16rem)_minmax(0,1fr)] lg:items-stretch lg:divide-x lg:divide-border xl:grid-cols-[minmax(15rem,17rem)_minmax(0,1fr)]">
               <BookingPanel
                 area="meta"
-                className="border-b border-border bg-muted/15 pb-4 lg:sticky lg:top-6 lg:z-[1] lg:self-start lg:overflow-hidden lg:rounded-l-xl lg:border-0 lg:px-4 lg:pb-6 lg:pt-6 xl:px-5"
+                className={cn(
+                  "border-b border-border pb-4 lg:sticky lg:top-0 lg:z-[1] lg:self-start lg:border-0 lg:px-6 lg:pb-6 lg:pt-6",
+                  !accentPanel && "bg-muted/15",
+                )}
                 {...panelMotion}
               >
                 <ServiceMetaPanel {...metaPanelProps} />
               </BookingPanel>
 
-              <BookingPanel area="main" className="relative z-0 min-w-0 lg:py-6" {...panelMotion}>
+              <BookingPanel area="main" className="relative z-0 min-w-0 lg:py-0" {...panelMotion}>
                 {state.service ? (
                   <div className="border-b border-border py-3 lg:hidden">
                     <BookingChoiceSummary
@@ -718,7 +735,7 @@ function BookingWizardInner({
                 <BookingMainStepTransition stepKey={showContactForm ? "confirm" : "dateTime"}>
                 {canPickSlots ? (
                   showContactForm ? (
-                    <div className="md:px-6 lg:px-8">
+                    <div className="px-5 py-5 md:px-6 lg:px-8 lg:py-6">
                       <StepConfirm
                         variant="inline"
                         formId="booking-contact-form"
@@ -736,7 +753,7 @@ function BookingWizardInner({
                       />
                     </div>
                   ) : (
-                    <div className="px-4 md:px-6 lg:px-8">
+                    <div className="px-0 py-0">
                       <StepDateTime
                         businessId={business.id}
                         copy={copy}
@@ -781,6 +798,7 @@ function BookingWizardInner({
             className="flex justify-center border-t border-border px-4 py-3"
           />
         )}
+        </div>
       </div>
   );
 
