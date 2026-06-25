@@ -11,7 +11,7 @@ import {
   authPrimaryButtonClassName,
 } from "@/components/auth/auth-form-styles";
 import { Icon } from "@/components/ui/Icon";
-import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 
 function getSafeCallbackUrl(raw: string | null, justRegistered: boolean): string {
   if (justRegistered) return "/dashboard/setup";
@@ -93,7 +93,7 @@ async function credentialsSignIn(input: {
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const reduceMotion = usePrefersReducedMotion();
+  const reduceMotion = useReducedMotion();
   const justRegistered = searchParams.get("registered") === "1";
   const passwordReset = searchParams.get("reset") === "1";
   const callbackUrl = getSafeCallbackUrl(searchParams.get("callbackUrl"), justRegistered);

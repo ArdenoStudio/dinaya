@@ -44,7 +44,6 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: [
       "lucide-react",
-      "react-icons",
       "react-bootstrap-icons",
       "@hugeicons/react",
     ],
