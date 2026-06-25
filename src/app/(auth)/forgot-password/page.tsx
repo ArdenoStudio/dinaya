@@ -5,9 +5,10 @@ import Link from "next/link";
 import { Logo } from "@/components/Logo";
 import { AuthThemeToggle } from "@/components/AuthThemeToggle";
 import { Icon } from "@/components/ui/Icon";
+import { authFieldTransitionClassName, authSubmitButtonClassName } from "@/components/auth/auth-form-styles";
 
 const inputCls =
-  "mt-1.5 w-full border border-gray-200 dark:border-neutral-800 rounded-lg px-3 py-2.5 text-sm bg-white dark:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 placeholder:text-gray-300 dark:placeholder:text-neutral-600 transition-all";
+  `mt-1.5 w-full border border-gray-200 dark:border-neutral-800 rounded-lg px-3 py-2.5 text-sm bg-white dark:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 placeholder:text-gray-300 dark:placeholder:text-neutral-600 ${authFieldTransitionClassName}`;
 
 function ForgotPasswordForm() {
   const emailRef = useRef<HTMLInputElement>(null);
@@ -113,7 +114,7 @@ function ForgotPasswordForm() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-b from-primary/90 to-primary text-primary-foreground py-3 rounded-lg text-sm font-medium border-b-2 border-primary/70 shadow-[0_0_0_2px_rgba(0,0,0,0.04),0_0_14px_0_rgba(99,102,241,0.2)] transition-all hover:shadow-primary/30 hover:shadow-md disabled:cursor-not-allowed"
+              className={authSubmitButtonClassName}
             >
               {loading && <Icon name="arrow-repeat" className="text-sm animate-spin" />}
               {loading ? "Sending…" : "Send reset link"}

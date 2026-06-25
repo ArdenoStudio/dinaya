@@ -8,6 +8,7 @@ import { getAppBaseUrl } from "@/lib/booking-url";
  * - `dinaya:ready` `{ slug: string }`
  * - `dinaya:booking_started` `{ slug: string, serviceId?: string }`
  * - `dinaya:booking_completed` `{ slug: string, status?: string }`
+ * - `dinaya:prefill` `{ contact: { name?, email?, phone? } }` (parent → iframe after ready)
  *
  * Non-resize events are re-dispatched as `dinaya-embed` CustomEvents on `document`.
  * Optional theming: pass `embedAccent` in embed config (e.g. `#2563eb`).

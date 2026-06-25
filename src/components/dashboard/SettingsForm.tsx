@@ -8,6 +8,8 @@ import { buildPublicBookingUrl } from "@/lib/booking-url";
 import { bookingLogoHasIntrinsicPadding } from "@/lib/booking/logo-avatar";
 import { isOptimizableRemoteImage } from "@/lib/utils";
 import { Icon } from "@/components/ui/Icon";
+import { Button } from "@/components/ui/button";
+import { dashboardInputClass } from "@/lib/dashboard-ui";
 
 type SettingsBusiness = {
   address: string | null;
@@ -43,7 +45,6 @@ type SettingsBusiness = {
 interface Props { business: SettingsBusiness; }
 
 export default function SettingsForm({ business }: Props) {
-  const canCustomizeBookingPage = business.canCustomizeBookingPage;
   const settingsCopy = useDashboardCopy().settings;
   const bookingUrl = buildPublicBookingUrl({
     slug: business.slug,
@@ -71,8 +72,6 @@ export default function SettingsForm({ business }: Props) {
     paypalEnabled: business.paypalEnabled,
     paypalClientId: business.paypalClientId ?? "",
     paypalClientSecret: "",
-    hideDinayaBranding: business.hideDinayaBranding,
-    accentColor: business.accentColor ?? "#2563eb",
   });
 
   const [galleryImages, setGalleryImages] = useState<string[]>(
@@ -126,8 +125,7 @@ export default function SettingsForm({ business }: Props) {
     setGalleryImages((prev) => prev.filter((u) => u !== url));
   }
 
-  const inputCls =
-    "mt-1 w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 bg-white dark:border-neutral-700 dark:bg-neutral-900";
+  const inputCls = `${dashboardInputClass} mt-0`;
 
   return (
     <div className="space-y-5">
@@ -444,76 +442,21 @@ export default function SettingsForm({ business }: Props) {
           </p>
         </div>
 
-        {/* Pro branding */}
-        <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-6 space-y-4">
+        {/* Booking page appearance */}
+        <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-6 space-y-3 xl:col-span-2">
           <div className="flex items-center gap-2">
             <Icon name="palette" className="text-sm text-muted-foreground" />
-            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Booking page branding</p>
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Booking page look</p>
           </div>
-          {canCustomizeBookingPage ? (
-            <>
-              <p className="text-xs text-muted-foreground">
-                Hide the &quot;Powered by Dinaya&quot; footer on your public booking page for a fully branded experience.
-              </p>
-              <label className="flex items-center gap-2.5 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={form.hideDinayaBranding}
-                  onChange={(e) => setForm((f) => ({ ...f, hideDinayaBranding: e.target.checked }))}
-                  className="rounded"
-                />
-                <span className="text-sm font-medium">Remove Dinaya branding</span>
-              </label>
-
-              <div>
-                <label className="block text-sm font-medium">Accent color</label>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Used on your public booking page buttons, calendar, and headers.
-                </p>
-                <div className="mt-2 flex items-center gap-3">
-                  <input
-                    type="color"
-                    value={form.accentColor}
-                    onChange={(e) => setForm((f) => ({ ...f, accentColor: e.target.value }))}
-                    className="h-10 w-14 cursor-pointer rounded border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-1"
-                  />
-                  <input
-                    type="text"
-                    value={form.accentColor}
-                    onChange={(e) => setForm((f) => ({ ...f, accentColor: e.target.value }))}
-                    className={`${inputCls} max-w-[8rem] font-mono`}
-                    pattern="^#[0-9a-fA-F]{6}$"
-                  />
-                </div>
-              </div>
-
-              <div className="rounded-lg border bg-muted/30 p-4 text-sm">
-                <p className="font-medium">Custom domain</p>
-                <p className="mt-1 text-muted-foreground">
-                  Save and verify your domain on the Integrations page using a TXT DNS record.
-                </p>
-                <Link
-                  href="/dashboard/settings/integrations"
-                  className="mt-3 inline-flex text-sm font-medium text-primary hover:underline"
-                >
-                  Manage custom domain
-                </Link>
-              </div>
-            </>
-          ) : (
-            <div className="rounded-lg border border-violet-200 bg-violet-50/70 p-4 text-sm">
-              <p className="font-medium text-violet-950">Remove Dinaya branding</p>
-              <p className="mt-1 text-violet-900/75">
-                Upgrade to Growth to hide the Dinaya footer and use a custom domain on your booking page.
-              </p>
-              <Link
-                href="/dashboard/billing"
-                className="mt-3 inline-flex rounded-md bg-violet-600 px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-violet-700"
-              >
-                View plan options
-              </Link>
-            </div>
-          )}
+          <p className="text-sm text-muted-foreground">
+            Customize your logo, hero banner, accent color, and page background on the dedicated booking page editor.
+          </p>
+          <Link
+            href="/dashboard/booking-page"
+            className="inline-flex rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+          >
+            Open booking page editor
+          </Link>
         </div>
 
         {/* PayHere */}
@@ -635,14 +578,10 @@ export default function SettingsForm({ business }: Props) {
 
         {error && <p className="text-destructive text-sm xl:col-span-2">{error}</p>}
 
-        <div className="flex items-center gap-3 xl:col-span-2 sticky bottom-0 -mx-1 border-t border-neutral-200/80 bg-neutral-50/95 px-1 py-4 backdrop-blur-sm dark:border-neutral-800 dark:bg-neutral-950/95">
-          <button
-            type="submit"
-            disabled={saving}
-            className="bg-gradient-to-b from-primary/90 to-primary text-primary-foreground px-5 py-2.5 rounded-lg text-sm font-medium border-b-2 border-primary/70 shadow-sm transition-all hover:shadow-primary/30 hover:shadow-md disabled:opacity-50"
-          >
+        <div className="sticky bottom-0 -mx-1 flex items-center gap-3 border-t border-neutral-200 bg-neutral-50 px-1 py-4 xl:col-span-2 dark:border-neutral-800 dark:bg-neutral-950">
+          <Button type="submit" disabled={saving} className="min-h-11">
             {saving ? "Saving…" : "Save changes"}
-          </button>
+          </Button>
           {saved && (
             <span className="flex items-center gap-1.5 text-green-600 text-sm">
               <Icon name="check-circle" className="text-sm" /> Saved

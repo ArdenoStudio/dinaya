@@ -16,7 +16,7 @@ export function StarRating({ rating, size = "sm", className }: Props) {
         <Icon
           key={value}
           name={value <= Math.round(rating) ? "star-fill" : "star"}
-          className={`${value <= Math.round(rating) ? "text-amber-400" : "text-gray-300 dark:text-neutral-600"} ${iconClass}`}
+          className={`${value <= Math.round(rating) ? "text-amber-500 dark:text-amber-400/85" : "text-muted-foreground/35"} ${iconClass}`}
         />
       ))}
     </span>

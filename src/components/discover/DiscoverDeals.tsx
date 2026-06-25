@@ -58,7 +58,7 @@ function DealCard({ deal, sourcePage }: { deal: DealListItem; sourcePage: string
             alt=""
             width={48}
             height={48}
-            className="rounded-xl object-cover"
+            className="size-12 rounded-xl object-cover image-depth"
             unoptimized={!isOptimizableRemoteImage(deal.logoUrl)}
           />
         ) : (
@@ -70,18 +70,18 @@ function DealCard({ deal, sourcePage }: { deal: DealListItem; sourcePage: string
           <p className="font-medium truncate">{deal.businessName}</p>
           <p className="text-sm text-muted-foreground truncate">{deal.serviceName}</p>
         </div>
-        <span className="rounded-full bg-primary px-2.5 py-1 text-xs font-bold text-primary-foreground">
+        <span className="rounded-full bg-primary px-2.5 py-1 text-xs font-bold tabular-nums text-primary-foreground">
           {deal.discountPercent}% OFF
         </span>
       </div>
 
       <div className="mt-4 flex items-end justify-between gap-3">
         <div>
-          <p className="text-sm">
+          <p className="text-sm tabular-nums">
             <span className="text-muted-foreground line-through">{formatLkr(deal.servicePriceLkr)}</span>{" "}
             <span className="font-semibold text-primary">{formatLkr(discounted)}</span>
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">
+          <p className="mt-1 text-xs tabular-nums text-muted-foreground">
             {deal.slotsRemaining} slot{deal.slotsRemaining === 1 ? "" : "s"} left ·{" "}
             {format(deal.apptWindowStart, "EEE h:mm a")} – {format(deal.apptWindowEnd, "h:mm a")}
           </p>
@@ -96,7 +96,7 @@ function DealCard({ deal, sourcePage }: { deal: DealListItem; sourcePage: string
             category: deal.directoryCategory,
             sourcePage,
           })}
-          className="rounded-lg bg-primary px-3 py-2 text-xs font-medium text-primary-foreground"
+          className="rounded-lg bg-primary px-3 py-2 text-xs font-medium text-primary-foreground transition-transform duration-150 ease-out active:scale-[0.96] motion-reduce:active:scale-100"
         >
           Book deal
         </Link>

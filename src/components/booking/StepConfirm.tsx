@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { format, parseISO } from "date-fns";
 import type { BookingBusiness, BookingState } from "./BookingWizard";
-import { formatLkr, isOptimizableRemoteImage } from "@/lib/utils";
+import { Icon } from "@/components/ui/Icon";
+import { cn, formatLkr, isOptimizableRemoteImage } from "@/lib/utils";
 import type { BookingCopy } from "@/lib/i18n";
 import { readStoredAttribution } from "@/lib/booking-attribution";
 import { getBookingSessionToken } from "@/lib/booking-session";
@@ -15,9 +16,10 @@ import {
   resolveDefaultPaymentMethod,
 } from "@/lib/payments/resolve";
 import type { DealListItem } from "@/lib/deals/queries";
-import { Icon } from "@/components/ui/Icon";
+import { BookingSubmitButton } from "./BookingSubmitButton";
 import {
   validateConfirmFields,
+  firstConfirmFieldId,
   type ConfirmFieldErrors,
 } from "./booking-confirm-validation";
 import type { IntakeQuestion } from "@/lib/intake";
@@ -28,6 +30,7 @@ interface Props {
   copy: BookingCopy;
   selectedDeal?: DealListItem | null;
   sessionToken?: string;
+  slotUnavailable?: boolean;
   onUpdate: (partial: Partial<BookingState>) => void;
   onBack: () => void;
   onConfirmed: (data: {
@@ -41,15 +44,30 @@ interface Props {
   }) => void;
   variant?: "inline" | "full";
   formId?: string;
+  /** When the wizard shows breadcrumbs, hide the duplicate inline back link. */
+  hideInlineBack?: boolean;
+  /** When breadcrumbs already show the step name, hide the in-form heading. */
+  hideDetailsHeading?: boolean;
+  /** Solid pink panel — avoid white form chrome. */
+  onAccentPanel?: boolean;
 }
 
 const fieldBaseCls =
-  "mt-1.5 w-full rounded-xl border px-3 py-2.5 text-sm transition-shadow placeholder:text-gray-400 focus:outline-none focus:ring-2";
-const fieldOkCls = `${fieldBaseCls} border-gray-200 dark:border-neutral-800 focus:border-blue-400 focus:ring-blue-500/20`;
-const fieldErrCls = `${fieldBaseCls} border-red-300 bg-red-50/40 focus:border-red-400 focus:ring-red-500/20 dark:border-red-900/50 dark:bg-red-950/20`;
+  "mt-1.5 w-full min-h-11 rounded-xl border px-3 py-2.5 text-base transition-shadow placeholder:text-muted-foreground focus:outline-none focus:ring-2 md:text-sm";
+const fieldOkCls = `${fieldBaseCls} border-border bg-card focus:border-[var(--booking-accent)] focus:ring-[var(--booking-accent-soft)]`;
+const fieldErrCls = `${fieldBaseCls} border-destructive bg-card focus:border-destructive focus:ring-destructive/25`;
 
 function fieldErrorId(field: string) {
   return `confirm-error-${field}`;
+}
+
+function FieldError({ id, message }: { id: string; message: string }) {
+  return (
+    <p id={id} className="mt-1.5 flex items-center gap-1.5 text-sm text-destructive">
+      <Icon name="exclamation-circle" className="shrink-0 text-xs" aria-hidden />
+      <span>{message}</span>
+    </p>
+  );
 }
 
 function IntakeField({
@@ -71,16 +89,16 @@ function IntakeField({
 
   return (
     <div>
-      <label htmlFor={id} className="text-sm font-medium text-gray-800 dark:text-gray-200">
+      <label htmlFor={id} className="text-sm font-medium text-foreground">
         {question.label}{" "}
         {question.required ? (
-          <span className="font-normal text-gray-400 dark:text-gray-500">*</span>
+          <span className="font-normal text-muted-foreground">*</span>
         ) : (
-          <span className="text-xs font-normal text-gray-400 dark:text-gray-500">(optional)</span>
+          <span className="text-xs font-normal text-muted-foreground">(optional)</span>
         )}
       </label>
       {question.sensitive ? (
-        <p className="mt-0.5 text-xs text-gray-400 dark:text-gray-500">{copy.intakePrivacy}</p>
+        <p className="mt-0.5 text-xs text-muted-foreground">{copy.intakePrivacy}</p>
       ) : null}
       {question.type === "textarea" ? (
         <textarea
@@ -132,13 +150,18 @@ function IntakeField({
           className={cls}
         />
       )}
-      {error ? (
-        <p id={errorId} className="mt-1 text-xs text-red-600 dark:text-red-400">
-          {error}
-        </p>
-      ) : null}
+      {error ? <FieldError id={errorId} message={error} /> : null}
     </div>
   );
+}
+
+function focusFirstInvalidField(fieldId: string) {
+  requestAnimationFrame(() => {
+    const el = document.getElementById(fieldId);
+    if (!(el instanceof HTMLElement)) return;
+    el.focus({ preventScroll: true });
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+  });
 }
 
 export default function StepConfirm({
@@ -147,11 +170,15 @@ export default function StepConfirm({
   copy,
   selectedDeal,
   sessionToken,
+  slotUnavailable = false,
   onUpdate,
   onBack,
   onConfirmed,
   variant = "full",
   formId = "booking-contact-form",
+  hideInlineBack = false,
+  hideDetailsHeading = false,
+  onAccentPanel = false,
 }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -164,6 +191,12 @@ export default function StepConfirm({
   } | null>(null);
 
   const service = state.service;
+  const panelCardCls = onAccentPanel
+    ? "rounded-xl border border-border/80 p-4"
+    : "rounded-xl border border-border bg-card p-4";
+  const formShellCls = onAccentPanel
+    ? "space-y-4"
+    : "space-y-4 md:rounded-xl md:border md:border-border md:bg-card md:p-6";
   const intakeQuestions = useMemo(
     () => service?.intakeQuestions ?? [],
     [service?.intakeQuestions],
@@ -262,8 +295,6 @@ export default function StepConfirm({
       ? `${copy.confirmAndPay} — ${formatLkr(dueNow)}`
       : copy.confirmBooking;
 
-  const canSubmit = liveValidation.valid && !loading;
-
   useEffect(() => {
     if (!service || selectedDeal) {
       setUpsell(null);
@@ -301,6 +332,11 @@ export default function StepConfirm({
   }
 
   async function handleBook() {
+    if (slotUnavailable) {
+      setError(copy.slotTakenAction);
+      return;
+    }
+
     const result = validateConfirmFields({
       clientName: state.clientName,
       clientPhone: state.clientPhone,
@@ -320,6 +356,8 @@ export default function StepConfirm({
 
     if (!result.valid) {
       setError(result.firstError ?? copy.fieldRequired);
+      const fieldId = firstConfirmFieldId(result.errors, intakeQuestions);
+      if (fieldId) focusFirstInvalidField(fieldId);
       return;
     }
 
@@ -392,95 +430,27 @@ export default function StepConfirm({
 
   const summaryCards = (
     <div className="flex flex-col gap-2 md:gap-3">
-      <div className="rounded-2xl bg-white dark:bg-neutral-900 px-[15px] py-[13px] md:rounded-xl md:border md:border-gray-100 dark:border-neutral-800 md:p-4">
-        <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.08em] text-gray-400 dark:text-gray-500">
-          {copy.selectedService}
-        </p>
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="text-[15px] font-semibold leading-snug text-gray-900 dark:text-gray-100 md:text-base">
-              {service?.name}
-            </p>
-            <div className="mt-1 flex items-center gap-1 text-[11px] text-gray-400 dark:text-gray-500 md:text-xs">
-              <Icon name="clock" className="text-[10px] text-gray-300" />
-              {service?.durationMinutes} min
-              {state.staff && (
-                <>
-                  <span className="text-gray-300">·</span>
-                  {state.staff.name}
-                </>
-              )}
-            </div>
-          </div>
-          <p className="shrink-0 text-base font-bold tabular-nums booking-text-accent md:text-lg">
-            {service && service.priceLkr > 0 ? formatLkr(service.priceLkr) : "Free"}
-          </p>
-        </div>
-      </div>
-
-      <div className="rounded-2xl bg-white dark:bg-neutral-900 px-[15px] py-[13px] md:rounded-xl md:border md:border-gray-100 dark:border-neutral-800 md:p-4">
-        <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.08em] text-gray-400 dark:text-gray-500">
+      <div className={panelCardCls}>
+        <p className="mb-3 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
           {copy.appointment}
         </p>
-        <div className="mb-2 flex items-center gap-[11px]">
-          <div className="flex size-[34px] shrink-0 items-center justify-center rounded-[10px] booking-bg-accent-muted">
-            <Icon name="calendar3" className="text-[13px] booking-text-accent" />
-          </div>
-          <div>
-            <p className="text-[13px] font-semibold text-gray-900 dark:text-gray-100 md:text-sm">{dateLabel}</p>
-            <p className="text-[11px] text-gray-400 dark:text-gray-500 md:text-xs">{yearLabel}</p>
-          </div>
-        </div>
-        <div className="mb-2 h-px bg-gray-100 dark:bg-neutral-800" />
-        <div className="flex items-center gap-[11px]">
-          <div className="flex size-[34px] shrink-0 items-center justify-center rounded-[10px] bg-emerald-50 dark:bg-emerald-950/40">
-            <Icon name="clock" className="text-[13px] text-emerald-500" />
-          </div>
-          <div className="flex-1">
-            <p className="text-[13px] font-semibold text-gray-900 dark:text-gray-100 md:text-sm">{state.timeLabel}</p>
-            <p className="text-[11px] text-gray-400 dark:text-gray-500 md:text-xs">{service?.durationMinutes} min</p>
-          </div>
-          <span className="shrink-0 rounded-full border border-emerald-100 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 text-[11px] font-semibold text-emerald-600">
-            {copy.available}
-          </span>
-        </div>
+        <p className="text-xl font-semibold tabular-nums text-foreground">{state.timeLabel}</p>
+        <p className="mt-1 text-sm text-muted-foreground">{dateLabel}</p>
+        {yearLabel ? <p className="text-xs text-muted-foreground">{yearLabel}</p> : null}
+        <p className="mt-3 text-sm text-foreground">
+          {service?.name}
+          {state.staff ? <span className="text-muted-foreground"> · {state.staff.name}</span> : null}
+        </p>
       </div>
 
       {service && service.priceLkr > 0 && (
-        <div className="rounded-2xl bg-white dark:bg-neutral-900 px-[15px] py-[13px] md:rounded-xl md:border md:border-gray-100 dark:border-neutral-800 md:p-4">
-          <div className="flex items-center justify-between">
-            <p className="text-[12px] text-gray-500 dark:text-gray-400">{service.name}</p>
-            <p className="text-[12px] font-medium tabular-nums text-gray-700 dark:text-gray-300">
-              {formatLkr(service.priceLkr)}
-            </p>
-          </div>
-          {service.requiresPayment && service.depositPercent > 0 && (
-            <div className="mt-1 flex items-center justify-between">
-              <p className="text-[11px] text-gray-400 dark:text-gray-500">
-                {copy.depositDue} ({service.depositPercent}%)
-              </p>
-              <p className="text-[11px] font-semibold tabular-nums booking-text-accent">
-                {formatLkr(depositAmount)}
-              </p>
-            </div>
-          )}
-          <div className="my-2 h-px bg-gray-100 dark:bg-neutral-800" />
-          {selectedDeal && (
-            <div className="mb-2 flex items-center justify-between text-emerald-700">
-              <p className="text-[12px] font-medium">
-                Deal discount ({selectedDeal.discountPercent}%)
-              </p>
-              <p className="text-[12px] font-semibold tabular-nums">
-                −{formatLkr(service.priceLkr - discountedPrice)}
-              </p>
-            </div>
-          )}
-          <div className="flex items-center justify-between">
-            <p className="text-[13px] font-bold text-gray-900 dark:text-gray-100">{copy.fullAmount}</p>
-            <p className="text-[14px] font-bold tabular-nums text-gray-900 dark:text-gray-100">
+        <div className={panelCardCls}>
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-sm text-muted-foreground">{copy.fullAmount}</p>
+            <p className="text-base font-semibold tabular-nums text-foreground">
               {selectedDeal ? (
                 <>
-                  <span className="mr-2 text-[12px] font-medium text-gray-400 dark:text-gray-500 line-through">
+                  <span className="mr-2 text-sm font-normal text-muted-foreground line-through">
                     {formatLkr(service.priceLkr)}
                   </span>
                   {formatLkr(discountedPrice)}
@@ -490,6 +460,14 @@ export default function StepConfirm({
               )}
             </p>
           </div>
+          {service.requiresPayment && service.depositPercent > 0 && (
+            <div className="mt-2 flex items-center justify-between text-sm">
+              <p className="text-muted-foreground">
+                {copy.depositDue} ({service.depositPercent}%)
+              </p>
+              <p className="font-medium tabular-nums booking-text-accent">{formatLkr(depositAmount)}</p>
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -500,13 +478,15 @@ export default function StepConfirm({
   const emailError = showFieldError("clientEmail");
 
   const contactForm = (
-    <div className="space-y-3 md:rounded-xl md:border md:border-gray-100 dark:border-neutral-800 md:bg-white dark:md:bg-neutral-900 md:p-5">
-      <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 md:mb-1">
-        {copy.details}
-      </p>
+    <div className={formShellCls}>
+      {hideDetailsHeading ? (
+        <h2 className="sr-only">{copy.details}</h2>
+      ) : (
+        <p className="text-base font-semibold text-foreground">{copy.details}</p>
+      )}
       <div>
-        <label htmlFor="clientName" className="text-sm font-medium text-gray-800 dark:text-gray-200">
-          Full name <span className="font-normal text-gray-400 dark:text-gray-500">*</span>
+        <label htmlFor="clientName" className="text-sm font-medium text-foreground">
+          Full name <span className="font-normal text-muted-foreground">*</span>
         </label>
         <input
           id="clientName"
@@ -522,15 +502,11 @@ export default function StepConfirm({
           className={nameError ? fieldErrCls : fieldOkCls}
           placeholder="Nimal Perera"
         />
-        {nameError ? (
-          <p id={fieldErrorId("clientName")} className="mt-1 text-xs text-red-600 dark:text-red-400">
-            {nameError}
-          </p>
-        ) : null}
+        {nameError ? <FieldError id={fieldErrorId("clientName")} message={nameError} /> : null}
       </div>
       <div>
-        <label htmlFor="clientPhone" className="text-sm font-medium text-gray-800 dark:text-gray-200">
-          Phone number <span className="font-normal text-gray-400 dark:text-gray-500">*</span>
+        <label htmlFor="clientPhone" className="text-sm font-medium text-foreground">
+          Phone number <span className="font-normal text-muted-foreground">*</span>
         </label>
         <input
           id="clientPhone"
@@ -547,15 +523,11 @@ export default function StepConfirm({
           className={phoneError ? fieldErrCls : fieldOkCls}
           placeholder="+94 77 123 4567"
         />
-        {phoneError ? (
-          <p id={fieldErrorId("clientPhone")} className="mt-1 text-xs text-red-600 dark:text-red-400">
-            {phoneError}
-          </p>
-        ) : null}
+        {phoneError ? <FieldError id={fieldErrorId("clientPhone")} message={phoneError} /> : null}
       </div>
       <div>
-        <label htmlFor="clientEmail" className="text-sm font-medium text-gray-800 dark:text-gray-200">
-          Email <span className="text-xs font-normal text-gray-400 dark:text-gray-500">(optional)</span>
+        <label htmlFor="clientEmail" className="text-sm font-medium text-foreground">
+          Email <span className="text-xs font-normal text-muted-foreground">(optional)</span>
         </label>
         <input
           id="clientEmail"
@@ -571,15 +543,11 @@ export default function StepConfirm({
           className={emailError ? fieldErrCls : fieldOkCls}
           placeholder="you@email.com"
         />
-        {emailError ? (
-          <p id={fieldErrorId("clientEmail")} className="mt-1 text-xs text-red-600 dark:text-red-400">
-            {emailError}
-          </p>
-        ) : null}
+        {emailError ? <FieldError id={fieldErrorId("clientEmail")} message={emailError} /> : null}
       </div>
       <div>
-        <label htmlFor="notes" className="text-sm font-medium text-gray-800 dark:text-gray-200">
-          Notes <span className="text-xs font-normal text-gray-400 dark:text-gray-500">(optional)</span>
+        <label htmlFor="notes" className="text-sm font-medium text-foreground">
+          Notes <span className="text-xs font-normal text-muted-foreground">(optional)</span>
         </label>
         <textarea
           id="notes"
@@ -595,10 +563,10 @@ export default function StepConfirm({
       </div>
 
       {intakeQuestions.length > 0 && (
-        <div className="space-y-3 border-t border-gray-100 dark:border-neutral-800 pt-4">
+        <div className="space-y-3 border-t border-border pt-4">
           <div>
-            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{copy.intakeSection}</p>
-            <p className="mt-0.5 text-xs text-gray-400 dark:text-gray-500">{copy.intakePrivacy}</p>
+            <p className="text-sm font-semibold text-foreground">{copy.intakeSection}</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">{copy.intakePrivacy}</p>
           </div>
           {intakeQuestions.map((q) => (
             <IntakeField
@@ -622,94 +590,152 @@ export default function StepConfirm({
     </div>
   );
 
-  const paymentExtras = (
-    <>
-      {hasManualPaymentFallback && (
-        <div className="mb-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm dark:border-amber-800/50 dark:bg-amber-950/40 md:mb-4">
-          <p className="mb-2 font-medium text-amber-900 dark:text-amber-200">{copy.localPayment}</p>
-          {business.bankTransferInstructions && (
-            <p className="whitespace-pre-wrap text-amber-900 dark:text-amber-200/80">
-              {business.bankTransferInstructions}
-            </p>
-          )}
-          {business.lankaqrImageUrl && (
-            <div className="mt-3">
-              <Image
-                src={business.lankaqrImageUrl}
-                alt="LankaQR"
-                width={144}
-                height={144}
-                className="h-36 w-36 rounded-lg border bg-white object-contain p-2 dark:border-neutral-800 dark:bg-neutral-900"
-                unoptimized={!isOptimizableRemoteImage(business.lankaqrImageUrl)}
-              />
-            </div>
-          )}
-        </div>
-      )}
-      {upsell && (
-        <div className="mb-3 rounded-xl border border-blue-100 bg-[var(--booking-accent-muted)]/70 p-4 text-sm md:mb-4">
-          <p className="font-medium text-blue-950 dark:text-blue-100">Recommended add-on</p>
-          <p className="mt-1 text-[var(--booking-accent)]/80">
-            {upsell.reason} Ask about <span className="font-semibold">{upsell.name}</span>
-            {upsell.priceLkr > 0 ? ` (${formatLkr(upsell.priceLkr)})` : ""} during your visit.
+  const manualPaymentNotice =
+    hasManualPaymentFallback ? (
+      <div className="mb-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm dark:border-amber-800/50 dark:bg-amber-950/40 md:mb-4">
+        <p className="mb-2 font-medium text-amber-900 dark:text-amber-200">{copy.localPayment}</p>
+        {business.bankTransferInstructions && (
+          <p className="whitespace-pre-wrap text-amber-900 dark:text-amber-200/80">
+            {business.bankTransferInstructions}
           </p>
-        </div>
-      )}
-      {onlineMethods.length > 1 && service?.requiresPayment && dueNow > 0 && (
-        <div className="mb-3 space-y-2 rounded-xl border border-border bg-card p-4 md:mb-4">
-          <p className="text-sm font-medium text-foreground">{copy.paymentMethod}</p>
-          <label className="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground">
-            <input
-              type="radio"
-              name="paymentMethod"
-              checked={paymentMethod === "payhere"}
-              onChange={() => setPaymentMethod("payhere")}
+        )}
+        {business.lankaqrImageUrl && (
+          <div className="mt-3">
+            <Image
+              src={business.lankaqrImageUrl}
+              alt="LankaQR"
+              width={144}
+              height={144}
+              className="h-36 w-36 rounded-lg border border-border bg-card object-contain p-2"
+              unoptimized={!isOptimizableRemoteImage(business.lankaqrImageUrl)}
             />
-            {copy.paymentMethodPayhere}
-          </label>
-          <label className="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground">
-            <input
-              type="radio"
-              name="paymentMethod"
-              checked={paymentMethod === "paypal"}
-              onChange={() => setPaymentMethod("paypal")}
-            />
-            {copy.paymentMethodPaypal}
-          </label>
-        </div>
-      )}
+          </div>
+        )}
+      </div>
+    ) : null;
+
+  const upsellNotice =
+    upsell ? (
+      <div className="mt-4 rounded-xl border border-[var(--booking-accent-soft)] bg-[var(--booking-accent-muted)]/70 p-4 text-sm">
+        <p className="font-medium text-foreground">Recommended add-on</p>
+        <p className="mt-1 booking-text-accent">
+          {upsell.reason} Ask about <span className="font-semibold">{upsell.name}</span>
+          {upsell.priceLkr > 0 ? ` (${formatLkr(upsell.priceLkr)})` : ""} during your visit.
+        </p>
+      </div>
+    ) : null;
+
+  const paymentMethodSelector =
+    onlineMethods.length > 1 && service?.requiresPayment && dueNow > 0 ? (
+      <div className={cn("mt-4 space-y-2", panelCardCls)}>
+        <p className="text-sm font-medium text-foreground">{copy.paymentMethod}</p>
+        {(
+          [
+            { id: "payhere" as const, label: copy.paymentMethodPayhere },
+            { id: "paypal" as const, label: copy.paymentMethodPaypal },
+          ] as const
+        )
+          .filter((option) => onlineMethods.includes(option.id))
+          .map((option) => {
+            const selected = paymentMethod === option.id;
+            return (
+              <label
+                key={option.id}
+                className={cn(
+                  "flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border px-3 py-2.5 text-sm transition-colors",
+                  selected
+                    ? "border-[var(--booking-accent)] bg-[var(--booking-accent-muted)] text-foreground"
+                    : onAccentPanel
+                      ? "border-border/80 bg-white text-muted-foreground hover:bg-white/90"
+                      : "border-border bg-card text-muted-foreground hover:bg-muted/50",
+                )}
+              >
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  checked={selected}
+                  onChange={() => setPaymentMethod(option.id)}
+                  className="size-4 shrink-0 accent-[var(--booking-accent)]"
+                />
+                {option.label}
+              </label>
+            );
+          })}
+      </div>
+    ) : null;
+
+  const submitError =
+    error ? (
+      <div className="mt-4 flex items-start gap-2 rounded-xl border border-destructive/30 bg-card px-3 py-2.5 text-sm text-destructive">
+        <Icon name="exclamation-circle" className="mt-0.5 shrink-0 text-sm" />
+        <span>{error}</span>
+      </div>
+    ) : null;
+
+  const trustStrip = (
+    <div className="mt-2 flex items-center justify-center gap-1 lg:mt-3">
+      <Icon name="shield-check" className="text-xs text-muted-foreground" />
+      <span className="text-xs text-muted-foreground">{copy.paymentSecure}</span>
+    </div>
+  );
+
+  const slotUnavailableNotice =
+    slotUnavailable ? (
+      <div
+        className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800/50 dark:bg-amber-950/40 dark:text-amber-200"
+        role="alert"
+      >
+        <p className="font-medium">{copy.slotTaken}</p>
+        <p className="mt-1">{copy.slotTakenAction}</p>
+        <button
+          type="button"
+          onClick={onBack}
+          className="mt-3 min-h-11 text-sm font-medium booking-text-accent hover:underline"
+        >
+          {copy.pickDateTime}
+        </button>
+      </div>
+    ) : null;
+
+  const confirmActions = (
+    <>
+      <BookingSubmitButton
+        loading={loading}
+        disabled={loading || slotUnavailable}
+        onClick={handleBook}
+      >
+        {payLabel}
+      </BookingSubmitButton>
+      {trustStrip}
     </>
   );
 
   if (variant === "inline") {
     return (
-      <div id={formId} className="pt-2">
-        {paymentExtras}
+      <div id={formId} className="pb-28 lg:pb-0">
+        {slotUnavailableNotice}
+        {manualPaymentNotice}
         {contactForm}
-        {error && (
-          <div className="mt-3 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300">
-            <Icon name="exclamation-circle" className="mt-0.5 shrink-0 text-sm" />
-            <span>{error}</span>
-          </div>
-        )}
-        <button
-          type="button"
-          onClick={handleBook}
-          disabled={!canSubmit}
-          className="mt-4 w-full rounded-xl bg-[var(--booking-accent)] py-3.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+        {paymentMethodSelector}
+        {upsellNotice}
+        {submitError}
+
+        <div
+          className={cn(
+            "sticky bottom-0 z-10 -mx-4 mt-6 border-t border-border px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 lg:relative lg:mx-0 lg:mt-6 lg:border-0 lg:px-0 lg:pb-0 lg:pt-0",
+            onAccentPanel ? "booking-panel-surface border-border/80" : "bg-background",
+          )}
         >
-          {loading ? "Booking…" : payLabel}
-        </button>
-        <button
-          type="button"
-          onClick={onBack}
-          className="mt-3 text-sm text-muted-foreground transition-colors hover:text-foreground"
-        >
-          {copy.back}
-        </button>
-        <div className="mt-3 flex items-center justify-center gap-1">
-          <Icon name="shield-check" className="text-[11px] text-muted-foreground" />
-          <span className="text-[11px] text-muted-foreground">{copy.paymentSecure}</span>
+          {!hideInlineBack ? (
+            <button
+              type="button"
+              onClick={onBack}
+              className="mb-3 flex min-h-11 items-center text-sm text-muted-foreground transition-colors hover:text-foreground"
+            >
+              {copy.back}
+            </button>
+          ) : null}
+          {confirmActions}
         </div>
       </div>
     );
@@ -717,43 +743,33 @@ export default function StepConfirm({
 
   return (
     <div className="flex flex-col">
-      <div className="flex flex-col gap-3 booking-panel-bg px-[14px] py-3 md:grid md:grid-cols-2 md:gap-8 md:bg-transparent md:px-8 md:py-7">
+      <div className="flex flex-col gap-3 booking-panel-bg px-4 py-3 md:grid md:grid-cols-2 md:gap-8 md:bg-transparent md:px-8 md:py-7">
         <div>{summaryCards}</div>
         <div>
-          {paymentExtras}
+          {slotUnavailableNotice}
+          {manualPaymentNotice}
           {contactForm}
+          {paymentMethodSelector}
+          {upsellNotice}
         </div>
       </div>
 
       {error && (
-        <div className="mx-[14px] mb-2 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 dark:border-red-900/50 dark:bg-red-950/40 px-3 py-2.5 text-sm text-red-700 dark:text-red-300 md:mx-8">
+        <div className="mx-4 mb-2 flex items-start gap-2 rounded-xl border border-destructive/30 bg-card px-3 py-2.5 text-sm text-destructive md:mx-8">
           <Icon name="exclamation-circle" className="mt-0.5 shrink-0 text-sm" />
           <span>{error}</span>
         </div>
       )}
 
-      <div className="sticky bottom-0 z-10 border-t border-gray-200 dark:border-neutral-800/80 booking-sticky-bar px-[14px] pb-[max(1rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-md md:relative md:mt-6 md:border-0 md:bg-transparent md:px-8 md:pb-0 md:pt-0">
-        <div className="mb-2 flex md:mb-4">
-          <button
-            type="button"
-            onClick={onBack}
-            className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 md:mr-4"
-          >
-            <Icon name="chevron-left" className="text-sm" /> {copy.back}
-          </button>
-        </div>
+      <div className="sticky bottom-0 z-10 border-t border-border bg-background px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 md:relative md:mt-6 md:border-0 md:bg-transparent md:px-8 md:pb-0 md:pt-0">
         <button
           type="button"
-          onClick={handleBook}
-          disabled={!canSubmit}
-          className="w-full rounded-[14px] bg-gradient-to-r booking-gradient-accent py-[17px] text-[16px] font-bold text-white shadow-lg booking-shadow-accent transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 md:rounded-xl md:py-3.5 md:text-sm md:font-semibold"
+          onClick={onBack}
+          className="mb-3 flex min-h-11 items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
-          {loading ? "Booking…" : payLabel}
+          <Icon name="chevron-left" className="text-sm" /> {copy.back}
         </button>
-        <div className="mt-2 flex items-center justify-center gap-1 md:mt-3">
-          <Icon name="shield-check" className="text-[11px] text-gray-300" />
-          <span className="text-[11px] text-gray-400 dark:text-gray-500">{copy.paymentSecure}</span>
-        </div>
+        {confirmActions}
       </div>
     </div>
   );

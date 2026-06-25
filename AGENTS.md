@@ -107,4 +107,19 @@ Validate request bodies with Zod schemas from `src/lib/schemas/` or colocated sc
 
 ## Cursor skills
 
-`.cursor/skills/dag-task-runner/` is copied from [cursor/cookbook](https://github.com/cursor/cookbook) for optional multi-step agent workflows. Invoking it requires a `CURSOR_API_KEY` and consumes Cursor subscription usage — it is not part of Dinaya production.
+Dev-only agent skills live in `.cursor/skills/`. See [`.cursor/skills/README.md`](.cursor/skills/README.md) for the full pack.
+
+| Layer | Skills |
+|-------|--------|
+| **Hub** | `dinaya-hub` — route to the right specialist |
+| **Brand** | `dinaya-brand-voice`, `dinaya-visual-system` |
+| **Executive** | `dinaya-ceo`, `dinaya-cpo`, `dinaya-cto`, `dinaya-cfo`, `dinaya-head-of-growth`, `dinaya-head-of-sales` |
+| **Engineering** | `dinaya-booking-engine`, `dinaya-payhere`, `dinaya-migrations`, `dinaya-api-auth`, `dinaya-plan-gating`, `dinaya-messaging`, `dinaya-events`, `dinaya-voice-api` |
+| **Review** | `dinaya-security-review`, `dinaya-pr-ship-review`, `dinaya-content-review`, `apple-design-head` |
+| **Orchestration** | `dag-task-runner` (from [cursor/cookbook](https://github.com/cursor/cookbook); requires `CURSOR_API_KEY`) |
+
+Shared context: `.cursor/skills/_shared/` (brand, visual, product, stack, paths, competitors).
+
+Master plan: `docs/superpowers/plans/2026-06-22-dinaya-skill-pack-master-plan.md`
+
+Skills are not part of Dinaya production — never ship `@cursor/sdk` in the app bundle.

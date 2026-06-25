@@ -108,10 +108,15 @@ html.nav-open {
 
 @layer base {
   * { @apply border-border; }
-  body { @apply bg-background text-foreground; }
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
 }
 
 @layer utilities {
+  .image-depth {
+    @apply outline outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10;
+  }
   .surface-page {
     @apply bg-white dark:bg-neutral-950;
   }
@@ -124,16 +129,12 @@ html.nav-open {
     @apply bg-gray-50 dark:bg-neutral-900/60;
   }
 
-  .booking-page-bg {
-    @apply bg-muted/30 dark:bg-neutral-950;
-  }
-
   .booking-panel-bg {
-    @apply bg-card dark:bg-neutral-950;
+    @apply bg-card;
   }
 
   .booking-sticky-bar {
-    @apply bg-background/95 dark:bg-neutral-950/95;
+    @apply bg-background/95 backdrop-blur-md;
   }
 
   .public-page-offset {
@@ -144,7 +145,6 @@ html.nav-open {
     padding-top: calc(var(--public-nav-top) + var(--public-nav-height) + 2.75rem);
   }
 }
-
 
 /* Hide scrollbar globally but preserve scrolling functionality */
 html, body {
@@ -167,6 +167,10 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
 @layer components {
   [data-booking-theme] {
     --booking-accent: #2563eb;
+    --booking-page-bg: #ffffff;
+    --booking-panel-bg: #ffffff;
+    --booking-hero-overlay: #ffffff;
+    --booking-hero-overlay-opacity: 0.6;
     --booking-accent-hover: color-mix(in srgb, var(--booking-accent) 88%, black);
     --booking-accent-muted: color-mix(in srgb, var(--booking-accent) 10%, white);
     --booking-accent-soft: color-mix(in srgb, var(--booking-accent) 18%, white);
@@ -181,6 +185,22 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
     --booking-accent-soft: color-mix(in srgb, var(--booking-accent) 24%, black);
     --booking-accent-shadow: color-mix(in srgb, var(--booking-accent) 45%, transparent);
     --booking-accent-on-dark: color-mix(in srgb, var(--booking-accent) 65%, white);
+
+    /* Apple-style grouped surfaces: true black canvas, neutral elevated cards */
+    --background: 0 0% 0%;
+    --foreground: 0 0% 98%;
+    --card: 240 5% 11%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 5% 11%;
+    --popover-foreground: 0 0% 98%;
+    --secondary: 240 4% 16%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 4% 16%;
+    --muted-foreground: 240 4% 64%;
+    --accent: 240 4% 16%;
+    --accent-foreground: 0 0% 98%;
+    --border: 240 4% 22%;
+    --input: 240 4% 18%;
   }
 
   .booking-bg-accent { background-color: var(--booking-accent); }
@@ -194,5 +214,39 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
   .booking-bg-accent-soft { background-color: var(--booking-accent-soft); }
   .booking-gradient-accent {
     background-image: linear-gradient(to right, var(--booking-accent), var(--booking-accent-hover));
+  }
+
+  .booking-page-bg {
+    background-color: var(--booking-page-bg);
+  }
+
+  .booking-panel-surface {
+    background-color: var(--booking-panel-bg);
+  }
+
+  /* Solid pink panel: readable text + solid white sub-surfaces (slots, inputs) */
+  [data-booking-theme][data-booking-panel="accent"] .booking-panel-surface {
+    --foreground: 330 28% 16%;
+    --muted-foreground: 330 14% 32%;
+    --card: 0 0% 100%;
+    --card-foreground: 330 28% 16%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 330 28% 16%;
+    --secondary: 0 0% 100%;
+    --secondary-foreground: 330 28% 16%;
+    --muted: 330 45% 94%;
+    --accent: 330 45% 94%;
+    --accent-foreground: 330 28% 16%;
+    --border: 330 30% 76%;
+    --input: 330 30% 76%;
+    color: hsl(var(--foreground));
+  }
+
+  .booking-hero-overlay {
+    background-color: color-mix(
+      in srgb,
+      var(--booking-hero-overlay) calc(var(--booking-hero-overlay-opacity) * 100%),
+      transparent
+    );
   }
 }

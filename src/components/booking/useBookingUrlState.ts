@@ -78,8 +78,9 @@ export function useBookingUrlSync(input: {
   staffId: string | null;
   dealId: string | null;
   enabled?: boolean;
+  setParams: (updates: Partial<BookingUrlState>, options?: { replace?: boolean }) => void;
 }) {
-  const { setParams } = useBookingUrlState();
+  const { setParams } = input;
 
   useEffect(() => {
     if (input.enabled === false) return;

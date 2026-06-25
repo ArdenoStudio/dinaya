@@ -6,8 +6,8 @@ import { DiscoverDeals } from "@/components/discover/DiscoverDeals";
 import {
   categoryLabel,
   isValidDirectoryCategory,
-  listDirectoryBusinesses,
 } from "@/lib/directory";
+import { listDirectoryBusinesses } from "@/lib/directory-server";
 import { listActiveDeals } from "@/lib/deals/queries";
 import { Icon } from "@/components/ui/Icon";
 

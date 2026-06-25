@@ -1,9 +1,10 @@
 import { db } from "@/db";
-import { availability, availabilityOverrides, bookings, staff } from "@/db/schema";
+import { availability, availabilityOverrides, bookings, staff, staffLocations, staffServices } from "@/db/schema";
 import { and, count, eq, gte, lt } from "drizzle-orm";
 import { endOfDay, parseISO, startOfDay } from "date-fns";
 import { fromZonedTime } from "date-fns-tz";
 import { getAvailableSlots, isStaffClosedOnDate } from "@/lib/availability";
+import { getEligibleStaff } from "@/lib/booking-staff";
 import {
   filterSlotsByBusinessHoliday,
   getBusinessHolidayForDate,
@@ -18,6 +19,34 @@ export type SlotWithStaff = {
   label: string;
   staffId: string;
 };
+
+/** Staff IDs eligible for a service (and optional branch), for merged "any staff" availability. */
+export async function listEligibleStaffIdsForService(
+  businessId: string,
+  serviceId: string,
+  locationId?: string | null,
+): Promise<string[]> {
+  const [staffList, assignments, locationMap] = await Promise.all([
+    db
+      .select()
+      .from(staff)
+      .where(and(eq(staff.businessId, businessId), eq(staff.isActive, true))),
+    db
+      .select({ staffId: staffServices.staffId, serviceId: staffServices.serviceId })
+      .from(staffServices)
+      .innerJoin(staff, eq(staffServices.staffId, staff.id))
+      .where(eq(staff.businessId, businessId)),
+    db
+      .select({ staffId: staffLocations.staffId, locationId: staffLocations.locationId })
+      .from(staffLocations)
+      .innerJoin(staff, eq(staffLocations.staffId, staff.id))
+      .where(eq(staff.businessId, businessId)),
+  ]);
+
+  return getEligibleStaff(staffList, assignments, serviceId, locationMap, locationId).map(
+    (member) => member.id,
+  );
+}
 
 export async function getMergedSlotsForStaff({
   staffIds,

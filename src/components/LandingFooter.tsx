@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Icon } from "@/components/ui/Icon";
 import { FooterColumn } from "@/components/FooterColumn";
 import { getPublicSupportWhatsApp } from "@/lib/public-support";
+import { MARKETING_CTA_HERO, MARKETING_CTA_NAV } from "@/lib/marketing-copy";
 
 const supportWhatsApp = getPublicSupportWhatsApp();
 
@@ -29,9 +30,9 @@ export function LandingFooter() {
             </p>
             <Link
               href="/register"
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-white text-gray-900 px-6 py-3.5 text-sm font-semibold hover:bg-gray-100 transition-all hover:scale-[1.02] active:scale-95 self-start"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-white/90 hover:text-white transition-colors self-start"
             >
-              Get started free
+              {MARKETING_CTA_HERO}
               <Icon name="arrow-right" className="text-xs" />
             </Link>
           </div>
@@ -45,7 +46,7 @@ export function LandingFooter() {
               { label: "Help center", href: "/help" },
               { label: "Pricing", href: "/pricing" },
               { label: "Solutions", href: "/solutions" },
-              { label: "Get started", href: "/register" },
+              { label: MARKETING_CTA_NAV, href: "/register" },
               { label: "Sign in", href: "/auth/signin" },
             ]}
           />
@@ -82,6 +83,35 @@ export function LandingFooter() {
           />
         </div>
 
+        {/* Sri Lanka trust signals */}
+        <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 mb-10 pb-10 border-b border-white/10 text-xs text-gray-400">
+          {[
+            { icon: "geo-alt-fill", text: "Built for Sri Lanka" },
+            { icon: "currency-dollar", text: "No USD subscriptions" },
+            { icon: "percent", text: "Zero commission on bookings" },
+          ].map((item) => (
+            <div key={item.text} className="flex items-center gap-1.5">
+              <Icon name={item.icon} className="text-primary text-xs" />
+              <span>{item.text}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Payment providers */}
+        <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 mb-10 pb-10 border-b border-white/10">
+          <span className="text-[11px] uppercase tracking-widest text-gray-500 font-semibold">
+            Accept payments via
+          </span>
+          {["PayHere", "Visa", "Mastercard", "LankaQR", "FriMi"].map((p) => (
+            <span
+              key={p}
+              className="inline-flex items-center rounded-md border border-white/10 bg-white/5 px-2.5 py-1 text-xs font-semibold text-gray-300"
+            >
+              {p}
+            </span>
+          ))}
+        </div>
+
         {/* Bottom Metadata */}
         <div className="flex flex-col sm:flex-row justify-between items-center gap-6 text-xs text-gray-500 dark:text-gray-400 pb-4 border-b border-white/10 mb-4">
           <div className="flex items-center gap-1.5">
@@ -97,7 +127,7 @@ export function LandingFooter() {
                 aria-label={label}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white dark:hover:bg-neutral-800/15 border border-white/10 flex items-center justify-center text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 hover:text-white transition-all hover:scale-110 active:scale-95"
+                className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white dark:hover:bg-neutral-800/15 border border-white/10 flex items-center justify-center text-gray-400 dark:text-gray-500 hover:text-white transition-[transform,background-color,border-color,color] duration-150 ease-out hover:scale-110 active:scale-[0.96] motion-reduce:active:scale-100"
               >
                 <Icon name={name} size={14} />
               </a>
