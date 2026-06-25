@@ -328,7 +328,7 @@ export default function StepDateTime({
       ) : null}
 
       <div className="flex min-w-0 w-full max-w-full flex-col lg:grid lg:min-h-[24rem] lg:grid-cols-[minmax(0,1.05fr)_minmax(13.5rem,0.95fr)] lg:divide-x lg:divide-border xl:grid-cols-[minmax(0,1.1fr)_minmax(14rem,0.9fr)]">
-        <section className="min-w-0 flex-1 px-5 py-5 lg:px-6 lg:py-6 lg:pb-6">
+        <section className="min-w-0 flex-1 px-4 py-4 lg:px-5 lg:py-6">
           <div className="mb-3 flex items-center justify-between gap-2 md:mb-4">
             <p className="text-sm font-medium text-foreground md:sr-only">{copy.chooseDate}</p>
             <button
@@ -400,7 +400,7 @@ export default function StepDateTime({
         </section>
 
         {!hideSlots ? (
-          <section className="min-w-0 flex-1 border-t border-border px-5 py-5 lg:flex lg:min-h-0 lg:flex-col lg:border-t-0 lg:px-6 lg:py-6">
+          <section className="min-w-0 flex-1 border-t border-border px-4 py-4 lg:flex lg:min-h-0 lg:flex-col lg:border-t-0 lg:px-5 lg:py-6">
             {compactDateHeading ? (
                 <div className="mb-3 flex items-baseline justify-between gap-2 md:mb-4">
                   <h3 className="text-sm font-semibold text-foreground md:text-base">{compactDateHeading}</h3>

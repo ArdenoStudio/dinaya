@@ -50,7 +50,6 @@ import {
 } from "./useGoogleCalendarOverlay";
 import { shouldShowBookingContactForm } from "@/lib/booking/wizard-contact-step";
 import { useBookingInstantUrlSync } from "@/lib/booking/use-booking-instant-url-sync";
-import { cn } from "@/lib/utils";
 
 const COLOMBO_TZ = "Asia/Colombo";
 
@@ -604,8 +603,6 @@ function BookingWizardInner({
       ? "staff"
       : "dateTime";
 
-  const accentPanel = theme.panelBackground === "accent";
-
   const breadcrumbBlock =
     showBreadcrumb ? (
       <div
@@ -620,18 +617,7 @@ function BookingWizardInner({
     ) : null;
 
   const bookerCard = (
-      <div
-        className={cn(
-          "w-full min-w-0 max-w-full booking-panel-surface lg:overflow-visible lg:rounded-xl lg:border lg:border-border lg:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)] dark:lg:shadow-none dark:lg:ring-1 dark:lg:ring-white/10",
-          accentPanel && "booking-booker-frame",
-        )}
-      >
-        <div
-          className={cn(
-            "w-full min-w-0 overflow-hidden",
-            accentPanel && "booking-booker-inset rounded-[10px] lg:rounded-[11px]",
-          )}
-        >
+      <div className="w-full min-w-0 max-w-full booking-panel-surface rounded-none border-x-0 shadow-none lg:overflow-visible lg:rounded-xl lg:border lg:border-border lg:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)] dark:lg:shadow-none dark:lg:ring-1 dark:lg:ring-white/10">
         <BookingAttributionCapture businessId={business.id} />
         <BookingDealsSection
           deals={activeDeals}
@@ -701,10 +687,7 @@ function BookingWizardInner({
             <div className="grid w-full min-w-0 max-w-full grid-cols-1 gap-0 lg:grid-cols-[minmax(14rem,16rem)_minmax(0,1fr)] lg:items-stretch lg:divide-x lg:divide-border xl:grid-cols-[minmax(15rem,17rem)_minmax(0,1fr)]">
               <BookingPanel
                 area="meta"
-                className={cn(
-                  "border-b border-border pb-4 lg:sticky lg:top-0 lg:z-[1] lg:self-start lg:border-0 lg:px-6 lg:pb-6 lg:pt-6",
-                  !accentPanel && "bg-muted/15",
-                )}
+                className="border-b border-border pb-4 lg:sticky lg:top-0 lg:z-[1] lg:self-start lg:border-0 lg:px-5 lg:pb-6 lg:pt-6 xl:px-6"
                 {...panelMotion}
               >
                 <ServiceMetaPanel {...metaPanelProps} />
@@ -753,7 +736,7 @@ function BookingWizardInner({
                       />
                     </div>
                   ) : (
-                    <div className="px-0 py-0">
+                    <div className="lg:px-6">
                       <StepDateTime
                         businessId={business.id}
                         copy={copy}
@@ -798,7 +781,6 @@ function BookingWizardInner({
             className="flex justify-center border-t border-border px-4 py-3"
           />
         )}
-        </div>
       </div>
   );
 
