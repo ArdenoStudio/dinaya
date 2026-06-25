@@ -31,6 +31,7 @@
     "seed:test-booking": "tsx scripts/seed-test-booking.ts",
     "seed:pilot-wax": "tsx scripts/seed-pilot-wax.ts",
     "setup:wax": "node scripts/setup-wax.mjs",
+    "migrate:demo-logos": "tsx scripts/migrate-demo-logos.ts",
     "seed:personas": "tsx scripts/seed-e2e-personas.ts",
     "seed:personas:clean": "tsx scripts/seed-e2e-personas.ts --clean",
     "seed:personas:enrich": "tsx scripts/seed-e2e-personas.ts --enrich-rich",

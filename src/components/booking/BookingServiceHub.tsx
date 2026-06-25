@@ -229,9 +229,6 @@ export default function BookingServiceHub({
     ? "relative z-10 -mt-5 flex flex-col rounded-t-2xl booking-panel-surface pt-14 md:-mt-6 md:pt-[4.25rem]"
     : "flex flex-col";
 
-  const serviceMeta =
-    services.length === 1 ? copy.selectedService : `${services.length} services`;
-
   return (
     <BlurFade className={cn("w-full", showStickyCta ? "pb-28 md:pb-0" : "pb-4")}>
       <article className={cn("flex w-full flex-col", shell)}>
