@@ -1,4 +1,4 @@
-import SettingsForm from "@/components/dashboard/SettingsForm";
+import { BookingPageEditor } from "@/components/dashboard/BookingPageEditor";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
 import { db } from "@/db";
 import { businesses } from "@/db/schema";
@@ -6,41 +6,28 @@ import { requireOwner } from "@/lib/auth";
 import { canUseFeature, resolveEffectivePlan } from "@/lib/plan";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
-import { getAppBaseUrl } from "@/lib/booking-url";
 
 export default async function BookingPageEditorRoute() {
   const { businessId } = await requireOwner();
   const [business] = await db
     .select({
-      address: businesses.address,
-      bankTransferInstructions: businesses.bankTransferInstructions,
-      businessType: businesses.businessType,
-      cancellationPolicy: businesses.cancellationPolicy,
-      description: businesses.description,
-      depositPolicy: businesses.depositPolicy,
-      facebookUrl: businesses.facebookUrl,
-      galleryImages: businesses.galleryImages,
-      logoUrl: businesses.logoUrl,
-      instagramUrl: businesses.instagramUrl,
-      language: businesses.language,
-      lankaqrImageUrl: businesses.lankaqrImageUrl,
-      name: businesses.name,
-      payhereEnabled: businesses.payhereEnabled,
-      payhereMerchantId: businesses.payhereMerchantId,
-      hasPayhereMerchantSecret: businesses.payhereMerchantSecret,
-      paypalEnabled: businesses.paypalEnabled,
-      paypalClientId: businesses.paypalClientId,
-      hasPaypalClientSecret: businesses.paypalClientSecret,
-      hideDinayaBranding: businesses.hideDinayaBranding,
       accentColor: businesses.accentColor,
+      bookingPageBackground: businesses.bookingPageBackground,
+      bookingPageBackgroundColor: businesses.bookingPageBackgroundColor,
+      bookingHeroOverlay: businesses.bookingHeroOverlay,
+      bookingHeroOverlayOpacity: businesses.bookingHeroOverlayOpacity,
+      bookingThemePreset: businesses.bookingThemePreset,
+      bookingPanelBackground: businesses.bookingPanelBackground,
       customDomain: businesses.customDomain,
       customDomainVerified: businesses.customDomainVerified,
+      description: businesses.description,
+      galleryImages: businesses.galleryImages,
+      hideDinayaBranding: businesses.hideDinayaBranding,
+      logoUrl: businesses.logoUrl,
+      name: businesses.name,
       plan: businesses.plan,
       planExpiresAt: businesses.planExpiresAt,
-      phone: businesses.phone,
       slug: businesses.slug,
-      timezone: businesses.timezone,
-      websiteUrl: businesses.websiteUrl,
     })
     .from(businesses)
     .where(eq(businesses.id, businessId))
@@ -52,33 +39,21 @@ export default async function BookingPageEditorRoute() {
     storedPlan: business.plan,
     planExpiresAt: business.planExpiresAt,
   });
-  const previewUrl = `${getAppBaseUrl().replace(/\/$/, "")}/embed/book/${business.slug}?embed=1&hideGallery=0`;
 
   return (
     <div className="space-y-6">
       <DashboardPageHeader
         title="Booking page"
-        description="Edit how your public booking page looks and preview it live."
+        description="Customize how your public booking page looks. Changes preview live on the right."
       />
-      <div className="grid gap-6 xl:grid-cols-[1fr_1fr]">
-        <SettingsForm
-          business={{
-            ...business,
-            hasPayhereMerchantSecret: Boolean(business.hasPayhereMerchantSecret),
-            hasPaypalClientSecret: Boolean(business.hasPaypalClientSecret),
-            customDomainVerified: Boolean(business.customDomainVerified),
-            canCustomizeBookingPage: canUseFeature(effectivePlan, "publicBookingPageCustomization"),
-          }}
-        />
-        <div className="rounded-xl border bg-white p-5 xl:sticky xl:top-6 xl:self-start">
-          <h2 className="mb-3 font-semibold">Live preview</h2>
-          <iframe
-            src={previewUrl}
-            title="Booking page preview"
-            className="h-[min(80vh,900px)] w-full rounded-lg border"
-          />
-        </div>
-      </div>
+      <BookingPageEditor
+        business={{
+          ...business,
+          customDomainVerified: Boolean(business.customDomainVerified),
+          canCustomizeBookingPage: canUseFeature(effectivePlan, "publicBookingPageCustomization"),
+          canUseBookingPageTheme: canUseFeature(effectivePlan, "bookingPageTheme"),
+        }}
+      />
     </div>
   );
 }

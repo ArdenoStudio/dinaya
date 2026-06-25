@@ -8,7 +8,13 @@ import {
   type DashboardNavLabelKey,
   type DashboardRoute,
 } from "../../../src/lib/dashboard-route-map";
+import { slugify } from "../../../src/lib/utils";
 import { buildDesktopApiPath, desktopApiRequest } from "./desktop-api";
+import { findDashboardRouteByHref, hrefForView } from "./lib/routes";
+import { DesktopAppShell } from "./shell/DesktopAppShell";
+import { DashboardBookingsPage } from "./views/DashboardBookingsPage";
+import { DashboardOverviewPage, type DesktopShellMeta } from "./views/DashboardOverviewPage";
+import "./globals.css";
 import "./styles.css";
 
 type Business = {
@@ -103,6 +109,29 @@ type LoginPayload = {
     role: "owner" | "staff";
   };
 };
+
+type AuthView = "login" | "register";
+
+type RegisterFormState = {
+  businessName: string;
+  businessType: string;
+  email: string;
+  language: string;
+  name: string;
+  password: string;
+  slug: string;
+};
+
+const REGISTER_BUSINESS_TYPES = [
+  { helper: "Seeds haircut, colouring, and grooming services.", label: "Salon / barber", value: "salon_barber" },
+  { helper: "Seeds consultation and follow-up appointment types.", label: "Clinic", value: "clinic" },
+  { helper: "Seeds one-to-one and group class sessions.", label: "Tuition / classes", value: "tuition" },
+  { helper: "Seeds inspection and workshop service slots.", label: "Vehicle service", value: "vehicle_service" },
+  { helper: "Seeds consultation and shoot session services.", label: "Photography", value: "photography" },
+  { helper: "Seeds therapy and treatment appointments.", label: "Spa / wellness", value: "spa_wellness" },
+  { helper: "Seeds discovery and paid consultation calls.", label: "Consulting", value: "consulting" },
+  { helper: "Seeds a clean generic appointment setup.", label: "Other", value: "other" },
+] as const;
 
 type DashboardMetrics = {
   activeToday: number;
@@ -2204,7 +2233,11 @@ class DesktopErrorBoundary extends React.Component<
 function App() {
   const [booting, setBooting] = useState(true);
   const [authReady, setAuthReady] = useState(false);
+  const [authView, setAuthView] = useState<AuthView>(() =>
+    typeof window !== "undefined" && window.location.hash === "#register" ? "register" : "login",
+  );
   const [business, setBusiness] = useState<Business | null>(null);
+  const [user, setUser] = useState<LoginPayload["user"] | null>(null);
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const [view, setView] = useState<View>("overview");
   const [tab, setTab] = useState<Tab>("today");
@@ -2215,8 +2248,9 @@ function App() {
   const [calendarError, setCalendarError] = useState("");
   const [calendarLoading, setCalendarLoading] = useState(false);
   const [query, setQuery] = useState("");
-  const [staffFilter, setStaffFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  const [shellMeta, setShellMeta] = useState<DesktopShellMeta | null>(null);
+  const [staffFilter] = useState("");
+  const [statusFilter] = useState("");
   const [rows, setRows] = useState<BookingRow[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [detail, setDetail] = useState<BookingDetail | null>(null);
@@ -2381,6 +2415,31 @@ function App() {
   const initialNotificationSync = useRef(true);
 
   const route = findDashboardRoute(view) ?? findDashboardRoute("overview")!;
+
+  const refreshing =
+    syncing ||
+    moduleLoading ||
+    calendarLoading ||
+    availabilityLoading ||
+    clientsLoading ||
+    servicesLoading ||
+    staffLoading ||
+    locationsLoading ||
+    billingLoading ||
+    paymentsLoading ||
+    reviewsLoading ||
+    dealsLoading ||
+    broadcastsLoading ||
+    marketingLoading ||
+    aiRunsLoading ||
+    automationsLoading ||
+    integrationsLoading ||
+    reportsLoading;
+
+  function navigateByHref(href: string) {
+    const nextRoute = findDashboardRouteByHref(href);
+    if (nextRoute) openRoute(nextRoute);
+  }
 
   const visibleRows = useMemo(() => {
     if (view === "overview") return rows.filter((row) => isActiveDailyStatus(row.status));
@@ -4005,6 +4064,16 @@ function App() {
     }
   }
 
+  async function completeAuthSession(payload: LoginPayload) {
+    setBusiness(payload.business);
+    setUser(payload.user);
+    setAuthReady(true);
+    setAuthView("login");
+    setView("overview");
+    setTab("today");
+    await runSync("today");
+  }
+
   async function login(email: string, password: string) {
     setError("");
     const payload = await invoke<LoginPayload>("desktop_auth_login", {
@@ -4014,18 +4083,33 @@ function App() {
         password,
       },
     });
-    setBusiness(payload.business);
-    setAuthReady(true);
-    setView("overview");
-    setTab("today");
-    await runSync("today");
+    await completeAuthSession(payload);
+  }
+
+  async function register(form: RegisterFormState) {
+    setError("");
+    const payload = await invoke<LoginPayload>("desktop_auth_register", {
+      payload: {
+        businessName: form.businessName,
+        businessType: form.businessType,
+        deviceName: navigator.userAgent.includes("Windows") ? "Windows PC" : "Desktop",
+        email: form.email,
+        language: form.language,
+        name: form.name,
+        password: form.password,
+        slug: form.slug,
+      },
+    });
+    await completeAuthSession(payload);
   }
 
   async function logout() {
     await invoke("desktop_logout").catch(() => undefined);
     clearOfflineReadCache();
     setAuthReady(false);
+    setAuthView("login");
     setBusiness(null);
+    setUser(null);
     setRows([]);
     setDetail(null);
     setSelectedId(null);
@@ -4803,63 +4887,86 @@ function App() {
   }
 
   if (!authReady) {
-    return <LoginScreen error={error} onLogin={login} />;
+    if (authView === "register") {
+      return (
+        <RegisterScreen
+          error={error}
+          onRegister={register}
+          onSignIn={() => {
+            setError("");
+            setAuthView("login");
+          }}
+        />
+      );
+    }
+
+    return (
+      <LoginScreen
+        error={error}
+        onLogin={login}
+        onRegister={() => {
+          setError("");
+          setAuthView("register");
+        }}
+      />
+    );
   }
 
   return (
-    <div className="desktop-shell">
+    <>
       <a className="skip-link" href="#desktop-main">
         Skip to dashboard content
       </a>
-      <DashboardSidebar
-        business={business}
-        currentView={view}
-        onRoute={openRoute}
-      />
-
-      <main id="desktop-main" className="main-pane" tabIndex={-1}>
-        <header className="topbar glass-surface" aria-busy={syncing || moduleLoading || calendarLoading || availabilityLoading || clientsLoading || servicesLoading || staffLoading || locationsLoading || billingLoading || paymentsLoading || reviewsLoading || dealsLoading || broadcastsLoading || marketingLoading || aiRunsLoading || automationsLoading || integrationsLoading || reportsLoading}>
-          <div className="topbar-title">
-            <p className="eyebrow">{business?.name ?? "Dinaya"}</p>
-            <h1>{route.label}</h1>
-          </div>
-          <div className="command-bar">
-            <input
-              aria-label="Search dashboard"
-              placeholder="Search bookings, clients, services"
-              type="search"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") applyGlobalSearch();
-              }}
-            />
-            <button className="small" aria-haspopup="dialog" onClick={openCommandPalette}>
-              Command
-            </button>
-            <button className="primary small" disabled={syncing || moduleLoading || calendarLoading || availabilityLoading || clientsLoading || servicesLoading || staffLoading || locationsLoading || billingLoading || paymentsLoading || reviewsLoading || dealsLoading || broadcastsLoading || marketingLoading || aiRunsLoading || automationsLoading || integrationsLoading || reportsLoading} onClick={refreshCurrentView}>
-              {syncing || moduleLoading || calendarLoading || availabilityLoading || clientsLoading || servicesLoading || staffLoading || locationsLoading || billingLoading || paymentsLoading || reviewsLoading || dealsLoading || broadcastsLoading || marketingLoading || aiRunsLoading || automationsLoading || integrationsLoading || reportsLoading ? "Syncing..." : "Refresh"}
-            </button>
-          </div>
-        </header>
-
-        {error && <div className="error-banner" aria-live="assertive" role="alert">{error}</div>}
-        {offlineNotice && <div className="offline-banner" aria-live="polite" role="status">{offlineNotice}</div>}
-
+      <nav aria-current="page" aria-label="Current dashboard route" className="sr-only">
+        {route.label}
+      </nav>
+      <div aria-live="polite" className="sr-only">
+        {refreshing ? "Syncing dashboard data" : ""}
+      </div>
+      <DesktopAppShell
+        activeHref={hrefForView(view)}
+        banner={
+          error || offlineNotice ? (
+            <>
+              {error ? (
+                <div
+                  aria-live="assertive"
+                  className="border-b border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300"
+                  role="alert"
+                >
+                  {error}
+                </div>
+              ) : null}
+              {offlineNotice ? (
+                <div
+                  className="border-b border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-200"
+                  role="status"
+                >
+                  {offlineNotice}
+                </div>
+              ) : null}
+            </>
+          ) : undefined
+        }
+        businessName={business?.name ?? "Dinaya"}
+        plan={business?.plan ?? "trial"}
+        searchQuery={query}
+        shellMeta={shellMeta}
+        userEmail={user?.email ?? "Signed in"}
+        userName={user?.name ?? null}
+        userRole={user?.role ?? "owner"}
+        onNavigate={navigateByHref}
+        onSearchQueryChange={setQuery}
+        onSearchSubmit={() => applyGlobalSearch()}
+        onSignOut={() => void logout()}
+      >
         {view === "overview" ? (
-          <OverviewView
-            business={business}
-            lastSync={lastSync}
-            metrics={metrics}
-            rows={visibleRows}
-            staff={staff}
-            onCopyBookingLink={() => void copyBookingLink()}
-            onExportDaySheet={exportDaySheet}
-            onOpenBooking={(id) => void openDetail(id)}
-            onOpenBookings={() => setView("bookings")}
-            onPrintDaySheet={printDaySheet}
-          />
-        ) : view === "calendar" ? (
+          <DashboardOverviewPage onShellMeta={setShellMeta} />
+        ) : view === "bookings" ? (
+          <DashboardBookingsPage />
+        ) : (
+          <div className="desktop-legacy">
+        {view === "calendar" ? (
           <CalendarWorkspace
             data={calendarData}
             date={calendarDate}
@@ -4919,28 +5026,6 @@ function App() {
             onRefresh={() => void loadAvailability()}
             onSave={(staffId) => void updateAvailabilityWindows(staffId)}
             onSelectStaff={selectAvailabilityStaff}
-          />
-        ) : view === "bookings" ? (
-          <BookingsWorkspace
-            detail={detail}
-            rows={visibleRows}
-            selectedId={selectedId}
-            staff={staff}
-            staffFilter={staffFilter}
-            statusFilter={statusFilter}
-            tab={tab}
-            onApply={() => void runSync(tab)}
-            onExport={exportBookingsList}
-            onOpenBooking={(id) => void openDetail(id)}
-            onOpenWeb={(id) => void invoke("desktop_open_booking_web", { id })}
-            onPrint={printBookingsList}
-            onStaffFilter={setStaffFilter}
-            onStatus={(id, status) => void updateStatus(id, status)}
-            onStatusFilter={setStatusFilter}
-            onTab={(next) => {
-              setTab(next);
-              void runSync(next);
-            }}
           />
         ) : view === "clients" ? (
           <ClientsWorkspace
@@ -5410,21 +5495,23 @@ function App() {
             onLocationSave={(id) => void updateLocationDetail(id)}
           />
         )}
-
-        {commandOpen && (
-          <CommandPalette
-            commands={filteredCommands}
-            inputRef={commandInputRef}
-            query={commandQuery}
-            selectedIndex={commandIndex}
-            onClose={() => setCommandOpen(false)}
-            onQuery={setCommandQuery}
-            onRun={runCommand}
-            onSelectIndex={setCommandIndex}
-          />
+          </div>
         )}
-      </main>
-    </div>
+      </DesktopAppShell>
+
+      {commandOpen && (
+        <CommandPalette
+          commands={filteredCommands}
+          inputRef={commandInputRef}
+          query={commandQuery}
+          selectedIndex={commandIndex}
+          onClose={() => setCommandOpen(false)}
+          onQuery={setCommandQuery}
+          onRun={runCommand}
+          onSelectIndex={setCommandIndex}
+        />
+      )}
+    </>
   );
 }
 
@@ -5530,56 +5617,14 @@ function CommandPalette({
   );
 }
 
-function DashboardSidebar({
-  business,
-  currentView,
-  onRoute,
-}: {
-  business: Business | null;
-  currentView: View;
-  onRoute: (route: DashboardRoute) => void;
-}) {
-  return (
-    <aside className="sidebar glass-surface">
-      <div className="brand">
-        <div className="app-mark">D</div>
-        <div>
-          <strong>Dinaya</strong>
-          <span>{business?.plan ?? "Desktop"} dashboard</span>
-        </div>
-      </div>
-
-      <nav className="nav-groups" aria-label="Desktop dashboard">
-        {dashboardRouteGroups.map((group) => (
-          <section key={group.id} className="nav-group">
-            <p>{group.label}</p>
-            {group.routes.map((routeItem) => (
-              <button
-                key={routeItem.id}
-                aria-current={currentView === routeItem.id ? "page" : undefined}
-                aria-label={`${routeItem.label}. ${routeStateLabel(routeItem)} desktop screen.`}
-                className={currentView === routeItem.id ? "active" : ""}
-                onClick={() => onRoute(routeItem)}
-              >
-                <span>{routeItem.label}</span>
-                <span className={`route-state ${routeItem.nativeStatus}`}>
-                  {routeStateLabel(routeItem)}
-                </span>
-              </button>
-            ))}
-          </section>
-        ))}
-      </nav>
-    </aside>
-  );
-}
-
 function LoginScreen({
   error,
   onLogin,
+  onRegister,
 }: {
   error: string;
   onLogin: (email: string, password: string) => Promise<void>;
+  onRegister: () => void;
 }) {
   const emailRef = useRef<HTMLInputElement>(null);
   const [email, setEmail] = useState("");
@@ -5605,256 +5650,460 @@ function LoginScreen({
     }
   }
 
+  const displayError = localError || error;
+
   return (
     <div className="login-screen">
-      <section className="login-story" aria-label="Dinaya">
+      <div className="login-form-shell">
         <DinayaBrand />
 
-        <div className="login-story-copy">
-          <h1>
-            Your calendar,
-            <span>always full.</span>
-          </h1>
-          <p>Thousands of appointments managed. Zero phone calls needed.</p>
+        <header className="login-form-header">
+          <h1>Welcome back</h1>
+          <p>Sign in to your Dinaya dashboard</p>
+        </header>
 
-          <ul>
-            <li><span className="story-icon calendar-icon" />Clients book 24/7 without calling you</li>
-            <li><span className="story-icon card-icon" />Accept online payments via PayHere</li>
-            <li><span className="story-icon grid-icon" />Manage everything from one dashboard</li>
-          </ul>
-
-          <div className="login-quote">
-            <p>&quot;I used to miss bookings because of WhatsApp messages I forgot to reply to. Now everything&apos;s in Dinaya and I haven&apos;t missed one since.&quot;</p>
-            <span>Kavinda Jayasuriya - Owner, The Barber Room - Kandy</span>
-          </div>
-        </div>
-
-        <p className="login-copyright">© {new Date().getFullYear()} Dinaya by Ardeno Studio</p>
-      </section>
-
-      <section className="login-form-panel">
-        <form className="login-card" onSubmit={submit}>
-          <div>
-            <h2>Welcome back</h2>
-            <p>Sign in to your dashboard</p>
-          </div>
-
-          <label>
+        <form className="login-form" onSubmit={submit} noValidate>
+          <label className="login-field" htmlFor="desktop-email">
             Email
             <input
               ref={emailRef}
               autoComplete="email"
+              className="login-input"
+              id="desktop-email"
               inputMode="email"
+              name="email"
               placeholder="you@example.com"
+              required
               type="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
             />
           </label>
-          <label>
-            <span className="label-row">
-              Password
-              <button type="button" onClick={() => void invoke("desktop_open_app_path", { path: "/forgot-password" })}>
+
+          <div className="login-field">
+            <div className="login-label-row">
+              <label htmlFor="desktop-password">Password</label>
+              <button
+                className="login-link-button"
+                type="button"
+                onClick={() => void invoke("desktop_open_app_path", { path: "/forgot-password" })}
+              >
                 Forgot password?
               </button>
-            </span>
-            <span className="password-field">
+            </div>
+            <div className="login-password-field">
               <input
                 autoComplete="current-password"
-                placeholder="••••••••"
+                className="login-input"
+                id="desktop-password"
+                name="password"
+                placeholder="Enter your password"
+                required
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
               />
               <button
                 aria-label={showPassword ? "Hide password" : "Show password"}
+                className="login-password-toggle"
+                tabIndex={-1}
                 type="button"
                 onClick={() => setShowPassword((current) => !current)}
               >
-                {showPassword ? "Hide" : "Show"}
+                {showPassword ? <LoginEyeSlashIcon /> : <LoginEyeIcon />}
               </button>
-            </span>
-          </label>
-          {(localError || error) && <div className="error-banner inline">{localError || error}</div>}
-          <button className="primary login-submit" disabled={loading} type="submit">
-            {loading ? "Signing in..." : "Sign in"}
-          </button>
+            </div>
+          </div>
 
-          <div className="secure-line">Secure sign-in · Your data is encrypted</div>
+          {displayError ? (
+            <div className="login-error" role="alert">
+              <LoginAlertIcon />
+              <span>{displayError}</span>
+            </div>
+          ) : null}
+
+          <button className="login-submit" disabled={loading} type="submit">
+            {loading ? "Signing in…" : "Sign in"}
+          </button>
         </form>
 
-        <p className="register-line">
+        <div className="login-secure-line">
+          <LoginLockIcon />
+          <span>Secure sign-in · Your data is encrypted</span>
+        </div>
+
+        <p className="login-register-line">
           No account?{" "}
-          <button type="button" onClick={() => void invoke("desktop_open_app_path", { path: "/register" })}>
-            Create one free
+          <button className="login-register-link" type="button" onClick={onRegister}>
+            Create your booking page
           </button>
         </p>
-      </section>
+      </div>
     </div>
   );
 }
 
 function DinayaBrand() {
   return (
-    <div className="login-brand">
+    <div className="login-brand" aria-label="Dinaya">
       <svg
         aria-hidden="true"
+        className="login-brand-mark"
         fill="currentColor"
-        height="30"
         viewBox="318 319 875 866"
-        width="30"
         xmlns="http://www.w3.org/2000/svg"
       >
         <path d="M 819.949219 499.695312 L 563.980469 755.773438 C 513.210938 806.554688 513.210938 889.15625 563.980469 939.941406 C 614.75 990.777344 697.378906 990.726562 748.09375 939.941406 L 966.117188 721.851562 C 982.484375 705.480469 982.484375 678.953125 966.117188 662.582031 C 949.75 646.207031 923.230469 646.207031 906.863281 662.582031 L 688.84375 880.671875 C 670.753906 898.707031 641.375 898.761719 623.234375 880.671875 C 605.144531 862.578125 605.144531 833.132812 623.234375 815.042969 L 879.203125 558.96875 C 931.742188 506.464844 1017.1875 506.464844 1069.671875 558.96875 C 1095.097656 584.425781 1109.117188 618.265625 1109.117188 654.257812 C 1109.117188 690.226562 1095.097656 724.0625 1069.671875 749.523438 L 782.496094 1036.789062 C 740.375 1078.921875 684.367188 1102.117188 624.816406 1102.117188 C 565.261719 1102.117188 509.285156 1078.921875 467.164062 1036.789062 C 380.222656 949.820312 380.222656 808.328125 467.164062 721.359375 L 797.144531 391.253906 C 813.511719 374.878906 813.511719 348.355469 797.144531 331.980469 C 780.773438 315.609375 754.257812 315.609375 737.890625 331.980469 L 407.910156 662.089844 C 288.285156 781.722656 288.285156 976.425781 407.910156 1096.058594 C 465.828125 1154.019531 542.867188 1185.945312 624.816406 1185.945312 C 706.765625 1185.945312 783.804688 1154.019531 841.746094 1096.058594 L 1128.925781 808.792969 C 1214.121094 723.570312 1214.121094 584.917969 1128.925781 499.695312 C 1043.78125 414.558594 905.144531 414.445312 819.949219 499.695312 Z" />
       </svg>
-      <strong>Dinaya.lk</strong>
+      <span>Dinaya</span>
     </div>
   );
 }
 
-function OverviewView({
-  business,
-  lastSync,
-  metrics,
-  rows,
-  staff,
-  onCopyBookingLink,
-  onExportDaySheet,
-  onOpenBooking,
-  onOpenBookings,
-  onPrintDaySheet,
+function getPasswordStrength(password: string): 0 | 1 | 2 | 3 {
+  if (password.length === 0) return 0;
+  let score = 0;
+  if (password.length >= 8) score++;
+  if (/[0-9]/.test(password)) score++;
+  if (/[^a-zA-Z0-9]/.test(password)) score++;
+  return score as 0 | 1 | 2 | 3;
+}
+
+const passwordStrengthLabel = ["", "Weak", "Fair", "Strong"];
+const passwordStrengthClass = ["", "is-weak", "is-fair", "is-strong"];
+
+function RegisterScreen({
+  error,
+  onRegister,
+  onSignIn,
 }: {
-  business: Business | null;
-  lastSync: string | null;
-  metrics: DashboardMetrics;
-  rows: BookingRow[];
-  staff: StaffMember[];
-  onCopyBookingLink: () => void;
-  onExportDaySheet: () => void;
-  onOpenBooking: (id: string) => void;
-  onOpenBookings: () => void;
-  onPrintDaySheet: () => void;
+  error: string;
+  onRegister: (form: RegisterFormState) => Promise<void>;
+  onSignIn: () => void;
 }) {
-  const [clock, setClock] = useState(() => new Date());
-  const nextBooking = nextBookingForRows(rows, clock);
+  const step1Ref = useRef<HTMLInputElement>(null);
+  const step2Ref = useRef<HTMLInputElement>(null);
+  const slugTouched = useRef(false);
+  const [step, setStep] = useState<1 | 2>(1);
+  const [form, setForm] = useState<RegisterFormState>({
+    businessName: "",
+    businessType: "salon_barber",
+    email: "",
+    language: "en",
+    name: "",
+    password: "",
+    slug: "",
+  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [localError, setLocalError] = useState("");
 
   useEffect(() => {
-    const timer = window.setInterval(() => setClock(new Date()), 60_000);
-    return () => window.clearInterval(timer);
+    step1Ref.current?.focus();
   }, []);
 
-  return (
-    <section className="overview-layout">
-      <LivingDaySheet
-        business={business}
-        clock={clock}
-        lastSync={lastSync}
-        metrics={metrics}
-        nextBooking={nextBooking}
-        staff={staff}
-        onCopyBookingLink={onCopyBookingLink}
-        onExportDaySheet={onExportDaySheet}
-        onOpenBookings={onOpenBookings}
-        onPrintDaySheet={onPrintDaySheet}
-      />
+  useEffect(() => {
+    if (step === 2) step2Ref.current?.focus();
+  }, [step]);
 
-      <div className="overview-main">
-        <div className="metric-grid">
-          <MetricCard label="Active today" tone="cobalt" value={metrics.activeToday} />
-          <MetricCard label="Pending" tone="amber" value={metrics.pendingToday} />
-          <MetricCard label="Confirmed" tone="emerald" value={metrics.confirmedToday} />
-          <MetricCard label="Staff load" tone="slate" value={`${metrics.staffOnDeck}/${staff.length || 0}`} />
+  const strength = getPasswordStrength(form.password);
+  const displayError = localError || error;
+  const selectedBusinessType = REGISTER_BUSINESS_TYPES.find((type) => type.value === form.businessType);
+
+  function handleBusinessNameChange(value: string) {
+    setForm((current) => ({
+      ...current,
+      businessName: value,
+      slug: slugTouched.current ? current.slug : slugify(value),
+    }));
+  }
+
+  function handleSlugChange(value: string) {
+    slugTouched.current = true;
+    setForm((current) => ({ ...current, slug: slugify(value) }));
+  }
+
+  async function handleStep1(event: React.FormEvent) {
+    event.preventDefault();
+    setLocalError("");
+    if (form.password.length < 8) {
+      setLocalError("Password must be at least 8 characters.");
+      return;
+    }
+    setStep(2);
+  }
+
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    setLoading(true);
+    setLocalError("");
+    try {
+      await onRegister(form);
+    } catch (registerError) {
+      setLocalError(String(registerError));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="login-screen">
+      <div className="login-form-shell">
+        <DinayaBrand />
+
+        <div className="register-step-dots" aria-hidden="true">
+          <span className={step === 1 ? "is-active" : "is-complete"} />
+          <span className={step === 2 ? "is-active" : ""} />
         </div>
 
-        <section className="panel">
-          <div className="panel-head">
-            <div>
-              <p className="eyebrow">Bookings</p>
-              <h2>Today queue</h2>
-            </div>
-            <div className="panel-actions">
-              <button onClick={onPrintDaySheet}>Print</button>
-              <button onClick={onExportDaySheet}>Export CSV</button>
-              <button onClick={onOpenBookings}>Open inbox</button>
-            </div>
-          </div>
-          <BookingList rows={rows.slice(0, 8)} selectedId={null} onOpen={onOpenBooking} />
-        </section>
+        {step === 1 ? (
+          <>
+            <header className="login-form-header">
+              <h1>Create your account</h1>
+              <p>Start your 14-day free trial. No credit card needed.</p>
+            </header>
+
+            <form className="login-form" onSubmit={handleStep1} noValidate>
+              <label className="login-field" htmlFor="desktop-register-name">
+                Your name
+                <input
+                  ref={step1Ref}
+                  autoComplete="name"
+                  className="login-input"
+                  id="desktop-register-name"
+                  name="name"
+                  placeholder="Amara Silva"
+                  required
+                  type="text"
+                  value={form.name}
+                  onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))}
+                />
+              </label>
+
+              <label className="login-field" htmlFor="desktop-register-email">
+                Email
+                <input
+                  autoComplete="email"
+                  className="login-input"
+                  id="desktop-register-email"
+                  inputMode="email"
+                  name="email"
+                  placeholder="you@example.com"
+                  required
+                  type="email"
+                  value={form.email}
+                  onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))}
+                />
+              </label>
+
+              <div className="login-field">
+                <label htmlFor="desktop-register-password">Password</label>
+                <div className="login-password-field">
+                  <input
+                    autoComplete="new-password"
+                    className="login-input"
+                    id="desktop-register-password"
+                    minLength={8}
+                    name="password"
+                    placeholder="Min. 8 characters"
+                    required
+                    type={showPassword ? "text" : "password"}
+                    value={form.password}
+                    onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))}
+                  />
+                  <button
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    className="login-password-toggle"
+                    tabIndex={-1}
+                    type="button"
+                    onClick={() => setShowPassword((current) => !current)}
+                  >
+                    {showPassword ? <LoginEyeSlashIcon /> : <LoginEyeIcon />}
+                  </button>
+                </div>
+                {form.password.length > 0 ? (
+                  <div className="register-password-strength">
+                    <div className="register-password-strength-bars">
+                      {[1, 2, 3].map((index) => (
+                        <span
+                          key={index}
+                          className={index <= strength ? passwordStrengthClass[strength] : ""}
+                        />
+                      ))}
+                    </div>
+                    <p className={`register-password-strength-label ${passwordStrengthClass[strength]}`}>
+                      {passwordStrengthLabel[strength]}
+                      {strength === 1 ? " — add numbers or symbols" : null}
+                      {strength === 2 ? " — add a symbol to strengthen" : null}
+                    </p>
+                  </div>
+                ) : null}
+              </div>
+
+              {displayError ? (
+                <div className="login-error" role="alert">
+                  <LoginAlertIcon />
+                  <span>{displayError}</span>
+                </div>
+              ) : null}
+
+              <button className="login-submit" type="submit">
+                Continue
+              </button>
+            </form>
+          </>
+        ) : (
+          <>
+            <button
+              className="register-back-button"
+              type="button"
+              onClick={() => {
+                setStep(1);
+                setLocalError("");
+              }}
+            >
+              Back
+            </button>
+
+            <header className="login-form-header">
+              <h1>Set up your booking page</h1>
+              <p>This is your public page that clients will visit.</p>
+            </header>
+
+            <form className="login-form" onSubmit={handleSubmit} noValidate>
+              <label className="login-field" htmlFor="desktop-register-business-name">
+                Business name
+                <input
+                  ref={step2Ref}
+                  autoComplete="organization"
+                  className="login-input"
+                  id="desktop-register-business-name"
+                  name="businessName"
+                  placeholder="e.g. Glow Beauty Studio"
+                  required
+                  type="text"
+                  value={form.businessName}
+                  onChange={(event) => handleBusinessNameChange(event.target.value)}
+                />
+              </label>
+
+              <div className="login-field">
+                <label htmlFor="desktop-register-slug">Your booking URL</label>
+                <div className="register-slug-field">
+                  <input
+                    className="login-input"
+                    id="desktop-register-slug"
+                    name="slug"
+                    placeholder="your-business"
+                    required
+                    value={form.slug}
+                    onChange={(event) => handleSlugChange(event.target.value)}
+                  />
+                  <span className="register-slug-suffix">.dinaya.lk</span>
+                </div>
+                {form.slug ? (
+                  <p className="register-slug-preview">
+                    Clients will book at <strong>{form.slug}.dinaya.lk</strong>
+                  </p>
+                ) : null}
+              </div>
+
+              <label className="login-field" htmlFor="desktop-register-business-type">
+                Business type
+                <select
+                  className="login-select"
+                  id="desktop-register-business-type"
+                  value={form.businessType}
+                  onChange={(event) => setForm((current) => ({ ...current, businessType: event.target.value }))}
+                >
+                  {REGISTER_BUSINESS_TYPES.map((type) => (
+                    <option key={type.value} value={type.value}>
+                      {type.label}
+                    </option>
+                  ))}
+                </select>
+                {selectedBusinessType ? (
+                  <p className="register-field-helper">{selectedBusinessType.helper}</p>
+                ) : null}
+              </label>
+
+              <label className="login-field" htmlFor="desktop-register-language">
+                Booking page language
+                <select
+                  className="login-select"
+                  id="desktop-register-language"
+                  value={form.language}
+                  onChange={(event) => setForm((current) => ({ ...current, language: event.target.value }))}
+                >
+                  <option value="en">English</option>
+                  <option value="si">Sinhala</option>
+                  <option value="ta">Tamil</option>
+                </select>
+                <p className="register-field-helper">You can change this later in Settings.</p>
+              </label>
+
+              {displayError ? (
+                <div className="login-error" role="alert">
+                  <LoginAlertIcon />
+                  <span>{displayError}</span>
+                </div>
+              ) : null}
+
+              <button className="login-submit" disabled={loading} type="submit">
+                {loading ? "Creating…" : "Create your booking page"}
+              </button>
+            </form>
+          </>
+        )}
+
+        <div className="login-secure-line">
+          <LoginLockIcon />
+          <span>Secure sign-up · No credit card required</span>
+        </div>
+
+        <p className="login-register-line">
+          Already have an account?{" "}
+          <button className="login-register-link" type="button" onClick={onSignIn}>
+            Sign in
+          </button>
+        </p>
       </div>
-    </section>
+    </div>
   );
 }
 
-function LivingDaySheet({
-  business,
-  clock,
-  lastSync,
-  metrics,
-  nextBooking,
-  staff,
-  onCopyBookingLink,
-  onExportDaySheet,
-  onOpenBookings,
-  onPrintDaySheet,
-}: {
-  business: Business | null;
-  clock: Date;
-  lastSync: string | null;
-  metrics: DashboardMetrics;
-  nextBooking: BookingRow | null;
-  staff: StaffMember[];
-  onCopyBookingLink: () => void;
-  onExportDaySheet: () => void;
-  onOpenBookings: () => void;
-  onPrintDaySheet: () => void;
-}) {
+function LoginEyeIcon() {
   return (
-    <aside className="living-day glass-surface">
-      <div>
-        <p className="eyebrow">Living Day Sheet</p>
-        <h2>{formatDate(clock.toISOString())}</h2>
-        <p>{clock.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
-      </div>
+    <svg aria-hidden="true" fill="currentColor" height="16" viewBox="0 0 16 16" width="16">
+      <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.133 13.133 0 0 1 1.172 8z" />
+      <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z" />
+    </svg>
+  );
+}
 
-      <div className="day-focus">
-        <span>Next</span>
-        {nextBooking ? (
-          <div>
-            <strong>{nextBooking.clientName}</strong>
-            <p>{formatTime(nextBooking.startsAt)} - {nextBooking.serviceName}</p>
-          </div>
-        ) : (
-          <div>
-            <strong>No active booking</strong>
-            <p>{business?.name ?? "Dinaya"} is clear for now.</p>
-          </div>
-        )}
-      </div>
+function LoginEyeSlashIcon() {
+  return (
+    <svg aria-hidden="true" fill="currentColor" height="16" viewBox="0 0 16 16" width="16">
+      <path d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a7.028 7.028 0 0 0-2.79.588l.77.771A6.001 6.001 0 0 1 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.134 13.134 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755-.165.165-.337.328-.517.491l1.716 1.716zm-2.828 2.828-1.716-1.716c-.23.179-.488.335-.775.48a3.5 3.5 0 0 1-4.474-4.474l-.823-.823A6.004 6.004 0 0 0 2 8s3 5.5 8 5.5c1.55 0 2.904-.33 4.031-.934z" />
+      <path d="M5.525 7.646a2.5 2.5 0 0 1 2.829 2.829l.686.686a6.002 6.002 0 0 0-3.515-3.515l.686.686zm4.396 4.396L4.11 6.131a.5.5 0 0 1 0-.707l.707-.707a.5.5 0 0 1 .707 0l7.071 7.071a.5.5 0 0 1 0 .707l-.707.707a.5.5 0 0 1-.707 0z" />
+    </svg>
+  );
+}
 
-      <div className="day-stack">
-        <div>
-          <span>Pending</span>
-          <strong>{metrics.pendingToday}</strong>
-        </div>
-        <div>
-          <span>Confirmed</span>
-          <strong>{metrics.confirmedToday}</strong>
-        </div>
-        <div>
-          <span>Staff</span>
-          <strong>{metrics.staffOnDeck}/{staff.length || 0}</strong>
-        </div>
-      </div>
+function LoginLockIcon() {
+  return (
+    <svg aria-hidden="true" fill="currentColor" height="14" viewBox="0 0 16 16" width="14">
+      <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
+    </svg>
+  );
+}
 
-      <div className="day-actions">
-        <button className="primary" onClick={onOpenBookings}>Review today</button>
-        <button onClick={onCopyBookingLink}>Copy booking link</button>
-        <button onClick={onPrintDaySheet}>Print</button>
-        <button onClick={onExportDaySheet}>Export CSV</button>
-      </div>
-
-      <p className="sync-line">{lastSync ? `Synced ${formatTime(lastSync)}` : "Waiting for first sync"}</p>
-    </aside>
+function LoginAlertIcon() {
+  return (
+    <svg aria-hidden="true" fill="currentColor" height="16" viewBox="0 0 16 16" width="16">
+      <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
+      <path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995z" />
+    </svg>
   );
 }
 
@@ -6325,129 +6574,6 @@ function AvailabilityDetailPanel({
         )}
       </section>
     </aside>
-  );
-}
-
-function BookingsWorkspace(props: {
-  detail: BookingDetail | null;
-  rows: BookingRow[];
-  selectedId: string | null;
-  staff: StaffMember[];
-  staffFilter: string;
-  statusFilter: string;
-  tab: Tab;
-  onApply: () => void;
-  onExport: () => void;
-  onOpenBooking: (id: string) => void;
-  onOpenWeb: (id: string) => void;
-  onPrint: () => void;
-  onStaffFilter: (value: string) => void;
-  onStatus: (id: string, status: BookingStatus) => void;
-  onStatusFilter: (value: string) => void;
-  onTab: (tab: Tab) => void;
-}) {
-  return (
-    <section className="workspace">
-      <div className="list-pane">
-        <Filters
-          staff={props.staff}
-          staffFilter={props.staffFilter}
-          statusFilter={props.statusFilter}
-          tab={props.tab}
-          onApply={props.onApply}
-          onStaffFilter={props.onStaffFilter}
-          onStatusFilter={props.onStatusFilter}
-          onTab={props.onTab}
-        />
-        <div className="export-row">
-          <span>{props.rows.length} bookings in this view</span>
-          <div>
-            <button onClick={props.onPrint}>Print</button>
-            <button onClick={props.onExport}>Export CSV</button>
-          </div>
-        </div>
-        <BookingList
-          rows={props.rows}
-          selectedId={props.selectedId}
-          onOpen={props.onOpenBooking}
-        />
-      </div>
-      <BookingDetailPanel
-        detail={props.detail}
-        selectedId={props.selectedId}
-        onOpenWeb={props.onOpenWeb}
-        onStatus={props.onStatus}
-      />
-    </section>
-  );
-}
-
-function Filters(props: {
-  staff: StaffMember[];
-  staffFilter: string;
-  statusFilter: string;
-  tab: Tab;
-  onApply: () => void;
-  onStaffFilter: (value: string) => void;
-  onStatusFilter: (value: string) => void;
-  onTab: (tab: Tab) => void;
-}) {
-  return (
-    <div className="filters">
-      <div className="tabs">
-        {(["today", "upcoming", "past"] as Tab[]).map((item) => (
-          <button key={item} className={props.tab === item ? "active" : ""} onClick={() => props.onTab(item)}>
-            {item[0].toUpperCase() + item.slice(1)}
-          </button>
-        ))}
-      </div>
-      <div className="filter-row">
-        <select value={props.staffFilter} onChange={(event) => props.onStaffFilter(event.target.value)}>
-          <option value="">All staff</option>
-          {props.staff.map((member) => (
-            <option key={member.id} value={member.id}>{member.name}</option>
-          ))}
-        </select>
-        <select value={props.statusFilter} onChange={(event) => props.onStatusFilter(event.target.value)}>
-          <option value="">All statuses</option>
-          {Object.entries(statusLabels).map(([value, label]) => (
-            <option key={value} value={value}>{label}</option>
-          ))}
-        </select>
-        <button onClick={props.onApply}>Apply</button>
-      </div>
-    </div>
-  );
-}
-
-function BookingList({
-  rows,
-  selectedId,
-  onOpen,
-}: {
-  rows: BookingRow[];
-  selectedId: string | null;
-  onOpen: (id: string) => void;
-}) {
-  if (rows.length === 0) {
-    return <div className="empty-state">No bookings in this view.</div>;
-  }
-
-  return (
-    <ul className="booking-list">
-      {rows.map((row) => (
-        <li key={row.id}>
-          <button className={selectedId === row.id ? "booking-row selected" : "booking-row"} onClick={() => onOpen(row.id)}>
-            <span className="time">{formatTime(row.startsAt)}</span>
-            <span className="booking-copy">
-              <strong>{row.clientName}</strong>
-              <span>{row.serviceName} with {row.staffName}</span>
-            </span>
-            <span className={`badge ${row.status}`}>{statusLabels[row.status]}</span>
-          </button>
-        </li>
-      ))}
-    </ul>
   );
 }
 

@@ -104,6 +104,7 @@ async function main() {
   console.log(
     `\nDone — ${business.name} (${business.slug}): ${inserted} reviews seeded (${fives}×5, ${fours}×4 → ~${targetAvg} avg).`,
   );
+  process.exit(0);
 }
 
 main().catch((error) => {

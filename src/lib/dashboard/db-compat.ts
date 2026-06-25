@@ -1,44 +1,27 @@
 import { sql } from "drizzle-orm";
 import { db } from "@/db";
+export { isMissingSchemaError, isTransientDbConnectionError } from "./db-errors";
 
 const tableCache = new Map<string, Promise<boolean>>();
 const columnCache = new Map<string, Promise<boolean>>();
 
-function existsFromResult(result: unknown): boolean {
-  const rows = (result as { rows?: Array<{ exists?: boolean }> }).rows ?? [];
+/** Normalize drizzle execute() shape — postgres-js returns an array; Neon HTTP uses `.rows`. */
+export function schemaExistsFromExecuteResult(result: unknown): boolean {
+  const rows = Array.isArray(result)
+    ? (result as Array<{ exists?: boolean }>)
+    : ((result as { rows?: Array<{ exists?: boolean }> }).rows ?? []);
   return Boolean(rows[0]?.exists);
 }
 
-export function isMissingSchemaError(error: unknown): boolean {
-  const directCode = (error as { code?: string } | null)?.code;
-  const causeCode = (error as { cause?: { code?: string } } | null)?.cause?.code;
-  return directCode === "42P01" || directCode === "42703" || causeCode === "42P01" || causeCode === "42703";
-}
-
-function collectErrorMessages(error: unknown): string {
-  const parts: string[] = [];
-  let current: unknown = error;
-  for (let depth = 0; current && depth < 4; depth++) {
-    if (typeof current === "string") {
-      parts.push(current);
-      break;
-    }
-    const message = (current as { message?: string }).message;
-    if (message) parts.push(message);
-    current = (current as { cause?: unknown }).cause;
-  }
-  return parts.join(" ");
-}
-
-export function isTransientDbConnectionError(error: unknown): boolean {
-  const message = collectErrorMessages(error);
-  return /fetch failed|econnreset|etimedout|socket hang up|connection (refused|reset|timed? ?out|terminated|closed)/i.test(message);
+function existsFromResult(result: unknown): boolean {
+  return schemaExistsFromExecuteResult(result);
 }
 
 export async function withTransientDbRetry<T>(
   fn: () => Promise<T>,
   attempts = 3,
 ): Promise<T> {
+  const { isTransientDbConnectionError } = await import("./db-errors");
   let lastError: unknown;
   for (let attempt = 0; attempt < attempts; attempt++) {
     try {

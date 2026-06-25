@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, inArray } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, sql } from "drizzle-orm";
 import { format } from "date-fns";
 import { db } from "@/db";
 import { bookings, businesses, communications, services } from "@/db/schema";
@@ -35,6 +35,8 @@ function phoneVariants(raw: string): string[] {
   return Array.from(new Set([norm, digits, local, raw.trim()].filter(Boolean)));
 }
 
+const ACTIVE_BOOKING_STATUSES = ["pending", "confirmed"] as const;
+
 const bookingColumns = {
   id: bookings.id,
   businessId: bookings.businessId,
@@ -44,15 +46,76 @@ const bookingColumns = {
   serviceId: bookings.serviceId,
 };
 
-async function findRecentBooking(fromPhone: string, now: Date) {
+function activeBookingFilter(variants: string[], businessId: string) {
+  return and(
+    eq(bookings.businessId, businessId),
+    inArray(bookings.clientPhone, variants),
+    inArray(bookings.status, [...ACTIVE_BOOKING_STATUSES]),
+  );
+}
+
+/**
+ * Dinaya uses one platform WhatsApp number. When a phone has bookings at multiple
+ * tenants, attribute inbound messages to a single business before replying.
+ */
+export async function resolveInboundBusinessId(fromPhone: string): Promise<string | null> {
   const variants = phoneVariants(fromPhone);
   if (variants.length === 0) return null;
+
+  const tenantRows = await db
+    .selectDistinct({ businessId: bookings.businessId })
+    .from(bookings)
+    .where(and(
+      inArray(bookings.clientPhone, variants),
+      inArray(bookings.status, [...ACTIVE_BOOKING_STATUSES]),
+    ));
+
+  if (tenantRows.length === 0) return null;
+  if (tenantRows.length === 1) return tenantRows[0]!.businessId;
+
+  const normalized = toWhatsAppPhone(fromPhone);
+
+  const [recentOutbound] = await db
+    .select({ businessId: communications.businessId })
+    .from(communications)
+    .innerJoin(bookings, eq(bookings.id, communications.bookingId))
+    .where(and(
+      eq(communications.channel, "whatsapp"),
+      eq(communications.direction, "outbound"),
+      inArray(bookings.clientPhone, variants),
+    ))
+    .orderBy(desc(communications.sentAt), desc(communications.createdAt))
+    .limit(1);
+
+  if (recentOutbound) return recentOutbound.businessId;
+
+  const [recentInbound] = await db
+    .select({ businessId: communications.businessId })
+    .from(communications)
+    .where(and(
+      eq(communications.channel, "whatsapp"),
+      eq(communications.direction, "inbound"),
+      sql`${communications.meta}->>'fromPhone' = ${normalized}`,
+    ))
+    .orderBy(desc(communications.createdAt))
+    .limit(1);
+
+  if (recentInbound) return recentInbound.businessId;
+
+  return null;
+}
+
+async function findRecentBooking(fromPhone: string, now: Date, businessId: string) {
+  const variants = phoneVariants(fromPhone);
+  if (variants.length === 0) return null;
+
+  const scoped = activeBookingFilter(variants, businessId);
 
   // Prefer the soonest upcoming booking; fall back to the most recent past one.
   const [upcoming] = await db
     .select(bookingColumns)
     .from(bookings)
-    .where(and(inArray(bookings.clientPhone, variants), gte(bookings.startsAt, now)))
+    .where(and(scoped, gte(bookings.startsAt, now)))
     .orderBy(bookings.startsAt)
     .limit(1);
   if (upcoming) return upcoming;
@@ -60,7 +123,7 @@ async function findRecentBooking(fromPhone: string, now: Date) {
   const [recent] = await db
     .select(bookingColumns)
     .from(bookings)
-    .where(inArray(bookings.clientPhone, variants))
+    .where(scoped)
     .orderBy(desc(bookings.startsAt))
     .limit(1);
   return recent ?? null;
@@ -128,10 +191,11 @@ export async function handleInboundWhatsApp(msg: InboundWhatsAppMessage): Promis
 
   const now = new Date();
   const normalizedFrom = toWhatsAppPhone(msg.fromPhone);
-  const booking = await findRecentBooking(msg.fromPhone, now);
+  const businessId = await resolveInboundBusinessId(msg.fromPhone);
+  const booking = businessId ? await findRecentBooking(msg.fromPhone, now, businessId) : null;
 
   if (!booking) {
-    // No booking on record for this number — no business to attribute, reply generically.
+    // No unambiguous tenant context — never disclose another business's booking details.
     await sendWhatsApp({
       clientPhone: msg.fromPhone,
       body: "Thanks for your message! We couldn't find a booking linked to this number. To book, please use the link your provider shared with you.",

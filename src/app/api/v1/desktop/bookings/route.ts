@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { and, asc, desc, eq, gte, ilike, lt, or } from "drizzle-orm";
+import { and, asc, desc, eq, gte, ilike, lt, ne, or } from "drizzle-orm";
 import { endOfDay, startOfDay } from "date-fns";
 import { fromZonedTime, toZonedTime } from "date-fns-tz";
 import { db } from "@/db";
-import { bookings, businesses, services, staff } from "@/db/schema";
+import { bookings, businesses, payments, services, staff } from "@/db/schema";
 import { withRateLimit } from "@/lib/rate-limit";
 import { requireDesktopBookings } from "@/app/api/v1/desktop/_shared";
 
-const VALID_TABS = ["upcoming", "today", "past"] as const;
+const VALID_TABS = ["upcoming", "today", "past", "cancelled", "all"] as const;
 const VALID_STATUSES = ["pending", "confirmed", "cancelled", "completed", "no_show"] as const;
 const DEFAULT_LIMIT = 40;
 const MAX_LIMIT = 100;
@@ -33,10 +33,11 @@ export async function GET(req: NextRequest) {
   if (!limited.ok) return limited.response;
 
   const params = req.nextUrl.searchParams;
-  const tabRaw = params.get("tab") ?? "today";
+  const tabRaw = params.get("tab") ?? "upcoming";
   const tab = VALID_TABS.includes(tabRaw as (typeof VALID_TABS)[number])
     ? (tabRaw as (typeof VALID_TABS)[number])
-    : "today";
+    : "upcoming";
+  const webCompat = params.get("compat") === "web";
 
   const parsedLimit = Number(params.get("limit") ?? DEFAULT_LIMIT);
   const limit = Number.isFinite(parsedLimit)
@@ -75,9 +76,10 @@ export async function GET(req: NextRequest) {
 
   const filters = [
     eq(bookings.businessId, businessId),
-    ...(tab === "upcoming" ? [gte(bookings.startsAt, now)] : []),
+    ...(tab === "upcoming" ? [gte(bookings.startsAt, now), ne(bookings.status, "cancelled")] : []),
     ...(tab === "today" ? [gte(bookings.startsAt, dayStart), lt(bookings.startsAt, dayEnd)] : []),
-    ...(tab === "past" ? [lt(bookings.startsAt, now)] : []),
+    ...(tab === "past" ? [lt(bookings.startsAt, now), ne(bookings.status, "cancelled")] : []),
+    ...(tab === "cancelled" ? [eq(bookings.status, "cancelled")] : []),
     ...(cursor
       ? [tab === "past" ? lt(bookings.startsAt, cursor) : gte(bookings.startsAt, cursor)]
       : []),
@@ -98,13 +100,17 @@ export async function GET(req: NextRequest) {
   const rows = await db
     .select({
       id: bookings.id,
+      clientId: bookings.clientId,
       clientName: bookings.clientName,
       clientPhone: bookings.clientPhone,
       clientEmail: bookings.clientEmail,
       startsAt: bookings.startsAt,
       endsAt: bookings.endsAt,
       status: bookings.status,
+      source: bookings.source,
       createdAt: bookings.createdAt,
+      amountLkr: payments.amountLkr,
+      paymentStatus: payments.status,
       serviceName: services.name,
       staffId: bookings.staffId,
       staffName: staff.name,
@@ -112,32 +118,43 @@ export async function GET(req: NextRequest) {
     .from(bookings)
     .innerJoin(services, eq(bookings.serviceId, services.id))
     .innerJoin(staff, eq(bookings.staffId, staff.id))
+    .leftJoin(payments, eq(payments.bookingId, bookings.id))
     .where(and(...filters))
-    .orderBy(tab === "past" ? desc(bookings.startsAt) : asc(bookings.startsAt))
+    .orderBy(tab === "upcoming" || tab === "today" || tab === "all" ? asc(bookings.startsAt) : desc(bookings.startsAt))
     .limit(limit + 1);
 
   const hasMore = rows.length > limit;
   const page = hasMore ? rows.slice(0, limit) : rows;
   const nextCursor = hasMore ? page[page.length - 1]?.startsAt.toISOString() : null;
 
+  const mappedRows = page.map((row) => ({
+    id: row.id,
+    clientId: row.clientId,
+    clientName: row.clientName,
+    clientPhone: row.clientPhone,
+    clientEmail: row.clientEmail,
+    amountLkr: row.amountLkr,
+    paymentStatus: row.paymentStatus,
+    source: row.source,
+    serviceName: row.serviceName,
+    staffId: row.staffId,
+    staffName: row.staffName,
+    startsAt: row.startsAt.toISOString(),
+    endsAt: row.endsAt.toISOString(),
+    status: row.status,
+    revisionTs: row.createdAt.toISOString(),
+    webUrl: `/dashboard/bookings/${row.id}`,
+  }));
+
+  if (webCompat) {
+    return NextResponse.json(mappedRows);
+  }
+
   return NextResponse.json({
     tab,
     limit,
     nextCursor,
     serverTime: now.toISOString(),
-    rows: page.map((row) => ({
-      id: row.id,
-      clientName: row.clientName,
-      clientPhone: row.clientPhone,
-      clientEmail: row.clientEmail,
-      serviceName: row.serviceName,
-      staffId: row.staffId,
-      staffName: row.staffName,
-      startsAt: row.startsAt.toISOString(),
-      endsAt: row.endsAt.toISOString(),
-      status: row.status,
-      revisionTs: row.createdAt.toISOString(),
-      webUrl: `/dashboard/bookings/${row.id}`,
-    })),
+    rows: mappedRows,
   });
 }

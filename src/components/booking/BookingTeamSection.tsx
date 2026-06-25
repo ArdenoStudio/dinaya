@@ -9,8 +9,17 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { BlurFade } from "@/components/ui/blur-fade";
+import { UserAvatars, type AvatarUser } from "@/components/ui/user-avatars";
 
 type StaffMember = Pick<Staff, "id" | "name" | "bio" | "avatarUrl">;
+
+function staffToAvatarUsers(members: StaffMember[]): AvatarUser[] {
+  return members.map((member) => ({
+    id: member.id,
+    name: member.name,
+    image: member.avatarUrl,
+  }));
+}
 
 interface Props {
   members: StaffMember[];
@@ -58,27 +67,23 @@ export function BookingTeamSection({ members, copy, variant, className, id }: Pr
   const closeDialog = () => dialogRef.current?.close();
 
   if (variant === "dialog") {
-    const preview = members.slice(0, 4);
-    const overflow = members.length - preview.length;
-
     return (
       <BlurFade inView className={className}>
         <div id={id} className="flex justify-center">
           <button
           type="button"
           onClick={openDialog}
-          className="group flex min-h-11 items-center gap-3 rounded-full border border-border/70 bg-card/80 px-4 py-2.5 text-sm text-muted-foreground shadow-sm transition-[background-color,border-color,transform] duration-200 ease-out hover:border-border hover:bg-card hover:text-foreground active:scale-[0.99]"
+          className="group flex min-h-11 items-center gap-3 rounded-full border border-border/70 bg-card/80 px-4 py-2.5 text-sm text-muted-foreground shadow-sm transition-[background-color,border-color,transform] duration-200 ease-out hover:border-border hover:bg-card hover:text-foreground active:scale-[0.96] motion-reduce:active:scale-100"
         >
-          <span className="flex -space-x-2.5">
-            {preview.map((member) => (
-              <MemberAvatar key={member.id} member={member} size="sm" stacked />
-            ))}
-            {overflow > 0 && (
-              <span className="flex size-8 items-center justify-center rounded-full border-2 border-background bg-muted text-[10px] font-semibold text-muted-foreground ring-1 ring-border/50">
-                +{overflow}
-              </span>
-            )}
-          </span>
+          <UserAvatars
+            users={staffToAvatarUsers(members)}
+            size={32}
+            maxVisible={4}
+            overlap={65}
+            isOverlapOnly
+            decorative
+            className="shrink-0"
+          />
           <span className="font-medium">
             {copy.meetTeam}
             <span className="ml-1 font-normal text-muted-foreground">({members.length})</span>

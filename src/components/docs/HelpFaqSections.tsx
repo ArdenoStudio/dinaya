@@ -100,7 +100,7 @@ export function HelpFaqSections() {
                   <Link
                     key={a.label}
                     href={`/docs/guides/${a.guideSlug}`}
-                    className="group flex items-center gap-3 rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-3.5 hover:border-primary/30 hover:shadow-sm transition-all"
+                    className="group flex items-center gap-3 rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-3.5 hover:border-primary/30 hover:shadow-sm transition-[transform,box-shadow,border-color] duration-150 ease-out active:scale-[0.96] motion-reduce:active:scale-100"
                   >
                     {inner}
                   </Link>
@@ -114,7 +114,7 @@ export function HelpFaqSections() {
                     setActiveCategory(a.cat);
                     document.getElementById(a.cat)?.scrollIntoView({ behavior: "smooth" });
                   }}
-                  className="group flex items-center gap-3 rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-3.5 text-left hover:border-primary/30 hover:shadow-sm transition-all w-full"
+                  className="group flex items-center gap-3 rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-3.5 text-left hover:border-primary/30 hover:shadow-sm transition-[transform,box-shadow,border-color] duration-150 ease-out active:scale-[0.96] motion-reduce:active:scale-100 w-full"
                 >
                   {inner}
                 </button>

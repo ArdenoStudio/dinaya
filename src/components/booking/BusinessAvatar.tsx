@@ -22,7 +22,7 @@ export function BusinessAvatar({ name, logoUrl, icon, size, onDark }: BusinessAv
         alt={name}
         width={pixelSize}
         height={pixelSize}
-        className={`${dim} shrink-0 object-cover ${onDark ? "ring-2 ring-white/30" : "ring-1 ring-white/25"}`}
+        className={`${dim} shrink-0 object-cover image-depth`}
         unoptimized={!isOptimizableRemoteImage(logoUrl)}
       />
     );

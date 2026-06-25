@@ -56,7 +56,7 @@ export function BookingPolicyAccordion({
           <AccordionItem key={item.id} value={item.id} className="border-border/70 px-3 md:px-4">
             <AccordionTrigger className="gap-3 py-3.5 text-sm font-medium hover:no-underline">
               <span className="flex min-w-0 items-center gap-3">
-                <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-lg booking-bg-accent-muted booking-text-accent">
                   <Icon name={POLICY_ICONS[item.id]} className="text-base" />
                 </span>
                 <span className="truncate text-left text-foreground">{item.title}</span>

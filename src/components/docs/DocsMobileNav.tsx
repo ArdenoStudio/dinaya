@@ -8,19 +8,36 @@ export function DocsMobileNav() {
   const router = useRouter();
 
   return (
-    <div className="lg:hidden mb-6">
+    <div className="mb-6 lg:hidden">
+      <nav aria-label="Documentation guides" className="mb-4 flex flex-col gap-1">
+        <Link
+          href="/docs"
+          className="flex min-h-11 items-center rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm font-medium text-gray-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-gray-100"
+        >
+          Documentation home
+        </Link>
+        {allGuides.slice(0, 6).map((guide) => (
+          <Link
+            key={guide.slug}
+            href={`/docs/guides/${guide.slug}`}
+            className="flex min-h-11 items-center rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 dark:border-neutral-800 dark:bg-neutral-900 dark:text-gray-300"
+          >
+            {guide.title}
+          </Link>
+        ))}
+      </nav>
       <label htmlFor="docs-mobile-nav" className="sr-only">
         Jump to a guide
       </label>
       <select
         id="docs-mobile-nav"
-        className="w-full rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-sm shadow-sm shadow-gray-900/5 dark:shadow-black/20"
+        className="min-h-11 w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-base shadow-sm shadow-gray-900/5 dark:border-neutral-800 dark:bg-neutral-900 dark:shadow-black/20"
         defaultValue=""
         onChange={(e) => {
           if (e.target.value) router.push(e.target.value);
         }}
       >
-        <option value="">Browse guides…</option>
+        <option value="">Browse all guides…</option>
         {allGuides.map((g) => (
           <option key={g.slug} value={`/docs/guides/${g.slug}`}>
             {g.title}
@@ -28,12 +45,8 @@ export function DocsMobileNav() {
         ))}
       </select>
       <p className="mt-2 text-center text-xs">
-        <Link href="/docs" className="text-primary hover:underline">
-          Documentation home
-        </Link>
-        {" · "}
         <Link href="/docs.md" className="text-primary hover:underline">
-          Markdown
+          Markdown export
         </Link>
       </p>
     </div>

@@ -5,6 +5,7 @@ import { addDays, format, parseISO } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import { Icon } from "@/components/ui/Icon";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import type { Staff } from "@/db/schema";
 import { getBookingSessionToken } from "@/lib/booking-session";
 import type { BookingService } from "./BookingWizard";
@@ -13,6 +14,7 @@ import MonthCalendar, { type MonthDayStatus } from "./MonthCalendar";
 import DateQuickStrip from "./DateQuickStrip";
 import TimeSlotGrid, { type SlotEmptyState, type SlotOption } from "./TimeSlotGrid";
 import { SlotListPanel } from "./SlotListPanel";
+import { SlotPickerSheet } from "./SlotPickerSheet";
 import type { NextAvailableSlot } from "./SlotsEmptyView";
 import { CalendarOverlayControl } from "./CalendarOverlayControl";
 import type { GoogleCalendarOverlay } from "./useGoogleCalendarOverlay";
@@ -82,6 +84,7 @@ export default function StepDateTime({
   const slotCacheRef = useRef<Record<string, { slots: SlotOption[]; emptyState: SlotEmptyState }>>({});
   const [nextAvailable, setNextAvailable] = useState<NextAvailableSlot | null>(null);
   const [showMobileCalendar, setShowMobileCalendar] = useState(false);
+  const [slotSheetOpen, setSlotSheetOpen] = useState(false);
   const [monthDayStatus, setMonthDayStatus] = useState<Record<string, MonthDayStatus>>({});
   const [calendarMonth, setCalendarMonth] = useState(() => format(today, "yyyy-MM"));
   const autoAdvancedDateRef = useRef(false);
@@ -159,6 +162,7 @@ export default function StepDateTime({
       if (dealId) query.set("dealId", dealId);
       if (sessionToken) query.set("sessionToken", sessionToken);
       const res = await fetch(`/api/availability/month?${query.toString()}`);
+      if (!res.ok) return;
       const data = await res.json();
       setMonthDayStatus((prev) => ({ ...prev, ...(data.days ?? {}) }));
     },
@@ -169,6 +173,7 @@ export default function StepDateTime({
     if (!canLoad || !selectedDate) {
       setSlots([]);
       setHasFetched(false);
+      setLoadingSlots(false);
       slotCacheRef.current = {};
       return;
     }
@@ -206,6 +211,10 @@ export default function StepDateTime({
       if (locationId) query.set("locationId", locationId);
       if (sessionToken) query.set("sessionToken", sessionToken);
       const res = await fetch(`/api/availability/next?${query.toString()}`);
+      if (!res.ok) {
+        if (!cancelled) setNextAvailable(null);
+        return;
+      }
       const data = await res.json();
       if (!cancelled) setNextAvailable(data.next ?? null);
     })();
@@ -253,8 +262,17 @@ export default function StepDateTime({
         endUtc: slot.endUtc,
         label: slot.label,
       });
+      setSlotSheetOpen(false);
     },
     [onDateChange, onSlotSelect],
+  );
+
+  const handleMobileSlotSelect = useCallback(
+    (slot: SlotOption) => {
+      onSlotSelect(slot);
+      setSlotSheetOpen(false);
+    },
+    [onSlotSelect],
   );
 
   const compactDateHeading = selectedDate
@@ -297,6 +315,10 @@ export default function StepDateTime({
     onNextAvailable: handleNextAvailable,
   };
 
+  const mobileTimeLabel = selectedSlot
+    ? `${selectedSlot.label} · ${copy.changeTime}`
+    : copy.availableTimes;
+
   return (
       <div className="flex h-full min-w-0 w-full max-w-full flex-col">
       {!hideHeading ? (
@@ -305,8 +327,8 @@ export default function StepDateTime({
         </p>
       ) : null}
 
-      <div className="flex min-w-0 w-full max-w-full flex-col lg:grid lg:min-h-[22rem] lg:grid-cols-[minmax(0,1fr)_minmax(0,16rem)] lg:divide-x lg:divide-border xl:grid-cols-[minmax(0,1fr)_minmax(0,18rem)]">
-        <section className="min-w-0 pb-0 lg:px-4 lg:pb-0 lg:pt-0 xl:px-5">
+      <div className="flex min-w-0 w-full max-w-full flex-col lg:grid lg:min-h-[24rem] lg:grid-cols-[minmax(0,1fr)_minmax(14rem,0.92fr)] lg:divide-x lg:divide-border/80 xl:grid-cols-[minmax(0,1.08fr)_minmax(14.5rem,0.88fr)]">
+        <section className="min-w-0 flex-1 py-0 lg:pr-6">
           <div className="mb-3 flex items-center justify-between gap-2 md:mb-4">
             <p className="text-sm font-medium text-foreground md:sr-only">{copy.chooseDate}</p>
             <button
@@ -378,17 +400,17 @@ export default function StepDateTime({
         </section>
 
         {!hideSlots ? (
-          <section className="min-w-0 border-t border-border pt-3 lg:flex lg:min-h-0 lg:flex-col lg:border-t-0 lg:px-4 lg:pt-0 xl:px-5">
+          <section className="min-w-0 flex-1 border-t border-border/80 py-4 lg:flex lg:min-h-0 lg:flex-col lg:border-t-0 lg:py-0 lg:pl-6">
             {compactDateHeading ? (
                 <div className="mb-3 flex items-baseline justify-between gap-2 md:mb-4">
                   <h3 className="text-sm font-semibold text-foreground md:text-base">{compactDateHeading}</h3>
-                  <span className="hidden text-xs text-muted-foreground md:inline">{copy.availableTimes}</span>
+                  <span className="text-xs font-medium text-muted-foreground">{copy.availableTimes}</span>
                 </div>
               ) : (
                 <p className="mb-3 text-xs text-muted-foreground">{copy.selectDate}</p>
               )}
 
-              {holdLabel && (
+              {holdLabel && selectedSlot && (
                 <p className="mb-3 rounded-lg booking-bg-accent-muted px-3 py-2 text-xs font-medium booking-text-accent">
                   <Icon name="clock" className="mr-1.5" />
                   {holdLabel}
@@ -407,9 +429,25 @@ export default function StepDateTime({
               ) : (
                 <>
                   <div className="lg:hidden">
-                    <TimeSlotGrid {...slotPanelProps} />
+                    {showSlotSkeleton ? (
+                      <TimeSlotGrid {...slotPanelProps} loading />
+                    ) : hasFetched ? (
+                      <button
+                        type="button"
+                        onClick={() => setSlotSheetOpen(true)}
+                        className={cn(
+                          "flex min-h-11 w-full items-center justify-between gap-3 rounded-xl border px-4 py-3 text-left text-sm font-semibold transition-colors",
+                          selectedSlot
+                            ? "border-[var(--booking-accent)] bg-[var(--booking-accent-muted)]/50 text-[var(--booking-accent)]"
+                            : "border-border bg-card text-foreground hover:bg-muted/40",
+                        )}
+                      >
+                        <span className="truncate">{mobileTimeLabel}</span>
+                        <Icon name="chevron-right" className="shrink-0 text-xs text-muted-foreground" />
+                      </button>
+                    ) : null}
                   </div>
-                  <div className="scrollbar-hide hidden min-w-0 max-h-[min(28rem,calc(100vh-12rem))] overflow-y-auto overflow-x-hidden lg:block">
+                  <div className="scrollbar-hide hidden min-w-0 w-full max-h-[min(30rem,calc(100vh-14rem))] overflow-y-auto overflow-x-hidden pb-4 lg:block">
                     <SlotListPanel {...slotPanelProps} />
                   </div>
                 </>
@@ -437,6 +475,20 @@ export default function StepDateTime({
           )}
         </div>
       )}
+
+      <SlotPickerSheet
+        open={slotSheetOpen}
+        onClose={() => setSlotSheetOpen(false)}
+        selectedDate={selectedDate}
+        slots={slots}
+        selectedStartUtc={selectedSlot?.startUtc ?? null}
+        copy={copy}
+        onSelect={handleMobileSlotSelect}
+        loading={showSlotSkeleton}
+        emptyState={slotEmptyState}
+        timezone={timezone}
+        calendarOverlay={calendarOverlay}
+      />
     </div>
   );
 }
