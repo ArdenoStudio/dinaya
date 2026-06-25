@@ -78,6 +78,8 @@ export default function SettingsForm({ business }: Props) {
     business.galleryImages ?? []
   );
   const [logoUrl, setLogoUrl] = useState(business.logoUrl ?? "");
+  const [logoUploading, setLogoUploading] = useState(false);
+  const [logoUploadError, setLogoUploadError] = useState("");
   const [newImageUrl, setNewImageUrl] = useState("");
 
   const [saving, setSaving] = useState(false);
@@ -123,6 +125,24 @@ export default function SettingsForm({ business }: Props) {
 
   function removeGalleryImage(url: string) {
     setGalleryImages((prev) => prev.filter((u) => u !== url));
+  }
+
+  async function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setLogoUploading(true);
+    setLogoUploadError("");
+    const data = new FormData();
+    data.append("file", file);
+    const res = await fetch("/api/dashboard/upload/logo", { method: "POST", body: data });
+    const json = await res.json();
+    if (!res.ok) {
+      setLogoUploadError(json.error ?? "Upload failed.");
+    } else {
+      setLogoUrl(json.url);
+    }
+    setLogoUploading(false);
+    e.target.value = "";
   }
 
   const inputCls = `${dashboardInputClass} mt-0`;
@@ -333,12 +353,12 @@ export default function SettingsForm({ business }: Props) {
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Business logo</p>
           </div>
           <p className="text-xs text-muted-foreground -mt-2">
-            Shown on your booking page next to your business name. Paste a direct image link (square or wide logos work best).
+            Shown on your booking page next to your business name. Square logos work best. Max 2 MB.
           </p>
 
-          {logoUrl.trim() && (
-            <div className="flex items-center gap-4">
-              <div className="relative size-16 overflow-hidden rounded-full border bg-[var(--booking-accent-muted)] ring-1 ring-border/60">
+          <div className="flex items-center gap-4">
+            {logoUrl.trim() && (
+              <div className="relative size-16 shrink-0 overflow-hidden rounded-full border bg-[var(--booking-accent-muted)] ring-1 ring-border/60">
                 {bookingLogoHasIntrinsicPadding(logoUrl.trim()) ? (
                   <Image
                     src={logoUrl.trim()}
@@ -361,23 +381,35 @@ export default function SettingsForm({ business }: Props) {
                   </div>
                 )}
               </div>
-              <button
-                type="button"
-                onClick={() => setLogoUrl("")}
-                className="text-xs font-medium text-muted-foreground hover:text-foreground"
-              >
-                Remove logo
-              </button>
-            </div>
-          )}
+            )}
 
-          <div className="flex gap-2">
-            <input
-              value={logoUrl}
-              onChange={(e) => setLogoUrl(e.target.value)}
-              className="flex-1 border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 bg-white dark:border-neutral-700 dark:bg-neutral-900"
-              placeholder="https://example.com/logo.png"
-            />
+            <div className="flex flex-col gap-2">
+              <label className="cursor-pointer">
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml"
+                  className="sr-only"
+                  disabled={logoUploading}
+                  onChange={handleLogoUpload}
+                />
+                <span className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${logoUploading ? "opacity-50 cursor-not-allowed" : "hover:bg-muted cursor-pointer"}`}>
+                  <Icon name="upload" className="text-xs" />
+                  {logoUploading ? "Uploading…" : logoUrl.trim() ? "Replace logo" : "Upload logo"}
+                </span>
+              </label>
+              {logoUrl.trim() && (
+                <button
+                  type="button"
+                  onClick={() => setLogoUrl("")}
+                  className="text-xs font-medium text-muted-foreground hover:text-foreground text-left"
+                >
+                  Remove logo
+                </button>
+              )}
+              {logoUploadError && (
+                <p className="text-xs text-destructive">{logoUploadError}</p>
+              )}
+            </div>
           </div>
         </div>
 
