@@ -14,6 +14,9 @@ If either secret is missing, e2e is skipped with a workflow warning (verify stil
 ## Required environment variables
 
 - `DATABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_URL` — Supabase project URL (Settings → API)
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` — Supabase anon/public key
+- `SUPABASE_SERVICE_ROLE_KEY` — **required for dashboard logo uploads** (`POST /api/dashboard/upload/logo`). Copy from Supabase → Project Settings → API → **service_role** (secret). Add to Vercel **Production** and **Preview**, then redeploy. Without it, the Upload logo button returns 503.
 - `AUTH_SECRET`
 - `AUTH_URL`
 - `SECRET_ENCRYPTION_KEY`
