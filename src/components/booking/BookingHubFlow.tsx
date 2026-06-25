@@ -372,10 +372,10 @@ export function BookingHubFlow({
       className={cn(
         "w-full",
         viewportCentered && "grid min-h-dvh w-full place-items-center px-4 py-6 md:px-6",
-        showHub && heroImageUrl && "block pt-0",
+        showHub && heroImageUrl && "mx-auto w-full max-w-full pt-0",
       )}
     >
-      <div className={cn("w-full", layoutMaxWidth, viewportCentered && "justify-self-center")}>
+      <div className={cn("mx-auto w-full", layoutMaxWidth, viewportCentered && "justify-self-center")}>
         {flowBody}
       </div>
     </div>

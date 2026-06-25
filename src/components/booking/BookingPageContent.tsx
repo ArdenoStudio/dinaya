@@ -7,7 +7,7 @@ import { BookingTheme } from "@/components/booking/BookingTheme";
 import { BookingThemeToggle } from "@/components/booking/BookingThemeToggle";
 import { getBookingCopy } from "@/lib/i18n";
 import { normalizePublicHttpsUrl } from "@/lib/public-url";
-import { isOptimizableRemoteImage } from "@/lib/utils";
+import { isOptimizableRemoteImage, cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import type { BookingPageData } from "@/lib/booking/load-page-data";
 import { resolveBookingTheme, type BookingThemeOverrides } from "@/lib/booking-theme";
@@ -152,7 +152,13 @@ export default async function BookingPageContent({
       <div
         className={
           useHubFlow
-            ? "booking-page-bg min-h-dvh w-full"
+            ? cn(
+                "booking-page-bg min-h-dvh w-full",
+                hubHasHero && "flex flex-col items-center pt-0 md:pt-4",
+                !hubHasHero &&
+                  centeredLayout &&
+                  "flex flex-col items-center md:justify-center md:py-10",
+              )
             : centeredLayout
               ? hubHasHero
                 ? "booking-page-bg flex min-h-dvh w-full flex-col items-center pt-0 md:pt-4"
