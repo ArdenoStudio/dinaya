@@ -5,7 +5,7 @@ export function bookingLogoHasIntrinsicPadding(logoUrl: string): boolean {
 }
 
 /** Zoom raster marks on the large hub avatar so the wordmark fills the circle. */
-export const BOOKING_LOGO_HUB_RASTER_SCALE = 1.16;
+export const BOOKING_LOGO_HUB_RASTER_SCALE = 1.08;
 /** Extra zoom for SVG / padded canvas assets. */
 export const BOOKING_LOGO_PADDED_SCALE = 1.85;
 
