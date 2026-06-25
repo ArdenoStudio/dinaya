@@ -10,7 +10,11 @@ import { BlurFade } from "@/components/ui/blur-fade";
 import { NumberTicker } from "@/components/ui/number-ticker";
 import { ReviewRatingSummary, type StarFilter } from "./ReviewRatingSummary";
 import { StarRating } from "./StarRating";
+<<<<<<< HEAD
+import { BOOKING_REVIEWS_SECTION_ID } from "./BusinessRating";
+=======
 import { BusinessRating } from "./BusinessRating";
+>>>>>>> master
 
 const PAGE_SIZE = 20;
 
@@ -110,6 +114,28 @@ export function BookingReviewsSection({
   }
 
   return (
+<<<<<<< HEAD
+    <div id={BOOKING_REVIEWS_SECTION_ID} className={className}>
+      <button
+        type="button"
+        data-reviews-trigger
+        onClick={openDialog}
+        className="group mx-auto flex items-center gap-2 rounded-full border border-border/60 bg-card/60 px-4 py-2 text-xs text-muted-foreground transition-colors hover:border-border hover:bg-card hover:text-foreground"
+      >
+        <span className="inline-flex items-center gap-1">
+          <span className="text-amber-500" aria-hidden>
+            ★
+          </span>
+          <span className="tabular-nums text-foreground">{avgRating.toFixed(1)}</span>
+          <span className="text-muted-foreground/50" aria-hidden>
+            ·
+          </span>
+          <span className="font-medium">{copy.readReviews}</span>
+          <span className="tabular-nums">({reviewCount.toLocaleString()})</span>
+        </span>
+        <Icon name="chevron-right" className="text-xs opacity-50 transition-transform group-hover:translate-x-0.5" />
+      </button>
+=======
     <BlurFade inView className={className}>
       <div
         id={id}
@@ -171,6 +197,7 @@ export function BookingReviewsSection({
         </button>
         )}
       </div>
+>>>>>>> master
 
       <dialog
         ref={dialogRef}
