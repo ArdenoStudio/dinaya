@@ -1,6 +1,7 @@
 /**
  * Full QA seed for the public test booking page (/book/test):
- * branding (logo + hero banner), reviews, services, and availability.
+ * branding (logo + hero banner when SEED_LOGO_URL / SEED_BANNER_URL are set),
+ * reviews, services, and availability.
  *
  * Usage:
  *   npx tsx scripts/seed-test-booking.ts

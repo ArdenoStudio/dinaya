@@ -2,7 +2,7 @@
  * Sets logo and hero banner (first gallery image) for the test booking business.
  *
  * Usage:
- *   npx tsx scripts/seed-test-branding.ts
+ *   SEED_LOGO_URL=https://... SEED_BANNER_URL=https://... npx tsx scripts/seed-test-branding.ts
  *   npx tsx scripts/seed-test-branding.ts my-slug
  */
 import * as dotenv from "dotenv";
@@ -13,13 +13,19 @@ import { businesses } from "../src/db/schema";
 dotenv.config({ path: ".env.local" });
 dotenv.config({ path: ".env" });
 
-/** Served from public/demo/ — works on localhost and dinaya.lk. */
-export const TEST_SALON_LOGO_PATH = "/demo/test-salon-logo.webp";
-export const TEST_SALON_BANNER_PATH = "/demo/test-salon-banner.webp";
+const logoUrl = process.env.SEED_LOGO_URL?.trim() || null;
+const bannerUrl = process.env.SEED_BANNER_URL?.trim() || null;
 
 async function main() {
   const slug =
     process.argv[2] && !process.argv[2].startsWith("--") ? process.argv[2] : "test";
+
+  if (!logoUrl && !bannerUrl) {
+    console.log(
+      "Skipping branding — set SEED_LOGO_URL and/or SEED_BANNER_URL (public HTTPS URLs) to apply logo and banner.",
+    );
+    process.exit(0);
+  }
 
   const [business] = await db
     .select({ id: businesses.id, name: businesses.name, slug: businesses.slug })
@@ -35,14 +41,17 @@ async function main() {
   await db
     .update(businesses)
     .set({
-      logoUrl: TEST_SALON_LOGO_PATH,
-      galleryImages: [TEST_SALON_BANNER_PATH],
+      ...(logoUrl ? { logoUrl } : {}),
+      ...(bannerUrl ? { galleryImages: [bannerUrl] } : {}),
     })
     .where(eq(businesses.id, business.id));
 
-  console.log(
-    `Done — ${business.name} (${business.slug}): logo → ${TEST_SALON_LOGO_PATH}, banner → ${TEST_SALON_BANNER_PATH}`,
-  );
+  const parts = [
+    logoUrl ? `logo → ${logoUrl}` : null,
+    bannerUrl ? `banner → ${bannerUrl}` : null,
+  ].filter(Boolean);
+
+  console.log(`Done — ${business.name} (${business.slug}): ${parts.join(", ")}`);
   process.exit(0);
 }
 
