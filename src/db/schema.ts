@@ -147,6 +147,7 @@ export const businesses = pgTable("businesses", {
   bookingHeroOverlay: varchar("booking_hero_overlay", { length: 20 }).default("light").notNull(),
   bookingHeroOverlayOpacity: integer("booking_hero_overlay_opacity").default(60).notNull(),
   bookingThemePreset: varchar("booking_theme_preset", { length: 40 }),
+  bookingPanelBackground: varchar("booking_panel_background", { length: 20 }).default("white").notNull(),
   directoryListed: boolean("directory_listed").default(false).notNull(),
   directoryCity: varchar("directory_city", { length: 80 }),
   directoryDistrict: varchar("directory_district", { length: 80 }),

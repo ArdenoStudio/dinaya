@@ -72,7 +72,7 @@ export const SwapForm: FC<SwapFormProps> = ({
   };
 
   return (
-    <AnimatePresence mode="wait">
+    <AnimatePresence initial={false} mode="wait">
       <motion.div
         key={isSignIn ? "signin" : "signup"}
         variants={variants}
@@ -85,8 +85,8 @@ export const SwapForm: FC<SwapFormProps> = ({
         }}
         className="w-xs sm:w-sm bg-[#F6F5FA] dark:bg-zinc-900 shadow-[0_10px_20px_rgba(0,0,0,0.08)] rounded-[32px] overflow-hidden border-[1.5px] border-[#E6E6EF] dark:border-zinc-800 transition-colors"
       >
-        <div className="p-6 sm:p-8 pb-8 sm:pb-10 border-b-[1.2px] bg-[#FEFEFE] dark:bg-zinc-950 rounded-[28px] border-[#E6E6EF] dark:border-zinc-800 transition-colors">
-          <h2 className="text-2xl sm:text-3xl font-bold text-[#191919] dark:text-zinc-100 mb-1.5 sm:mb-2 text-center sm:text-left">
+        <div className="p-6 sm:p-8 pb-8 sm:pb-10 border-b-[1.2px] bg-[#FEFEFE] dark:bg-zinc-950 rounded-2xl border-[#E6E6EF] dark:border-zinc-800 transition-colors">
+          <h2 className="text-2xl sm:text-3xl font-bold text-[#191919] dark:text-zinc-100 mb-1.5 sm:mb-2 text-balance text-center sm:text-left">
             {isSignIn
               ? mergedTexts.signInTitle
               : mergedTexts.signUpTitle}

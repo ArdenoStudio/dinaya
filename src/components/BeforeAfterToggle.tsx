@@ -164,7 +164,7 @@ export function BeforeAfterToggle() {
         }}
       >
         {/* Horizontal stripe bands behind pills */}
-        <AnimatePresence>
+        <AnimatePresence initial={false}>
           {active === "without" && (
             <motion.div
               key="stripes"

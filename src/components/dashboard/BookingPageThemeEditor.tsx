@@ -7,8 +7,10 @@ import { buildPublicBookingUrl } from "@/lib/booking-url";
 import {
   BOOKING_THEME_PRESETS,
   accentContrastWarning,
+  tintAccentBackground,
   type BookingHeroOverlay,
   type BookingPageBackground,
+  type BookingPanelBackground,
   type BookingThemePreset,
 } from "@/lib/booking-theme";
 import { isOptimizableRemoteImage } from "@/lib/utils";
@@ -23,6 +25,7 @@ type ThemeBusiness = {
   bookingHeroOverlay: string;
   bookingHeroOverlayOpacity: number;
   bookingThemePreset: string | null;
+  bookingPanelBackground: string;
   canUseBookingPageTheme: boolean;
   canCustomizeBookingPage: boolean;
   customDomain: string | null;
@@ -42,7 +45,8 @@ interface Props {
 
 const PRESET_LABELS: Record<Exclude<BookingThemePreset, "custom">, string> = {
   classic: "Classic",
-  salon: "Salon",
+  salon: "Salon (soft blush)",
+  salon_vivid: "Salon (vivid pink)",
   spa: "Spa calm",
   bold: "Bold",
 };
@@ -57,7 +61,13 @@ const HERO_OVERLAY_OPTIONS: { value: BookingHeroOverlay; label: string }[] = [
 const PAGE_BACKGROUND_OPTIONS: { value: BookingPageBackground; label: string }[] = [
   { value: "white", label: "White" },
   { value: "grouped", label: "Soft gray" },
-  { value: "custom", label: "Custom" },
+  { value: "custom", label: "Custom color" },
+  { value: "accent", label: "Accent wash (brand pink)" },
+];
+
+const PANEL_BACKGROUND_OPTIONS: { value: BookingPanelBackground; label: string }[] = [
+  { value: "white", label: "White card" },
+  { value: "accent", label: "Brand pink panel" },
 ];
 
 function buildPreviewUrl(
@@ -66,6 +76,7 @@ function buildPreviewUrl(
     accentColor: string;
     bookingPageBackground: BookingPageBackground;
     bookingPageBackgroundColor: string;
+    bookingPanelBackground: BookingPanelBackground;
     bookingHeroOverlay: BookingHeroOverlay;
     bookingHeroOverlayOpacity: number;
   },
@@ -75,6 +86,7 @@ function buildPreviewUrl(
     hideGallery: "0",
     previewAccent: values.accentColor,
     previewPageBg: values.bookingPageBackground,
+    previewPanelBg: values.bookingPanelBackground,
     previewHeroOverlay: values.bookingHeroOverlay,
     previewHeroOpacity: String(values.bookingHeroOverlayOpacity),
   });
@@ -95,6 +107,7 @@ export function BookingPageThemeEditor({ business, onPreviewChange }: Props) {
     accentColor: business.accentColor ?? "#2563eb",
     bookingPageBackground: (business.bookingPageBackground || "white") as BookingPageBackground,
     bookingPageBackgroundColor: business.bookingPageBackgroundColor ?? "#f2f2f7",
+    bookingPanelBackground: (business.bookingPanelBackground || "white") as BookingPanelBackground,
     bookingHeroOverlay: (business.bookingHeroOverlay || "light") as BookingHeroOverlay,
     bookingHeroOverlayOpacity: business.bookingHeroOverlayOpacity ?? 60,
     bookingThemePreset: (business.bookingThemePreset ?? "custom") as BookingThemePreset,
@@ -110,11 +123,15 @@ export function BookingPageThemeEditor({ business, onPreviewChange }: Props) {
 
   const contrastWarning = accentContrastWarning(
     form.accentColor,
-    form.bookingPageBackground === "custom"
+    form.bookingPanelBackground === "accent"
+      ? tintAccentBackground(form.accentColor, 0.48)
+      : form.bookingPageBackground === "custom"
       ? form.bookingPageBackgroundColor
       : form.bookingPageBackground === "grouped"
         ? "#f2f2f7"
-        : "#ffffff",
+        : form.bookingPageBackground === "accent"
+          ? tintAccentBackground(form.accentColor, 0.38)
+          : "#ffffff",
   );
 
   useEffect(() => {
@@ -128,6 +145,7 @@ export function BookingPageThemeEditor({ business, onPreviewChange }: Props) {
         accentColor: next.accentColor,
         bookingPageBackground: next.bookingPageBackground,
         bookingPageBackgroundColor: next.bookingPageBackgroundColor,
+        bookingPanelBackground: next.bookingPanelBackground,
         bookingHeroOverlay: next.bookingHeroOverlay,
         bookingHeroOverlayOpacity: next.bookingHeroOverlayOpacity,
       }),
@@ -141,6 +159,7 @@ export function BookingPageThemeEditor({ business, onPreviewChange }: Props) {
       accentColor: values.accentColor,
       bookingPageBackground: values.pageBackground,
       bookingPageBackgroundColor: values.pageBackgroundColor ?? "#f2f2f7",
+      bookingPanelBackground: values.panelBackground ?? "white",
       bookingHeroOverlay: values.heroOverlay,
       bookingHeroOverlayOpacity: values.heroOverlayOpacity,
       bookingThemePreset: preset,
@@ -166,6 +185,7 @@ export function BookingPageThemeEditor({ business, onPreviewChange }: Props) {
       bookingPageBackground: form.bookingPageBackground,
       bookingPageBackgroundColor:
         form.bookingPageBackground === "custom" ? form.bookingPageBackgroundColor : null,
+      bookingPanelBackground: form.bookingPanelBackground,
       bookingHeroOverlay: form.bookingHeroOverlay,
       bookingHeroOverlayOpacity: form.bookingHeroOverlayOpacity,
       bookingThemePreset: form.bookingThemePreset,
@@ -323,6 +343,32 @@ export function BookingPageThemeEditor({ business, onPreviewChange }: Props) {
                   </div>
                 ) : null}
               </div>
+
+              {form.bookingPageBackground === "accent" ? (
+                <div>
+                  <label className="text-sm font-medium">Content panel</label>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Choose a white card on the accent page, or a darker brand panel with a lighter page
+                    background.
+                  </p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {PANEL_BACKGROUND_OPTIONS.map((option) => (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => updateForm("bookingPanelBackground", option.value)}
+                        className={`rounded-full border px-3 py-1.5 text-sm transition-colors ${
+                          form.bookingPanelBackground === option.value
+                            ? "border-primary bg-primary/10 text-primary"
+                            : "hover:bg-muted/60"
+                        }`}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
 
               <div>
                 <label className="text-sm font-medium">Hero overlay</label>

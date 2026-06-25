@@ -53,6 +53,7 @@ interface Props {
   cancellationPolicy?: string | null;
   depositPolicy?: string | null;
   bankTransferInstructions?: string | null;
+  onSelectService?: (service: BookingService) => void;
 }
 
 function serviceInitial(name: string) {
@@ -83,7 +84,7 @@ function HubBusinessLogo({
           alt=""
           width={72}
           height={72}
-          className="size-full bg-white object-cover"
+          className="size-full bg-white object-contain p-1"
           unoptimized={!isOptimizableRemoteImage(logoUrl)}
         />
       ) : (
@@ -112,6 +113,7 @@ export default function BookingServiceHub({
   cancellationPolicy,
   depositPolicy,
   bankTransferInstructions,
+  onSelectService,
 }: Props) {
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
@@ -151,26 +153,22 @@ export default function BookingServiceHub({
   function renderHubService(service: BookingService) {
     const href = buildServiceBookingPath(businessSlug, service.slug ?? service.id);
     const iconName = serviceIconName(service.name);
-
-    return (
-      <li key={service.id}>
-        <Link
-          href={href}
-          className={cn(
-            "group flex min-h-[4.75rem] items-start gap-3.5 rounded-xl border border-border/50 px-3.5 py-4 md:px-4 md:py-[1.125rem]",
-            "transition-[background-color,box-shadow,border-color] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]",
-            "hover:border-[var(--booking-accent)]/25 hover:bg-[var(--booking-accent-muted)] hover:shadow-sm",
-            "active:scale-[0.99] motion-reduce:active:scale-100",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--booking-accent-soft)]",
-          )}
-        >
+    const rowClassName = cn(
+      "group flex min-h-[4.75rem] w-full items-start gap-3.5 rounded-[1.375rem] border border-border/50 px-3.5 py-4 text-left md:px-4 md:py-[1.125rem]",
+      "transition-[transform,background-color,box-shadow,border-color] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]",
+      "hover:border-[var(--booking-accent)]/25 hover:bg-[var(--booking-accent-muted)] hover:shadow-sm",
+      "active:scale-[0.96] motion-reduce:active:scale-100",
+      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--booking-accent-soft)]",
+    );
+    const rowContent = (
+      <>
           {service.imageUrl ? (
             <Image
               src={service.imageUrl}
               alt=""
               width={48}
               height={48}
-              className="size-12 shrink-0 rounded-xl object-cover ring-1 ring-border/50"
+              className="size-12 shrink-0 rounded-xl object-cover image-depth"
               unoptimized={!isOptimizableRemoteImage(service.imageUrl)}
             />
           ) : (
@@ -202,7 +200,20 @@ export default function BookingServiceHub({
           </div>
 
           <BookingServiceArrow />
-        </Link>
+      </>
+    );
+
+    return (
+      <li key={service.id}>
+        {onSelectService ? (
+          <button type="button" onClick={() => onSelectService(service)} className={rowClassName}>
+            {rowContent}
+          </button>
+        ) : (
+          <Link href={href} className={rowClassName}>
+            {rowContent}
+          </Link>
+        )}
       </li>
     );
   }
@@ -212,10 +223,10 @@ export default function BookingServiceHub({
 
   const shell = heroImageUrl
     ? "overflow-hidden rounded-none border-x-0 bg-transparent shadow-none md:rounded-2xl md:border-0"
-    : "overflow-hidden rounded-2xl border-x-0 bg-card shadow-none md:border md:border-border/80 md:shadow-[0_12px_40px_-24px_rgba(15,23,42,0.28)] dark:md:shadow-none dark:md:ring-1 dark:md:ring-white/10";
+    : "overflow-hidden rounded-2xl border-x-0 booking-panel-surface shadow-none md:border md:border-border/80 md:shadow-[0_12px_40px_-24px_rgba(15,23,42,0.28)] dark:md:shadow-none dark:md:ring-1 dark:md:ring-white/10";
 
   const contentShell = heroImageUrl
-    ? "relative z-10 -mt-5 flex flex-col rounded-t-2xl bg-card pt-14 md:-mt-6 md:pt-[4.25rem]"
+    ? "relative z-10 -mt-5 flex flex-col rounded-t-2xl booking-panel-surface pt-14 md:-mt-6 md:pt-[4.25rem]"
     : "flex flex-col";
 
   return (
@@ -324,7 +335,7 @@ export default function BookingServiceHub({
           ) : listWindow.mode === "grouped" && listWindow.groupedServices ? (
             listWindow.groupedServices.map((group) => (
               <li key={group.category} className="space-y-2.5">
-                <h2 className="sticky top-0 z-10 -mx-1 bg-card px-1 py-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                <h2 className="sticky top-0 z-10 -mx-1 booking-panel-surface px-1 py-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   {group.category}
                 </h2>
                 <ul className="flex flex-col gap-2.5">
@@ -383,6 +394,11 @@ export default function BookingServiceHub({
           variant="sticky"
           emphasis={showStickyBrowse ? "secondary" : "primary"}
           scrollToId={showStickyBrowse ? "hub-services" : undefined}
+          onSelect={
+            onSelectService && !showStickyBrowse
+              ? () => onSelectService(primaryService)
+              : undefined
+          }
         />
       ) : null}
     </BlurFade>

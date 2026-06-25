@@ -33,7 +33,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="bg-background" suppressHydrationWarning>
-      <body className={`${calSans.variable} font-sans`}>
+      <body className={`${calSans.variable} font-sans antialiased`}>
         <ThemeProvider>
           <a
             href="#main-content"

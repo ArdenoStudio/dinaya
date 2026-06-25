@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import Link from "next/link";
 import { useTheme } from "next-themes";
 import IPhoneMockup from "@/components/ui/iphone-mockup";
@@ -79,7 +79,7 @@ function DinayaBranding({ compact = false }: { compact?: boolean }) {
 
 function TrustLine({ persona, light = false }: { persona: PersonaData; light?: boolean }) {
   return (
-    <p className={`text-xs mt-0.5 ${light ? "text-blue-200/90" : "text-gray-500 dark:text-gray-400"}`}>
+    <p className={`text-xs mt-0.5 tabular-nums ${light ? "text-blue-200/90" : "text-gray-500 dark:text-gray-400"}`}>
       {persona.trust.rating} ★ · {persona.trust.bookings} bookings
     </p>
   );
@@ -95,7 +95,7 @@ function CalendarDay({ cell }: { cell: DayCell }) {
 
   return (
     <div
-      className={`relative mx-auto flex size-7 items-center justify-center rounded-lg text-[9px] font-medium transition-all xl:size-8 xl:rounded-xl xl:text-[10px] ${
+      className={`relative mx-auto flex size-7 items-center justify-center rounded-lg text-[9px] font-medium tabular-nums transition-[background-color,transform,box-shadow] duration-150 ease-out xl:size-8 xl:rounded-xl xl:text-[10px] ${
         isSelected
           ? "bg-blue-600 text-white shadow-md"
           : isBooked
@@ -175,7 +175,7 @@ function PhoneDateTimeScreen({
               <Icon name="clock" className="text-[11px]" />
               {selectedService.duration.replace(" min", "m")}
               <span className="text-muted-foreground/50">·</span>
-              <span className="font-medium text-foreground">{selectedService.price}</span>
+              <span className="font-medium tabular-nums text-foreground">{selectedService.price}</span>
             </p>
           </div>
         </div>
@@ -217,7 +217,7 @@ function PhoneDateTimeScreen({
         <div className="border-t border-border pb-[16px] pt-[10px]">
           <button
             type="button"
-            className="w-full rounded-xl bg-blue-600 py-[12px] text-[13px] font-semibold text-white shadow-sm"
+            className="w-full rounded-xl bg-blue-600 py-[12px] text-[13px] font-semibold text-white shadow-sm transition-transform duration-150 ease-out active:scale-[0.96] motion-reduce:active:scale-100"
           >
             Continue · {selectedTime}
           </button>
@@ -244,7 +244,7 @@ function SlotButton({
     <button
       type="button"
       onClick={onSelect}
-      className={`flex min-h-[34px] w-full items-center gap-1.5 rounded-lg border px-2 py-1.5 text-[10px] font-medium transition-all ${
+      className={`flex min-h-[34px] w-full items-center gap-1.5 rounded-lg border px-2 py-1.5 text-[10px] font-medium tabular-nums transition-[transform,background-color,border-color,box-shadow] duration-150 ease-out active:scale-[0.96] motion-reduce:active:scale-100 ${
         selected
           ? "border-transparent bg-blue-600 text-white shadow-sm"
           : "border-border bg-secondary/40 text-foreground ring-1 ring-white/5 hover:border-blue-400/40"
@@ -294,7 +294,7 @@ function CustomerBookingDesktop({
               <Icon name="clock" className="text-[10px]" />
               {selectedService.duration.replace(" min", "m")}
               <span className="text-muted-foreground/50">·</span>
-              <span className="font-medium text-foreground">{selectedService.price}</span>
+              <span className="font-medium tabular-nums text-foreground">{selectedService.price}</span>
             </p>
           </div>
 
@@ -384,7 +384,9 @@ function DemoFrame({ children }: { children: ReactNode }) {
 export default function ProductMockup() {
   const [selectedSlot, setSelectedSlot] = useState(INITIAL_SELECTED_SLOT);
   const { resolvedTheme } = useTheme();
-  const screenBg = resolvedTheme === "dark" ? "#000000" : "#f4f4f5";
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const screenBg = mounted && resolvedTheme === "dark" ? "#000000" : "#f4f4f5";
   const persona = primaryPersona;
 
   const mobileScale = 0.72 * DEMO_SCALE;

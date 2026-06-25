@@ -200,11 +200,11 @@ async function ReportsOverview({ businessId }: { businessId: string }) {
               <div key={item.label}>
                 <div className="mb-1.5 flex items-center justify-between text-sm">
                   <span className="font-medium">{item.label}</span>
-                  <span className={cn("font-semibold", item.text)}>{item.value}</span>
+                  <span className={cn("font-semibold tabular-nums", item.text)}>{item.value}</span>
                 </div>
                 <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
                   <div
-                    className={cn("h-full rounded-full transition-all", item.color)}
+                    className={cn("h-full rounded-full transition-[width] duration-300 ease-out", item.color)}
                     style={{ width: `${Math.round((item.value / maxHealthCount) * 100)}%` }}
                   />
                 </div>
@@ -212,11 +212,11 @@ async function ReportsOverview({ businessId }: { businessId: string }) {
             ))}
             <div className="grid grid-cols-2 gap-3 pt-1">
               <div className="rounded-lg bg-muted/40 py-3 text-center">
-                <p className="text-lg font-semibold">{metrics.cancellationRate}%</p>
+                <p className="text-lg font-semibold tabular-nums">{metrics.cancellationRate}%</p>
                 <p className="text-xs text-muted-foreground">Cancellation rate</p>
               </div>
               <div className="rounded-lg bg-muted/40 py-3 text-center">
-                <p className="text-lg font-semibold">{metrics.noShowRate}%</p>
+                <p className="text-lg font-semibold tabular-nums">{metrics.noShowRate}%</p>
                 <p className="text-xs text-muted-foreground">No-show rate</p>
               </div>
             </div>

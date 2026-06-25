@@ -30,6 +30,7 @@ interface Props {
   copy: BookingCopy;
   selectedDeal?: DealListItem | null;
   sessionToken?: string;
+  slotUnavailable?: boolean;
   onUpdate: (partial: Partial<BookingState>) => void;
   onBack: () => void;
   onConfirmed: (data: {
@@ -47,6 +48,8 @@ interface Props {
   hideInlineBack?: boolean;
   /** When breadcrumbs already show the step name, hide the in-form heading. */
   hideDetailsHeading?: boolean;
+  /** Solid pink panel — avoid white form chrome. */
+  onAccentPanel?: boolean;
 }
 
 const fieldBaseCls =
@@ -167,6 +170,7 @@ export default function StepConfirm({
   copy,
   selectedDeal,
   sessionToken,
+  slotUnavailable = false,
   onUpdate,
   onBack,
   onConfirmed,
@@ -174,6 +178,7 @@ export default function StepConfirm({
   formId = "booking-contact-form",
   hideInlineBack = false,
   hideDetailsHeading = false,
+  onAccentPanel = false,
 }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -186,6 +191,12 @@ export default function StepConfirm({
   } | null>(null);
 
   const service = state.service;
+  const panelCardCls = onAccentPanel
+    ? "rounded-xl border border-border/80 p-4"
+    : "rounded-xl border border-border bg-card p-4";
+  const formShellCls = onAccentPanel
+    ? "space-y-4"
+    : "space-y-4 md:rounded-xl md:border md:border-border md:bg-card md:p-6";
   const intakeQuestions = useMemo(
     () => service?.intakeQuestions ?? [],
     [service?.intakeQuestions],
@@ -321,6 +332,11 @@ export default function StepConfirm({
   }
 
   async function handleBook() {
+    if (slotUnavailable) {
+      setError(copy.slotTakenAction);
+      return;
+    }
+
     const result = validateConfirmFields({
       clientName: state.clientName,
       clientPhone: state.clientPhone,
@@ -414,7 +430,7 @@ export default function StepConfirm({
 
   const summaryCards = (
     <div className="flex flex-col gap-2 md:gap-3">
-      <div className="rounded-xl border border-border bg-card p-4">
+      <div className={panelCardCls}>
         <p className="mb-3 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
           {copy.appointment}
         </p>
@@ -428,7 +444,7 @@ export default function StepConfirm({
       </div>
 
       {service && service.priceLkr > 0 && (
-        <div className="rounded-xl border border-border bg-card p-4">
+        <div className={panelCardCls}>
           <div className="flex items-center justify-between gap-3">
             <p className="text-sm text-muted-foreground">{copy.fullAmount}</p>
             <p className="text-base font-semibold tabular-nums text-foreground">
@@ -462,7 +478,7 @@ export default function StepConfirm({
   const emailError = showFieldError("clientEmail");
 
   const contactForm = (
-    <div className="space-y-4 md:rounded-xl md:border md:border-border md:bg-card md:p-6">
+    <div className={formShellCls}>
       {hideDetailsHeading ? (
         <h2 className="sr-only">{copy.details}</h2>
       ) : (
@@ -600,9 +616,9 @@ export default function StepConfirm({
 
   const upsellNotice =
     upsell ? (
-      <div className="mt-4 rounded-xl border border-blue-100 bg-[var(--booking-accent-muted)]/70 p-4 text-sm">
-        <p className="font-medium text-blue-950 dark:text-blue-100">Recommended add-on</p>
-        <p className="mt-1 text-[var(--booking-accent)]/80">
+      <div className="mt-4 rounded-xl border border-[var(--booking-accent-soft)] bg-[var(--booking-accent-muted)]/70 p-4 text-sm">
+        <p className="font-medium text-foreground">Recommended add-on</p>
+        <p className="mt-1 booking-text-accent">
           {upsell.reason} Ask about <span className="font-semibold">{upsell.name}</span>
           {upsell.priceLkr > 0 ? ` (${formatLkr(upsell.priceLkr)})` : ""} during your visit.
         </p>
@@ -611,7 +627,7 @@ export default function StepConfirm({
 
   const paymentMethodSelector =
     onlineMethods.length > 1 && service?.requiresPayment && dueNow > 0 ? (
-      <div className="mt-4 space-y-2 rounded-xl border border-border bg-card p-4">
+      <div className={cn("mt-4 space-y-2", panelCardCls)}>
         <p className="text-sm font-medium text-foreground">{copy.paymentMethod}</p>
         {(
           [
@@ -629,7 +645,9 @@ export default function StepConfirm({
                   "flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border px-3 py-2.5 text-sm transition-colors",
                   selected
                     ? "border-[var(--booking-accent)] bg-[var(--booking-accent-muted)] text-foreground"
-                    : "border-border bg-card text-muted-foreground hover:bg-muted/50",
+                    : onAccentPanel
+                      ? "border-border/80 bg-white text-muted-foreground hover:bg-white/90"
+                      : "border-border bg-card text-muted-foreground hover:bg-muted/50",
                 )}
               >
                 <input
@@ -661,9 +679,31 @@ export default function StepConfirm({
     </div>
   );
 
+  const slotUnavailableNotice =
+    slotUnavailable ? (
+      <div
+        className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800/50 dark:bg-amber-950/40 dark:text-amber-200"
+        role="alert"
+      >
+        <p className="font-medium">{copy.slotTaken}</p>
+        <p className="mt-1">{copy.slotTakenAction}</p>
+        <button
+          type="button"
+          onClick={onBack}
+          className="mt-3 min-h-11 text-sm font-medium booking-text-accent hover:underline"
+        >
+          {copy.pickDateTime}
+        </button>
+      </div>
+    ) : null;
+
   const confirmActions = (
     <>
-      <BookingSubmitButton loading={loading} disabled={loading} onClick={handleBook}>
+      <BookingSubmitButton
+        loading={loading}
+        disabled={loading || slotUnavailable}
+        onClick={handleBook}
+      >
         {payLabel}
       </BookingSubmitButton>
       {trustStrip}
@@ -673,13 +713,19 @@ export default function StepConfirm({
   if (variant === "inline") {
     return (
       <div id={formId} className="pb-28 lg:pb-0">
+        {slotUnavailableNotice}
         {manualPaymentNotice}
         {contactForm}
         {paymentMethodSelector}
         {upsellNotice}
         {submitError}
 
-        <div className="sticky bottom-0 z-10 -mx-4 mt-6 border-t border-border bg-background px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 lg:relative lg:mx-0 lg:mt-6 lg:border-0 lg:px-0 lg:pb-0 lg:pt-0">
+        <div
+          className={cn(
+            "sticky bottom-0 z-10 -mx-4 mt-6 border-t border-border px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 lg:relative lg:mx-0 lg:mt-6 lg:border-0 lg:px-0 lg:pb-0 lg:pt-0",
+            onAccentPanel ? "booking-panel-surface border-border/80" : "bg-background",
+          )}
+        >
           {!hideInlineBack ? (
             <button
               type="button"
@@ -700,6 +746,7 @@ export default function StepConfirm({
       <div className="flex flex-col gap-3 booking-panel-bg px-4 py-3 md:grid md:grid-cols-2 md:gap-8 md:bg-transparent md:px-8 md:py-7">
         <div>{summaryCards}</div>
         <div>
+          {slotUnavailableNotice}
           {manualPaymentNotice}
           {contactForm}
           {paymentMethodSelector}

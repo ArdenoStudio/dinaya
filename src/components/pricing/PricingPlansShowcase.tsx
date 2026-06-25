@@ -145,7 +145,7 @@ export function PricingPlansShowcase({
           14-day free trial — no card required
         </div>
 
-        <h2 id="pricing-showcase-heading" className="font-cal text-4xl tracking-tight md:text-5xl">
+        <h2 id="pricing-showcase-heading" className="font-cal text-4xl tracking-tight text-balance md:text-5xl">
           <VerticalCutReveal
             splitBy="words"
             staggerDuration={0.12}
@@ -168,7 +168,7 @@ export function PricingPlansShowcase({
           animationNum={0}
           timelineRef={pricingRef}
           customVariants={revealVariants}
-          className="mx-auto mt-4 max-w-2xl text-base text-gray-300"
+          className="mx-auto mt-4 max-w-2xl text-base text-pretty text-gray-300"
         >
           LKR pricing, PayHere-ready checkout, and a live booking page from day one. Pick monthly or
           annual billing when you are ready to subscribe.
@@ -228,7 +228,7 @@ export function PricingPlansShowcase({
                         <span className="text-sm font-medium text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">LKR</span>
                         <NumberFlow
                           value={priceParts.whole}
-                          className="font-cal text-4xl tracking-tight"
+                          className="font-cal text-4xl tracking-tight tabular-nums"
                         />
                         {plan.monthlyPriceLkr != null ? (
                           <span className="ml-1 text-sm text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
@@ -247,7 +247,7 @@ export function PricingPlansShowcase({
                     </p>
                   ) : null}
 
-                  <p className="mt-3 min-h-[3.5rem] text-sm leading-relaxed text-gray-300">
+                  <p className="mt-3 min-h-[3.5rem] text-sm leading-relaxed text-pretty text-gray-300">
                     {plan.description}
                   </p>
                 </CardHeader>
@@ -256,7 +256,7 @@ export function PricingPlansShowcase({
                   <Link
                     href={ctaHref}
                     className={cn(
-                      "mb-6 inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-sm font-semibold transition-transform hover:-translate-y-0.5",
+                      "mb-6 inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-sm font-semibold transition-[transform,box-shadow] duration-150 ease-out hover:-translate-y-0.5 active:scale-[0.96] motion-reduce:active:scale-100",
                       plan.popular
                         ? "border border-primary/60 bg-gradient-to-t from-primary to-primary/85 text-white shadow-lg shadow-primary/30"
                         : "border border-neutral-700 bg-gradient-to-t from-neutral-950 to-neutral-800 text-white shadow-lg shadow-black/30",

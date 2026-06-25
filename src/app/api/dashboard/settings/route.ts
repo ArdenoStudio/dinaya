@@ -52,7 +52,7 @@ const galleryImageSchema = z
 
 const settingsSchema = z
   .object({
-    name: z.string().trim().min(1, "Business name is required.").max(100),
+    name: z.string().trim().min(1, "Business name is required.").max(100).optional(),
     description: z.string().trim().max(2000).optional().nullable(),
     phone: z.string().trim().max(20).optional().nullable(),
     address: z.string().trim().max(1000).optional().nullable(),
@@ -67,7 +67,7 @@ const settingsSchema = z
     facebookUrl: publicHttpsUrlSchema,
     websiteUrl: publicHttpsUrlSchema,
     logoUrl: logoUrlSchema,
-    galleryImages: z.array(galleryImageSchema).max(12).optional().default([]),
+    galleryImages: z.array(galleryImageSchema).max(12).optional(),
     payhereEnabled: z.boolean().optional(),
     payhereMerchantId: z.string().trim().max(100).optional().nullable(),
     payhereMerchantSecret: z.string().trim().max(1000).optional().nullable(),
@@ -117,6 +117,7 @@ export async function PATCH(req: NextRequest) {
     bookingHeroOverlay,
     bookingHeroOverlayOpacity,
     bookingThemePreset,
+    bookingPanelBackground,
     phone,
     timezone,
     websiteUrl,
@@ -141,7 +142,8 @@ export async function PATCH(req: NextRequest) {
     bookingPageBackgroundColor !== undefined ||
     bookingHeroOverlay !== undefined ||
     bookingHeroOverlayOpacity !== undefined ||
-    bookingThemePreset !== undefined;
+    bookingThemePreset !== undefined ||
+    bookingPanelBackground !== undefined;
 
   if (themeFieldsTouched) {
     try {
@@ -160,22 +162,34 @@ export async function PATCH(req: NextRequest) {
   await db
     .update(businesses)
     .set({
-      name,
-      description: description || null,
-      phone: phone || null,
-      address: address || null,
+      ...(name !== undefined && { name }),
+      ...(description !== undefined && { description: description || null }),
+      ...(phone !== undefined && { phone: phone || null }),
+      ...(address !== undefined && { address: address || null }),
       ...(timezone !== undefined && { timezone }),
       ...(language !== undefined && { language }),
-      businessType: businessType || null,
-      cancellationPolicy: cancellationPolicy || null,
-      depositPolicy: depositPolicy || null,
-      bankTransferInstructions: bankTransferInstructions || null,
-      lankaqrImageUrl: lankaqrImageUrl || null,
-      instagramUrl: normalizePublicHttpsUrl(instagramUrl),
-      facebookUrl: normalizePublicHttpsUrl(facebookUrl),
-      websiteUrl: normalizePublicHttpsUrl(websiteUrl),
-      logoUrl: logoUrl?.trim() || null,
-      galleryImages: Array.isArray(galleryImages) ? galleryImages.filter(Boolean) : null,
+      ...(businessType !== undefined && { businessType: businessType || null }),
+      ...(cancellationPolicy !== undefined && {
+        cancellationPolicy: cancellationPolicy || null,
+      }),
+      ...(depositPolicy !== undefined && { depositPolicy: depositPolicy || null }),
+      ...(bankTransferInstructions !== undefined && {
+        bankTransferInstructions: bankTransferInstructions || null,
+      }),
+      ...(lankaqrImageUrl !== undefined && { lankaqrImageUrl: lankaqrImageUrl || null }),
+      ...(instagramUrl !== undefined && {
+        instagramUrl: normalizePublicHttpsUrl(instagramUrl),
+      }),
+      ...(facebookUrl !== undefined && {
+        facebookUrl: normalizePublicHttpsUrl(facebookUrl),
+      }),
+      ...(websiteUrl !== undefined && {
+        websiteUrl: normalizePublicHttpsUrl(websiteUrl),
+      }),
+      ...(logoUrl !== undefined && { logoUrl: logoUrl?.trim() || null }),
+      ...(galleryImages !== undefined && {
+        galleryImages: galleryImages.filter(Boolean),
+      }),
       ...(payhereEnabled !== undefined && { payhereEnabled: Boolean(payhereEnabled) }),
       ...(payhereMerchantId !== undefined && { payhereMerchantId: payhereMerchantId || null }),
       ...(payhereMerchantSecret !== undefined && payhereMerchantSecret !== null && {
@@ -199,13 +213,14 @@ export async function PATCH(req: NextRequest) {
       ...(bookingHeroOverlay !== undefined && { bookingHeroOverlay }),
       ...(bookingHeroOverlayOpacity !== undefined && { bookingHeroOverlayOpacity }),
       ...(bookingThemePreset !== undefined && { bookingThemePreset: bookingThemePreset || null }),
+      ...(bookingPanelBackground !== undefined && { bookingPanelBackground }),
     })
     .where(eq(businesses.id, context.businessId));
 
   await syncBusinessPrimaryLocation(context.businessId, {
-    name,
-    address: address || null,
-    phone: phone || null,
+    ...(name !== undefined && { name }),
+    ...(address !== undefined && { address: address || null }),
+    ...(phone !== undefined && { phone: phone || null }),
     ...(timezone !== undefined && { timezone }),
   });
 

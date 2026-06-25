@@ -48,8 +48,8 @@ function ServiceRow({
       type="button"
       onClick={onSelect}
       className={cn(
-        "group flex w-full items-start gap-3 rounded-xl border p-3.5 text-left transition-[background-color,box-shadow,border-color] duration-200",
-        "motion-reduce:transition-none active:scale-[0.99] motion-reduce:active:scale-100",
+        "group flex w-full items-start gap-3 rounded-[1.375rem] border p-3.5 text-left transition-[transform,background-color,box-shadow,border-color] duration-200",
+        "motion-reduce:transition-none active:scale-[0.96] motion-reduce:active:scale-100",
         selected
           ? "border-[var(--booking-accent)] bg-[var(--booking-accent-muted)]/50 shadow-sm ring-2 ring-[var(--booking-accent-soft)]"
           : "border-border/50 hover:border-[var(--booking-accent)]/25 hover:bg-[var(--booking-accent-muted)] hover:shadow-sm",
@@ -61,7 +61,7 @@ function ServiceRow({
           alt=""
           width={44}
           height={44}
-          className="size-11 shrink-0 rounded-lg object-cover"
+          className="size-11 shrink-0 rounded-lg object-cover outline outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10"
           unoptimized={!isOptimizableRemoteImage(service.imageUrl)}
         />
       ) : (
@@ -153,8 +153,8 @@ export default function StepService({ services, selected, copy, bookingRouter, o
                   type="button"
                   onClick={() => onSelect(target)}
                   className={cn(
-                    "group flex w-full items-center justify-between gap-3 rounded-xl border px-3.5 py-3 text-left transition-[background-color,box-shadow,border-color] duration-200",
-                    "motion-reduce:transition-none active:scale-[0.99] motion-reduce:active:scale-100",
+                    "group flex w-full items-center justify-between gap-3 rounded-[1.375rem] border px-3.5 py-3 text-left transition-[transform,background-color,box-shadow,border-color] duration-200",
+                    "motion-reduce:transition-none active:scale-[0.96] motion-reduce:active:scale-100",
                     isSelected
                       ? "border-[var(--booking-accent)] bg-[var(--booking-accent-muted)]/50 shadow-sm ring-2 ring-[var(--booking-accent-soft)]"
                       : "border-border/50 hover:border-[var(--booking-accent)]/25 hover:bg-[var(--booking-accent-muted)] hover:shadow-sm",

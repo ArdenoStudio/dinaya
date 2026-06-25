@@ -9,6 +9,7 @@ type BuildBookingBreadcrumbInput = {
   showStaffStep: boolean;
   needsStaffPicker: boolean;
   hubHref?: string | null;
+  onBackToHub?: () => void;
   lockServiceSelection: boolean;
   multiService: boolean;
   onBackToServices: () => void;
@@ -23,6 +24,7 @@ export function buildBookingBreadcrumbItems({
   showStaffStep,
   needsStaffPicker,
   hubHref,
+  onBackToHub,
   lockServiceSelection,
   multiService,
   onBackToServices,
@@ -31,7 +33,9 @@ export function buildBookingBreadcrumbItems({
 }: BuildBookingBreadcrumbInput): BookingBreadcrumbItem[] {
   const items: BookingBreadcrumbItem[] = [];
 
-  if (hubHref) {
+  if (onBackToHub) {
+    items.push({ label: copy.allServices, onClick: onBackToHub });
+  } else if (hubHref) {
     items.push({ label: copy.allServices, href: hubHref });
   } else if (!lockServiceSelection && multiService) {
     items.push({ label: copy.chooseService, onClick: onBackToServices });

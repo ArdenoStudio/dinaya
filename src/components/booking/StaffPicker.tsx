@@ -42,7 +42,7 @@ export default function StaffPicker({
   if (eligible.length <= 1) return null;
 
   const pillBase =
-    "inline-flex min-h-11 items-center gap-2 rounded-full border px-3 py-2 text-sm font-medium transition-all";
+    "inline-flex min-h-11 items-center gap-2 rounded-full border px-3 py-2 text-sm font-medium transition-[transform,background-color,border-color,box-shadow] duration-150 ease-out active:scale-[0.96] motion-reduce:active:scale-100";
 
   return (
     <div className={compact ? "mt-4" : "mb-5"}>
@@ -56,7 +56,7 @@ export default function StaffPicker({
             onClick={onSelectAny}
             aria-pressed={anyStaffSelected}
             className={cn(
-              "inline-flex min-h-11 max-w-full flex-col items-start justify-center gap-0.5 rounded-2xl border px-3 py-2 text-left text-sm font-medium transition-all sm:flex-row sm:items-center sm:gap-2 sm:rounded-full sm:py-2",
+              "inline-flex min-h-11 max-w-full flex-col items-start justify-center gap-0.5 rounded-2xl border px-3 py-2 text-left text-sm font-medium transition-[transform,background-color,border-color,box-shadow] duration-150 ease-out active:scale-[0.96] motion-reduce:active:scale-100 sm:flex-row sm:items-center sm:gap-2 sm:rounded-full sm:py-2",
               pillFocus,
               anyStaffSelected
                 ? "booking-border-accent booking-bg-accent-muted booking-text-accent ring-2 booking-ring-accent"
@@ -94,7 +94,7 @@ export default function StaffPicker({
                   alt={s.name}
                   width={24}
                   height={24}
-                  className="size-6 rounded-full object-cover"
+                  className="size-6 rounded-full object-cover image-depth"
                   unoptimized={!isOptimizableRemoteImage(s.avatarUrl)}
                 />
               ) : (

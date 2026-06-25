@@ -50,10 +50,10 @@ export default function DocsHubPage() {
               <Icon name="book" className="text-xs" />
               Documentation
             </span>
-            <h1 className="font-cal text-3xl tracking-tight text-gray-950 md:text-4xl">
+            <h1 className="font-cal text-3xl tracking-tight text-balance text-gray-950 md:text-4xl">
               Learn Dinaya
             </h1>
-            <p className="mt-2 max-w-xl text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+            <p className="mt-2 max-w-xl text-sm leading-relaxed text-pretty text-gray-600 dark:text-gray-400">
               Step-by-step guides with UI walkthroughs for setup, operations, growth, and integrations.
             </p>
           </div>
@@ -153,7 +153,7 @@ export default function DocsHubPage() {
                   <Link
                     key={slug}
                     href={`/docs/guides/${slug}`}
-                    className="group overflow-hidden rounded-2xl border border-gray-200 dark:border-neutral-800 bg-gradient-to-br from-blue-50/50 to-white shadow-sm shadow-gray-900/5 dark:shadow-black/20 transition-all hover:border-primary/30 hover:shadow-md"
+                    className="group overflow-hidden rounded-2xl border border-gray-200 dark:border-neutral-800 bg-gradient-to-br from-blue-50/50 to-white shadow-sm shadow-gray-900/5 dark:shadow-black/20 transition-[transform,box-shadow,border-color] duration-150 ease-out hover:border-primary/30 hover:shadow-md active:scale-[0.99] motion-reduce:active:scale-100"
                   >
                     <DocsGuideThumbnail mockupId={getGuidePreviewMockupId(g)} className="rounded-none border-0 border-b" />
                     <div className="p-4">
@@ -184,7 +184,7 @@ export default function DocsHubPage() {
                 <a
                   key={cat.id}
                   href={`#${cat.id}`}
-                  className="rounded-2xl border border-gray-200 dark:border-neutral-800 bg-white dark:border-neutral-800 dark:bg-neutral-900 p-4 shadow-sm shadow-gray-900/5 dark:shadow-black/20 transition-all hover:border-primary/30 hover:shadow-md"
+                  className="rounded-2xl border border-gray-200 dark:border-neutral-800 bg-white dark:border-neutral-800 dark:bg-neutral-900 p-4 shadow-sm shadow-gray-900/5 dark:shadow-black/20 transition-[transform,box-shadow,border-color] duration-150 ease-out hover:border-primary/30 hover:shadow-md active:scale-[0.99] motion-reduce:active:scale-100"
                 >
                   <div className="flex items-center gap-2 mb-1">
                     <Icon name={cat.icon} className="text-primary" />
@@ -207,7 +207,7 @@ export default function DocsHubPage() {
                     <li key={g.slug}>
                       <Link
                         href={`/docs/guides/${g.slug}`}
-                        className="flex items-center gap-3 rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-4 py-3 shadow-sm shadow-gray-900/5 dark:shadow-black/20 transition hover:border-primary/30 hover:bg-gray-50 dark:bg-neutral-900/60"
+                        className="flex items-center gap-3 rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-4 py-3 shadow-sm shadow-gray-900/5 dark:shadow-black/20 transition-[box-shadow,border-color,background-color] duration-150 ease-out hover:border-primary/30 hover:bg-gray-50 dark:bg-neutral-900/60"
                       >
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">

@@ -73,7 +73,7 @@ export function BookingTeamSection({ members, copy, variant, className, id }: Pr
           <button
           type="button"
           onClick={openDialog}
-          className="group flex min-h-11 items-center gap-3 rounded-full border border-border/70 bg-card/80 px-4 py-2.5 text-sm text-muted-foreground shadow-sm transition-[background-color,border-color,transform] duration-200 ease-out hover:border-border hover:bg-card hover:text-foreground active:scale-[0.99]"
+          className="group flex min-h-11 items-center gap-3 rounded-full border border-border/70 bg-card/80 px-4 py-2.5 text-sm text-muted-foreground shadow-sm transition-[background-color,border-color,transform] duration-200 ease-out hover:border-border hover:bg-card hover:text-foreground active:scale-[0.96] motion-reduce:active:scale-100"
         >
           <UserAvatars
             users={staffToAvatarUsers(members)}
