@@ -74,6 +74,18 @@ describe("payhere", () => {
         merchantSecret,
       }),
     ).toBe(false);
+
+    expect(
+      verifyPayhereWebhook({
+        merchantId,
+        orderId,
+        payhereAmount: amount,
+        payhereCurrency: currency,
+        statusCode,
+        md5sig: md5sig.toLowerCase(),
+        merchantSecret,
+      }),
+    ).toBe(true);
   });
 
   it("matches PayHere amount strings to stored LKR integers", () => {

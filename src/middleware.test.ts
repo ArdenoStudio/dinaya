@@ -24,6 +24,7 @@ describe("middleware docs markdown rewrites", () => {
     vi.clearAllMocks();
     lookupCustomDomainSlugMock.mockResolvedValue(null);
     process.env.NEXT_PUBLIC_APP_DOMAIN = "dinaya.lk";
+    process.env.PLATFORM_ADMIN_EMAILS = "admin@dinaya.lk";
   });
 
   it("rewrites docs markdown aliases to internal markdown routes", async () => {
@@ -98,5 +99,45 @@ describe("middleware docs markdown rewrites", () => {
     const rewrite = res.headers.get("x-middleware-rewrite");
     expect(rewrite).toBeTruthy();
     expect(rewrite).toContain("/book/salon/docs");
+  });
+
+  it("redirects signed-in non-admin users away from /admin", async () => {
+    const req = new NextRequest("https://dinaya.lk/admin", {
+      headers: {
+        host: "dinaya.lk",
+      },
+    });
+    Object.assign(req, {
+      auth: {
+        user: {
+          email: "owner@example.com",
+        },
+      },
+    });
+
+    const res = await middleware(req);
+
+    expect(res.headers.get("location")).toContain("/auth/signin");
+    expect(res.headers.get("location")).toContain("callbackUrl=%2Fadmin");
+  });
+
+  it("allows platform admins through /admin", async () => {
+    const req = new NextRequest("https://dinaya.lk/admin", {
+      headers: {
+        host: "dinaya.lk",
+      },
+    });
+    Object.assign(req, {
+      auth: {
+        user: {
+          email: "admin@dinaya.lk",
+        },
+      },
+    });
+
+    const res = await middleware(req);
+
+    expect(res.headers.get("location")).toBeNull();
+    expect(res.headers.get("x-middleware-rewrite")).toBeNull();
   });
 });

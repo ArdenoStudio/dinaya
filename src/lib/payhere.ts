@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import { timingSafeEqual } from "node:crypto";
 
 export interface PayhereCheckoutParams {
   orderId: string;
@@ -17,6 +18,12 @@ export interface PayhereCheckoutParams {
 
 function md5(str: string): string {
   return crypto.createHash("md5").update(str).digest("hex").toUpperCase();
+}
+
+function timingSafeStringEqual(a: string, b: string): boolean {
+  const aBuffer = Buffer.from(a);
+  const bBuffer = Buffer.from(b);
+  return aBuffer.length === bBuffer.length && timingSafeEqual(aBuffer, bBuffer);
 }
 
 export function generatePayhereHash({
@@ -86,7 +93,7 @@ export function verifyPayhereWebhook({
   const hashedSecret = md5(merchantSecret);
   const raw = `${merchantId}${orderId}${payhereAmount}${payhereCurrency}${statusCode}${hashedSecret}`;
   const expected = md5(raw);
-  return expected === md5sig.toUpperCase();
+  return timingSafeStringEqual(expected, md5sig.toUpperCase());
 }
 
 export function getPayhereUrl(): string {

@@ -23,6 +23,8 @@ type ApiAuthResult =
   | { ok: true; context: ApiBusinessContext }
   | { ok: false; response: NextResponse };
 
+export { hasApiKeyAuth };
+
 async function rejectInactiveBusiness(businessId: string): Promise<NextResponse | null> {
   const status = await getBusinessActiveStatus(businessId);
   if (status === "active") return null;

@@ -30,6 +30,16 @@ function wantsMarkdownResponse(req: NextRequest): boolean {
   return acceptHeader.includes("text/markdown");
 }
 
+function isEnvPlatformAdmin(email?: string | null): boolean {
+  if (!email) return false;
+  const raw = process.env.PLATFORM_ADMIN_EMAILS ?? "";
+  return raw
+    .split(",")
+    .map((entry) => entry.trim().toLowerCase())
+    .filter(Boolean)
+    .includes(email.toLowerCase());
+}
+
 export default auth(async (req) => {
   const { pathname } = req.nextUrl;
   const hostname = req.headers.get("host") ?? req.nextUrl.host ?? "";
@@ -84,6 +94,12 @@ export default auth(async (req) => {
 
   if (pathname.startsWith("/admin")) {
     if (!req.auth) {
+      const signInUrl = redirectOnSameOrigin(req, "/auth/signin");
+      signInUrl.searchParams.set("callbackUrl", pathname);
+      return NextResponse.redirect(signInUrl);
+    }
+
+    if (!isEnvPlatformAdmin(req.auth.user?.email)) {
       const signInUrl = redirectOnSameOrigin(req, "/auth/signin");
       signInUrl.searchParams.set("callbackUrl", pathname);
       return NextResponse.redirect(signInUrl);

@@ -10,7 +10,7 @@ import {
   staff,
   staffLocations,
 } from "@/db/schema";
-import { requireApiBusiness } from "@/lib/api-auth";
+import { hasApiKeyAuth, requireApiBusiness } from "@/lib/api-auth";
 
 function parseStaffIds(req: NextRequest): string[] {
   const params = req.nextUrl.searchParams;
@@ -28,6 +28,10 @@ export async function GET(req: NextRequest) {
   if (apiAuth.ok) {
     businessId = apiAuth.context.businessId;
   } else {
+    if (hasApiKeyAuth(req)) {
+      return apiAuth.response;
+    }
+
     const session = await auth();
     if (!session?.user?.businessId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
