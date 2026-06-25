@@ -86,7 +86,7 @@ export function DiscoverListings({ listings, activeCategory, activeCity, showCit
               <Link
                 key={business.slug}
                 href={bookingUrl}
-                className="rounded-2xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5 shadow-sm transition-[transform,box-shadow,border-color] duration-150 ease-out hover:border-primary/30 hover:shadow-md active:scale-[0.99] motion-reduce:active:scale-100"
+                className="rounded-2xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5 shadow-sm transition-[transform,box-shadow,border-color] duration-150 ease-out hover:border-primary/30 hover:shadow-md active:scale-[0.96] motion-reduce:active:scale-100"
               >
                 <div className="mb-3 flex items-start justify-between gap-3">
                   <div className="flex min-w-0 items-start gap-3">
