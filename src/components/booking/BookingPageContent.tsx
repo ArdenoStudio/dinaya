@@ -16,6 +16,7 @@ import {
   createCalendarOverlayTicket,
   isCalendarOverlayOriginAllowed,
 } from "@/lib/calendar-overlay-ticket";
+import { isResolvableBookingImageUrl, resolveHeroImageUrl } from "@/lib/booking/hero-image";
 import type { CalendarOverlayConfig } from "./useGoogleCalendarOverlay";
 
 type Props = {
@@ -100,8 +101,8 @@ export default async function BookingPageContent({
 
   const copy = getBookingCopy(business.language);
   const calendarOverlayConfig = await buildCalendarOverlayConfig(mode, business.language);
-  const gallery = business.galleryImages ?? [];
-  const heroImageUrl = !hideGallery && gallery.length > 0 ? gallery[0]! : null;
+  const gallery = (business.galleryImages ?? []).filter(isResolvableBookingImageUrl);
+  const heroImageUrl = resolveHeroImageUrl(business.galleryImages, { hideGallery });
   const staffWithBio = staff.filter((s) => s.bio || s.avatarUrl);
   const instagramUrl = normalizePublicHttpsUrl(business.instagramUrl);
   const facebookUrl = normalizePublicHttpsUrl(business.facebookUrl);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { isOptimizableRemoteImage, cn } from "@/lib/utils";
@@ -15,6 +15,7 @@ import { BookingServicePrice } from "@/components/booking/BookingServicePrice";
 import { Icon } from "@/components/ui/Icon";
 import { Separator } from "@/components/ui/separator";
 import { BlurFade } from "@/components/ui/blur-fade";
+import { BookingBusinessAvatar } from "@/components/booking/BookingBusinessAvatar";
 import { BookingHubHeroImage } from "@/components/booking/BookingHubHeroImage";
 import { BookingHubCta } from "@/components/booking/BookingHubCta";
 import { BookingServiceSearch } from "@/components/booking/BookingServiceSearch";
@@ -56,43 +57,24 @@ interface Props {
   onSelectService?: (service: BookingService) => void;
 }
 
-function serviceInitial(name: string) {
-  return name.trim().charAt(0).toUpperCase() || "?";
-}
-
 function HubBusinessLogo({
   businessName,
   logoUrl,
+  variant = "header",
   className,
 }: {
   businessName: string;
   logoUrl?: string | null;
+  variant?: "header" | "hero";
   className?: string;
 }) {
   return (
-    <div
-      className={cn(
-        "flex size-[4.5rem] shrink-0 items-center justify-center overflow-hidden rounded-full border border-border/60 bg-muted/40 shadow-md ring-2 ring-card md:size-20",
-        logoUrl && "bg-card",
-        className,
-      )}
-      aria-hidden={logoUrl ? undefined : true}
-    >
-      {logoUrl ? (
-        <Image
-          src={logoUrl}
-          alt=""
-          width={72}
-          height={72}
-          className="size-full bg-white object-contain p-1"
-          unoptimized={!isOptimizableRemoteImage(logoUrl)}
-        />
-      ) : (
-        <span className="text-xl font-semibold text-[var(--booking-accent)] md:text-2xl">
-          {serviceInitial(businessName)}
-        </span>
-      )}
-    </div>
+    <BookingBusinessAvatar
+      name={businessName}
+      logoUrl={logoUrl}
+      size={variant === "hero" ? "hubHero" : "hub"}
+      className={cn("border border-border/60 bg-card shadow-md ring-2 ring-card", className)}
+    />
   );
 }
 
@@ -117,6 +99,13 @@ export default function BookingServiceHub({
 }: Props) {
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [heroDisplayed, setHeroDisplayed] = useState(Boolean(heroImageUrl));
+
+  useEffect(() => {
+    setHeroDisplayed(Boolean(heroImageUrl));
+  }, [heroImageUrl]);
+
+  const showHero = Boolean(heroImageUrl) && heroDisplayed;
 
   const categories = useMemo(() => uniqueServiceCategories(services), [services]);
   const filteredServices = useMemo(
@@ -221,23 +210,31 @@ export default function BookingServiceHub({
   const tagline = hubTagline(businessDescription, copy.selectServiceHint);
   const locationLine = formatHubLocationLine(businessAddress, businessPhone);
 
-  const shell = heroImageUrl
+  const shell = showHero
     ? "overflow-hidden rounded-none border-x-0 bg-transparent shadow-none md:rounded-2xl md:border-0"
     : "overflow-hidden rounded-2xl border-x-0 booking-panel-surface shadow-none md:border md:border-border/80 md:shadow-[0_12px_40px_-24px_rgba(15,23,42,0.28)] dark:md:shadow-none dark:md:ring-1 dark:md:ring-white/10";
 
-  const contentShell = heroImageUrl
+  const contentShell = showHero
     ? "relative z-10 -mt-5 flex flex-col rounded-t-2xl booking-panel-surface pt-14 md:-mt-6 md:pt-[4.25rem]"
     : "flex flex-col";
 
   return (
     <BlurFade className={cn("w-full", showStickyCta ? "pb-28 md:pb-0" : "pb-4")}>
       <article className={cn("flex w-full flex-col", shell)}>
-        {heroImageUrl ? (
+        {showHero ? (
           <div className="relative">
-            <BookingHubHeroImage src={heroImageUrl} alt={businessName} />
+            <BookingHubHeroImage
+              src={heroImageUrl!}
+              alt={businessName}
+              onUnavailable={() => setHeroDisplayed(false)}
+            />
             <div className="pointer-events-none absolute inset-x-0 bottom-3 z-20 flex justify-center md:bottom-4">
               <div className="pointer-events-auto translate-y-1/3">
-                <HubBusinessLogo businessName={businessName} logoUrl={businessLogoUrl} />
+                <HubBusinessLogo
+                  businessName={businessName}
+                  logoUrl={businessLogoUrl}
+                  variant="hero"
+                />
               </div>
             </div>
           </div>
@@ -247,20 +244,21 @@ export default function BookingServiceHub({
         <header
           className={cn(
             "flex flex-col items-center px-4 pb-4 text-center md:px-6",
-            heroImageUrl ? "pt-0" : "pt-6 md:pt-8",
+            showHero ? "pt-0" : "pt-6 md:pt-8",
           )}
         >
-          {!heroImageUrl ? (
+          {!showHero ? (
             <HubBusinessLogo
               businessName={businessName}
               logoUrl={businessLogoUrl}
+              variant="header"
               className="mb-4 md:mb-5"
             />
           ) : null}
           <h1
             className={cn(
               "text-[1.625rem] font-bold leading-tight tracking-tight text-foreground md:text-3xl",
-              heroImageUrl && "mt-1 md:mt-1.5",
+              showHero && "mt-1 md:mt-1.5",
             )}
           >
             {businessName}

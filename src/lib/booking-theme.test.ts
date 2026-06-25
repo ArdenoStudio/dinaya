@@ -74,9 +74,8 @@ describe("booking-theme", () => {
     expect(contrastRatio("#111111", "#ffffff")).toBeGreaterThan(10);
   });
 
-  it("resolves salon preset colors for Wax-style branding", () => {
+  it("resolves salon preset layout without forcing a pink accent", () => {
     const salon = BOOKING_THEME_PRESETS.salon;
-    expect(salon.accentColor).toBe("#ff46a2");
     expect(salon.pageBackground).toBe("custom");
     expect(salon.pageBackgroundColor).toBe("#fff6f8");
   });

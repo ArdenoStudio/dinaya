@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
-import Link from "next/link";
+import { ImageUploadField } from "@/components/dashboard/ImageUploadField";
 import { buildPublicBookingUrl } from "@/lib/booking-url";
 import {
   BOOKING_THEME_PRESETS,
@@ -13,6 +12,8 @@ import {
   type BookingPanelBackground,
   type BookingThemePreset,
 } from "@/lib/booking-theme";
+import Link from "next/link";
+import Image from "next/image";
 import { isOptimizableRemoteImage } from "@/lib/utils";
 import { Icon } from "@/components/ui/Icon";
 import { Button } from "@/components/ui/button";
@@ -45,8 +46,8 @@ interface Props {
 
 const PRESET_LABELS: Record<Exclude<BookingThemePreset, "custom">, string> = {
   classic: "Classic",
-  salon: "Salon (soft blush)",
-  salon_vivid: "Salon (vivid pink)",
+  salon: "Salon (soft)",
+  salon_vivid: "Salon (vivid)",
   spa: "Spa calm",
   bold: "Bold",
 };
@@ -62,12 +63,12 @@ const PAGE_BACKGROUND_OPTIONS: { value: BookingPageBackground; label: string }[]
   { value: "white", label: "White" },
   { value: "grouped", label: "Soft gray" },
   { value: "custom", label: "Custom color" },
-  { value: "accent", label: "Accent wash (brand pink)" },
+  { value: "accent", label: "Accent wash" },
 ];
 
 const PANEL_BACKGROUND_OPTIONS: { value: BookingPanelBackground; label: string }[] = [
   { value: "white", label: "White card" },
-  { value: "accent", label: "Brand pink panel" },
+  { value: "accent", label: "Brand accent panel" },
 ];
 
 function buildPreviewUrl(
@@ -116,10 +117,12 @@ export function BookingPageThemeEditor({ business, onPreviewChange }: Props) {
   const [logoUrl, setLogoUrl] = useState(business.logoUrl ?? "");
   const [heroBannerUrl, setHeroBannerUrl] = useState(business.galleryImages?.[0] ?? "");
   const [galleryRest, setGalleryRest] = useState<string[]>(business.galleryImages?.slice(1) ?? []);
-  const [newGalleryUrl, setNewGalleryUrl] = useState("");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
+
+  const galleryImageCount = [heroBannerUrl.trim(), ...galleryRest].filter(Boolean).length;
+  const galleryAtLimit = galleryImageCount >= 12;
 
   const contrastWarning = accentContrastWarning(
     form.accentColor,
@@ -156,7 +159,6 @@ export function BookingPageThemeEditor({ business, onPreviewChange }: Props) {
     const values = BOOKING_THEME_PRESETS[preset];
     const next = {
       ...form,
-      accentColor: values.accentColor,
       bookingPageBackground: values.pageBackground,
       bookingPageBackgroundColor: values.pageBackgroundColor ?? "#f2f2f7",
       bookingPanelBackground: values.panelBackground ?? "white",
@@ -219,39 +221,27 @@ export function BookingPageThemeEditor({ business, onPreviewChange }: Props) {
           <Icon name="image" className="text-sm text-muted-foreground" />
           <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Identity</p>
         </div>
-        <div className="mt-4 space-y-4">
-          <div>
-            <label className="text-sm font-medium">Logo</label>
-            <p className="mt-1 text-xs text-muted-foreground">Shown in the header and on your booking page.</p>
-            <input
-              value={logoUrl}
-              onChange={(e) => setLogoUrl(e.target.value)}
-              className={`${dashboardInputClass} mt-2`}
-              placeholder="https://example.com/logo.webp"
-            />
-            {logoUrl.trim() ? (
-              <div className="mt-3 flex size-16 items-center justify-center overflow-hidden rounded-full border bg-muted/30">
-                <Image
-                  src={logoUrl.trim()}
-                  alt=""
-                  width={64}
-                  height={64}
-                  className="size-full object-contain"
-                  unoptimized={!isOptimizableRemoteImage(logoUrl.trim())}
-                />
-              </div>
-            ) : null}
-          </div>
-          <div>
-            <label className="text-sm font-medium">Hero banner</label>
-            <p className="mt-1 text-xs text-muted-foreground">The wide image at the top of your booking page.</p>
-            <input
-              value={heroBannerUrl}
-              onChange={(e) => setHeroBannerUrl(e.target.value)}
-              className={`${dashboardInputClass} mt-2`}
-              placeholder="https://example.com/banner.jpg"
-            />
-          </div>
+        <div className="mt-4 space-y-6">
+          <ImageUploadField
+            label="Logo"
+            hint="Shown in the header and on your booking page."
+            value={logoUrl}
+            onChange={setLogoUrl}
+            kind="logo"
+            aspectRatio={1}
+            outputWidth={512}
+            previewShape="circle"
+          />
+          <ImageUploadField
+            label="Hero banner"
+            hint="The wide image at the top of your booking page."
+            value={heroBannerUrl}
+            onChange={setHeroBannerUrl}
+            kind="banner"
+            aspectRatio={16 / 9}
+            outputWidth={1600}
+            previewShape="wide"
+          />
         </div>
       </div>
 
@@ -423,23 +413,25 @@ export function BookingPageThemeEditor({ business, onPreviewChange }: Props) {
           <Icon name="images" className="text-sm text-muted-foreground" />
           <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Gallery</p>
         </div>
-        <p className="mt-2 text-xs text-muted-foreground">Optional extra photos below the hero banner.</p>
+        <p className="mt-2 text-xs text-muted-foreground">
+          Optional extra photos below the hero banner. Upload from your device or paste a URL.
+        </p>
         {galleryRest.length > 0 ? (
           <div className="mt-3 grid grid-cols-2 gap-2">
             {galleryRest.map((url) => (
-              <div key={url} className="relative overflow-hidden rounded-lg border">
+              <div key={url} className="group relative aspect-[4/3] overflow-hidden rounded-lg border bg-muted/20">
                 <Image
                   src={url}
                   alt=""
-                  width={240}
-                  height={140}
-                  className="h-28 w-full object-cover"
+                  fill
+                  className="object-cover"
+                  sizes="200px"
                   unoptimized={!isOptimizableRemoteImage(url)}
                 />
                 <button
                   type="button"
                   onClick={() => setGalleryRest((prev) => prev.filter((item) => item !== url))}
-                  className="absolute right-2 top-2 rounded-full bg-black/60 p-1 text-white"
+                  className="absolute right-2 top-2 flex size-8 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity group-hover:opacity-100"
                   aria-label="Remove image"
                 >
                   <Icon name="x-lg" />
@@ -448,26 +440,21 @@ export function BookingPageThemeEditor({ business, onPreviewChange }: Props) {
             ))}
           </div>
         ) : null}
-        <div className="mt-3 flex gap-2">
-          <input
-            value={newGalleryUrl}
-            onChange={(e) => setNewGalleryUrl(e.target.value)}
-            className={`${dashboardInputClass} flex-1`}
-            placeholder="https://example.com/photo.jpg"
-          />
-          <Button
-            type="button"
-            variant="secondary"
-            disabled={!newGalleryUrl.trim()}
-            onClick={() => {
-              const url = newGalleryUrl.trim();
-              if (!url || galleryRest.includes(url)) return;
+        <div className="mt-3">
+          <ImageUploadField
+            label="Add gallery photo"
+            hint={`${galleryImageCount}/12 photos`}
+            value=""
+            onChange={(url) => {
+              if (!url || galleryRest.includes(url) || galleryAtLimit) return;
               setGalleryRest((prev) => [...prev, url]);
-              setNewGalleryUrl("");
             }}
-          >
-            Add
-          </Button>
+            kind="gallery"
+            aspectRatio={4 / 3}
+            outputWidth={1200}
+            previewShape="wide"
+            allowUrl
+          />
         </div>
       </div>
 
