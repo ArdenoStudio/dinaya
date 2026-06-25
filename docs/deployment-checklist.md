@@ -70,6 +70,7 @@ Configure these repository settings in GitHub:
 
 - Repository variable or secret `DINAYA_APP_URL`: production app URL, for example `https://dinaya.lk`
 - Repository secret `CRON_SECRET`: the same value configured in the Vercel/hosting environment
+- Repository secret `DATABASE_URL_DIRECT` (preferred) or `DATABASE_URL`: required for the **DB Migrate** workflow (`.github/workflows/db-migrate.yml`). Use the Supabase **direct** connection string (port 5432) for `DATABASE_URL_DIRECT`. Without either secret, pushes to `master` skip migrations with a workflow warning.
 
 All cron workflows use `DINAYA_APP_URL` and `CRON_SECRET`. Schedules are UTC:
 
