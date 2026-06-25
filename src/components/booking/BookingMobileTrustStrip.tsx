@@ -34,7 +34,6 @@ export default function BookingMobileTrustStrip({
               reviewCount={reviewCount}
               copy={copy}
               size="sm"
-              scrollToReviews
             />
           </div>
         )}

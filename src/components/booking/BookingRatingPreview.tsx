@@ -5,12 +5,14 @@ import { BookingBusinessIdentity } from "@/components/booking/BookingBusinessIde
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader } from "@/components/ui/card";
 import { getBookingCopy } from "@/lib/i18n";
+import { resolveBookingTheme } from "@/lib/booking-theme";
 
 const copy = getBookingCopy("en");
+const previewTheme = resolveBookingTheme({ accentColor: "#F97316" });
 
 export function BookingRatingPreview() {
   return (
-    <BookingTheme accentColor="#F97316">
+    <BookingTheme theme={previewTheme}>
       <div className="booking-page-bg min-h-dvh bg-muted/20 px-4 py-10">
         <div className="mx-auto flex w-full max-w-lg flex-col gap-4">
           <div className="text-center">

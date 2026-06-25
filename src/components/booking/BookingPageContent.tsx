@@ -7,16 +7,8 @@ import { BookingTheme } from "@/components/booking/BookingTheme";
 import { BookingThemeToggle } from "@/components/booking/BookingThemeToggle";
 import { getBookingCopy } from "@/lib/i18n";
 import { normalizePublicHttpsUrl } from "@/lib/public-url";
-<<<<<<< HEAD
-import { isOptimizableRemoteImage } from "@/lib/utils";
-import { Card, CardContent } from "@/components/ui/card";
-import { BookingTeamSection } from "@/components/booking/BookingTeamSection";
-import { BookingReviewsSection } from "@/components/booking/BookingReviewsSection";
-import { getBusinessRating } from "@/lib/booking/rating";
-=======
 import { isOptimizableRemoteImage, cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
->>>>>>> master
 import type { BookingPageData } from "@/lib/booking/load-page-data";
 import { resolveBookingTheme, type BookingThemeOverrides } from "@/lib/booking-theme";
 import { canUseFeature } from "@/lib/plan";

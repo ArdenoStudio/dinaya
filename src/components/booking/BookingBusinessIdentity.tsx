@@ -53,8 +53,7 @@ export function BookingBusinessIdentity({
               reviewCount={rating.reviewCount}
               copy={copy}
               size="sm"
-              variant="pill"
-              scrollToReviews
+              compactAttribution
             />
           ) : null}
         </div>

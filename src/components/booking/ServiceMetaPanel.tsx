@@ -9,23 +9,12 @@ import type { BookingCopy } from "@/lib/i18n";
 import type { DealListItem } from "@/lib/deals/queries";
 import { formatLkr } from "@/lib/utils";
 import { Icon } from "@/components/ui/Icon";
-<<<<<<< HEAD
-import { BookingBusinessIdentity } from "./BookingBusinessIdentity";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { fadeInUp } from "@/lib/booking/booking-animations";
-import StaffPicker from "./StaffPicker";
-import StepLocation from "./StepLocation";
-import { computeDiscountedPrice } from "@/lib/deals/pricing";
-import { getBusinessRating } from "@/lib/booking/rating";
-=======
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { bookingPanelMotion } from "@/lib/booking/booking-motion";
 import StepLocation from "./StepLocation";
 import { computeDiscountedPrice } from "@/lib/deals/pricing";
 import { BusinessRating, getBusinessRating } from "./BusinessRating";
 import { BookingServicePrice } from "./BookingServicePrice";
->>>>>>> master
 
 interface ServiceMetaPanelProps {
   business: BookingBusiness;
@@ -94,16 +83,6 @@ export function ServiceMetaPanel({
   const rating = getBusinessRating(avgRating, reviewCount);
 
   return (
-<<<<<<< HEAD
-    <div className="flex flex-col">
-      <BookingBusinessIdentity
-        name={business.name}
-        logoUrl={business.logoUrl}
-        copy={copy}
-        rating={rating}
-        size="sm"
-      />
-=======
     <div className="flex min-w-0 flex-col">
       <div className="flex items-start gap-3">
         <Avatar className="size-10 shrink-0" data-size="lg">
@@ -127,7 +106,6 @@ export function ServiceMetaPanel({
           )}
         </div>
       </div>
->>>>>>> master
 
       {needsLocationPicker && (
         <div className="mt-6">
