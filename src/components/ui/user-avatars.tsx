@@ -130,7 +130,7 @@ export function UserAvatars({
                 <img
                   src={user.image}
                   alt=""
-                  className="h-full w-full object-cover"
+                  className="h-full w-full object-cover image-depth"
                 />
               ) : (
                 <div className="flex h-full w-full items-center justify-center bg-[var(--booking-accent-muted)] text-xs font-semibold text-[var(--booking-accent)]">
@@ -139,7 +139,7 @@ export function UserAvatars({
               )}
             </div>
 
-            <AnimatePresence>
+            <AnimatePresence initial={false}>
               {!decorative && shouldScale && user.name ? (
                 <m.div
                   role="tooltip"

@@ -109,7 +109,7 @@ export default function TimeSlotGrid({
                   aria-label={`${slot.label}${isSelected ? ", selected" : ""}${
                     hasCalendarConflict ? `, ${copy.calendarConflict}` : ""
                   }`}
-                  className={`w-full min-h-11 rounded-lg px-2 py-2.5 text-base font-semibold tabular-nums transition-all md:text-sm ${
+                  className={`w-full min-h-11 rounded-lg px-2 py-2.5 text-base font-semibold tabular-nums transition-[transform,background-color,border-color,box-shadow] duration-150 ease-out active:scale-[0.96] motion-reduce:active:scale-100 md:text-sm ${
                     hasCalendarConflict
                       ? "cursor-not-allowed border border-border bg-muted text-muted-foreground line-through"
                       : isSelected
