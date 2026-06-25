@@ -20,7 +20,21 @@ function runStep(label, command, args) {
   }
 }
 
-if (process.env.DATABASE_URL) {
+function shouldRunMigrations() {
+  // Vercel builds usually expose the Supabase pooler URL, which cannot run DDL
+  // reliably from the build environment. Apply migrations via the DB Migrate
+  // GitHub Action (on push to master) or manually before deploy.
+  if (process.env.VERCEL === "1") {
+    console.log(
+      "[build] Vercel — skipping db:migrate (use DB Migrate workflow or run locally before deploy)",
+    );
+    return false;
+  }
+
+  return Boolean(process.env.DATABASE_URL_DIRECT ?? process.env.DATABASE_URL);
+}
+
+if (shouldRunMigrations()) {
   const migrateResult = spawnSync("npm", ["run", "db:migrate"], {
     env: process.env,
     stdio: "inherit",
@@ -39,7 +53,7 @@ if (process.env.DATABASE_URL) {
       "[build] db:migrate failed — continuing build. Run migrations manually or via the DB Migrate workflow.",
     );
   }
-} else {
+} else if (!process.env.VERCEL) {
   console.log("[build] DATABASE_URL not set — skipping db:migrate");
 }
 
