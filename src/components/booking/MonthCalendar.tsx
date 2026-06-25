@@ -140,7 +140,7 @@ export default function MonthCalendar({
               type="button"
               disabled={disabled}
               onClick={() => !disabled && onSelect(dateStr)}
-              className={`relative min-w-0 font-medium transition-all ${
+              className={`relative min-w-0 font-medium tabular-nums transition-[background-color,box-shadow,transform] ${
                 comfortable
                   ? "mx-auto flex size-11 items-center justify-center rounded-xl text-sm"
                   : "mx-auto flex size-11 min-h-11 min-w-11 max-w-none items-center justify-center rounded-lg text-xs"

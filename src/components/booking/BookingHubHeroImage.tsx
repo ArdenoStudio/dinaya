@@ -23,7 +23,7 @@ export function BookingHubHeroImage({ src, alt }: Props) {
           fill
           priority
           sizes="(max-width: 768px) 100vw, 672px"
-          className="object-cover object-top"
+          className="object-cover object-top outline outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10"
           unoptimized={!isOptimizableRemoteImage(src)}
           onError={() => setHidden(true)}
         />

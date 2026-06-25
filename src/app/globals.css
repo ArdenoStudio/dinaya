@@ -108,10 +108,15 @@ html.nav-open {
 
 @layer base {
   * { @apply border-border; }
-  body { @apply bg-background text-foreground; }
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
 }
 
 @layer utilities {
+  .image-depth {
+    @apply outline outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10;
+  }
   .surface-page {
     @apply bg-white dark:bg-neutral-950;
   }

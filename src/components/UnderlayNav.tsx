@@ -94,7 +94,7 @@ export function UnderlayNav() {
       </svg>
 
       {/* Backdrop */}
-      <AnimatePresence>
+      <AnimatePresence initial={false}>
         {isOpen && (
           <motion.div
             key="backdrop"
