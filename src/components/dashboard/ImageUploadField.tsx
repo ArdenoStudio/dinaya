@@ -44,16 +44,19 @@ export function ImageUploadField({
   async function uploadBlob(blob: Blob) {
     setUploading(true);
     setError("");
-    const data = new FormData();
-    data.append("file", blob, `${kind}.webp`);
-    data.append("kind", kind);
-    const res = await fetch("/api/dashboard/upload/image", { method: "POST", body: data });
-    const json = await res.json();
-    if (!res.ok) {
-      throw new Error(json.error ?? "Upload failed.");
+    try {
+      const data = new FormData();
+      data.append("file", blob, `${kind}.webp`);
+      data.append("kind", kind);
+      const res = await fetch("/api/dashboard/upload/image", { method: "POST", body: data });
+      const json = await res.json();
+      if (!res.ok) {
+        throw new Error(json.error ?? "Upload failed.");
+      }
+      onChange(json.url);
+    } finally {
+      setUploading(false);
     }
-    onChange(json.url);
-    setUploading(false);
   }
 
   async function handleFileSelect(file: File) {
