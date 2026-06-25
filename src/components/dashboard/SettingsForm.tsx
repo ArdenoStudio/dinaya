@@ -5,11 +5,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { useDashboardCopy } from "@/components/dashboard/DashboardLocaleProvider";
 import { buildPublicBookingUrl } from "@/lib/booking-url";
-import { bookingLogoHasIntrinsicPadding } from "@/lib/booking/logo-avatar";
 import { isOptimizableRemoteImage } from "@/lib/utils";
 import { Icon } from "@/components/ui/Icon";
-import { Button } from "@/components/ui/button";
 import { dashboardInputClass } from "@/lib/dashboard-ui";
+import { ImageUploadField } from "@/components/dashboard/ImageUploadField";
+import { Button } from "@/components/ui/button";
 
 type SettingsBusiness = {
   address: string | null;
@@ -78,9 +78,6 @@ export default function SettingsForm({ business }: Props) {
     business.galleryImages ?? []
   );
   const [logoUrl, setLogoUrl] = useState(business.logoUrl ?? "");
-  const [logoUploading, setLogoUploading] = useState(false);
-  const [logoUploadError, setLogoUploadError] = useState("");
-  const [newImageUrl, setNewImageUrl] = useState("");
 
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -116,33 +113,8 @@ export default function SettingsForm({ business }: Props) {
     setSaving(false);
   }
 
-  function addGalleryImage() {
-    const url = newImageUrl.trim();
-    if (!url || galleryImages.includes(url)) return;
-    setGalleryImages((prev) => [...prev, url]);
-    setNewImageUrl("");
-  }
-
   function removeGalleryImage(url: string) {
     setGalleryImages((prev) => prev.filter((u) => u !== url));
-  }
-
-  async function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setLogoUploading(true);
-    setLogoUploadError("");
-    const data = new FormData();
-    data.append("file", file);
-    const res = await fetch("/api/dashboard/upload/logo", { method: "POST", body: data });
-    const json = await res.json();
-    if (!res.ok) {
-      setLogoUploadError(json.error ?? "Upload failed.");
-    } else {
-      setLogoUrl(json.url);
-    }
-    setLogoUploading(false);
-    e.target.value = "";
   }
 
   const inputCls = `${dashboardInputClass} mt-0`;
@@ -346,71 +318,17 @@ export default function SettingsForm({ business }: Props) {
           </div>
         </div>
 
-        {/* Business logo */}
-        <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-6 space-y-4">
-          <div className="flex items-center gap-2">
-            <Icon name="image" className="text-sm text-muted-foreground" />
-            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Business logo</p>
-          </div>
-          <p className="text-xs text-muted-foreground -mt-2">
-            Shown on your booking page next to your business name. Square logos work best. Max 2 MB.
-          </p>
-
-          <div className="flex items-center gap-4">
-            {logoUrl.trim() && (
-              <div className="relative size-16 shrink-0 overflow-hidden rounded-full border bg-[var(--booking-accent-muted)] ring-1 ring-border/60">
-                {bookingLogoHasIntrinsicPadding(logoUrl.trim()) ? (
-                  <Image
-                    src={logoUrl.trim()}
-                    alt="Business logo preview"
-                    fill
-                    sizes="64px"
-                    className="object-cover object-center scale-[1.85]"
-                    unoptimized={!isOptimizableRemoteImage(logoUrl.trim())}
-                  />
-                ) : (
-                  <div className="absolute inset-0 flex items-center justify-center p-2">
-                    <Image
-                      src={logoUrl.trim()}
-                      alt="Business logo preview"
-                      width={52}
-                      height={52}
-                      className="max-h-full max-w-full object-contain"
-                      unoptimized={!isOptimizableRemoteImage(logoUrl.trim())}
-                    />
-                  </div>
-                )}
-              </div>
-            )}
-
-            <div className="flex flex-col gap-2">
-              <label className="cursor-pointer">
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml"
-                  className="sr-only"
-                  disabled={logoUploading}
-                  onChange={handleLogoUpload}
-                />
-                <span className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${logoUploading ? "opacity-50 cursor-not-allowed" : "hover:bg-muted cursor-pointer"}`}>
-                  <Icon name="upload" className="text-xs" />
-                  {logoUploading ? "Uploading…" : logoUrl.trim() ? "Replace logo" : "Upload logo"}
-                </span>
-              </label>
-              {logoUrl.trim() && (
-                <button
-                  type="button"
-                  onClick={() => setLogoUrl("")}
-                  className="text-xs font-medium text-muted-foreground hover:text-foreground text-left"
-                >
-                  Remove logo
-                </button>
-              )}
-              {logoUploadError && (
-                <p className="text-xs text-destructive">{logoUploadError}</p>
-              )}
-            </div>
-          </div>
+        <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-6 space-y-4 xl:col-span-2">
+          <ImageUploadField
+            label="Business logo"
+            hint="Shown on your booking page next to your business name. Square logos work best."
+            value={logoUrl}
+            onChange={setLogoUrl}
+            kind="logo"
+            aspectRatio={1}
+            outputWidth={512}
+            previewShape="circle"
+          />
         </div>
 
         {/* Portfolio gallery */}
@@ -420,7 +338,7 @@ export default function SettingsForm({ business }: Props) {
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Portfolio gallery</p>
           </div>
           <p className="text-xs text-muted-foreground -mt-2">
-            Add photo URLs to showcase your work on your booking page. Paste a direct image link (ending in .jpg, .png, etc.).
+            Showcase your work on your booking page. Upload photos directly — no third-party host needed.
           </p>
 
           {/* Existing images */}
@@ -448,30 +366,20 @@ export default function SettingsForm({ business }: Props) {
             </div>
           )}
 
-          {/* Add image */}
-          <div className="flex gap-2">
-            <input
-              value={newImageUrl}
-              onChange={(e) => setNewImageUrl(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addGalleryImage())}
-              className="flex-1 border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 bg-white dark:border-neutral-700 dark:bg-neutral-900"
-              placeholder="https://example.com/photo.jpg"
-            />
-            <button
-              type="button"
-              onClick={addGalleryImage}
-              disabled={!newImageUrl.trim()}
-              className="px-4 py-2.5 rounded-lg bg-primary/10 text-primary text-sm font-medium hover:bg-primary/15 disabled:opacity-40 transition-colors"
-            >
-              Add
-            </button>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            {galleryImages.length}/12 photos · Upload images to a host like{" "}
-            <a href="https://imgbb.com" target="_blank" rel="noopener noreferrer" className="underline">imgbb.com</a> or{" "}
-            <a href="https://imgur.com" target="_blank" rel="noopener noreferrer" className="underline">imgur.com</a>{" "}
-            and paste the direct link here.
-          </p>
+          <ImageUploadField
+            label="Add portfolio photo"
+            hint={`${galleryImages.length}/12 photos`}
+            value=""
+            onChange={(url) => {
+              if (!url || galleryImages.includes(url) || galleryImages.length >= 12) return;
+              setGalleryImages((prev) => [...prev, url]);
+            }}
+            kind="gallery"
+            aspectRatio={4 / 3}
+            outputWidth={1200}
+            previewShape="wide"
+            allowUrl
+          />
         </div>
 
         {/* Booking page appearance */}
