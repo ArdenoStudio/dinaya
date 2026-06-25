@@ -5,7 +5,7 @@ import { SlotListPanelSkeleton } from "./SlotListPanelSkeleton";
 export function BookingBookerSkeleton() {
   return (
     <div className="w-full max-w-5xl px-0 md:px-4">
-      <Card className="overflow-hidden rounded-none border-x-0 bg-card md:rounded-xl md:border-x lg:overflow-visible lg:rounded-xl lg:border lg:border-border lg:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)] dark:lg:shadow-none dark:lg:ring-1 dark:lg:ring-white/10">
+      <Card className="overflow-hidden rounded-none border-x-0 booking-panel-surface md:rounded-xl md:border-x lg:overflow-visible lg:rounded-xl lg:border lg:border-border lg:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)] dark:lg:shadow-none dark:lg:ring-1 dark:lg:ring-white/10">
         <div className="grid w-full min-w-0 grid-cols-1 lg:grid-cols-[15rem_minmax(0,1fr)] lg:items-start lg:divide-x lg:divide-border xl:grid-cols-[16rem_minmax(0,1fr)]">
           <div className="border-b border-border px-4 py-6 lg:px-4 lg:pb-6 lg:pt-6 xl:px-5">
             <div className="flex items-start gap-3">

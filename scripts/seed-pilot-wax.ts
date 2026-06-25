@@ -37,7 +37,7 @@ const BUSINESS_NAME = "Wax in the City";
 export const WAX_LOGO_PATH = "/demo/wax-in-the-city-logo.webp";
 export const WAX_BANNER_PATH = "/demo/wax-in-the-city-banner.webp";
 /** Pink from the Wax in the City brand mark (logo background). */
-export const WAX_ACCENT_COLOR = "#ff6699";
+export const WAX_ACCENT_COLOR = "#ff46a2";
 /** Soft blush page background — pairs with the salon preset. */
 export const WAX_PAGE_BACKGROUND_COLOR = "#fff6f8";
 
@@ -284,6 +284,7 @@ async function updateBusinessProfile(businessId: string) {
       accentColor: WAX_ACCENT_COLOR,
       bookingPageBackground: "accent",
       bookingPageBackgroundColor: null,
+      bookingPanelBackground: "accent",
       bookingHeroOverlay: "brand",
       bookingHeroOverlayOpacity: 55,
       bookingThemePreset: "salon_vivid",

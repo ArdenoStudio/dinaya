@@ -327,8 +327,8 @@ export default function StepDateTime({
         </p>
       ) : null}
 
-      <div className="flex min-w-0 w-full max-w-full flex-col lg:grid lg:min-h-[22rem] lg:grid-cols-[minmax(0,1.15fr)_minmax(11rem,0.85fr)] lg:divide-x lg:divide-border xl:grid-cols-[minmax(0,1.2fr)_minmax(12rem,0.8fr)]">
-        <section className="min-w-0 flex-1 pb-0 lg:px-3 lg:pb-0 lg:pt-0 xl:px-4">
+      <div className="flex min-w-0 w-full max-w-full flex-col lg:grid lg:min-h-[24rem] lg:grid-cols-[minmax(0,1fr)_minmax(14rem,0.92fr)] lg:divide-x lg:divide-border/80 xl:grid-cols-[minmax(0,1.08fr)_minmax(14.5rem,0.88fr)]">
+        <section className="min-w-0 flex-1 py-0 lg:pr-6">
           <div className="mb-3 flex items-center justify-between gap-2 md:mb-4">
             <p className="text-sm font-medium text-foreground md:sr-only">{copy.chooseDate}</p>
             <button
@@ -400,7 +400,7 @@ export default function StepDateTime({
         </section>
 
         {!hideSlots ? (
-          <section className="min-w-0 flex-1 border-t border-border pt-3 lg:flex lg:min-h-0 lg:flex-col lg:border-t-0 lg:px-3 lg:pt-0 xl:px-4">
+          <section className="min-w-0 flex-1 border-t border-border/80 py-4 lg:flex lg:min-h-0 lg:flex-col lg:border-t-0 lg:py-0 lg:pl-6">
             {compactDateHeading ? (
                 <div className="mb-3 flex items-baseline justify-between gap-2 md:mb-4">
                   <h3 className="text-sm font-semibold text-foreground md:text-base">{compactDateHeading}</h3>
@@ -447,7 +447,7 @@ export default function StepDateTime({
                       </button>
                     ) : null}
                   </div>
-                  <div className="scrollbar-hide hidden min-w-0 w-full max-h-[min(28rem,calc(100vh-12rem))] overflow-y-auto overflow-x-hidden lg:block">
+                  <div className="scrollbar-hide hidden min-w-0 w-full max-h-[min(30rem,calc(100vh-14rem))] overflow-y-auto overflow-x-hidden pb-4 lg:block">
                     <SlotListPanel {...slotPanelProps} />
                   </div>
                 </>

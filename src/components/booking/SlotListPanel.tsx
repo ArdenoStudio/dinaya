@@ -80,7 +80,7 @@ export function SlotListPanel({
 
   return (
     <div
-      className={`relative flex flex-col gap-4 transition-opacity ${refreshing ? "pointer-events-none opacity-50" : ""}`}
+      className={`relative flex flex-col gap-5 transition-opacity ${refreshing ? "pointer-events-none opacity-50" : ""}`}
       aria-busy={refreshing || undefined}
     >
       {PERIOD_ORDER.map((period) => {
@@ -88,10 +88,10 @@ export function SlotListPanel({
         if (periodSlots.length === 0) return null;
         return (
           <div key={period}>
-            <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+            <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
               {copy[PERIOD_LABEL[period]]}
             </p>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2.5">
               {periodSlots.map((slot) => {
                 const isSelected = slot.startUtc === selectedStartUtc;
                 const hasCalendarConflict = slotConflictsWithBusyTime(slot, busyTimes);
@@ -105,7 +105,7 @@ export function SlotListPanel({
                       hasCalendarConflict ? `, ${copy.calendarConflict}` : ""
                     }`}
                     onClick={() => onSelect(slot)}
-                    className={`flex min-h-11 w-full items-center gap-2 rounded-lg border px-2.5 py-2 text-sm font-medium transition-colors ${
+                    className={`flex min-h-11 w-full items-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-medium transition-colors ${
                       hasCalendarConflict
                         ? "cursor-not-allowed border-border bg-muted text-muted-foreground"
                         : isSelected
@@ -137,7 +137,7 @@ export function SlotListPanel({
         );
       })}
       <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-card to-transparent"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-background to-transparent"
         aria-hidden
       />
     </div>

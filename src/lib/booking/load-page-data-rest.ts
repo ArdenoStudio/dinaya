@@ -41,6 +41,7 @@ function mapBusiness(row: JsonRow) {
     accentColor: (row.accent_color as string | null) ?? null,
     bookingPageBackground: (row.booking_page_background as string | null) ?? "white",
     bookingPageBackgroundColor: (row.booking_page_background_color as string | null) ?? null,
+    bookingPanelBackground: (row.booking_panel_background as string | null) ?? "white",
     bookingHeroOverlay: (row.booking_hero_overlay as string | null) ?? "light",
     bookingHeroOverlayOpacity: Number(row.booking_hero_overlay_opacity ?? 60),
     bookingThemePreset: (row.booking_theme_preset as string | null) ?? null,

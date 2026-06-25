@@ -223,10 +223,10 @@ export default function BookingServiceHub({
 
   const shell = heroImageUrl
     ? "overflow-hidden rounded-none border-x-0 bg-transparent shadow-none md:rounded-2xl md:border-0"
-    : "overflow-hidden rounded-2xl border-x-0 bg-card shadow-none md:border md:border-border/80 md:shadow-[0_12px_40px_-24px_rgba(15,23,42,0.28)] dark:md:shadow-none dark:md:ring-1 dark:md:ring-white/10";
+    : "overflow-hidden rounded-2xl border-x-0 booking-panel-surface shadow-none md:border md:border-border/80 md:shadow-[0_12px_40px_-24px_rgba(15,23,42,0.28)] dark:md:shadow-none dark:md:ring-1 dark:md:ring-white/10";
 
   const contentShell = heroImageUrl
-    ? "relative z-10 -mt-5 flex flex-col rounded-t-2xl bg-card pt-14 md:-mt-6 md:pt-[4.25rem]"
+    ? "relative z-10 -mt-5 flex flex-col rounded-t-2xl booking-panel-surface pt-14 md:-mt-6 md:pt-[4.25rem]"
     : "flex flex-col";
 
   return (
@@ -335,7 +335,7 @@ export default function BookingServiceHub({
           ) : listWindow.mode === "grouped" && listWindow.groupedServices ? (
             listWindow.groupedServices.map((group) => (
               <li key={group.category} className="space-y-2.5">
-                <h2 className="sticky top-0 z-10 -mx-1 bg-card px-1 py-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                <h2 className="sticky top-0 z-10 -mx-1 booking-panel-surface px-1 py-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   {group.category}
                 </h2>
                 <ul className="flex flex-col gap-2.5">

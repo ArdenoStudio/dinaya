@@ -603,21 +603,17 @@ function BookingWizardInner({
       ? "staff"
       : "dateTime";
 
+  const accentPanel = theme.panelBackground === "accent";
+
   const breadcrumbBlock =
     showBreadcrumb ? (
-      <div
-        className={
-          centeredBookerLayout
-            ? "shrink-0 pt-2 md:pt-4"
-            : "mb-3 flex justify-start px-4 md:mb-4 md:px-0"
-        }
-      >
+      <div className="mb-3 flex justify-start px-4 md:mb-4 md:px-0">
         <BookingBreadcrumb items={breadcrumbItems} />
       </div>
     ) : null;
 
   const bookerCard = (
-      <div className="w-full min-w-0 max-w-full bg-card lg:overflow-visible lg:rounded-xl lg:border lg:border-border lg:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)] dark:lg:shadow-none dark:lg:ring-1 dark:lg:ring-white/10">
+      <div className="w-full min-w-0 max-w-full booking-panel-surface rounded-none border-x-0 shadow-none lg:overflow-visible lg:rounded-xl lg:border lg:border-border lg:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)] dark:lg:shadow-none dark:lg:ring-1 dark:lg:ring-white/10">
         <BookingAttributionCapture businessId={business.id} />
         <BookingDealsSection
           deals={activeDeals}
@@ -684,16 +680,16 @@ function BookingWizardInner({
               />
             </>
           ) : (
-            <div className="grid w-full min-w-0 max-w-full grid-cols-1 gap-0 lg:grid-cols-[15rem_minmax(0,1fr)] lg:items-start lg:divide-x lg:divide-border xl:grid-cols-[16rem_minmax(0,1fr)]">
+            <div className="grid w-full min-w-0 max-w-full grid-cols-1 gap-0 lg:grid-cols-[minmax(14rem,16rem)_minmax(0,1fr)] lg:items-stretch lg:divide-x lg:divide-border xl:grid-cols-[minmax(15rem,17rem)_minmax(0,1fr)]">
               <BookingPanel
                 area="meta"
-                className="border-b border-border bg-muted/15 pb-4 lg:sticky lg:top-6 lg:z-[1] lg:self-start lg:overflow-hidden lg:rounded-l-xl lg:border-0 lg:px-4 lg:pb-6 lg:pt-6 xl:px-5"
+                className="border-b border-border pb-4 lg:sticky lg:top-0 lg:z-[1] lg:self-start lg:border-0 lg:px-5 lg:pb-6 lg:pt-6 xl:px-6"
                 {...panelMotion}
               >
                 <ServiceMetaPanel {...metaPanelProps} />
               </BookingPanel>
 
-              <BookingPanel area="main" className="relative z-0 min-w-0 lg:py-6" {...panelMotion}>
+              <BookingPanel area="main" className="relative z-0 min-w-0 lg:py-0" {...panelMotion}>
                 {state.service ? (
                   <div className="border-b border-border py-3 lg:hidden">
                     <BookingChoiceSummary
@@ -718,10 +714,11 @@ function BookingWizardInner({
                 <BookingMainStepTransition stepKey={showContactForm ? "confirm" : "dateTime"}>
                 {canPickSlots ? (
                   showContactForm ? (
-                    <div className="md:px-6 lg:px-8">
+                    <div className="px-4 py-4 md:px-6 lg:px-8 lg:py-6">
                       <StepConfirm
                         variant="inline"
                         formId="booking-contact-form"
+                        onAccentPanel={accentPanel}
                         state={state}
                         business={business}
                         copy={copy}
@@ -736,7 +733,7 @@ function BookingWizardInner({
                       />
                     </div>
                   ) : (
-                    <div className="px-4 md:px-6 lg:px-8">
+                    <div className="px-4 py-4 md:px-6 lg:px-8 lg:py-6">
                       <StepDateTime
                         businessId={business.id}
                         copy={copy}
@@ -786,7 +783,7 @@ function BookingWizardInner({
 
   const brandingBlock =
     showBranding ? (
-      <div className="mt-3 flex justify-center px-4 md:mt-4 md:px-0">
+      <div className="mt-3 flex justify-center px-4 pb-[max(1rem,env(safe-area-inset-bottom))] md:mt-4 md:px-0">
         <BookingBranding copy={copy} hideBranding={business.hideBranding} />
       </div>
     ) : null;
@@ -796,12 +793,10 @@ function BookingWizardInner({
       <BookingTheme
         theme={theme}
         embed={embedMode}
-        className="flex min-h-0 w-full flex-1 flex-col"
+        className="w-full"
       >
         {breadcrumbBlock}
-        <div className="flex min-h-0 flex-1 items-center justify-center overflow-y-auto pb-4 md:pb-6">
-          <div className="w-full">{bookerCard}</div>
-        </div>
+        {bookerCard}
         {brandingBlock}
       </BookingTheme>
     );

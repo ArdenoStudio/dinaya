@@ -168,6 +168,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
   [data-booking-theme] {
     --booking-accent: #2563eb;
     --booking-page-bg: #ffffff;
+    --booking-panel-bg: #ffffff;
     --booking-hero-overlay: #ffffff;
     --booking-hero-overlay-opacity: 0.6;
     --booking-accent-hover: color-mix(in srgb, var(--booking-accent) 88%, black);
@@ -217,6 +218,28 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
 
   .booking-page-bg {
     background-color: var(--booking-page-bg);
+  }
+
+  .booking-panel-surface {
+    background-color: var(--booking-panel-bg);
+  }
+
+  /* Solid pink panel: readable text + solid white sub-surfaces (slots, inputs) */
+  [data-booking-theme][data-booking-panel="accent"] .booking-panel-surface {
+    --foreground: 330 28% 16%;
+    --muted-foreground: 330 14% 32%;
+    --card: 0 0% 100%;
+    --card-foreground: 330 28% 16%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 330 28% 16%;
+    --secondary: 0 0% 100%;
+    --secondary-foreground: 330 28% 16%;
+    --muted: 330 45% 94%;
+    --accent: 330 45% 94%;
+    --accent-foreground: 330 28% 16%;
+    --border: 330 30% 76%;
+    --input: 330 30% 76%;
+    color: hsl(var(--foreground));
   }
 
   .booking-hero-overlay {

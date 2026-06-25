@@ -117,6 +117,7 @@ export async function PATCH(req: NextRequest) {
     bookingHeroOverlay,
     bookingHeroOverlayOpacity,
     bookingThemePreset,
+    bookingPanelBackground,
     phone,
     timezone,
     websiteUrl,
@@ -141,7 +142,8 @@ export async function PATCH(req: NextRequest) {
     bookingPageBackgroundColor !== undefined ||
     bookingHeroOverlay !== undefined ||
     bookingHeroOverlayOpacity !== undefined ||
-    bookingThemePreset !== undefined;
+    bookingThemePreset !== undefined ||
+    bookingPanelBackground !== undefined;
 
   if (themeFieldsTouched) {
     try {
@@ -211,6 +213,7 @@ export async function PATCH(req: NextRequest) {
       ...(bookingHeroOverlay !== undefined && { bookingHeroOverlay }),
       ...(bookingHeroOverlayOpacity !== undefined && { bookingHeroOverlayOpacity }),
       ...(bookingThemePreset !== undefined && { bookingThemePreset: bookingThemePreset || null }),
+      ...(bookingPanelBackground !== undefined && { bookingPanelBackground }),
     })
     .where(eq(businesses.id, context.businessId));
 

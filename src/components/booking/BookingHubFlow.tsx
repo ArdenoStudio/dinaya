@@ -18,7 +18,7 @@ import type { BookingRouter } from "@/lib/booking-router";
 import type { Staff, Location } from "@/db/schema";
 import type { CalendarOverlayConfig } from "@/components/booking/useGoogleCalendarOverlay";
 import { useBookingHubNavigation } from "@/lib/booking/use-booking-hub-navigation";
-import { isOptimizableRemoteImage, cn } from "@/lib/utils";
+import { isOptimizableRemoteImage } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { getBusinessRating } from "@/components/booking/BusinessRating";
 
@@ -124,10 +124,10 @@ export function BookingHubFlow({
   const showSecondarySections = !hideSidebarSections && !(bookerFocus && !showHub);
 
   const layoutMaxWidth = showHub
-    ? "max-w-2xl"
+    ? "mx-auto w-full max-w-2xl px-0 md:px-4"
     : bookerFocus
-      ? "max-w-5xl"
-      : "max-w-5xl";
+      ? "mx-auto w-full max-w-5xl px-0 md:px-4"
+      : "mx-auto max-w-5xl px-0 md:px-8 md:py-6";
 
   const hubBackHref =
     mode === "service" && services.length > 1 ? `/book/${business.slug}` : null;
@@ -187,7 +187,7 @@ export function BookingHubFlow({
         staffServiceMap={staffServiceMap}
         staffLocationMap={staffLocationMap}
         locations={locations}
-        showBranding={!bookerFocus}
+        showBranding={!hideBranding}
         activeDeals={activeDeals}
         initialDealId={dealId ?? null}
         initialService={wizardService}
@@ -219,9 +219,6 @@ export function BookingHubFlow({
       {wizardPanel}
     </BookingStepTransition>
   );
-
-  /** Booker + hub-without-hero: center in viewport. Hub-with-hero stays top-aligned. */
-  const viewportCentered = bookerFocus || (showHub && !heroImageUrl);
 
   const flowBody = (
     <>
@@ -347,37 +344,14 @@ export function BookingHubFlow({
     </>
   );
 
-  if (bookerFocus) {
-    return (
-      <div className="flex min-h-dvh w-full flex-col">
-        <div
-          className={cn(
-            "mx-auto flex min-h-0 w-full flex-1 flex-col px-4 md:px-6",
-            layoutMaxWidth,
-          )}
-        >
-          {flowBody}
-        </div>
-        {!hideBranding ? (
-          <div className="flex shrink-0 justify-center px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-2">
-            <BookingBranding copy={copy} />
-          </div>
-        ) : null}
-      </div>
-    );
-  }
-
   return (
-    <div
-      className={cn(
-        "w-full",
-        viewportCentered && "grid min-h-dvh w-full place-items-center px-4 py-6 md:px-6",
-        showHub && heroImageUrl && "block pt-0",
-      )}
-    >
-      <div className={cn("w-full", layoutMaxWidth, viewportCentered && "justify-self-center")}>
-        {flowBody}
-      </div>
+    <div className={layoutMaxWidth}>
+      {flowBody}
+      {showHub && !hideBranding ? (
+        <div className="mt-3 flex justify-center px-4 pb-[max(1rem,env(safe-area-inset-bottom))] md:mt-4 md:px-0">
+          <BookingBranding copy={copy} />
+        </div>
+      ) : null}
     </div>
   );
 }

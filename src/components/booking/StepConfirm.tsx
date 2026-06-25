@@ -48,6 +48,8 @@ interface Props {
   hideInlineBack?: boolean;
   /** When breadcrumbs already show the step name, hide the in-form heading. */
   hideDetailsHeading?: boolean;
+  /** Solid pink panel — avoid white form chrome. */
+  onAccentPanel?: boolean;
 }
 
 const fieldBaseCls =
@@ -176,6 +178,7 @@ export default function StepConfirm({
   formId = "booking-contact-form",
   hideInlineBack = false,
   hideDetailsHeading = false,
+  onAccentPanel = false,
 }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -188,6 +191,12 @@ export default function StepConfirm({
   } | null>(null);
 
   const service = state.service;
+  const panelCardCls = onAccentPanel
+    ? "rounded-xl border border-border/80 p-4"
+    : "rounded-xl border border-border bg-card p-4";
+  const formShellCls = onAccentPanel
+    ? "space-y-4"
+    : "space-y-4 md:rounded-xl md:border md:border-border md:bg-card md:p-6";
   const intakeQuestions = useMemo(
     () => service?.intakeQuestions ?? [],
     [service?.intakeQuestions],
@@ -421,7 +430,7 @@ export default function StepConfirm({
 
   const summaryCards = (
     <div className="flex flex-col gap-2 md:gap-3">
-      <div className="rounded-xl border border-border bg-card p-4">
+      <div className={panelCardCls}>
         <p className="mb-3 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
           {copy.appointment}
         </p>
@@ -435,7 +444,7 @@ export default function StepConfirm({
       </div>
 
       {service && service.priceLkr > 0 && (
-        <div className="rounded-xl border border-border bg-card p-4">
+        <div className={panelCardCls}>
           <div className="flex items-center justify-between gap-3">
             <p className="text-sm text-muted-foreground">{copy.fullAmount}</p>
             <p className="text-base font-semibold tabular-nums text-foreground">
@@ -469,7 +478,7 @@ export default function StepConfirm({
   const emailError = showFieldError("clientEmail");
 
   const contactForm = (
-    <div className="space-y-4 md:rounded-xl md:border md:border-border md:bg-card md:p-6">
+    <div className={formShellCls}>
       {hideDetailsHeading ? (
         <h2 className="sr-only">{copy.details}</h2>
       ) : (
@@ -618,7 +627,7 @@ export default function StepConfirm({
 
   const paymentMethodSelector =
     onlineMethods.length > 1 && service?.requiresPayment && dueNow > 0 ? (
-      <div className="mt-4 space-y-2 rounded-xl border border-border bg-card p-4">
+      <div className={cn("mt-4 space-y-2", panelCardCls)}>
         <p className="text-sm font-medium text-foreground">{copy.paymentMethod}</p>
         {(
           [
@@ -636,7 +645,9 @@ export default function StepConfirm({
                   "flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border px-3 py-2.5 text-sm transition-colors",
                   selected
                     ? "border-[var(--booking-accent)] bg-[var(--booking-accent-muted)] text-foreground"
-                    : "border-border bg-card text-muted-foreground hover:bg-muted/50",
+                    : onAccentPanel
+                      ? "border-border/80 bg-white text-muted-foreground hover:bg-white/90"
+                      : "border-border bg-card text-muted-foreground hover:bg-muted/50",
                 )}
               >
                 <input
@@ -709,7 +720,12 @@ export default function StepConfirm({
         {upsellNotice}
         {submitError}
 
-        <div className="sticky bottom-0 z-10 -mx-4 mt-6 border-t border-border bg-background px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 lg:relative lg:mx-0 lg:mt-6 lg:border-0 lg:px-0 lg:pb-0 lg:pt-0">
+        <div
+          className={cn(
+            "sticky bottom-0 z-10 -mx-4 mt-6 border-t border-border px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 lg:relative lg:mx-0 lg:mt-6 lg:border-0 lg:px-0 lg:pb-0 lg:pt-0",
+            onAccentPanel ? "booking-panel-surface border-border/80" : "bg-background",
+          )}
+        >
           {!hideInlineBack ? (
             <button
               type="button"
