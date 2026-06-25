@@ -10,6 +10,7 @@ import { MARKETING_CTA_PRIMARY } from "@/lib/marketing-copy";
 import { Logo } from "@/components/Logo";
 import { AuthThemeToggle } from "@/components/AuthThemeToggle";
 import { Icon } from "@/components/ui/Icon";
+import { authFieldTransitionClassName, authSubmitButtonClassName } from "@/components/auth/auth-form-styles";
 
 const perks = [
   "Your own booking page at yourname.dinaya.lk",
@@ -36,7 +37,7 @@ const businessTypes = [
 ];
 
 const inputCls =
-  "mt-1.5 w-full border border-gray-200 dark:border-neutral-800 rounded-lg px-3 py-2.5 text-sm bg-white dark:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 placeholder:text-gray-300 dark:placeholder:text-neutral-600 transition-all";
+  `mt-1.5 w-full border border-gray-200 dark:border-neutral-800 rounded-lg px-3 py-2.5 text-sm bg-white dark:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 placeholder:text-gray-300 dark:placeholder:text-neutral-600 ${authFieldTransitionClassName}`;
 
 function getPasswordStrength(pw: string): 0 | 1 | 2 | 3 {
   if (pw.length === 0) return 0;
@@ -230,8 +231,8 @@ export default function RegisterPage() {
 
           {/* Step dots */}
           <div className="flex items-center gap-1.5 justify-center mb-5">
-            <div className={`h-1.5 rounded-full transition-all duration-300 ${step === 1 ? "w-6 bg-primary" : "w-3 bg-primary/60"}`} />
-            <div className={`h-1.5 rounded-full transition-all duration-300 ${step === 2 ? "w-6 bg-primary" : "w-3 bg-gray-300 dark:bg-neutral-600"}`} />
+            <div className={`h-1.5 rounded-full transition-[width,background-color] duration-300 ${step === 1 ? "w-6 bg-primary" : "w-3 bg-primary/60"}`} />
+            <div className={`h-1.5 rounded-full transition-[width,background-color] duration-300 ${step === 2 ? "w-6 bg-primary" : "w-3 bg-gray-300 dark:bg-neutral-600"}`} />
           </div>
 
           {/* Card */}
@@ -265,7 +266,7 @@ export default function RegisterPage() {
                       <input id="password" name="password" type={showPassword ? "text" : "password"}
                         required minLength={8} autoComplete="new-password"
                         value={form.password} onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
-                        className="w-full border border-gray-200 dark:border-neutral-800 rounded-lg pl-3 pr-10 py-2.5 text-sm bg-white dark:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 placeholder:text-gray-300 dark:placeholder:text-neutral-600 transition-all"
+                        className={`w-full border border-gray-200 dark:border-neutral-800 rounded-lg pl-3 pr-10 py-2.5 text-sm bg-white dark:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 placeholder:text-gray-300 dark:placeholder:text-neutral-600 ${authFieldTransitionClassName}`}
                         placeholder="Min. 8 characters" />
                       <button type="button" onClick={() => setShowPassword((s) => !s)}
                         className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-gray-300 hover:text-gray-500 dark:text-gray-400 rounded-md transition-colors"
@@ -277,7 +278,7 @@ export default function RegisterPage() {
                       <div className="mt-2">
                         <div className="flex gap-1">
                           {[1, 2, 3].map((i) => (
-                            <div key={i} className={`h-1 flex-1 rounded-full transition-all duration-300 ${i <= strength ? strengthColor[strength] : "bg-gray-100 dark:bg-neutral-800"}`} />
+                            <div key={i} className={`h-1 flex-1 rounded-full transition-[width,background-color] duration-300 ${i <= strength ? strengthColor[strength] : "bg-gray-100 dark:bg-neutral-800"}`} />
                           ))}
                         </div>
                         <p className={`text-xs mt-1 ${strengthText[strength]}`}>
@@ -302,7 +303,7 @@ export default function RegisterPage() {
                   <button
                     type="button"
                     onClick={handleStep1Continue}
-                    className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-b from-primary/90 to-primary text-primary-foreground py-3 rounded-lg text-sm font-medium border-b-2 border-primary/70 shadow-[0_0_0_2px_rgba(0,0,0,0.04),0_0_14px_0_rgba(99,102,241,0.2)] transition-all hover:shadow-primary/30 hover:shadow-md mt-1">
+                    className={`${authSubmitButtonClassName} mt-1`}>
                     Continue <Icon name="arrow-right" className="text-sm" />
                   </button>
                 </form>
@@ -327,7 +328,7 @@ export default function RegisterPage() {
 
                   <div>
                     <label className="text-sm font-medium text-gray-700 dark:text-gray-300" htmlFor="slug">Your booking URL</label>
-                    <div className="mt-1.5 flex items-center border border-gray-200 dark:border-neutral-800 rounded-lg overflow-hidden bg-white dark:bg-neutral-900 focus-within:ring-2 focus-within:ring-primary/40 transition-all">
+                    <div className={`mt-1.5 flex items-center border border-gray-200 dark:border-neutral-800 rounded-lg overflow-hidden bg-white dark:bg-neutral-900 focus-within:ring-2 focus-within:ring-primary/40 ${authFieldTransitionClassName}`}>
                       <input id="slug" name="slug" required value={form.slug}
                         onChange={(e) => handleSlugChange(e.target.value)}
                         className="flex-1 px-3 py-2.5 text-sm focus:outline-none placeholder:text-gray-300 dark:placeholder:text-neutral-600"
@@ -385,7 +386,7 @@ export default function RegisterPage() {
                   )}
 
                   <button type="submit" disabled={loading}
-                    className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-b from-primary/90 to-primary text-primary-foreground py-3 rounded-lg text-sm font-medium border-b-2 border-primary/70 shadow-[0_0_0_2px_rgba(0,0,0,0.04),0_0_14px_0_rgba(99,102,241,0.2)] transition-all hover:shadow-primary/30 hover:shadow-md disabled:cursor-not-allowed mt-1">
+                    className={`${authSubmitButtonClassName} disabled:cursor-not-allowed mt-1`}>
                     {loading && <Icon name="arrow-repeat" className="text-sm animate-spin" />}
                     {loading ? "Creating…" : MARKETING_CTA_PRIMARY}
                   </button>

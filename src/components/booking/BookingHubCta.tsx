@@ -17,10 +17,10 @@ type Props = {
 };
 
 const primaryCtaClass =
-  "inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[var(--booking-accent)] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,transform,box-shadow] duration-200 ease-out hover:bg-[var(--booking-accent-hover)] hover:shadow-md active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--booking-accent-soft)] focus-visible:ring-offset-2";
+  "inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[var(--booking-accent)] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,transform,box-shadow] duration-200 ease-out hover:bg-[var(--booking-accent-hover)] hover:shadow-md active:scale-[0.96] motion-reduce:active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--booking-accent-soft)] focus-visible:ring-offset-2";
 
 const secondaryCtaClass =
-  "inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-border bg-card px-5 py-2.5 text-sm font-semibold text-foreground shadow-sm transition-[background-color,transform,border-color] duration-200 ease-out hover:border-border hover:bg-muted/80 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--booking-accent-soft)] focus-visible:ring-offset-2";
+  "inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-border bg-card px-5 py-2.5 text-sm font-semibold text-foreground shadow-sm transition-[background-color,transform,border-color] duration-200 ease-out hover:border-border hover:bg-muted/80 active:scale-[0.96] motion-reduce:active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--booking-accent-soft)] focus-visible:ring-offset-2";
 
 function scrollToElement(id: string) {
   const el = document.getElementById(id);

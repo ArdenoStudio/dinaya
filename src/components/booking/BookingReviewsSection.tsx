@@ -141,7 +141,7 @@ export function BookingReviewsSection({
         <button
           type="button"
           onClick={openDialog}
-            className="group flex min-h-11 items-center gap-3 rounded-full border border-border/70 bg-card px-4 py-2.5 text-sm text-muted-foreground shadow-sm transition-[background-color,border-color,transform,box-shadow] duration-200 ease-out hover:border-border hover:bg-muted/50 hover:text-foreground hover:shadow active:scale-[0.99]"
+            className="group flex min-h-11 items-center gap-3 rounded-full border border-border/70 bg-card px-4 py-2.5 text-sm text-muted-foreground shadow-sm transition-[background-color,border-color,transform,box-shadow] duration-200 ease-out hover:border-border hover:bg-muted/50 hover:text-foreground hover:shadow active:scale-[0.96] motion-reduce:active:scale-100"
         >
           <span className="flex items-center gap-2">
             <StarRating rating={avgRating} size="sm" />

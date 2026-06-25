@@ -86,7 +86,7 @@ export function DiscoverListings({ listings, activeCategory, activeCity, showCit
               <Link
                 key={business.slug}
                 href={bookingUrl}
-                className="rounded-2xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5 shadow-sm transition hover:border-primary/30 hover:shadow-md"
+                className="rounded-2xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5 shadow-sm transition-[transform,box-shadow,border-color] duration-150 ease-out hover:border-primary/30 hover:shadow-md active:scale-[0.99] motion-reduce:active:scale-100"
               >
                 <div className="mb-3 flex items-start justify-between gap-3">
                   <div className="flex min-w-0 items-start gap-3">
@@ -95,7 +95,7 @@ export function DiscoverListings({ listings, activeCategory, activeCity, showCit
                       <img
                         src={business.logoUrl}
                         alt=""
-                        className="size-10 shrink-0 rounded-lg border object-cover"
+                        className="size-10 shrink-0 rounded-lg object-cover image-depth"
                       />
                     ) : (
                       <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border bg-gray-50 dark:bg-neutral-900/60 text-xs font-semibold text-primary">
@@ -103,7 +103,7 @@ export function DiscoverListings({ listings, activeCategory, activeCity, showCit
                       </div>
                     )}
                     <div className="min-w-0">
-                      <h2 className="line-clamp-2 font-cal text-xl tracking-tight">{business.name}</h2>
+                      <h2 className="line-clamp-2 font-cal text-xl tracking-tight text-balance">{business.name}</h2>
                       <p className="mt-1 truncate text-xs text-muted-foreground">
                         {business.directoryCity ?? "Sri Lanka"} · {categoryLabel(business.directoryCategory)}
                       </p>
@@ -114,7 +114,7 @@ export function DiscoverListings({ listings, activeCategory, activeCity, showCit
                   </span>
                 </div>
                 {business.description ? (
-                  <p className="line-clamp-3 text-sm text-muted-foreground">{business.description}</p>
+                  <p className="line-clamp-3 text-sm text-pretty text-muted-foreground">{business.description}</p>
                 ) : (
                   <p className="text-sm text-muted-foreground">Online booking available on Dinaya.</p>
                 )}

@@ -63,7 +63,7 @@ export default function StepStaff({
       </div>
 
       <h2 className="mb-1 font-cal text-xl text-balance text-foreground md:text-2xl">{copy.chooseTeam}</h2>
-      <p className="mb-6 text-base leading-relaxed text-muted-foreground md:text-sm">{copy.chooseTeamHint}</p>
+      <p className="mb-6 text-base leading-relaxed text-pretty text-muted-foreground md:text-sm">{copy.chooseTeamHint}</p>
 
       {eligible.length === 0 ? (
         <p className="py-8 text-center text-base text-muted-foreground md:text-sm">{copy.noStaff}</p>
@@ -76,7 +76,7 @@ export default function StepStaff({
               aria-selected={anyStaffSelected}
               onClick={onSelectAny}
               className={cn(
-                "flex w-full min-h-11 items-center gap-3 rounded-xl border px-4 py-3.5 text-left transition-all",
+                "flex w-full min-h-11 items-center gap-3 rounded-[1.375rem] border px-4 py-3.5 text-left transition-[transform,background-color,border-color,box-shadow] duration-150 ease-out active:scale-[0.96] motion-reduce:active:scale-100",
                 rowFocus,
                 anyStaffSelected
                   ? "booking-border-accent booking-bg-accent-muted ring-2 booking-ring-accent"
@@ -114,7 +114,7 @@ export default function StepStaff({
                 aria-selected={isSelected}
                 onClick={() => onSelect(s)}
                 className={cn(
-                  "flex w-full min-h-11 items-center gap-3 rounded-xl border px-4 py-3.5 text-left transition-all",
+                  "flex w-full min-h-11 items-center gap-3 rounded-[1.375rem] border px-4 py-3.5 text-left transition-[transform,background-color,border-color,box-shadow] duration-150 ease-out active:scale-[0.96] motion-reduce:active:scale-100",
                   rowFocus,
                   isSelected
                     ? "booking-border-accent booking-bg-accent-muted ring-2 booking-ring-accent"
@@ -128,7 +128,7 @@ export default function StepStaff({
                       alt={s.name}
                       width={44}
                       height={44}
-                      className="size-11 rounded-full object-cover"
+                      className="size-11 rounded-full object-cover image-depth"
                       unoptimized={!isOptimizableRemoteImage(s.avatarUrl)}
                     />
                   ) : (

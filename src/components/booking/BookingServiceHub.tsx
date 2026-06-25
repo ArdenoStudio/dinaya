@@ -154,10 +154,10 @@ export default function BookingServiceHub({
     const href = buildServiceBookingPath(businessSlug, service.slug ?? service.id);
     const iconName = serviceIconName(service.name);
     const rowClassName = cn(
-      "group flex min-h-[4.75rem] w-full items-start gap-3.5 rounded-xl border border-border/50 px-3.5 py-4 text-left md:px-4 md:py-[1.125rem]",
-      "transition-[background-color,box-shadow,border-color] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]",
+      "group flex min-h-[4.75rem] w-full items-start gap-3.5 rounded-[1.375rem] border border-border/50 px-3.5 py-4 text-left md:px-4 md:py-[1.125rem]",
+      "transition-[transform,background-color,box-shadow,border-color] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]",
       "hover:border-[var(--booking-accent)]/25 hover:bg-[var(--booking-accent-muted)] hover:shadow-sm",
-      "active:scale-[0.99] motion-reduce:active:scale-100",
+      "active:scale-[0.96] motion-reduce:active:scale-100",
       "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--booking-accent-soft)]",
     );
     const rowContent = (
@@ -168,7 +168,7 @@ export default function BookingServiceHub({
               alt=""
               width={48}
               height={48}
-              className="size-12 shrink-0 rounded-xl object-cover ring-1 ring-border/50"
+              className="size-12 shrink-0 rounded-xl object-cover image-depth"
               unoptimized={!isOptimizableRemoteImage(service.imageUrl)}
             />
           ) : (
