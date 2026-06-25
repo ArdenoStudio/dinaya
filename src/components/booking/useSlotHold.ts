@@ -15,6 +15,7 @@ export function useSlotHold(input: {
   staffId: string | null;
   locationId?: string | null;
   enabled?: boolean;
+  formatHoldLabel?: (minutes: number, seconds: number) => string;
 }) {
   const [hold, setHold] = useState<HoldState>(null);
   const [slotUnavailable, setSlotUnavailable] = useState(false);
@@ -145,9 +146,20 @@ export function useSlotHold(input: {
     ? Math.max(0, Math.floor((hold.expiresAt.getTime() - now) / 1000))
     : 0;
 
+  useEffect(() => {
+    if (hold && secondsRemaining === 0) {
+      setSlotUnavailable(true);
+    }
+  }, [hold, secondsRemaining]);
+
   const holdLabel =
     hold && secondsRemaining > 0
-      ? `Holding this slot for ${Math.floor(secondsRemaining / 60)}:${String(secondsRemaining % 60).padStart(2, "0")}`
+      ? input.formatHoldLabel
+        ? input.formatHoldLabel(
+            Math.floor(secondsRemaining / 60),
+            secondsRemaining % 60,
+          )
+        : `Holding this slot for ${Math.floor(secondsRemaining / 60)}:${String(secondsRemaining % 60).padStart(2, "0")}`
       : null;
 
   return {

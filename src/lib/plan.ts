@@ -25,6 +25,7 @@ export type PlanFeature =
   | "payments"
   | "publicBookingPage"
   | "publicBookingPageCustomization"
+  | "bookingPageTheme"
   | "reports"
   | "reviewEngine"
   | "reviews"
@@ -108,6 +109,7 @@ const DEFAULT_TRIAL_ENTITLEMENTS: Entitlements = {
     payments: true,
     publicBookingPage: true,
     publicBookingPageCustomization: false,
+    bookingPageTheme: false,
     reports: true,
     reviewEngine: false,
     reviews: true,
@@ -144,6 +146,7 @@ const DEFAULT_EXPIRED_ENTITLEMENTS: Entitlements = {
     payments: false,
     publicBookingPage: false,
     publicBookingPageCustomization: false,
+    bookingPageTheme: false,
     reports: false,
     reviewEngine: false,
     reviews: false,
@@ -178,6 +181,7 @@ const DEFAULT_STARTER_ENTITLEMENTS: Entitlements = {
     payments: true,
     publicBookingPage: true,
     publicBookingPageCustomization: false,
+    bookingPageTheme: false,
     reports: false,
     reviewEngine: false,
     reviews: false,
@@ -212,6 +216,7 @@ const DEFAULT_PRO_ENTITLEMENTS: Entitlements = {
     payments: true,
     publicBookingPage: true,
     publicBookingPageCustomization: false,
+    bookingPageTheme: true,
     reports: true,
     reviewEngine: false,
     reviews: true,
@@ -246,6 +251,7 @@ const DEFAULT_MAX_ENTITLEMENTS: Entitlements = {
     payments: true,
     publicBookingPage: true,
     publicBookingPageCustomization: true,
+    bookingPageTheme: true,
     reports: true,
     reviewEngine: true,
     reviews: true,
@@ -572,6 +578,7 @@ const FEATURE_LABELS: Record<PlanFeature, string> = {
   payments: "PayHere payments",
   publicBookingPage: "Public booking page",
   publicBookingPageCustomization: "Booking page customization",
+  bookingPageTheme: "Booking page colors & hero",
   reports: "Reports",
   reviewEngine: "Review engine",
   reviews: "Reviews",

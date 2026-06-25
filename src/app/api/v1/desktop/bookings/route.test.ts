@@ -34,6 +34,7 @@ function makeBookingsQuery(result: unknown) {
   const query = {
     from: vi.fn(() => query),
     innerJoin: vi.fn(() => query),
+    leftJoin: vi.fn(() => query),
     where: vi.fn(() => query),
     orderBy: vi.fn(() => query),
     limit: vi.fn(async () => result),
@@ -85,13 +86,17 @@ describe("GET /api/v1/desktop/bookings", () => {
       .mockReturnValueOnce(makeBookingsQuery([
         {
           id: "bk_1",
+          clientId: null,
           clientName: "Kasun",
           clientPhone: "+94770000000",
           clientEmail: "kasun@example.com",
           startsAt: new Date("2026-05-26T09:00:00.000Z"),
           endsAt: new Date("2026-05-26T09:45:00.000Z"),
           status: "confirmed",
+          source: "online",
           createdAt: new Date("2026-05-26T08:00:00.000Z"),
+          amountLkr: 2500,
+          paymentStatus: "success",
           serviceName: "Haircut",
           staffId: "st_1",
           staffName: "Ashan",

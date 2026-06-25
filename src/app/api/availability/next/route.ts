@@ -5,6 +5,8 @@ import { eq, and, gte, lt, count } from "drizzle-orm";
 import { addDays, format, parseISO, startOfDay, endOfDay } from "date-fns";
 import { fromZonedTime, toZonedTime } from "date-fns-tz";
 import { getAvailableSlots } from "@/lib/availability";
+import { getMergedSlotsForStaff, listEligibleStaffIdsForService } from "@/lib/availability-staff";
+import { ANY_STAFF_ID } from "@/lib/booking-staff";
 import { getActiveReservationsForStaff } from "@/lib/slot-reservations";
 import { withRateLimit } from "@/lib/rate-limit";
 
@@ -46,11 +48,13 @@ export async function GET(req: NextRequest) {
   if (!service) return NextResponse.json({ next: null });
 
   const [[staffMember], [business]] = await Promise.all([
-    db
-      .select({ businessId: staff.businessId, isActive: staff.isActive })
-      .from(staff)
-      .where(eq(staff.id, staffId))
-      .limit(1),
+    staffId === ANY_STAFF_ID
+      ? Promise.resolve([{ businessId: service.businessId, isActive: true }])
+      : db
+          .select({ businessId: staff.businessId, isActive: staff.isActive })
+          .from(staff)
+          .where(eq(staff.id, staffId))
+          .limit(1),
     db
       .select({ timezone: businesses.timezone })
       .from(businesses)
@@ -72,6 +76,48 @@ export async function GET(req: NextRequest) {
   const maxDays = service.maximumAdvanceDays
     ? Math.min(service.maximumAdvanceDays, MAX_SCAN_DAYS)
     : MAX_SCAN_DAYS;
+
+  if (staffId === ANY_STAFF_ID) {
+    const eligibleIds = await listEligibleStaffIdsForService(
+      service.businessId,
+      serviceId,
+      searchParams.get("locationId"),
+    );
+
+    for (let offset = 0; offset <= maxDays; offset += 1) {
+      const day = addDays(today, offset);
+      const date = format(day, "yyyy-MM-dd");
+      const merged = await getMergedSlotsForStaff({
+        staffIds: eligibleIds,
+        businessId: service.businessId,
+        serviceId,
+        date,
+        durationMinutes: service.durationMinutes,
+        beforeBuffer: service.beforeBuffer ?? 0,
+        afterBuffer: service.afterBuffer ?? 0,
+        minimumNoticeHours: service.minimumNoticeHours ?? 0,
+        maximumAdvanceDays: service.maximumAdvanceDays ?? 0,
+        dailyCapacity: service.dailyCapacity,
+        timezone,
+        locationId: searchParams.get("locationId"),
+        sessionToken: sessionToken ?? undefined,
+      });
+
+      if (merged.slots.length > 0) {
+        const first = merged.slots[0]!;
+        return NextResponse.json({
+          next: {
+            date,
+            startUtc: first.startUtc.toISOString(),
+            endUtc: first.endUtc.toISOString(),
+            label: first.label,
+          },
+        });
+      }
+    }
+
+    return NextResponse.json({ next: null });
+  }
 
   const staffAvailability = await db
     .select()

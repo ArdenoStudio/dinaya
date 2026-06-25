@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { useState, type ReactNode } from "react";
 import { SidebarToggleIcon } from "@/components/unlumen-ui/sidebar-toggle-icon";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { cn } from "@/lib/utils";
 
 export interface MacOSSidebarItem {
@@ -28,7 +29,10 @@ export interface MacOSSidebarProps {
   className?: string;
   header?: ReactNode;
   footer?: ReactNode;
+  collapsedFooter?: ReactNode;
   onNavigate?: () => void;
+  /** When set, nav items render as buttons instead of Next.js links (desktop app). */
+  onItemSelect?: (href: string) => void;
 }
 
 function isItemActive(item: MacOSSidebarItem, activeHref: string): boolean {
@@ -36,6 +40,57 @@ function isItemActive(item: MacOSSidebarItem, activeHref: string): boolean {
     return activeHref === item.href;
   }
   return activeHref === item.href || activeHref.startsWith(`${item.href}/`);
+}
+
+function SidebarNavLink({
+  item,
+  active,
+  className,
+  onNavigate,
+  onItemSelect,
+  children,
+  collapsed = false,
+}: {
+  item: MacOSSidebarItem;
+  active: boolean;
+  className: string;
+  onNavigate?: () => void;
+  onItemSelect?: (href: string) => void;
+  children: ReactNode;
+  collapsed?: boolean;
+}) {
+  const labelProps = collapsed
+    ? { "aria-label": item.label, title: item.label }
+    : {};
+
+  if (onItemSelect) {
+    return (
+      <button
+        type="button"
+        aria-current={active ? "page" : undefined}
+        onClick={() => {
+          onItemSelect(item.href);
+          onNavigate?.();
+        }}
+        className={className}
+        {...labelProps}
+      >
+        {children}
+      </button>
+    );
+  }
+
+  return (
+    <Link
+      href={item.href}
+      aria-current={active ? "page" : undefined}
+      onClick={onNavigate}
+      className={className}
+      {...labelProps}
+    >
+      {children}
+    </Link>
+  );
 }
 
 export function MacOSSidebar({
@@ -46,10 +101,16 @@ export function MacOSSidebar({
   className,
   header,
   footer,
+  collapsedFooter,
   onNavigate,
+  onItemSelect,
 }: MacOSSidebarProps) {
   const [hoveredKey, setHoveredKey] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(defaultOpen);
+  const reducedMotion = useReducedMotion();
+  const sidebarTransition = reducedMotion
+    ? { duration: 0 }
+    : { type: "spring" as const, bounce: 0.15, duration: 0.35 };
 
   return (
     <div
@@ -60,7 +121,7 @@ export function MacOSSidebar({
     >
       <motion.aside
         animate={{ width: isOpen ? 240 : 64 }}
-        transition={{ type: "spring", bounce: 0.4, duration: 0.8 }}
+        transition={sidebarTransition}
         className={cn(
           "hidden lg:flex lg:h-full lg:max-h-full p-2 shrink-0 flex-col items-start transition-colors duration-300 ease-out",
           isOpen ? "bg-neutral-100 dark:bg-neutral-800" : "bg-transparent",
@@ -91,7 +152,7 @@ export function MacOSSidebar({
             type="button"
             layout
             aria-label={isOpen ? "Collapse sidebar" : "Expand sidebar"}
-            className="shrink-0 flex items-center justify-center rounded-md p-1 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200/80 dark:hover:bg-neutral-700/80 transition-colors"
+            className="shrink-0 flex size-11 items-center justify-center rounded-md text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200/80 dark:hover:bg-neutral-700/80 transition-colors"
             onClick={() => setIsOpen((open) => !open)}
           >
             <SidebarToggleIcon isOpen={isOpen} strokeWidth={2} className="size-6" />
@@ -139,12 +200,13 @@ export function MacOSSidebar({
                             ) : null}
                           </AnimatePresence>
 
-                          <Link
-                            href={item.href}
-                            aria-current={active ? "page" : undefined}
-                            onClick={onNavigate}
+                          <SidebarNavLink
+                            item={item}
+                            active={active}
+                            onNavigate={onNavigate}
+                            onItemSelect={onItemSelect}
                             className={cn(
-                              "relative z-10 flex items-center gap-2.5 px-3 py-2.5 rounded-md tracking-tight transition-colors",
+                              "relative z-10 flex items-center gap-2.5 px-3 py-2.5 rounded-md tracking-tight transition-colors w-full text-left",
                               active
                                 ? "text-neutral-900 dark:text-neutral-100 font-medium"
                                 : "text-neutral-700 dark:text-neutral-200/70 hover:text-neutral-900 dark:hover:text-neutral-100",
@@ -154,7 +216,7 @@ export function MacOSSidebar({
                               <span className="shrink-0 opacity-80">{item.icon}</span>
                             ) : null}
                             <span className="truncate">{item.label}</span>
-                          </Link>
+                          </SidebarNavLink>
 
                           <AnimatePresence>
                             {hoveredKey === key && !active ? (
@@ -189,22 +251,22 @@ export function MacOSSidebar({
                   section.items.map((item) => {
                     const active = isItemActive(item, activeHref);
                     return (
-                      <Link
+                      <SidebarNavLink
                         key={item.href}
-                        href={item.href}
-                        aria-current={active ? "page" : undefined}
-                        aria-label={item.label}
-                        title={item.label}
-                        onClick={onNavigate}
+                        item={item}
+                        active={active}
+                        collapsed
+                        onNavigate={onNavigate}
+                        onItemSelect={onItemSelect}
                         className={cn(
-                          "flex size-10 items-center justify-center rounded-md transition-colors",
+                          "flex size-11 items-center justify-center rounded-md transition-colors",
                           active
                             ? "bg-neutral-200 dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100"
                             : "text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200/70 dark:hover:bg-neutral-700/70",
                         )}
                       >
                         {item.icon}
-                      </Link>
+                      </SidebarNavLink>
                     );
                   }),
                 )}
@@ -216,6 +278,11 @@ export function MacOSSidebar({
         {footer ? (
           <div className={cn("w-full shrink-0 pt-3", !isOpen && "hidden")}>
             {footer}
+          </div>
+        ) : null}
+        {!isOpen && collapsedFooter ? (
+          <div className="w-full shrink-0 border-t border-neutral-200/80 pt-3 dark:border-neutral-700/80">
+            {collapsedFooter}
           </div>
         ) : null}
       </motion.aside>

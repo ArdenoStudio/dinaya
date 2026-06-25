@@ -87,7 +87,7 @@ export default function MonthCalendar({
 
   return (
     <div
-      className={`min-w-0 w-full ${comfortable ? "" : "rounded-xl border border-border bg-card p-3.5"}`}
+      className={`min-w-0 w-full ${comfortable ? "px-0.5 py-1" : "rounded-xl border border-border bg-card p-3.5"}`}
     >
       <div className={`flex items-center justify-between ${comfortable ? "mb-4" : "mb-3"}`}>
         <span className={`font-semibold text-foreground ${comfortable ? "text-lg" : "text-sm"}`}>
@@ -114,7 +114,7 @@ export default function MonthCalendar({
         </div>
       </div>
       <div
-        className={`grid w-full min-w-0 grid-cols-7 text-center ${comfortable ? "gap-1" : "gap-0.5"}`}
+        className={`grid w-full min-w-0 grid-cols-7 text-center ${comfortable ? "gap-1.5" : "gap-0.5"}`}
       >
         {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
           <div
@@ -140,7 +140,7 @@ export default function MonthCalendar({
               type="button"
               disabled={disabled}
               onClick={() => !disabled && onSelect(dateStr)}
-              className={`relative min-w-0 font-medium transition-all ${
+              className={`relative min-w-0 font-medium tabular-nums transition-[background-color,box-shadow,transform] ${
                 comfortable
                   ? "mx-auto flex size-11 items-center justify-center rounded-xl text-sm"
                   : "mx-auto flex size-11 min-h-11 min-w-11 max-w-none items-center justify-center rounded-lg text-xs"

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Icon } from "@/components/ui/Icon";
 import { FooterColumn } from "@/components/FooterColumn";
 import { getPublicSupportWhatsApp } from "@/lib/public-support";
+import { MARKETING_CTA_HERO, MARKETING_CTA_NAV } from "@/lib/marketing-copy";
 
 const supportWhatsApp = getPublicSupportWhatsApp();
 
@@ -31,7 +32,7 @@ export function LandingFooter() {
               href="/register"
               className="inline-flex items-center gap-2 text-sm font-semibold text-white/90 hover:text-white transition-colors self-start"
             >
-              Create your booking page
+              {MARKETING_CTA_HERO}
               <Icon name="arrow-right" className="text-xs" />
             </Link>
           </div>
@@ -45,7 +46,7 @@ export function LandingFooter() {
               { label: "Help center", href: "/help" },
               { label: "Pricing", href: "/pricing" },
               { label: "Solutions", href: "/solutions" },
-              { label: "Get started", href: "/register" },
+              { label: MARKETING_CTA_NAV, href: "/register" },
               { label: "Sign in", href: "/auth/signin" },
             ]}
           />
@@ -126,7 +127,7 @@ export function LandingFooter() {
                 aria-label={label}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white dark:hover:bg-neutral-800/15 border border-white/10 flex items-center justify-center text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 hover:text-white transition-all hover:scale-110 active:scale-95"
+                className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white dark:hover:bg-neutral-800/15 border border-white/10 flex items-center justify-center text-gray-400 dark:text-gray-500 hover:text-white transition-[transform,background-color,border-color,color] duration-150 ease-out hover:scale-110 active:scale-[0.96] motion-reduce:active:scale-100"
               >
                 <Icon name={name} size={14} />
               </a>

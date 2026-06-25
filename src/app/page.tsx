@@ -9,6 +9,7 @@ import { Icon } from "@/components/ui/Icon";
 import { BeforeAfterToggle } from "@/components/BeforeAfterToggle";
 import { FeatureShowcase } from "@/components/FeatureShowcase";
 import { LANDING_LIVE_DEMO_PATH } from "@/lib/landing-demo";
+import { MARKETING_CTA_HERO } from "@/lib/marketing-copy";
 
 const HowItWorks = dynamic(() =>
   import("@/components/HowItWorks").then((m) => ({ default: m.HowItWorks }))
@@ -74,7 +75,7 @@ export default function LandingPage() {
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-3">
-            <CTAPrimaryButton>Create your booking page</CTAPrimaryButton>
+            <CTAPrimaryButton>{MARKETING_CTA_HERO}</CTAPrimaryButton>
             <Link
               href={LANDING_LIVE_DEMO_PATH}
               className="inline-flex items-center gap-2 rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-6 py-3 text-sm font-medium text-gray-800 dark:text-gray-200 shadow-sm hover:bg-gray-50 dark:hover:bg-neutral-900/60 transition-colors"

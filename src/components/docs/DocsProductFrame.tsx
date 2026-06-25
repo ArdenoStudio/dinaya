@@ -75,7 +75,7 @@ export function DocsProductFrame({
               src={src}
               alt={alt}
               fill
-              className="object-cover object-top"
+              className="object-cover object-top image-depth"
               sizes={compact ? "200px" : "(max-width: 768px) 100vw, 480px"}
             />
           ) : (

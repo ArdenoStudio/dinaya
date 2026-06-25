@@ -16,21 +16,18 @@ export function BookingHubHeroImage({ src, alt }: Props) {
 
   return (
     <div className="relative w-full overflow-hidden bg-muted">
-      <div className="relative aspect-[4/3] w-full md:aspect-[3/2] md:max-h-[400px]">
+      <div className="relative aspect-[3/2] w-full md:max-h-[min(28rem,52vh)]">
         <Image
           src={src}
           alt={alt}
           fill
           priority
           sizes="(max-width: 768px) 100vw, 672px"
-          className="object-cover object-center"
+          className="object-cover object-top outline outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10"
           unoptimized={!isOptimizableRemoteImage(src)}
           onError={() => setHidden(true)}
         />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 bg-gradient-to-t from-card/80 via-transparent to-transparent"
-        />
+        <div aria-hidden className="booking-hero-overlay pointer-events-none absolute inset-0" />
       </div>
     </div>
   );

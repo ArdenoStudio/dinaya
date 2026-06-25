@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { Icon } from "@/components/ui/Icon";
-import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import Link from "next/link";
 import { LANDING_LIVE_DEMO_PATH } from "@/lib/landing-demo";
 
@@ -40,7 +40,7 @@ function BookingFeatureIllustration() {
 
 // ─── Mockup 2: Payment ────────────────────────────────────────────────────────
 function PaymentMockup() {
-  const reduceMotion = usePrefersReducedMotion();
+  const reduceMotion = useReducedMotion();
   const [phase, setPhase] = useState(reduceMotion ? 2 : 0);
 
   useEffect(() => {
@@ -113,7 +113,7 @@ function PaymentMockup() {
 
 // ─── Mockup 3: Reminders ──────────────────────────────────────────────────────
 function RemindersMockup() {
-  const reduceMotion = usePrefersReducedMotion();
+  const reduceMotion = useReducedMotion();
   const reminders = [
     { name: "Kavya S.", time: "10:30 AM", service: "Haircut & Style" },
     { name: "Nimal P.", time: "2:00 PM", service: "Facial Treatment" },
@@ -268,7 +268,7 @@ function FeatureCard({ f, i, reduceMotion }: { f: typeof features[number]; i: nu
       whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-80px" }}
       transition={reduceMotion ? undefined : { duration: 0.55, ease: [0.22, 1, 0.36, 1], delay: (i % 2) * 0.12 }}
-      className="rounded-3xl overflow-hidden border border-white/60 bg-white/70 backdrop-blur-2xl saturate-[1.8] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.6),0_12px_40px_rgba(0,0,0,0.09)] dark:border-neutral-700/50 dark:bg-neutral-900/75 dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06),0_12px_40px_rgba(0,0,0,0.35)]"
+      className="rounded-3xl overflow-hidden border border-gray-200/80 bg-white shadow-sm dark:border-neutral-700/50 dark:bg-neutral-900"
     >
       {/* Mockup area */}
       <div
@@ -300,15 +300,14 @@ function FeatureCard({ f, i, reduceMotion }: { f: typeof features[number]; i: nu
 
 // ─── Main export ──────────────────────────────────────────────────────────────
 export function FeatureShowcase() {
-  const reduceMotion = usePrefersReducedMotion();
+  const reduceMotion = useReducedMotion();
 
   return (
     <div className="relative overflow-hidden">
       {/* Background blobs for glass to blur through */}
       <div className="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
-        <div className="absolute -top-48 -right-24 size-[700px] rounded-full bg-primary/10 blur-[140px]" />
-        <div className="absolute -bottom-24 -left-40 size-[600px] rounded-full bg-violet-500/10 blur-[120px]" />
-        <div className="absolute top-1/2 left-1/3 size-[400px] -translate-y-1/2 rounded-full bg-amber-400/6 blur-[100px]" />
+        <div className="absolute -top-48 -right-24 size-[500px] rounded-full bg-primary/5 blur-3xl" />
+        <div className="absolute -bottom-24 -left-40 size-[400px] rounded-full bg-violet-500/5 blur-3xl" />
       </div>
     <section className="max-w-6xl mx-auto px-6 py-20 border-t">
       <div className="text-center mb-14">

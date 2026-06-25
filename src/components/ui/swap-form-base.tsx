@@ -112,7 +112,7 @@ export const SwapForm: FC<SwapFormProps> = ({
   }
 
   return (
-    <AnimatePresence mode="wait">
+    <AnimatePresence initial={false} mode="wait">
       <motion.div
         key={isSignIn ? "signin" : "signup"}
         variants={variants}
@@ -127,14 +127,14 @@ export const SwapForm: FC<SwapFormProps> = ({
       >
         <form
           onSubmit={handleSubmit}
-          className="p-6 sm:p-8 pb-8 sm:pb-10 border-b bg-card rounded-2xl border-border transition-colors"
+          className="p-6 sm:p-8 pb-8 sm:pb-10 border-b bg-card rounded-xl border-border transition-colors"
           noValidate
         >
-          <h2 className="font-sans text-2xl sm:text-3xl font-bold text-foreground mb-1.5 sm:mb-2 text-center sm:text-left">
+          <h2 className="font-sans text-2xl sm:text-3xl font-bold text-foreground mb-1.5 sm:mb-2 text-balance text-center sm:text-left">
             {isSignIn ? mergedTexts.signInTitle : mergedTexts.signUpTitle}
           </h2>
 
-          <p className="font-sans text-muted-foreground text-[15px] sm:text-[17px] mb-4 sm:mb-6 text-center sm:text-left">
+          <p className="font-sans text-muted-foreground text-[15px] sm:text-[17px] mb-4 sm:mb-6 text-pretty text-center sm:text-left">
             {isSignIn ? mergedTexts.signInSubtitle : mergedTexts.signUpSubtitle}
           </p>
 

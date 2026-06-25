@@ -6,6 +6,7 @@ import { LandingFooter } from "@/components/LandingFooter";
 import { PricingPlansShowcase } from "@/components/pricing/PricingPlansShowcase";
 import { Icon } from "@/components/ui/Icon";
 import { auth } from "@/auth";
+import { MARKETING_CTA_PRIMARY } from "@/lib/marketing-copy";
 import {
   addOns,
   comparisonRows,
@@ -41,7 +42,7 @@ function PlanCell({ value }: { value: string }) {
 export default async function PricingPage() {
   const session = await auth();
   const ctaHref = session?.user ? "/dashboard/billing" : "/register";
-  const ctaLabel = session?.user ? "Manage in dashboard" : "Start free trial";
+  const ctaLabel = session?.user ? "Manage in dashboard" : MARKETING_CTA_PRIMARY;
   const config = await getPlanConfigAsync();
 
   const plans: PricingShowcasePlan[] = [
@@ -235,7 +236,7 @@ export default async function PricingPage() {
             No card required. Your booking page goes live instantly.
           </p>
           <CTAPrimaryButton href="/register" size="md" className="mt-8">
-            Start free trial
+            {MARKETING_CTA_PRIMARY}
           </CTAPrimaryButton>
         </div>
       </section>

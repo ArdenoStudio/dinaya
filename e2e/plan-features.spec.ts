@@ -6,7 +6,7 @@ import {
   addLocations,
   createServiceViaApi,
   makeAccount,
-  registerAndLogin,
+  registerLoginAsStarter,
   registerLoginAndSetPlan,
   registerViaApi,
   seedReviewByEmail,
@@ -14,10 +14,10 @@ import {
   visitAndExpectUpgradeGate,
 } from "./helpers/auth";
 
-test.describe("Plan features — Free plan", () => {
+test.describe("Plan features — Starter plan", () => {
   test.beforeEach(async ({ page, request }) => {
-    const account = makeAccount("plan-free");
-    await registerAndLogin(page, request, account);
+    const account = makeAccount("plan-starter");
+    await registerLoginAsStarter(page, request, account);
   });
 
   for (const route of PRO_GATED_ROUTES) {
@@ -36,7 +36,7 @@ test.describe("Plan features — Free plan", () => {
     test(`loads ${route.path} without upgrade gate`, async ({ page }) => {
       await page.goto(route.path);
       await expect(page.getByRole("heading", { name: route.heading })).toBeVisible();
-      await expect(page.getByText(/Upgrade to (Pro|Max)/i)).not.toBeVisible();
+      await expect(page.getByText(/Upgrade to (Pro|Growth)/i)).not.toBeVisible();
     });
   }
 
@@ -52,7 +52,7 @@ test.describe("Plan features — Free plan", () => {
   test("reviews page hides AI reply generation on Free", async ({ page }) => {
     await page.goto("/dashboard/reviews");
     await expect(page.getByRole("heading", { name: "Reviews" })).toBeVisible();
-    await expect(page.getByText("Upgrade to Max to generate AI replies")).not.toBeVisible();
+    await expect(page.getByText(/Upgrade to Growth to generate AI replies/i)).not.toBeVisible();
   });
 
   test("public booking page loads without login", async ({ page, request }) => {
@@ -99,10 +99,11 @@ test.describe("Plan features — Pro plan", () => {
     expect(sixth.ok).toBe(true);
   });
 
-  test("blocks a fourth location on Pro (3-location cap)", async ({ page }) => {
-    await addLocations(page, ["Branch Two", "Branch Three"]);
+  test("blocks a second location on Pro (1-location cap)", async ({ page }) => {
+    await page.goto("/dashboard/locations");
+    await expect(page.getByText(/1\/1 on Pro plan/i)).toBeVisible({ timeout: 15_000 });
     await expect(page.getByRole("button", { name: /Add location/i })).not.toBeVisible();
-    await expect(page.getByText(/reached your plan limit of 3 locations/i)).toBeVisible();
+    await expect(page.getByText(/reached your plan limit of 1 location/i)).toBeVisible();
   });
 
   test("reviews page still hides AI reply generation on Pro", async ({ page, request }) => {
@@ -112,7 +113,7 @@ test.describe("Plan features — Pro plan", () => {
     await page.goto("/dashboard/reviews");
     await expect(page.getByText("E2E Reviewer")).toBeVisible();
     await page.getByRole("button", { name: "Your reply" }).click();
-    await expect(page.getByText("Upgrade to Max to generate AI replies")).toBeVisible();
+    await expect(page.getByText(/Upgrade to Growth to generate AI replies/i)).toBeVisible();
     await expect(page.getByRole("button", { name: "Generate with AI" })).not.toBeVisible();
   });
 });
@@ -155,10 +156,14 @@ test.describe("Plan features — Max plan", () => {
     );
   });
 
-  test("can add a fourth location on Max (beyond Pro cap)", async ({ page }) => {
-    await addLocations(page, ["Branch Two", "Branch Three", "Branch Four"]);
-    await expect(page.getByText("Branch Four")).toBeVisible();
-    await expect(page.getByRole("button", { name: /Add location/i })).toBeVisible();
+  test("can add two more locations on Max (3-location cap)", async ({ page }) => {
+    await page.goto("/dashboard/locations");
+    await expect(page.getByText(/1\/3 on Growth plan/i)).toBeVisible({ timeout: 15_000 });
+    await addLocations(page, ["Branch Two", "Branch Three"]);
+    await expect(page.getByText("Branch Three")).toBeVisible();
+    await expect(page.getByText(/3\/3 on Growth plan/i)).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByRole("button", { name: /Add location/i })).not.toBeVisible();
+    await expect(page.getByText(/reached your plan limit of 3 locations/i)).toBeVisible();
   });
 
   test("shows AI reply generation on Max when a review exists", async ({ page, request }) => {

@@ -59,12 +59,14 @@ function BookingDealRow({
       type="button"
       onClick={() => onSelectDeal(selected ? null : deal)}
       className={`w-full rounded-lg border px-3 py-2 text-left text-sm transition-colors ${
-        selected ? "border-primary bg-white dark:bg-neutral-900" : "border-transparent bg-white/70 dark:bg-neutral-900/70 hover:border-primary/30"
+        selected
+          ? "border-[var(--booking-accent)] bg-card"
+          : "border-transparent bg-card/70 hover:border-[var(--booking-accent-soft)]"
       }`}
     >
       <div className="flex items-center justify-between gap-2">
         <span className="font-medium">{deal.serviceName}</span>
-        <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-bold text-primary-foreground">
+        <span className="rounded-full bg-[var(--booking-accent)] px-2 py-0.5 text-xs font-bold text-white">
           {deal.discountPercent}% OFF
         </span>
       </div>
@@ -80,8 +82,8 @@ export function BookingDealsSection({ deals, selectedDealId, onSelectDeal }: Pro
   if (deals.length === 0) return null;
 
   return (
-    <div className="mx-4 mb-4 rounded-xl border border-primary/20 bg-primary/5 p-4 md:mx-8 md:mb-6">
-      <p className="text-sm font-semibold text-primary">Deals available</p>
+    <div className="mx-4 mb-4 rounded-xl border border-[var(--booking-accent-soft)] bg-[var(--booking-accent-muted)]/40 p-4 md:mx-8 md:mb-6">
+      <p className="text-sm font-semibold booking-text-accent">Deals available</p>
       <div className="mt-3 space-y-2">
         {deals.map((deal) => (
           <BookingDealRow

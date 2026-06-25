@@ -1,22 +1,38 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { formatLkr, isOptimizableRemoteImage, cn } from "@/lib/utils";
+import { isOptimizableRemoteImage, cn } from "@/lib/utils";
 import { buildServiceBookingPath } from "@/lib/booking-url";
 import {
   formatHubLocationLine,
   hubTagline,
   serviceIconName,
 } from "@/lib/booking-hub-present";
+import { BookingServiceArrow } from "@/components/booking/BookingServiceArrow";
+import { BookingServicePrice } from "@/components/booking/BookingServicePrice";
 import { Icon } from "@/components/ui/Icon";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { BlurFade } from "@/components/ui/blur-fade";
 import { BookingHubHeroImage } from "@/components/booking/BookingHubHeroImage";
 import { BookingHubCta } from "@/components/booking/BookingHubCta";
+import { BookingServiceSearch } from "@/components/booking/BookingServiceSearch";
 import { BookingPolicyAccordion } from "@/components/booking/BookingPolicyAccordion";
+import { BookingServiceListFooter } from "@/components/booking/BookingServiceListFooter";
+import { useServiceListWindow } from "@/components/booking/useServiceListWindow";
+import {
+  filterServices,
+  HUB_STICKY_CTA_MAX_SERVICES,
+  shouldShowServiceSearch,
+  uniqueServiceCategories,
+} from "@/lib/booking/service-list-filter";
 import { BusinessRating, getBusinessRating } from "./BusinessRating";
+import {
+  BookingReviewsSection,
+  type SerializedPublicReview,
+} from "./BookingReviewsSection";
+import type { ReviewDistribution } from "@/lib/reviews-public";
 import type { BookingCopy } from "@/lib/i18n";
 import type { BookingService } from "./BookingWizard";
 
@@ -32,52 +48,51 @@ interface Props {
   copy: BookingCopy;
   avgRating?: number | null;
   reviewCount?: number;
+  reviewDistribution?: ReviewDistribution;
+  initialReviews?: SerializedPublicReview[];
   cancellationPolicy?: string | null;
   depositPolicy?: string | null;
   bankTransferInstructions?: string | null;
-  hasTeam?: boolean;
-  hasReviews?: boolean;
+  onSelectService?: (service: BookingService) => void;
 }
 
 function serviceInitial(name: string) {
   return name.trim().charAt(0).toUpperCase() || "?";
 }
 
-function HubQuickLinks({
-  hasTeam,
-  hasReviews,
-  copy,
+function HubBusinessLogo({
+  businessName,
+  logoUrl,
+  className,
 }: {
-  hasTeam?: boolean;
-  hasReviews?: boolean;
-  copy: BookingCopy;
+  businessName: string;
+  logoUrl?: string | null;
+  className?: string;
 }) {
-  if (!hasTeam && !hasReviews) return null;
-
-  const linkClass =
-    "text-sm font-medium text-[var(--booking-accent)] underline-offset-4 transition-opacity hover:underline";
-
   return (
-    <nav
-      aria-label="Booking page sections"
-      className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm"
+    <div
+      className={cn(
+        "flex size-[4.5rem] shrink-0 items-center justify-center overflow-hidden rounded-full border border-border/60 bg-muted/40 shadow-md ring-2 ring-card md:size-20",
+        logoUrl && "bg-card",
+        className,
+      )}
+      aria-hidden={logoUrl ? undefined : true}
     >
-      {hasReviews ? (
-        <a href="#booking-hub-reviews" className={linkClass}>
-          {copy.readReviews}
-        </a>
-      ) : null}
-      {hasTeam && hasReviews ? (
-        <span className="text-muted-foreground/60" aria-hidden>
-          ·
+      {logoUrl ? (
+        <Image
+          src={logoUrl}
+          alt=""
+          width={72}
+          height={72}
+          className="size-full bg-white object-contain p-1"
+          unoptimized={!isOptimizableRemoteImage(logoUrl)}
+        />
+      ) : (
+        <span className="text-xl font-semibold text-[var(--booking-accent)] md:text-2xl">
+          {serviceInitial(businessName)}
         </span>
-      ) : null}
-      {hasTeam ? (
-        <a href="#booking-hub-team" className={linkClass}>
-          {copy.meetTeam}
-        </a>
-      ) : null}
-    </nav>
+      )}
+    </div>
   );
 }
 
@@ -93,13 +108,37 @@ export default function BookingServiceHub({
   copy,
   avgRating,
   reviewCount,
+  reviewDistribution,
+  initialReviews,
   cancellationPolicy,
   depositPolicy,
   bankTransferInstructions,
-  hasTeam,
-  hasReviews,
+  onSelectService,
 }: Props) {
+  const [query, setQuery] = useState("");
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+
+  const categories = useMemo(() => uniqueServiceCategories(services), [services]);
+  const filteredServices = useMemo(
+    () => filterServices(services, query, activeCategory),
+    [services, query, activeCategory],
+  );
+  const listWindow = useServiceListWindow({
+    filteredServices,
+    categories,
+    query,
+    activeCategory,
+    uncategorizedLabel: copy.allServices,
+  });
+
   if (services.length <= 1) return null;
+
+  const showSearch = shouldShowServiceSearch(services.length, "hub");
+  const showStickyBrowse = services.length > HUB_STICKY_CTA_MAX_SERVICES;
+  const showStickyCta = true;
+  const showingLabel = copy.showingServices
+    .replace("{count}", String(filteredServices.length))
+    .replace("{total}", String(services.length));
 
   const rating = getBusinessRating(avgRating, reviewCount);
   const primaryService = services[0]!;
@@ -107,87 +146,158 @@ export default function BookingServiceHub({
     businessSlug,
     primaryService.slug ?? primaryService.id,
   );
-  const primaryCtaLabel = `${copy.chooseTime} · ${primaryService.name}`;
+  const primaryCtaLabel = showStickyBrowse
+    ? copy.browseServices
+    : `${copy.chooseTime} · ${primaryService.name}`;
+
+  function renderHubService(service: BookingService) {
+    const href = buildServiceBookingPath(businessSlug, service.slug ?? service.id);
+    const iconName = serviceIconName(service.name);
+    const rowClassName = cn(
+      "group flex min-h-[4.75rem] w-full items-start gap-3.5 rounded-[1.375rem] border border-border/50 px-3.5 py-4 text-left md:px-4 md:py-[1.125rem]",
+      "transition-[transform,background-color,box-shadow,border-color] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]",
+      "hover:border-[var(--booking-accent)]/25 hover:bg-[var(--booking-accent-muted)] hover:shadow-sm",
+      "active:scale-[0.96] motion-reduce:active:scale-100",
+      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--booking-accent-soft)]",
+    );
+    const rowContent = (
+      <>
+          {service.imageUrl ? (
+            <Image
+              src={service.imageUrl}
+              alt=""
+              width={48}
+              height={48}
+              className="size-12 shrink-0 rounded-xl object-cover image-depth"
+              unoptimized={!isOptimizableRemoteImage(service.imageUrl)}
+            />
+          ) : (
+            <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-[var(--booking-accent-muted)] ring-1 ring-border/40">
+              <Icon name={iconName} className="text-lg text-[var(--booking-accent)]" />
+            </div>
+          )}
+
+          <div className="min-w-0 flex-1">
+            <p className="text-base font-semibold leading-snug text-foreground transition-colors duration-200 group-hover:text-[var(--booking-accent)]">
+              {service.name}
+            </p>
+            {service.categoryName ? (
+              <p className="mt-0.5 text-xs font-medium text-muted-foreground">{service.categoryName}</p>
+            ) : null}
+            {service.description ? (
+              <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
+                {service.description}
+              </p>
+            ) : null}
+            <p className="mt-2 text-sm text-muted-foreground">
+              {service.durationMinutes}m
+              <span aria-hidden className="text-muted-foreground/50">
+                {" "}
+                ·{" "}
+              </span>
+              <BookingServicePrice priceLkr={service.priceLkr} />
+            </p>
+          </div>
+
+          <BookingServiceArrow />
+      </>
+    );
+
+    return (
+      <li key={service.id}>
+        {onSelectService ? (
+          <button type="button" onClick={() => onSelectService(service)} className={rowClassName}>
+            {rowContent}
+          </button>
+        ) : (
+          <Link href={href} className={rowClassName}>
+            {rowContent}
+          </Link>
+        )}
+      </li>
+    );
+  }
+
   const tagline = hubTagline(businessDescription, copy.selectServiceHint);
   const locationLine = formatHubLocationLine(businessAddress, businessPhone);
-  const showHeaderAvatar = !heroImageUrl;
 
-  const shell =
-    "overflow-hidden rounded-none border-x-0 bg-card shadow-none md:rounded-2xl md:border md:border-border/80 md:shadow-[0_12px_40px_-24px_rgba(15,23,42,0.28)] dark:md:shadow-none dark:md:ring-1 dark:md:ring-white/10";
+  const shell = heroImageUrl
+    ? "overflow-hidden rounded-none border-x-0 bg-transparent shadow-none md:rounded-2xl md:border-0"
+    : "overflow-hidden rounded-2xl border-x-0 booking-panel-surface shadow-none md:border md:border-border/80 md:shadow-[0_12px_40px_-24px_rgba(15,23,42,0.28)] dark:md:shadow-none dark:md:ring-1 dark:md:ring-white/10";
+
+  const contentShell = heroImageUrl
+    ? "relative z-10 -mt-5 flex flex-col rounded-t-2xl booking-panel-surface pt-14 md:-mt-6 md:pt-[4.25rem]"
+    : "flex flex-col";
 
   return (
-    <BlurFade className="w-full pb-28 md:pb-0">
+    <BlurFade className={cn("w-full", showStickyCta ? "pb-28 md:pb-0" : "pb-4")}>
       <article className={cn("flex w-full flex-col", shell)}>
         {heroImageUrl ? (
           <div className="relative">
             <BookingHubHeroImage src={heroImageUrl} alt={businessName} />
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-card via-card/90 to-transparent px-4 pb-4 pt-20 md:px-6 md:pb-5">
-              <h1 className="font-cal text-[2rem] font-semibold leading-[1.05] tracking-tight text-foreground md:text-4xl">
-                {businessName}
-              </h1>
+            <div className="pointer-events-none absolute inset-x-0 bottom-3 z-20 flex justify-center md:bottom-4">
+              <div className="pointer-events-auto translate-y-1/3">
+                <HubBusinessLogo businessName={businessName} logoUrl={businessLogoUrl} />
+              </div>
             </div>
           </div>
         ) : null}
 
+        <div className={contentShell}>
         <header
           className={cn(
-            "flex flex-col gap-4 px-4 pb-4 md:px-6",
-            heroImageUrl ? "pt-4" : "pt-5 md:pt-6",
+            "flex flex-col items-center px-4 pb-4 text-center md:px-6",
+            heroImageUrl ? "pt-0" : "pt-6 md:pt-8",
           )}
         >
-          <div className={cn("flex gap-4", showHeaderAvatar ? "items-start" : "flex-col")}>
-            {showHeaderAvatar ? (
-              <Avatar className="size-12 shrink-0 ring-2 ring-border/80" data-size="lg">
-                {businessLogoUrl ? (
-                  <AvatarImage
-                    src={businessLogoUrl}
-                    alt=""
-                    className="bg-white object-contain p-1"
-                  />
-                ) : null}
-                <AvatarFallback className="bg-[var(--booking-accent-muted)] text-base font-semibold text-[var(--booking-accent)]">
-                  {serviceInitial(businessName)}
-                </AvatarFallback>
-              </Avatar>
-            ) : null}
+          {!heroImageUrl ? (
+            <HubBusinessLogo
+              businessName={businessName}
+              logoUrl={businessLogoUrl}
+              className="mb-4 md:mb-5"
+            />
+          ) : null}
+          <h1
+            className={cn(
+              "text-[1.625rem] font-bold leading-tight tracking-tight text-foreground md:text-3xl",
+              heroImageUrl && "mt-1 md:mt-1.5",
+            )}
+          >
+            {businessName}
+          </h1>
+          <p className="mt-2 max-w-md text-[0.9375rem] leading-relaxed text-muted-foreground">
+            {tagline}
+          </p>
+          {rating && reviewDistribution && initialReviews ? (
+            <BookingReviewsSection
+              businessSlug={businessSlug}
+              businessName={businessName}
+              avgRating={rating.avgRating}
+              reviewCount={rating.reviewCount}
+              reviewDistribution={reviewDistribution}
+              initialReviews={initialReviews}
+              copy={copy}
+              variant="rating"
+              className="mt-3"
+            />
+          ) : rating ? (
+            <BusinessRating
+              avgRating={rating.avgRating}
+              reviewCount={rating.reviewCount}
+              copy={copy}
+              size="sm"
+              compactAttribution
+              className="mt-3 justify-center"
+            />
+          ) : null}
+          {locationLine ? (
+            <p className="mt-2 flex items-start justify-center gap-1.5 text-sm text-foreground/75">
+              <Icon name="geo-alt" className="mt-0.5 shrink-0 text-muted-foreground" />
+              <span>{locationLine}</span>
+            </p>
+          ) : null}
 
-            <div className="min-w-0 flex-1">
-              {!heroImageUrl ? (
-                <h1 className="font-cal text-3xl font-semibold leading-[1.05] tracking-tight text-foreground md:text-4xl">
-                  {businessName}
-                </h1>
-              ) : null}
-              <p
-                className={cn(
-                  "text-[0.9375rem] leading-relaxed text-muted-foreground",
-                  heroImageUrl ? "" : "mt-2",
-                )}
-              >
-                {tagline}
-              </p>
-              {rating ? (
-                <BusinessRating
-                  avgRating={rating.avgRating}
-                  reviewCount={rating.reviewCount}
-                  copy={copy}
-                  size="sm"
-                  compactAttribution
-                  className="mt-3"
-                />
-              ) : null}
-              {locationLine ? (
-                <p className="mt-2 flex items-start gap-1.5 text-sm text-foreground/75">
-                  <Icon name="geo-alt" className="mt-0.5 shrink-0 text-muted-foreground" />
-                  <span>{locationLine}</span>
-                </p>
-              ) : null}
-              <div className="mt-3">
-                <HubQuickLinks hasTeam={hasTeam} hasReviews={hasReviews} copy={copy} />
-              </div>
-            </div>
-          </div>
-
-          <div className="hidden border-t border-border/50 pt-4 md:block">
+          <div className="mt-4 w-full border-t border-border/50 pt-4">
             <p className="text-sm text-muted-foreground">
               {copy.chooseServiceAndTime}
               <span className="ml-2 text-foreground/60">· {services.length} services</span>
@@ -197,65 +307,63 @@ export default function BookingServiceHub({
 
         <Separator className="bg-border/50" />
 
-        <ul className="flex flex-col gap-2 px-4 md:gap-2 md:px-6 md:pb-2">
-          {services.map((service) => {
-            const href = buildServiceBookingPath(businessSlug, service.slug ?? service.id);
-            const iconName = serviceIconName(service.name);
+        {showSearch ? (
+          <div className="px-4 pt-3 md:px-6">
+            <BookingServiceSearch
+              query={query}
+              onQueryChange={setQuery}
+              placeholder={copy.searchServices}
+              categories={categories}
+              activeCategory={activeCategory}
+              onCategoryChange={setActiveCategory}
+              allCategoriesLabel={copy.allCategories}
+              resultCount={filteredServices.length}
+              totalCount={services.length}
+              showingLabel={showingLabel}
+            />
+          </div>
+        ) : null}
 
-            return (
-              <li key={service.id}>
-                <Link
-                  href={href}
-                  className={cn(
-                    "group flex min-h-[4.75rem] items-start gap-3.5 rounded-xl border border-transparent py-4 md:py-[1.125rem]",
-                    "transition-[background-color,transform,box-shadow,border-color] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]",
-                    "hover:border-border/80 hover:bg-[var(--booking-accent-muted)] hover:shadow-sm",
-                    "active:scale-[0.985] md:hover:translate-y-[-1px]",
-                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--booking-accent-soft)]",
-                  )}
-                >
-                  {service.imageUrl ? (
-                    <Image
-                      src={service.imageUrl}
-                      alt=""
-                      width={48}
-                      height={48}
-                      className="size-12 shrink-0 rounded-xl object-cover ring-1 ring-border/50"
-                      unoptimized={!isOptimizableRemoteImage(service.imageUrl)}
-                    />
-                  ) : (
-                    <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-[var(--booking-accent-muted)] ring-1 ring-border/40">
-                      <Icon
-                        name={iconName}
-                        className="text-lg text-[var(--booking-accent)]"
-                      />
-                    </div>
-                  )}
-
-                  <div className="min-w-0 flex-1">
-                    <p className="text-base font-semibold leading-snug text-foreground transition-colors duration-200 group-hover:text-[var(--booking-accent)]">
-                      {service.name}
-                    </p>
-                    {service.description ? (
-                      <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
-                        {service.description}
-                      </p>
-                    ) : null}
-                    <p className="mt-2 text-sm text-muted-foreground">
-                      {service.durationMinutes}m
-                      {service.priceLkr > 0 ? ` · ${formatLkr(service.priceLkr)}` : " · Free"}
-                    </p>
-                  </div>
-
-                  <Icon
-                    name="chevron-right"
-                    className="size-4 shrink-0 self-center text-muted-foreground/60 transition-[transform,color] duration-200 ease-out group-hover:translate-x-1 group-hover:text-[var(--booking-accent)]"
-                  />
-                </Link>
+        <ul
+          id="hub-services"
+          className="flex flex-col gap-2.5 px-4 py-3 md:gap-2.5 md:px-6 md:pb-4"
+        >
+          {filteredServices.length === 0 ? (
+            <li className="rounded-xl border border-dashed border-border/70 px-4 py-10 text-center text-sm text-muted-foreground">
+              {copy.noServicesMatch}
+            </li>
+          ) : listWindow.mode === "grouped" && listWindow.groupedServices ? (
+            listWindow.groupedServices.map((group) => (
+              <li key={group.category} className="space-y-2.5">
+                <h2 className="sticky top-0 z-10 -mx-1 booking-panel-surface px-1 py-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  {group.category}
+                </h2>
+                <ul className="flex flex-col gap-2.5">
+                  {group.services.map((service) => renderHubService(service as BookingService))}
+                </ul>
               </li>
-            );
-          })}
+            ))
+          ) : (
+            (listWindow.flatServices ?? []).map((service) =>
+              renderHubService(service as BookingService),
+            )
+          )}
         </ul>
+
+        {filteredServices.length > 0 ? (
+          <div className="px-4 pb-2 md:px-6">
+            <BookingServiceListFooter
+              copy={copy}
+              showMore={listWindow.showMore}
+              remaining={listWindow.remaining}
+              onShowMore={listWindow.onShowMore}
+              usePagination={listWindow.usePagination}
+              searchPage={listWindow.searchPage}
+              totalPages={listWindow.totalPages}
+              onSearchPageChange={listWindow.onSearchPageChange}
+            />
+          </div>
+        ) : null}
 
         {(cancellationPolicy || depositPolicy || bankTransferInstructions) && (
           <>
@@ -275,14 +383,24 @@ export default function BookingServiceHub({
         <div className="sr-only">
           <Link href={primaryHref}>{copy.chooseService}</Link>
         </div>
+        </div>
       </article>
 
-      <BookingHubCta
-        businessSlug={businessSlug}
-        serviceSlug={primaryService.slug ?? primaryService.id}
-        label={primaryCtaLabel}
-        variant="sticky"
-      />
+      {showStickyCta ? (
+        <BookingHubCta
+          businessSlug={businessSlug}
+          serviceSlug={primaryService.slug ?? primaryService.id}
+          label={primaryCtaLabel}
+          variant="sticky"
+          emphasis={showStickyBrowse ? "secondary" : "primary"}
+          scrollToId={showStickyBrowse ? "hub-services" : undefined}
+          onSelect={
+            onSelectService && !showStickyBrowse
+              ? () => onSelectService(primaryService)
+              : undefined
+          }
+        />
+      ) : null}
     </BlurFade>
   );
 }

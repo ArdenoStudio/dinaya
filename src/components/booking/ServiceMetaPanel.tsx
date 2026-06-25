@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, m } from "motion/react";
+import { AnimatePresence, m, useReducedMotion } from "motion/react";
 import { format, parseISO } from "date-fns";
 import type { Staff } from "@/db/schema";
 import type { Location } from "@/db/schema";
@@ -10,20 +10,17 @@ import type { DealListItem } from "@/lib/deals/queries";
 import { formatLkr } from "@/lib/utils";
 import { Icon } from "@/components/ui/Icon";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { fadeInUp } from "@/lib/booking/booking-animations";
-import StaffPicker from "./StaffPicker";
+import { bookingPanelMotion } from "@/lib/booking/booking-motion";
 import StepLocation from "./StepLocation";
 import { computeDiscountedPrice } from "@/lib/deals/pricing";
 import { BusinessRating, getBusinessRating } from "./BusinessRating";
+import { BookingServicePrice } from "./BookingServicePrice";
 
 interface ServiceMetaPanelProps {
   business: BookingBusiness;
   service: BookingService | null;
   staff: Staff | null;
   anyStaff: boolean;
-  allStaff: Staff[];
-  staffServiceMap: { staffId: string; serviceId: string }[];
-  staffLocationMap: { staffId: string; locationId: string }[];
   locations: Pick<Location, "id" | "name" | "address">[];
   needsLocationPicker: boolean;
   selectedLocation: Pick<Location, "id" | "name" | "address"> | null;
@@ -37,8 +34,7 @@ interface ServiceMetaPanelProps {
   lockServiceSelection: boolean;
   avgRating?: number | null;
   reviewCount?: number;
-  onSelectStaff: (staff: Staff) => void;
-  onSelectAnyStaff: () => void;
+  onChangeStaff?: () => void;
   onSelectLocation: (location: Pick<Location, "id" | "name" | "address">) => void;
   onChangeService?: () => void;
 }
@@ -55,9 +51,6 @@ export function ServiceMetaPanel({
   service,
   staff,
   anyStaff,
-  allStaff,
-  staffServiceMap,
-  staffLocationMap,
   locations,
   needsLocationPicker,
   selectedLocation,
@@ -71,11 +64,12 @@ export function ServiceMetaPanel({
   lockServiceSelection,
   avgRating,
   reviewCount,
-  onSelectStaff,
-  onSelectAnyStaff,
+  onChangeStaff,
   onSelectLocation,
   onChangeService,
 }: ServiceMetaPanelProps) {
+  const reduceMotion = useReducedMotion() ?? false;
+  const serviceMotion = bookingPanelMotion(reduceMotion, !lockServiceSelection);
   const dateLabel = selectedDate
     ? format(parseISO(selectedDate + "T12:00:00"), "EEE, d MMM yyyy")
     : null;
@@ -89,7 +83,7 @@ export function ServiceMetaPanel({
   const rating = getBusinessRating(avgRating, reviewCount);
 
   return (
-    <div className="flex flex-col">
+    <div className="flex min-w-0 flex-col">
       <div className="flex items-start gap-3">
         <Avatar className="size-10 shrink-0" data-size="lg">
           {business.logoUrl ? (
@@ -128,9 +122,8 @@ export function ServiceMetaPanel({
         {service && (
           <m.div
             key="service-info"
-            {...fadeInUp}
-            initial={lockServiceSelection ? false : fadeInUp.initial}
-            className="mt-6 border-t border-border/70 pt-4"
+            {...serviceMotion}
+            className="mt-6 min-w-0 border-t border-border/70 pt-4"
           >
             {!lockServiceSelection && onChangeService && (
               <button
@@ -144,58 +137,51 @@ export function ServiceMetaPanel({
             )}
             <h2 className="text-xl font-semibold leading-tight text-foreground md:text-2xl">{service.name}</h2>
             {service.description && (
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{service.description}</p>
+              <p className="mt-2 text-base leading-relaxed text-muted-foreground md:text-sm">{service.description}</p>
             )}
             <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
-              <span className="inline-flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5">
                 <Icon name="clock" className="size-3.5 shrink-0" />
                 {formatDuration(service.durationMinutes)}
               </span>
               <span aria-hidden className="text-muted-foreground/50">
                 ·
               </span>
-              <span className="inline-flex items-center gap-1 font-medium text-foreground">
-                {service.priceLkr > 0 ? formatLkr(price) : "Free"}
-              </span>
+              <BookingServicePrice
+                priceLkr={service.priceLkr}
+                displayPrice={selectedDeal && service.priceLkr > 0 ? price : undefined}
+              />
             </div>
-            {staffLabel && (
-              <p className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
-                <Icon name="person" className="shrink-0 text-base" />
-                <span className="text-foreground">{staffLabel}</span>
-              </p>
-            )}
-            {anyStaff && !staff && (
-              <p className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
-                <Icon name="people" className="shrink-0 text-base" />
-                <span className="text-foreground">{copy.anyAvailableStaff}</span>
-              </p>
+            {(staffLabel || anyStaff) && (
+              <div className="mt-3 flex items-start justify-between gap-3">
+                <p className="flex min-w-0 items-center gap-2 text-sm text-muted-foreground">
+                  <Icon name={anyStaff ? "people" : "person"} className="shrink-0 text-base" />
+                  <span className="text-foreground">
+                    {anyStaff ? copy.anyAvailableStaff : staffLabel}
+                  </span>
+                </p>
+                {onChangeStaff && needsStaffPicker ? (
+                  <button
+                    type="button"
+                    onClick={onChangeStaff}
+                    className="shrink-0 text-xs font-medium booking-text-accent hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--booking-accent-soft)] focus-visible:ring-offset-2"
+                  >
+                    {copy.changeStaff}
+                  </button>
+                ) : null}
+              </div>
             )}
             {service.depositPercent > 0 && service.priceLkr > 0 && (
-              <p className="mt-3 text-xs text-[var(--booking-accent)]">
-                {copy.depositDue}: {formatLkr(Math.ceil((price * service.depositPercent) / 100))}
+              <p className="mt-3 text-xs font-medium text-foreground">
+                <span className="text-muted-foreground">{copy.depositDue}: </span>
+                <span className="booking-text-accent">
+                  {formatLkr(Math.ceil((price * service.depositPercent) / 100))}
+                </span>
               </p>
             )}
           </m.div>
         )}
       </AnimatePresence>
-
-      {service && needsStaffPicker && (
-        <div className="mt-6">
-          <StaffPicker
-            allStaff={allStaff}
-            staffServiceMap={staffServiceMap}
-            staffLocationMap={staffLocationMap}
-            locationId={selectedLocation?.id}
-            serviceId={service.id}
-            selected={staff}
-            anyStaffSelected={anyStaff}
-            copy={copy}
-            onSelect={onSelectStaff}
-            onSelectAny={onSelectAnyStaff}
-            compact
-          />
-        </div>
-      )}
 
       {service && !staff && !anyStaff && !needsStaffPicker && (
         <p className="mt-3 text-center text-sm text-amber-600">{copy.noStaff}</p>
@@ -222,7 +208,7 @@ export function ServiceMetaPanel({
         {holdLabel && dateLabel && timeLabel && (
           <m.div
             key="selected-time"
-            {...fadeInUp}
+            {...bookingPanelMotion(reduceMotion, true)}
             className="mt-4 hidden rounded-lg booking-bg-accent-muted px-3 py-2 lg:block"
           >
             <p className="text-xs font-medium booking-text-accent">
@@ -234,7 +220,7 @@ export function ServiceMetaPanel({
       </AnimatePresence>
 
       {slotUnavailable && (
-        <div className="mt-3 hidden rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:border-amber-800/50 dark:bg-amber-950/40 dark:text-amber-200 lg:block">
+        <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:border-amber-800/50 dark:bg-amber-950/40 dark:text-amber-200">
           <p className="font-medium">{copy.slotTaken}</p>
           <p className="mt-0.5">{copy.slotTakenAction}</p>
         </div>

@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 import {
   makeAccount,
+  nextBookableDate,
   registerLoginAndSetPlan,
   registerViaApi,
   type TestAccount,
@@ -27,7 +28,20 @@ test.describe("Public booking — single location", () => {
   test("completes a free booking through confirm", async ({ page }) => {
     await page.goto(`/book/${account.slug}`);
     await page.getByRole("button", { name: /Haircut/i }).click();
-    await page.getByRole("button", { name: /9:00 AM|9:30 AM|10:00 AM/i }).first().click();
+
+    const dateStr = nextBookableDate();
+    const dateInput = page.locator('input[type="date"]');
+    if (await dateInput.count()) {
+      await dateInput.first().fill(dateStr);
+    }
+
+    const slotButton = page
+      .locator("button")
+      .filter({ hasText: /^\d{1,2}:\d{2}\s*(am|pm)?$/i })
+      .first();
+    await expect(slotButton).toBeVisible({ timeout: 25_000 });
+    await slotButton.click();
+
     await page.getByLabel(/Full name/i).fill("Test Client");
     await page.getByLabel(/Phone number/i).fill("+94771234567");
     await page.getByRole("button", { name: /Confirm booking/i }).click();
@@ -40,8 +54,14 @@ test.describe("Public booking — single location", () => {
     await page.goto(`/book/${account.slug}`);
     await page.getByRole("button", { name: /Haircut/i }).click();
 
+    const dateStr = nextBookableDate();
+    const dateInput = page.locator('input[type="date"]');
+    if (await dateInput.count()) {
+      await dateInput.first().fill(dateStr);
+    }
+
     const slotButtons = page.locator("button").filter({ hasText: /^\d{1,2}:\d{2}\s*(am|pm)?$/i });
-    await expect(slotButtons.first()).toBeVisible({ timeout: 20_000 });
+    await expect(slotButtons.first()).toBeVisible({ timeout: 25_000 });
     expect(await slotButtons.count()).toBeGreaterThanOrEqual(3);
 
     await expect(page.getByText(/Fully booked on this date/i)).not.toBeVisible();

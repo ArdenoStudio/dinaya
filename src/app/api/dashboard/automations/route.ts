@@ -3,7 +3,7 @@ import { db } from "@/db";
 import { automationRules } from "@/db/schema";
 import { requireApiBusiness } from "@/lib/api-auth";
 import { getAutomationsDashboardList } from "@/lib/dashboard/automations";
-import { requirePro } from "@/lib/plan";
+import { PlanRequiredError, requirePro } from "@/lib/plan";
 import { z } from "@/lib/validation";
 
 const ruleSchema = z.object({
@@ -15,11 +15,28 @@ const ruleSchema = z.object({
   isActive: z.boolean().optional(),
 });
 
+async function requireAutomations(businessId: string): Promise<NextResponse | null> {
+  try {
+    await requirePro(businessId, "automations");
+    return null;
+  } catch (error) {
+    if (error instanceof PlanRequiredError) {
+      return NextResponse.json(
+        { error: error.message, feature: "automations" },
+        { status: 402 },
+      );
+    }
+    throw error;
+  }
+}
+
 export async function GET(req: NextRequest) {
   const authResult = await requireApiBusiness({ req });
   if (!authResult.ok) return authResult.response;
   const { businessId } = authResult.context;
-  await requirePro(businessId, "automations");
+
+  const accessError = await requireAutomations(businessId);
+  if (accessError) return accessError;
 
   const rules = await getAutomationsDashboardList(businessId, { limit: 200 });
 
@@ -30,7 +47,9 @@ export async function POST(req: NextRequest) {
   const authResult = await requireApiBusiness({ ownerOnly: true, req });
   if (!authResult.ok) return authResult.response;
   const { businessId } = authResult.context;
-  await requirePro(businessId, "automations");
+
+  const accessError = await requireAutomations(businessId);
+  if (accessError) return accessError;
 
   const parsed = ruleSchema.safeParse(await req.json());
   if (!parsed.success) {

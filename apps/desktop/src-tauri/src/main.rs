@@ -169,6 +169,7 @@ fn main() {
             commands::desktop_auth_set_key,
             commands::desktop_auth_has_key,
             commands::desktop_auth_login,
+            commands::desktop_auth_register,
             commands::desktop_logout,
             commands::desktop_api_request,
             commands::desktop_sync_run,
