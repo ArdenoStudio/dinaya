@@ -46,7 +46,7 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     await db
       .update(deals)
       .set({ status: "cancelled" })
-      .where(eq(deals.id, id));
+      .where(and(eq(deals.id, id), eq(deals.businessId, businessId)));
 
     void logActivity({
       businessId,
@@ -110,7 +110,7 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
       slotsTotal: nextSlotsTotal,
       status: nextStatus,
     })
-    .where(eq(deals.id, id))
+    .where(and(eq(deals.id, id), eq(deals.businessId, businessId)))
     .returning({
       id: deals.id,
       dealWindowEnd: deals.dealWindowEnd,

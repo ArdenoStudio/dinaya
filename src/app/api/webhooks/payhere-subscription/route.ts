@@ -114,14 +114,25 @@ export async function POST(req: NextRequest) {
       break;
     }
     case "-1": {
+      const cancelledAt = new Date();
+
       await db
         .update(subscriptions)
-        .set({ status: "cancelled", cancelledAt: new Date() })
+        .set({ status: "cancelled", cancelledAt })
         .where(eq(subscriptions.id, sub.id));
 
-      if (sub.status === "pending") {
-        break;
+      if (sub.currentPeriodEnd) {
+        await db
+          .update(businesses)
+          .set({ plan: sub.plan, planExpiresAt: sub.currentPeriodEnd })
+          .where(eq(businesses.id, sub.businessId));
+      } else {
+        await db
+          .update(businesses)
+          .set({ plan: "expired", planExpiresAt: null })
+          .where(eq(businesses.id, sub.businessId));
       }
+
       break;
     }
     case "-2": {
