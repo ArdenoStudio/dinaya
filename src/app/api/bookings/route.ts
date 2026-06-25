@@ -555,7 +555,7 @@ export async function POST(req: NextRequest) {
   }
 
   if (sessionToken) {
-    await releaseSlotReservation(sessionToken);
+    await releaseSlotReservation(businessId, sessionToken);
   }
 
   if (validatedDealId) {

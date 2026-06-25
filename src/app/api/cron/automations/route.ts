@@ -12,6 +12,12 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const result = await processDueAutomationRuns();
-  return NextResponse.json(result);
+  try {
+    const result = await processDueAutomationRuns();
+    return NextResponse.json(result);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("[cron/automations] unhandled error:", message, err);
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }

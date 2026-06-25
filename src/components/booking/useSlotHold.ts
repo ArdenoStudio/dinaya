@@ -49,15 +49,17 @@ export function useSlotHold(input: {
       return;
     }
     try {
-      await fetch(`/api/slot-reservations?sessionToken=${encodeURIComponent(sessionToken)}`, {
-        method: "DELETE",
+      const query = new URLSearchParams({
+        businessId: input.businessId,
+        sessionToken,
       });
+      await fetch(`/api/slot-reservations?${query.toString()}`, { method: "DELETE" });
     } catch {
       // ignore
     }
     setHold(null);
     setSlotUnavailable(false);
-  }, [clearPoll, sessionToken]);
+  }, [clearPoll, input.businessId, sessionToken]);
 
   const reserveSlot = useCallback(
     async (slot: SlotOption) => {

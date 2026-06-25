@@ -188,8 +188,13 @@ export async function purgeExpiredSlotReservations(): Promise<void> {
   await db.delete(slotReservations).where(lt(slotReservations.expiresAt, new Date()));
 }
 
-export async function releaseSlotReservation(sessionToken: string): Promise<void> {
-  await db.delete(slotReservations).where(eq(slotReservations.sessionToken, sessionToken));
+export async function releaseSlotReservation(
+  businessId: string,
+  sessionToken: string,
+): Promise<void> {
+  await db
+    .delete(slotReservations)
+    .where(and(eq(slotReservations.businessId, businessId), eq(slotReservations.sessionToken, sessionToken)));
 }
 
 export async function getActiveReservationsForStaff(
@@ -198,8 +203,6 @@ export async function getActiveReservationsForStaff(
   dayEndUtc: Date,
   excludeSessionToken?: string,
 ) {
-  await purgeExpiredSlotReservations();
-
   const conditions = [
     eq(slotReservations.staffId, staffId),
     lt(slotReservations.startsAt, dayEndUtc),
@@ -226,8 +229,6 @@ export async function verifySlotReservation(input: {
   startsAt: Date;
   endsAt: Date;
 }): Promise<boolean> {
-  await purgeExpiredSlotReservations();
-
   const [row] = await db
     .select({ id: slotReservations.id })
     .from(slotReservations)
@@ -252,8 +253,6 @@ export async function isSlotBlockedByReservation(
   endsAt: Date,
   sessionToken?: string,
 ): Promise<boolean> {
-  await purgeExpiredSlotReservations();
-
   const conditions = [
     eq(slotReservations.staffId, staffId),
     lt(slotReservations.startsAt, endsAt),

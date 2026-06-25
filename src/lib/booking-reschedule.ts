@@ -7,7 +7,7 @@ import {
   services,
   staff,
 } from "@/db/schema";
-import { and, eq, gt, inArray, lt, ne } from "drizzle-orm";
+import { and, eq, gt, gte, inArray, lt, ne } from "drizzle-orm";
 import { getAvailableSlots } from "@/lib/availability";
 import {
   filterSlotsByBusinessHoliday,
@@ -27,6 +27,8 @@ import {
   releaseSlotReservation,
 } from "@/lib/slot-reservations";
 import { runAfterResponse } from "@/lib/after-response";
+import { endOfDay, parseISO, startOfDay } from "date-fns";
+import { fromZonedTime } from "date-fns-tz";
 
 export type RescheduleResult =
   | { ok: true; booking: { id: string; startsAt: Date; endsAt: Date; status: string } }
@@ -103,6 +105,9 @@ export async function getRescheduleSlots(input: {
   }
 
   const timezone = booking.timezone ?? "Asia/Colombo";
+  const localDate = parseISO(input.date);
+  const dayStartUtc = fromZonedTime(startOfDay(localDate), timezone);
+  const dayEndUtc = fromZonedTime(endOfDay(localDate), timezone);
   const holiday = await getBusinessHolidayForDate({
     businessId: booking.businessId,
     date: input.date,
@@ -115,7 +120,10 @@ export async function getRescheduleSlots(input: {
 
   const [staffAvailability, overrides, existingBookings] = await Promise.all([
     db.select().from(availability).where(eq(availability.staffId, booking.staffId)),
-    db.select().from(availabilityOverrides).where(eq(availabilityOverrides.staffId, booking.staffId)),
+    db
+      .select()
+      .from(availabilityOverrides)
+      .where(and(eq(availabilityOverrides.staffId, booking.staffId), eq(availabilityOverrides.date, input.date))),
     db
       .select({
         id: bookings.id,
@@ -128,6 +136,8 @@ export async function getRescheduleSlots(input: {
         eq(bookings.staffId, booking.staffId),
         ne(bookings.id, booking.id),
         inArray(bookings.status, ["pending", "confirmed"]),
+        gte(bookings.startsAt, dayStartUtc),
+        lt(bookings.startsAt, dayEndUtc),
       )),
   ]);
 
@@ -292,7 +302,7 @@ export async function rescheduleBooking(input: {
     }
 
     if (input.sessionToken) {
-      await releaseSlotReservation(input.sessionToken);
+      await releaseSlotReservation(row.businessId, input.sessionToken);
     }
 
     void logActivity({

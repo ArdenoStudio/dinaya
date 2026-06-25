@@ -97,10 +97,11 @@ export async function DELETE(req: NextRequest) {
   if (!limited.ok) return limited.response;
 
   const sessionToken = req.nextUrl.searchParams.get("sessionToken");
-  if (!sessionToken) {
-    return NextResponse.json({ error: "Missing sessionToken" }, { status: 400 });
+  const businessId = req.nextUrl.searchParams.get("businessId");
+  if (!sessionToken || !businessId) {
+    return NextResponse.json({ error: "Missing businessId or sessionToken" }, { status: 400 });
   }
 
-  await releaseSlotReservation(sessionToken);
+  await releaseSlotReservation(businessId, sessionToken);
   return NextResponse.json({ ok: true });
 }

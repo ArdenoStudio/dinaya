@@ -19,6 +19,8 @@ import { sendMessage } from "@/lib/messaging";
 import { canUseFeature, getBusinessPlan, type Plan } from "@/lib/plan";
 import type { BookingLanguage } from "@/lib/i18n";
 
+const AUTOMATION_TRIGGER_VERSION = "v1";
+
 type AutomationAction = {
   type: string;
   template?: string;
@@ -140,6 +142,7 @@ async function executeAutomationAction(input: {
 async function markRun(input: {
   ruleId: string;
   bookingId: string;
+  triggerVersion: string;
   status: "completed" | "failed";
   error?: string;
 }) {
@@ -152,6 +155,7 @@ async function markRun(input: {
     .where(and(
       eq(automationRuns.ruleId, input.ruleId),
       eq(automationRuns.entityId, input.bookingId),
+      eq(automationRuns.triggerVersion, input.triggerVersion),
     ));
 }
 
@@ -159,36 +163,38 @@ async function queueOrRunRule(input: {
   rule: typeof automationRules.$inferSelect;
   bookingId: string;
 }) {
-  const [existingRun] = await db
-    .select({ id: automationRuns.id, status: automationRuns.status })
-    .from(automationRuns)
-    .where(and(
-      eq(automationRuns.ruleId, input.rule.id),
-      eq(automationRuns.entityId, input.bookingId),
-    ))
-    .limit(1);
-
-  if (existingRun && existingRun.status === "completed") {
-    return;
-  }
+  const triggerVersion = AUTOMATION_TRIGGER_VERSION;
 
   if (input.rule.delayMinutes > 0) {
-    if (!existingRun) {
-      await db.insert(automationRuns).values({
+    await db
+      .insert(automationRuns)
+      .values({
         ruleId: input.rule.id,
         entityId: input.bookingId,
+        triggerVersion,
         status: "pending",
+      })
+      .onConflictDoNothing({
+        target: [automationRuns.ruleId, automationRuns.entityId, automationRuns.triggerVersion],
       });
-    }
     return;
   }
 
-  if (!existingRun) {
-    await db.insert(automationRuns).values({
+  const [createdRun] = await db
+    .insert(automationRuns)
+    .values({
       ruleId: input.rule.id,
       entityId: input.bookingId,
+      triggerVersion,
       status: "running",
-    });
+    })
+    .onConflictDoNothing({
+      target: [automationRuns.ruleId, automationRuns.entityId, automationRuns.triggerVersion],
+    })
+    .returning({ id: automationRuns.id });
+
+  if (!createdRun) {
+    return;
   }
 
   const actions = parseActions(input.rule.actions);
@@ -202,6 +208,7 @@ async function queueOrRunRule(input: {
       await markRun({
         ruleId: input.rule.id,
         bookingId: input.bookingId,
+        triggerVersion,
         status: "failed",
         error: result.error,
       });
@@ -212,6 +219,7 @@ async function queueOrRunRule(input: {
   await markRun({
     ruleId: input.rule.id,
     bookingId: input.bookingId,
+    triggerVersion,
     status: "completed",
   });
 }
@@ -248,6 +256,7 @@ export async function processDueAutomationRuns(): Promise<{ processed: number; f
       runId: automationRuns.id,
       bookingId: automationRuns.entityId,
       createdAt: automationRuns.createdAt,
+      triggerVersion: automationRuns.triggerVersion,
       ruleId: automationRules.id,
       delayMinutes: automationRules.delayMinutes,
       actions: automationRules.actions,
@@ -286,6 +295,7 @@ export async function processDueAutomationRuns(): Promise<{ processed: number; f
         await markRun({
           ruleId: run.ruleId,
           bookingId: run.bookingId,
+          triggerVersion: run.triggerVersion,
           status: "failed",
           error: result.error,
         });
@@ -298,6 +308,7 @@ export async function processDueAutomationRuns(): Promise<{ processed: number; f
       await markRun({
         ruleId: run.ruleId,
         bookingId: run.bookingId,
+        triggerVersion: run.triggerVersion,
         status: "completed",
       });
       processed++;

@@ -10,6 +10,12 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const retried = await retryDueWebhookDeliveries();
-  return NextResponse.json({ retried });
+  try {
+    const retried = await retryDueWebhookDeliveries();
+    return NextResponse.json({ retried });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("[cron/webhook-retries] unhandled error:", message, err);
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }
