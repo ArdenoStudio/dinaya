@@ -121,6 +121,9 @@ export function BookingPageThemeEditor({ business, onPreviewChange }: Props) {
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
 
+  const galleryImageCount = [heroBannerUrl.trim(), ...galleryRest].filter(Boolean).length;
+  const galleryAtLimit = galleryImageCount >= 12;
+
   const contrastWarning = accentContrastWarning(
     form.accentColor,
     form.bookingPanelBackground === "accent"
@@ -440,10 +443,10 @@ export function BookingPageThemeEditor({ business, onPreviewChange }: Props) {
         <div className="mt-3">
           <ImageUploadField
             label="Add gallery photo"
-            hint="Upload a photo for your portfolio gallery."
+            hint={`${galleryImageCount}/12 photos`}
             value=""
             onChange={(url) => {
-              if (!url || galleryRest.includes(url)) return;
+              if (!url || galleryRest.includes(url) || galleryAtLimit) return;
               setGalleryRest((prev) => [...prev, url]);
             }}
             kind="gallery"
