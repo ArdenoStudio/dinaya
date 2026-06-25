@@ -5,6 +5,8 @@ import {
   contrastRatio,
   normalizeAccentColor,
   resolveBookingTheme,
+  resolvePageBackgroundColor,
+  resolvePanelBackgroundColor,
   BOOKING_THEME_PRESETS,
 } from "@/lib/booking-theme";
 import { slugifyServiceName } from "@/lib/service-slug";
@@ -79,16 +81,33 @@ describe("booking-theme", () => {
     expect(salon.pageBackgroundColor).toBe("#fff6f8");
   });
 
-  it("resolves salon_vivid preset with accent wash background", () => {
+  it("resolves salon_vivid preset with layered pink page and panel backgrounds", () => {
     const vivid = BOOKING_THEME_PRESETS.salon_vivid;
     expect(vivid.pageBackground).toBe("accent");
+    expect(vivid.panelBackground).toBe("accent");
     const theme = resolveBookingTheme(
       { accentColor: vivid.accentColor, bookingThemePreset: "salon_vivid" },
       { canUseExtendedTheme: true },
     );
     const style = buildBookingThemeStyle(theme);
     expect(style["--booking-page-bg"]).not.toBe("#ffffff");
-    expect(style["--booking-page-bg"]).not.toBe("#fff6f8");
+    expect(style["--booking-page-bg"]).not.toBe(style["--booking-panel-bg"]);
+    expect(resolvePageBackgroundColor(theme)).toBe(style["--booking-page-bg"]);
+    expect(resolvePanelBackgroundColor(theme)).toBe(style["--booking-panel-bg"]);
+  });
+
+  it("keeps white panel when accent page uses accent wash only", () => {
+    const theme = resolveBookingTheme(
+      {
+        accentColor: "#ff6699",
+        bookingPageBackground: "accent",
+        bookingPanelBackground: "white",
+        bookingThemePreset: "custom",
+      },
+      { canUseExtendedTheme: true },
+    );
+    expect(resolvePanelBackgroundColor(theme)).toBe("#ffffff");
+    expect(resolvePageBackgroundColor(theme)).not.toBe("#ffffff");
   });
 
   it("resolves all theme presets with valid accent colors", () => {

@@ -17,6 +17,7 @@ export default async function BookingPageEditorRoute() {
       bookingHeroOverlay: businesses.bookingHeroOverlay,
       bookingHeroOverlayOpacity: businesses.bookingHeroOverlayOpacity,
       bookingThemePreset: businesses.bookingThemePreset,
+      bookingPanelBackground: businesses.bookingPanelBackground,
       customDomain: businesses.customDomain,
       customDomainVerified: businesses.customDomainVerified,
       description: businesses.description,

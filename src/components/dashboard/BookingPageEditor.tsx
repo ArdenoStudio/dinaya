@@ -10,6 +10,7 @@ type ThemeBusiness = {
   bookingHeroOverlay: string;
   bookingHeroOverlayOpacity: number;
   bookingThemePreset: string | null;
+  bookingPanelBackground: string;
   canUseBookingPageTheme: boolean;
   canCustomizeBookingPage: boolean;
   customDomain: string | null;

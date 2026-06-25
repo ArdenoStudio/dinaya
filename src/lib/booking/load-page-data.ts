@@ -65,6 +65,7 @@ async function loadBookingPageDataInner(slug: string, serviceSlug?: string) {
         ? {
             bookingPageBackground: businesses.bookingPageBackground,
             bookingPageBackgroundColor: businesses.bookingPageBackgroundColor,
+            bookingPanelBackground: businesses.bookingPanelBackground,
             bookingHeroOverlay: businesses.bookingHeroOverlay,
             bookingHeroOverlayOpacity: businesses.bookingHeroOverlayOpacity,
             bookingThemePreset: businesses.bookingThemePreset,
@@ -92,6 +93,9 @@ async function loadBookingPageDataInner(slug: string, serviceSlug?: string) {
         bookingPageBackgroundColor: includeBookingTheme
           ? (businessRow as { bookingPageBackgroundColor?: string | null }).bookingPageBackgroundColor ?? null
           : null,
+        bookingPanelBackground: includeBookingTheme
+          ? (businessRow as { bookingPanelBackground?: string | null }).bookingPanelBackground ?? "white"
+          : "white",
         bookingHeroOverlay: includeBookingTheme
           ? (businessRow as { bookingHeroOverlay?: string | null }).bookingHeroOverlay ?? "light"
           : "light",

@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export function BookingPageSkeleton() {
   return (
-    <div className="w-full overflow-hidden rounded-2xl border border-border/80 bg-card shadow-none dark:ring-1 dark:ring-white/10">
+    <div className="w-full overflow-hidden rounded-2xl border border-border/80 booking-panel-surface shadow-none dark:ring-1 dark:ring-white/10">
       <div className="relative">
         <Skeleton className="aspect-[16/7] w-full rounded-none md:rounded-t-2xl" />
         <div className="absolute inset-x-0 bottom-0 flex justify-center pb-4">

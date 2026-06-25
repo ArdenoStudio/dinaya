@@ -1,6 +1,7 @@
 import { z } from "@/lib/validation";
 
 export const bookingPageBackgroundSchema = z.enum(["white", "grouped", "custom", "accent"]);
+export const bookingPanelBackgroundSchema = z.enum(["white", "accent"]);
 export const bookingHeroOverlaySchema = z.enum(["light", "dark", "brand", "none"]);
 export const bookingThemePresetSchema = z.enum([
   "classic",
@@ -25,6 +26,7 @@ export const bookingThemeFieldsSchema = z.object({
     .regex(/^#[0-9a-fA-F]{6}$/, "Background color must be a hex value.")
     .optional()
     .nullable(),
+  bookingPanelBackground: bookingPanelBackgroundSchema.optional(),
   bookingHeroOverlay: bookingHeroOverlaySchema.optional(),
   bookingHeroOverlayOpacity: z.number().int().min(0).max(100).optional(),
   bookingThemePreset: bookingThemePresetSchema.optional().nullable(),

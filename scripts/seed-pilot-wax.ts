@@ -284,6 +284,7 @@ async function updateBusinessProfile(businessId: string) {
       accentColor: WAX_ACCENT_COLOR,
       bookingPageBackground: "accent",
       bookingPageBackgroundColor: null,
+      bookingPanelBackground: "accent",
       bookingHeroOverlay: "brand",
       bookingHeroOverlayOpacity: 55,
       bookingThemePreset: "salon_vivid",

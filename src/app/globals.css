@@ -163,6 +163,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
   [data-booking-theme] {
     --booking-accent: #2563eb;
     --booking-page-bg: #ffffff;
+    --booking-panel-bg: #ffffff;
     --booking-hero-overlay: #ffffff;
     --booking-hero-overlay-opacity: 0.6;
     --booking-accent-hover: color-mix(in srgb, var(--booking-accent) 88%, black);
@@ -212,6 +213,10 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
 
   .booking-page-bg {
     background-color: var(--booking-page-bg);
+  }
+
+  .booking-panel-surface {
+    background-color: var(--booking-panel-bg);
   }
 
   .booking-hero-overlay {
