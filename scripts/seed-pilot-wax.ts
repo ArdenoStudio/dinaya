@@ -36,10 +36,10 @@ const BUSINESS_NAME = "Wax in the City";
 /** Optional public HTTPS URLs — set WAX_LOGO_URL / WAX_BANNER_URL when seeding branding. */
 const WAX_LOGO_URL = process.env.WAX_LOGO_URL?.trim() || null;
 const WAX_BANNER_URL = process.env.WAX_BANNER_URL?.trim() || null;
-/** Pink from the Wax in the City brand mark (logo background). */
-export const WAX_ACCENT_COLOR = "#ff46a2";
-/** Soft blush page background — pairs with the salon preset. */
-export const WAX_PAGE_BACKGROUND_COLOR = "#fff6f8";
+/** Burgundy from the Wax in the City logo. */
+export const WAX_ACCENT_COLOR = "#451014";
+/** Warm off-white page background — pairs with the burgundy accent. */
+export const WAX_PAGE_BACKGROUND_COLOR = "#faf5f6";
 
 const BUSINESS_DESCRIPTION =
   "Ladies waxing and beauty studio in Colombo — root-clean hair removal, facials, Moroccan rituals, and HydraFacial treatments. Book online and pay your balance at the salon.";
