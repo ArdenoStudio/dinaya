@@ -14,8 +14,8 @@ const sizeClasses: Record<AvatarSize, { box: string; text: string; pixels: numbe
   sm: { box: "size-10", text: "text-sm", pixels: 40 },
   md: { box: "size-12", text: "text-base", pixels: 48 },
   lg: { box: "size-14", text: "text-lg", pixels: 56 },
-  hub: { box: "size-[4.5rem] md:size-20", text: "text-2xl", pixels: 80 },
-  hubHero: { box: "size-20 md:size-[4.5rem]", text: "text-xl", pixels: 80 },
+  hub: { box: "size-[5.5rem] md:size-24", text: "text-2xl", pixels: 96 },
+  hubHero: { box: "size-20 md:size-[5.5rem]", text: "text-xl", pixels: 88 },
 };
 
 interface BookingBusinessAvatarProps {
