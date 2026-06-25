@@ -51,7 +51,7 @@ export const BOOKING_THEME_PRESETS: Record<
     heroOverlayOpacity: 60,
   },
   salon: {
-    accentColor: "#ff6699",
+    accentColor: "#ff46a2",
     pageBackground: "custom",
     pageBackgroundColor: "#fff6f8",
     panelBackground: "white",
@@ -59,7 +59,7 @@ export const BOOKING_THEME_PRESETS: Record<
     heroOverlayOpacity: 55,
   },
   salon_vivid: {
-    accentColor: "#ff6699",
+    accentColor: "#ff46a2",
     pageBackground: "accent",
     pageBackgroundColor: null,
     panelBackground: "accent",

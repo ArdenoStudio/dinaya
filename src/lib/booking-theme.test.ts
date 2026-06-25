@@ -39,14 +39,14 @@ describe("booking-theme", () => {
   it("applies accent on all plans but gates extended theme on trial", () => {
     const trialTheme = resolveBookingTheme(
       {
-        accentColor: "#ff6699",
+        accentColor: "#ff46a2",
         bookingPageBackground: "grouped",
         bookingHeroOverlay: "brand",
         bookingHeroOverlayOpacity: 80,
       },
       { canUseExtendedTheme: false },
     );
-    expect(trialTheme.accentColor).toBe("#ff6699");
+    expect(trialTheme.accentColor).toBe("#ff46a2");
     expect(trialTheme.pageBackground).toBe("white");
     expect(trialTheme.heroOverlay).toBe("light");
   });
@@ -54,7 +54,7 @@ describe("booking-theme", () => {
   it("allows extended theme on pro", () => {
     const proTheme = resolveBookingTheme(
       {
-        accentColor: "#ff6699",
+        accentColor: "#ff46a2",
         bookingPageBackground: "custom",
         bookingPageBackgroundColor: "#fff6f8",
         bookingHeroOverlay: "brand",
@@ -76,7 +76,7 @@ describe("booking-theme", () => {
 
   it("resolves salon preset colors for Wax-style branding", () => {
     const salon = BOOKING_THEME_PRESETS.salon;
-    expect(salon.accentColor).toBe("#ff6699");
+    expect(salon.accentColor).toBe("#ff46a2");
     expect(salon.pageBackground).toBe("custom");
     expect(salon.pageBackgroundColor).toBe("#fff6f8");
   });
@@ -99,7 +99,7 @@ describe("booking-theme", () => {
   it("keeps white panel when accent page uses accent wash only", () => {
     const theme = resolveBookingTheme(
       {
-        accentColor: "#ff6699",
+        accentColor: "#ff46a2",
         bookingPageBackground: "accent",
         bookingPanelBackground: "white",
         bookingThemePreset: "custom",
