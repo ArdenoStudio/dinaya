@@ -15,6 +15,7 @@ import {
   date,
   smallint,
   uniqueIndex,
+  type AnyPgColumn,
 } from "drizzle-orm/pg-core";
 import { relations, sql } from "drizzle-orm";
 
@@ -153,7 +154,7 @@ export const businesses = pgTable("businesses", {
   directoryDistrict: varchar("directory_district", { length: 80 }),
   directoryCategory: varchar("directory_category", { length: 80 }),
   referralCode: varchar("referral_code", { length: 40 }),
-  referredByBusinessId: uuid("referred_by_business_id").references(() => businesses.id, {
+  referredByBusinessId: uuid("referred_by_business_id").references((): AnyPgColumn => businesses.id, {
     onDelete: "set null",
   }),
   onboardingCompletedAt: timestamp("onboarding_completed_at"),

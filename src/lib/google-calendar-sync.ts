@@ -74,6 +74,7 @@ export async function syncGoogleCalendarBookings(limit = 30): Promise<number> {
         .limit(limit);
 
       for (const booking of upcoming) {
+        if (!booking.serviceId || !booking.staffId) continue;
         const [service] = await db
           .select({ name: services.name })
           .from(services)

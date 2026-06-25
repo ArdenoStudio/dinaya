@@ -22,6 +22,7 @@ export default async function ClientBookingPage({ params }: Props) {
   const { token } = await params;
   const booking = await getClientBookingByToken(token);
   if (!booking) notFound();
+  if (!booking.serviceId || !booking.staffId) notFound();
 
   const timezone = booking.businessTimezone ?? "Asia/Colombo";
   const copy = getBookingCopy(booking.businessLanguage);

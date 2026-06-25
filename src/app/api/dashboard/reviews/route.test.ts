@@ -58,7 +58,7 @@ describe("GET /api/dashboard/reviews", () => {
 
   it("returns 402 when the reviews feature is not available", async () => {
     const { PlanRequiredError } = await import("@/lib/plan");
-    requireProMock.mockRejectedValue(new PlanRequiredError());
+    requireProMock.mockRejectedValue(new PlanRequiredError("biz_1", "reviews", "pro"));
 
     const req = new NextRequest("http://localhost/api/dashboard/reviews");
     const res = await GET(req);

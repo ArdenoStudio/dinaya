@@ -51,7 +51,7 @@ function makeWebhookRequest() {
 
   return {
     formData: vi.fn().mockResolvedValue(form),
-  } as Parameters<typeof POST>[0];
+  } as unknown as Parameters<typeof POST>[0];
 }
 
 describe("POST /api/webhooks/payhere-subscription", () => {

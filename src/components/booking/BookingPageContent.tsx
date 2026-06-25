@@ -246,7 +246,7 @@ export default async function BookingPageContent({
                     : "grid-cols-3"
               }`}
             >
-              {gallery.slice(0, 6).map((url, i) => (
+              {gallery.slice(0, 6).map((url: string, i: number) => (
                 <div
                   key={url}
                   className={`relative overflow-hidden bg-muted ${

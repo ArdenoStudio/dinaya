@@ -93,6 +93,10 @@ export async function getRescheduleSlots(input: {
     .limit(1);
 
   if (!booking) return null;
+  if (!booking.staffId) {
+    return { booking, slots: [], blockedReason: "This booking cannot be rescheduled." };
+  }
+  const staffId = booking.staffId;
 
   const modifyCheck = canModifyClientBooking({
     startsAt: booking.startsAt,
@@ -119,11 +123,11 @@ export async function getRescheduleSlots(input: {
   }
 
   const [staffAvailability, overrides, existingBookings] = await Promise.all([
-    db.select().from(availability).where(eq(availability.staffId, booking.staffId)),
+    db.select().from(availability).where(eq(availability.staffId, staffId)),
     db
       .select()
       .from(availabilityOverrides)
-      .where(and(eq(availabilityOverrides.staffId, booking.staffId), eq(availabilityOverrides.date, input.date))),
+      .where(and(eq(availabilityOverrides.staffId, staffId), eq(availabilityOverrides.date, input.date))),
     db
       .select({
         id: bookings.id,
@@ -133,7 +137,7 @@ export async function getRescheduleSlots(input: {
       })
       .from(bookings)
       .where(and(
-        eq(bookings.staffId, booking.staffId),
+        eq(bookings.staffId, staffId),
         ne(bookings.id, booking.id),
         inArray(bookings.status, ["pending", "confirmed"]),
         gte(bookings.startsAt, dayStartUtc),
@@ -209,6 +213,11 @@ export async function rescheduleBooking(input: {
     return { ok: false, error: "Booking not found.", status: 404 };
   }
 
+  if (!row.staffId) {
+    return { ok: false, error: "This booking is missing staff information.", status: 400 };
+  }
+  const staffId = row.staffId;
+
   if (row.status === "cancelled" || row.status === "completed" || row.status === "no_show") {
     return { ok: false, error: "This booking can no longer be changed.", status: 400 };
   }
@@ -235,7 +244,7 @@ export async function rescheduleBooking(input: {
   // reschedules by staff may move bookings freely.
   if (input.source === "client_portal") {
     const slotAvailable = await isRequestedSlotAvailable({
-      staffId: row.staffId,
+      staffId,
       start: input.startsAt,
       durationMinutes: row.durationMinutes,
       beforeBuffer: row.beforeBuffer,
@@ -252,7 +261,7 @@ export async function rescheduleBooking(input: {
     }
 
     const blockedByHold = await isSlotBlockedByReservation(
-      row.staffId,
+      staffId,
       input.startsAt,
       input.endsAt,
       input.sessionToken,
@@ -266,7 +275,7 @@ export async function rescheduleBooking(input: {
     .select({ id: bookings.id })
     .from(bookings)
     .where(and(
-      eq(bookings.staffId, row.staffId),
+      eq(bookings.staffId, staffId),
       ne(bookings.id, row.id),
       inArray(bookings.status, ["pending", "confirmed"]),
       lt(bookings.startsAt, input.endsAt),

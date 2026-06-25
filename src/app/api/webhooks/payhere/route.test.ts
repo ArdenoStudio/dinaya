@@ -141,7 +141,7 @@ describe("POST /api/webhooks/payhere", () => {
 
     const req = {
       formData: vi.fn().mockResolvedValue(new FormData()),
-    } as Parameters<typeof POST>[0];
+    } as unknown as Parameters<typeof POST>[0];
 
     const res = await POST(req);
     const body = await res.json();
@@ -166,7 +166,7 @@ describe("POST /api/webhooks/payhere", () => {
 
     const req = {
       formData: vi.fn().mockResolvedValue(new FormData()),
-    } as Parameters<typeof POST>[0];
+    } as unknown as Parameters<typeof POST>[0];
 
     const res = await POST(req);
     const body = await res.json();

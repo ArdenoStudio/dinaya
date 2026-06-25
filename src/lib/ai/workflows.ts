@@ -505,12 +505,12 @@ async function runUpsells(business: BusinessRow): Promise<WorkflowStats> {
     .limit(40);
 
   const eligibleRows = rows.filter(
-    (row) => !row.locationId || enabledIds.has(row.locationId),
+    (row) => row.serviceId && (!row.locationId || enabledIds.has(row.locationId)),
   );
   const results = await mapWithConcurrency(eligibleRows, 5, async (row) => {
     const recommendation = await getUpsellRecommendation({
       businessId: business.id,
-      serviceId: row.serviceId,
+      serviceId: row.serviceId!,
     });
     if (!recommendation) return null;
     return sendWorkflowMessage({

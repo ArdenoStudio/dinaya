@@ -219,11 +219,13 @@ export async function handleInboundWhatsApp(msg: InboundWhatsAppMessage): Promis
     .from(businesses)
     .where(eq(businesses.id, booking.businessId))
     .limit(1);
-  const [service] = await db
-    .select({ name: services.name })
-    .from(services)
-    .where(eq(services.id, booking.serviceId))
-    .limit(1);
+  const [service] = booking.serviceId
+    ? await db
+        .select({ name: services.name })
+        .from(services)
+        .where(eq(services.id, booking.serviceId))
+        .limit(1)
+    : [];
 
   const businessName = business?.name ?? "your provider";
   const serviceName = service?.name ?? "appointment";
