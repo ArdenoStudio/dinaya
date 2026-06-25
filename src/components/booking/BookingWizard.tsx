@@ -607,13 +607,7 @@ function BookingWizardInner({
 
   const breadcrumbBlock =
     showBreadcrumb ? (
-      <div
-        className={
-          centeredBookerLayout
-            ? "shrink-0 pt-2 md:pt-4"
-            : "mb-3 flex justify-start px-4 md:mb-4 md:px-0"
-        }
-      >
+      <div className="mb-3 flex justify-start px-4 md:mb-4 md:px-0">
         <BookingBreadcrumb items={breadcrumbItems} />
       </div>
     ) : null;
@@ -789,7 +783,7 @@ function BookingWizardInner({
 
   const brandingBlock =
     showBranding ? (
-      <div className="mt-3 flex justify-center px-4 md:mt-4 md:px-0">
+      <div className="mt-3 flex justify-center px-4 pb-[max(1rem,env(safe-area-inset-bottom))] md:mt-4 md:px-0">
         <BookingBranding copy={copy} hideBranding={business.hideBranding} />
       </div>
     ) : null;
@@ -799,11 +793,11 @@ function BookingWizardInner({
       <BookingTheme
         theme={theme}
         embed={embedMode}
-        className="flex min-h-0 w-full flex-1 flex-col"
+        className="w-full"
       >
         {breadcrumbBlock}
-        <div className="w-full pt-2 md:pt-4">{bookerCard}</div>
-        {showBranding ? brandingBlock : null}
+        {bookerCard}
+        {brandingBlock}
       </BookingTheme>
     );
   }
