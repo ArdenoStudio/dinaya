@@ -4,8 +4,8 @@ export function bookingLogoHasIntrinsicPadding(logoUrl: string): boolean {
   return /\.svg($|[?#])/i.test(lower) || lower.includes("dinaya-logo");
 }
 
-/** Zoom raster marks so the wordmark fills the circular frame. */
-export const BOOKING_LOGO_RASTER_SCALE = 1.38;
+/** Zoom raster marks on the large hub avatar so the wordmark fills the circle. */
+export const BOOKING_LOGO_RASTER_SCALE = 1.32;
 /** Extra zoom for SVG / padded canvas assets. */
 export const BOOKING_LOGO_PADDED_SCALE = 1.85;
 
