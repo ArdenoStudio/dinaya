@@ -15,6 +15,7 @@ import { BookingServicePrice } from "@/components/booking/BookingServicePrice";
 import { Icon } from "@/components/ui/Icon";
 import { Separator } from "@/components/ui/separator";
 import { BlurFade } from "@/components/ui/blur-fade";
+import { BookingBusinessAvatar } from "@/components/booking/BookingBusinessAvatar";
 import { BookingHubHeroImage } from "@/components/booking/BookingHubHeroImage";
 import { BookingHubCta } from "@/components/booking/BookingHubCta";
 import { BookingServiceSearch } from "@/components/booking/BookingServiceSearch";
@@ -56,43 +57,27 @@ interface Props {
   onSelectService?: (service: BookingService) => void;
 }
 
-function serviceInitial(name: string) {
-  return name.trim().charAt(0).toUpperCase() || "?";
-}
-
 function HubBusinessLogo({
   businessName,
   logoUrl,
+  variant = "header",
   className,
 }: {
   businessName: string;
   logoUrl?: string | null;
+  variant?: "header" | "hero";
   className?: string;
 }) {
   return (
-    <div
+    <BookingBusinessAvatar
+      name={businessName}
+      logoUrl={logoUrl}
+      size={variant === "hero" ? "hubHero" : "hub"}
       className={cn(
-        "flex size-[4.5rem] shrink-0 items-center justify-center overflow-hidden rounded-full border border-border/60 bg-muted/40 shadow-md ring-2 ring-card md:size-20",
-        logoUrl && "bg-card",
+        "border border-border/60 bg-card shadow-md ring-2 ring-card",
         className,
       )}
-      aria-hidden={logoUrl ? undefined : true}
-    >
-      {logoUrl ? (
-        <Image
-          src={logoUrl}
-          alt=""
-          width={72}
-          height={72}
-          className="size-full bg-white object-contain p-1"
-          unoptimized={!isOptimizableRemoteImage(logoUrl)}
-        />
-      ) : (
-        <span className="text-xl font-semibold text-[var(--booking-accent)] md:text-2xl">
-          {serviceInitial(businessName)}
-        </span>
-      )}
-    </div>
+    />
   );
 }
 
@@ -248,7 +233,11 @@ export default function BookingServiceHub({
             />
             <div className="pointer-events-none absolute inset-x-0 bottom-3 z-20 flex justify-center md:bottom-4">
               <div className="pointer-events-auto translate-y-1/3">
-                <HubBusinessLogo businessName={businessName} logoUrl={businessLogoUrl} />
+                <HubBusinessLogo
+                  businessName={businessName}
+                  logoUrl={businessLogoUrl}
+                  variant="hero"
+                />
               </div>
             </div>
           </div>
@@ -265,6 +254,7 @@ export default function BookingServiceHub({
             <HubBusinessLogo
               businessName={businessName}
               logoUrl={businessLogoUrl}
+              variant="header"
               className="mb-4 md:mb-5"
             />
           ) : null}
