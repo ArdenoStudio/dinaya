@@ -603,6 +603,8 @@ function BookingWizardInner({
       ? "staff"
       : "dateTime";
 
+  const accentPanel = theme.panelBackground === "accent";
+
   const breadcrumbBlock =
     showBreadcrumb ? (
       <div
@@ -718,10 +720,11 @@ function BookingWizardInner({
                 <BookingMainStepTransition stepKey={showContactForm ? "confirm" : "dateTime"}>
                 {canPickSlots ? (
                   showContactForm ? (
-                    <div className="px-5 py-5 md:px-6 lg:px-8 lg:py-6">
+                    <div className="px-4 py-4 md:px-6 lg:px-8 lg:py-6">
                       <StepConfirm
                         variant="inline"
                         formId="booking-contact-form"
+                        onAccentPanel={accentPanel}
                         state={state}
                         business={business}
                         copy={copy}
@@ -736,7 +739,7 @@ function BookingWizardInner({
                       />
                     </div>
                   ) : (
-                    <div className="lg:px-6">
+                    <div className="px-4 py-4 md:px-6 lg:px-8 lg:py-6">
                       <StepDateTime
                         businessId={business.id}
                         copy={copy}
@@ -799,10 +802,8 @@ function BookingWizardInner({
         className="flex min-h-0 w-full flex-1 flex-col"
       >
         {breadcrumbBlock}
-        <div className="flex min-h-0 flex-1 items-center justify-center overflow-y-auto pb-4 md:pb-6">
-          <div className="w-full">{bookerCard}</div>
-        </div>
-        {brandingBlock}
+        <div className="w-full pt-2 md:pt-4">{bookerCard}</div>
+        {showBranding ? brandingBlock : null}
       </BookingTheme>
     );
   }

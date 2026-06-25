@@ -187,7 +187,7 @@ export function BookingHubFlow({
         staffServiceMap={staffServiceMap}
         staffLocationMap={staffLocationMap}
         locations={locations}
-        showBranding={!bookerFocus}
+        showBranding={false}
         activeDeals={activeDeals}
         initialDealId={dealId ?? null}
         initialService={wizardService}
@@ -359,7 +359,7 @@ export function BookingHubFlow({
           {flowBody}
         </div>
         {!hideBranding ? (
-          <div className="flex shrink-0 justify-center px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-2">
+          <div className="flex shrink-0 justify-center px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3">
             <BookingBranding copy={copy} />
           </div>
         ) : null}
@@ -368,16 +368,22 @@ export function BookingHubFlow({
   }
 
   return (
-    <div
-      className={cn(
-        "w-full",
-        viewportCentered && "grid min-h-dvh w-full place-items-center px-4 py-6 md:px-6",
-        showHub && heroImageUrl && "mx-auto w-full max-w-full pt-0",
-      )}
-    >
-      <div className={cn("mx-auto w-full", layoutMaxWidth, viewportCentered && "justify-self-center")}>
+    <div className="flex min-h-dvh w-full flex-col">
+      <div
+        className={cn(
+          "mx-auto flex w-full flex-1 flex-col min-h-0 px-4 md:px-6",
+          layoutMaxWidth,
+          viewportCentered && !heroImageUrl && "justify-center py-6 md:py-10",
+          showHub && heroImageUrl && "pt-0",
+        )}
+      >
         {flowBody}
       </div>
+      {!hideBranding ? (
+        <div className="flex shrink-0 justify-center px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3">
+          <BookingBranding copy={copy} />
+        </div>
+      ) : null}
     </div>
   );
 }
