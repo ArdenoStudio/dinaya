@@ -12,7 +12,7 @@
   "app": {
     "withGlobalTauri": true,
     "security": {
-      "csp": null
+      "csp": "default-src 'self'; connect-src 'self' https://dinaya.lk https://*.dinaya.lk; img-src 'self' data: blob: https:; style-src 'self' 'unsafe-inline'"
     },
     "windows": [
       {

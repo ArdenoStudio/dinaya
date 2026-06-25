@@ -390,7 +390,7 @@ function loadFromDisk(): PlanConfig | null {
   try {
     const raw = readFileSync(CONFIG_FILE, "utf8");
     const parsed = JSON.parse(raw) as Partial<PlanConfig>;
-    if (!parsed.plans?.pro || !parsed.plans?.max) return null;
+    if (!parsed.plans?.starter || !parsed.plans?.pro || !parsed.plans?.max) return null;
     return mergePlanConfig(parsed);
   } catch {
     return null;
@@ -424,7 +424,7 @@ export async function getPlanConfigAsync(): Promise<PlanConfig> {
   try {
     const { getPlatformSetting } = await import("@/lib/platform-settings");
     const fromDb = await getPlatformSetting<Partial<PlanConfig>>("plan_config");
-    if (fromDb?.plans?.pro && fromDb?.plans?.max) {
+    if (fromDb?.plans?.starter && fromDb?.plans?.pro && fromDb?.plans?.max) {
       cached = mergePlanConfig(fromDb);
       return cached;
     }
@@ -510,7 +510,6 @@ export function resolveEffectivePlan(input: {
 
 const MAX_ONLY_FEATURES: readonly PlanFeature[] = [
   ...AI_FEATURES,
-  "aiDealSuggestions",
   "aiVoiceReceptionist",
   "publicBookingPageCustomization",
   "reviewReplies",
@@ -532,8 +531,10 @@ export function getEntitlements(plan: Plan): Entitlements {
 }
 
 /** Max inherits Pro operational entitlements at runtime. */
-export function getEffectiveEntitlements(plan: Plan): Entitlements {
-  const config = getPlanConfig();
+export function getEffectiveEntitlements(
+  plan: Plan,
+  config: PlanConfig = getPlanConfig()
+): Entitlements {
   if (plan === "max") {
     return {
       limits: config.plans.max.limits,
@@ -546,8 +547,12 @@ export function getEffectiveEntitlements(plan: Plan): Entitlements {
   return config.plans[plan];
 }
 
-export function canUseFeature(plan: Plan, feature: PlanFeature): boolean {
-  return getEffectiveEntitlements(plan).features[feature];
+export function canUseFeature(
+  plan: Plan,
+  feature: PlanFeature,
+  config: PlanConfig = getPlanConfig()
+): boolean {
+  return getEffectiveEntitlements(plan, config).features[feature];
 }
 
 export const TRIAL_ENTITLEMENTS = DEFAULT_TRIAL_ENTITLEMENTS;
@@ -650,10 +655,13 @@ export async function requirePro(
   businessId: string,
   feature: PlanFeature = "reports"
 ): Promise<void> {
-  const plan = await getBusinessPlan(businessId);
+  const [plan, config] = await Promise.all([
+    getBusinessPlan(businessId),
+    getPlanConfigAsync(),
+  ]);
   const requiredPlan = minimumPlanForFeature(feature);
 
-  if (!canUseFeature(plan, feature)) {
+  if (!canUseFeature(plan, feature, config)) {
     throw new PlanRequiredError(businessId, feature, requiredPlan);
   }
 }
@@ -663,8 +671,11 @@ export async function requirePlanLimit(
   limit: PlanLimit,
   currentCount: number
 ): Promise<void> {
-  const plan = await getBusinessPlan(businessId);
-  const max = getEffectiveEntitlements(plan).limits[limit];
+  const [plan, config] = await Promise.all([
+    getBusinessPlan(businessId),
+    getPlanConfigAsync(),
+  ]);
+  const max = getEffectiveEntitlements(plan, config).limits[limit];
 
   if (max !== null && currentCount >= max) {
     throw new PlanLimitError(limit, max);

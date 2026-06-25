@@ -22,7 +22,7 @@ vi.mock("@/db", () => ({
 }));
 
 vi.mock("@/lib/google-calendar", () => ({
-  GOOGLE_PROVIDER: "google",
+  GOOGLE_PROVIDER: "google_calendar",
   exchangeGoogleCode: exchangeGoogleCodeMock,
 }));
 

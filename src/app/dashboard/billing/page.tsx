@@ -280,7 +280,7 @@ export default async function BillingPage() {
             Cancel anytime. You&apos;ll keep {planDisplayName(plan)} features until the current period ends.
           </p>
           <div className="mt-4">
-            <CancelButton />
+            <CancelButton plan={plan} />
           </div>
         </section>
       )}

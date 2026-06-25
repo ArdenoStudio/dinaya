@@ -16,7 +16,7 @@ use tauri_plugin_notification::NotificationExt;
 const TRAY_ID: &str = "main_tray";
 const DESKTOP_KEY_SERVICE: &str = "DinayaDesktop";
 const DESKTOP_KEY_USERNAME: &str = "desktop_api_key";
-const DEFAULT_API_BASE_URL: &str = "https://dinaya-lk.vercel.app";
+const DEFAULT_API_BASE_URL: &str = "https://dinaya.lk";
 
 fn write_startup_log(message: &str) {
   if std::env::var("DINAYA_DESKTOP_STARTUP_LOG").ok().as_deref() != Some("1") {
@@ -589,8 +589,11 @@ pub async fn desktop_sync_run(
     .join("&");
 
   let token = load_desktop_key(&state)?;
-  let bootstrap = desktop_api_get("/api/v1/desktop/bootstrap", &token).await?;
-  let bookings = desktop_api_get(&format!("/api/v1/desktop/bookings?{}", query), &token).await?;
+  let bootstrap_request = desktop_api_get("/api/v1/desktop/bootstrap", &token);
+  let bookings_request = desktop_api_get(&format!("/api/v1/desktop/bookings?{}", query), &token);
+  let (bootstrap, bookings) = tokio::join!(bootstrap_request, bookings_request);
+  let bootstrap = bootstrap?;
+  let bookings = bookings?;
 
   if let Ok(mut active_business) = state.active_business.lock() {
     *active_business = bootstrap
