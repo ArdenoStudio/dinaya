@@ -9,6 +9,8 @@ coverage/
 playwright-report/
 test-results/
 blob-report/
+e2e/fixtures/personas.json
+e2e/fixtures/persona-journey-report.json
 
 # next.js
 .next/

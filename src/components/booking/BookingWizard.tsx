@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useReducedMotion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { format, parseISO } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
@@ -9,24 +10,35 @@ import type { IntakeQuestion } from "@/lib/intake";
 import type { BookingRouter } from "@/lib/booking-router";
 import StepService from "./StepService";
 import StepLocation from "./StepLocation";
+import StepStaff from "./StepStaff";
 import StepDateTime from "./StepDateTime";
 import StepConfirm from "./StepConfirm";
+import { resolveBookingTheme, type ResolvedBookingTheme } from "@/lib/booking-theme";
 import { BookingTheme } from "./BookingTheme";
-import { useBookingUrlState, useBookingUrlSync, useStripBookingContactFromUrl } from "./useBookingUrlState";
+import { useBookingUrlState, useBookingUrlSync, useStripBookingContactFromUrl, type BookingUrlState } from "./useBookingUrlState";
 import { useSlotHold } from "./useSlotHold";
-import { getBookingCopy } from "@/lib/i18n";
-import { getEligibleStaff, pickDefaultStaff } from "@/lib/booking-staff";
+import { getBookingCopy, formatBookingCopy } from "@/lib/i18n";
+import { getEligibleStaff, resolveBookingStaffSelection } from "@/lib/booking-staff";
 import { trackBookingStart } from "@/lib/analytics/gtag";
 import { ServiceMetaPanel } from "./ServiceMetaPanel";
 import { BookingWizardSkeleton } from "./BookingWizardSkeleton";
 import BookingBranding from "./BookingBranding";
 import { BookingChoiceSummary } from "./BookingChoiceSummary";
-import { BookingBackPill } from "./BookingBackPill";
+import { BookingBreadcrumb } from "./BookingBreadcrumb";
+import { BookingPanel } from "./BookingPanel";
+import { buildBookingBreadcrumbItems } from "./booking-breadcrumb";
+import { bookingPanelMotion } from "@/lib/booking/booking-motion";
+import {
+  BookingMainStepTransition,
+  BookingStepTransition,
+  type WizardStep,
+} from "./BookingStepTransition";
 import { BookingTeamSection } from "./BookingTeamSection";
 import { BookingAttributionCapture } from "./BookingAttributionCapture";
 import { BookingDealsSection } from "./BookingDealsSection";
 import type { DealListItem } from "@/lib/deals/queries";
 import { useBookingContactStorage } from "./useBookingContactStorage";
+import { useEmbedContactPrefill } from "./useEmbedContactPrefill";
 import {
   applyEmbedThemeFromQuery,
   createBookingCompletedEmbedEvent,
@@ -36,6 +48,8 @@ import {
   useGoogleCalendarOverlay,
   type CalendarOverlayConfig,
 } from "./useGoogleCalendarOverlay";
+import { shouldShowBookingContactForm } from "@/lib/booking/wizard-contact-step";
+import { useBookingInstantUrlSync } from "@/lib/booking/use-booking-instant-url-sync";
 
 const COLOMBO_TZ = "Asia/Colombo";
 
@@ -60,6 +74,12 @@ interface Props {
   businessDescription?: string | null;
   teamMembers?: Pick<Staff, "id" | "name" | "bio" | "avatarUrl">[];
   hubHref?: string | null;
+  onBackToHub?: () => void;
+  bookingTheme?: ResolvedBookingTheme;
+  /** Hub instant navigation — skip Suspense while search params hydrate. */
+  instantNav?: boolean;
+  /** Center the white card in the viewport; breadcrumb stays above. */
+  centeredBookerLayout?: boolean;
 }
 
 export type BookingBusiness = {
@@ -98,6 +118,8 @@ export type BookingService = {
   requiresPayment: boolean;
   depositPercent: number;
   intakeQuestions: IntakeQuestion[];
+  categoryId?: string | null;
+  categoryName?: string | null;
 };
 
 export type BookingState = {
@@ -116,6 +138,19 @@ export type BookingState = {
 };
 
 type SlotData = { startUtc: string; endUtc: string; label: string; staffId?: string };
+
+const EMPTY_BOOKING_URL_STATE = {};
+
+type BookingWizardInnerProps = Props & {
+  urlState: BookingUrlState;
+  setUrlParams: (updates: Partial<BookingUrlState>, options?: { replace?: boolean }) => void;
+};
+
+function BookingWizardWithUrl(props: Props) {
+  const { state: urlState, setParams } = useBookingUrlState();
+  useStripBookingContactFromUrl();
+  return <BookingWizardInner {...props} urlState={urlState} setUrlParams={setParams} instantNav={false} />;
+}
 
 function BookingWizardInner({
   business,
@@ -136,23 +171,39 @@ function BookingWizardInner({
   reviewCount,
   teamMembers = [],
   hubHref = null,
-}: Props) {
+  onBackToHub,
+  bookingTheme,
+  instantNav = false,
+  centeredBookerLayout = false,
+  urlState,
+  setUrlParams,
+}: BookingWizardInnerProps) {
+  const theme =
+    bookingTheme ??
+    resolveBookingTheme({
+      accentColor: business.accentColor,
+    });
   const copy = getBookingCopy(business.language);
   const router = useRouter();
   const timezone = business.timezone ?? COLOMBO_TZ;
-  const { state: urlState } = useBookingUrlState();
   const needsLocationPicker = locations.length > 1;
   const defaultLocation = locations.length === 1 ? locations[0]! : null;
   const todayStr = format(toZonedTime(new Date(), timezone), "yyyy-MM-dd");
 
   const [state, setState] = useState<BookingState>(() => {
     const preselected = initialService ?? null;
-    const preStaff = preselected
-      ? pickDefaultStaff(staff, staffServiceMap, preselected.id, staffLocationMap, defaultLocation?.id)
-      : null;
+    const staffSelection = preselected
+      ? resolveBookingStaffSelection(
+          staff,
+          staffServiceMap,
+          preselected.id,
+          staffLocationMap,
+          defaultLocation?.id,
+        )
+      : { staff: null as Staff | null, anyStaff: false, eligibleCount: 0 };
     const matchedStaff = urlState.staffId
-      ? staff.find((s) => s.id === urlState.staffId) ?? preStaff
-      : preStaff;
+      ? staff.find((s) => s.id === urlState.staffId) ?? staffSelection.staff
+      : staffSelection.staff;
 
     return {
       location: defaultLocation,
@@ -170,14 +221,23 @@ function BookingWizardInner({
     };
   });
 
-  const [selectedSlot, setSelectedSlot] = useState<SlotData | null>(() =>
-    urlState.slot ? { startUtc: urlState.slot, endUtc: "", label: "" } : null,
-  );
+  const [anyStaff, setAnyStaff] = useState(() => {
+    if (!initialService) return false;
+    const selection = resolveBookingStaffSelection(
+      staff,
+      staffServiceMap,
+      initialService.id,
+      staffLocationMap,
+      defaultLocation?.id,
+    );
+    return selection.anyStaff;
+  });
+
+  const [selectedSlot, setSelectedSlot] = useState<SlotData | null>(null);
   const [selectedDealId, setSelectedDealId] = useState<string | null>(
     initialDealId ?? urlState.dealId ?? null,
   );
 
-  const [anyStaff, setAnyStaff] = useState(false);
   const [calendarViewMonth, setCalendarViewMonth] = useState(() =>
     format(toZonedTime(new Date(), timezone), "yyyy-MM"),
   );
@@ -194,6 +254,10 @@ function BookingWizardInner({
     staffId: state.staff?.id ?? null,
     locationId: state.location?.id ?? null,
     enabled: true,
+    formatHoldLabel: (minutes, seconds) =>
+      formatBookingCopy(copy.slotHoldActive, {
+        time: `${minutes}:${String(seconds).padStart(2, "0")}`,
+      }),
   });
 
   useBookingUrlSync({
@@ -201,10 +265,28 @@ function BookingWizardInner({
     slotStartUtc: state.timeSlot,
     staffId: state.staff?.id ?? null,
     dealId: selectedDealId,
-    enabled: !embedMode,
+    enabled: !embedMode && !instantNav,
+    setParams: setUrlParams,
   });
 
-  useStripBookingContactFromUrl();
+  useBookingInstantUrlSync({
+    date: state.date,
+    slotStartUtc: state.timeSlot,
+    staffId: state.staff?.id ?? null,
+    dealId: selectedDealId,
+    enabled: instantNav && !embedMode,
+  });
+
+  const applyEmbedPrefill = useCallback((contact: { name?: string; email?: string; phone?: string }) => {
+    setState((s) => ({
+      ...s,
+      clientName: contact.name?.trim() || s.clientName,
+      clientEmail: contact.email?.trim() || s.clientEmail,
+      clientPhone: contact.phone?.trim() || s.clientPhone,
+    }));
+  }, []);
+
+  useEmbedContactPrefill(embedMode, applyEmbedPrefill);
 
   useEffect(() => {
     if (!embedMode) return;
@@ -264,6 +346,17 @@ function BookingWizardInner({
     return getEligibleStaff(staff, staffServiceMap, state.service.id, staffLocationMap, state.location?.id).length > 1;
   }, [state.service, state.location?.id, staff, staffServiceMap, staffLocationMap]);
 
+  const eligibleStaffCount = useMemo(() => {
+    if (!state.service) return 0;
+    return getEligibleStaff(
+      staff,
+      staffServiceMap,
+      state.service.id,
+      staffLocationMap,
+      state.location?.id,
+    ).length;
+  }, [state.service, state.location?.id, staff, staffServiceMap, staffLocationMap]);
+
   function update(partial: Partial<BookingState>) {
     setState((s) => ({ ...s, ...partial }));
   }
@@ -312,23 +405,29 @@ function BookingWizardInner({
         });
       });
     },
-    [slotHold, staff, state.staff],
+    [slotHold, staff, state.staff, setSelectedSlot, setAnyStaff],
   );
 
   const selectService = useCallback(
     (service: BookingService) => {
       markBookingStart(false, service.id);
-      const defaultStaff = pickDefaultStaff(staff, staffServiceMap, service.id, staffLocationMap, state.location?.id);
+      const staffSelection = resolveBookingStaffSelection(
+        staff,
+        staffServiceMap,
+        service.id,
+        staffLocationMap,
+        state.location?.id,
+      );
       update({
         service,
-        staff: defaultStaff,
+        staff: staffSelection.staff,
         date: todayStr,
         timeSlot: "",
         timeSlotEnd: "",
         timeLabel: "",
       });
       setSelectedSlot(null);
-      setAnyStaff(false);
+      setAnyStaff(staffSelection.anyStaff);
       void slotHold.releaseHold();
       setSelectedDealId(null);
     },
@@ -346,21 +445,30 @@ function BookingWizardInner({
       const eligibleStaff = service
         ? getEligibleStaff(staff, staffServiceMap, service.id, staffLocationMap, location?.id)
         : [];
-      const dealStaff = deal.staffId
-        ? eligibleStaff.find((member) => member.id === deal.staffId) ?? null
-        : pickDefaultStaff(staff, staffServiceMap, deal.serviceId, staffLocationMap, location?.id);
+      const staffSelection = deal.staffId
+        ? {
+            staff: eligibleStaff.find((member) => member.id === deal.staffId) ?? null,
+            anyStaff: false,
+          }
+        : resolveBookingStaffSelection(
+            staff,
+            staffServiceMap,
+            deal.serviceId,
+            staffLocationMap,
+            location?.id,
+          );
 
       update({
         location: location ?? null,
         service,
-        staff: dealStaff,
+        staff: staffSelection.staff,
         date: todayStr,
         timeSlot: "",
         timeSlotEnd: "",
         timeLabel: "",
       });
       setSelectedSlot(null);
-      setAnyStaff(false);
+      setAnyStaff(staffSelection.anyStaff);
       void slotHold.releaseHold();
     },
     [locations, services, staff, staffServiceMap, staffLocationMap, state.location, todayStr, slotHold, markBookingStart],
@@ -371,6 +479,12 @@ function BookingWizardInner({
     const deal = activeDeals.find((item) => item.id === initialDealId);
     if (deal) applyDeal(deal);
   }, [initialDealId, activeDeals, applyDeal]);
+
+  useEffect(() => {
+    if (!initialService || !lockServiceSelection) return;
+    if (state.service?.id === initialService.id) return;
+    selectService(initialService);
+  }, [initialService, lockServiceSelection, state.service?.id, selectService]);
 
   const clearSlot = useCallback(() => {
     update({ timeSlot: "", timeSlotEnd: "", timeLabel: "" });
@@ -386,91 +500,120 @@ function BookingWizardInner({
     void slotHold.releaseHold();
   }, [clearSlot, slotHold]);
 
-  const canPickSlots = Boolean(
-    state.service && (state.staff || anyStaff || !needsStaffPicker),
+  const clearStaffSelection = useCallback(() => {
+    clearSlot();
+    setAnyStaff(false);
+    update({ staff: null });
+  }, [clearSlot]);
+
+  useEffect(() => {
+    if (state.timeSlot && !state.timeLabel) {
+      clearSlot();
+    }
+  }, [state.timeSlot, state.timeLabel, clearSlot]);
+
+  const showContactForm = shouldShowBookingContactForm({
+    selectedSlot,
+    timeLabel: state.timeLabel,
+    staff: state.staff,
+    anyStaff,
+    needsLocationPicker,
+    location: state.location,
+  });
+
+  const showStaffStep = Boolean(
+    state.service &&
+      needsStaffPicker &&
+      !state.staff &&
+      !anyStaff &&
+      !showContactForm,
   );
 
-  const showContactForm = Boolean(
-    selectedSlot &&
-      state.timeLabel &&
-      (state.staff || anyStaff) &&
-      !slotHold.slotUnavailable &&
-      (!needsLocationPicker || state.location),
+  const canPickSlots = Boolean(
+    state.service &&
+      eligibleStaffCount > 0 &&
+      (state.staff || anyStaff || !needsStaffPicker),
   );
+
+  const staffSummaryLabel = anyStaff
+    ? copy.anyAvailableStaff
+    : state.staff && state.staff.name !== business.name
+      ? state.staff.name
+      : null;
 
   const metaPanelProps = {
     business,
     service: state.service,
     staff: state.staff,
     anyStaff,
-    allStaff: staff,
-    staffServiceMap,
-    staffLocationMap,
     locations,
     needsLocationPicker,
     selectedLocation: state.location,
     needsStaffPicker,
     selectedDate: state.date,
     timeLabel: state.timeLabel,
-    holdLabel: slotHold.holdLabel,
+    holdLabel: state.timeLabel ? slotHold.holdLabel : null,
     slotUnavailable: slotHold.slotUnavailable,
     selectedDeal,
     copy,
     lockServiceSelection,
     avgRating,
     reviewCount,
-    onSelectStaff: (s: Staff) => {
-      setAnyStaff(false);
-      clearSlot();
-      update({ staff: s });
-    },
-    onSelectAnyStaff: () => {
-      setAnyStaff(true);
-      clearSlot();
-      update({ staff: null });
-    },
+    onChangeStaff: needsStaffPicker && !showStaffStep ? clearStaffSelection : undefined,
     onSelectLocation: (location: Pick<Location, "id" | "name" | "address">) => {
       clearSlot();
+      setAnyStaff(false);
       update({ location, staff: null });
     },
     onChangeService: !lockServiceSelection && !hubHref ? clearService : undefined,
   };
 
-  const showBackPill =
+  const showBreadcrumb =
     !embedMode &&
     Boolean(state.service) &&
-    (Boolean(hubHref) || (!lockServiceSelection && services.length > 1));
+    (Boolean(hubHref) || Boolean(onBackToHub) || (!lockServiceSelection && services.length > 1));
 
-  const backPillLabel = showContactForm
-    ? copy.dateTime
-    : hubHref
-      ? copy.allServices
-      : copy.back;
-
-  const backPillHref = showContactForm ? undefined : hubHref ?? undefined;
-
-  const backPillOnClick = showContactForm
-    ? clearSlot
-    : !hubHref && !lockServiceSelection
-      ? clearService
-      : undefined;
+  const breadcrumbItems = state.service
+    ? buildBookingBreadcrumbItems({
+        copy,
+        service: state.service,
+        showContactForm,
+        showStaffStep,
+        needsStaffPicker,
+        hubHref,
+        onBackToHub,
+        lockServiceSelection,
+        multiService: services.length > 1,
+        onBackToServices: clearService,
+        onBackToStaff: clearStaffSelection,
+        onBackToDateTime: clearSlot,
+      })
+    : [];
 
   const choiceDateLabel = state.date
     ? format(parseISO(state.date + "T12:00:00"), "EEE d MMM")
     : null;
 
-  return (
-    <BookingTheme accentColor={business.accentColor} embed={embedMode}>
-      {showBackPill && (
-        <div className="mb-3 flex justify-start px-4 md:mb-4 md:px-0">
-          <BookingBackPill
-            label={backPillLabel}
-            href={backPillHref}
-            onClick={backPillOnClick}
-          />
-        </div>
-      )}
-      <div className="w-full min-w-0 max-w-full bg-card lg:overflow-visible lg:rounded-xl lg:border lg:border-border lg:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)] dark:lg:shadow-none dark:lg:ring-1 dark:lg:ring-white/10">
+  const reduceMotion = useReducedMotion() ?? false;
+  const panelMotion = bookingPanelMotion(reduceMotion, !instantNav);
+
+  const wizardStep: WizardStep = !state.service
+    ? "service"
+    : showStaffStep
+      ? "staff"
+      : "dateTime";
+
+  const accentPanel = theme.panelBackground === "accent";
+
+  const breadcrumbBlock =
+    showBreadcrumb ? (
+      <div className="mb-3 flex justify-start px-4 md:mb-4 md:px-0">
+        <BookingBreadcrumb items={breadcrumbItems} />
+      </div>
+    ) : null;
+
+  const bookerCard = (
+      <div className="w-full min-w-0 max-w-full booking-panel-surface rounded-none border-x-0 shadow-none lg:overflow-visible lg:rounded-xl lg:border lg:border-border lg:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)] dark:lg:shadow-none dark:lg:ring-1 dark:lg:ring-white/10">
         <BookingAttributionCapture businessId={business.id} />
         <BookingDealsSection
           deals={activeDeals}
@@ -479,6 +622,7 @@ function BookingWizardInner({
         />
 
         <div className="px-4 py-4 md:px-0 md:py-0">
+          <BookingStepTransition step={wizardStep}>
           {!state.service ? (
             <div className="mx-auto w-full max-w-lg">
               {needsLocationPicker && (
@@ -508,16 +652,49 @@ function BookingWizardInner({
                 onSelect={selectService}
               />
             </div>
-          ) : (
-            <div className="grid w-full min-w-0 max-w-full gap-0 lg:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] lg:items-start lg:divide-x lg:divide-border xl:grid-cols-[minmax(0,16rem)_minmax(0,1fr)]">
-              <div className="border-b border-border pb-4 lg:sticky lg:top-6 lg:self-start lg:border-0 lg:px-4 lg:pb-6 lg:pt-6 xl:px-5">
-                <ServiceMetaPanel {...metaPanelProps} />
+          ) : showStaffStep ? (
+            <>
+              <div className="border-b border-border py-3 lg:hidden">
+                <BookingChoiceSummary
+                  serviceName={state.service?.name}
+                  stepLabel={copy.chooseTeam}
+                />
               </div>
+              <StepStaff
+                service={state.service!}
+                allStaff={staff}
+                staffServiceMap={staffServiceMap}
+                staffLocationMap={staffLocationMap}
+                locationId={state.location?.id}
+                selected={state.staff}
+                anyStaffSelected={anyStaff}
+                copy={copy}
+                onSelect={(s) => {
+                  setAnyStaff(false);
+                  update({ staff: s });
+                }}
+                onSelectAny={() => {
+                  setAnyStaff(true);
+                  update({ staff: null });
+                }}
+              />
+            </>
+          ) : (
+            <div className="grid w-full min-w-0 max-w-full grid-cols-1 gap-0 lg:grid-cols-[minmax(14rem,16rem)_minmax(0,1fr)] lg:items-stretch lg:divide-x lg:divide-border xl:grid-cols-[minmax(15rem,17rem)_minmax(0,1fr)]">
+              <BookingPanel
+                area="meta"
+                className="border-b border-border pb-4 lg:sticky lg:top-0 lg:z-[1] lg:self-start lg:border-0 lg:px-5 lg:pb-6 lg:pt-6 xl:px-6"
+                {...panelMotion}
+              >
+                <ServiceMetaPanel {...metaPanelProps} />
+              </BookingPanel>
 
-              <div className="min-w-0 lg:py-6">
+              <BookingPanel area="main" className="relative z-0 min-w-0 lg:py-0" {...panelMotion}>
                 {state.service ? (
                   <div className="border-b border-border py-3 lg:hidden">
                     <BookingChoiceSummary
+                      serviceName={state.service?.name}
+                      staffLabel={staffSummaryLabel}
                       dateLabel={choiceDateLabel}
                       timeLabel={state.timeLabel || null}
                       stepLabel={
@@ -527,59 +704,73 @@ function BookingWizardInner({
                             ? copy.details
                             : copy.pickDateTime
                       }
+                      holdLabel={state.timeLabel ? slotHold.holdLabel : null}
+                      slotUnavailable={slotHold.slotUnavailable}
+                      slotTaken={copy.slotTaken}
+                      slotTakenAction={copy.slotTakenAction}
                     />
                   </div>
                 ) : null}
+                <BookingMainStepTransition stepKey={showContactForm ? "confirm" : "dateTime"}>
                 {canPickSlots ? (
                   showContactForm ? (
-                    <div className="md:px-6 lg:px-8">
+                    <div className="px-4 py-4 md:px-6 lg:px-8 lg:py-6">
                       <StepConfirm
                         variant="inline"
                         formId="booking-contact-form"
+                        onAccentPanel={accentPanel}
                         state={state}
                         business={business}
                         copy={copy}
                         selectedDeal={selectedDeal}
                         sessionToken={slotHold.sessionToken}
+                        slotUnavailable={slotHold.slotUnavailable}
                         onUpdate={update}
                         onBack={clearSlot}
                         onConfirmed={handleConfirmed}
-                        hideInlineBack={showBackPill}
+                        hideInlineBack={showBreadcrumb}
+                        hideDetailsHeading={showBreadcrumb}
                       />
                     </div>
                   ) : (
-                    <StepDateTime
-                      businessId={business.id}
-                      copy={copy}
-                      service={state.service}
-                      staff={state.staff}
-                      anyStaff={anyStaff}
-                      locationId={state.location?.id}
-                      timezone={timezone}
-                      selectedDate={state.date}
-                      selectedSlot={selectedSlot}
-                      dealId={selectedDealId}
-                      holdLabel={slotHold.holdLabel}
-                      slotUnavailable={slotHold.slotUnavailable}
-                      onDateChange={(date) => {
-                        clearSlot();
-                        update({ date });
-                      }}
-                      onSlotSelect={selectSlot}
-                      onCalendarMonthChange={setCalendarViewMonth}
-                      calendarOverlay={calendarOverlay}
-                      hideHeading
-                    />
+                    <div className="px-4 py-4 md:px-6 lg:px-8 lg:py-6">
+                      <StepDateTime
+                        businessId={business.id}
+                        copy={copy}
+                        service={state.service}
+                        staff={state.staff}
+                        anyStaff={anyStaff}
+                        locationId={state.location?.id}
+                        timezone={timezone}
+                        selectedDate={state.date}
+                        selectedSlot={selectedSlot}
+                        dealId={selectedDealId}
+                        holdLabel={state.timeLabel ? slotHold.holdLabel : null}
+                        slotUnavailable={slotHold.slotUnavailable}
+                        onDateChange={(date) => {
+                          clearSlot();
+                          update({ date });
+                        }}
+                        onSlotSelect={selectSlot}
+                        onCalendarMonthChange={setCalendarViewMonth}
+                        calendarOverlay={calendarOverlay}
+                        hideHeading
+                      />
+                    </div>
                   )
                 ) : (
-                  <p className="py-12 text-center text-sm text-amber-600">{copy.noStaff}</p>
+                  <p className="px-4 py-12 text-center text-sm text-amber-600 md:px-6 lg:px-8">
+                    {eligibleStaffCount === 0 ? copy.noStaff : copy.chooseTeamToSeeTimes}
+                  </p>
                 )}
-              </div>
+                </BookingMainStepTransition>
+              </BookingPanel>
             </div>
           )}
+          </BookingStepTransition>
         </div>
 
-        {state.service && teamMembers.length > 0 && !embedMode && !hubHref && (
+        {state.service && teamMembers.length > 0 && !embedMode && !hubHref && !onBackToHub && !showStaffStep && (
           <BookingTeamSection
             members={teamMembers}
             copy={copy}
@@ -588,20 +779,52 @@ function BookingWizardInner({
           />
         )}
       </div>
+  );
 
-      {showBranding && (
-        <div className="mt-3 flex justify-center px-4 md:mt-4 md:px-0">
-          <BookingBranding copy={copy} hideBranding={business.hideBranding} />
-        </div>
-      )}
+  const brandingBlock =
+    showBranding ? (
+      <div className="mt-3 flex justify-center px-4 pb-[max(1rem,env(safe-area-inset-bottom))] md:mt-4 md:px-0">
+        <BookingBranding copy={copy} hideBranding={business.hideBranding} />
+      </div>
+    ) : null;
+
+  if (centeredBookerLayout) {
+    return (
+      <BookingTheme
+        theme={theme}
+        embed={embedMode}
+        className="w-full"
+      >
+        {breadcrumbBlock}
+        {bookerCard}
+        {brandingBlock}
+      </BookingTheme>
+    );
+  }
+
+  return (
+    <BookingTheme theme={theme} embed={embedMode}>
+      {breadcrumbBlock}
+      {bookerCard}
+      {brandingBlock}
     </BookingTheme>
   );
 }
 
 export default function BookingWizard(props: Props) {
+  if (props.instantNav) {
+    return (
+      <BookingWizardInner
+        {...props}
+        urlState={EMPTY_BOOKING_URL_STATE}
+        setUrlParams={() => {}}
+      />
+    );
+  }
+
   return (
     <Suspense fallback={<BookingWizardSkeleton />}>
-      <BookingWizardInner {...props} />
+      <BookingWizardWithUrl {...props} />
     </Suspense>
   );
 }

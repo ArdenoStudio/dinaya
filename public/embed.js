@@ -14,27 +14,49 @@
       url.searchParams.set("parentOrigin", window.location.origin);
     }
     if (config.service) url.searchParams.set("service", config.service);
-    if (config.name) url.searchParams.set("name", config.name);
-    if (config.email) url.searchParams.set("email", config.email);
-    if (config.phone) url.searchParams.set("phone", config.phone);
     if (config.hideGallery) url.searchParams.set("hideGallery", "1");
     if (config.hideGallery === false) url.searchParams.set("hideGallery", "0");
     if (config.embedAccent) url.searchParams.set("embedAccent", config.embedAccent);
     return url.toString();
   }
 
-  function attachEmbedListener(iframe) {
-    var allowedOrigin = "";
+  function embedTargetOrigin(iframe) {
     try {
-      allowedOrigin = new URL(iframe.src).origin;
+      return new URL(iframe.src).origin;
     } catch (e) {
-      return;
+      return "";
     }
+  }
+
+  function sendEmbedPrefill(iframe, config) {
+    if (!config || (!config.name && !config.email && !config.phone)) return;
+    var targetOrigin = embedTargetOrigin(iframe);
+    if (!targetOrigin || !iframe.contentWindow) return;
+    iframe.contentWindow.postMessage(
+      {
+        type: "dinaya:prefill",
+        contact: {
+          name: config.name || undefined,
+          email: config.email || undefined,
+          phone: config.phone || undefined,
+        },
+      },
+      targetOrigin,
+    );
+  }
+
+  function attachEmbedListener(iframe, config) {
+    var allowedOrigin = embedTargetOrigin(iframe);
+    if (!allowedOrigin) return;
 
     window.addEventListener("message", function (event) {
       if (event.origin !== allowedOrigin) return;
       if (event.source !== iframe.contentWindow) return;
       if (!event.data || typeof event.data.type !== "string") return;
+      if (event.data.type === "dinaya:ready") {
+        sendEmbedPrefill(iframe, config || {});
+        return;
+      }
       if (event.data.type === "dinaya:resize") {
         if (typeof event.data.height !== "number") return;
         iframe.style.height = Math.max(480, event.data.height) + "px";
@@ -63,10 +85,11 @@
       if (!el) return;
       skeleton(el);
       var iframe = document.createElement("iframe");
-      iframe.src = buildEmbedUrl(opts.slug, opts.config || {});
+      var config = opts.config || {};
+      iframe.src = buildEmbedUrl(opts.slug, config);
       iframe.title = "Book appointment";
       iframe.style.cssText = "width:100%;height:" + (opts.height || 720) + "px;border:0;border-radius:16px";
-      attachEmbedListener(iframe);
+      attachEmbedListener(iframe, config);
       iframe.onload = function () {
         el.innerHTML = "";
         el.appendChild(iframe);
@@ -79,10 +102,11 @@
       var panel = document.createElement("div");
       panel.style.cssText = "width:100%;max-width:920px;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.2)";
       var iframe = document.createElement("iframe");
-      iframe.src = buildEmbedUrl(opts.slug, opts.config || {});
+      var config = opts.config || {};
+      iframe.src = buildEmbedUrl(opts.slug, config);
       iframe.title = "Book appointment";
       iframe.style.cssText = "width:100%;height:min(82vh,760px);border:0;display:block";
-      attachEmbedListener(iframe);
+      attachEmbedListener(iframe, config);
       panel.appendChild(iframe);
       overlay.appendChild(panel);
       overlay.addEventListener("click", function (e) {

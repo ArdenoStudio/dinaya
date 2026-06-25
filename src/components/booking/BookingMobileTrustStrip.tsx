@@ -1,19 +1,7 @@
 import { Icon } from "@/components/ui/Icon";
 import { Card, CardContent } from "@/components/ui/card";
-
-function StarRating({ rating }: { rating: number }) {
-  return (
-    <span className="inline-flex items-center gap-0.5">
-      {[1, 2, 3, 4, 5].map((n) => (
-        <Icon
-          key={n}
-          name={n <= Math.round(rating) ? "star-fill" : "star"}
-          className={`text-xs ${n <= Math.round(rating) ? "text-amber-400" : "text-muted-foreground/40"}`}
-        />
-      ))}
-    </span>
-  );
-}
+import { BusinessRating } from "@/components/booking/BusinessRating";
+import type { BookingCopy } from "@/lib/i18n";
 
 type Props = {
   description?: string | null;
@@ -21,6 +9,7 @@ type Props = {
   reviewCount: number;
   cancellationPolicy?: string | null;
   securedLabel: string;
+  copy: BookingCopy;
 };
 
 export default function BookingMobileTrustStrip({
@@ -29,6 +18,7 @@ export default function BookingMobileTrustStrip({
   reviewCount,
   cancellationPolicy,
   securedLabel,
+  copy,
 }: Props) {
   const hasRating = avgRating !== null && reviewCount > 0;
   const hasContent = hasRating || description || cancellationPolicy;
@@ -38,12 +28,14 @@ export default function BookingMobileTrustStrip({
     <Card className="mx-0 rounded-none border-x-0 border-t-0 shadow-none md:hidden">
       <CardContent className="px-4 py-3.5">
         {hasRating && (
-          <div className="mb-2 flex items-center gap-2">
-            <StarRating rating={avgRating} />
-            <span className="text-sm font-semibold text-foreground">{avgRating.toFixed(1)}</span>
-            <span className="text-xs text-muted-foreground">
-              ({reviewCount} review{reviewCount !== 1 ? "s" : ""})
-            </span>
+          <div className="mb-2">
+            <BusinessRating
+              avgRating={avgRating}
+              reviewCount={reviewCount}
+              copy={copy}
+              size="sm"
+              scrollToReviews
+            />
           </div>
         )}
         {description && (

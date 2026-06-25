@@ -20,7 +20,7 @@ export function LegalArticle({ title, current, children }: LegalArticleProps) {
   return (
     <article
       className={[
-        "max-w-none text-sm leading-relaxed text-gray-700 dark:text-gray-300",
+        "max-w-none text-base leading-relaxed text-gray-700 dark:text-gray-300",
         "[&_h1]:font-cal [&_h1]:text-3xl [&_h1]:tracking-tight [&_h1]:text-gray-900 dark:text-gray-100 [&_h1]:mb-2",
         "[&_h2]:font-cal [&_h2]:text-lg [&_h2]:tracking-tight [&_h2]:text-gray-900 dark:text-gray-100 [&_h2]:mt-10 [&_h2]:mb-3",
         "[&_p]:mb-4 [&_p:last-child]:mb-0",

@@ -173,6 +173,19 @@ pub struct DesktopLoginRequest {
   pub password: String,
 }
 
+#[derive(serde::Deserialize, serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DesktopRegisterRequest {
+  pub business_name: String,
+  pub business_type: String,
+  pub device_name: String,
+  pub email: String,
+  pub language: String,
+  pub name: String,
+  pub password: String,
+  pub slug: String,
+}
+
 #[derive(serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DesktopApiRequest {
@@ -453,6 +466,46 @@ pub async fn desktop_auth_login(
     .get("desktopKey")
     .and_then(|value| value.as_str())
     .ok_or_else(|| "Desktop login did not return a key.".to_string())?
+    .to_string();
+  persist_desktop_key(&key)?;
+  if let Ok(mut desktop_key) = state.desktop_key.lock() {
+    *desktop_key = Some(key);
+  }
+
+  if let Some(object) = response.as_object_mut() {
+    object.remove("desktopKey");
+  }
+
+  if let Ok(mut auth_status) = state.auth_status.lock() {
+    *auth_status = "authenticated".to_string();
+  }
+  if let Ok(mut active_business) = state.active_business.lock() {
+    *active_business = response
+      .get("business")
+      .and_then(|value| value.get("id"))
+      .and_then(|value| value.as_str())
+      .map(|value| value.to_string());
+  }
+
+  Ok(response)
+}
+
+#[tauri::command]
+pub async fn desktop_auth_register(
+  state: State<'_, DesktopRuntimeState>,
+  payload: DesktopRegisterRequest,
+) -> Result<serde_json::Value, String> {
+  let mut response = desktop_api_post(
+    "/api/v1/desktop/auth/register",
+    serde_json::to_value(payload).map_err(|err| err.to_string())?,
+    None,
+  )
+  .await?;
+
+  let key = response
+    .get("desktopKey")
+    .and_then(|value| value.as_str())
+    .ok_or_else(|| "Desktop registration did not return a key.".to_string())?
     .to_string();
   persist_desktop_key(&key)?;
   if let Ok(mut desktop_key) = state.desktop_key.lock() {

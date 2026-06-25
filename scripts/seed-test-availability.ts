@@ -72,6 +72,7 @@ async function main() {
   console.log(
     `Done — ${business.name} (${business.slug}) has Mon–Sat 09:00–17:00 availability and 0h minimum notice for testing.`,
   );
+  process.exit(0);
 }
 
 main().catch((error) => {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
+import { cn } from "@/lib/utils";
 import type { BookingCopy } from "@/lib/i18n";
 import type { PublicReview, ReviewDistribution } from "@/lib/reviews-public";
 import { Icon } from "@/components/ui/Icon";
@@ -9,6 +10,11 @@ import { BlurFade } from "@/components/ui/blur-fade";
 import { NumberTicker } from "@/components/ui/number-ticker";
 import { ReviewRatingSummary, type StarFilter } from "./ReviewRatingSummary";
 import { StarRating } from "./StarRating";
+<<<<<<< HEAD
+import { BOOKING_REVIEWS_SECTION_ID } from "./BusinessRating";
+=======
+import { BusinessRating } from "./BusinessRating";
+>>>>>>> master
 
 const PAGE_SIZE = 20;
 
@@ -24,6 +30,7 @@ interface Props {
   copy: BookingCopy;
   className?: string;
   id?: string;
+  variant?: "pill" | "rating";
 }
 
 function formatReviewDate(iso: string) {
@@ -53,6 +60,7 @@ export function BookingReviewsSection({
   copy,
   className,
   id,
+  variant = "pill",
 }: Props) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [reviews, setReviews] = useState(initialReviews);
@@ -106,12 +114,60 @@ export function BookingReviewsSection({
   }
 
   return (
+<<<<<<< HEAD
+    <div id={BOOKING_REVIEWS_SECTION_ID} className={className}>
+      <button
+        type="button"
+        data-reviews-trigger
+        onClick={openDialog}
+        className="group mx-auto flex items-center gap-2 rounded-full border border-border/60 bg-card/60 px-4 py-2 text-xs text-muted-foreground transition-colors hover:border-border hover:bg-card hover:text-foreground"
+      >
+        <span className="inline-flex items-center gap-1">
+          <span className="text-amber-500" aria-hidden>
+            ★
+          </span>
+          <span className="tabular-nums text-foreground">{avgRating.toFixed(1)}</span>
+          <span className="text-muted-foreground/50" aria-hidden>
+            ·
+          </span>
+          <span className="font-medium">{copy.readReviews}</span>
+          <span className="tabular-nums">({reviewCount.toLocaleString()})</span>
+        </span>
+        <Icon name="chevron-right" className="text-xs opacity-50 transition-transform group-hover:translate-x-0.5" />
+      </button>
+=======
     <BlurFade inView className={className}>
-      <div id={id} className="mx-auto flex w-full max-w-3xl justify-center px-4">
+      <div
+        id={id}
+        className={cn(
+          "mx-auto flex w-full max-w-3xl",
+          variant === "rating" ? "justify-center px-0" : "justify-center px-4",
+        )}
+      >
+        {variant === "rating" ? (
+          <button
+            type="button"
+            onClick={openDialog}
+            className="group inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 py-1.5 transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--booking-accent-soft)]"
+            aria-label={copy.readReviews}
+          >
+            <BusinessRating
+              avgRating={avgRating}
+              reviewCount={reviewCount}
+              copy={copy}
+              size="sm"
+              compactAttribution
+            />
+            <Icon
+              name="chevron-right"
+              className="text-xs text-muted-foreground opacity-60 transition-transform duration-200 ease-out group-hover:translate-x-0.5"
+            />
+          </button>
+        ) : (
         <button
           type="button"
           onClick={openDialog}
-          className="group flex min-h-11 items-center gap-3 rounded-full border border-border/70 bg-card/80 px-4 py-2.5 text-sm text-muted-foreground shadow-sm backdrop-blur-sm transition-[background-color,border-color,transform,box-shadow] duration-200 ease-out hover:border-border hover:bg-card hover:text-foreground hover:shadow active:scale-[0.99]"
+            className="group flex min-h-11 items-center gap-3 rounded-full border border-border/70 bg-card px-4 py-2.5 text-sm text-muted-foreground shadow-sm transition-[background-color,border-color,transform,box-shadow] duration-200 ease-out hover:border-border hover:bg-muted/50 hover:text-foreground hover:shadow active:scale-[0.96] motion-reduce:active:scale-100"
         >
           <span className="flex items-center gap-2">
             <StarRating rating={avgRating} size="sm" />
@@ -139,7 +195,9 @@ export function BookingReviewsSection({
             className="text-xs opacity-50 transition-transform duration-200 ease-out group-hover:translate-x-0.5"
           />
         </button>
+        )}
       </div>
+>>>>>>> master
 
       <dialog
         ref={dialogRef}

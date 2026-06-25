@@ -3,6 +3,7 @@ import {
   isValidEmail,
   isValidPhone,
   validateConfirmFields,
+  firstConfirmFieldId,
 } from "@/components/booking/booking-confirm-validation";
 
 const messages = {
@@ -38,6 +39,21 @@ describe("booking confirm validation", () => {
     expect(result.valid).toBe(false);
     expect(result.errors.clientEmail).toBe("Email invalid");
     expect(result.errors.intake?.q1).toBe("Required: Symptoms");
+  });
+
+  it("returns first invalid field id for focus management", () => {
+    expect(
+      firstConfirmFieldId(
+        { clientPhone: "Phone required" },
+        [],
+      ),
+    ).toBe("clientPhone");
+    expect(
+      firstConfirmFieldId(
+        { intake: { q1: "Required" } },
+        [{ id: "q1", label: "Symptoms", type: "text", required: true }],
+      ),
+    ).toBe("intake-q1");
   });
 });
 

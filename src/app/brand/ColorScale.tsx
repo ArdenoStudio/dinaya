@@ -27,7 +27,7 @@ function SwatchItem({ swatch }: { swatch: Swatch }) {
         {swatch.hex.toUpperCase()}
       </p>
       <span
-        className={`inline-block w-fit text-[11px] font-medium px-2.5 py-1 rounded-full transition-all
+        className={`inline-block w-fit text-[11px] font-medium px-2.5 py-1 rounded-full transition-[opacity,transform] duration-150 ease-out
           ${copied
             ? "bg-black text-white opacity-100"
             : "bg-black text-white opacity-0 group-hover:opacity-100"

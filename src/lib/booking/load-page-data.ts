@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { db } from "@/db";
-import { businesses, services, staff, staffServices, reviews } from "@/db/schema";
+import { businesses, services, staff, staffServices, reviews, serviceCategories } from "@/db/schema";
 import { listActiveLocations, getStaffLocationMap, ensureBusinessHasDefaultLocation } from "@/lib/locations";
 import { eq, and, avg, count } from "drizzle-orm";
 import { canUseFeature, resolveEffectivePlan } from "@/lib/plan";
@@ -10,18 +10,24 @@ import { backfillServiceSlugsForBusiness } from "@/lib/slot-reservations";
 import { resolveServiceSlug } from "@/lib/service-slug";
 import { getReviewDistribution } from "@/lib/reviews-public";
 import { hasPublicColumn, withTransientDbRetry } from "@/lib/dashboard/db-compat";
+import { loadBookingPageDataViaSupabase } from "@/lib/booking/load-page-data-rest";
+import { canUseSupabaseRestDataSource } from "@/lib/supabase-server";
 
 export type BookingPageData = NonNullable<Awaited<ReturnType<typeof loadBookingPageData>>>;
 
 export async function loadBookingPageData(slug: string, serviceSlug?: string) {
+  if (canUseSupabaseRestDataSource()) {
+    return loadBookingPageDataViaSupabase(slug, serviceSlug);
+  }
   return withTransientDbRetry(() => loadBookingPageDataInner(slug, serviceSlug));
 }
 
 async function loadBookingPageDataInner(slug: string, serviceSlug?: string) {
-  const [includePaypal, includeAccentColor, includeBookingRouter, includeServiceSlug, includeServiceImage] =
+  const [includePaypal, includeAccentColor, includeBookingTheme, includeBookingRouter, includeServiceSlug, includeServiceImage] =
     await Promise.all([
       hasPublicColumn("businesses", "paypal_enabled"),
       hasPublicColumn("businesses", "accent_color"),
+      hasPublicColumn("businesses", "booking_page_background"),
       hasPublicColumn("businesses", "booking_router"),
       hasPublicColumn("services", "slug"),
       hasPublicColumn("services", "image_url"),
@@ -55,6 +61,16 @@ async function loadBookingPageDataInner(slug: string, serviceSlug?: string) {
       websiteUrl: businesses.websiteUrl,
       hideDinayaBranding: businesses.hideDinayaBranding,
       ...(includeAccentColor ? { accentColor: businesses.accentColor } : {}),
+      ...(includeBookingTheme
+        ? {
+            bookingPageBackground: businesses.bookingPageBackground,
+            bookingPageBackgroundColor: businesses.bookingPageBackgroundColor,
+            bookingPanelBackground: businesses.bookingPanelBackground,
+            bookingHeroOverlay: businesses.bookingHeroOverlay,
+            bookingHeroOverlayOpacity: businesses.bookingHeroOverlayOpacity,
+            bookingThemePreset: businesses.bookingThemePreset,
+          }
+        : {}),
       customDomain: businesses.customDomain,
       customDomainVerified: businesses.customDomainVerified,
     })
@@ -70,6 +86,24 @@ async function loadBookingPageDataInner(slug: string, serviceSlug?: string) {
           : null,
         accentColor: includeAccentColor
           ? (businessRow as { accentColor?: string | null }).accentColor ?? null
+          : null,
+        bookingPageBackground: includeBookingTheme
+          ? (businessRow as { bookingPageBackground?: string | null }).bookingPageBackground ?? "white"
+          : "white",
+        bookingPageBackgroundColor: includeBookingTheme
+          ? (businessRow as { bookingPageBackgroundColor?: string | null }).bookingPageBackgroundColor ?? null
+          : null,
+        bookingPanelBackground: includeBookingTheme
+          ? (businessRow as { bookingPanelBackground?: string | null }).bookingPanelBackground ?? "white"
+          : "white",
+        bookingHeroOverlay: includeBookingTheme
+          ? (businessRow as { bookingHeroOverlay?: string | null }).bookingHeroOverlay ?? "light"
+          : "light",
+        bookingHeroOverlayOpacity: includeBookingTheme
+          ? (businessRow as { bookingHeroOverlayOpacity?: number | null }).bookingHeroOverlayOpacity ?? 60
+          : 60,
+        bookingThemePreset: includeBookingTheme
+          ? (businessRow as { bookingThemePreset?: string | null }).bookingThemePreset ?? null
           : null,
         paypalEnabled: includePaypal
           ? Boolean((businessRow as { paypalEnabled?: boolean }).paypalEnabled)
@@ -119,8 +153,11 @@ async function loadBookingPageDataInner(slug: string, serviceSlug?: string) {
           maximumAdvanceDays: services.maximumAdvanceDays,
           intakeQuestions: services.intakeQuestions,
           createdAt: services.createdAt,
+          categoryId: services.categoryId,
+          categoryName: serviceCategories.name,
         })
         .from(services)
+        .leftJoin(serviceCategories, eq(services.categoryId, serviceCategories.id))
         .where(and(eq(services.businessId, business.id), eq(services.isActive, true))),
       db.select().from(staff).where(and(eq(staff.businessId, business.id), eq(staff.isActive, true))),
       db

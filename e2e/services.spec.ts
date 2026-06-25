@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 import {
   createServiceViaApi,
   makeAccount,
-  registerAndLogin,
+  registerLoginAsStarter,
   registerLoginAndSetPlan,
   registerViaApi,
 } from "./helpers/auth";
@@ -10,7 +10,7 @@ import {
 test.describe("Services — Free plan limit", () => {
   test("lists three preset services from registration", async ({ page, request }) => {
     const account = makeAccount("svc-free-list");
-    await registerAndLogin(page, request, account);
+    await registerLoginAsStarter(page, request, account);
     await page.goto("/dashboard/services");
     await expect(page.getByText("Haircut")).toBeVisible();
     await expect(page.getByText("Beard trim")).toBeVisible();
@@ -19,7 +19,7 @@ test.describe("Services — Free plan limit", () => {
 
   test("blocks a sixth service on Free (5-service cap)", async ({ page, request }) => {
     const account = makeAccount("svc-free-cap");
-    await registerAndLogin(page, request, account);
+    await registerLoginAsStarter(page, request, account);
 
     for (let i = 1; i <= 2; i++) {
       const result = await createServiceViaApi(page, `Extra Service ${i}`);
@@ -37,7 +37,7 @@ test.describe("Services — Free plan limit", () => {
 
   test("shows plan limit error in new service UI on Free", async ({ page, request }) => {
     const account = makeAccount("svc-free-ui");
-    await registerAndLogin(page, request, account);
+    await registerLoginAsStarter(page, request, account);
 
     for (let i = 1; i <= 2; i++) {
       await createServiceViaApi(page, `Fill Service ${i}`);
