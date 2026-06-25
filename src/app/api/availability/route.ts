@@ -6,20 +6,18 @@ import {
   bookings,
   businesses,
   staff,
-  staffServices,
-  staffLocations,
   services,
 } from "@/db/schema";
 import { getDealById } from "@/lib/deals/queries";
 import { eq, and, gte, lt, count } from "drizzle-orm";
 import { getAvailableSlots, isStaffClosedOnDate } from "@/lib/availability";
-import { getMergedSlotsForStaff } from "@/lib/availability-staff";
+import { getMergedSlotsForStaff, listEligibleStaffIdsForService } from "@/lib/availability-staff";
 import {
   filterSlotsByBusinessHoliday,
   getBusinessHolidayForDate,
   isBusinessHolidayClosed,
 } from "@/lib/business-holidays";
-import { ANY_STAFF_ID, getEligibleStaff } from "@/lib/booking-staff";
+import { ANY_STAFF_ID } from "@/lib/booking-staff";
 import { getActiveReservationsForStaff } from "@/lib/slot-reservations";
 import { withRateLimit } from "@/lib/rate-limit";
 import { parseISO, startOfDay, endOfDay } from "date-fns";
@@ -77,33 +75,14 @@ export async function GET(req: NextRequest) {
   }
 
   if (staffId === ANY_STAFF_ID) {
-    const [staffList, assignments, locationMap] = await Promise.all([
-      db
-        .select()
-        .from(staff)
-        .where(and(eq(staff.businessId, service.businessId), eq(staff.isActive, true))),
-      db
-        .select({ staffId: staffServices.staffId, serviceId: staffServices.serviceId })
-        .from(staffServices)
-        .innerJoin(staff, eq(staffServices.staffId, staff.id))
-        .where(eq(staff.businessId, service.businessId)),
-      db
-        .select({ staffId: staffLocations.staffId, locationId: staffLocations.locationId })
-        .from(staffLocations)
-        .innerJoin(staff, eq(staffLocations.staffId, staff.id))
-        .where(eq(staff.businessId, service.businessId)),
-    ]);
-
-    const eligible = getEligibleStaff(
-      staffList,
-      assignments,
+    const eligibleIds = await listEligibleStaffIdsForService(
+      service.businessId,
       serviceId,
-      locationMap,
       locationId,
     );
 
     const merged = await getMergedSlotsForStaff({
-      staffIds: eligible.map((member) => member.id),
+      staffIds: eligibleIds,
       businessId: service.businessId,
       serviceId,
       date,

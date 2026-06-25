@@ -70,6 +70,7 @@ Configure these repository settings in GitHub:
 
 - Repository variable or secret `DINAYA_APP_URL`: production app URL, for example `https://dinaya.lk`
 - Repository secret `CRON_SECRET`: the same value configured in the Vercel/hosting environment
+- Repository secret `DATABASE_URL_DIRECT` (preferred) or `DATABASE_URL`: required for the **DB Migrate** workflow (`.github/workflows/db-migrate.yml`). Use the Supabase **direct** connection string (port 5432) for `DATABASE_URL_DIRECT`. Without either secret, pushes to `master` skip migrations with a workflow warning.
 
 All cron workflows use `DINAYA_APP_URL` and `CRON_SECRET`. Schedules are UTC:
 
@@ -115,8 +116,9 @@ The high-severity audit gate must pass before deployment. Moderate findings from
 
 ## Database migration order
 
-1. Confirm `DATABASE_URL` points at the intended database.
-2. Run migrations before shipping code that depends on new columns or constraints:
+1. Confirm `DATABASE_URL` points at the intended database for app traffic.
+2. Set `DATABASE_URL_DIRECT` (Supabase direct port **5432**) in GitHub Actions secrets for the **DB Migrate** workflow. Migrations do **not** run during Vercel builds — the pooler URL is unreliable for DDL from the build environment.
+3. Run migrations before shipping code that depends on new columns or constraints (automatic on push to `master` via `.github/workflows/db-migrate.yml`, or manually):
 
 ```bash
 npm run db:migrate

@@ -8,6 +8,7 @@
  * - `dinaya:ready` — `{ slug: string }` when booking UI mounts
  * - `dinaya:booking_started` — `{ slug: string, serviceId?: string }` when service selected
  * - `dinaya:booking_completed` — `{ slug: string, status?: string }`
+ * - `dinaya:prefill` — `{ contact: { name?, email?, phone? } }` (host → iframe after ready)
  *
  * Optional theming via query `?embedAccent=%23hex` sets `--booking-accent` on the embed root.
  */
@@ -17,6 +18,17 @@ export type EmbedEvent =
   | { type: "dinaya:ready"; slug: string }
   | { type: "dinaya:booking_started"; slug: string; serviceId?: string }
   | { type: "dinaya:booking_completed"; slug: string; status?: string };
+
+export type EmbedPrefillContact = {
+  name?: string;
+  email?: string;
+  phone?: string;
+};
+
+export type EmbedPrefillEvent = {
+  type: "dinaya:prefill";
+  contact: EmbedPrefillContact;
+};
 
 export function createBookingCompletedEmbedEvent(
   slug: string,
@@ -29,7 +41,7 @@ export function createBookingCompletedEmbedEvent(
   };
 }
 
-function resolveEmbedParentOrigin(): string | null {
+export function resolveEmbedParentOrigin(): string | null {
   if (typeof window === "undefined") return null;
 
   const parentOrigin = new URLSearchParams(window.location.search).get("parentOrigin");

@@ -4,6 +4,7 @@ import { getStaffDashboardList } from "@/lib/dashboard/staff";
 import { StaffInviteForm } from "@/components/dashboard/StaffInviteForm";
 import { EmptyState } from "@/components/dashboard/EmptyState";
 import { Icon } from "@/components/ui/Icon";
+import { dashboardPrimaryActionClass } from "@/lib/dashboard-ui";
 import { UserRoundCheck } from "lucide-react";
 
 export default async function StaffPage() {
@@ -14,10 +15,7 @@ export default async function StaffPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-cal text-2xl">Staff</h1>
-        <Link
-          href="/dashboard/staff/new"
-          className="flex items-center gap-1.5 bg-gradient-to-b from-primary/90 to-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium border-b-2 border-primary/70 shadow-sm transition-all hover:shadow-primary/30 hover:shadow-md"
-        >
+        <Link href="/dashboard/staff/new" className={dashboardPrimaryActionClass}>
           <Icon name="plus" className="text-xs" /> Add staff
         </Link>
       </div>

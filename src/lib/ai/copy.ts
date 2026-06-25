@@ -93,6 +93,11 @@ const FALLBACKS: Record<PlanFeature, (input: AiCopyInput) => AiCopyResult> = {
     body: `Book your next appointment with ${input.businessName}${input.bookingUrl ? `: ${input.bookingUrl}` : "."}`,
     source: "fallback",
   }),
+  bookingPageTheme: (input) => ({
+    subject: `Book with ${input.businessName}`,
+    body: `Book your next appointment with ${input.businessName}${input.bookingUrl ? `: ${input.bookingUrl}` : "."}`,
+    source: "fallback",
+  }),
   reports: reminderFallback,
   reviews: (input) => ({
     subject: `How was your visit to ${input.businessName}?`,

@@ -2,13 +2,14 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { LandingNav } from "@/components/LandingNav";
 import { ProductMockupSkeleton } from "@/components/ProductMockupSkeleton";
-import { WordRotate } from "@/components/WordRotate";
 import { CTAPrimaryButton } from "@/components/cta-primary-button";
 import { LandingFooter } from "@/components/LandingFooter";
+import { LandingIndustries } from "@/components/LandingIndustries";
 import { Icon } from "@/components/ui/Icon";
-import { TextAnimate } from "@/components/ui/text-animate";
 import { BeforeAfterToggle } from "@/components/BeforeAfterToggle";
 import { FeatureShowcase } from "@/components/FeatureShowcase";
+import { LANDING_LIVE_DEMO_PATH } from "@/lib/landing-demo";
+import { MARKETING_CTA_HERO } from "@/lib/marketing-copy";
 
 const HowItWorks = dynamic(() =>
   import("@/components/HowItWorks").then((m) => ({ default: m.HowItWorks }))
@@ -17,27 +18,6 @@ const HowItWorks = dynamic(() =>
 const ProductMockup = dynamic(() => import("@/components/ProductMockup"), {
   loading: () => <ProductMockupSkeleton />,
 });
-
-const steps = [
-  {
-    number: "01",
-    icon: "sliders",
-    title: "Set up your page",
-    desc: "Add your services, prices, and availability. Takes less than 5 minutes.",
-  },
-  {
-    number: "02",
-    icon: "send",
-    title: "Share your link",
-    desc: "Send your dinaya.lk/yourname link via WhatsApp, Instagram, or Facebook.",
-  },
-  {
-    number: "03",
-    icon: "calendar-check",
-    title: "Get booked",
-    desc: "Clients pick a time, pay online. You get an instant notification.",
-  },
-];
 
 const testimonials = [
   {
@@ -66,72 +46,44 @@ const testimonials = [
   },
 ];
 
-
 export default function LandingPage() {
   return (
     <div className="min-h-dvh bg-white dark:bg-neutral-950">
 
-      {/* Nav — fix #5 (mobile menu) + fix #6 (dead resource links) via LandingNav */}
       <LandingNav />
 
-      {/* Hero — static markup for fast LCP (no Motion fade-in on headline) */}
       <section className="max-w-4xl mx-auto px-6 public-page-offset-lg pb-12 text-center">
         <div className="flex flex-col items-center">
           <div className="mb-8">
-            <a
-              href="/register"
-              className="inline-flex items-center gap-3 rounded-full bg-white dark:bg-neutral-900 px-2.5 py-0.5 pr-3 pl-0.5 text-sm font-medium text-gray-900 dark:text-gray-100 ring-1 shadow-lg shadow-primary/10 ring-black/10 dark:ring-white/10 transition-colors hover:bg-primary/5"
-            >
+            <div className="inline-flex items-center gap-3 rounded-full bg-white dark:bg-neutral-900 px-2.5 py-0.5 pr-3 pl-0.5 text-sm font-medium text-gray-900 dark:text-gray-100 ring-1 shadow-lg shadow-primary/10 ring-black/10 dark:ring-white/10">
               <span className="shrink-0 rounded-full border bg-gray-50 dark:bg-neutral-900/60 px-2.5 py-1 text-xs text-gray-600 dark:text-gray-400">
                 New
               </span>
-              <span className="flex items-center gap-1 truncate">
-                Free 14-day trial — no card needed
-                <Icon name="arrow-up-right" className="text-xs shrink-0 text-gray-700 dark:text-gray-300" />
-              </span>
-            </a>
+              <span className="truncate">Free 14-day trial — no card needed</span>
+            </div>
           </div>
 
           <h1 className="font-cal text-5xl tracking-tight mb-6 text-balance">
             Stop the{" "}
-            <span className="text-primary">
-              <WordRotate
-                words={[
-                  "WhatsApp chaos.",
-                  "missed bookings.",
-                  "back-and-forth.",
-                  "double bookings.",
-                  "manual reminders.",
-                ]}
-                className="text-primary"
-              />
-            </span>
+            <span className="text-primary">WhatsApp chaos.</span>
             <br />
             Get a real booking page in 5 minutes.
           </h1>
 
-          <TextAnimate
-            animation="fadeIn"
-            by="word"
-            as="p"
-            startOnView={false}
-            className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto text-pretty"
-          >
+          <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto text-pretty">
             Give your salon, clinic, or tuition class a booking page that works. Clients pick a time, pay online, and you get notified.
-          </TextAnimate>
+          </p>
 
           <div className="flex flex-wrap items-center justify-center gap-3">
-            <CTAPrimaryButton>Create your booking page</CTAPrimaryButton>
+            <CTAPrimaryButton>{MARKETING_CTA_HERO}</CTAPrimaryButton>
             <Link
-              href="#demo"
+              href={LANDING_LIVE_DEMO_PATH}
               className="inline-flex items-center gap-2 rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-6 py-3 text-sm font-medium text-gray-800 dark:text-gray-200 shadow-sm hover:bg-gray-50 dark:hover:bg-neutral-900/60 transition-colors"
             >
-              <Icon name="play-circle" className="text-base" />
-              See a live demo
+              <Icon name="box-arrow-up-right" className="text-base" />
+              Try a live booking page
             </Link>
           </div>
-
-          <p className="text-sm text-muted-foreground mt-4">14-day free trial. No credit card needed.</p>
         </div>
       </section>
 
@@ -139,40 +91,6 @@ export default function LandingPage() {
         <ProductMockup />
       </div>
 
-
-      {/* Trust strip — fix #3: concrete differentiators instead of vague claim */}
-      <section className="max-w-6xl mx-auto px-6 py-6 border-t">
-        <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-xs text-muted-foreground">
-          {[
-            { icon: "geo-alt-fill", text: "Built exclusively for Sri Lanka" },
-            { icon: "currency-dollar", text: "No USD subscriptions" },
-            { icon: "percent", text: "Zero commission on bookings" },
-            { icon: "whatsapp", text: "Replace WhatsApp chaos for good" },
-          ].map((item) => (
-            <div key={item.text} className="flex items-center gap-1.5">
-              <Icon name={item.icon} className="text-primary text-xs" />
-              <span>{item.text}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* Payment providers — localized trust signals */}
-        <div className="mt-5 pt-5 border-t border-dashed border-gray-200 dark:border-neutral-800/80 flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
-          <span className="text-[11px] uppercase tracking-widest text-gray-400 dark:text-gray-500 font-semibold">
-            Accept payments via
-          </span>
-          {["PayHere", "Visa", "Mastercard", "LankaQR", "FriMi"].map((p) => (
-            <span
-              key={p}
-              className="inline-flex items-center rounded-md border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-2.5 py-1 text-xs font-semibold text-gray-700 dark:text-gray-300 shadow-sm"
-            >
-              {p}
-            </span>
-          ))}
-        </div>
-      </section>
-
-      {/* Before / After toggle */}
       <section className="max-w-6xl mx-auto px-6 py-20 border-t">
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <BeforeAfterToggle />
@@ -200,9 +118,6 @@ export default function LandingPage() {
                 </li>
               ))}
             </ul>
-            <div className="mt-7">
-              <CTAPrimaryButton href="/register" size="md">Get started free</CTAPrimaryButton>
-            </div>
           </div>
         </div>
       </section>
@@ -213,60 +128,15 @@ export default function LandingPage() {
 
       <HowItWorks />
 
-      {/* How it works */}
-      <section id="how-it-works" className="max-w-5xl mx-auto px-6 py-20 border-t">
-        <div className="text-center mb-16">
-          <span className="relative text-sm font-semibold tracking-tight text-primary">
-            <span className="absolute top-0.5 -left-3 h-4 w-[3px] rounded-r-sm bg-primary" />
-            How it works
-          </span>
-          <TextAnimate
-            animation="fadeIn"
-            by="word"
-            as="h2"
-            className="font-cal text-3xl md:text-4xl mt-3 tracking-tight"
-          >
-            Up and running in minutes
-          </TextAnimate>
-        </div>
-
-        <div className="relative grid md:grid-cols-3 gap-10">
-          {/* Connecting line behind the icons */}
-          <div className="hidden md:block absolute top-7 left-[16.5%] right-[16.5%] h-px bg-gray-200 dark:bg-neutral-700" />
-
-          {steps.map((step) => (
-            <div key={step.number} className="flex flex-col items-center text-center">
-              {/* Icon badge with step number dot */}
-              <div className="relative z-10 mb-6">
-                <div className="flex size-14 items-center justify-center rounded-2xl bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-800 shadow-sm ring-4 ring-white dark:ring-neutral-950">
-                  <Icon name={step.icon} className="text-xl text-primary" />
-                </div>
-                <span className="absolute -top-2 -right-2 flex size-5 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-white">
-                  {parseInt(step.number)}
-                </span>
-              </div>
-              <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-lg mb-2">{step.title}</h3>
-              <p className="text-muted-foreground text-sm leading-relaxed max-w-[220px]">{step.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Testimonials — fix #2 (credibility) + fix #7 (redundant headings) */}
       <section className="max-w-6xl mx-auto px-6 py-16 border-t">
         <div className="text-center mb-12">
           <span className="relative text-sm font-semibold tracking-tight text-primary">
             <span className="absolute top-0.5 -left-3 h-4 w-[3px] rounded-r-sm bg-primary" />
             Early access users
           </span>
-          <TextAnimate
-            animation="fadeIn"
-            by="word"
-            as="h2"
-            className="font-cal text-3xl md:text-4xl mt-3 tracking-tight"
-          >
+          <h2 className="font-cal text-3xl md:text-4xl mt-3 tracking-tight">
             What businesses are saying
-          </TextAnimate>
+          </h2>
         </div>
 
         <div className="grid md:grid-cols-3 gap-5">
@@ -299,68 +169,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* CTA — fix #4: backslash → forward slash on secondary button */}
-      <section className="relative z-10 px-6 pb-20">
-        <div className="max-w-6xl mx-auto">
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 px-8 py-20 text-center shadow-2xl shadow-blue-500/20">
-            <div className="absolute inset-0 opacity-10">
-              <svg className="h-full w-full" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                  <pattern id="cta-pattern" patternUnits="userSpaceOnUse" width="64" height="64">
-                    {Array.from({ length: 17 }, (_, i) => {
-                      const offset = i * 8;
-                      return (
-                        <path
-                          key={i}
-                          d={`M${-106 + offset} 110L${22 + offset} -18`}
-                          stroke="white"
-                          strokeWidth="1"
-                        />
-                      );
-                    })}
-                  </pattern>
-                </defs>
-                <rect width="100%" height="100%" fill="url(#cta-pattern)" />
-              </svg>
-            </div>
+      <LandingIndustries />
 
-            <div className="relative z-10">
-              <div className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/20 px-4 py-1.5 text-sm text-white/80 mb-6">
-                <Icon name="lightning-charge" className="text-xs" />
-                14-day free trial · No credit card needed
-              </div>
-              <TextAnimate
-                animation="fadeIn"
-                by="word"
-                as="h2"
-                className="font-cal text-4xl md:text-5xl tracking-tight text-white mb-4"
-              >
-                Ready to go bookable?
-              </TextAnimate>
-              <p className="text-lg text-white/70 mb-10 max-w-md mx-auto">
-                Set up your booking page in 5 minutes. Start accepting clients today.
-              </p>
-              <div className="flex flex-wrap gap-4 justify-center">
-                <Link
-                  href="/register"
-                  className="inline-flex items-center gap-2 bg-white text-blue-700 px-7 py-3.5 rounded-xl font-semibold shadow-lg hover:bg-blue-50 transition-colors"
-                >
-                  Create your page
-                  <Icon name="arrow-right" className="text-sm" />
-                </Link>
-                <Link
-                  href="/auth/signin"
-                  className="inline-flex items-center gap-2 bg-black/25 border border-white/35 text-white px-7 py-3.5 rounded-xl font-medium hover:bg-black/40 backdrop-blur-sm transition-colors"
-                >
-                  Sign in
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
       <LandingFooter />
     </div>
   );

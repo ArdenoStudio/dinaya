@@ -9,7 +9,7 @@ const toneStyles = {
   },
   cobalt: {
     bar: "bg-primary",
-    icon: "bg-blue-50 dark:bg-blue-950/40 text-primary dark:bg-blue-950/50 dark:text-blue-300",
+    icon: "bg-blue-50 text-primary dark:bg-blue-950/40 dark:text-blue-300",
   },
   slate: {
     bar: "bg-slate-500",
@@ -57,14 +57,14 @@ export function StatCard({
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
             {label}
           </p>
-          <p className="mt-1.5 text-2xl font-semibold tracking-tight">{value}</p>
+          <p className="mt-1.5 text-2xl font-semibold tracking-tight tabular-nums">{value}</p>
           {delta && (
             <div className="mt-2 flex items-center gap-1">
               {isUp === true && <TrendingUp className="size-3 text-green-600" aria-hidden="true" />}
               {isUp === false && <TrendingDown className="size-3 text-red-500" aria-hidden="true" />}
               <span
                 className={cn(
-                  "text-xs font-medium",
+                  "text-xs font-medium tabular-nums",
                   isUp === true
                     ? "text-green-600"
                     : isUp === false

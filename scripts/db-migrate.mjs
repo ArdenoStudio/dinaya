@@ -1,5 +1,6 @@
-// Applies pending raw-SQL migrations over Neon's HTTP driver and records them
-// in a `_sql_migrations` table.
+// Applies pending raw-SQL migrations and records them in a `_sql_migrations`
+// table.  Supports both postgres-js (Supabase / any standard PG) and Neon HTTP
+// drivers — auto-detected from the DATABASE_URL hostname.
 //
 // Replaces `drizzle-kit migrate`, which CANNOT run on this project: migrations
 // are hand-written SQL with no drizzle journal, and drizzle-kit connects via
@@ -21,22 +22,34 @@ dotenv.config({ path: ".env" });
 
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
-import { neon } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-http";
 import { sql as raw } from "drizzle-orm";
 
 const MIGRATIONS_DIR = "drizzle";
 const TABLE = "_sql_migrations";
-const SENTINEL_TABLE = "businesses"; // present on any provisioned DB
+const SENTINEL_TABLE = "businesses";
 const FILENAME_RE = /^[0-9A-Za-z._-]+$/;
 
-const url = process.env.DATABASE_URL;
+const url = process.env.DATABASE_URL_DIRECT ?? process.env.DATABASE_URL;
 if (!url) {
-  console.error("DATABASE_URL is not set (looked in .env.local / .env).");
+  console.error("DATABASE_URL_DIRECT / DATABASE_URL is not set (looked in .env.local / .env).");
   process.exit(1);
 }
 
-const db = drizzle(neon(url));
+const isNeon = url.includes("neon.tech");
+
+let db;
+let close = async () => {};
+if (isNeon) {
+  const { neon } = await import("@neondatabase/serverless");
+  const { drizzle } = await import("drizzle-orm/neon-http");
+  db = drizzle(neon(url));
+} else {
+  const pg = (await import("postgres")).default;
+  const { drizzle } = await import("drizzle-orm/postgres-js");
+  const client = pg(url, { prepare: false });
+  db = drizzle(client);
+  close = () => client.end({ timeout: 5 });
+}
 
 async function run(text) {
   const res = await db.execute(raw.raw(text));
@@ -97,6 +110,8 @@ function splitStatements(sqlText) {
 }
 
 async function main() {
+  console.log(`Using ${isNeon ? "Neon HTTP" : "postgres-js"} driver`);
+
   const files = readdirSync(MIGRATIONS_DIR)
     .filter((f) => f.endsWith(".sql"))
     .sort();
@@ -109,7 +124,6 @@ async function main() {
     `CREATE TABLE IF NOT EXISTS "${TABLE}" ("name" text PRIMARY KEY, "applied_at" timestamptz NOT NULL DEFAULT now())`,
   );
 
-  // Adopting an already-provisioned DB: record history as applied, don't re-run.
   if (!trackerExisted && (await tableExists(SENTINEL_TABLE))) {
     for (const f of files) {
       await run(`INSERT INTO "${TABLE}" ("name") VALUES ('${f}') ON CONFLICT DO NOTHING`);
@@ -136,7 +150,21 @@ async function main() {
   console.log("✅ Migrations applied.");
 }
 
-main().catch((err) => {
-  console.error("Migration failed:", err?.message ?? err);
-  process.exit(1);
-});
+try {
+  await main();
+} catch (err) {
+  const message = err?.message ?? String(err);
+  console.error("Migration failed:", message);
+  if (
+    !process.env.DATABASE_URL_DIRECT &&
+    process.env.DATABASE_URL &&
+    /pooler|6543|pgbouncer/i.test(process.env.DATABASE_URL)
+  ) {
+    console.error(
+      "Hint: set DATABASE_URL_DIRECT (Supabase direct/session port 5432) for migrations — the pooler URL often cannot run DDL.",
+    );
+  }
+  process.exitCode = 1;
+} finally {
+  await close();
+}

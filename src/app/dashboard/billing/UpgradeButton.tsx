@@ -3,6 +3,9 @@
 import { useState } from "react";
 import type { BillingInterval, PaidPlan } from "@/lib/plan";
 import { trackPlanUpgradeStart } from "@/lib/analytics/gtag";
+import { DashboardConfirmDialog } from "@/components/dashboard/DashboardConfirmDialog";
+import { Button } from "@/components/ui/button";
+import { planDisplayName } from "@/lib/plan-display";
 
 export function UpgradeButton({
   targetPlan = "pro",
@@ -17,8 +20,9 @@ export function UpgradeButton({
 }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
-  async function handleClick() {
+  async function startCheckout() {
     setLoading(true);
     setError("");
     try {
@@ -55,26 +59,32 @@ export function UpgradeButton({
     }
   }
 
-  const tier =
-    targetPlan === "max" ? "Growth" : targetPlan === "pro" ? "Pro" : "Starter";
+  const tier = planDisplayName(targetPlan);
   const defaultLabel =
     interval === "annual" ? `${tier} — annual` : `${tier} — monthly`;
 
-  const className =
-    variant === "secondary"
-      ? "rounded-lg border border-neutral-300 bg-white px-5 py-2.5 text-sm font-medium text-neutral-800 transition-colors hover:bg-neutral-50 disabled:opacity-50"
-      : "rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50";
-
   return (
     <div>
-      <button
-        onClick={handleClick}
+      <Button
+        type="button"
+        onClick={() => setConfirmOpen(true)}
         disabled={loading}
-        className={className}
+        variant={variant === "secondary" ? "outline" : "default"}
+        className="min-h-11"
       >
         {loading ? "Redirecting to PayHere…" : (label ?? defaultLabel)}
-      </button>
-      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+      </Button>
+      {error ? <p className="mt-2 text-sm text-destructive">{error}</p> : null}
+
+      <DashboardConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title={`Continue to PayHere for ${tier}?`}
+        description={`You will leave Dinaya to complete payment for the ${tier} plan (${interval === "annual" ? "annual" : "monthly"} billing). Your card details are handled securely by PayHere.`}
+        confirmLabel="Continue to PayHere"
+        variant="default"
+        onConfirm={startCheckout}
+      />
     </div>
   );
 }

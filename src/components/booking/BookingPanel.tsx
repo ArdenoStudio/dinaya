@@ -1,7 +1,7 @@
 "use client";
 
-import { m } from "motion/react";
 import type { MotionProps } from "motion/react";
+import { m } from "motion/react";
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
 
@@ -14,16 +14,38 @@ interface BookingPanelProps extends MotionProps {
   children: ReactNode;
 }
 
-const AREA_CLASS: Record<GridArea, string> = {
-  meta: "[grid-area:meta]",
-  main: "[grid-area:main]",
-  timeslots: "[grid-area:timeslots]",
-};
+function hasMotionProps(props: MotionProps): boolean {
+  if (
+    props.initial === false &&
+    props.animate === undefined &&
+    props.variants === undefined &&
+    props.exit === undefined
+  ) {
+    return false;
+  }
+  return (
+    props.animate !== undefined ||
+    props.variants !== undefined ||
+    props.initial !== undefined ||
+    props.exit !== undefined
+  );
+}
 
 export function BookingPanel({ area, visible, className, children, ...motionProps }: BookingPanelProps) {
   if (visible === false) return null;
+
+  const classNames = cn(
+    area === "meta" && "min-w-0 lg:col-start-1",
+    area === "main" && "min-w-0 lg:col-start-2",
+    className,
+  );
+
+  if (!hasMotionProps(motionProps)) {
+    return <div className={classNames}>{children}</div>;
+  }
+
   return (
-    <m.div className={cn(AREA_CLASS[area], className)} layout {...motionProps}>
+    <m.div className={classNames} {...motionProps}>
       {children}
     </m.div>
   );

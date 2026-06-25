@@ -1,4 +1,5 @@
-import { neon } from "@neondatabase/serverless";
+import { db } from "@/db";
+import { sql } from "drizzle-orm";
 import { Resend } from "resend";
 
 export type PlatformHealthStatus = "up" | "down" | "degraded";
@@ -28,15 +29,14 @@ export async function checkDatabaseHealth(): Promise<PlatformHealthCheck> {
       status: "degraded",
       latencyMs: null,
       error: "DATABASE_URL not configured",
-      provider: "neon",
+      provider: "supabase",
     };
   }
 
   try {
-    const sql = neon(process.env.DATABASE_URL);
     const t0 = Date.now();
     await Promise.race([
-      sql`SELECT 1`,
+      db.execute(sql`SELECT 1`),
       new Promise((_, reject) =>
         setTimeout(() => reject(new Error("db_timeout")), DB_TIMEOUT_MS),
       ),
@@ -47,7 +47,7 @@ export async function checkDatabaseHealth(): Promise<PlatformHealthCheck> {
       name: "Database",
       status: "up",
       latencyMs,
-      provider: "neon",
+      provider: "supabase",
     };
   } catch (err) {
     error = err instanceof Error ? err.message : "unknown_error";
@@ -57,7 +57,7 @@ export async function checkDatabaseHealth(): Promise<PlatformHealthCheck> {
       status: "down",
       latencyMs: Date.now() - startedAt,
       error,
-      provider: "neon",
+      provider: "supabase",
     };
   }
 }

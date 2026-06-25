@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 
 export default function DocsLayout({ children }: { children: React.ReactNode }) {
   return (
-    <main className="min-h-screen bg-gradient-to-b from-white via-slate-50/40 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-white via-slate-50/40 to-white">
       <PublicNav />
       <div className="max-w-6xl mx-auto px-6 public-page-offset pb-10 flex gap-10">
         <DocsSidebar />
@@ -30,6 +30,6 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
         </div>
       </div>
       <LandingFooter />
-    </main>
+    </div>
   );
 }

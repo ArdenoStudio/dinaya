@@ -3,6 +3,7 @@ import type { PlanFeature } from "@/lib/plan";
 export const PLAN_FEATURE_ORDER: readonly PlanFeature[] = [
   "publicBookingPage",
   "publicBookingPageCustomization",
+  "bookingPageTheme",
   "reviews",
   "reviewReplies",
   "reviewEngine",

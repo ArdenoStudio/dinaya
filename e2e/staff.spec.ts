@@ -1,21 +1,21 @@
 import { test, expect } from "@playwright/test";
 import {
   makeAccount,
-  registerAndLogin,
+  registerLoginAsStarter,
   registerLoginAndSetPlan,
 } from "./helpers/auth";
 
 test.describe("Staff — Free plan", () => {
   test("lists owner as initial staff member", async ({ page, request }) => {
     const account = makeAccount("staff-free");
-    await registerAndLogin(page, request, account);
+    await registerLoginAsStarter(page, request, account);
     await page.goto("/dashboard/staff");
     await expect(page.getByText(account.name)).toBeVisible();
   });
 
   test("blocks adding a second staff member on Free", async ({ page, request }) => {
     const account = makeAccount("staff-free-limit");
-    await registerAndLogin(page, request, account);
+    await registerLoginAsStarter(page, request, account);
     await page.goto("/dashboard/staff/new");
     await page.getByPlaceholder("Kamala Silva").fill("Second Stylist");
     await page.getByRole("button", { name: /Save/i }).click();

@@ -103,7 +103,7 @@ export default async function GuidePage({ params }: Props) {
               <li key={r.slug}>
                 <Link
                   href={`/docs/guides/${r.slug}`}
-                  className="block overflow-hidden rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:border-neutral-800 dark:bg-neutral-900 text-sm shadow-sm shadow-gray-900/5 dark:shadow-black/20 transition hover:border-primary/30 hover:shadow-md"
+                  className="block overflow-hidden rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:border-neutral-800 dark:bg-neutral-900 text-sm shadow-sm shadow-gray-900/5 dark:shadow-black/20 transition-[box-shadow,border-color] duration-150 ease-out hover:border-primary/30 hover:shadow-md"
                 >
                   <DocsGuideThumbnail
                     mockupId={getGuidePreviewMockupId(r)}

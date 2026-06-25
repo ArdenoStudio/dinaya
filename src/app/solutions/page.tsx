@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { authSubmitButtonClassName } from "@/components/auth/auth-form-styles";
 import { FadeContainer, FadeDiv, FadeSpan } from "@/components/Fade";
 import { PublicNav } from "@/components/PublicNav";
 import { LandingFooter } from "@/components/LandingFooter";
 import { Icon } from "@/components/ui/Icon";
+import { MARKETING_CTA_HERO, MARKETING_CTA_PRIMARY } from "@/lib/marketing-copy";
 
 export const metadata: Metadata = {
   title: "Solutions — Salons, Clinics, Tutors & More | Dinaya",
@@ -205,13 +207,13 @@ export default function SolutionsPage() {
             </span>
           </FadeDiv>
 
-          <h1 className="font-cal text-5xl tracking-tight mb-5">
+          <h1 className="font-cal text-5xl tracking-tight text-balance mb-5">
             <FadeSpan>One platform,</FadeSpan>{" "}
             <FadeSpan className="text-primary">every business type.</FadeSpan>
           </h1>
 
           <FadeDiv>
-            <p className="text-lg text-muted-foreground max-w-xl mx-auto mb-8">
+            <p className="text-lg text-pretty text-muted-foreground max-w-xl mx-auto mb-8">
               Dinaya works for salons, clinics, tuition classes, freelancers, and more. Same product, tailored to how your business actually runs.
             </p>
           </FadeDiv>
@@ -223,7 +225,7 @@ export default function SolutionsPage() {
                 <a
                   key={ind.id}
                   href={`#${ind.id}`}
-                  className="inline-flex items-center gap-2 rounded-full border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm hover:shadow-md hover:border-gray-300 dark:border-neutral-700 transition-all"
+                  className="inline-flex items-center gap-2 rounded-full border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm hover:shadow-md hover:border-gray-300 dark:border-neutral-700 transition-[transform,box-shadow,border-color] duration-150 ease-out active:scale-[0.96] motion-reduce:active:scale-100"
                 >
                   <span className={`flex h-5 w-5 items-center justify-center rounded-md ${ind.color.bg} text-white`}>
                     <Icon name={ind.icon} className="text-[10px]" />
@@ -316,9 +318,9 @@ export default function SolutionsPage() {
                 </div>
                 <Link
                   href="/register"
-                  className="inline-flex items-center justify-center gap-2 bg-gradient-to-b from-primary/90 to-primary text-primary-foreground px-4 py-2.5 rounded-lg text-sm font-medium border-b-2 border-primary/70 shadow-sm transition-all hover:shadow-primary/30 hover:shadow-md"
+                  className={authSubmitButtonClassName}
                 >
-                  Create your page
+                  {MARKETING_CTA_HERO}
                   <Icon name="arrow-right" className="text-sm" />
                 </Link>
               </div>
@@ -365,7 +367,7 @@ export default function SolutionsPage() {
                 href="/register"
                 className="inline-flex items-center gap-2 bg-white text-blue-700 px-7 py-3.5 rounded-xl font-semibold shadow-lg hover:bg-blue-50 transition-colors"
               >
-                Start free trial
+                {MARKETING_CTA_PRIMARY}
                 <Icon name="arrow-right" className="text-sm" />
               </Link>
             </div>

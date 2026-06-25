@@ -20,7 +20,7 @@ interface SlotPickerSheetProps {
   loading: boolean;
   emptyState: SlotEmptyState;
   timezone: string;
-  calendarOverlay: GoogleCalendarOverlay;
+  calendarOverlay?: GoogleCalendarOverlay;
 }
 
 export function SlotPickerSheet({
@@ -79,9 +79,11 @@ export function SlotPickerSheet({
 
           {/* Slot list */}
           <div className="px-5 py-4">
-            <div className="mb-4">
-              <CalendarOverlayControl copy={copy} overlay={calendarOverlay} compact />
-            </div>
+            {calendarOverlay ? (
+              <div className="mb-4">
+                <CalendarOverlayControl copy={copy} overlay={calendarOverlay} compact />
+              </div>
+            ) : null}
             <SlotListPanel
               slots={slots}
               selectedStartUtc={selectedStartUtc}
@@ -90,7 +92,7 @@ export function SlotPickerSheet({
               loading={loading}
               emptyState={emptyState}
               timezone={timezone}
-              busyTimes={calendarOverlay.busyTimes}
+              busyTimes={calendarOverlay?.busyTimes}
             />
           </div>
         </Dialog.Content>
