@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import Link from "next/link";
 import { useTheme } from "next-themes";
 import IPhoneMockup from "@/components/ui/iphone-mockup";
@@ -384,7 +384,9 @@ function DemoFrame({ children }: { children: ReactNode }) {
 export default function ProductMockup() {
   const [selectedSlot, setSelectedSlot] = useState(INITIAL_SELECTED_SLOT);
   const { resolvedTheme } = useTheme();
-  const screenBg = resolvedTheme === "dark" ? "#000000" : "#f4f4f5";
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const screenBg = mounted && resolvedTheme === "dark" ? "#000000" : "#f4f4f5";
   const persona = primaryPersona;
 
   const mobileScale = 0.72 * DEMO_SCALE;
