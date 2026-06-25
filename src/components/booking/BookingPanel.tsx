@@ -45,7 +45,7 @@ export function BookingPanel({ area, visible, className, children, ...motionProp
   }
 
   return (
-    <m.div className={classNames} layout="position" {...motionProps}>
+    <m.div className={classNames} {...motionProps}>
       {children}
     </m.div>
   );
