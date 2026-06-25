@@ -1,6 +1,8 @@
 name: DB Migrate
 
 on:
+  push:
+    branches: [master]
   workflow_dispatch:
 
 jobs:
@@ -19,4 +21,5 @@ jobs:
       - name: Apply pending migrations
         run: npm run db:migrate
         env:
+          DATABASE_URL_DIRECT: ${{ secrets.DATABASE_URL_DIRECT }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}

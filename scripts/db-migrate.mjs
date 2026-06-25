@@ -153,7 +153,17 @@ async function main() {
 try {
   await main();
 } catch (err) {
-  console.error("Migration failed:", err?.message ?? err);
+  const message = err?.message ?? String(err);
+  console.error("Migration failed:", message);
+  if (
+    !process.env.DATABASE_URL_DIRECT &&
+    process.env.DATABASE_URL &&
+    /pooler|6543|pgbouncer/i.test(process.env.DATABASE_URL)
+  ) {
+    console.error(
+      "Hint: set DATABASE_URL_DIRECT (Supabase direct/session port 5432) for migrations — the pooler URL often cannot run DDL.",
+    );
+  }
   process.exitCode = 1;
 } finally {
   await close();
