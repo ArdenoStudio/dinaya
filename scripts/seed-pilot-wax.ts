@@ -33,9 +33,9 @@ dotenv.config({ path: ".env" });
 const DEFAULT_SLUG = "wax-in-the-city";
 const BUSINESS_NAME = "Wax in the City";
 
-/** Served from public/demo/ — Wax In The City SL Facebook profile logo. */
-export const WAX_LOGO_PATH = "/demo/wax-in-the-city-logo.webp";
-export const WAX_BANNER_PATH = "/demo/wax-in-the-city-banner.webp";
+/** Optional public HTTPS URLs — set WAX_LOGO_URL / WAX_BANNER_URL when seeding branding. */
+const WAX_LOGO_URL = process.env.WAX_LOGO_URL?.trim() || null;
+const WAX_BANNER_URL = process.env.WAX_BANNER_URL?.trim() || null;
 /** Pink from the Wax in the City brand mark (logo background). */
 export const WAX_ACCENT_COLOR = "#ff46a2";
 /** Soft blush page background — pairs with the salon preset. */
@@ -280,7 +280,7 @@ async function updateBusinessProfile(businessId: string) {
       cancellationPolicy: CANCELLATION_POLICY,
       depositPolicy: DEPOSIT_POLICY,
       businessType: "spa_wellness",
-      logoUrl: WAX_LOGO_PATH,
+      ...(WAX_LOGO_URL ? { logoUrl: WAX_LOGO_URL } : {}),
       accentColor: WAX_ACCENT_COLOR,
       bookingPageBackground: "accent",
       bookingPageBackgroundColor: null,
@@ -288,7 +288,7 @@ async function updateBusinessProfile(businessId: string) {
       bookingHeroOverlay: "brand",
       bookingHeroOverlayOpacity: 55,
       bookingThemePreset: "salon_vivid",
-      galleryImages: [WAX_BANNER_PATH],
+      ...(WAX_BANNER_URL ? { galleryImages: [WAX_BANNER_URL] } : {}),
       plan: "pro",
       planExpiresAt: addDays(new Date(), 365),
       onboardingCompletedAt: new Date(),

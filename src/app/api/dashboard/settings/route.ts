@@ -29,7 +29,7 @@ const publicImageUrlSchema = z
   .optional()
   .nullable()
   .refine((value) => !value || isPublicHttpsUrl(value) || value.startsWith("/"), {
-    message: "Image URL must be a public HTTPS link or a site path like /demo/logo.webp.",
+    message: "Image URL must be a public HTTPS link or a site path like /logo.png.",
   });
 
 const logoUrlSchema = z

@@ -227,7 +227,7 @@ export function BookingPageThemeEditor({ business, onPreviewChange }: Props) {
               value={logoUrl}
               onChange={(e) => setLogoUrl(e.target.value)}
               className={`${dashboardInputClass} mt-2`}
-              placeholder="/demo/logo.webp or https://..."
+              placeholder="https://example.com/logo.webp"
             />
             {logoUrl.trim() ? (
               <div className="mt-3 flex size-16 items-center justify-center overflow-hidden rounded-full border bg-muted/30">
