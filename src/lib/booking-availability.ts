@@ -1,4 +1,4 @@
-import { and, count, eq, gte, lt, ne, gt } from "drizzle-orm";
+import { and, count, eq, inArray, lt, ne, gt } from "drizzle-orm";
 import { endOfDay, format, parseISO, startOfDay } from "date-fns";
 import { fromZonedTime, toZonedTime } from "date-fns-tz";
 import { db } from "@/db";
@@ -34,7 +34,7 @@ export async function isDailyCapacityReached(input: {
   timezone: string;
   dailyCapacity: number | null;
 }): Promise<boolean> {
-  if (input.dailyCapacity == null) return false;
+  if (input.dailyCapacity == null || input.dailyCapacity === 0) return false;
 
   const dateStr = format(toZonedTime(input.start, input.timezone), "yyyy-MM-dd");
   const localDate = parseISO(dateStr);
@@ -48,9 +48,9 @@ export async function isDailyCapacityReached(input: {
       and(
         eq(bookings.staffId, input.staffId),
         eq(bookings.serviceId, input.serviceId),
-        gte(bookings.startsAt, dayStartUtc),
         lt(bookings.startsAt, dayEndUtc),
-        eq(bookings.status, "confirmed"),
+        gt(bookings.endsAt, dayStartUtc),
+        inArray(bookings.status, ["confirmed", "pending"]),
       ),
     );
 

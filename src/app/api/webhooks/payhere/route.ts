@@ -196,6 +196,26 @@ export async function POST(req: NextRequest) {
                 })
               : false;
 
+          // Mark payment success first — money was received regardless of booking recovery.
+          await db
+            .update(payments)
+            .set(
+              includePaymentProvider
+                ? {
+                    status: "success",
+                    payherePayload: allFields,
+                    provider: "payhere",
+                    currency: "LKR",
+                    providerOrderId: orderId,
+                    providerPayload: allFields,
+                  }
+                : {
+                    status: "success",
+                    payherePayload: allFields,
+                  },
+            )
+            .where(eq(payments.id, payment.id));
+
           if (slotConflict.length === 0 && !capacityReached) {
             try {
               const [reconfirmed] = await db
@@ -225,26 +245,6 @@ export async function POST(req: NextRequest) {
             }
           }
         }
-
-        const includePaymentProvider = await hasPublicColumn("payments", "provider");
-        await db
-          .update(payments)
-          .set(
-            includePaymentProvider
-              ? {
-                  status: "success",
-                  payherePayload: allFields,
-                  provider: "payhere",
-                  currency: "LKR",
-                  providerOrderId: orderId,
-                  providerPayload: allFields,
-                }
-              : {
-                  status: "success",
-                  payherePayload: allFields,
-                },
-          )
-          .where(eq(payments.id, payment.id));
 
         if (recovered) {
           await logActivity({
