@@ -273,7 +273,7 @@ export async function updateServiceDashboardFields(
         and(
           eq(bookings.businessId, businessId),
           eq(bookings.serviceId, serviceId),
-          gte(bookings.startsAt, new Date().toISOString()),
+          gte(bookings.startsAt, new Date()),
           inArray(bookings.status, ["pending", "confirmed"]),
         ),
       )

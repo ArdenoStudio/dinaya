@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { payments, bookings, businesses, services, staff } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, inArray, lt, gt, ne } from "drizzle-orm";
 import { payhereAmountMatches, verifyPayhereWebhook } from "@/lib/payhere";
 import { parsePayhereWebhookFields } from "@/lib/payhere-webhook";
 import { sendBookingNotificationToBusiness } from "@/lib/resend";
@@ -50,6 +50,7 @@ export async function POST(req: NextRequest) {
       serviceId: bookings.serviceId,
       staffId: bookings.staffId,
       startsAt: bookings.startsAt,
+      endsAt: bookings.endsAt,
     })
     .from(bookings)
     .where(eq(bookings.id, payment.bookingId))
@@ -142,6 +143,72 @@ export async function POST(req: NextRequest) {
 
       if (currentPayment?.status === "success") {
         return NextResponse.json({ received: true, duplicate: true });
+      }
+
+      // Late payment after expiry cron marked the payment failed and booking cancelled.
+      if (currentPayment?.status === "failed") {
+        const includePaymentProvider = await hasPublicColumn("payments", "provider");
+        await db
+          .update(payments)
+          .set(
+            includePaymentProvider
+              ? {
+                  status: "success",
+                  payherePayload: allFields,
+                  provider: "payhere",
+                  currency: "LKR",
+                  providerOrderId: orderId,
+                  providerPayload: allFields,
+                }
+              : {
+                  status: "success",
+                  payherePayload: allFields,
+                },
+          )
+          .where(eq(payments.id, payment.id));
+
+        const slotConflict = booking.staffId
+          ? await db
+              .select({ id: bookings.id })
+              .from(bookings)
+              .where(
+                and(
+                  eq(bookings.staffId, booking.staffId),
+                  ne(bookings.id, booking.id),
+                  inArray(bookings.status, ["pending", "confirmed"]),
+                  lt(bookings.startsAt, booking.endsAt),
+                  gt(bookings.endsAt, booking.startsAt),
+                ),
+              )
+              .limit(1)
+          : [];
+
+        if (booking.status === "cancelled" && booking.staffId && slotConflict.length === 0) {
+          await db
+            .update(bookings)
+            .set({ status: "confirmed", cancelledAt: null, cancellationReason: null })
+            .where(eq(bookings.id, booking.id));
+
+          await logActivity({
+            action: "payment_late_recovery",
+            businessId: booking.businessId,
+            entity: "booking",
+            entityId: booking.id,
+            meta: { orderId, amount: payhereAmount },
+          });
+
+          return NextResponse.json({ received: true, recovered: true });
+        }
+
+        await logActivity({
+          action: "payment_orphaned",
+          businessId: booking.businessId,
+          entity: "booking",
+          entityId: booking.id,
+          meta: { orderId, amount: payhereAmount, bookingStatus: booking.status },
+        });
+
+        return NextResponse.json({ received: true, orphaned: true });
       }
 
       return WEBHOOK_REJECTED;

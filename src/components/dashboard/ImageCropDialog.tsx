@@ -109,6 +109,7 @@ export function ImageCropDialog({
         outputWidth,
         mimeType: "image/webp",
         quality: 0.9,
+        shape,
       });
       await onConfirm(blob);
       onOpenChange(false);

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/db";
-import { businessHolidays } from "@/db/schema";
+import { businessHolidays, locations } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 import { requireApiBusiness } from "@/lib/api-auth";
 
@@ -37,6 +37,20 @@ export async function POST(req: NextRequest) {
   }
 
   const data = parsed.data;
+
+  if (data.locationId) {
+    const [location] = await db
+      .select({ id: locations.id })
+      .from(locations)
+      .where(
+        and(eq(locations.id, data.locationId), eq(locations.businessId, authResult.context.businessId)),
+      )
+      .limit(1);
+    if (!location) {
+      return NextResponse.json({ error: "Invalid branch for this business." }, { status: 400 });
+    }
+  }
+
   const [holiday] = await db
     .insert(businessHolidays)
     .values({

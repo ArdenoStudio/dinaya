@@ -7,14 +7,14 @@ import {
   services,
   staff,
 } from "@/db/schema";
-import { and, eq, gt, gte, inArray, lt, ne } from "drizzle-orm";
+import { and, eq, gt, inArray, lt, ne } from "drizzle-orm";
 import { getAvailableSlots } from "@/lib/availability";
 import {
   filterSlotsByBusinessHoliday,
   getBusinessHolidayForDate,
   isBusinessHolidayClosed,
 } from "@/lib/business-holidays";
-import { isRequestedSlotAvailable } from "@/lib/booking-availability";
+import { isRequestedSlotAvailable, bookingsOverlappingDayFilter } from "@/lib/booking-availability";
 import { buildClientBookingUrl } from "@/lib/client-tokens";
 import { sendBookingRescheduleMessage } from "@/lib/messaging/booking-messages";
 import { logActivity } from "@/lib/activity-log";
@@ -25,6 +25,7 @@ import { processBookingAutomationTrigger } from "@/lib/automations/engine";
 import {
   isSlotBlockedByReservation,
   releaseSlotReservation,
+  getActiveReservationsForStaff,
 } from "@/lib/slot-reservations";
 import { runAfterResponse } from "@/lib/after-response";
 import { endOfDay, parseISO, startOfDay } from "date-fns";
@@ -122,7 +123,7 @@ export async function getRescheduleSlots(input: {
     return { booking, slots: [], blockedReason: "This day is closed." };
   }
 
-  const [staffAvailability, overrides, existingBookings] = await Promise.all([
+  const [staffAvailability, overrides, existingBookings, reservations] = await Promise.all([
     db.select().from(availability).where(eq(availability.staffId, staffId)),
     db
       .select()
@@ -136,14 +137,20 @@ export async function getRescheduleSlots(input: {
         status: bookings.status,
       })
       .from(bookings)
-      .where(and(
-        eq(bookings.staffId, staffId),
-        ne(bookings.id, booking.id),
-        inArray(bookings.status, ["pending", "confirmed"]),
-        gte(bookings.startsAt, dayStartUtc),
-        lt(bookings.startsAt, dayEndUtc),
-      )),
+      .where(
+        and(
+          bookingsOverlappingDayFilter(staffId, dayStartUtc, dayEndUtc, booking.id),
+          inArray(bookings.status, ["pending", "confirmed"]),
+        ),
+      ),
+    getActiveReservationsForStaff(staffId, dayStartUtc, dayEndUtc),
   ]);
+
+  const blockedReservations = reservations.map((r) => ({
+    startsAt: r.startsAt,
+    endsAt: r.endsAt,
+    status: "confirmed" as const,
+  }));
 
   let slots = getAvailableSlots({
     date: input.date,
@@ -154,7 +161,7 @@ export async function getRescheduleSlots(input: {
     maximumAdvanceDays: booking.maximumAdvanceDays ?? 0,
     staffAvailability,
     overrides,
-    existingBookings,
+    existingBookings: [...existingBookings, ...blockedReservations],
     timezone,
   });
 

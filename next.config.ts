@@ -44,13 +44,12 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: [
       "lucide-react",
-      "react-bootstrap-icons",
-      "@hugeicons/react",
     ],
   },
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "*.dinaya.lk" },
+      { protocol: "https", hostname: "*.supabase.co" },
       { protocol: "https", hostname: "res.cloudinary.com" },
       { protocol: "https", hostname: "api.qrserver.com" },
     ],

@@ -15,6 +15,7 @@ import {
 } from "@/lib/plan";
 import { PlanPricingActions } from "./PlanPricingActions";
 import { CancelButton } from "./CancelButton";
+import { BillingReturnBanner } from "./BillingReturnBanner";
 
 function formatRs(amount: number) {
   return amount.toLocaleString("en-LK");
@@ -75,8 +76,13 @@ function PlanPricing({
   );
 }
 
-export default async function BillingPage() {
+export default async function BillingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ success?: string; cancelled?: string }>;
+}) {
   const { businessId } = await requireOwner();
+  const params = await searchParams;
   const config = await getPlanConfigAsync();
   const {
     starterMonthlyPriceLkr,
@@ -120,6 +126,10 @@ export default async function BillingPage() {
 
   return (
     <div className="max-w-3xl space-y-6">
+      <BillingReturnBanner
+        success={params.success === "1"}
+        cancelled={params.cancelled === "1"}
+      />
       <DashboardPageHeader
         title="Billing"
         description="Manage your Dinaya plan and subscription."

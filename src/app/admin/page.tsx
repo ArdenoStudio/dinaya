@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { and, count, desc, eq, gte, sql } from "drizzle-orm";
+import { and, count, desc, eq, gte, lt, sql } from "drizzle-orm";
 import { format, subDays } from "date-fns";
 import { ArrowUpRight, Building2, CalendarCheck, CreditCard, TrendingUp, UserPlus, Users } from "lucide-react";
 import { db } from "@/db";
@@ -58,7 +58,7 @@ export default async function AdminOverviewPage() {
       db
         .select({ newAccounts60to30: count() })
         .from(businesses)
-        .where(and(gte(businesses.createdAt, last60), sql`${businesses.createdAt} < ${last30}`)),
+        .where(and(gte(businesses.createdAt, last60), lt(businesses.createdAt, last30))),
       [{ newAccounts60to30: 0 }] as { newAccounts60to30: number }[]
     ),
     safeAdminQuery(
@@ -94,7 +94,7 @@ export default async function AdminOverviewPage() {
       db
         .select({ bookings60to30: count() })
         .from(bookings)
-        .where(and(gte(bookings.createdAt, last60), sql`${bookings.createdAt} < ${last30}`)),
+        .where(and(gte(bookings.createdAt, last60), lt(bookings.createdAt, last30))),
       [{ bookings60to30: 0 }] as { bookings60to30: number }[]
     ),
     safeAdminQuery(
