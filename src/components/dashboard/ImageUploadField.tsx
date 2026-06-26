@@ -159,6 +159,7 @@ export function ImageUploadField({
           description="Drag to reposition and use zoom to frame the image."
           aspectRatio={aspectRatio}
           outputWidth={outputWidth}
+          shape={previewShape === "circle" ? "circle" : "rectangle"}
           onConfirm={uploadBlob}
         />
       ) : null}

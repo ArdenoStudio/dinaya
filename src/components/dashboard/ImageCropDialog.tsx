@@ -17,6 +17,7 @@ type Props = {
   description?: string;
   aspectRatio: number;
   outputWidth: number;
+  shape?: "circle" | "rectangle";
   onConfirm: (blob: Blob) => void | Promise<void>;
 };
 
@@ -39,6 +40,7 @@ export function ImageCropDialog({
   description,
   aspectRatio,
   outputWidth,
+  shape = "rectangle",
   onConfirm,
 }: Props) {
   const frameRef = useRef<HTMLDivElement>(null);
@@ -174,7 +176,24 @@ export function ImageCropDialog({
                   transform: `translate(calc(-50% + ${transform.offsetX}px), calc(-50% + ${transform.offsetY}px))`,
                 }}
               />
-              <div className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-black/10 ring-inset dark:ring-white/10" />
+              {shape === "circle" ? (
+                <div
+                  className="pointer-events-none absolute inset-0 flex items-center justify-center"
+                  aria-hidden="true"
+                >
+                  <div
+                    className="rounded-full"
+                    style={{
+                      width: Math.min(frameSize.width, frameSize.height),
+                      height: Math.min(frameSize.width, frameSize.height),
+                      boxShadow: "0 0 0 9999px rgba(0,0,0,0.45)",
+                      outline: "1.5px solid rgba(255,255,255,0.6)",
+                    }}
+                  />
+                </div>
+              ) : (
+                <div className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-black/10 ring-inset dark:ring-white/10" />
+              )}
             </div>
 
             <div>
