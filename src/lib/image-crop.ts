@@ -33,17 +33,22 @@ export function computeCropSourceRect(
   frame: CropFrame,
   transform: CropTransform,
 ): { sx: number; sy: number; sw: number; sh: number } {
-  const scale = Math.max(1, transform.scale);
+  const scale = Math.max(0.01, transform.scale);
   const baseScale = Math.max(frame.width / image.width, frame.height / image.height);
   const drawWidth = image.width * baseScale * scale;
   const drawHeight = image.height * baseScale * scale;
-  const centeredX = (frame.width - drawWidth) / 2 + transform.offsetX;
-  const centeredY = (frame.height - drawHeight) / 2 + transform.offsetY;
+  const imgLeft = (frame.width - drawWidth) / 2 + transform.offsetX;
+  const imgTop = (frame.height - drawHeight) / 2 + transform.offsetY;
 
-  const sx = Math.max(0, (-centeredX / drawWidth) * image.width);
-  const sy = Math.max(0, (-centeredY / drawHeight) * image.height);
-  const sw = Math.min(image.width - sx, (frame.width / drawWidth) * image.width);
-  const sh = Math.min(image.height - sy, (frame.height / drawHeight) * image.height);
+  const visLeft = Math.max(0, imgLeft);
+  const visTop = Math.max(0, imgTop);
+  const visRight = Math.min(frame.width, imgLeft + drawWidth);
+  const visBottom = Math.min(frame.height, imgTop + drawHeight);
+
+  const sx = ((visLeft - imgLeft) / drawWidth) * image.width;
+  const sy = ((visTop - imgTop) / drawHeight) * image.height;
+  const sw = Math.max(0, ((visRight - visLeft) / drawWidth) * image.width);
+  const sh = Math.max(0, ((visBottom - visTop) / drawHeight) * image.height);
 
   return { sx, sy, sw, sh };
 }
@@ -55,7 +60,6 @@ export async function cropImageWithTransform(
   options?: { mimeType?: string; quality?: number; outputWidth?: number },
 ): Promise<CroppedImageResult> {
   const image = await loadImage(imageSrc);
-  const { sx, sy, sw, sh } = computeCropSourceRect(image, frame, transform);
   const outputWidth = options?.outputWidth ?? frame.width;
   const outputHeight = Math.round((outputWidth / frame.width) * frame.height);
 
@@ -65,7 +69,35 @@ export async function cropImageWithTransform(
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Canvas is not available.");
 
-  ctx.drawImage(image, sx, sy, sw, sh, 0, 0, outputWidth, outputHeight);
+  const scale = Math.max(0.01, transform.scale);
+  const baseScale = Math.max(frame.width / image.width, frame.height / image.height);
+  const drawWidth = image.width * baseScale * scale;
+  const drawHeight = image.height * baseScale * scale;
+  const imgLeft = (frame.width - drawWidth) / 2 + transform.offsetX;
+  const imgTop = (frame.height - drawHeight) / 2 + transform.offsetY;
+
+  // Visible portion of the image within the frame bounds
+  const visLeft = Math.max(0, imgLeft);
+  const visTop = Math.max(0, imgTop);
+  const visRight = Math.min(frame.width, imgLeft + drawWidth);
+  const visBottom = Math.min(frame.height, imgTop + drawHeight);
+
+  if (visRight > visLeft && visBottom > visTop) {
+    const sx = ((visLeft - imgLeft) / drawWidth) * image.width;
+    const sy = ((visTop - imgTop) / drawHeight) * image.height;
+    const sw = ((visRight - visLeft) / drawWidth) * image.width;
+    const sh = ((visBottom - visTop) / drawHeight) * image.height;
+
+    // Map visible frame region to output canvas — preserves position when image
+    // is smaller than the frame (zoomed out below cover).
+    const frameToOutput = outputWidth / frame.width;
+    const dstX = visLeft * frameToOutput;
+    const dstY = visTop * frameToOutput;
+    const dstW = (visRight - visLeft) * frameToOutput;
+    const dstH = (visBottom - visTop) * frameToOutput;
+
+    ctx.drawImage(image, sx, sy, sw, sh, dstX, dstY, dstW, dstH);
+  }
 
   const mimeType = options?.mimeType ?? "image/webp";
   const quality = options?.quality ?? 0.9;

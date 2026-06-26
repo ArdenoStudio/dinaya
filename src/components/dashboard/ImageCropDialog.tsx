@@ -29,7 +29,7 @@ function coverScale(
   scale: number,
 ) {
   const base = Math.max(frame.width / image.width, frame.height / image.height);
-  return base * Math.max(1, scale);
+  return base * Math.max(0.01, scale);
 }
 
 export function ImageCropDialog({
@@ -164,10 +164,17 @@ export function ImageCropDialog({
                 alt=""
                 draggable={false}
                 onLoad={(event) => {
-                  setImageSize({
-                    width: event.currentTarget.naturalWidth,
-                    height: event.currentTarget.naturalHeight,
-                  });
+                  const w = event.currentTarget.naturalWidth;
+                  const h = event.currentTarget.naturalHeight;
+                  setImageSize({ width: w, height: h });
+                  if (frameSize.width > 0) {
+                    const base = Math.max(frameSize.width / w, frameSize.height / h);
+                    const contain = Math.min(frameSize.width / w, frameSize.height / h);
+                    const initialScale = contain / base;
+                    if (initialScale < 0.99) {
+                      setTransform((t) => ({ ...t, scale: Math.max(0.1, initialScale) }));
+                    }
+                  }
                 }}
                 className="pointer-events-none absolute left-1/2 top-1/2 max-w-none select-none"
                 style={{
@@ -200,7 +207,7 @@ export function ImageCropDialog({
               <label className="text-sm font-medium">Zoom</label>
               <input
                 type="range"
-                min={1}
+                min={0.1}
                 max={3}
                 step={0.01}
                 value={transform.scale}
