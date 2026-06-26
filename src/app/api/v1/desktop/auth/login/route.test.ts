@@ -56,8 +56,8 @@ describe("POST /api/v1/desktop/auth/login", () => {
     dbSelectMock
       .mockReturnValueOnce(makeSelectQuery([
         {
-          id: "user_1",
-          businessId: "biz_1",
+          id: "00000000-0000-4000-8000-000000000002",
+          businessId: "00000000-0000-4000-8000-000000000001",
           email: "owner@example.com",
           name: "Owner",
           passwordHash: "hash",
@@ -66,7 +66,7 @@ describe("POST /api/v1/desktop/auth/login", () => {
       ]))
       .mockReturnValueOnce(makeSelectQuery([
         {
-          id: "biz_1",
+          id: "00000000-0000-4000-8000-000000000001",
           name: "Dinaya Salon",
           slug: "dinaya-salon",
           timezone: "Asia/Colombo",
@@ -92,12 +92,12 @@ describe("POST /api/v1/desktop/auth/login", () => {
 
     expect(res.status).toBe(200);
     expect(body.desktopKey).toBe("dinaya_desktop_key");
-    expect(body.business.id).toBe("biz_1");
+    expect(body.business.id).toBe("00000000-0000-4000-8000-000000000001");
     expect(body.user.email).toBe("owner@example.com");
     expect(dbInsertMock).toHaveBeenCalled();
     expect(dbInsertMock.mock.results[0].value.values).toHaveBeenCalledWith(
       expect.objectContaining({
-        businessId: "biz_1",
+        businessId: "00000000-0000-4000-8000-000000000001",
         keyType: "desktop",
         scopes: ["desktop:read", "desktop:bookings", "desktop:write"],
       }),
@@ -123,8 +123,8 @@ describe("POST /api/v1/desktop/auth/login", () => {
     dbSelectMock
       .mockReturnValueOnce(makeSelectQuery([
         {
-          id: "user_1",
-          businessId: "biz_1",
+          id: "00000000-0000-4000-8000-000000000002",
+          businessId: "00000000-0000-4000-8000-000000000001",
           email: "owner@example.com",
           name: "Owner",
           passwordHash: "hash",
@@ -133,7 +133,7 @@ describe("POST /api/v1/desktop/auth/login", () => {
       ]))
       .mockReturnValueOnce(makeSelectQuery([
         {
-          id: "biz_1",
+          id: "00000000-0000-4000-8000-000000000001",
           name: "Dinaya Salon",
           slug: "dinaya-salon",
           timezone: "Asia/Colombo",
@@ -159,8 +159,8 @@ describe("POST /api/v1/desktop/auth/login", () => {
     dbSelectMock
       .mockReturnValueOnce(makeSelectQuery([
         {
-          id: "user_1",
-          businessId: "biz_1",
+          id: "00000000-0000-4000-8000-000000000002",
+          businessId: "00000000-0000-4000-8000-000000000001",
           email: "owner@example.com",
           name: "Owner",
           passwordHash: "hash",
@@ -169,7 +169,7 @@ describe("POST /api/v1/desktop/auth/login", () => {
       ]))
       .mockReturnValueOnce(makeSelectQuery([
         {
-          id: "biz_1",
+          id: "00000000-0000-4000-8000-000000000001",
           name: "Dinaya Salon",
           slug: "dinaya-salon",
           timezone: "Asia/Colombo",

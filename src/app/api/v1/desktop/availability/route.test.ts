@@ -44,11 +44,11 @@ describe("GET /api/v1/desktop/availability", () => {
     withRateLimitMock.mockResolvedValue({ ok: true });
     requireDesktopReadMock.mockResolvedValue({
       ok: true,
-      context: { businessId: "biz_1", deviceId: "device_1" },
+      context: { businessId: "00000000-0000-4000-8000-000000000001", deviceId: "device_1" },
     });
     requireDesktopWriteMock.mockResolvedValue({
       ok: true,
-      context: { businessId: "biz_1", deviceId: "device_1" },
+      context: { businessId: "00000000-0000-4000-8000-000000000001", deviceId: "device_1" },
     });
   });
 
@@ -107,7 +107,7 @@ describe("GET /api/v1/desktop/availability", () => {
     expect(body.members[0].windows).toHaveLength(1);
     expect(body.members[0].overrides).toHaveLength(1);
     expect(body.serverTime).toEqual(expect.any(String));
-    expect(getAvailabilityDashboardOverviewMock).toHaveBeenCalledWith("biz_1");
+    expect(getAvailabilityDashboardOverviewMock).toHaveBeenCalledWith("00000000-0000-4000-8000-000000000001");
   });
 
   it("updates weekly windows through the desktop write bridge", async () => {
@@ -147,7 +147,7 @@ describe("GET /api/v1/desktop/availability", () => {
     const body = await res.json();
 
     expect(res.status).toBe(200);
-    expect(updateAvailabilityDashboardWindowsMock).toHaveBeenCalledWith("biz_1", "staff_1", [
+    expect(updateAvailabilityDashboardWindowsMock).toHaveBeenCalledWith("00000000-0000-4000-8000-000000000001", "staff_1", [
       { dayOfWeek: 1, startTime: "09:00", endTime: "17:00" },
       { dayOfWeek: 2, startTime: "10:00", endTime: "15:00" },
     ]);

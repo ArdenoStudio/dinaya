@@ -37,7 +37,7 @@ describe("POST /api/v1/desktop/auth/register", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     withRateLimitMock.mockResolvedValue({ ok: true });
-    registerBusinessAccountMock.mockResolvedValue({ businessId: "biz_1" });
+    registerBusinessAccountMock.mockResolvedValue({ businessId: "00000000-0000-4000-8000-000000000001" });
     createDesktopAuthSessionMock.mockResolvedValue({
       desktopKey: "dinaya_desktop_key",
       auth: {
@@ -47,7 +47,7 @@ describe("POST /api/v1/desktop/auth/register", () => {
         deviceName: "Dinaya Desktop",
       },
       business: {
-        id: "biz_1",
+        id: "00000000-0000-4000-8000-000000000001",
         name: "Dinaya Salon",
         slug: "dinaya-salon",
         timezone: "Asia/Colombo",
@@ -55,7 +55,7 @@ describe("POST /api/v1/desktop/auth/register", () => {
         customDomain: null,
       },
       user: {
-        id: "user_1",
+        id: "00000000-0000-4000-8000-000000000002",
         name: "Owner",
         email: "owner@example.com",
         role: "owner",

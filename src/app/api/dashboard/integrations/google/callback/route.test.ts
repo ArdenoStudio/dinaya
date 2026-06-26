@@ -72,8 +72,8 @@ describe("Google OAuth callback route", () => {
     vi.clearAllMocks();
     authMock.mockResolvedValue({
       user: {
-        businessId: "biz_1",
-        id: "user_1",
+        businessId: "00000000-0000-4000-8000-000000000001",
+        id: "00000000-0000-4000-8000-000000000002",
         role: "owner",
       },
     });
@@ -83,8 +83,8 @@ describe("Google OAuth callback route", () => {
       refreshToken: "refresh-token",
     });
     verifyGoogleOAuthStateMock.mockReturnValue({
-      businessId: "biz_1",
-      userId: "user_1",
+      businessId: "00000000-0000-4000-8000-000000000001",
+      userId: "00000000-0000-4000-8000-000000000002",
     });
     dbSelectMock.mockReturnValue(makeSelectQuery([{ id: "connection_1" }]));
     dbUpdateMock.mockReturnValue(makeUpdateQuery());

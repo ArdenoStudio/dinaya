@@ -45,11 +45,11 @@ describe("GET /api/v1/desktop/clients/:id", () => {
     withRateLimitMock.mockResolvedValue({ ok: true });
     requireDesktopReadMock.mockResolvedValue({
       ok: true,
-      context: { businessId: "biz_1", deviceId: "device_1" },
+      context: { businessId: "00000000-0000-4000-8000-000000000001", deviceId: "device_1" },
     });
     requireDesktopWriteMock.mockResolvedValue({
       ok: true,
-      context: { businessId: "biz_1", deviceId: "device_1" },
+      context: { businessId: "00000000-0000-4000-8000-000000000001", deviceId: "device_1" },
     });
   });
 
@@ -75,7 +75,7 @@ describe("GET /api/v1/desktop/clients/:id", () => {
 
     expect(res.status).toBe(404);
     expect(body.error).toBe("Not found.");
-    expect(getClientDashboardDetailMock).toHaveBeenCalledWith("biz_1", "client_1");
+    expect(getClientDashboardDetailMock).toHaveBeenCalledWith("00000000-0000-4000-8000-000000000001", "client_1");
   });
 
   it("returns client profile, booking history, and notes", async () => {
@@ -161,7 +161,7 @@ describe("GET /api/v1/desktop/clients/:id", () => {
     const body = await res.json();
 
     expect(res.status).toBe(200);
-    expect(updateClientDashboardFieldsMock).toHaveBeenCalledWith("biz_1", "client_1", expect.objectContaining({
+    expect(updateClientDashboardFieldsMock).toHaveBeenCalledWith("00000000-0000-4000-8000-000000000001", "client_1", expect.objectContaining({
       communicationOptOut: true,
       name: "Kasun Perera",
       phone: "0770000000",

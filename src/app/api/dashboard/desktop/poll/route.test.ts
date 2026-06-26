@@ -58,7 +58,7 @@ describe("GET /api/dashboard/desktop/poll", () => {
   it("returns tenant-scoped payload and today counter", async () => {
     requireApiBusinessMock.mockResolvedValue({
       ok: true,
-      context: { businessId: "biz_1" },
+      context: { businessId: "00000000-0000-4000-8000-000000000001" },
     });
 
     const businessQ = makeLimitQuery([{ timezone: "Asia/Colombo" }]);
@@ -120,7 +120,7 @@ describe("GET /api/dashboard/desktop/poll", () => {
   it("returns 400 for malformed since", async () => {
     requireApiBusinessMock.mockResolvedValue({
       ok: true,
-      context: { businessId: "biz_1" },
+      context: { businessId: "00000000-0000-4000-8000-000000000001" },
     });
 
     const req = new NextRequest(
@@ -136,7 +136,7 @@ describe("GET /api/dashboard/desktop/poll", () => {
   it("returns 400 for malformed windowMinutes", async () => {
     requireApiBusinessMock.mockResolvedValue({
       ok: true,
-      context: { businessId: "biz_1" },
+      context: { businessId: "00000000-0000-4000-8000-000000000001" },
     });
 
     const req = new NextRequest("http://localhost/api/dashboard/desktop/poll?windowMinutes=abc");
@@ -150,7 +150,7 @@ describe("GET /api/dashboard/desktop/poll", () => {
   it("clamps out-of-range windowMinutes and still returns success", async () => {
     requireApiBusinessMock.mockResolvedValue({
       ok: true,
-      context: { businessId: "biz_1" },
+      context: { businessId: "00000000-0000-4000-8000-000000000001" },
     });
 
     dbSelectMock

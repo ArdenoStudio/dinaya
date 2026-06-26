@@ -34,7 +34,7 @@ describe("GET /api/v1/desktop/ai/:id", () => {
     withRateLimitMock.mockResolvedValue({ ok: true });
     requireDesktopReadMock.mockResolvedValue({
       ok: true,
-      context: { businessId: "biz_1", deviceId: "device_1" },
+      context: { businessId: "00000000-0000-4000-8000-000000000001", deviceId: "device_1" },
     });
     requireProMock.mockResolvedValue(undefined);
   });
@@ -61,8 +61,8 @@ describe("GET /api/v1/desktop/ai/:id", () => {
 
     expect(res.status).toBe(404);
     expect(body.error).toBe("Not found.");
-    expect(requireProMock).toHaveBeenCalledWith("biz_1", "aiBookingAutopilot");
-    expect(getAiWorkflowRunDashboardDetailMock).toHaveBeenCalledWith("biz_1", "run_1");
+    expect(requireProMock).toHaveBeenCalledWith("00000000-0000-4000-8000-000000000001", "aiBookingAutopilot");
+    expect(getAiWorkflowRunDashboardDetailMock).toHaveBeenCalledWith("00000000-0000-4000-8000-000000000001", "run_1");
   });
 
   it("returns workflow run copy, delivery context, and branch context", async () => {

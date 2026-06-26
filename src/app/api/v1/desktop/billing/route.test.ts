@@ -25,7 +25,7 @@ describe("GET /api/v1/desktop/billing", () => {
     withRateLimitMock.mockResolvedValue({ ok: true });
     requireDesktopReadMock.mockResolvedValue({
       ok: true,
-      context: { businessId: "biz_1", deviceId: "device_1" },
+      context: { businessId: "00000000-0000-4000-8000-000000000001", deviceId: "device_1" },
     });
   });
 
@@ -54,7 +54,7 @@ describe("GET /api/v1/desktop/billing", () => {
       },
       business: {
         effectivePlan: "pro",
-        id: "biz_1",
+        id: "00000000-0000-4000-8000-000000000001",
         name: "Salon",
         planExpiresAt: "2026-06-28T00:00:00.000Z",
         planLabel: "Pro",
@@ -105,7 +105,7 @@ describe("GET /api/v1/desktop/billing", () => {
     expect(body.currentSubscription).toMatchObject({ id: "sub_1", status: "active" });
     expect(body.pricing.pro.monthlyLkr).toBe(3990);
     expect(body.serverTime).toEqual(expect.any(String));
-    expect(getBillingDashboardOverviewMock).toHaveBeenCalledWith("biz_1");
+    expect(getBillingDashboardOverviewMock).toHaveBeenCalledWith("00000000-0000-4000-8000-000000000001");
   });
 
   it("applies desktop billing rate limit", async () => {

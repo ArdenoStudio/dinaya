@@ -33,10 +33,10 @@ describe("GET /api/v1/desktop/marketing", () => {
     withRateLimitMock.mockResolvedValue({ ok: true });
     requireDesktopReadMock.mockResolvedValue({
       ok: true,
-      context: { businessId: "biz_1", deviceId: "device_1" },
+      context: { businessId: "00000000-0000-4000-8000-000000000001", deviceId: "device_1" },
     });
     getMarketingDashboardListMock.mockResolvedValue({
-      business: { id: "biz_1", name: "Dinaya Salon", slug: "dinaya-salon" },
+      business: { id: "00000000-0000-4000-8000-000000000001", name: "Dinaya Salon", slug: "dinaya-salon" },
       directory: { category: "Salon", city: "Kandy", district: "Kandy", listed: true },
       filters: { limit: 80, q: "", status: "all" },
       referral: { bookings: 3, code: "dinaya-salon" },
@@ -99,7 +99,7 @@ describe("GET /api/v1/desktop/marketing", () => {
     const body = await res.json();
 
     expect(res.status).toBe(200);
-    expect(getMarketingDashboardListMock).toHaveBeenCalledWith("biz_1", {
+    expect(getMarketingDashboardListMock).toHaveBeenCalledWith("00000000-0000-4000-8000-000000000001", {
       limit: 20,
       q: "monday",
       status: "draft",

@@ -38,11 +38,11 @@ describe("GET /api/v1/desktop/marketing/:id", () => {
     withRateLimitMock.mockResolvedValue({ ok: true });
     requireDesktopReadMock.mockResolvedValue({
       ok: true,
-      context: { businessId: "biz_1", deviceId: "device_1" },
+      context: { businessId: "00000000-0000-4000-8000-000000000001", deviceId: "device_1" },
     });
     requireDesktopWriteMock.mockResolvedValue({
       ok: true,
-      context: { businessId: "biz_1", deviceId: "device_1" },
+      context: { businessId: "00000000-0000-4000-8000-000000000001", deviceId: "device_1" },
     });
     requireProMock.mockResolvedValue(undefined);
   });
@@ -62,7 +62,7 @@ describe("GET /api/v1/desktop/marketing/:id", () => {
 
   it("returns share tool detail for native marketing tools", async () => {
     getMarketingDashboardDetailMock.mockResolvedValue({
-      business: { id: "biz_1", name: "Dinaya Salon", slug: "dinaya-salon" },
+      business: { id: "00000000-0000-4000-8000-000000000001", name: "Dinaya Salon", slug: "dinaya-salon" },
       directory: { category: "Salon", city: "Kandy", district: "Kandy", listed: true },
       kind: "share_tool",
       referral: { bookings: 3, code: "dinaya-salon" },
@@ -100,13 +100,13 @@ describe("GET /api/v1/desktop/marketing/:id", () => {
 
     expect(res.status).toBe(404);
     expect(body.error).toBe("Not found.");
-    expect(getMarketingDashboardDetailMock).toHaveBeenCalledWith("biz_1", "content_1");
+    expect(getMarketingDashboardDetailMock).toHaveBeenCalledWith("00000000-0000-4000-8000-000000000001", "content_1");
   });
 
   it("approves content calendar items with desktop write scope", async () => {
     updateMarketingContentActionMock.mockResolvedValue({ id: "content_1", status: "approved" });
     getMarketingDashboardDetailMock.mockResolvedValue({
-      business: { id: "biz_1", name: "Dinaya Salon", slug: "dinaya-salon" },
+      business: { id: "00000000-0000-4000-8000-000000000001", name: "Dinaya Salon", slug: "dinaya-salon" },
       content: {
         approvedAt: "2026-05-29T03:00:00.000Z",
         caption: "Book today",
@@ -140,8 +140,8 @@ describe("GET /api/v1/desktop/marketing/:id", () => {
     const body = await res.json();
 
     expect(res.status).toBe(200);
-    expect(requireProMock).toHaveBeenCalledWith("biz_1", "aiContentMachine");
-    expect(updateMarketingContentActionMock).toHaveBeenCalledWith("biz_1", "content_1", "approve");
+    expect(requireProMock).toHaveBeenCalledWith("00000000-0000-4000-8000-000000000001", "aiContentMachine");
+    expect(updateMarketingContentActionMock).toHaveBeenCalledWith("00000000-0000-4000-8000-000000000001", "content_1", "approve");
     expect(body.content).toMatchObject({ id: "content_1", status: "approved" });
     expect(body.serverTime).toEqual(expect.any(String));
   });

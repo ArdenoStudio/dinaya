@@ -46,11 +46,11 @@ describe("/api/v1/desktop/settings", () => {
     withRateLimitMock.mockResolvedValue({ ok: true });
     requireDesktopReadMock.mockResolvedValue({
       ok: true,
-      context: { businessId: "biz_1", deviceId: "device_1", keyId: "key_1" },
+      context: { businessId: "00000000-0000-4000-8000-000000000001", deviceId: "device_1", keyId: "key_1" },
     });
     requireDesktopWriteMock.mockResolvedValue({
       ok: true,
-      context: { businessId: "biz_1", deviceId: "device_1", keyId: "key_1" },
+      context: { businessId: "00000000-0000-4000-8000-000000000001", deviceId: "device_1", keyId: "key_1" },
     });
     getDesktopSettingsDataMock.mockResolvedValue({
       business: {
@@ -58,7 +58,7 @@ describe("/api/v1/desktop/settings", () => {
         customDomain: null,
         directoryListed: true,
         email: "owner@example.com",
-        id: "biz_1",
+        id: "00000000-0000-4000-8000-000000000001",
         name: "Salon",
         payhereEnabled: true,
         phone: "0770000000",
@@ -92,7 +92,7 @@ describe("/api/v1/desktop/settings", () => {
         customDomain: null,
         directoryListed: true,
         email: "owner@example.com",
-        id: "biz_1",
+        id: "00000000-0000-4000-8000-000000000001",
         name: "Salon",
         payhereEnabled: true,
         phone: "0770000000",
@@ -124,9 +124,9 @@ describe("/api/v1/desktop/settings", () => {
 
     expect(res.status).toBe(200);
     expect(body.webUrl).toBe("/dashboard/settings");
-    expect(body.business).toMatchObject({ id: "biz_1", name: "Salon" });
+    expect(body.business).toMatchObject({ id: "00000000-0000-4000-8000-000000000001", name: "Salon" });
     expect(body.devices[0]).toMatchObject({ id: "key_1", isCurrent: true });
-    expect(getDesktopSettingsDataMock).toHaveBeenCalledWith("biz_1", "key_1");
+    expect(getDesktopSettingsDataMock).toHaveBeenCalledWith("00000000-0000-4000-8000-000000000001", "key_1");
   });
 
   it("revokes the current desktop device", async () => {
@@ -142,18 +142,18 @@ describe("/api/v1/desktop/settings", () => {
     expect(res.status).toBe(200);
     expect(body.revoked).toBe(true);
     expect(body.revokedKeyId).toBe("key_1");
-    expect(revokeCurrentDesktopDeviceMock).toHaveBeenCalledWith("biz_1", "key_1");
+    expect(revokeCurrentDesktopDeviceMock).toHaveBeenCalledWith("00000000-0000-4000-8000-000000000001", "key_1");
   });
 
   it("updates native business settings", async () => {
-    updateDesktopSettingsBusinessMock.mockResolvedValue({ id: "biz_1" });
+    updateDesktopSettingsBusinessMock.mockResolvedValue({ id: "00000000-0000-4000-8000-000000000001" });
     getDesktopSettingsDataMock.mockResolvedValue({
       business: {
         address: "Colombo",
         customDomain: null,
         directoryListed: false,
         email: "owner@example.com",
-        id: "biz_1",
+        id: "00000000-0000-4000-8000-000000000001",
         name: "Salon Pro",
         payhereEnabled: true,
         phone: "0771111111",
@@ -182,7 +182,7 @@ describe("/api/v1/desktop/settings", () => {
     const body = await res.json();
 
     expect(res.status).toBe(200);
-    expect(updateDesktopSettingsBusinessMock).toHaveBeenCalledWith("biz_1", {
+    expect(updateDesktopSettingsBusinessMock).toHaveBeenCalledWith("00000000-0000-4000-8000-000000000001", {
       address: "Colombo",
       directoryListed: false,
       name: "Salon Pro",

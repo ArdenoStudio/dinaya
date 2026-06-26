@@ -56,7 +56,7 @@ describe("PATCH /api/v1/desktop/bookings/:id/status", () => {
   it("blocks forbidden status transitions", async () => {
     requireDesktopBookingsMock.mockResolvedValue({
       ok: true,
-      context: { businessId: "biz_1", deviceId: "device_1", keyId: "key_1" },
+      context: { businessId: "00000000-0000-4000-8000-000000000001", deviceId: "device_1", keyId: "key_1" },
     });
     dbSelectMock.mockReturnValueOnce(makeSelectQuery([{ id: "bk_1", status: "completed" }]));
 
@@ -75,7 +75,7 @@ describe("PATCH /api/v1/desktop/bookings/:id/status", () => {
   it("updates status for valid transitions", async () => {
     requireDesktopBookingsMock.mockResolvedValue({
       ok: true,
-      context: { businessId: "biz_1", deviceId: "device_1", keyId: "key_1" },
+      context: { businessId: "00000000-0000-4000-8000-000000000001", deviceId: "device_1", keyId: "key_1" },
     });
 
     dbSelectMock

@@ -35,7 +35,7 @@ describe("POST /api/v1/desktop/clients/:id/notes", () => {
     withRateLimitMock.mockResolvedValue({ ok: true });
     requireDesktopWriteMock.mockResolvedValue({
       ok: true,
-      context: { businessId: "biz_1", deviceId: "device_1" },
+      context: { businessId: "00000000-0000-4000-8000-000000000001", deviceId: "device_1" },
     });
     getClientDashboardDetailMock.mockResolvedValue({
       bookings: [],
@@ -93,7 +93,7 @@ describe("POST /api/v1/desktop/clients/:id/notes", () => {
     const body = await res.json();
 
     expect(res.status).toBe(201);
-    expect(createClientDashboardNoteMock).toHaveBeenCalledWith("biz_1", "client_1", {
+    expect(createClientDashboardNoteMock).toHaveBeenCalledWith("00000000-0000-4000-8000-000000000001", "client_1", {
       body: "Prefers mornings",
     });
     expect(body.webUrl).toBe("/dashboard/clients/client_1");

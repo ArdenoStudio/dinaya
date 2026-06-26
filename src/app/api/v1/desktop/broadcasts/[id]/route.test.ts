@@ -34,7 +34,7 @@ describe("GET /api/v1/desktop/broadcasts/:id", () => {
     withRateLimitMock.mockResolvedValue({ ok: true });
     requireDesktopReadMock.mockResolvedValue({
       ok: true,
-      context: { businessId: "biz_1", deviceId: "device_1" },
+      context: { businessId: "00000000-0000-4000-8000-000000000001", deviceId: "device_1" },
     });
     requireProMock.mockResolvedValue(undefined);
   });
@@ -61,8 +61,8 @@ describe("GET /api/v1/desktop/broadcasts/:id", () => {
 
     expect(res.status).toBe(404);
     expect(body.error).toBe("Not found.");
-    expect(requireProMock).toHaveBeenCalledWith("biz_1", "broadcasts");
-    expect(getBroadcastDashboardDetailMock).toHaveBeenCalledWith("biz_1", "broadcast_1");
+    expect(requireProMock).toHaveBeenCalledWith("00000000-0000-4000-8000-000000000001", "broadcasts");
+    expect(getBroadcastDashboardDetailMock).toHaveBeenCalledWith("00000000-0000-4000-8000-000000000001", "broadcast_1");
   });
 
   it("returns broadcast audience and result summary", async () => {

@@ -35,7 +35,7 @@ describe("GET /api/v1/desktop/ai", () => {
     withRateLimitMock.mockResolvedValue({ ok: true });
     requireDesktopReadMock.mockResolvedValue({
       ok: true,
-      context: { businessId: "biz_1", deviceId: "device_1" },
+      context: { businessId: "00000000-0000-4000-8000-000000000001", deviceId: "device_1" },
     });
     requireProMock.mockResolvedValue(undefined);
     getAiHubDashboardDataMock.mockResolvedValue({
@@ -119,8 +119,8 @@ describe("GET /api/v1/desktop/ai", () => {
     const body = await res.json();
 
     expect(res.status).toBe(200);
-    expect(requireProMock).toHaveBeenCalledWith("biz_1", "aiBookingAutopilot");
-    expect(getAiHubDashboardDataMock).toHaveBeenCalledWith("biz_1", {
+    expect(requireProMock).toHaveBeenCalledWith("00000000-0000-4000-8000-000000000001", "aiBookingAutopilot");
+    expect(getAiHubDashboardDataMock).toHaveBeenCalledWith("00000000-0000-4000-8000-000000000001", {
       limit: 20,
       q: "reminder",
       status: "sent",

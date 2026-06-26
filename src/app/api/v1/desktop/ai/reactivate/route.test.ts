@@ -38,7 +38,7 @@ describe("POST /api/v1/desktop/ai/reactivate", () => {
     withRateLimitMock.mockResolvedValue({ ok: true });
     requireDesktopWriteMock.mockResolvedValue({
       ok: true,
-      context: { businessId: "biz_1", deviceId: "device_1" },
+      context: { businessId: "00000000-0000-4000-8000-000000000001", deviceId: "device_1" },
     });
     requireProMock.mockResolvedValue(undefined);
     runAiReactivationDashboardMock.mockResolvedValue({
@@ -56,8 +56,8 @@ describe("POST /api/v1/desktop/ai/reactivate", () => {
     const body = await res.json();
 
     expect(res.status).toBe(200);
-    expect(requireProMock).toHaveBeenCalledWith("biz_1", "clientReactivationCampaign");
-    expect(runAiReactivationDashboardMock).toHaveBeenCalledWith("biz_1", { clientId: undefined });
+    expect(requireProMock).toHaveBeenCalledWith("00000000-0000-4000-8000-000000000001", "clientReactivationCampaign");
+    expect(runAiReactivationDashboardMock).toHaveBeenCalledWith("00000000-0000-4000-8000-000000000001", { clientId: undefined });
     expect(body.stats.sent).toBe(1);
     expect(body.previews).toHaveLength(1);
   });

@@ -60,11 +60,11 @@ describe("GET /api/v1/desktop/reviews/:id", () => {
     withRateLimitMock.mockResolvedValue({ ok: true });
     requireDesktopReadMock.mockResolvedValue({
       ok: true,
-      context: { businessId: "biz_1", deviceId: "device_1" },
+      context: { businessId: "00000000-0000-4000-8000-000000000001", deviceId: "device_1" },
     });
     requireDesktopWriteMock.mockResolvedValue({
       ok: true,
-      context: { businessId: "biz_1", deviceId: "device_1" },
+      context: { businessId: "00000000-0000-4000-8000-000000000001", deviceId: "device_1" },
     });
     requireProMock.mockResolvedValue(undefined);
   });
@@ -91,7 +91,7 @@ describe("GET /api/v1/desktop/reviews/:id", () => {
 
     expect(res.status).toBe(404);
     expect(body.error).toBe("Not found.");
-    expect(getReviewDashboardDetailMock).toHaveBeenCalledWith("biz_1", "review_1");
+    expect(getReviewDashboardDetailMock).toHaveBeenCalledWith("00000000-0000-4000-8000-000000000001", "review_1");
   });
 
   it("returns review details with booking context", async () => {
@@ -126,8 +126,8 @@ describe("GET /api/v1/desktop/reviews/:id", () => {
     const body = await res.json();
 
     expect(res.status).toBe(200);
-    expect(requireProMock).toHaveBeenCalledWith("biz_1", "reviewReplies");
-    expect(updateReviewDashboardFieldsMock).toHaveBeenCalledWith("biz_1", "review_1", {
+    expect(requireProMock).toHaveBeenCalledWith("00000000-0000-4000-8000-000000000001", "reviewReplies");
+    expect(updateReviewDashboardFieldsMock).toHaveBeenCalledWith("00000000-0000-4000-8000-000000000001", "review_1", {
       ownerReply: "Thank you for visiting!",
     });
     expect(body.review.ownerReply).toBe("Thank you for visiting!");

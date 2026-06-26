@@ -25,7 +25,7 @@ describe("GET /api/v1/desktop/integrations/:id", () => {
     withRateLimitMock.mockResolvedValue({ ok: true });
     requireDesktopReadMock.mockResolvedValue({
       ok: true,
-      context: { businessId: "biz_1", deviceId: "device_1" },
+      context: { businessId: "00000000-0000-4000-8000-000000000001", deviceId: "device_1" },
     });
   });
 
@@ -51,7 +51,7 @@ describe("GET /api/v1/desktop/integrations/:id", () => {
 
     expect(res.status).toBe(404);
     expect(body.error).toBe("Not found.");
-    expect(getIntegrationDashboardDetailMock).toHaveBeenCalledWith("biz_1", "integration_1");
+    expect(getIntegrationDashboardDetailMock).toHaveBeenCalledWith("00000000-0000-4000-8000-000000000001", "integration_1");
   });
 
   it("returns social connection detail", async () => {

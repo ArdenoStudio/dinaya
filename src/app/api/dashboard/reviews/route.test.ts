@@ -34,7 +34,7 @@ describe("GET /api/dashboard/reviews", () => {
     vi.clearAllMocks();
     requireApiBusinessMock.mockResolvedValue({
       ok: true,
-      context: { businessId: "biz_1" },
+      context: { businessId: "00000000-0000-4000-8000-000000000001" },
     });
     requireProMock.mockResolvedValue(undefined);
     getReviewsDashboardListMock.mockResolvedValue({
@@ -58,7 +58,7 @@ describe("GET /api/dashboard/reviews", () => {
 
   it("returns 402 when the reviews feature is not available", async () => {
     const { PlanRequiredError } = await import("@/lib/plan");
-    requireProMock.mockRejectedValue(new PlanRequiredError("biz_1", "reviews", "pro"));
+    requireProMock.mockRejectedValue(new PlanRequiredError("00000000-0000-4000-8000-000000000001", "reviews", "pro"));
 
     const req = new NextRequest("http://localhost/api/dashboard/reviews");
     const res = await GET(req);
@@ -76,8 +76,8 @@ describe("GET /api/dashboard/reviews", () => {
     const body = await res.json();
 
     expect(res.status).toBe(200);
-    expect(requireProMock).toHaveBeenCalledWith("biz_1", "reviews");
-    expect(getReviewsDashboardListMock).toHaveBeenCalledWith("biz_1", { limit: 200 });
+    expect(requireProMock).toHaveBeenCalledWith("00000000-0000-4000-8000-000000000001", "reviews");
+    expect(getReviewsDashboardListMock).toHaveBeenCalledWith("00000000-0000-4000-8000-000000000001", { limit: 200 });
     expect(body).toEqual([{ id: "review_1", authorName: "Kasun", rating: 5 }]);
   });
 });

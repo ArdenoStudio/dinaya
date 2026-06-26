@@ -29,11 +29,11 @@ describe("GET /api/v1/desktop/services/:id", () => {
     withRateLimitMock.mockResolvedValue({ ok: true });
     requireDesktopReadMock.mockResolvedValue({
       ok: true,
-      context: { businessId: "biz_1", deviceId: "device_1" },
+      context: { businessId: "00000000-0000-4000-8000-000000000001", deviceId: "device_1" },
     });
     requireDesktopWriteMock.mockResolvedValue({
       ok: true,
-      context: { businessId: "biz_1", deviceId: "device_1" },
+      context: { businessId: "00000000-0000-4000-8000-000000000001", deviceId: "device_1" },
     });
   });
 
@@ -59,7 +59,7 @@ describe("GET /api/v1/desktop/services/:id", () => {
 
     expect(res.status).toBe(404);
     expect(body.error).toBe("Not found.");
-    expect(getServiceDashboardDetailMock).toHaveBeenCalledWith("biz_1", "service_1");
+    expect(getServiceDashboardDetailMock).toHaveBeenCalledWith("00000000-0000-4000-8000-000000000001", "service_1");
   });
 
   it("returns service details, assigned staff, and recent bookings", async () => {
@@ -143,7 +143,7 @@ describe("GET /api/v1/desktop/services/:id", () => {
     const body = await res.json();
 
     expect(res.status).toBe(200);
-    expect(updateServiceDashboardFieldsMock).toHaveBeenCalledWith("biz_1", "service_1", expect.objectContaining({
+    expect(updateServiceDashboardFieldsMock).toHaveBeenCalledWith("00000000-0000-4000-8000-000000000001", "service_1", expect.objectContaining({
       durationMinutes: 60,
       isActive: true,
       name: "Haircut Pro",

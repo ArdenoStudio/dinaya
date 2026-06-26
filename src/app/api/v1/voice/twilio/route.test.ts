@@ -78,7 +78,7 @@ describe("Twilio voice webhook", () => {
 
   it("returns TwiML for a valid signed request", async () => {
     dbSelectMock
-      .mockReturnValueOnce(makeLimitQuery([{ id: "biz_1", name: "Salon" }]))
+      .mockReturnValueOnce(makeLimitQuery([{ id: "00000000-0000-4000-8000-000000000001", name: "Salon" }]))
       .mockReturnValueOnce(
         makeLimitQuery([{ fallbackMessage: "Please book online.", welcomeMessage: "Hello!" }]),
       );

@@ -20,6 +20,7 @@
     "video:lint": "npm --prefix apps/video run lint",
     "subapps:verify": "npm run mcp:dinaya:self-test && npm run mcp:dinaya:audit && npm run video:lint",
     "test": "vitest run",
+    "test:routes:generate": "node scripts/generate-route-tests.mjs",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:install": "playwright install --with-deps chromium",

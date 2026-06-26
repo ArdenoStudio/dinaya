@@ -26,7 +26,7 @@ describe("GET /api/v1/desktop/reviews", () => {
     withRateLimitMock.mockResolvedValue({ ok: true });
     requireDesktopReadMock.mockResolvedValue({
       ok: true,
-      context: { businessId: "biz_1", deviceId: "device_1" },
+      context: { businessId: "00000000-0000-4000-8000-000000000001", deviceId: "device_1" },
     });
     getReviewsDashboardListMock.mockResolvedValue({
       filters: { limit: 80, q: "", rating: null, status: "all" },
@@ -82,7 +82,7 @@ describe("GET /api/v1/desktop/reviews", () => {
     const body = await res.json();
 
     expect(res.status).toBe(200);
-    expect(getReviewsDashboardListMock).toHaveBeenCalledWith("biz_1", {
+    expect(getReviewsDashboardListMock).toHaveBeenCalledWith("00000000-0000-4000-8000-000000000001", {
       limit: 20,
       q: "kasun",
       rating: 5,

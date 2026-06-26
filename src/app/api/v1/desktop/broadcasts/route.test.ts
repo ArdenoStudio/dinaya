@@ -36,7 +36,7 @@ describe("GET /api/v1/desktop/broadcasts", () => {
     withRateLimitMock.mockResolvedValue({ ok: true });
     requireDesktopReadMock.mockResolvedValue({
       ok: true,
-      context: { businessId: "biz_1", deviceId: "device_1" },
+      context: { businessId: "00000000-0000-4000-8000-000000000001", deviceId: "device_1" },
     });
     requireProMock.mockResolvedValue(undefined);
     getBroadcastsDashboardListMock.mockResolvedValue({
@@ -100,8 +100,8 @@ describe("GET /api/v1/desktop/broadcasts", () => {
     const body = await res.json();
 
     expect(res.status).toBe(200);
-    expect(requireProMock).toHaveBeenCalledWith("biz_1", "broadcasts");
-    expect(getBroadcastsDashboardListMock).toHaveBeenCalledWith("biz_1", {
+    expect(requireProMock).toHaveBeenCalledWith("00000000-0000-4000-8000-000000000001", "broadcasts");
+    expect(getBroadcastsDashboardListMock).toHaveBeenCalledWith("00000000-0000-4000-8000-000000000001", {
       channel: "email",
       limit: 20,
       q: "offer",

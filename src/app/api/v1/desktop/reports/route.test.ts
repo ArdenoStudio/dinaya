@@ -49,7 +49,7 @@ describe("GET /api/v1/desktop/reports", () => {
     withRateLimitMock.mockResolvedValue({ ok: true });
     requireDesktopReadMock.mockResolvedValue({
       ok: true,
-      context: { businessId: "biz_1", deviceId: "device_1" },
+      context: { businessId: "00000000-0000-4000-8000-000000000001", deviceId: "device_1" },
     });
     requireProMock.mockResolvedValue(undefined);
   });
@@ -70,7 +70,7 @@ describe("GET /api/v1/desktop/reports", () => {
 
   it("returns a plan gate response when reports are unavailable", async () => {
     const { PlanRequiredError } = await import("@/lib/plan");
-    requireProMock.mockRejectedValue(new PlanRequiredError("biz_1", "reports", "pro"));
+    requireProMock.mockRejectedValue(new PlanRequiredError("00000000-0000-4000-8000-000000000001", "reports", "pro"));
 
     const req = new NextRequest("http://localhost/api/v1/desktop/reports");
     const res = await GET(req);
@@ -91,7 +91,7 @@ describe("GET /api/v1/desktop/reports", () => {
         staffLoad: [{ label: "Ashan", value: 4 }],
         topClients: [{ label: "Kasun", value: 2500 }],
       },
-      business: { id: "biz_1", name: "Salon", timezone: "Asia/Colombo" },
+      business: { id: "00000000-0000-4000-8000-000000000001", name: "Salon", timezone: "Asia/Colombo" },
       export: {
         csv: "Metric,Value\nRevenue,2500",
         filename: "dinaya-reports.csv",
@@ -126,8 +126,8 @@ describe("GET /api/v1/desktop/reports", () => {
     expect(body.metrics.totalRevenueLkr).toBe(2500);
     expect(body.export.filename).toBe("dinaya-reports.csv");
     expect(body.serverTime).toEqual(expect.any(String));
-    expect(requireProMock).toHaveBeenCalledWith("biz_1", "reports");
-    expect(getReportsDashboardOverviewMock).toHaveBeenCalledWith("biz_1", {
+    expect(requireProMock).toHaveBeenCalledWith("00000000-0000-4000-8000-000000000001", "reports");
+    expect(getReportsDashboardOverviewMock).toHaveBeenCalledWith("00000000-0000-4000-8000-000000000001", {
       from: "2026-05-01",
       to: "2026-05-28",
     });

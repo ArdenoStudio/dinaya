@@ -45,7 +45,7 @@ describe("/api/v1/desktop/availability/overrides", () => {
     withRateLimitMock.mockResolvedValue({ ok: true });
     requireDesktopWriteMock.mockResolvedValue({
       ok: true,
-      context: { businessId: "biz_1", deviceId: "device_1" },
+      context: { businessId: "00000000-0000-4000-8000-000000000001", deviceId: "device_1" },
     });
     getAvailabilityDashboardOverviewMock.mockResolvedValue({
       members: [
@@ -94,7 +94,7 @@ describe("/api/v1/desktop/availability/overrides", () => {
     const body = await res.json();
 
     expect(res.status).toBe(200);
-    expect(upsertAvailabilityDashboardOverrideMock).toHaveBeenCalledWith("biz_1", expect.objectContaining({
+    expect(upsertAvailabilityDashboardOverrideMock).toHaveBeenCalledWith("00000000-0000-4000-8000-000000000001", expect.objectContaining({
       date: "2026-06-01",
       isBlocked: true,
       staffId: "staff_1",
@@ -136,7 +136,7 @@ describe("/api/v1/desktop/availability/overrides", () => {
     const body = await res.json();
 
     expect(res.status).toBe(200);
-    expect(deleteAvailabilityDashboardOverrideMock).toHaveBeenCalledWith("biz_1", {
+    expect(deleteAvailabilityDashboardOverrideMock).toHaveBeenCalledWith("00000000-0000-4000-8000-000000000001", {
       id: "override_1",
       staffId: "staff_1",
     });

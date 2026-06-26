@@ -57,7 +57,7 @@ describe("GET /api/v1/desktop/calendar", () => {
     withRateLimitMock.mockResolvedValue({ ok: true });
     requireDesktopBookingsMock.mockResolvedValue({
       ok: true,
-      context: { businessId: "biz_1", deviceId: "device_1" },
+      context: { businessId: "00000000-0000-4000-8000-000000000001", deviceId: "device_1" },
     });
   });
 

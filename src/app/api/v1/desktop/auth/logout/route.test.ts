@@ -30,7 +30,7 @@ describe("POST /api/v1/desktop/auth/logout", () => {
     requireDesktopReadMock.mockResolvedValue({
       ok: true,
       context: {
-        businessId: "biz_1",
+        businessId: "00000000-0000-4000-8000-000000000001",
         keyId: "key_1",
       },
     });

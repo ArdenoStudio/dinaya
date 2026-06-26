@@ -64,7 +64,7 @@ describe("GET /api/v1/desktop/bookings", () => {
   it("returns 400 for malformed since param", async () => {
     requireDesktopBookingsMock.mockResolvedValue({
       ok: true,
-      context: { businessId: "biz_1", deviceId: "device_1" },
+      context: { businessId: "00000000-0000-4000-8000-000000000001", deviceId: "device_1" },
     });
 
     const req = new NextRequest("http://localhost/api/v1/desktop/bookings?since=bad");
@@ -78,7 +78,7 @@ describe("GET /api/v1/desktop/bookings", () => {
   it("returns compact rows and cursor", async () => {
     requireDesktopBookingsMock.mockResolvedValue({
       ok: true,
-      context: { businessId: "biz_1", deviceId: "device_1" },
+      context: { businessId: "00000000-0000-4000-8000-000000000001", deviceId: "device_1" },
     });
 
     dbSelectMock

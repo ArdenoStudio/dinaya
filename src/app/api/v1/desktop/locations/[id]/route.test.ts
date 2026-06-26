@@ -39,11 +39,11 @@ describe("GET /api/v1/desktop/locations/:id", () => {
     withRateLimitMock.mockResolvedValue({ ok: true });
     requireDesktopReadMock.mockResolvedValue({
       ok: true,
-      context: { businessId: "biz_1", deviceId: "device_1" },
+      context: { businessId: "00000000-0000-4000-8000-000000000001", deviceId: "device_1" },
     });
     requireDesktopWriteMock.mockResolvedValue({
       ok: true,
-      context: { businessId: "biz_1", deviceId: "device_1" },
+      context: { businessId: "00000000-0000-4000-8000-000000000001", deviceId: "device_1" },
     });
   });
 
@@ -69,7 +69,7 @@ describe("GET /api/v1/desktop/locations/:id", () => {
 
     expect(res.status).toBe(404);
     expect(body.error).toBe("Not found.");
-    expect(getLocationDashboardDetailMock).toHaveBeenCalledWith("biz_1", "location_1");
+    expect(getLocationDashboardDetailMock).toHaveBeenCalledWith("00000000-0000-4000-8000-000000000001", "location_1");
   });
 
   it("returns location details, assigned staff, and recent bookings", async () => {
@@ -145,7 +145,7 @@ describe("GET /api/v1/desktop/locations/:id", () => {
     const body = await res.json();
 
     expect(res.status).toBe(200);
-    expect(updateLocationDashboardFieldsMock).toHaveBeenCalledWith("biz_1", "location_1", expect.objectContaining({
+    expect(updateLocationDashboardFieldsMock).toHaveBeenCalledWith("00000000-0000-4000-8000-000000000001", "location_1", expect.objectContaining({
       name: "Main branch",
       timezone: "Asia/Colombo",
     }));

@@ -39,7 +39,7 @@ describe("POST /api/dashboard/api-keys", () => {
     vi.clearAllMocks();
     requireApiBusinessMock.mockResolvedValue({
       ok: true,
-      context: { businessId: "biz_1" },
+      context: { businessId: "00000000-0000-4000-8000-000000000001" },
     });
   });
 

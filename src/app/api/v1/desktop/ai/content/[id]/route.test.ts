@@ -38,7 +38,7 @@ describe("PATCH /api/v1/desktop/ai/content/:id", () => {
     withRateLimitMock.mockResolvedValue({ ok: true });
     requireDesktopWriteMock.mockResolvedValue({
       ok: true,
-      context: { businessId: "biz_1", deviceId: "device_1" },
+      context: { businessId: "00000000-0000-4000-8000-000000000001", deviceId: "device_1" },
     });
     requireProMock.mockResolvedValue(undefined);
     updateAiContentDashboardActionMock.mockResolvedValue({
@@ -57,8 +57,8 @@ describe("PATCH /api/v1/desktop/ai/content/:id", () => {
     const body = await res.json();
 
     expect(res.status).toBe(200);
-    expect(requireProMock).toHaveBeenCalledWith("biz_1", "aiContentMachine");
-    expect(updateAiContentDashboardActionMock).toHaveBeenCalledWith("biz_1", "content_1", "approve");
+    expect(requireProMock).toHaveBeenCalledWith("00000000-0000-4000-8000-000000000001", "aiContentMachine");
+    expect(updateAiContentDashboardActionMock).toHaveBeenCalledWith("00000000-0000-4000-8000-000000000001", "content_1", "approve");
     expect(body.item.status).toBe("approved");
   });
 
