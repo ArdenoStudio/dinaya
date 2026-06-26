@@ -18,6 +18,7 @@ import {
   isBusinessHolidayClosed,
 } from "@/lib/business-holidays";
 import { ANY_STAFF_ID } from "@/lib/booking-staff";
+import { bookingsOverlappingDayFilter } from "@/lib/booking-availability";
 import { getActiveReservationsForStaff } from "@/lib/slot-reservations";
 import { withRateLimit } from "@/lib/rate-limit";
 import { parseISO, startOfDay, endOfDay } from "date-fns";
@@ -144,11 +145,7 @@ export async function GET(req: NextRequest) {
   const dayStartUtc = fromZonedTime(startOfDay(localDate), timezone);
   const dayEndUtc = fromZonedTime(endOfDay(localDate), timezone);
 
-  const dayBookingsFilter = and(
-    eq(bookings.staffId, staffId),
-    gte(bookings.startsAt, dayStartUtc),
-    lt(bookings.startsAt, dayEndUtc),
-  );
+  const dayBookingsFilter = bookingsOverlappingDayFilter(staffId, dayStartUtc, dayEndUtc);
 
   const [staffAvailability, overrides, existingBookings, capacityRow, reservations] =
     await Promise.all([

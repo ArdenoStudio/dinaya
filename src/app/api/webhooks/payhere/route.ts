@@ -12,7 +12,7 @@ import type { BookingLanguage } from "@/lib/i18n";
 import { logActivity } from "@/lib/activity-log";
 import { decryptSecret } from "@/lib/secrets";
 import { processBookingAutomationTrigger } from "@/lib/automations/engine";
-import { releaseDealSlotForBooking } from "@/lib/deals/claim";
+import { releaseDealSlotForBooking, claimDealSlot } from "@/lib/deals/claim";
 import { sendPaymentReceiptEmail } from "@/lib/receipts";
 import { logRejectedSettled, runAfterResponse } from "@/lib/after-response";
 import { hasPublicColumn } from "@/lib/dashboard/db-compat";
@@ -58,6 +58,8 @@ export async function POST(req: NextRequest) {
       staffId: bookings.staffId,
       startsAt: bookings.startsAt,
       endsAt: bookings.endsAt,
+      dealId: bookings.dealId,
+      cancellationReason: bookings.cancellationReason,
     })
     .from(bookings)
     .where(eq(bookings.id, payment.bookingId))
@@ -157,7 +159,12 @@ export async function POST(req: NextRequest) {
       if (currentPayment?.status === "failed") {
         let recovered = false;
 
-        if (booking.status === "cancelled" && booking.staffId && booking.serviceId) {
+        if (
+          booking.status === "cancelled" &&
+          booking.staffId &&
+          booking.serviceId &&
+          booking.cancellationReason === "Payment not completed in time."
+        ) {
           const slotConflict = await db
             .select({ id: bookings.id })
             .from(bookings)
@@ -197,6 +204,20 @@ export async function POST(req: NextRequest) {
                 .where(and(eq(bookings.id, booking.id), eq(bookings.status, "cancelled")))
                 .returning({ id: bookings.id });
               recovered = Boolean(reconfirmed);
+              if (recovered && booking.dealId) {
+                const claimedDeal = await claimDealSlot(booking.dealId);
+                if (!claimedDeal) {
+                  await db
+                    .update(bookings)
+                    .set({
+                      status: "cancelled",
+                      cancelledAt: new Date(),
+                      cancellationReason: "Deal sold out during late payment recovery.",
+                    })
+                    .where(eq(bookings.id, booking.id));
+                  recovered = false;
+                }
+              }
             } catch (error) {
               if (!isOverlapConstraintError(error)) {
                 throw error;
@@ -227,12 +248,24 @@ export async function POST(req: NextRequest) {
 
         if (recovered) {
           await logActivity({
+            action: "payment_success",
+            businessId: booking.businessId,
+            entity: "booking",
+            entityId: booking.id,
+            meta: { orderId, amount: payhereAmount, currency: payhereCurrency, recovered: true },
+          });
+          await logActivity({
             action: "payment_late_recovery",
             businessId: booking.businessId,
             entity: "booking",
             entityId: booking.id,
             meta: { orderId, amount: payhereAmount },
           });
+          void processBookingAutomationTrigger(booking.businessId, booking.id, "booking.confirmed").catch(
+            (error) => {
+              console.error("Automation trigger failed:", error);
+            },
+          );
 
           return NextResponse.json({ received: true, recovered: true });
         }
