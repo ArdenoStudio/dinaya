@@ -128,13 +128,13 @@ export async function getServicesDashboardList(
   ]);
 
   const serviceIds = rows.map((row) => row.id);
-  const now = new Date();
+  const nowIso = new Date().toISOString();
   const [bookingSummary, staffSummary] = serviceIds.length
     ? await Promise.all([
         db
           .select({
             bookingCount: count(),
-            futureBookingCount: sql<number>`coalesce(count(*) filter (where ${bookings.startsAt} >= ${now} and ${bookings.status} in ('pending', 'confirmed')), 0)::int`,
+            futureBookingCount: sql<number>`coalesce(count(*) filter (where ${bookings.startsAt} >= ${nowIso} and ${bookings.status} in ('pending', 'confirmed')), 0)::int`,
             lastBookingAt: sql<Date | null>`max(${bookings.startsAt})`,
             serviceId: bookings.serviceId,
           })
@@ -273,7 +273,7 @@ export async function updateServiceDashboardFields(
         and(
           eq(bookings.businessId, businessId),
           eq(bookings.serviceId, serviceId),
-          gte(bookings.startsAt, new Date()),
+          gte(bookings.startsAt, new Date().toISOString()),
           inArray(bookings.status, ["pending", "confirmed"]),
         ),
       )

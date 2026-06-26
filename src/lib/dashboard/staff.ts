@@ -212,6 +212,9 @@ async function getStaffDashboardListStrict(
   todayStart.setHours(0, 0, 0, 0);
   const todayEnd = new Date(todayStart);
   todayEnd.setDate(todayEnd.getDate() + 1);
+  const nowIso = now.toISOString();
+  const todayStartIso = todayStart.toISOString();
+  const todayEndIso = todayEnd.toISOString();
 
   const [serviceSummary, locationRows, availabilitySummary, bookingSummary] = staffIds.length
     ? await Promise.all([
@@ -246,10 +249,10 @@ async function getStaffDashboardListStrict(
           .groupBy(availability.staffId),
         db
           .select({
-            futureBookingCount: sql<number>`coalesce(count(*) filter (where ${bookings.startsAt} >= ${now} and ${bookings.status} in ('pending', 'confirmed')), 0)::int`,
+            futureBookingCount: sql<number>`coalesce(count(*) filter (where ${bookings.startsAt} >= ${nowIso} and ${bookings.status} in ('pending', 'confirmed')), 0)::int`,
             lastBookingAt: sql<Date | null>`max(${bookings.startsAt})`,
             staffId: bookings.staffId,
-            todayBookingCount: sql<number>`coalesce(count(*) filter (where ${bookings.startsAt} >= ${todayStart} and ${bookings.startsAt} < ${todayEnd}), 0)::int`,
+            todayBookingCount: sql<number>`coalesce(count(*) filter (where ${bookings.startsAt} >= ${todayStartIso} and ${bookings.startsAt} < ${todayEndIso}), 0)::int`,
           })
           .from(bookings)
           .where(and(eq(bookings.businessId, businessId), inArray(bookings.staffId, staffIds)))

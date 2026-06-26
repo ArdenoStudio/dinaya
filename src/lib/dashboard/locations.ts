@@ -98,7 +98,7 @@ export async function getLocationsDashboardList(
   ]);
 
   const locationIds = rows.map((row) => row.id);
-  const now = new Date();
+  const nowIso = new Date().toISOString();
   const [staffRows, bookingSummary] = locationIds.length
     ? await Promise.all([
         db
@@ -113,7 +113,7 @@ export async function getLocationsDashboardList(
         db
           .select({
             bookingCount: count(),
-            futureBookingCount: sql<number>`coalesce(count(*) filter (where ${bookings.startsAt} >= ${now} and ${bookings.status} in ('pending', 'confirmed')), 0)::int`,
+            futureBookingCount: sql<number>`coalesce(count(*) filter (where ${bookings.startsAt} >= ${nowIso} and ${bookings.status} in ('pending', 'confirmed')), 0)::int`,
             lastBookingAt: sql<Date | null>`max(${bookings.startsAt})`,
             locationId: bookings.locationId,
           })
