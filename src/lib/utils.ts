@@ -34,7 +34,8 @@ export function isOptimizableRemoteImage(url: string): boolean {
       hostname === "res.cloudinary.com" ||
       hostname === "api.qrserver.com" ||
       hostname.endsWith(".dinaya.lk") ||
-      hostname === "dinaya.lk"
+      hostname === "dinaya.lk" ||
+      hostname.endsWith(".supabase.co")
     );
   } catch {
     return url.startsWith("/");

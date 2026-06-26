@@ -32,6 +32,7 @@ export function ReviewsClient({ canUseAiReplies }: { canUseAiReplies: boolean })
   const copy = useDashboardCopy().reviews;
   const [reviewList, setReviewList] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [activeReplyId, setActiveReplyId] = useState<string | null>(null);
   const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({});
   const [savingReplyId, setSavingReplyId] = useState<string | null>(null);
@@ -40,12 +41,21 @@ export function ReviewsClient({ canUseAiReplies }: { canUseAiReplies: boolean })
 
   useEffect(() => {
     fetch("/api/dashboard/reviews")
-      .then((response) => response.json())
-      .then((data: Review[]) => {
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(typeof data?.error === "string" ? data.error : "Could not load reviews.");
+        }
+        if (!Array.isArray(data)) {
+          throw new Error("Could not load reviews.");
+        }
         setReviewList(data);
-        setReplyDrafts(Object.fromEntries(data.map((review) => [review.id, review.ownerReply ?? ""])));
-        setLoading(false);
-      });
+        setReplyDrafts(Object.fromEntries(data.map((review: Review) => [review.id, review.ownerReply ?? ""])));
+      })
+      .catch((error: unknown) => {
+        setLoadError(error instanceof Error ? error.message : "Could not load reviews.");
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   async function togglePublished(id: string, current: boolean) {
@@ -125,6 +135,10 @@ export function ReviewsClient({ canUseAiReplies }: { canUseAiReplies: boolean })
 
       {loading ? (
         <p className="text-sm text-muted-foreground">{copy.loading}</p>
+      ) : loadError ? (
+        <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center dark:border-red-900 dark:bg-red-950/40">
+          <p className="text-sm text-red-800 dark:text-red-200">{loadError}</p>
+        </div>
       ) : reviewList.length === 0 ? (
         <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-12 text-center">
           <Icon name="star" className="mb-3 block text-3xl text-muted-foreground/40" />

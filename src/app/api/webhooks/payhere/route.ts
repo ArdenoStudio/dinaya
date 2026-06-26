@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { payments, bookings, businesses, services, staff } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, inArray, lt, gt, ne } from "drizzle-orm";
 import { payhereAmountMatches, verifyPayhereWebhook } from "@/lib/payhere";
 import { parsePayhereWebhookFields } from "@/lib/payhere-webhook";
 import { sendBookingNotificationToBusiness } from "@/lib/resend";
@@ -12,12 +12,19 @@ import type { BookingLanguage } from "@/lib/i18n";
 import { logActivity } from "@/lib/activity-log";
 import { decryptSecret } from "@/lib/secrets";
 import { processBookingAutomationTrigger } from "@/lib/automations/engine";
-import { releaseDealSlotForBooking } from "@/lib/deals/claim";
+import { releaseDealSlotForBooking, claimDealSlot } from "@/lib/deals/claim";
 import { sendPaymentReceiptEmail } from "@/lib/receipts";
 import { logRejectedSettled, runAfterResponse } from "@/lib/after-response";
 import { hasPublicColumn } from "@/lib/dashboard/db-compat";
+import { isDailyCapacityReached } from "@/lib/booking-availability";
 
 const WEBHOOK_REJECTED = NextResponse.json({ error: "Invalid webhook" }, { status: 400 });
+
+function isOverlapConstraintError(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+  const maybe = error as { code?: string; cause?: { code?: string } };
+  return maybe.code === "23P01" || maybe.cause?.code === "23P01";
+}
 
 export async function POST(req: NextRequest) {
   const form = await req.formData();
@@ -50,6 +57,9 @@ export async function POST(req: NextRequest) {
       serviceId: bookings.serviceId,
       staffId: bookings.staffId,
       startsAt: bookings.startsAt,
+      endsAt: bookings.endsAt,
+      dealId: bookings.dealId,
+      cancellationReason: bookings.cancellationReason,
     })
     .from(bookings)
     .where(eq(bookings.id, payment.bookingId))
@@ -69,6 +79,7 @@ export async function POST(req: NextRequest) {
       slug: businesses.slug,
       plan: businesses.plan,
       language: businesses.language,
+      timezone: businesses.timezone,
     })
     .from(businesses)
     .where(eq(businesses.id, booking.businessId))
@@ -142,6 +153,132 @@ export async function POST(req: NextRequest) {
 
       if (currentPayment?.status === "success") {
         return NextResponse.json({ received: true, duplicate: true });
+      }
+
+      // Late payment after expiry cron marked the payment failed and booking cancelled.
+      if (currentPayment?.status === "failed") {
+        let recovered = false;
+
+        if (
+          booking.status === "cancelled" &&
+          booking.staffId &&
+          booking.serviceId &&
+          booking.cancellationReason === "Payment not completed in time."
+        ) {
+          const slotConflict = await db
+            .select({ id: bookings.id })
+            .from(bookings)
+            .where(
+              and(
+                eq(bookings.staffId, booking.staffId),
+                ne(bookings.id, booking.id),
+                inArray(bookings.status, ["pending", "confirmed"]),
+                lt(bookings.startsAt, booking.endsAt),
+                gt(bookings.endsAt, booking.startsAt),
+              ),
+            )
+            .limit(1);
+
+          const [service] = await db
+            .select({ dailyCapacity: services.dailyCapacity })
+            .from(services)
+            .where(eq(services.id, booking.serviceId))
+            .limit(1);
+
+          const capacityReached =
+            service && booking.staffId
+              ? await isDailyCapacityReached({
+                  staffId: booking.staffId,
+                  serviceId: booking.serviceId,
+                  start: booking.startsAt,
+                  timezone: business.timezone ?? "Asia/Colombo",
+                  dailyCapacity: service.dailyCapacity,
+                })
+              : false;
+
+          if (slotConflict.length === 0 && !capacityReached) {
+            try {
+              const [reconfirmed] = await db
+                .update(bookings)
+                .set({ status: "confirmed", cancelledAt: null, cancellationReason: null })
+                .where(and(eq(bookings.id, booking.id), eq(bookings.status, "cancelled")))
+                .returning({ id: bookings.id });
+              recovered = Boolean(reconfirmed);
+              if (recovered && booking.dealId) {
+                const claimedDeal = await claimDealSlot(booking.dealId);
+                if (!claimedDeal) {
+                  await db
+                    .update(bookings)
+                    .set({
+                      status: "cancelled",
+                      cancelledAt: new Date(),
+                      cancellationReason: "Deal sold out during late payment recovery.",
+                    })
+                    .where(eq(bookings.id, booking.id));
+                  recovered = false;
+                }
+              }
+            } catch (error) {
+              if (!isOverlapConstraintError(error)) {
+                throw error;
+              }
+            }
+          }
+        }
+
+        const includePaymentProvider = await hasPublicColumn("payments", "provider");
+        await db
+          .update(payments)
+          .set(
+            includePaymentProvider
+              ? {
+                  status: "success",
+                  payherePayload: allFields,
+                  provider: "payhere",
+                  currency: "LKR",
+                  providerOrderId: orderId,
+                  providerPayload: allFields,
+                }
+              : {
+                  status: "success",
+                  payherePayload: allFields,
+                },
+          )
+          .where(eq(payments.id, payment.id));
+
+        if (recovered) {
+          await logActivity({
+            action: "payment_success",
+            businessId: booking.businessId,
+            entity: "booking",
+            entityId: booking.id,
+            meta: { orderId, amount: payhereAmount, currency: payhereCurrency, recovered: true },
+          });
+          await logActivity({
+            action: "payment_late_recovery",
+            businessId: booking.businessId,
+            entity: "booking",
+            entityId: booking.id,
+            meta: { orderId, amount: payhereAmount },
+          });
+          void processBookingAutomationTrigger(booking.businessId, booking.id, "booking.confirmed").catch(
+            (error) => {
+              console.error("Automation trigger failed:", error);
+            },
+          );
+
+          return NextResponse.json({ received: true, recovered: true });
+        }
+
+        await logActivity({
+          action: "payment_orphaned",
+          businessId: booking.businessId,
+          entity: "booking",
+          entityId: booking.id,
+          meta: { orderId, amount: payhereAmount, bookingStatus: booking.status },
+        });
+
+        return NextResponse.json({ received: true, orphaned: true });
       }
 
       return WEBHOOK_REJECTED;

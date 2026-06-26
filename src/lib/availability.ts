@@ -59,7 +59,7 @@ export function getAvailableSlots({
 
   // Find the recurring availability for this day of week. Multiple rows allow split shifts.
   const localDate = parseISO(date);
-  const dayOfWeek = localDate.getDay(); // 0=Sun, ..., 6=Sat
+  const dayOfWeek = localDate.getUTCDay(); // 0=Sun, ..., 6=Sat (date-only strings are UTC midnight)
   const recurringSlots = staffAvailability.filter((a) => a.dayOfWeek === dayOfWeek);
 
   if (recurringSlots.length === 0 && !dayOverride?.startTime) return [];
@@ -144,7 +144,7 @@ export function isStaffClosedOnDate({
   const dayOverride = overrides.find((o) => o.date === date);
   if (dayOverride?.isBlocked && !dayOverride.startTime) return true;
 
-  const dayOfWeek = parseISO(date).getDay();
+  const dayOfWeek = parseISO(date).getUTCDay();
   const recurringSlots = staffAvailability.filter((a) => a.dayOfWeek === dayOfWeek);
   return recurringSlots.length === 0 && !(dayOverride?.startTime && dayOverride.endTime);
 }

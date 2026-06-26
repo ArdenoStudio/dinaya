@@ -30,7 +30,11 @@ describe("POST /api/dashboard/upload/image", () => {
 
   it("uploads a banner image for the authenticated business", async () => {
     const { POST } = await import("@/app/api/dashboard/upload/image/route");
-    const file = new File([new Uint8Array([1, 2, 3])], "banner.webp", { type: "image/webp" });
+    const webpBytes = new Uint8Array([
+      0x52, 0x49, 0x46, 0x46, 0x24, 0x00, 0x00, 0x00,
+      0x57, 0x45, 0x42, 0x50, 0x56, 0x50, 0x38, 0x20,
+    ]);
+    const file = new File([webpBytes], "banner.webp", { type: "image/webp" });
     const formData = new FormData();
     formData.append("file", file);
     formData.append("kind", "banner");

@@ -1,7 +1,5 @@
 "use client";
 
-import { PlusSignIcon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
 import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { useState, type ReactNode } from "react";
@@ -265,7 +263,7 @@ export function MacOSSidebar({
                             : "text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200/70 dark:hover:bg-neutral-700/70",
                         )}
                       >
-                        {item.icon}
+                        {item.icon ?? null}
                       </SidebarNavLink>
                     );
                   }),
@@ -288,134 +286,6 @@ export function MacOSSidebar({
       </motion.aside>
 
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-        {children}
-      </div>
-    </div>
-  );
-}
-
-// Keep registry-compatible export for demos
-export interface MacOSSidebarDemoProps {
-  items: string[];
-  defaultOpen?: boolean;
-  initialSelectedIndex?: number;
-  children?: ReactNode;
-  className?: string;
-}
-
-export function MacOSSidebarDemo({
-  items,
-  defaultOpen = true,
-  initialSelectedIndex = 0,
-  children,
-  className,
-}: MacOSSidebarDemoProps) {
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  const [selectedIndex, setSelectedIndex] = useState(initialSelectedIndex);
-  const [isOpen, setIsOpen] = useState(defaultOpen);
-
-  return (
-    <div
-      className={cn(
-        "flex bg-neutral-200 dark:bg-neutral-900 rounded-3xl p-3 relative w-full sm:min-w-[480px] overflow-hidden",
-        className,
-      )}
-    >
-      <motion.div
-        animate={{ width: isOpen ? 240 : 64 }}
-        transition={{ type: "spring", bounce: 0.4, duration: 0.8 }}
-        className={cn(
-          "p-2 rounded-2xl shrink-0 flex flex-col items-start transition-colors duration-900 ease-out",
-          isOpen ? "bg-neutral-100 dark:bg-neutral-800" : "bg-transparent",
-        )}
-      >
-        <div
-          className={cn(
-            "flex items-center w-full text-neutral-700 dark:text-neutral-300 p-2 shrink-0",
-            isOpen ? "justify-end gap-4" : "justify-center",
-          )}
-        >
-          <AnimatePresence>
-            {isOpen ? (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                transition={{ duration: 0.2 }}
-              >
-                <HugeiconsIcon icon={PlusSignIcon} className="size-5 cursor-pointer" />
-              </motion.div>
-            ) : null}
-          </AnimatePresence>
-          <motion.button
-            type="button"
-            layout
-            aria-label={isOpen ? "Collapse sidebar" : "Expand sidebar"}
-            className="shrink-0 flex items-center justify-center"
-            onClick={() => setIsOpen((open) => !open)}
-          >
-            <SidebarToggleIcon isOpen={isOpen} strokeWidth={2} className="size-6" />
-          </motion.button>
-        </div>
-
-        <AnimatePresence>
-          {isOpen ? (
-            <motion.div
-              initial={{ opacity: 0, filter: "blur(4px)" }}
-              animate={{ opacity: 1, filter: "blur(0px)" }}
-              exit={{ opacity: 0, filter: "blur(4px)" }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
-              className="flex flex-col gap-2 mt-4 w-full relative z-10 whitespace-nowrap"
-              onMouseLeave={() => setHoveredIndex(null)}
-            >
-              {items.map((item, index) => (
-                <div
-                  key={item}
-                  className="relative cursor-pointer"
-                  onMouseEnter={() => setHoveredIndex(index)}
-                  onClick={() => setSelectedIndex(index)}
-                >
-                  <AnimatePresence>
-                    {selectedIndex === index ? (
-                      <motion.div
-                        className="absolute inset-0 z-0 bg-neutral-200 dark:bg-neutral-700 rounded-md"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.2, ease: "easeOut" }}
-                      />
-                    ) : null}
-                  </AnimatePresence>
-                  <p
-                    className={cn(
-                      "relative z-10 px-5 py-3 tracking-tight",
-                      selectedIndex === index
-                        ? "text-neutral-900 dark:text-neutral-100 font-medium"
-                        : "text-neutral-700 dark:text-neutral-200/50",
-                    )}
-                  >
-                    {item}
-                  </p>
-                  <AnimatePresence>
-                    {hoveredIndex === index && selectedIndex !== index ? (
-                      <motion.span
-                        layoutId="sidebar-hover-bg"
-                        className="absolute inset-0 z-0 bg-neutral-200/50 dark:bg-neutral-900/50 rounded-md"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ type: "spring", stiffness: 350, damping: 30 }}
-                      />
-                    ) : null}
-                  </AnimatePresence>
-                </div>
-              ))}
-            </motion.div>
-          ) : null}
-        </AnimatePresence>
-      </motion.div>
-
-      <div className="flex-1 w-full h-full min-h-full overflow-y-auto z-0 pl-4 lg:pl-8">
         {children}
       </div>
     </div>

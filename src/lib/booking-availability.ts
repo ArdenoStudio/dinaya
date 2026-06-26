@@ -1,4 +1,4 @@
-import { and, eq, gte, lt, ne } from "drizzle-orm";
+import { and, count, eq, gte, lt, ne, gt } from "drizzle-orm";
 import { endOfDay, format, parseISO, startOfDay } from "date-fns";
 import { fromZonedTime, toZonedTime } from "date-fns-tz";
 import { db } from "@/db";
@@ -11,6 +11,51 @@ import {
 } from "@/lib/business-holidays";
 
 const DEFAULT_TIMEZONE = "Asia/Colombo";
+
+/** Bookings that overlap a calendar day in the business timezone. */
+export function bookingsOverlappingDayFilter(
+  staffId: string,
+  dayStartUtc: Date,
+  dayEndUtc: Date,
+  excludeBookingId?: string,
+) {
+  return and(
+    eq(bookings.staffId, staffId),
+    lt(bookings.startsAt, dayEndUtc),
+    gt(bookings.endsAt, dayStartUtc),
+    ...(excludeBookingId ? [ne(bookings.id, excludeBookingId)] : []),
+  );
+}
+
+export async function isDailyCapacityReached(input: {
+  staffId: string;
+  serviceId: string;
+  start: Date;
+  timezone: string;
+  dailyCapacity: number | null;
+}): Promise<boolean> {
+  if (input.dailyCapacity == null) return false;
+
+  const dateStr = format(toZonedTime(input.start, input.timezone), "yyyy-MM-dd");
+  const localDate = parseISO(dateStr);
+  const dayStartUtc = fromZonedTime(startOfDay(localDate), input.timezone);
+  const dayEndUtc = fromZonedTime(endOfDay(localDate), input.timezone);
+
+  const [capacityRow] = await db
+    .select({ value: count() })
+    .from(bookings)
+    .where(
+      and(
+        eq(bookings.staffId, input.staffId),
+        eq(bookings.serviceId, input.serviceId),
+        gte(bookings.startsAt, dayStartUtc),
+        lt(bookings.startsAt, dayEndUtc),
+        eq(bookings.status, "confirmed"),
+      ),
+    );
+
+  return capacityRow != null && Number(capacityRow.value) >= input.dailyCapacity;
+}
 
 /**
  * Server-side check that a requested appointment start is genuinely an
@@ -65,14 +110,7 @@ export async function isRequestedSlotAvailable(input: {
     db
       .select({ startsAt: bookings.startsAt, endsAt: bookings.endsAt, status: bookings.status })
       .from(bookings)
-      .where(
-        and(
-          eq(bookings.staffId, input.staffId),
-          gte(bookings.startsAt, dayStartUtc),
-          lt(bookings.startsAt, dayEndUtc),
-          ...(input.excludeBookingId ? [ne(bookings.id, input.excludeBookingId)] : []),
-        ),
-      ),
+      .where(bookingsOverlappingDayFilter(input.staffId, dayStartUtc, dayEndUtc, input.excludeBookingId)),
     holidayPromise,
   ]);
 

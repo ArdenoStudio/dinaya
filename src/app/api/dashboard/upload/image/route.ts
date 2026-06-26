@@ -6,6 +6,7 @@ import {
   getSupabaseStorageConfig,
   publicLogoUrl,
 } from "@/lib/supabase-storage";
+import { detectImageMimeType, extensionForMimeType } from "@/lib/image-upload-validation";
 
 const MAX_BYTES = 4 * 1024 * 1024;
 const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
@@ -50,13 +51,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Image must be under 4 MB." }, { status: 400 });
   }
 
-  const ext = file.type === "image/jpeg" ? "jpg" : file.type.split("/")[1];
-  const path = storagePath(authResult.context.businessId, kind, ext);
   const buffer = Buffer.from(await file.arrayBuffer());
+  const detectedType = detectImageMimeType(buffer);
+  if (!detectedType || !ALLOWED_TYPES.has(detectedType)) {
+    return NextResponse.json({ error: "Only JPEG, PNG, WebP, and GIF images are allowed." }, { status: 400 });
+  }
+
+  const ext = extensionForMimeType(detectedType);
+  const path = storagePath(authResult.context.businessId, kind, ext);
 
   const storage = createBusinessLogosStorage(storageConfig);
   const { error } = await storage.upload(path, buffer, {
-    contentType: file.type,
+    contentType: detectedType,
     upsert: kind !== "gallery",
   });
   if (error) {
