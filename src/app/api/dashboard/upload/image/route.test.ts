@@ -6,7 +6,7 @@ const mockGetPublicUrl = vi.fn(() => ({ data: { publicUrl: "https://cdn.example.
 vi.mock("@/lib/api-auth", () => ({
   requireApiBusiness: vi.fn(async () => ({
     ok: true,
-    context: { businessId: "biz_1", userId: "user_1" },
+    context: { businessId: "00000000-0000-4000-8000-000000000001", userId: "00000000-0000-4000-8000-000000000002" },
   })),
 }));
 
@@ -45,11 +45,10 @@ describe("POST /api/dashboard/upload/image", () => {
 
     expect(res.status).toBe(200);
     expect(body.url).toContain("https://cdn.example.com");
-    expect(mockUpload).toHaveBeenCalledWith(
-      "biz_1/banner.webp",
-      expect.any(Buffer),
-      expect.objectContaining({ contentType: "image/webp", upsert: true }),
-    );
+    const [path, data, options] = mockUpload.mock.calls[0]!;
+    expect(path).toBe("00000000-0000-4000-8000-000000000001/banner.webp");
+    expect(Buffer.isBuffer(data)).toBe(true);
+    expect(options).toEqual(expect.objectContaining({ contentType: "image/webp", upsert: true }));
   });
 
   it("rejects invalid kinds", async () => {
