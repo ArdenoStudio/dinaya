@@ -1,6 +1,7 @@
 import BookingPageContent from "@/components/booking/BookingPageContent";
 import { loadBookingPageData } from "@/lib/booking/load-page-data";
 import { parseBookingThemePreviewParams } from "@/lib/booking-theme";
+import { parseBookingContentPreviewParams } from "@/lib/booking/theme-editor-preview";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -16,6 +17,10 @@ interface Props {
     previewPageBgColor?: string;
     previewHeroOverlay?: string;
     previewHeroOpacity?: string;
+    previewPanelBg?: string;
+    previewLogo?: string;
+    previewGallery?: string;
+    previewHideBranding?: string;
   }>;
 }
 
@@ -31,6 +36,7 @@ export default async function EmbedBookingPage({ params, searchParams }: Props) 
     }
   }
   const themePreview = parseBookingThemePreviewParams(previewParams);
+  const contentPreview = parseBookingContentPreviewParams(previewParams);
   const data = await loadBookingPageData(slug, serviceSlug);
 
   if (data.status !== "ok") {
@@ -49,6 +55,7 @@ export default async function EmbedBookingPage({ params, searchParams }: Props) 
       serviceSlug={serviceSlug}
       hideGallery={hideGallery}
       themePreview={themePreview}
+      contentPreview={contentPreview}
     />
   );
 }
