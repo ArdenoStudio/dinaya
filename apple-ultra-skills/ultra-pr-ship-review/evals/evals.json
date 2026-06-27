@@ -1,0 +1,57 @@
+{
+  "skill_name": "ultra-pr-ship-review",
+  "evals": [
+    {
+      "id": 0,
+      "name": "pr-ready-full-gate",
+      "type": "functional",
+      "prompt": "PR ready? I added a dashboard API route for exporting clients.",
+      "expected_output": "Runs or requests npm run verify, checks API auth on new route, classifies change type, outputs SHIP|FIX|REJECT with numbered blockers.",
+      "assertions": [
+        "Verdict:",
+        "verify",
+        "Blockers"
+      ]
+    },
+    {
+      "id": 1,
+      "name": "schema-without-migration-blocker",
+      "type": "functional",
+      "prompt": "Ship this PR — I updated the schema file with a new column but no migration file yet.",
+      "expected_output": "FIX with B-002 schema drift blocker; does not approve SHIP.",
+      "assertions": [
+        "B-002",
+        "FIX",
+        "migration"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "reject-edited-migration",
+      "type": "functional",
+      "prompt": "Merge review: I edited an already-applied migration file to fix a typo in production.",
+      "expected_output": "REJECT with B-003; explains forward-only migration policy.",
+      "assertions": [
+        "REJECT",
+        "B-003",
+        "applied migration"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "trigger-should-pr-ready",
+      "type": "trigger_should",
+      "prompt": "pre-merge check on this branch",
+      "expected_output": "Skill activates",
+      "assertions": []
+    },
+    {
+      "id": 4,
+      "name": "trigger-should-not-design",
+      "type": "trigger_should_not",
+      "prompt": "Apple quality review of checkout button contrast",
+      "expected_output": "Routes to apple-design-head, not ultra-pr-ship-review",
+      "assertions": []
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "pack": "apple-ultra",
+  "version": "1.1.0",
+  "skills": [
+    { "id": "apple-hub", "section": "hub", "triggers": ["route", "which skill", "apple ultra"] },
+    { "id": "apple-design-head", "section": "design", "triggers": ["ship-ready", "design critique", "Apple polish", "UX audit"] },
+    { "id": "ultra-component-discovery", "section": "design", "triggers": ["find component", "shadcn", "21st.dev", "registry"] },
+    { "id": "ultra-visual-system", "section": "design", "triggers": ["design tokens", "visual audit", "tailwind tokens"] },
+    { "id": "ultra-pr-ship-review", "section": "review", "triggers": ["PR ready", "merge review", "pre-merge"] },
+    { "id": "ultra-security-review", "section": "review", "triggers": ["security review", "threat model", "OWASP"] },
+    { "id": "ultra-brand-voice", "section": "brand", "triggers": ["brand voice", "copy tone", "messaging"] },
+    { "id": "ultra-content-review", "section": "brand", "triggers": ["content review", "microcopy", "empty state copy"] },
+    { "id": "ultra-ceo", "section": "executive", "triggers": ["CEO", "strategy", "vision", "fundraising"] },
+    { "id": "ultra-cpo", "section": "executive", "triggers": ["CPO", "product strategy", "roadmap", "RICE"] },
+    { "id": "ultra-cto", "section": "executive", "triggers": ["CTO", "architecture", "ADR", "tech debt"] },
+    { "id": "ultra-cfo", "section": "executive", "triggers": ["CFO", "unit economics", "SaaS metrics"] },
+    { "id": "ultra-head-of-growth", "section": "gtm", "triggers": ["growth", "acquisition", "funnel"] },
+    { "id": "ultra-head-of-sales", "section": "gtm", "triggers": ["sales", "pipeline", "demo", "objections"] },
+    { "id": "ultra-scheduling-engine", "section": "engineering", "triggers": ["booking", "availability", "slots"] },
+    { "id": "ultra-payments", "section": "engineering", "triggers": ["payments", "checkout", "webhook"] },
+    { "id": "ultra-migrations", "section": "engineering", "triggers": ["migration", "schema", "drizzle"] },
+    { "id": "ultra-api-auth", "section": "engineering", "triggers": ["API auth", "session", "API key"] },
+    { "id": "ultra-plan-gating", "section": "engineering", "triggers": ["plan gate", "entitlement", "tier"] },
+    { "id": "ultra-messaging", "section": "engineering", "triggers": ["SMS", "email", "WhatsApp", "notifications"] },
+    { "id": "ultra-events", "section": "engineering", "triggers": ["events", "webhooks", "automation"] },
+    { "id": "ultra-integrations", "section": "engineering", "triggers": ["integration", "third-party API", "voice agent"] },
+    { "id": "dag-task-runner", "section": "infrastructure", "triggers": ["DAG", "orchestrate agents", "parallel tasks"] }
+  ]
+}
