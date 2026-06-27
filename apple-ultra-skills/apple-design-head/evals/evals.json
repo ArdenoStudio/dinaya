@@ -1,0 +1,45 @@
+{
+  "skill_name": "apple-design-head",
+  "evals": [
+    {
+      "id": 0,
+      "name": "ship-ready-full-review",
+      "type": "functional",
+      "prompt": "Is this checkout flow ship-ready? Grade it like Apple would.",
+      "expected_output": "Loads .ultra.md if present, runs slop gate, discovery, weighted rounds, P0/P1 findings, A-D grade, SHIP/ITERATE/REJECT verdict.",
+      "assertions": ["Verdict:", "P0", "Grade", "slop"]
+    },
+    {
+      "id": 1,
+      "name": "quick-scan-mid-iteration",
+      "type": "functional",
+      "prompt": "Quick review of the settings page — I'm iterating fast.",
+      "expected_output": "Quick scan mode: slop gate, A-F grade, top 3 issues only, no full 67-item ledger.",
+      "assertions": ["Quick Scan", "Top 3", "Grade"]
+    },
+    {
+      "id": 2,
+      "name": "accessibility-audit",
+      "type": "functional",
+      "prompt": "Run an accessibility audit on the booking form — WCAG 2.2 AA.",
+      "expected_output": "A11y deep mode or R4 with criterion-level failures, code fixes, contrast checks.",
+      "assertions": ["contrast", "focus", "WCAG"]
+    },
+    {
+      "id": 3,
+      "name": "trigger-should-design-critique",
+      "type": "trigger_should",
+      "prompt": "review my design — does this look professional?",
+      "expected_output": "Skill activates",
+      "assertions": []
+    },
+    {
+      "id": 4,
+      "name": "trigger-should-not-pr-ship",
+      "type": "trigger_should_not",
+      "prompt": "PR ready? check migrations and npm run verify",
+      "expected_output": "Routes to ultra-pr-ship-review, not apple-design-head",
+      "assertions": []
+    }
+  ]
+}
