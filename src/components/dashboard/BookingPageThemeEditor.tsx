@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useId, useState } from "react";
+import { AccentColorSwatches } from "@/components/dashboard/AccentColorSwatches";
 import { ImageUploadField } from "@/components/dashboard/ImageUploadField";
 import { buildPublicBookingUrl } from "@/lib/booking-url";
 import {
@@ -17,7 +18,12 @@ import Image from "next/image";
 import { isOptimizableRemoteImage } from "@/lib/utils";
 import { Icon } from "@/components/ui/Icon";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { dashboardInputClass } from "@/lib/dashboard-ui";
+import type { AccentColorOption } from "@/lib/color/harmonious-palette";
+import { extractAccentColorOptions } from "@/lib/color/extract-logo-colors";
+import { applySolidBookingTheme, isSolidBookingTheme } from "@/lib/color/solid-theme";
 
 type ThemeBusiness = {
   accentColor: string | null;
@@ -98,6 +104,7 @@ function buildPreviewUrl(
 }
 
 export function BookingPageThemeEditor({ business, onPreviewChange }: Props) {
+  const solidSwitchId = useId();
   const bookingUrl = buildPublicBookingUrl({
     slug: business.slug,
     customDomain: business.customDomain,
@@ -120,9 +127,14 @@ export function BookingPageThemeEditor({ business, onPreviewChange }: Props) {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
+  const [logoColorOptions, setLogoColorOptions] = useState<AccentColorOption[]>([]);
+  const [logoColorsLoading, setLogoColorsLoading] = useState(false);
+  const [logoColorsError, setLogoColorsError] = useState("");
 
   const galleryImageCount = [heroBannerUrl.trim(), ...galleryRest].filter(Boolean).length;
   const galleryAtLimit = galleryImageCount >= 12;
+
+  const solidTheme = isSolidBookingTheme(form.bookingPageBackground, form.bookingPanelBackground);
 
   const contrastWarning = accentContrastWarning(
     form.accentColor,
@@ -137,10 +149,34 @@ export function BookingPageThemeEditor({ business, onPreviewChange }: Props) {
           : "#ffffff",
   );
 
+  const loadLogoColors = useCallback(async (source: Blob | string) => {
+    setLogoColorsLoading(true);
+    setLogoColorsError("");
+    try {
+      const options = await extractAccentColorOptions(source);
+      setLogoColorOptions(options);
+    } catch {
+      setLogoColorOptions([]);
+      setLogoColorsError("Could not read colors from this logo. Use the custom picker below.");
+    } finally {
+      setLogoColorsLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     updatePreview(form);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- initial preview only
   }, []);
+
+  useEffect(() => {
+    const trimmed = logoUrl.trim();
+    if (!trimmed) {
+      setLogoColorOptions([]);
+      setLogoColorsError("");
+      return;
+    }
+    void loadLogoColors(trimmed);
+  }, [loadLogoColors, logoUrl]);
 
   function updatePreview(next: typeof form) {
     onPreviewChange(
@@ -172,6 +208,17 @@ export function BookingPageThemeEditor({ business, onPreviewChange }: Props) {
 
   function updateForm<K extends keyof typeof form>(key: K, value: (typeof form)[K]) {
     const next = { ...form, [key]: value, bookingThemePreset: "custom" as const };
+    setForm(next);
+    updatePreview(next);
+  }
+
+  function setSolidTheme(enabled: boolean) {
+    const surfaces = applySolidBookingTheme(enabled);
+    const next = {
+      ...form,
+      ...surfaces,
+      bookingThemePreset: "custom" as const,
+    };
     setForm(next);
     updatePreview(next);
   }
@@ -224,13 +271,16 @@ export function BookingPageThemeEditor({ business, onPreviewChange }: Props) {
         <div className="mt-4 space-y-6">
           <ImageUploadField
             label="Logo"
-            hint="Shown in the header and on your booking page."
+            hint="Shown in the header and on your booking page. Upload a logo to get color suggestions."
             value={logoUrl}
             onChange={setLogoUrl}
             kind="logo"
             aspectRatio={1}
             outputWidth={512}
             previewShape="circle"
+            onCroppedBlob={(blob) => {
+              void loadLogoColors(blob);
+            }}
           />
           <ImageUploadField
             label="Hero banner"
@@ -252,22 +302,40 @@ export function BookingPageThemeEditor({ business, onPreviewChange }: Props) {
         </div>
         <div className="mt-4 space-y-4">
           <div>
-            <label className="text-sm font-medium">Accent color</label>
-            <p className="mt-1 text-xs text-muted-foreground">Buttons, selected services, and time slots.</p>
-            <div className="mt-2 flex items-center gap-3">
-              <input
-                type="color"
+            <label className="text-sm font-medium">Brand color</label>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Pick from your logo or choose a custom color for buttons, slots, and highlights.
+            </p>
+            <div className="mt-3 space-y-3">
+              <AccentColorSwatches
+                options={logoColorOptions}
                 value={form.accentColor}
-                onChange={(e) => updateForm("accentColor", e.target.value)}
-                className="h-10 w-14 cursor-pointer rounded border bg-white p-1 dark:border-neutral-800 dark:bg-neutral-900"
+                loading={logoColorsLoading}
+                onSelect={(hex) => updateForm("accentColor", hex)}
               />
-              <input
-                type="text"
-                value={form.accentColor}
-                onChange={(e) => updateForm("accentColor", e.target.value)}
-                className={`${dashboardInputClass} max-w-[8rem] font-mono`}
-                pattern="^#[0-9a-fA-F]{6}$"
-              />
+              {logoColorsError ? (
+                <p className="text-xs text-muted-foreground">{logoColorsError}</p>
+              ) : null}
+              <div>
+                <p className="text-xs font-medium text-muted-foreground">Custom color</p>
+                <div className="mt-2 flex items-center gap-3">
+                  <input
+                    type="color"
+                    value={form.accentColor}
+                    onChange={(e) => updateForm("accentColor", e.target.value)}
+                    className="h-10 w-14 cursor-pointer rounded border bg-white p-1 dark:border-neutral-800 dark:bg-neutral-900"
+                    aria-label="Custom accent color"
+                  />
+                  <input
+                    type="text"
+                    value={form.accentColor}
+                    onChange={(e) => updateForm("accentColor", e.target.value)}
+                    className={`${dashboardInputClass} max-w-[8rem] font-mono`}
+                    pattern="^#[0-9a-fA-F]{6}$"
+                    aria-label="Accent color hex value"
+                  />
+                </div>
+              </div>
             </div>
             {contrastWarning ? (
               <p className="mt-2 text-xs text-amber-700 dark:text-amber-300">{contrastWarning}</p>
@@ -275,6 +343,28 @@ export function BookingPageThemeEditor({ business, onPreviewChange }: Props) {
               <p className="mt-2 text-xs text-emerald-700 dark:text-emerald-300">Contrast looks good.</p>
             )}
           </div>
+
+          {business.canUseBookingPageTheme ? (
+            <div className="flex items-center justify-between gap-4 rounded-lg border bg-muted/30 px-4 py-3 dark:border-neutral-800">
+              <div className="min-w-0">
+                <Label htmlFor={solidSwitchId} className="text-sm font-medium">
+                  Solid theme
+                </Label>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  {solidTheme
+                    ? "Your brand color fills the page and booking panels — like a full pink salon look."
+                    : "White page and panels with your brand color on buttons and selected slots."}
+                </p>
+              </div>
+              <Switch
+                id={solidSwitchId}
+                checked={solidTheme}
+                onCheckedChange={setSolidTheme}
+                aria-label="Solid theme"
+                className="h-6 w-11 shrink-0 data-[size=default]:h-6 data-[size=default]:w-11"
+              />
+            </div>
+          ) : null}
 
           {business.canUseBookingPageTheme ? (
             <>

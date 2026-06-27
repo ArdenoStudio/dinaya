@@ -95,6 +95,23 @@ describe("booking-theme", () => {
     expect(resolvePanelBackgroundColor(theme)).toBe(style["--booking-panel-bg"]);
   });
 
+  it("uses layered tints for full accent page and panel backgrounds", () => {
+    const theme = resolveBookingTheme(
+      {
+        accentColor: "#ff46a2",
+        bookingPageBackground: "accent",
+        bookingPanelBackground: "accent",
+        bookingThemePreset: "custom",
+      },
+      { canUseExtendedTheme: true },
+    );
+    const style = buildBookingThemeStyle(theme);
+    expect(style["--booking-page-bg"]).not.toBe("#ffffff");
+    expect(style["--booking-page-bg"]).not.toBe(style["--booking-panel-bg"]);
+    expect(resolvePageBackgroundColor(theme)).toBe(style["--booking-page-bg"]);
+    expect(resolvePanelBackgroundColor(theme)).toBe(style["--booking-panel-bg"]);
+  });
+
   it("keeps white panel when accent page uses accent wash only", () => {
     const theme = resolveBookingTheme(
       {

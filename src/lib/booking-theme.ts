@@ -154,11 +154,20 @@ function accentPageTintStrength(theme: ResolvedBookingTheme): number {
   if (theme.themePreset === "salon_vivid") {
     return SALON_VIVID_PANEL_TINT;
   }
+  if (
+    theme.pageBackground === "accent" &&
+    theme.panelBackground === "accent"
+  ) {
+    return SALON_VIVID_PAGE_TINT;
+  }
   return ACCENT_PAGE_TINT;
 }
 
 function accentPanelTintStrength(theme: ResolvedBookingTheme): number {
-  if (theme.themePreset === "salon_vivid") {
+  if (
+    theme.themePreset === "salon_vivid" ||
+    (theme.pageBackground === "accent" && theme.panelBackground === "accent")
+  ) {
     return SALON_VIVID_PANEL_TINT;
   }
   return ACCENT_PANEL_TINT;
