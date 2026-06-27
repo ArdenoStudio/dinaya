@@ -1,6 +1,8 @@
 ---
+
 name: ultra-payments
-description: Ultra Payments payments expert for local currency checkout, MD5 hash generation, redirect forms, subscription billing, and webhook verification. Use when integrating payment gateway, debugging payment failures, webhook signature mismatches, double-charge/idempotency, or booking/subscription checkout flows. Keywords: payment gateway, local currency, md5sig, notify_url, merchant_secret.
+description: >
+  Payments expert for checkout, webhooks, hash verification, and idempotency. Use when integrating payment gateway, debugging payment failures, webhook mismatches, double-charge. Triggers: payment gateway, checkout, webhook, md5sig, double charge, refund — even for payment not working.
 paths:
   - src/lib/payment-gateway.ts
   - src/lib/payment-gateway-webhook.ts
@@ -26,8 +28,8 @@ Read before advising or implementing:
 
 - [_shared/STACK.md](../_shared/STACK.md) — never log PAYMENT_GATEWAY secrets
 - [_shared/PATHS.md](../_shared/PATHS.md) — `/book/[slug]/pay`, webhook routes
-- Rule: [.cursor/rules/api-routes.mdc](../../rules/api-routes.mdc) — webhook verification, idempotency
-- Rule: [_shared/STACK.md](../../rules/stack-rules.mdc)
+- Rule: [_shared/PATHS.md](../_shared/PATHS.md) — webhook verification, idempotency
+- Rule: [_shared/STACK.md](../_shared/STACK.md)
 
 ---
 

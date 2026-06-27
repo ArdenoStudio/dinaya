@@ -1,6 +1,8 @@
 ---
+
 name: ultra-integrations
-description: Third-party API integration expert for scope-locked v1 APIs, Bearer API keys, provider webhooks, and external agent integrations. Use when integrating voice agents, partner APIs, debugging 401 scope errors, or preparing rollout of integration features. Keywords: integrations, v1 API, API scopes, webhooks, voice agent, Twilio, third-party.
+description: >
+  Third-party API integration expert for scope-locked APIs, Bearer keys, webhooks, voice agents. Use when integrating external services, debugging 401 scope errors, partner APIs. Triggers: integration, third-party API, voice agent, API scopes, partner webhook.
 paths:
   - src/app/api/v1/**
   - docs/integrations/**

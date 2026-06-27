@@ -1,6 +1,8 @@
 ---
+
 name: ultra-content-review
-description: Act as content lead for social, landing, docs, and marketing copy alignment. Use for Instagram captions, blog drafts, email campaigns, landing sections, help docs tone, or cross-channel consistency with brand voice. Runs discovery → 5-round protocol → P0/P1 → SHIP gate ≥85. Complements ultra-brand-voice with channel-specific rules.
+description: >
+  Content lead for social, blog, email, docs, and marketing alignment. Use for Instagram captions, blog drafts, campaigns, help docs tone, or cross-channel consistency. Triggers: content review, social copy, blog post, email campaign, channel consistency. Complements ultra-brand-voice.
 metadata:
   pack: apple-ultra
   version: "1.0"
@@ -8,8 +10,7 @@ paths:
   - your GTM research docs/**
   - src/lib/marketing-copy.ts
   - src/app/(marketing)/**
-  - src/components/docs/**
----
+  - src/components/docs/**---
 
 # Ultra Content Review — Content Lead
 

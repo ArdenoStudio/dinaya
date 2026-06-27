@@ -1,0 +1,42 @@
+# .ultra.md — Apple Ultra Project Context
+*Example for Acme Scheduling (fictional). Copy and customize via ultra-teach.*
+
+## Product
+Acme Scheduling lets local businesses accept online bookings with payments and reminders.
+Stage: growth
+Primary action: book an appointment
+Type: scheduling/booking
+Register: Product
+
+## Users
+Primary user: small business owner (salon, clinic, tutor) — low technical sophistication
+Job-to-be-done: fill calendar without phone tag and no-shows
+Failure mode: double-booking, missed payment, customer shows up at wrong time
+
+## Design
+Creative North Star: The Reception Desk — calm, clear, never flashy on the booking path
+System: shadcn/ui + Tailwind tokens in globals.css
+Key tokens: cobalt primary, violet accent, amber pending, emerald confirmed; Cal Sans display
+
+Named Rules:
+- **The One Accent Rule.** Only cobalt is saturated on booking surfaces — status colors are semantic only.
+- **The Flat Booking Card Rule.** Booking hub cards use fill hierarchy, not glass or heavy shadow.
+- **The No-Pink-on-Booking Rule.** Rose/pink reserved for marketing — never on /book flows.
+
+## Benchmarks
+Positive: Linear, Stripe Checkout, Cal.com
+Anti: generic AI SaaS dashboards, purple gradient KPI heroes
+Priority dimension: seamlessness
+
+## Stack
+Verify: npm run verify
+Migrations: drizzle/
+Schema: src/db/schema.ts
+API patterns: cron Bearer, dashboard session, v1 API keys
+
+## Known Issues
+- Settings page density on mobile
+Off-limits: legacy embed widget CSS (deprecating Q3)
+
+## History
+- 2026-06-27 | ultra-teach | — | onboarded | example file created

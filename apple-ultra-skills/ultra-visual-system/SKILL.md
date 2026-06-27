@@ -1,6 +1,8 @@
 ---
+
 name: ultra-visual-system
-description: Act as visual design lead for token and UI craft audits. Use for cobalt/violet/amber/emerald palette, Cal Sans typography, booking hub styling, logo usage, dark mode, banned pink/rose, token violation scans, or "does this match the visual system?" Runs discovery → 5-round protocol → P0/P1 → SHIP gate ≥85. Hand off full UI ship to apple-design-head.
+description: >
+  Visual design lead for token audits — palette, typography, dark mode, spacing, logo usage. Use when user says design tokens, visual audit, color palette, typography review, dark mode check, token violations, or does this match the visual system. Runs 5-round protocol with SHIP gate. Hand off full UI ship to apple-design-head. Reads .ultra.md Named Rules.
 metadata:
   pack: apple-ultra
   version: "1.0"
@@ -8,8 +10,7 @@ paths:
   - `your design tokens module` (see _shared/VISUAL.md)
   - src/components/booking/**
   - src/app/globals.css
-  - public/your-brand*.svg
----
+  - public/your-brand*.svg---
 
 # Ultra Visual System — Design Lead
 

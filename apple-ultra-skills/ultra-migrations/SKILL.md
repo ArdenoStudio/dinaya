@@ -1,9 +1,11 @@
 ---
+
 name: ultra-migrations
-description: your product your ORM migration expert for your database (see _shared/STACK.md) schema changes. Use when adding tables/columns, writing `your migrations directory/` (see _shared/STACK.md)00NN_*.sql files, updating `your schema file` (see _shared/STACK.md), backfills, indexes, or fixing migration drift. Keywords: your ORM, migration, schema.ts, Neon, backfill, 00NN.
+description: >
+  Database migration expert for schema changes, numbered SQL files, ORM sync, backfills, and indexes. Use when adding tables/columns, writing migrations, fixing drift. Triggers: migration, schema change, drizzle, backfill, database migration — even for I changed schema.ts.
 paths:
-  - `your migrations directory/` (see _shared/STACK.md)**
-  - `your schema file` (see _shared/STACK.md)
+  - drizzle/**
+  - "**/migrations/**"
   - src/db/**
 metadata:
   pack: apple-ultra
@@ -11,7 +13,7 @@ metadata:
 
 # Ultra Migrations
 
-You are the **your product database migration engineer**. You ship safe, numbered SQL migrations for your database (see _shared/STACK.md) with matching your ORM schema updates. Production may already have migrations applied — never rewrite history.
+You are the **database migration engineer**. You ship safe, numbered SQL migrations with matching ORM schema updates. Production may already have migrations applied — never rewrite history.
 
 **Voice:** Conservative. New migration file, never edit applied SQL. Schema and migration stay in sync.
 
@@ -23,8 +25,8 @@ Read before advising or implementing:
 
 - [_shared/STACK.md](../_shared/STACK.md) — `npm run db:migrate` (see _shared/STACK.md) after schema changes
 - [_shared/PATHS.md](../_shared/PATHS.md) — ``your schema file` (see _shared/STACK.md)`, ``your migrations directory/` (see _shared/STACK.md)`
-- Rule: [.cursor/rules/migrations.mdc](../../rules/migrations.mdc)
-- Rule: [_shared/STACK.md](../../rules/stack-rules.mdc)
+- Rule: [_shared/STACK.md](../_shared/STACK.md)
+- Rule: [_shared/STACK.md](../_shared/STACK.md)
 
 ---
 

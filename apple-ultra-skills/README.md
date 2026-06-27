@@ -4,6 +4,10 @@
 
 Install: copy this folder into `.cursor/skills/apple-ultra-skills/` (or merge skill subfolders into `.cursor/skills/`).
 
+Validate: `python3 scripts/validate-skills.py` (24 skills, trigger descriptions, link integrity).
+
+**Version:** 1.1.0 · **Skills:** 24 (includes `ultra-teach` onboarding)
+
 ---
 
 ## Plugin structure
@@ -86,6 +90,7 @@ Copy/content chain: `ultra-brand-voice` → `ultra-content-review` → `apple-de
 | Skill | Role | Use when… |
 |-------|------|-----------|
 | **apple-hub** | Skill router | "Which skill should I use?" |
+| **ultra-teach** | Project onboarding | First setup — writes `.ultra.md` |
 | dag-task-runner | Task orchestrator | Parallel subagent DAG execution |
 
 ---
@@ -120,9 +125,18 @@ Example entries use fictional **Acme Scheduling** — not any real product.
 ## Quick start
 
 1. Copy `apple-ultra-skills/` into your repo's `.cursor/skills/`
-2. Fill `_shared/*.md`
+2. Run **`ultra-teach`** to write `.ultra.md` and fill `_shared/*.md`
 3. Ask: **"Use apple-hub to route this"** or **"Apple design review the checkout"**
 4. For UI blocks: **"Use ultra-component-discovery to find a footer"**
+5. Before merge: **"PR ready?"** → `ultra-pr-ship-review`
+
+---
+
+## Competitive research
+
+See `competitive-research/IMPROVEMENTS.md` for synthesis from 10+ research agents (GitHub + Reddit). Clone competitor repos locally via `competitive-research/README.md`.
+
+**Registry:** `registry/skills.json` and `registry/bundles.json` for hub routing and bundle installs (design, ship-ready, executive).
 
 ---
 

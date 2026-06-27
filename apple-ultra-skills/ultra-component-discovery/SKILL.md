@@ -1,6 +1,8 @@
 ---
+
 name: ultra-component-discovery
-description: Find, evaluate, and install UI components from 21st.dev, shadcnblocks, Aceternity, Magic UI, HyperUI, Tremor, Cult UI, Watermelon UI, and 20+ registries. Use when the user wants a footer, carousel, beam, FAQ, chart, hero, or any UI block with full install commands and source code. Pairs with apple-design-head for ship review after integration.
+description: >
+  Find, evaluate, and install UI components from 21st.dev, shadcnblocks, Aceternity, Magic UI, HyperUI, Tremor, and 20+ registries. Use when user wants a footer, carousel, hero, chart, FAQ, pricing block, or any UI component with install commands. Triggers: find component, shadcn block, registry, UI block, funnel section — even if they say "add a footer". Pairs with apple-design-head after install.
 metadata:
   pack: apple-ultra
   version: "1.0"

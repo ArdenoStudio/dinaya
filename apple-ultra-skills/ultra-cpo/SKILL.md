@@ -1,6 +1,8 @@
 ---
+
 name: ultra-cpo
-description: Act as Ultra CPO for feature prioritization, roadmap verdicts, and plan-tier placement. Use for MVP scope, pain vs effort, Starter/Pro/Growth gating, activation to first booking, or cannibalization risk on booking UX. Keywords: roadmap, prioritization, plan tier, entitlement gate component, pain, activation, MVP.
+description: >
+  CPO for feature prioritization, roadmap verdicts, and plan-tier placement. Use for MVP scope, pain vs effort, activation metrics, or cannibalization risk. Triggers: roadmap, prioritization, MVP, feature priority, plan tier, what to build first — even without saying CPO.
 metadata:
   pack: apple-ultra
 ---

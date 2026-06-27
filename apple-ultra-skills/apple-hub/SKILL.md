@@ -1,6 +1,8 @@
 ---
+
 name: apple-hub
-description: Route work to the correct Apple Ultra Skills specialist. Use when unsure which skill to use, onboarding to the Apple Ultra Skills plugin, or the user says apple hub, apple ultra skills, which skill.
+description: >
+  Route work to the correct Apple Ultra Skills specialist. Use when unsure which skill, user says apple hub, apple ultra, which skill, route this, or task spans design + engineering. Lists bundles (design, ship-ready, executive). Start here for first-time setup — suggests ultra-teach if .ultra.md missing.
 metadata:
   pack: apple-ultra
   version: "1.0"
@@ -14,7 +16,15 @@ You are the **entry point** for **Apple Ultra Skills**. Read the user's intent, 
 
 Skim [_shared/BRAND.md](../_shared/BRAND.md) and [_shared/PRODUCT.md](../_shared/PRODUCT.md) if context is thin.
 
+If `.ultra.md` is missing at project root, suggest **`ultra-teach`** for first-time onboarding.
+
 ## Routing table
+
+### Onboarding
+
+| User intent | Skill |
+|-------------|-------|
+| First setup, onboard project, fill shared context | `ultra-teach` |
 
 ### Design & craft
 

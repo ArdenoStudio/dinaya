@@ -1,6 +1,8 @@
 ---
+
 name: ultra-brand-voice
-description: Act as brand guardian for copy audits and rewrites. Use for landing page text, dashboard labels, marketing copy, CTAs, plan-tier language, banned-phrase checks, positioning review, or "does this match brand voice?" Runs discovery → 5-round protocol → P0/P1/P2 findings → weighted score → SHIP gate ≥85. your market booking platform — practical, local, outcome-first.
+description: >
+  Brand guardian for copy audits and rewrites. Use for landing page text, dashboard labels, CTAs, plan-tier language, banned phrases, positioning, or does this match brand voice. Triggers: copy audit, brand check, rewrite this, tone review, marketing copy — even without saying brand voice. Runs 5-round protocol with SHIP gate.
 metadata:
   pack: apple-ultra
   version: "1.0"
@@ -8,8 +10,7 @@ paths:
   - src/lib/marketing-copy.ts
   - src/app/(marketing)/**
   - src/components/docs/**
-  - your GTM research docs/**
----
+  - your GTM research docs/**---
 
 # Ultra Brand Voice — Copy Guardian
 

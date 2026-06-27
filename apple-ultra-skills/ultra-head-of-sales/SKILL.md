@@ -1,6 +1,8 @@
 ---
+
 name: ultra-head-of-sales
-description: Act as Ultra Head of Sales for B2B target customer outreach, objection handling, and concierge setup closes. Use for pitch scripts, DM templates, primary messaging channel/payment/setup objections, in-person road pitches, or free setup call CTAs. Keywords: target customer pitch, objections, concierge, free setup, messaging chaos, no-shows.
+description: >
+  Head of Sales for B2B outreach, objection handling, and close patterns. Use for pitch scripts, DM templates, demo prep, setup-call CTAs. Triggers: sales pitch, objections, outreach, close deal, DM script — even for how do I sell this.
 metadata:
   pack: apple-ultra
 ---

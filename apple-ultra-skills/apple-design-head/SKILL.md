@@ -1,6 +1,29 @@
 ---
 name: apple-design-head
-description: Act as Head of Apple Design reviewing any product for ship readiness. Use for Apple-quality design review, UI/UX critique, design system audit, ship-ready grading, accessibility review, or comparing interfaces against Apple HIG and top-tier product standards. Works on any repo (web, mobile, native). Runs discovery → 5-round protocol → P0/P1/P2 findings → weighted A–D grade → ship gate. Can audit, critique, or implement fixes.
+description: >
+  Head of Apple Design UI/UX ship review with P0/P1/P2 findings, weighted A–D grade, and
+  SHIP/ITERATE/REJECT gate. Use when user says ship-ready, design critique, Apple polish,
+  Apple quality, grade the UI, UX audit, accessibility audit, visual craft review, HIG review,
+  or before merging UI PRs — even if they only say "review my design" or "is this good UI".
+  Modes: full 5-round, quick scan (A–F + top 3), focused surface, a11y deep, handoff spec.
+  Reads .ultra.md when present. Works on web, mobile, native any repo.
+metadata:
+  pack: apple-ultra
+  version: "1.1"
+paths:
+  - src/components/**
+  - src/app/**
+  - "**/globals.css"
+  - "**/tailwind.config.*"
+reads:
+  - .ultra.md
+  - ../_shared/VISUAL.md
+  - ../_shared/BRAND.md
+writes:
+  - .ultra.md
+chains:
+  upstream: [ultra-component-discovery, ultra-visual-system]
+  downstream: [ultra-pr-ship-review]
 ---
 
 # Apple Design Head — Universal UI/UX Review
@@ -25,11 +48,51 @@ Trigger when the user says:
 **Modes** (user may specify; default = full):
 | Mode | Scope |
 |------|-------|
-| **Full** | Discovery + Rounds 0–4 + ship gate |
+| **Full** | Discovery + slop gate + Rounds 0–4 + ship gate |
+| **Quick scan** | 30s pass — slop gate + grade A–F + top 3 issues only (mid-iteration) |
 | **Focused** | Named surface only (e.g. "checkout", "settings", "onboarding") |
 | **Component** | Single component + all states |
+| **A11y deep** | WCAG 2.2 AA criterion pass/fail + committable checklist |
+| **Handoff** | Developer-ready spec — states, tokens, interactions, copy |
 | **Ship gate** | Re-score after fixes; skip discovery if context exists |
 | **Implement** | After ITERATE verdict, fix P0/P1 and re-run affected rounds |
+
+---
+
+## Step 0 — Load project context
+
+Check project root for `.ultra.md`. If present, read before Discovery:
+- Register (Brand vs Product), product type, primary action
+- Creative North Star + Named Rules
+- Positive / anti benchmarks, priority dimension
+- Known Issues + off-limits areas
+- History (prior review scores — flag regressions)
+
+If absent: run generic review; note gap in output. Suggest `ultra-teach` once per project.
+
+See [examples/.ultra.md.example](../examples/.ultra.md.example) for schema.
+
+---
+
+## Pre-Round 0 — AI slop gate (all modes except ship-gate re-check)
+
+**5-second disqualifier** (borrowed from CRISP): Before scoring craft, ask: *Would someone immediately say AI made this?*
+
+| Slop tell | Action |
+|-----------|--------|
+| Purple/blue gradient KPI hero on task screen | P1 minimum — cap at grade C |
+| Identical card grid with generic icons + lorem | P1 — note "template UI" |
+| Glassmorphism on content cards (not chrome) | P1 on Product register |
+| 3+ competing accent colors per viewport | P1 |
+| "Welcome to your dashboard" + 6 equal-weight cards | P1 on SaaS dashboards |
+
+If **2+ slop tells** on a primary user path → **ITERATE** regardless of other scores until addressed.
+
+---
+
+## Reference loading
+
+Before scoring, load 3–8 topics from [references/LOOKUP.md](./references/LOOKUP.md) based on surface keywords. Do not load entire HIG corpus.
 
 ---
 
@@ -412,6 +475,33 @@ Re-review [rounds] after [specific fixes].
 - [RUBRIC.md](./RUBRIC.md) — Full 67-item visual craft ledger
 - [DISCOVERY.md](./DISCOVERY.md) — Repo reconnaissance by framework
 - [PATTERNS.md](./PATTERNS.md) — Flow-specific checklists
+- [references/LOOKUP.md](./references/LOOKUP.md) — Topic routing (3–8 files per review)
+
+### Quick scan output (when mode = Quick scan)
+
+```markdown
+## Apple Design — Quick Scan
+**Slop gate:** PASS | FAIL (list tells)
+**Grade:** A | B | C | D | F
+**Top 3 issues:** (user impact order, with file:line)
+**Verdict:** SHIP | ITERATE — [one sentence]
+```
+
+Skip full RUBRIC ledger unless grade ≤ C or user asks for full audit.
+
+---
+
+## History append
+
+After delivering any review, append one line to `.ultra.md` ## History:
+
+```
+- YYYY-MM-DD | apple-design-head | R0:__ R1:__ R2:__ R3:__ R4:__ | __/100 (__grade__) | Verdict: SHIP|ITERATE|REJECT | Top: [one issue]
+```
+
+If prior History exists, call out regressions (e.g. R3 dropped 85→72).
+
+**Eval regression:** [evals/evals.json](./evals/evals.json)
 
 ---
 

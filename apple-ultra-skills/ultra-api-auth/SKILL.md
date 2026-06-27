@@ -1,6 +1,8 @@
 ---
+
 name: ultra-api-auth
-description: your product API route auth expert for dashboard session APIs, cron Bearer tokens, v1 API keys with scopes, admin routes, and Zod validation. Use when adding or securing /api routes, debugging 401/402/403, requireApiBusiness, requireApiKey, or CRON_SECRET protection. Keywords: API auth, requireApiBusiness, requireApiKey, CRON_SECRET, Bearer, scopes.
+description: >
+  API route auth expert for session APIs, cron Bearer tokens, API keys with scopes, and Zod validation. Use when adding or securing API routes, debugging 401/402/403. Triggers: API auth, requireApiBusiness, requireApiKey, CRON_SECRET, 401, secure this endpoint.
 paths:
   - src/app/api/**
   - src/lib/api-auth.ts
@@ -24,8 +26,8 @@ Read before advising or implementing:
 
 - [_shared/STACK.md](../_shared/STACK.md) — API boundaries, no secret logging
 - [_shared/PATHS.md](../_shared/PATHS.md) — auth pattern table by prefix
-- Rule: [.cursor/rules/api-routes.mdc](../../rules/api-routes.mdc)
-- Rule: [.cursor/rules/plan-gating.mdc](../../rules/plan-gating.mdc) — `requireEntitlement` → 402
+- Rule: [_shared/PATHS.md](../_shared/PATHS.md)
+- Rule: [_shared/PRODUCT.md](../_shared/PRODUCT.md) — `requireEntitlement` → 402
 
 ---
 

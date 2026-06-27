@@ -36,16 +36,21 @@ Apple Ultra is **ahead on integrated product craft**. The biggest gaps vs commun
 
 ## Top 10 improvements (prioritized)
 
-### P0 — Ship next
+### P0 — Implemented in v1.1
 
-| # | Improvement | Borrow from | Status |
-|---|-------------|-------------|--------|
-| 1 | **Pushy `description` fields** on all 23 skills — literal user trigger phrases | Reddit consensus, skill-creator docs | TODO |
-| 2 | **`ultra-pr-ship-review` rubric pack** — RUBRIC.md, blockers.md, evals.json, subagent prompt | superpowers + apple-design-head | **DONE** |
-| 3 | **`.ultra.md` project onboarding** — interview → project context file all skills read | CRISP `crisp-teach` / `.crisp.md` | TODO |
-| 4 | **`apple-hub` fallback** — route when auto-trigger fails; list skills on vague prompts | Reddit pain point #1 | Partial |
+| # | Improvement | Status |
+|---|-------------|--------|
+| 1 | Pushy `description` fields on all 24 skills | ✅ Done |
+| 2 | `ultra-pr-ship-review` rubric pack | ✅ Done |
+| 3 | `.ultra.md` + `ultra-teach` onboarding | ✅ Done |
+| 4 | `apple-hub` + ultra-teach routing | ✅ Done |
+| 5 | HIG `references/LOOKUP.md` + quick scan + slop gate | ✅ Done |
+| 6 | evals.json (design-head, security, pr-ship) | ✅ Done |
+| 7 | `validate-skills.py` + `plugin.json` + registry | ✅ Done |
 
-### P1 — High impact
+See [REVIEW-v1.1.md](./REVIEW-v1.1.md) for competitive re-review.
+
+### P1 — v1.2 backlog
 
 | # | Improvement | Borrow from |
 |---|-------------|-------------|

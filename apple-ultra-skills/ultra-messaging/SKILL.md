@@ -1,6 +1,8 @@
 ---
+
 name: ultra-messaging
-description: your product messaging expert for primary messaging channel (Meta Cloud API), SMS, email outbound, booking notifications, templates, usage metering, and inbound routing. Use when fixing confirmation/reminder delivery, primary messaging channel templates, channel fallback, allowance soft-cap, or cron reminders. Keywords: primary messaging channel, Meta, Twilio, Resend, booking-messages, templates, communications.
+description: >
+  Messaging expert for SMS, email, WhatsApp, templates, and booking notifications. Use for confirmation/reminder delivery, template setup, channel fallback, usage metering. Triggers: SMS, email, WhatsApp, notification, reminder, template — even for message not sending.
 paths:
   - `your messaging module/` (see _shared/PATHS.md)**
   - src/app/api/cron/reminders/**
@@ -25,7 +27,7 @@ Read before advising or implementing:
 - [_shared/PRODUCT.md](../_shared/PRODUCT.md) — `primary-messagingSms` Pro+
 - [_shared/PATHS.md](../_shared/PATHS.md) — reminder cron path
 - Master plan: `your product planning docs/2026-06-14-messaging-and-monetization-master-plan.md`
-- Rule: [.cursor/rules/api-routes.mdc](../../rules/api-routes.mdc)
+- Rule: [_shared/PATHS.md](../_shared/PATHS.md)
 
 ---
 

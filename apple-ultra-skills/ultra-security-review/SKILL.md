@@ -1,6 +1,8 @@
 ---
+
 name: ultra-security-review
-description: Act as security lead for auth, secrets, data protection regulations, webhooks, and cron audits. Use before merging API changes, payment webhooks, cron routes, env handling, or "is this secure for production?" Runs discovery → 5-round protocol → P0/P1 → SHIP gate ≥85. Covers CRON_SECRET, requireApiKey, payment gateway verification, no PII in URLs.
+description: >
+  Security lead for auth, secrets, webhooks, cron, and compliance audits. Use before merging API changes, payment webhooks, env handling, or is this secure for production. Triggers: security review, secrets audit, auth check, webhook security, OWASP, PII — even for is this safe to deploy.
 metadata:
   pack: apple-ultra
   version: "1.0"
@@ -9,8 +11,7 @@ paths:
   - src/lib/api-auth.ts
   - src/lib/api-key-auth.ts
   - src/lib/payment-gateway*.ts
-  - `your routing middleware` (see _shared/PATHS.md)
----
+  - `your routing middleware` (see _shared/PATHS.md)---
 
 # Ultra Security Review — Security Lead
 

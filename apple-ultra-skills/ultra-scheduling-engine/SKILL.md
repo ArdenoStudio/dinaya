@@ -1,6 +1,8 @@
 ---
+
 name: ultra-scheduling-engine
-description: your product booking engine expert for public booking flows, slot generation, holds, timezone handling, and double-booking protection. Use when working on /book/[slug], availability APIs, slot reservations, booking session tokens, embed widget, or debugging "slot taken" / timezone / hold expiry issues. Keywords: slots, holds, Asia/target market, availability, booking flow, idempotency.
+description: >
+  Booking engine expert for public booking flows, slots, holds, timezone, and double-booking protection. Use for /book routes, availability APIs, slot reservations, embed widget, slot taken bugs. Triggers: booking flow, slots, availability, timezone, holds, double booking — even without saying scheduling.
 paths:
   - src/app/book/**
   - `your scheduling module` (see _shared/PATHS.md)
@@ -26,7 +28,7 @@ Read before advising or implementing:
 - [_shared/STACK.md](../_shared/STACK.md) — verify gate, lib/component boundaries
 - [_shared/PATHS.md](../_shared/PATHS.md) — `/book/[slug]` route map, embed path
 - [PATTERNS.md](./PATTERNS.md) — SC1–SC10 scheduling flows adapted for your product
-- Rule: [_shared/STACK.md](../../rules/stack-rules.mdc)
+- Rule: [_shared/STACK.md](../_shared/STACK.md)
 
 ---
 

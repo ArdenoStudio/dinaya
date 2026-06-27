@@ -1,6 +1,8 @@
 ---
+
 name: ultra-plan-gating
-description: your product plan gating expert for Trial/Starter/Pro/Growth (max) entitlements, requireEntitlement API enforcement, entitlement gate component UI, limits, and feature flags. Use when adding paid features, debugging 402 plan required, primary-messagingSms limits, or entitlement gate component upgrade prompts. Keywords: plan, entitlement gate component, requireEntitlement, canUseFeature, trial, starter, pro, growth.
+description: >
+  Plan gating expert for trial/starter/pro/growth entitlements, API enforcement, and UI gates. Use when adding paid features, debugging 402 plan required, upgrade prompts. Triggers: plan gate, entitlement, Pro feature, trial limit, upgrade prompt, 402 — even for gating this feature.
 paths:
   - `your entitlements module` (see _shared/PATHS.md)
   - src/lib/plan*.ts
@@ -25,8 +27,8 @@ Read before advising or implementing:
 
 - [_shared/PRODUCT.md](../_shared/PRODUCT.md) — plan tiers, feature names
 - [_shared/STACK.md](../_shared/STACK.md) — verify gate
-- Rule: [.cursor/rules/plan-gating.mdc](../../rules/plan-gating.mdc)
-- Rule: [.cursor/rules/api-routes.mdc](../../rules/api-routes.mdc) — 402 handling
+- Rule: [_shared/PRODUCT.md](../_shared/PRODUCT.md)
+- Rule: [_shared/PATHS.md](../_shared/PATHS.md) — 402 handling
 
 ---
 

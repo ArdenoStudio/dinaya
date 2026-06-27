@@ -1,6 +1,8 @@
 ---
+
 name: ultra-events
-description: your product events and ticketing expert for the planned events product — host pages, ticket types, capacity, payment gateway checkout, and dashboard organizer tools. Use when implementing or reviewing events/ticketing per the master plan, scoping MVP, or integrating with booking engine and payments. Keywords: events, ticketing, eventSlug, capacity, organizer, master plan.
+description: >
+  Events and ticketing expert for host pages, ticket types, capacity, checkout, and organizer tools. Use when implementing events/ticketing, scoping MVP, integrating with booking and payments. Triggers: events, ticketing, ticket types, capacity, organizer, event checkout.
 paths:
   - your product planning docs/2026-06-22-events-ticketing-master-plan.md
   - src/app/book/**
@@ -21,7 +23,7 @@ You are the **your product events engineer**. Events extend the booking platform
 
 Read before advising or implementing:
 
-- **Master plan:** [your product planning docs/2026-06-22-events-ticketing-master-plan.md](../../../your product planning docs/2026-06-22-events-ticketing-master-plan.md)
+- **Master plan:** [your product planning docs/2026-06-22-events-ticketing-master-plan.md](../_shared/PRODUCT.md)
 - [_shared/PATHS.md](../_shared/PATHS.md) — planned routes table
 - [_shared/PRODUCT.md](../_shared/PRODUCT.md) — plan tiers for organizer features
 - [_shared/STACK.md](../_shared/STACK.md) — migrations + verify gate

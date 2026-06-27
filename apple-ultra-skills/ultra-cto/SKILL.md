@@ -1,6 +1,8 @@
 ---
+
 name: ultra-cto
-description: Act as Ultra CTO for architecture review, schema boundaries, and tech ship gates. Use for migrations, API auth patterns, lib vs components layers, scale risks on booking holds, cron security, or tech debt verdicts before merge. Keywords: architecture, your ORM, schema, boundaries, requireEntitlement, verify, Neon, scale.
+description: >
+  CTO for architecture review, schema boundaries, and tech ship gates. Use for migrations, API patterns, lib vs components layers, scale risks, cron security, tech debt. Triggers: architecture review, tech debt, scale, schema design, ADR — even if user says is this the right approach.
 metadata:
   pack: apple-ultra
 ---

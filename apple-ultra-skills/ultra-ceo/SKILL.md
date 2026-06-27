@@ -1,6 +1,8 @@
 ---
+
 name: ultra-ceo
-description: Act as Ultra CEO (founder) for strategy, beachhead focus, and say-no decisions. Use for "should we build X", pivot review, market expansion, pricing strategy, competitor response, events ticketing timing, or target customer-density cluster bets in your market. Runs focus → market → moat → execution → brand rounds → P0/P1/P2 → SHIP gate. Keywords: strategy, beachhead, target market, target customer segment, focus, founder.
+description: >
+  Startup CEO for strategy, beachhead focus, and say-no decisions. Use when user asks should we build X, pivot review, market expansion, competitor response, or founder strategy. Triggers: CEO perspective, strategy, beachhead, focus, say no, pivot — even for vague what should we do next.
 metadata:
   pack: apple-ultra
 ---

@@ -1,6 +1,8 @@
 ---
+
 name: ultra-cfo
-description: Act as Ultra CFO for local currency unit economics, plan pricing, and variable-cost coverage. Use for margin models, messaging/SMS COGS at Pro allowances, payment gateway fees, events ticketing fees, or pricing psychology for local SMEs. Keywords: unit economics, local currency, margin, messaging cost, Pro 3990, overage.
+description: >
+  CFO for unit economics, pricing, and margin models. Use for pricing psychology, variable-cost coverage, messaging COGS, payment fees, or SaaS metrics. Triggers: unit economics, pricing, margin, CAC, LTV, break-even, can we afford — even without saying CFO.
 metadata:
   pack: apple-ultra
 ---

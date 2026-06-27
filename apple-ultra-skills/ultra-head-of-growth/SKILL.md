@@ -1,6 +1,8 @@
 ---
+
 name: ultra-head-of-growth
-description: Act as Ultra Head of Growth for GTM, first 100 customers, and target geographic cluster density. Use for launch waves, Instagram/messaging channels, referrals, directory/Deals loops, creator plays, or founding-100 wall. Keywords: GTM, first 100, density, target market, referrals, powered by your product.
+description: >
+  Head of Growth for GTM, first 100 customers, and density plays. Use for launch waves, referrals, directory loops, creator plays, founding cohort. Triggers: GTM, growth strategy, first customers, launch plan, acquisition — even for how do we get users.
 metadata:
   pack: apple-ultra
 ---
