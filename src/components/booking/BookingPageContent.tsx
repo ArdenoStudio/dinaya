@@ -11,6 +11,7 @@ import { isOptimizableRemoteImage, cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import type { BookingPageData } from "@/lib/booking/load-page-data";
 import { resolveBookingTheme, type BookingThemeOverrides } from "@/lib/booking-theme";
+import type { BookingContentPreviewOverrides } from "@/lib/booking/theme-editor-preview";
 import { canUseFeature } from "@/lib/plan";
 import {
   createCalendarOverlayTicket,
@@ -26,6 +27,7 @@ type Props = {
   serviceSlug?: string;
   hideGallery?: boolean;
   themePreview?: BookingThemeOverrides | null;
+  contentPreview?: BookingContentPreviewOverrides | null;
 };
 
 async function buildCalendarOverlayConfig(
@@ -75,9 +77,10 @@ export default async function BookingPageContent({
   serviceSlug,
   hideGallery,
   themePreview,
+  contentPreview,
 }: Props) {
   const {
-    business,
+    business: sourceBusiness,
     services,
     staff,
     staffServiceMap,
@@ -93,6 +96,21 @@ export default async function BookingPageContent({
     initialService,
     effectivePlan,
   } = data;
+
+  const business = {
+    ...sourceBusiness,
+    logoUrl:
+      contentPreview?.logoUrl !== undefined ? contentPreview.logoUrl : sourceBusiness.logoUrl,
+    galleryImages:
+      contentPreview?.galleryImages !== undefined
+        ? contentPreview.galleryImages
+        : sourceBusiness.galleryImages,
+  };
+
+  const resolvedHideBranding =
+    contentPreview?.hideDinayaBranding !== undefined
+      ? contentPreview.hideDinayaBranding
+      : hideBranding;
 
   const resolvedTheme = resolveBookingTheme(business, {
     canUseExtendedTheme: canUseFeature(effectivePlan, "bookingPageTheme"),
@@ -198,7 +216,7 @@ export default async function BookingPageContent({
             locations={locations}
             copy={copy}
             resolvedTheme={resolvedTheme}
-            hideBranding={hideBranding}
+            hideBranding={resolvedHideBranding}
             activeDeals={activeDeals}
             dealId={dealId}
             bookingRouter={bookingRouter}
@@ -287,7 +305,7 @@ export default async function BookingPageContent({
               paypalEnabled: business.paypalEnabled,
               slug: business.slug,
               logoUrl: business.logoUrl,
-              hideBranding,
+              hideBranding: resolvedHideBranding,
             }}
             services={services}
             bookingRouter={bookingRouter}
