@@ -4,7 +4,7 @@ The most comprehensive AI cursor skills collection for building software with Ap
 
 ## What's included
 
-22 specialized AI personas + 1 skill router + 1 parallel task runner:
+22 specialized AI personas + 1 skill router + 1 component discovery skill + 1 parallel task runner:
 
 ### Executive Review Layer
 

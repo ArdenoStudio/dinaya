@@ -27,6 +27,7 @@ Skim [_shared/BRAND.md](../_shared/BRAND.md) and [_shared/PRODUCT.md](../_shared
 | Copy, positioning, landing page text | `ultra-brand-voice` |
 | Colors, typography, UI tokens, logo | `ultra-visual-system` |
 | UI ship review, accessibility, craft | `apple-design-head` |
+| Find/install UI component (footer, carousel, chart…) | `ultra-component-discovery` |
 | Booking page, slots, availability, holds | `ultra-scheduling-engine` |
 | Payments, webhooks, checkout | `ultra-payments` |
 | Database migration, schema | `ultra-migrations` |
