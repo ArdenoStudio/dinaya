@@ -126,7 +126,7 @@ export function BookingHubFlow({
   const layoutMaxWidth = showHub
     ? "mx-auto w-full max-w-2xl px-0 md:px-4"
     : bookerFocus
-      ? "mx-auto w-full max-w-5xl px-0 md:px-4"
+      ? "mx-auto w-full max-w-6xl px-0 md:px-4"
       : "mx-auto max-w-5xl px-0 md:px-8 md:py-6";
 
   const hubBackHref =

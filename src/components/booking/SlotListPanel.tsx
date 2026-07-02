@@ -114,7 +114,7 @@ export function SlotListPanel({
                     }`}
                   >
                     {!hasCalendarConflict && !isSelected && (
-                      <span className="size-2 shrink-0 rounded-full bg-emerald-500" aria-hidden />
+                      <span className="size-2 shrink-0 rounded-full bg-[#00D492]" aria-hidden />
                     )}
                     <span className="min-w-0 flex-1 text-left">
                       <span className={hasCalendarConflict ? "line-through decoration-gray-300" : ""}>

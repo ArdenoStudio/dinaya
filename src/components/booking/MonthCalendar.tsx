@@ -87,39 +87,37 @@ export default function MonthCalendar({
 
   return (
     <div
-      className={`min-w-0 w-full ${comfortable ? "px-0.5 py-1" : "rounded-xl border border-border bg-card p-3.5"}`}
+      className={`min-w-0 w-full ${comfortable ? "py-1" : "rounded-xl border border-border bg-card p-3.5"}`}
     >
       <div className={`flex items-center justify-between ${comfortable ? "mb-4" : "mb-3"}`}>
-        <span className={`font-semibold text-foreground ${comfortable ? "text-lg" : "text-sm"}`}>
+        <button
+          type="button"
+          disabled={!canGoPrev}
+          onClick={() => setViewMonth((m) => subMonths(m, 1))}
+          className="flex size-10 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30"
+          aria-label="Previous month"
+        >
+          <Icon name="chevron-left" className={comfortable ? "text-sm" : "text-xs"} />
+        </button>
+        <span className={`font-semibold text-foreground ${comfortable ? "text-base" : "text-sm"}`}>
           {format(viewMonth, "MMMM yyyy")}
         </span>
-        <div className="flex gap-1">
-          <button
-            type="button"
-            disabled={!canGoPrev}
-            onClick={() => setViewMonth((m) => subMonths(m, 1))}
-            className="flex size-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30"
-            aria-label="Previous month"
-          >
-            <Icon name="chevron-left" className={comfortable ? "text-sm" : "text-xs"} />
-          </button>
-          <button
-            type="button"
-            onClick={() => setViewMonth((m) => addMonths(m, 1))}
-            className="flex size-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            aria-label="Next month"
-          >
-            <Icon name="chevron-right" className={comfortable ? "text-sm" : "text-xs"} />
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => setViewMonth((m) => addMonths(m, 1))}
+          className="flex size-10 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          aria-label="Next month"
+        >
+          <Icon name="chevron-right" className={comfortable ? "text-sm" : "text-xs"} />
+        </button>
       </div>
       <div
-        className={`grid w-full min-w-0 grid-cols-7 text-center ${comfortable ? "gap-1.5" : "gap-0.5"}`}
+        className={`grid w-full min-w-0 grid-cols-7 text-center ${comfortable ? "gap-2" : "gap-0.5"}`}
       >
         {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
           <div
             key={d}
-            className={`font-semibold text-muted-foreground ${comfortable ? "pb-3 text-[11px] tracking-wide" : "pb-1.5 text-[10px] tracking-wide"}`}
+            className={`font-semibold text-muted-foreground ${comfortable ? "pb-3 text-xs tracking-wide" : "pb-1.5 text-[10px] tracking-wide"}`}
           >
             {comfortable ? d : d.slice(0, 3)}
           </div>
@@ -142,7 +140,7 @@ export default function MonthCalendar({
               onClick={() => !disabled && onSelect(dateStr)}
               className={`relative min-w-0 font-medium tabular-nums transition-[background-color,box-shadow,transform] ${
                 comfortable
-                  ? "mx-auto flex size-11 items-center justify-center rounded-xl text-sm"
+                  ? "mx-auto flex size-12 items-center justify-center rounded-xl text-sm"
                   : "mx-auto flex size-11 min-h-11 min-w-11 max-w-none items-center justify-center rounded-lg text-xs"
               } ${
                 !inMonth

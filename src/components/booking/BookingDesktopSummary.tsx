@@ -97,7 +97,7 @@ export default function BookingDesktopSummary({
           )}
           {timeLabel && (
             <li className="flex items-center gap-3">
-              <Icon name="clock" className="text-emerald-500" />
+              <Icon name="clock" className="text-[#00D492]" />
               <span className="font-medium text-foreground">{timeLabel}</span>
             </li>
           )}
