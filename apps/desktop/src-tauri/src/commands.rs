@@ -589,8 +589,9 @@ pub async fn desktop_sync_run(
     .join("&");
 
   let token = load_desktop_key(&state)?;
+  let bookings_path = format!("/api/v1/desktop/bookings?{}", query);
   let bootstrap_request = desktop_api_get("/api/v1/desktop/bootstrap", &token);
-  let bookings_request = desktop_api_get(&format!("/api/v1/desktop/bookings?{}", query), &token);
+  let bookings_request = desktop_api_get(&bookings_path, &token);
   let (bootstrap, bookings) = tokio::join!(bootstrap_request, bookings_request);
   let bootstrap = bootstrap?;
   let bookings = bookings?;
