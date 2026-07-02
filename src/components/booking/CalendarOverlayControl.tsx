@@ -137,7 +137,7 @@ export function CalendarOverlayControl({
           disabled={overlay.loading}
           onCheckedChange={() => overlay.toggle()}
           aria-label={copy.overlayMyCalendar}
-          className="h-6 w-11 shrink-0 data-[size=default]:h-6 data-[size=default]:w-11 data-checked:booking-bg-accent data-unchecked:bg-muted"
+          className="shrink-0 data-[checked]:bg-[var(--booking-accent)] data-[unchecked]:bg-muted"
         />
       </div>
 

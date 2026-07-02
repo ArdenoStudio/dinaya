@@ -194,7 +194,7 @@ export default function MonthCalendar({
                     personalBusyLabel ??
                     `${personalBusyCount} busy calendar period${personalBusyCount === 1 ? "" : "s"}`
                   }
-                  className="absolute right-0 top-0 size-0 border-l-[11px] border-t-[11px] border-l-transparent border-t-amber-500 dark:border-t-amber-400"
+                  className="absolute right-0 top-0 size-0 border-l-[14px] border-t-[14px] border-l-transparent border-t-amber-500 dark:border-t-amber-400"
                 />
               )}
             </button>
