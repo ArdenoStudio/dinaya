@@ -26,6 +26,32 @@ function overlayErrorMessage(
   }
 }
 
+function OverlayErrorAlert({
+  copy,
+  overlay,
+}: {
+  copy: BookingCopy;
+  overlay: GoogleCalendarOverlay;
+}) {
+  if (!overlay.error) return null;
+  return (
+    <Alert className="mt-2.5 border-amber-200/80 bg-amber-50/90 px-3 py-2.5 text-amber-800 dark:border-amber-800/50 dark:bg-amber-950/40 dark:text-amber-200">
+      <AlertDescription className="flex items-center justify-between gap-3 text-[11px] text-inherit">
+        <span>{overlayErrorMessage(copy, overlay.error)}</span>
+        <AlertAction className="static shrink-0">
+          <button
+            type="button"
+            onClick={overlay.retry}
+            className="font-semibold booking-text-accent hover:underline"
+          >
+            {copy.tryAgain}
+          </button>
+        </AlertAction>
+      </AlertDescription>
+    </Alert>
+  );
+}
+
 export function CalendarOverlayControl({
   copy,
   overlay,
@@ -39,15 +65,50 @@ export function CalendarOverlayControl({
 
   if (!overlay.available) return null;
 
-  const status = overlay.connecting
-    ? copy.calendarConnecting
-    : overlay.loading
-      ? copy.calendarChecking
-      : overlay.connected
-        ? overlay.enabled
-          ? copy.calendarOverlayOn
-          : copy.calendarOverlayOff
-        : copy.calendarOverlayHint;
+  if (!overlay.connected) {
+    return (
+      <div>
+        <button
+          type="button"
+          onClick={() => overlay.toggle()}
+          disabled={overlay.connecting}
+          className={`group flex w-full items-center gap-3 rounded-xl border border-[var(--booking-accent-soft)] bg-[var(--booking-accent-muted)]/50 text-left transition-[background-color,border-color] hover:border-[var(--booking-accent)] hover:bg-[var(--booking-accent-muted)] disabled:cursor-wait ${
+            compact ? "px-3 py-2.5" : "px-3.5 py-3"
+          }`}
+        >
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-card booking-text-accent shadow-sm ring-1 ring-border">
+            <Icon name="google" className="text-base" aria-hidden="true" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-[13px] font-semibold leading-snug text-foreground">
+              {copy.calendarOverlayTitle}
+            </span>
+            <span className="mt-0.5 block text-xs leading-4 text-muted-foreground">
+              {overlay.connecting ? copy.calendarConnecting : copy.calendarOverlayHint}
+            </span>
+          </span>
+          <span className="inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-full booking-bg-accent px-3.5 text-xs font-semibold text-white booking-shadow-accent">
+            {overlay.connecting ? (
+              <Icon
+                name="arrow-repeat"
+                className="motion-safe:animate-spin"
+                aria-hidden="true"
+              />
+            ) : (
+              copy.calendarOverlayCta
+            )}
+          </span>
+        </button>
+        <OverlayErrorAlert copy={copy} overlay={overlay} />
+      </div>
+    );
+  }
+
+  const status = overlay.loading
+    ? copy.calendarChecking
+    : overlay.enabled
+      ? copy.calendarOverlayOn
+      : copy.calendarOverlayOff;
 
   return (
     <div
@@ -73,31 +134,16 @@ export function CalendarOverlayControl({
         <Switch
           id={switchId}
           checked={overlay.enabled}
-          disabled={overlay.connecting || overlay.loading}
+          disabled={overlay.loading}
           onCheckedChange={() => overlay.toggle()}
           aria-label={copy.overlayMyCalendar}
           className="h-6 w-11 shrink-0 data-[size=default]:h-6 data-[size=default]:w-11 data-checked:booking-bg-accent data-unchecked:bg-muted"
         />
       </div>
 
-      {overlay.error && (
-        <Alert className="mt-2.5 border-amber-200/80 bg-amber-50/90 px-3 py-2.5 text-amber-800 dark:border-amber-800/50 dark:bg-amber-950/40 dark:text-amber-200">
-          <AlertDescription className="flex items-center justify-between gap-3 text-[11px] text-inherit">
-            <span>{overlayErrorMessage(copy, overlay.error)}</span>
-            <AlertAction className="static shrink-0">
-              <button
-                type="button"
-                onClick={overlay.retry}
-                className="font-semibold booking-text-accent hover:underline"
-              >
-                {copy.tryAgain}
-              </button>
-            </AlertAction>
-          </AlertDescription>
-        </Alert>
-      )}
+      <OverlayErrorAlert copy={copy} overlay={overlay} />
 
-      {overlay.connected && !overlay.error && !compact && (
+      {!overlay.error && !compact && (
         <div className="mt-2.5 flex items-center justify-between border-t border-border pt-2.5 text-[10px] text-muted-foreground">
           <span>{copy.calendarPrivacyHint}</span>
           <button

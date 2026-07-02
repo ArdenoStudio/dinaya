@@ -354,6 +354,7 @@ export default function StepDateTime({
                 maxDate={maxDate}
                 dayStatus={monthDayStatus}
                 personalBusyDates={calendarOverlay?.busyDates}
+                personalBusyLabel={copy.calendarConflict}
                 nextAvailableDate={showNextAvailable ? nextAvailable?.date : undefined}
                 onMonthChange={handleMonthChange}
                 onSelect={onDateChange}
@@ -377,6 +378,7 @@ export default function StepDateTime({
               maxDate={maxDate}
               dayStatus={monthDayStatus}
               personalBusyDates={calendarOverlay?.busyDates}
+              personalBusyLabel={copy.calendarConflict}
               nextAvailableDate={showNextAvailable ? nextAvailable?.date : undefined}
               onMonthChange={handleMonthChange}
               onSelect={onDateChange}
@@ -391,6 +393,7 @@ export default function StepDateTime({
               maxDate={maxDate}
               dayStatus={monthDayStatus}
               personalBusyDates={calendarOverlay?.busyDates}
+              personalBusyLabel={copy.calendarConflict}
               nextAvailableDate={showNextAvailable ? nextAvailable?.date : undefined}
               onMonthChange={handleMonthChange}
               onSelect={onDateChange}
