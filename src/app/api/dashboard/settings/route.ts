@@ -4,6 +4,8 @@ import { businesses } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { ok, validationError } from "@/lib/action-result";
 import { requireApiBusiness } from "@/lib/api-auth";
+import { collectRemovedBusinessImageUrls } from "@/lib/business-image-storage";
+import { deleteBusinessImagesByPublicUrls } from "@/lib/supabase-storage";
 import { logActivity } from "@/lib/activity-log";
 import { encryptSecret } from "@/lib/secrets";
 import { syncBusinessPrimaryLocation } from "@/lib/locations";
@@ -159,6 +161,33 @@ export async function PATCH(req: NextRequest) {
     }
   }
 
+  const [currentBusiness] = await db
+    .select({
+      logoUrl: businesses.logoUrl,
+      galleryImages: businesses.galleryImages,
+    })
+    .from(businesses)
+    .where(eq(businesses.id, context.businessId))
+    .limit(1);
+
+  const nextLogoUrl =
+    logoUrl !== undefined ? logoUrl?.trim() || null : (currentBusiness?.logoUrl ?? null);
+  const nextGalleryImages =
+    galleryImages !== undefined
+      ? galleryImages.filter(Boolean)
+      : (currentBusiness?.galleryImages ?? []);
+
+  const removedImageUrls = collectRemovedBusinessImageUrls(
+    {
+      logoUrl: currentBusiness?.logoUrl,
+      galleryImages: currentBusiness?.galleryImages,
+    },
+    {
+      logoUrl: nextLogoUrl,
+      galleryImages: nextGalleryImages,
+    },
+  );
+
   await db
     .update(businesses)
     .set({
@@ -234,6 +263,12 @@ export async function PATCH(req: NextRequest) {
   }).catch((error) => {
     console.error("Activity log write failed:", error);
   });
+
+  if (removedImageUrls.length > 0) {
+    void deleteBusinessImagesByPublicUrls(removedImageUrls, context.businessId).catch((error) => {
+      console.error("Storage cleanup after settings update failed:", error);
+    });
+  }
 
   return NextResponse.json(ok({ id: context.businessId }));
 }
