@@ -23,9 +23,6 @@ interface Props {
   minDate: Date;
   maxDate?: Date;
   dayStatus?: Record<string, MonthDayStatus>;
-  personalBusyDates?: Record<string, number>;
-  /** Legend label for the personal-conflict corner marker (e.g. copy.calendarConflict). */
-  personalBusyLabel?: string;
   nextAvailableDate?: string;
   onSelect: (dateStr: string) => void;
   onMonthChange?: (month: string) => void;
@@ -37,8 +34,6 @@ export default function MonthCalendar({
   minDate,
   maxDate,
   dayStatus,
-  personalBusyDates,
-  personalBusyLabel,
   nextAvailableDate,
   onSelect,
   onMonthChange,
@@ -88,15 +83,6 @@ export default function MonthCalendar({
 
   const canGoPrev = startOfMonth(viewMonth) > startOfMonth(minDate);
 
-  const viewMonthKey = format(viewMonth, "yyyy-MM");
-  const hasPersonalBusyInView = Boolean(
-    personalBusyLabel &&
-      personalBusyDates &&
-      Object.keys(personalBusyDates).some(
-        (date) => date.startsWith(viewMonthKey) && personalBusyDates[date] > 0,
-      ),
-  );
-
   return (
     <div
       className={`min-w-0 w-full ${comfortable ? "py-1" : "rounded-xl border border-border bg-card p-3.5"}`}
@@ -143,14 +129,13 @@ export default function MonthCalendar({
           const isNextAvailable =
             nextAvailableDate === dateStr && !isSelected && !disabled && inMonth;
           const status = dayStatus?.[dateStr];
-          const personalBusyCount = personalBusyDates?.[dateStr] ?? 0;
           return (
             <button
               key={dateStr}
               type="button"
               disabled={disabled}
               onClick={() => !disabled && onSelect(dateStr)}
-              className={`relative min-w-0 overflow-hidden font-medium tabular-nums transition-[background-color,box-shadow,transform] ${
+              className={`relative min-w-0 font-medium tabular-nums transition-[background-color,box-shadow,transform] ${
                 comfortable
                   ? "mx-auto flex size-12 items-center justify-center rounded-xl text-sm"
                   : "mx-auto flex size-11 min-h-11 min-w-11 max-w-none items-center justify-center rounded-lg text-xs"
@@ -170,8 +155,9 @@ export default function MonthCalendar({
             >
               {format(day, "d")}
               {/* Secondary hint: business has open slots. Deliberately faint —
-                  it fires on almost every enabled day, so it must read quieter
-                  than the personal-conflict marker. */}
+                  it fires on almost every enabled day. Personal calendar
+                  conflicts are surfaced on the time slots (cal.com-style),
+                  not on the month grid. */}
               {inMonth && status === "available" && !isSelected && (
                 <span
                   aria-hidden
@@ -184,34 +170,10 @@ export default function MonthCalendar({
                   className="absolute bottom-1 left-1/2 size-1 -translate-x-1/2 rounded-full bg-muted-foreground/30"
                 />
               )}
-              {/* Personal Google Calendar conflict: amber corner fold —
-                  a different shape and position from the availability dot so
-                  the two systems can't be confused at a glance. */}
-              {inMonth && personalBusyCount > 0 && !isSelected && (
-                <span
-                  aria-hidden="true"
-                  title={
-                    personalBusyLabel ??
-                    `${personalBusyCount} busy calendar period${personalBusyCount === 1 ? "" : "s"}`
-                  }
-                  className="absolute right-0 top-0 size-0 border-l-[14px] border-t-[14px] border-l-transparent border-t-amber-500 dark:border-t-amber-400"
-                />
-              )}
             </button>
           );
         })}
       </div>
-      {hasPersonalBusyInView && (
-        <div className="mt-3 flex items-center gap-2 text-[11px] leading-4 text-muted-foreground">
-          <span
-            aria-hidden="true"
-            className="relative size-3.5 shrink-0 overflow-hidden rounded-[5px] bg-muted ring-1 ring-inset ring-border"
-          >
-            <span className="absolute right-0 top-0 size-0 border-l-8 border-t-8 border-l-transparent border-t-amber-500 dark:border-t-amber-400" />
-          </span>
-          <span>{personalBusyLabel}</span>
-        </div>
-      )}
     </div>
   );
 }

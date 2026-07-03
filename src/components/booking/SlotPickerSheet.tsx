@@ -1,12 +1,12 @@
 "use client";
 
 import * as Dialog from "@radix-ui/react-dialog";
-import { useEffect, useState } from "react";
 import { format, parseISO } from "date-fns";
 import { Icon } from "@/components/ui/Icon";
 import type { BookingCopy } from "@/lib/i18n";
 import type { GoogleCalendarOverlay } from "./useGoogleCalendarOverlay";
 import { CalendarOverlayControl } from "./CalendarOverlayControl";
+import { useBookingThemeVars } from "./useBookingThemeVars";
 import { SlotListPanel } from "./SlotListPanel";
 import type { SlotEmptyState, SlotOption } from "./TimeSlotGrid";
 
@@ -41,23 +41,7 @@ export function SlotPickerSheet({
     ? format(parseISO(selectedDate + "T12:00:00"), "EEEE, d MMMM")
     : null;
 
-  // The sheet portals to document.body, outside the [data-booking-theme]
-  // wrapper that carries the tenant's --booking-* variables as inline styles.
-  // Copy them onto the sheet content so accent-tinted UI keeps its branding.
-  const [themeVars, setThemeVars] = useState<Record<string, string> | null>(null);
-  useEffect(() => {
-    if (!open) return;
-    const host = document.querySelector<HTMLElement>("[data-booking-theme]");
-    if (!host) return;
-    const vars: Record<string, string> = {};
-    for (let i = 0; i < host.style.length; i++) {
-      const name = host.style.item(i);
-      if (name.startsWith("--booking-")) {
-        vars[name] = host.style.getPropertyValue(name);
-      }
-    }
-    setThemeVars(vars);
-  }, [open]);
+  const themeVars = useBookingThemeVars(open);
 
   return (
     <Dialog.Root open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
@@ -102,7 +86,7 @@ export function SlotPickerSheet({
           <div className="px-5 py-4">
             {calendarOverlay ? (
               <div className="mb-4">
-                <CalendarOverlayControl copy={copy} overlay={calendarOverlay} compact />
+                <CalendarOverlayControl copy={copy} overlay={calendarOverlay} />
               </div>
             ) : null}
             <SlotListPanel

@@ -338,13 +338,14 @@ export default function StepDateTime({
             >
               {showMobileCalendar ? copy.quickDates : copy.fullCalendar}
             </button>
+            {/* Cal.com-style placement: inline switch in the picker header on
+                desktop; on mobile the same control lives in the slot sheet. */}
+            {calendarOverlay && (
+              <div className="hidden md:ml-auto md:block">
+                <CalendarOverlayControl copy={copy} overlay={calendarOverlay} />
+              </div>
+            )}
           </div>
-
-          {calendarOverlay && (
-            <div className="mb-4">
-              <CalendarOverlayControl copy={copy} overlay={calendarOverlay} />
-            </div>
-          )}
 
           <div className="md:hidden">
             {showMobileCalendar ? (
@@ -353,8 +354,6 @@ export default function StepDateTime({
                 minDate={today}
                 maxDate={maxDate}
                 dayStatus={monthDayStatus}
-                personalBusyDates={calendarOverlay?.busyDates}
-                personalBusyLabel={copy.calendarConflict}
                 nextAvailableDate={showNextAvailable ? nextAvailable?.date : undefined}
                 onMonthChange={handleMonthChange}
                 onSelect={onDateChange}
@@ -377,8 +376,6 @@ export default function StepDateTime({
               minDate={today}
               maxDate={maxDate}
               dayStatus={monthDayStatus}
-              personalBusyDates={calendarOverlay?.busyDates}
-              personalBusyLabel={copy.calendarConflict}
               nextAvailableDate={showNextAvailable ? nextAvailable?.date : undefined}
               onMonthChange={handleMonthChange}
               onSelect={onDateChange}
@@ -392,8 +389,6 @@ export default function StepDateTime({
               minDate={today}
               maxDate={maxDate}
               dayStatus={monthDayStatus}
-              personalBusyDates={calendarOverlay?.busyDates}
-              personalBusyLabel={copy.calendarConflict}
               nextAvailableDate={showNextAvailable ? nextAvailable?.date : undefined}
               onMonthChange={handleMonthChange}
               onSelect={onDateChange}
