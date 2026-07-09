@@ -132,9 +132,9 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
         </span>
       </div>
 
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Left col: profile + stage editor */}
-        <div className="col-span-1 space-y-4">
+        <div className="space-y-4 lg:col-span-1">
           {/* Contact info */}
           <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-5 space-y-3">
             <h2 className="font-medium text-sm">Contact</h2>
@@ -193,7 +193,7 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
         </div>
 
         {/* Right col: booking history + notes feed */}
-        <div className="col-span-2 space-y-5">
+        <div className="space-y-5 lg:col-span-2">
           {/* Booking history */}
           <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 overflow-hidden">
             <div className="px-5 py-4 border-b">

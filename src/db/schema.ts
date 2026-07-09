@@ -159,6 +159,10 @@ export const businesses = pgTable("businesses", {
   }),
   onboardingCompletedAt: timestamp("onboarding_completed_at"),
   onboardingStep: integer("onboarding_step").default(0).notNull(),
+  signupUtmSource: varchar("signup_utm_source", { length: 80 }),
+  signupUtmMedium: varchar("signup_utm_medium", { length: 80 }),
+  signupUtmCampaign: varchar("signup_utm_campaign", { length: 120 }),
+  firstBookingAt: timestamp("first_booking_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

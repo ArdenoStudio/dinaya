@@ -214,7 +214,7 @@ export async function getIntegrationsDashboardList(
       statusLabel: !canUseGoogleCalendar
         ? `${planDisplayName(minimumPlanForFeature("googleCalendarSync"))} required`
         : !googleConfigured
-          ? "Env required"
+          ? "Ask Dinaya to enable"
           : google?.isActive
             ? "Connected"
             : "Not connected",
@@ -232,14 +232,14 @@ export async function getIntegrationsDashboardList(
       provider: "resend",
       setupPath: "/dashboard/automations",
       status: resendConfigured ? "connected" : "env_required",
-      statusLabel: resendConfigured ? "Configured" : "Env required",
+      statusLabel: resendConfigured ? "Configured" : "Ask Dinaya to enable",
       updatedAt: null,
     },
     {
       accountName: null,
-      actionLabel: canUseWhatsappSms ? "Use in AI Hub" : "Upgrade",
+      actionLabel: canUseWhatsappSms ? "Open automations" : "Upgrade",
       category: "messaging",
-      description: "AI reminders and campaigns through WhatsApp or SMS gateway.",
+      description: "Reminders and campaigns through WhatsApp or SMS gateway.",
       detailId: null,
       id: "whatsapp-sms",
       kind: "provider",
@@ -250,25 +250,25 @@ export async function getIntegrationsDashboardList(
       statusLabel: canUseWhatsappSms
         ? messagingConfigured
           ? "Configured"
-          : "Env required"
+          : "Ask Dinaya to enable"
         : `${planDisplayName(minimumPlanForFeature("whatsappSms"))} required`,
       updatedAt: null,
     },
     {
       accountName: voiceRolloutOpen ? voice?.providerName ?? null : null,
-      actionLabel: voiceStatus.actionLabel,
+      actionLabel: voiceRolloutOpen ? voiceStatus.actionLabel : "Coming soon",
       category: "voice",
       description: voiceRolloutOpen
         ? "Managed phone agent for questions and appointment booking."
-        : "Phone-agent booking is being prepared for a later rollout.",
+        : "Coming soon — phone-agent booking is paused until rollout opens.",
       detailId: voiceRolloutOpen ? voice?.id ?? null : null,
       id: "ai-voice-receptionist",
       kind: "voice",
       name: "AI Voice Receptionist",
       provider: voiceRolloutOpen ? voice?.providerName ?? "Peak Agents" : "Dinaya",
-      setupPath: voiceSetupPath,
-      status: voiceStatus.status,
-      statusLabel: voiceStatus.statusLabel,
+      setupPath: voiceRolloutOpen ? voiceSetupPath : "/dashboard/settings/integrations",
+      status: voiceRolloutOpen ? voiceStatus.status : "coming_soon",
+      statusLabel: voiceRolloutOpen ? voiceStatus.statusLabel : "Coming soon",
       updatedAt: voiceRolloutOpen ? voice?.updatedAt.toISOString() ?? null : null,
     },
     {

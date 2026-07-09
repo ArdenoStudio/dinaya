@@ -11,6 +11,7 @@ import { Logo } from "@/components/Logo";
 import { AuthThemeToggle } from "@/components/AuthThemeToggle";
 import { Icon } from "@/components/ui/Icon";
 import { authFieldTransitionClassName, authSubmitButtonClassName } from "@/components/auth/auth-form-styles";
+import { dashboardInputClass } from "@/lib/dashboard-ui";
 
 const perks = [
   "Your own booking page at yourname.dinaya.lk",
@@ -36,8 +37,7 @@ const businessTypes = [
   { value: "other", label: "Other", helper: "Starts with a simple consultation and appointment setup." },
 ];
 
-const inputCls =
-  `mt-1.5 w-full border border-gray-200 dark:border-neutral-800 rounded-lg px-3 py-2.5 text-sm bg-white dark:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 placeholder:text-gray-300 dark:placeholder:text-neutral-600 ${authFieldTransitionClassName}`;
+const inputCls = `${dashboardInputClass} mt-1.5 ${authFieldTransitionClassName}`;
 
 function getPasswordStrength(pw: string): 0 | 1 | 2 | 3 {
   if (pw.length === 0) return 0;
@@ -55,6 +55,7 @@ const strengthText  = ["", "text-red-500", "text-amber-500", "text-emerald-600"]
 export default function RegisterPage() {
   const router = useRouter();
   const [referrerCode, setReferrerCode] = useState("");
+  const [utm, setUtm] = useState({ source: "", medium: "", campaign: "" });
   const step1Ref   = useRef<HTMLInputElement>(null);
   const step2Ref   = useRef<HTMLInputElement>(null);
   const slugTouched = useRef(false);
@@ -77,6 +78,11 @@ export default function RegisterPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     setReferrerCode(params.get("ref")?.trim().toLowerCase() ?? "");
+    setUtm({
+      source: params.get("utm_source")?.trim().slice(0, 80) ?? "",
+      medium: params.get("utm_medium")?.trim().slice(0, 80) ?? "",
+      campaign: params.get("utm_campaign")?.trim().slice(0, 120) ?? "",
+    });
     const emailFromQuery = params.get("email")?.trim();
     if (emailFromQuery) {
       setForm((f) => ({ ...f, email: emailFromQuery }));
@@ -114,6 +120,9 @@ export default function RegisterPage() {
         body: JSON.stringify({
           ...form,
           referrerCode: referrerCode || undefined,
+          utmSource: utm.source || undefined,
+          utmMedium: utm.medium || undefined,
+          utmCampaign: utm.campaign || undefined,
         }),
       });
       const data = await res.json();

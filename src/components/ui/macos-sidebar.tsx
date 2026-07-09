@@ -123,7 +123,7 @@ export function MacOSSidebar({
         animate={{ width: isOpen ? 240 : 64 }}
         transition={sidebarTransition}
         className={cn(
-          "hidden lg:flex lg:h-full lg:max-h-full p-2 shrink-0 flex-col items-start transition-colors duration-300 ease-out",
+          "hidden md:flex md:h-full md:max-h-full p-2 shrink-0 flex-col items-start transition-colors duration-300 ease-out",
           isOpen ? "bg-neutral-100 dark:bg-neutral-800" : "bg-transparent",
         )}
         aria-label="Sidebar"

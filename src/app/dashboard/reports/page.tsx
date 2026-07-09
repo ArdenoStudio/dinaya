@@ -1,12 +1,14 @@
 import { ProGate } from "@/components/ProGate";
 import { AnalyticsCharts } from "@/components/dashboard/AnalyticsCharts";
 import { DealAnalyticsPanel } from "@/components/dashboard/DealAnalyticsPanel";
+import { ReportsToolbar } from "@/components/dashboard/ReportsToolbar";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { getReportsDashboardOverview } from "@/lib/dashboard/reports";
 import { getDealAnalytics } from "@/lib/deals/analytics";
 import { requireBusiness } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import { BarChart3, CalendarDays, Star, Users } from "lucide-react";
+import { Suspense } from "react";
 
 const emptyDealAnalytics = {
   bestDeal: null,
@@ -89,23 +91,36 @@ function initialsFor(value: string) {
   );
 }
 
-export default async function ReportsPage() {
+export default async function ReportsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ from?: string; to?: string }>;
+}) {
   const { businessId } = await requireBusiness();
+  const params = await searchParams;
 
   return (
     <ProGate businessId={businessId} feature="reports">
-      <ReportsOverview businessId={businessId} />
+      <ReportsOverview businessId={businessId} from={params.from} to={params.to} />
     </ProGate>
   );
 }
 
-async function ReportsOverview({ businessId }: { businessId: string }) {
+async function ReportsOverview({
+  businessId,
+  from,
+  to,
+}: {
+  businessId: string;
+  from?: string;
+  to?: string;
+}) {
   const [reports, dealAnalytics] = await Promise.all([
-    getReportsDashboardOverview(businessId).catch(() => emptyReportsOverview(businessId)),
+    getReportsDashboardOverview(businessId, { from, to }).catch(() => emptyReportsOverview(businessId)),
     getDealAnalytics(businessId).catch(() => emptyDealAnalytics),
   ]);
 
-  const { breakdowns, metrics, trends } = reports;
+  const { breakdowns, metrics, trends, export: exportPayload, range } = reports;
   const maxHealthCount = Math.max(
     metrics.completedBookings,
     metrics.cancelledBookings,
@@ -125,11 +140,21 @@ async function ReportsOverview({ businessId }: { businessId: string }) {
       <div>
         <h1 className="font-cal text-2xl">Analytics & Reports</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Revenue trends, booking patterns, client spend, and staff workload.
+          Revenue trends, booking patterns, client spend, and staff workload
+          {range?.from && range?.to ? ` · ${range.from} → ${range.to}` : ""}.
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-4">
+      <Suspense fallback={null}>
+        <ReportsToolbar
+          csv={exportPayload.csv}
+          filename={exportPayload.filename}
+          initialFrom={range.from}
+          initialTo={range.to}
+        />
+      </Suspense>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
           label="Revenue"
           value={metrics.totalRevenueLabel}

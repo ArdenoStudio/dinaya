@@ -25,6 +25,9 @@ export const registerSchema = z.object({
     .optional(),
   language: z.enum(["en", "si", "ta"]).optional(),
   referrerCode: z.string().trim().max(40).optional(),
+  utmSource: z.string().trim().max(80).optional(),
+  utmMedium: z.string().trim().max(80).optional(),
+  utmCampaign: z.string().trim().max(120).optional(),
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>;
