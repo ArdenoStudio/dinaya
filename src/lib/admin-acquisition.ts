@@ -117,9 +117,11 @@ export async function getAcquisitionCohorts(days: AcquisitionDays): Promise<Acqu
     onboarded: number;
     activated: number;
   };
-  const rows = Array.isArray(result)
-    ? (result as CohortSqlRow[])
-    : (((result as { rows?: CohortSqlRow[] }).rows) ?? []);
+  const rows = (
+    Array.isArray(result)
+      ? (result as unknown as CohortSqlRow[])
+      : (((result as { rows?: CohortSqlRow[] }).rows) ?? [])
+  );
 
   return rows.map((row) => ({
     weekStart: row.week_start,
