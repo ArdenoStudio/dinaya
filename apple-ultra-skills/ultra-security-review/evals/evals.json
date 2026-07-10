@@ -1,0 +1,45 @@
+{
+  "skill_name": "ultra-security-review",
+  "evals": [
+    {
+      "id": 0,
+      "name": "api-route-auth-audit",
+      "type": "functional",
+      "prompt": "Security review — I added a new dashboard API route for deleting bookings.",
+      "expected_output": "Checks requireApiBusiness or equivalent, Zod validation, plan gates, P0/P1 findings, SHIP gate.",
+      "assertions": ["P0", "auth", "Verdict"]
+    },
+    {
+      "id": 1,
+      "name": "webhook-signature-check",
+      "type": "functional",
+      "prompt": "Is our payment webhook handler secure for production?",
+      "expected_output": "Verifies signature/hash, idempotency, no secret logging, replay protection.",
+      "assertions": ["webhook", "signature", "secret"]
+    },
+    {
+      "id": 2,
+      "name": "cron-bearer-required",
+      "type": "functional",
+      "prompt": "Review the new cron job that sends reminder emails.",
+      "expected_output": "P0 if cron route lacks Bearer CRON_SECRET pattern.",
+      "assertions": ["CRON", "Bearer", "P0"]
+    },
+    {
+      "id": 3,
+      "name": "trigger-should-security",
+      "type": "trigger_should",
+      "prompt": "secrets audit before we deploy this API change",
+      "expected_output": "Skill activates",
+      "assertions": []
+    },
+    {
+      "id": 4,
+      "name": "trigger-should-not-brand",
+      "type": "trigger_should_not",
+      "prompt": "does this landing page copy match our brand voice?",
+      "expected_output": "Routes to ultra-brand-voice, not ultra-security-review",
+      "assertions": []
+    }
+  ]
+}

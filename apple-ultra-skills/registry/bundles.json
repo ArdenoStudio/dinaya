@@ -1,0 +1,36 @@
+{
+  "bundles": {
+    "design": {
+      "description": "Component sourcing through Apple-quality ship review",
+      "skills": [
+        "ultra-component-discovery",
+        "ultra-visual-system",
+        "apple-design-head",
+        "ultra-brand-voice"
+      ]
+    },
+    "ship-ready": {
+      "description": "Pre-merge engineering and security gates",
+      "skills": [
+        "ultra-pr-ship-review",
+        "ultra-security-review",
+        "ultra-content-review"
+      ]
+    },
+    "executive": {
+      "description": "C-suite and GTM strategy personas",
+      "skills": [
+        "ultra-ceo",
+        "ultra-cpo",
+        "ultra-cto",
+        "ultra-cfo",
+        "ultra-head-of-growth",
+        "ultra-head-of-sales"
+      ]
+    },
+    "full": {
+      "description": "Complete Apple Ultra Skills pack",
+      "skills": ["*"]
+    }
+  }
+}
