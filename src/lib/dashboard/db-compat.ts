@@ -48,7 +48,10 @@ export async function hasPublicTable(tableName: string): Promise<boolean> {
       where table_schema = 'public'
         and table_name = ${tableName}
     ) as "exists"
-  `).then(existsFromResult);
+  `).then(existsFromResult).catch((err: unknown) => {
+    tableCache.delete(tableName);
+    throw err;
+  });
 
   tableCache.set(tableName, lookup);
   return lookup;
@@ -67,7 +70,10 @@ export async function hasPublicColumn(tableName: string, columnName: string): Pr
         and table_name = ${tableName}
         and column_name = ${columnName}
     ) as "exists"
-  `).then(existsFromResult);
+  `).then(existsFromResult).catch((err: unknown) => {
+    columnCache.delete(key);
+    throw err;
+  });
 
   columnCache.set(key, lookup);
   return lookup;

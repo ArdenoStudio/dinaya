@@ -18,6 +18,7 @@ import {
   isBusinessHolidayClosed,
 } from "@/lib/business-holidays";
 import { ANY_STAFF_ID } from "@/lib/booking-staff";
+import { bookingsOverlappingDayFilter } from "@/lib/booking-availability";
 import { getActiveReservationsForStaff } from "@/lib/slot-reservations";
 import { withRateLimit } from "@/lib/rate-limit";
 import {
@@ -222,13 +223,7 @@ export async function GET(req: NextRequest) {
       db
         .select({ startsAt: bookings.startsAt, endsAt: bookings.endsAt, status: bookings.status })
         .from(bookings)
-        .where(
-          and(
-            eq(bookings.staffId, staffId),
-            gte(bookings.startsAt, dayStartUtc),
-            lt(bookings.startsAt, dayEndUtc),
-          ),
-        ),
+        .where(bookingsOverlappingDayFilter(staffId, dayStartUtc, dayEndUtc)),
       getActiveReservationsForStaff(staffId, dayStartUtc, dayEndUtc, sessionToken ?? undefined),
     ]);
 

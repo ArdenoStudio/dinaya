@@ -2,9 +2,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 
 const generateDealSuggestionsMock = vi.hoisted(() => vi.fn());
+const expirePastDealsMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@/lib/deals/suggestions", () => ({
   generateDealSuggestions: generateDealSuggestionsMock,
+}));
+vi.mock("@/lib/deals/queries", () => ({
+  expirePastDeals: expirePastDealsMock,
 }));
 
 import { GET } from "./route";
@@ -14,6 +18,7 @@ describe("GET /api/cron/deal-suggestions", () => {
     vi.clearAllMocks();
     process.env.CRON_SECRET = "cron-test-secret";
     generateDealSuggestionsMock.mockResolvedValue({ ok: true });
+    expirePastDealsMock.mockResolvedValue(0);
   });
 
   it("returns 401 without bearer token", async () => {

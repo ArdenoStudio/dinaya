@@ -18,7 +18,7 @@ export function DataTable<TRow>({
   columns: DataTableColumn<TRow>[];
   empty?: React.ReactNode;
   getRowId: (row: TRow) => string;
-  /** Card layout for viewports below `md` (Apple mobile pattern). */
+  /** Card layout for viewports below `xl` (keeps cards through tablet). */
   mobileCard?: (row: TRow) => React.ReactNode;
   rows: TRow[];
 }) {
@@ -29,8 +29,8 @@ export function DataTable<TRow>({
   if (mobileCard) {
     return (
       <>
-        <div className="space-y-2 md:hidden">{rows.map((row) => mobileCard(row))}</div>
-        <div className="hidden overflow-hidden rounded-lg border bg-white dark:border-neutral-800 dark:bg-neutral-900 md:block">
+        <div className="space-y-2 xl:hidden">{rows.map((row) => mobileCard(row))}</div>
+        <div className="hidden overflow-hidden rounded-lg border bg-white dark:border-neutral-800 dark:bg-neutral-900 xl:block">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[46rem] text-sm">
               {renderTableHead(columns)}

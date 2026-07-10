@@ -56,6 +56,12 @@ export async function POST(req: NextRequest) {
 
   const { name, email, stage, source, tags, internalNotes } = parsed.data;
   const phone = normalizeSriLankanPhone(parsed.data.phone);
+  if (!phone || phone.length < 7) {
+    return NextResponse.json(
+      { error: "Please enter a valid Sri Lankan phone number.", fieldErrors: { phone: ["Invalid phone number."] } },
+      { status: 400 },
+    );
+  }
 
   const [client] = await db
     .insert(clients)

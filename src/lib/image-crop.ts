@@ -57,7 +57,7 @@ export async function cropImageWithTransform(
   imageSrc: string,
   frame: CropFrame,
   transform: CropTransform,
-  options?: { mimeType?: string; quality?: number; outputWidth?: number },
+  options?: { mimeType?: string; quality?: number; outputWidth?: number; shape?: "circle" | "rectangle" },
 ): Promise<CroppedImageResult> {
   const image = await loadImage(imageSrc);
   const outputWidth = options?.outputWidth ?? frame.width;
@@ -68,6 +68,14 @@ export async function cropImageWithTransform(
   canvas.height = outputHeight;
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Canvas is not available.");
+
+  const shape = options?.shape ?? "rectangle";
+  if (shape === "circle") {
+    ctx.beginPath();
+    ctx.arc(outputWidth / 2, outputHeight / 2, Math.min(outputWidth, outputHeight) / 2, 0, Math.PI * 2);
+    ctx.closePath();
+    ctx.clip();
+  }
 
   const scale = Math.max(0.01, transform.scale);
   const baseScale = Math.max(frame.width / image.width, frame.height / image.height);

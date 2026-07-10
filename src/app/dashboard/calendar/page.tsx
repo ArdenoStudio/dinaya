@@ -1,12 +1,27 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { format, startOfWeek, addDays, addWeeks, subWeeks, isSameDay } from "date-fns";
+import {
+  format,
+  startOfWeek,
+  addDays,
+  addWeeks,
+  subWeeks,
+  isSameDay,
+  startOfDay,
+} from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
-import { DashboardTableSkeleton } from "@/components/dashboard/DashboardLoadingPanel";
+import {
+  DashboardLoadingPanel,
+  DashboardTableSkeleton,
+} from "@/components/dashboard/DashboardLoadingPanel";
 import { buttonVariants } from "@/components/ui/button";
+import {
+  trackDashboardCalendarEventOpen,
+  trackDashboardCalendarView,
+} from "@/lib/analytics/gtag";
 import { cn } from "@/lib/utils";
 
 type StaffMember = {
@@ -26,6 +41,8 @@ type Booking = {
   serviceName: string;
   staffName: string;
 };
+
+type CalendarView = "day" | "agenda" | "week";
 
 const STATUS_BG: Record<string, string> = {
   pending: "bg-yellow-100 border-yellow-300 text-yellow-900 dark:bg-yellow-950/40 dark:border-yellow-800 dark:text-yellow-100",
@@ -60,22 +77,52 @@ function eventHeightPx(startsAt: string, endsAt: string): number {
 }
 
 export default function CalendarPage() {
+  const [view, setView] = useState<CalendarView>("day");
   const [weekStart, setWeekStart] = useState(() =>
     startOfWeek(new Date(), { weekStartsOn: 1 }),
   );
+  const [selectedDay, setSelectedDay] = useState(() => startOfDay(new Date()));
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
   const [selectedStaffId, setSelectedStaffId] = useState("");
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
+  const [reloadToken, setReloadToken] = useState(0);
+  const hydratedView = useRef(false);
 
-  const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
+  // Prefer week on large screens once; never leave week active below lg
+  useEffect(() => {
+    if (hydratedView.current) return;
+    hydratedView.current = true;
+    if (typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches) {
+      setView("week");
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const sync = () => {
+      setView((v) => (!mq.matches && v === "week" ? "day" : v));
+    };
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  const days = useMemo(
+    () => Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)),
+    [weekStart],
+  );
+
+  const rangeStart = view === "week" ? weekStart : selectedDay;
+  const rangeEnd = view === "week" ? addDays(weekStart, 7) : addDays(selectedDay, 1);
 
   useEffect(() => {
     setLoading(true);
     setLoadError(false);
-    const from = weekStart.toISOString();
-    const to = addDays(weekStart, 7).toISOString();
+    const from = rangeStart.toISOString();
+    const to = rangeEnd.toISOString();
     const staffParam = selectedStaffId
       ? `&staffIds=${encodeURIComponent(selectedStaffId)}`
       : "";
@@ -92,86 +139,242 @@ export default function CalendarPage() {
         setLoadError(true);
         setLoading(false);
       });
-  }, [weekStart, selectedStaffId]);
+  }, [rangeStart, rangeEnd, selectedStaffId, reloadToken]);
 
   function bookingsForDay(day: Date) {
-    return bookings.filter((b) => isSameDay(new Date(b.startsAt), day));
+    return bookings
+      .filter((b) => isSameDay(new Date(b.startsAt), day))
+      .sort((a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime());
   }
 
   const today = new Date();
+  const dayBookings = bookingsForDay(selectedDay);
+
+  function goToday() {
+    const now = startOfDay(new Date());
+    setSelectedDay(now);
+    setWeekStart(startOfWeek(now, { weekStartsOn: 1 }));
+  }
+
+  function changeView(next: CalendarView) {
+    if (
+      next === "week" &&
+      typeof window !== "undefined" &&
+      !window.matchMedia("(min-width: 1024px)").matches
+    ) {
+      setView("day");
+      trackDashboardCalendarView({ view: "day" });
+      return;
+    }
+    setView(next);
+    trackDashboardCalendarView({ view: next });
+  }
 
   return (
     <div className="flex h-full flex-col">
-      <DashboardPageHeader
-        title="Calendar"
-        actions={
-          <div className="flex flex-wrap items-center gap-2">
-            {staffMembers.length > 1 ? (
-              <label className="flex items-center gap-2 text-sm text-muted-foreground">
-                <span className="sr-only">Filter by staff</span>
-                <select
-                  value={selectedStaffId}
-                  onChange={(e) => setSelectedStaffId(e.target.value)}
-                  aria-label="Filter by staff member"
-                  className="min-h-11 rounded-md border bg-background px-3 py-2 text-base sm:text-sm"
-                >
-                  <option value="">All staff</option>
-                  {staffMembers.map((member) => (
-                    <option key={member.id} value={member.id}>
-                      {member.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            ) : null}
-            <Link href="/dashboard/bookings" className={cn(buttonVariants({ variant: "outline" }))}>
-              List view
-            </Link>
-            <Link href="/dashboard/bookings/new" className={cn(buttonVariants())}>
-              New booking
-            </Link>
-          </div>
-        }
-      />
+      <div className="sticky top-0 z-20 -mx-4 mb-4 space-y-3 border-b bg-background/95 px-4 pb-3 pt-1 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:-mx-6 sm:px-6 lg:static lg:mx-0 lg:border-0 lg:bg-transparent lg:px-0 lg:pb-0 lg:pt-0 lg:backdrop-blur-none">
+        <DashboardPageHeader
+          title="Calendar"
+          actions={
+            <div className="flex flex-wrap items-center gap-2">
+              {staffMembers.length > 1 ? (
+                <label className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <span className="sr-only">Filter by staff</span>
+                  <select
+                    value={selectedStaffId}
+                    onChange={(e) => setSelectedStaffId(e.target.value)}
+                    aria-label="Filter by staff member"
+                    className="min-h-11 rounded-md border bg-background px-3 py-2 text-base sm:text-sm"
+                  >
+                    <option value="">All staff</option>
+                    {staffMembers.map((member) => (
+                      <option key={member.id} value={member.id}>
+                        {member.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ) : null}
+              <Link
+                href="/dashboard/bookings"
+                className={cn(buttonVariants({ variant: "outline" }), "hidden min-h-11 sm:inline-flex")}
+              >
+                List view
+              </Link>
+              <Link href="/dashboard/bookings/new" className={cn(buttonVariants(), "min-h-11")}>
+                New booking
+              </Link>
+            </div>
+          }
+        />
 
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <div className="flex gap-1">
-          <button
-            type="button"
-            onClick={() => setWeekStart((w) => subWeeks(w, 1))}
-            aria-label="Previous week"
-            className={navButtonClass}
-          >
-            <ChevronLeft className="size-4" aria-hidden="true" />
-          </button>
-          <button
-            type="button"
-            onClick={() => setWeekStart(startOfWeek(new Date(), { weekStartsOn: 1 }))}
-            className={navButtonClass}
-          >
-            Today
-          </button>
-          <button
-            type="button"
-            onClick={() => setWeekStart((w) => addWeeks(w, 1))}
-            aria-label="Next week"
-            className={navButtonClass}
-          >
-            <ChevronRight className="size-4" aria-hidden="true" />
-          </button>
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex gap-1">
+            <button
+              type="button"
+              onClick={() => {
+                if (view === "week") setWeekStart((w) => subWeeks(w, 1));
+                else setSelectedDay((d) => addDays(d, -1));
+              }}
+              aria-label={view === "week" ? "Previous week" : "Previous day"}
+              className={navButtonClass}
+            >
+              <ChevronLeft className="size-4" aria-hidden="true" />
+            </button>
+            <button type="button" onClick={goToday} className={navButtonClass}>
+              Today
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (view === "week") setWeekStart((w) => addWeeks(w, 1));
+                else setSelectedDay((d) => addDays(d, 1));
+              }}
+              aria-label={view === "week" ? "Next week" : "Next day"}
+              className={navButtonClass}
+            >
+              <ChevronRight className="size-4" aria-hidden="true" />
+            </button>
+          </div>
+          <span className="text-sm text-muted-foreground">
+            {view === "week"
+              ? `${format(weekStart, "d MMM")} – ${format(addDays(weekStart, 6), "d MMM yyyy")}`
+              : format(selectedDay, "EEE d MMM yyyy")}
+          </span>
+          <div className="ml-auto flex rounded-lg border p-1 dark:border-neutral-800">
+            {(["day", "agenda", "week"] as const).map((option) => (
+              <button
+                key={option}
+                type="button"
+                onClick={() => changeView(option)}
+                aria-pressed={view === option}
+                className={cn(
+                  "inline-flex min-h-11 items-center rounded-md px-3 text-sm font-medium capitalize transition-transform active:scale-[0.96] motion-reduce:active:scale-100",
+                  view === option
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-muted",
+                  option === "week" && "hidden lg:inline-flex",
+                )}
+              >
+                {option}
+              </button>
+            ))}
+          </div>
         </div>
-        <span className="text-sm text-muted-foreground">
-          {format(weekStart, "d MMM")} – {format(addDays(weekStart, 6), "d MMM yyyy")}
-        </span>
       </div>
 
       {loadError ? (
         <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-6 text-sm">
           <p className="font-medium text-destructive">Could not load calendar</p>
-          <p className="mt-1 text-muted-foreground">Check your connection and refresh the page.</p>
+          <p className="mt-1 text-muted-foreground">Check your connection and try again.</p>
+          <button
+            type="button"
+            onClick={() => setReloadToken((n) => n + 1)}
+            className={cn(buttonVariants({ variant: "outline" }), "mt-4 min-h-11")}
+          >
+            Try again
+          </button>
         </div>
       ) : loading ? (
-        <DashboardTableSkeleton rows={8} />
+        <>
+          <DashboardLoadingPanel className="lg:hidden" rows={6} />
+          <div className="hidden lg:block">
+            <DashboardTableSkeleton rows={8} />
+          </div>
+        </>
+      ) : view === "agenda" ? (
+        <div className="space-y-2 rounded-xl border bg-card p-3 dark:border-neutral-800 dark:bg-neutral-900">
+          {dayBookings.length === 0 ? (
+            <div className="flex flex-col items-center gap-3 px-2 py-10 text-center">
+              <p className="text-sm text-muted-foreground">
+                No bookings on {format(selectedDay, "d MMM")}.
+              </p>
+              <Link href="/dashboard/bookings/new" className={cn(buttonVariants(), "min-h-11")}>
+                Create booking
+              </Link>
+            </div>
+          ) : (
+            dayBookings.map((b) => (
+              <Link
+                key={b.id}
+                href={`/dashboard/bookings/${b.id}`}
+                onClick={() => trackDashboardCalendarEventOpen({ bookingId: b.id })}
+                className={cn(
+                  "flex min-h-14 items-center justify-between gap-3 rounded-lg border px-3 py-3 active:opacity-80",
+                  STATUS_BG[b.status],
+                )}
+              >
+                <div className="min-w-0">
+                  <p className="truncate font-medium">{b.clientName}</p>
+                  <p className="truncate text-sm opacity-80">
+                    {b.serviceName}
+                    <span className="ml-1.5 capitalize opacity-70">· {b.status.replace("_", " ")}</span>
+                  </p>
+                </div>
+                <p className="shrink-0 text-sm tabular-nums">
+                  {format(new Date(b.startsAt), "h:mm a")}
+                </p>
+              </Link>
+            ))
+          )}
+        </div>
+      ) : view === "day" ? (
+        <div className="relative flex-1 overflow-auto rounded-xl border bg-card dark:border-neutral-800 dark:bg-neutral-900">
+          {dayBookings.length === 0 ? (
+            <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-3 bg-card/90 px-4 text-center dark:bg-neutral-900/90">
+              <p className="text-sm text-muted-foreground">
+                No bookings on {format(selectedDay, "d MMM")}.
+              </p>
+              <Link href="/dashboard/bookings/new" className={cn(buttonVariants(), "min-h-11")}>
+                Create booking
+              </Link>
+            </div>
+          ) : null}
+          <div className="grid grid-cols-[48px_1fr]">
+            <div className="border-r dark:border-neutral-800">
+              {Array.from({ length: TOTAL_HOURS }, (_, i) => (
+                <div
+                  key={i}
+                  style={{ height: HOUR_HEIGHT }}
+                  className="flex items-start justify-end border-b pr-2 pt-1 dark:border-neutral-800"
+                >
+                  <span className="text-xs text-muted-foreground">
+                    {format(new Date().setHours(START_HOUR + i, 0, 0, 0), "h a")}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <div className="relative" style={{ height: TOTAL_HOURS * HOUR_HEIGHT }}>
+              {Array.from({ length: TOTAL_HOURS }, (_, i) => (
+                <div
+                  key={i}
+                  className="absolute w-full border-b border-muted/40"
+                  style={{ top: i * HOUR_HEIGHT }}
+                />
+              ))}
+              {dayBookings.map((b) => {
+                const top = topPercent(b.startsAt);
+                const height = eventHeightPx(b.startsAt, b.endsAt);
+                return (
+                  <Link
+                    key={b.id}
+                    href={`/dashboard/bookings/${b.id}`}
+                    onClick={() => trackDashboardCalendarEventOpen({ bookingId: b.id })}
+                    className={`absolute left-2 right-2 z-20 flex min-h-11 flex-col justify-center overflow-hidden rounded border px-2 py-1 text-sm transition-opacity active:opacity-80 ${STATUS_BG[b.status]}`}
+                    style={{ top: `${top}%`, height }}
+                  >
+                    <p className="truncate font-medium">{b.clientName}</p>
+                    <p className="truncate opacity-75">
+                      <span className="tabular-nums">{format(new Date(b.startsAt), "h:mm a")}</span>
+                      {" · "}
+                      {b.serviceName}
+                    </p>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </div>
       ) : (
         <div className="flex-1 overflow-auto rounded-xl border bg-card dark:border-neutral-800 dark:bg-neutral-900">
           <div className="sticky top-0 z-10 grid grid-cols-[48px_repeat(7,1fr)] border-b bg-card dark:border-neutral-800 dark:bg-neutral-900">
@@ -179,14 +382,22 @@ export default function CalendarPage() {
             {days.map((day) => {
               const isToday = isSameDay(day, today);
               return (
-                <div key={day.toISOString()} className="border-r px-2 py-3 text-center last:border-0">
+                <button
+                  key={day.toISOString()}
+                  type="button"
+                  onClick={() => {
+                    setSelectedDay(day);
+                    changeView("day");
+                  }}
+                  className="border-r px-2 py-3 text-center last:border-0"
+                >
                   <p className="text-xs uppercase text-muted-foreground">{format(day, "EEE")}</p>
                   <p
                     className={`mx-auto mt-0.5 flex h-11 w-11 items-center justify-center rounded-full text-lg font-semibold ${isToday ? "bg-primary text-primary-foreground" : ""}`}
                   >
                     {format(day, "d")}
                   </p>
-                </div>
+                </button>
               );
             })}
           </div>
@@ -207,7 +418,7 @@ export default function CalendarPage() {
             </div>
 
             {days.map((day) => {
-              const dayBookings = bookingsForDay(day);
+              const columnBookings = bookingsForDay(day);
               return (
                 <div
                   key={day.toISOString()}
@@ -238,13 +449,14 @@ export default function CalendarPage() {
                       })()
                     : null}
 
-                  {dayBookings.map((b) => {
+                  {columnBookings.map((b) => {
                     const top = topPercent(b.startsAt);
                     const height = eventHeightPx(b.startsAt, b.endsAt);
                     return (
                       <Link
                         key={b.id}
                         href={`/dashboard/bookings/${b.id}`}
+                        onClick={() => trackDashboardCalendarEventOpen({ bookingId: b.id })}
                         className={`absolute left-1 right-1 z-20 flex min-h-11 flex-col justify-center overflow-hidden rounded border px-1.5 py-1 text-xs transition-opacity hover:opacity-80 ${STATUS_BG[b.status]}`}
                         style={{ top: `${top}%`, height }}
                         title={`${b.clientName} · ${b.serviceName}`}

@@ -31,14 +31,15 @@ export function DashboardConfirmDialog({
           <Dialog.Description className="mt-2 text-sm leading-6 text-muted-foreground">
             {description}
           </Dialog.Description>
-          <div className="mt-5 flex justify-end gap-2">
+          <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <Dialog.Close asChild>
-              <Button type="button" variant="outline">
+              <Button type="button" variant="outline" className="min-h-11 w-full sm:w-auto">
                 {cancelLabel}
               </Button>
             </Dialog.Close>
             <Button
               type="button"
+              className="min-h-11 w-full sm:w-auto"
               variant={variant === "destructive" ? "destructive" : "default"}
               onClick={() => {
                 void onConfirm();

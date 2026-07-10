@@ -160,9 +160,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true, alreadyCompleted: true });
   }
 
-  if (!business.phone?.trim() || !business.address?.trim() || !business.description?.trim()) {
+  if (!business.phone?.trim()) {
     return NextResponse.json(
-      { error: "Add your WhatsApp number, address, and a short description before finishing setup." },
+      { error: "Add your WhatsApp number before finishing setup." },
       { status: 400 },
     );
   }

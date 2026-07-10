@@ -17,7 +17,14 @@ import {
   dashboardPrimaryActionClass,
   dashboardSectionClass,
 } from "@/lib/dashboard-ui";
-import { trackOnboardingComplete } from "@/lib/analytics/gtag";
+import {
+  trackOnboardingComplete,
+  trackOnboardingLinkCopy,
+  trackOnboardingSetupStart,
+  trackOnboardingStepComplete,
+  trackOnboardingTestBookClick,
+  trackOnboardingWhatsappShare,
+} from "@/lib/analytics/gtag";
 import { cn } from "@/lib/utils";
 
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -150,6 +157,8 @@ export function SetupWizard() {
 
   const [staffId, setStaffId] = useState("");
   const [availRows, setAvailRows] = useState<AvailRow[]>([]);
+  const [businessSlug, setBusinessSlug] = useState("");
+  const [confirmDefaultHours, setConfirmDefaultHours] = useState(true);
 
   useEffect(() => {
     fetch("/api/dashboard/onboarding")
@@ -164,6 +173,11 @@ export function SetupWizard() {
         }
         const initialStep = Math.max(1, Math.min(4, (data.business.onboardingStep || 0) + 1));
         setStep(initialStep);
+        setBusinessSlug(data.business.slug);
+        trackOnboardingSetupStart({
+          resumeStep: initialStep,
+          businessSlug: data.business.slug,
+        });
         setDetails({
           name: data.business.name,
           description: data.business.description ?? "",
@@ -234,6 +248,7 @@ export function SetupWizard() {
     }
     try {
       await persistStep(1);
+      trackOnboardingStepComplete({ step: 1, businessSlug });
       setStep(2);
     } catch {
       setError("Couldn't save your progress. Refresh and try again.");
@@ -263,6 +278,7 @@ export function SetupWizard() {
     }
     try {
       await persistStep(2);
+      trackOnboardingStepComplete({ step: 2, businessSlug });
       setStep(3);
     } catch {
       setError("Couldn't save your progress. Refresh and try again.");
@@ -291,6 +307,7 @@ export function SetupWizard() {
     }
     try {
       await persistStep(3);
+      trackOnboardingStepComplete({ step: 3, businessSlug });
       setStep(4);
     } catch {
       setError("Couldn't save your progress. Refresh and try again.");
@@ -307,7 +324,8 @@ export function SetupWizard() {
       setSaving(false);
       return;
     }
-    trackOnboardingComplete();
+    trackOnboardingStepComplete({ step: 4, businessSlug });
+    trackOnboardingComplete({ businessSlug });
     router.push("/dashboard?onboarded=1");
     router.refresh();
   }
@@ -362,20 +380,20 @@ export function SetupWizard() {
   }
 
   return (
-    <div className="min-h-screen bg-stone-100 dark:bg-neutral-950">
-      <header className="border-b bg-white px-6 py-4 dark:border-neutral-800 dark:bg-neutral-900">
-        <div className="mx-auto flex max-w-2xl items-center justify-between gap-4">
+    <div className="min-h-dvh bg-stone-100 dark:bg-neutral-950">
+      <header className="border-b bg-white px-4 py-4 dark:border-neutral-800 dark:bg-neutral-900 sm:px-6">
+        <div className="mx-auto flex max-w-2xl flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <Logo size="sm" />
-          <div className="flex items-center gap-3">
-            <span className="text-xs font-medium text-muted-foreground">
-              {step} of 4 — booking page setup
+          <div className="flex items-center justify-between gap-3 sm:justify-end">
+            <span className="truncate text-xs font-medium text-muted-foreground">
+              Step {step} of 4
             </span>
             <AuthThemeToggle />
           </div>
         </div>
       </header>
 
-      <main className="mx-auto max-w-2xl px-6 py-10">
+      <main className="mx-auto max-w-2xl scroll-pb-28 px-6 py-10 pb-[calc(6rem+env(safe-area-inset-bottom))]">
         <div className="mb-8">
           <p className="text-xs font-semibold uppercase tracking-widest text-primary">
             Your booking page in 5 minutes
@@ -401,8 +419,9 @@ export function SetupWizard() {
           {step === 1 && (
             <form onSubmit={handleStep1} className="space-y-4" aria-busy={saving}>
               <p className="text-[17px] leading-snug text-muted-foreground sm:text-sm">
-                Add your WhatsApp number, address, and a short intro. These show on your booking link — so
-                clients can reach you without another DM.
+                Your page is already live at{" "}
+                <span className="font-medium text-foreground">{bookingDisplayUrl || "yourname.dinaya.lk"}</span>.
+                Add WhatsApp so clients can reach you — address and intro can wait.
               </p>
               <DashboardField htmlFor="biz-name" label="Business name" required>
                 <DashboardInput
@@ -432,22 +451,20 @@ export function SetupWizard() {
               <DashboardField
                 htmlFor="address"
                 label="Shop address"
-                required
-                hint="Helps clients find you. Shows on your booking page."
+                optional
+                hint="Helps clients find you. You can add this later in Settings."
               >
                 <DashboardInput
                   id="address"
-                  required
                   autoComplete="street-address"
                   placeholder="123 Galle Road, Colombo"
                   value={details.address}
                   onChange={(e) => setDetails((d) => ({ ...d, address: e.target.value }))}
                 />
               </DashboardField>
-              <DashboardField htmlFor="description" label="What you offer (one line)" required>
+              <DashboardField htmlFor="description" label="What you offer (one line)" optional>
                 <DashboardTextarea
                   id="description"
-                  required
                   rows={3}
                   placeholder="e.g. Haircuts, colour, and bridal styling in Colombo 7"
                   value={details.description}
@@ -459,13 +476,15 @@ export function SetupWizard() {
                   {error}
                 </p>
               ) : null}
-              <button
-                type="submit"
-                disabled={saving}
-                className={cn(dashboardPrimaryActionClass, "w-full justify-center")}
-              >
-                {saving ? currentStep.savingCta : currentStep.cta}
-              </button>
+              <div className="sticky bottom-0 -mx-6 mt-6 border-t border-border bg-card px-6 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className={cn(dashboardPrimaryActionClass, "w-full justify-center")}
+                >
+                  {saving ? currentStep.savingCta : currentStep.cta}
+                </button>
+              </div>
             </form>
           )}
 
@@ -483,7 +502,7 @@ export function SetupWizard() {
                   onChange={(e) => setService((s) => ({ ...s, name: e.target.value }))}
                 />
               </DashboardField>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <DashboardField htmlFor="duration" label="Duration (min)" required>
                   <DashboardInput
                     id="duration"
@@ -518,7 +537,7 @@ export function SetupWizard() {
                   {error}
                 </p>
               ) : null}
-              <div className="flex gap-3">
+              <div className="sticky bottom-0 -mx-6 mt-6 flex gap-3 border-t border-border bg-card px-6 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
                 <button type="button" onClick={() => setStep(1)} className={dashboardOutlineActionClass}>
                   Back
                 </button>
@@ -536,50 +555,70 @@ export function SetupWizard() {
           {step === 3 && (
             <form onSubmit={handleStep3} className="space-y-4" aria-busy={saving}>
               <p className="text-[17px] leading-snug text-muted-foreground sm:text-sm">
-                Set when clients can book online. You can change this later from Booking hours.
+                We pre-filled Mon–Sat 9:00–17:00. Confirm to continue, or edit hours below.
               </p>
-              <div className="flex flex-wrap gap-2">
-                {DAY_NAMES.map((name, day) => {
-                  const active = availRows.some((r) => r.dayOfWeek === day);
-                  return (
-                    <button
-                      key={name}
-                      type="button"
-                      onClick={() => toggleDay(day)}
-                      className={dashboardFilterPillClass(active)}
-                      aria-pressed={active}
-                    >
-                      {name}
-                    </button>
-                  );
-                })}
-              </div>
-              <div className="space-y-2">
-                {availRows.map((row, index) => (
-                  <div key={row.dayOfWeek} className="flex items-center gap-3 rounded-lg border p-3">
-                    <span className="w-10 text-sm font-medium">{DAY_NAMES[row.dayOfWeek]}</span>
-                    <input
-                      type="time"
-                      value={row.startTime}
-                      onChange={(e) => updateAvailRow(index, "startTime", e.target.value)}
-                      className={cn(dashboardInputClass, "mt-0 w-auto min-h-11 py-2")}
-                    />
-                    <span className="text-muted-foreground">to</span>
-                    <input
-                      type="time"
-                      value={row.endTime}
-                      onChange={(e) => updateAvailRow(index, "endTime", e.target.value)}
-                      className={cn(dashboardInputClass, "mt-0 w-auto min-h-11 py-2")}
-                    />
+              <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-lg border border-border bg-muted/30 px-4 py-3 text-sm dark:border-neutral-700">
+                <span className="flex size-11 shrink-0 items-center justify-center">
+                  <input
+                    type="checkbox"
+                    checked={confirmDefaultHours}
+                    onChange={(e) => setConfirmDefaultHours(e.target.checked)}
+                    className="size-5 rounded border-input"
+                  />
+                </span>
+                <span>Use default hours (Mon–Sat 9:00–17:00)</span>
+              </label>
+              {!confirmDefaultHours ? (
+                <>
+                  <div className="flex flex-wrap gap-2">
+                    {DAY_NAMES.map((name, day) => {
+                      const active = availRows.some((r) => r.dayOfWeek === day);
+                      return (
+                        <button
+                          key={name}
+                          type="button"
+                          onClick={() => toggleDay(day)}
+                          className={dashboardFilterPillClass(active)}
+                          aria-pressed={active}
+                        >
+                          {name}
+                        </button>
+                      );
+                    })}
                   </div>
-                ))}
-              </div>
+                  <div className="space-y-2">
+                    {availRows.map((row, index) => (
+                      <div
+                        key={row.dayOfWeek}
+                        className="flex flex-col gap-2 rounded-lg border p-3 sm:flex-row sm:items-center sm:gap-3"
+                      >
+                        <span className="w-10 text-sm font-medium">{DAY_NAMES[row.dayOfWeek]}</span>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <input
+                            type="time"
+                            value={row.startTime}
+                            onChange={(e) => updateAvailRow(index, "startTime", e.target.value)}
+                            className={cn(dashboardInputClass, "mt-0 w-auto min-h-11 py-2")}
+                          />
+                          <span className="text-muted-foreground">to</span>
+                          <input
+                            type="time"
+                            value={row.endTime}
+                            onChange={(e) => updateAvailRow(index, "endTime", e.target.value)}
+                            className={cn(dashboardInputClass, "mt-0 w-auto min-h-11 py-2")}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ) : null}
               {error ? (
                 <p role="alert" className={dashboardErrorAlertClass}>
                   {error}
                 </p>
               ) : null}
-              <div className="flex gap-3">
+              <div className="sticky bottom-0 -mx-6 mt-6 flex gap-3 border-t border-border bg-card px-6 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
                 <button type="button" onClick={() => setStep(2)} className={dashboardOutlineActionClass}>
                   Back
                 </button>
@@ -588,7 +627,7 @@ export function SetupWizard() {
                   disabled={saving || availRows.length === 0}
                   className={cn(dashboardPrimaryActionClass, "flex-1 justify-center")}
                 >
-                  {saving ? currentStep.savingCta : currentStep.cta}
+                  {saving ? currentStep.savingCta : confirmDefaultHours ? "Confirm hours" : currentStep.cta}
                 </button>
               </div>
             </form>
@@ -615,20 +654,27 @@ export function SetupWizard() {
               <BookingPreviewFrame bookingUrl={bookingUrl} />
 
               <div className="flex flex-wrap gap-3">
-                <a
-                  href={bookingUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  type="button"
                   className={cn(dashboardOutlineActionClass, "min-h-11")}
+                  onClick={async () => {
+                    try {
+                      await navigator.clipboard.writeText(bookingUrl);
+                      trackOnboardingLinkCopy({ source: "setup_wizard" });
+                    } catch {
+                      /* ignore */
+                    }
+                  }}
                 >
-                  <Icon name="box-arrow-up-right" className="text-xs" />
-                  Preview booking page
-                </a>
+                  <Icon name="clipboard" className="text-xs" />
+                  Copy link
+                </button>
                 <a
                   href={bookingUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className={cn(dashboardOutlineActionClass, "min-h-11")}
+                  onClick={() => trackOnboardingTestBookClick({ businessSlug })}
                 >
                   <Icon name="calendar-check" className="text-xs" />
                   Book yourself (test)
@@ -638,6 +684,7 @@ export function SetupWizard() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className={cn(dashboardOutlineActionClass, "min-h-11")}
+                  onClick={() => trackOnboardingWhatsappShare({ source: "setup_wizard" })}
                 >
                   <Icon name="whatsapp" className="text-emerald-600" />
                   Share on WhatsApp
@@ -649,7 +696,7 @@ export function SetupWizard() {
                   {error}
                 </p>
               ) : null}
-              <div className="flex gap-3">
+              <div className="sticky bottom-0 -mx-6 mt-6 flex gap-3 border-t border-border bg-card px-6 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
                 <button type="button" onClick={() => setStep(3)} className={dashboardOutlineActionClass}>
                   Back
                 </button>
