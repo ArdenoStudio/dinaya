@@ -558,12 +558,14 @@ export function SetupWizard() {
                 We pre-filled Mon–Sat 9:00–17:00. Confirm to continue, or edit hours below.
               </p>
               <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-lg border border-border bg-muted/30 px-4 py-3 text-sm dark:border-neutral-700">
-                <input
-                  type="checkbox"
-                  checked={confirmDefaultHours}
-                  onChange={(e) => setConfirmDefaultHours(e.target.checked)}
-                  className="size-4 rounded border-input"
-                />
+                <span className="flex size-11 shrink-0 items-center justify-center">
+                  <input
+                    type="checkbox"
+                    checked={confirmDefaultHours}
+                    onChange={(e) => setConfirmDefaultHours(e.target.checked)}
+                    className="size-5 rounded border-input"
+                  />
+                </span>
                 <span>Use default hours (Mon–Sat 9:00–17:00)</span>
               </label>
               {!confirmDefaultHours ? (

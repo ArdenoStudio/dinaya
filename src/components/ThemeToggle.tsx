@@ -30,8 +30,8 @@ export function ThemeToggle({ className, variant = "icon" }: ThemeToggleProps) {
       <span
         className={cn(
           variant === "pill"
-            ? "inline-flex h-9 w-[4.5rem] rounded-full border border-gray-200 dark:border-neutral-800 bg-white dark:border-neutral-800 dark:bg-neutral-900/80"
-            : "inline-flex size-9 rounded-full border border-gray-200 dark:border-neutral-800 bg-white dark:border-neutral-800 dark:bg-neutral-900/80",
+            ? "inline-flex h-11 min-w-[4.5rem] rounded-full border border-gray-200 dark:border-neutral-800 bg-white dark:border-neutral-800 dark:bg-neutral-900/80"
+            : "inline-flex size-11 rounded-full border border-gray-200 dark:border-neutral-800 bg-white dark:border-neutral-800 dark:bg-neutral-900/80",
           className,
         )}
         aria-hidden="true"
@@ -45,7 +45,7 @@ export function ThemeToggle({ className, variant = "icon" }: ThemeToggleProps) {
         type="button"
         onClick={toggleTheme}
         className={cn(
-          "inline-flex h-9 items-center gap-2 rounded-full border px-3 text-xs font-medium transition-colors",
+          "inline-flex h-11 items-center gap-2 rounded-full border px-3 text-xs font-medium transition-colors",
           "border-gray-300 dark:border-neutral-700 bg-white/90 text-gray-700 dark:text-gray-300 hover:border-gray-400 hover:text-gray-900 dark:text-gray-100",
           "dark:border-neutral-600 dark:bg-neutral-800/90 dark:text-neutral-200 dark:hover:border-neutral-500 dark:hover:text-white",
           className,
@@ -63,7 +63,7 @@ export function ThemeToggle({ className, variant = "icon" }: ThemeToggleProps) {
       type="button"
       onClick={toggleTheme}
       className={cn(
-        "inline-flex size-9 items-center justify-center rounded-full border transition-colors",
+        "inline-flex size-11 items-center justify-center rounded-full border transition-colors",
         "border-gray-300 dark:border-neutral-700 bg-white/90 text-gray-700 dark:text-gray-300 hover:border-gray-400 hover:text-gray-900 dark:text-gray-100",
         "dark:border-neutral-600 dark:bg-neutral-800/90 dark:text-neutral-200 dark:hover:border-neutral-500 dark:hover:text-white",
         className,

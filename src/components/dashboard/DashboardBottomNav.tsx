@@ -13,6 +13,7 @@ import {
   X,
   type LucideIcon,
 } from "lucide-react";
+import { DashboardConfirmDialog } from "@/components/dashboard/DashboardConfirmDialog";
 import { trackDashboardNavClick } from "@/lib/analytics/gtag";
 import { cn } from "@/lib/utils";
 
@@ -72,6 +73,7 @@ export function DashboardBottomNav({
   onNavigate,
 }: DashboardBottomNavProps) {
   const [moreOpen, setMoreOpen] = useState(false);
+  const [signOutOpen, setSignOutOpen] = useState(false);
   const sheetId = useId();
   const titleId = useId();
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -91,6 +93,15 @@ export function DashboardBottomNav({
       top: document.body.style.top,
       width: document.body.style.width,
     };
+    const inertTargets = Array.from(
+      document.querySelectorAll<HTMLElement>("[data-dashboard-shell-inert]"),
+    );
+    const navEl = document.querySelector<HTMLElement>("[data-dashboard-bottom-nav]");
+    if (navEl) inertTargets.push(navEl);
+    for (const el of inertTargets) {
+      el.setAttribute("inert", "");
+      el.setAttribute("aria-hidden", "true");
+    }
 
     document.body.style.overflow = "hidden";
     document.body.style.position = "fixed";
@@ -124,6 +135,10 @@ export function DashboardBottomNav({
       document.body.style.position = previous.position;
       document.body.style.top = previous.top;
       document.body.style.width = previous.width;
+      for (const el of inertTargets) {
+        el.removeAttribute("inert");
+        el.removeAttribute("aria-hidden");
+      }
       window.scrollTo(0, scrollY);
       window.removeEventListener("keydown", onKeyDown);
       triggerEl?.focus();
@@ -175,7 +190,7 @@ export function DashboardBottomNav({
               </div>
             </div>
 
-            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 pb-22">
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 pb-[5.5rem]">
               {moreSections.map((section) => (
                 <div key={section.label} className="mb-4">
                   <p className="mb-1.5 px-3 text-[0.7rem] font-semibold uppercase tracking-wider text-neutral-500">
@@ -279,7 +294,7 @@ export function DashboardBottomNav({
                       type="button"
                       onClick={() => {
                         setMoreOpen(false);
-                        onSignOut();
+                        setSignOutOpen(true);
                       }}
                       className={cn(
                         "flex min-h-12 w-full items-center gap-3 px-3.5 py-3 text-left text-[15px] font-medium text-red-600 active:bg-neutral-200/80 dark:text-red-400 dark:active:bg-neutral-800",
@@ -299,7 +314,19 @@ export function DashboardBottomNav({
         </div>
       ) : null}
 
+      <DashboardConfirmDialog
+        open={signOutOpen}
+        onOpenChange={setSignOutOpen}
+        title="Sign out?"
+        description="You’ll need to sign in again to manage bookings on this device."
+        confirmLabel="Sign out"
+        onConfirm={() => {
+          onSignOut();
+        }}
+      />
+
       <nav
+        data-dashboard-bottom-nav
         className="fixed inset-x-0 bottom-0 z-[55] border-t border-neutral-200/90 bg-white/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-1px_0_rgba(0,0,0,0.04)] backdrop-blur-xl md:hidden dark:border-neutral-800 dark:bg-neutral-950/95"
         aria-label="Primary"
       >

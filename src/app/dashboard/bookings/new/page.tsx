@@ -212,7 +212,7 @@ export default function NewBookingPage() {
                     type="button"
                     onClick={() => setSlot(s)}
                     className={cn(
-                      "min-h-11 rounded-md border px-4 text-sm transition-colors",
+                      "min-h-11 rounded-md border px-4 text-sm tabular-nums transition-colors",
                       slot?.startUtc === s.startUtc
                         ? "border-primary bg-primary text-primary-foreground"
                         : "hover:border-primary/40",

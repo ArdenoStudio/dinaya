@@ -230,7 +230,7 @@ export function DashboardShell({
       {shouldShowPlanBanner(activeHref, plan) && plan === "trial" ? (
         <Link
           href="/dashboard/billing"
-          className="shrink-0 border-b border-blue-500/30 bg-blue-50 dark:bg-blue-950/40 px-4 py-2 text-center text-sm text-blue-900 dark:text-blue-100 transition-colors hover:bg-blue-100 dark:hover:bg-blue-950/60"
+          className="flex min-h-11 shrink-0 items-center justify-center border-b border-blue-500/30 bg-blue-50 px-4 py-2.5 text-center text-sm text-blue-900 transition-colors hover:bg-blue-100 dark:bg-blue-950/40 dark:text-blue-100 dark:hover:bg-blue-950/60"
         >
           {trialDaysLeft != null && trialDaysLeft > 0
             ? `${trialDaysLeft} ${trialDaysLeft === 1 ? "day" : "days"} left in your free trial`
@@ -242,12 +242,13 @@ export function DashboardShell({
       {shouldShowPlanBanner(activeHref, plan) && plan === "expired" ? (
         <Link
           href="/dashboard/billing"
-          className="shrink-0 border-b border-red-500/30 bg-red-50 px-4 py-2 text-center text-sm font-medium text-red-900 transition-colors hover:bg-red-100 dark:bg-red-950/40 dark:text-red-200 dark:hover:bg-red-950/60"
+          className="flex min-h-11 shrink-0 items-center justify-center border-b border-red-500/30 bg-red-50 px-4 py-2.5 text-center text-sm font-medium text-red-900 transition-colors hover:bg-red-100 dark:bg-red-950/40 dark:text-red-200 dark:hover:bg-red-950/60"
         >
           Your free trial has ended — your booking page is offline. Reactivate by subscribing →
         </Link>
       ) : null}
 
+      <div data-dashboard-shell-inert className="min-h-0 flex-1">
       <MacOSSidebar
         activeHref={activeHref}
         sections={sidebarSections}
@@ -319,6 +320,7 @@ export function DashboardShell({
           </main>
         </DashboardToastProvider>
       </MacOSSidebar>
+      </div>
 
       <DashboardBottomNav
         activeHref={activeHref}

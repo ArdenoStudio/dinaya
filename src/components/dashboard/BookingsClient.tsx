@@ -343,7 +343,7 @@ export function BookingsClient({ api }: { api: BookingsApi }) {
               title="No bookings here yet"
               description="New bookings from your booking page or manual entries will appear here."
               action={
-                <Link href="/dashboard/bookings/new" className={cn(buttonVariants())}>
+                <Link href="/dashboard/bookings/new" className={cn(buttonVariants(), "min-h-11")}>
                   Create booking
                 </Link>
               }

@@ -13,7 +13,10 @@ import {
 } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
-import { DashboardTableSkeleton } from "@/components/dashboard/DashboardLoadingPanel";
+import {
+  DashboardLoadingPanel,
+  DashboardTableSkeleton,
+} from "@/components/dashboard/DashboardLoadingPanel";
 import { buttonVariants } from "@/components/ui/button";
 import {
   trackDashboardCalendarEventOpen,
@@ -273,7 +276,12 @@ export default function CalendarPage() {
           </button>
         </div>
       ) : loading ? (
-        <DashboardTableSkeleton rows={8} />
+        <>
+          <DashboardLoadingPanel className="lg:hidden" rows={6} />
+          <div className="hidden lg:block">
+            <DashboardTableSkeleton rows={8} />
+          </div>
+        </>
       ) : view === "agenda" ? (
         <div className="space-y-2 rounded-xl border bg-card p-3 dark:border-neutral-800 dark:bg-neutral-900">
           {dayBookings.length === 0 ? (
