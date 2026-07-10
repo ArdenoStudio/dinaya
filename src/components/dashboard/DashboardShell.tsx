@@ -314,16 +314,21 @@ export function DashboardShell({
         {banner}
 
         <DashboardToastProvider>
-          <main className="min-h-0 flex-1 overflow-auto bg-neutral-50 pb-20 dark:bg-neutral-950 md:pb-0">
+          <main className="min-h-0 flex-1 overflow-auto bg-neutral-50 pb-[calc(3.5rem+env(safe-area-inset-bottom)+0.75rem)] dark:bg-neutral-950 md:pb-0">
             <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">{children}</div>
           </main>
-          <DashboardBottomNav
-            activeHref={activeHref}
-            moreSections={moreSections}
-            onNavigate={(href) => navigation?.navigate?.(href)}
-          />
         </DashboardToastProvider>
       </MacOSSidebar>
+
+      <DashboardBottomNav
+        activeHref={activeHref}
+        moreSections={moreSections}
+        userEmail={userEmail}
+        planLabel={`${planLabel} ${copy.layout.planSuffix}`.trim()}
+        showAdminLink={showAdminLink}
+        onSignOut={handleSignOut}
+        onNavigate={(href) => navigation?.navigate?.(href)}
+      />
     </div>
   );
 }
