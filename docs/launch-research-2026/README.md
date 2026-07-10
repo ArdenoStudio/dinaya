@@ -27,6 +27,8 @@ AI should be positioned as the growth layer after businesses trust the core book
 - [04 Outreach Playbooks](04-outreach-playbooks.md) - DMs, calls, WhatsApp follow-ups, objections, and lead scoring.
 - [05 Promo, Referral, and Influencer Playbook](05-promo-referral-influencer-playbook.md) - What can be done now and what needs product work later.
 - [06 Product and Marketing Gap List](06-product-and-marketing-gap-list.md) - Missing pieces to prioritize after launch.
+- [07 First 100 Customers Action Plan](07-first-100-customers-action-plan.md) - Wave-based GTM execution (0→100 live businesses).
+- [08 Ovi Personal Brand Strategy](08-ovi-personal-brand-strategy.md) - Founder LinkedIn narrative, launch post drafts, profile setup.
 
 ## First 14 Days
 
