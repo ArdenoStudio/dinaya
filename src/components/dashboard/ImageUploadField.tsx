@@ -41,6 +41,8 @@ export function ImageUploadField({
   const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [cropOpen, setCropOpen] = useState(false);
 
+const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
+
   async function uploadBlob(blob: Blob) {
     setUploading(true);
     setError("");
@@ -49,11 +51,22 @@ export function ImageUploadField({
       data.append("file", blob, `${kind}.webp`);
       data.append("kind", kind);
       const res = await fetch("/api/dashboard/upload/image", { method: "POST", body: data });
-      const json = await res.json();
+      let json: { error?: string; url?: string };
+      try {
+        json = await res.json();
+      } catch {
+        throw new Error("Upload failed.");
+      }
       if (!res.ok) {
         throw new Error(json.error ?? "Upload failed.");
       }
+      if (!json.url) {
+        throw new Error("Upload failed.");
+      }
       onChange(json.url);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Upload failed.");
+      throw err;
     } finally {
       setUploading(false);
     }
@@ -61,6 +74,10 @@ export function ImageUploadField({
 
   async function handleFileSelect(file: File) {
     setError("");
+    if (file.size > MAX_UPLOAD_BYTES) {
+      setError("Image must be under 4 MB.");
+      return;
+    }
     try {
       const dataUrl = await readFileAsDataUrl(file);
       setCropSrc(dataUrl);

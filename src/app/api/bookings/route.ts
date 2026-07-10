@@ -16,7 +16,7 @@ import { normalizeSriLankanPhone } from "@/lib/phone";
 import { decryptSecret } from "@/lib/secrets";
 import { getBusinessPaymentSettings } from "@/lib/payments/business-query";
 import { resolveBookingLocationId } from "@/lib/locations";
-import { isRequestedSlotAvailable } from "@/lib/booking-availability";
+import { isRequestedSlotAvailable, isDailyCapacityReached } from "@/lib/booking-availability";
 import {
   getBookingIdempotencyResponse,
   hashBookingIdempotencyPayload,
@@ -276,6 +276,7 @@ export async function POST(req: NextRequest) {
       afterBuffer: services.afterBuffer,
       minimumNoticeHours: services.minimumNoticeHours,
       maximumAdvanceDays: services.maximumAdvanceDays,
+      dailyCapacity: services.dailyCapacity,
       intakeQuestions: services.intakeQuestions,
       isActive: services.isActive,
     })
@@ -448,6 +449,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: "That time isn't available. Please pick another slot." },
         { status: 409 }
+      );
+    }
+
+    const capacityReached = await isDailyCapacityReached({
+      staffId,
+      serviceId,
+      start,
+      timezone: business.timezone ?? "Asia/Colombo",
+      dailyCapacity: service.dailyCapacity,
+    });
+    if (capacityReached) {
+      return NextResponse.json(
+        { error: "This service is fully booked for the selected day." },
+        { status: 409 },
       );
     }
 

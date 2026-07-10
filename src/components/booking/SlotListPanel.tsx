@@ -105,18 +105,18 @@ export function SlotListPanel({
                       hasCalendarConflict ? `, ${copy.calendarConflict}` : ""
                     }`}
                     onClick={() => onSelect(slot)}
-                    className={`flex min-h-11 w-full items-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-medium transition-colors ${
+                    className={`flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-medium transition-colors ${
                       hasCalendarConflict
                         ? "cursor-not-allowed border-border bg-muted text-muted-foreground"
                         : isSelected
                         ? "booking-bg-accent border-transparent text-white booking-shadow-accent"
-                        : "border-border bg-secondary/40 text-foreground ring-1 ring-white/5 hover:border-[var(--booking-accent)] hover:bg-[var(--booking-accent-muted)]/40"
+                        : "border-[var(--booking-accent-soft)] bg-[var(--booking-accent-muted)] text-foreground hover:border-[var(--booking-accent)] hover:bg-[var(--booking-accent-soft)]"
                     }`}
                   >
                     {!hasCalendarConflict && !isSelected && (
-                      <span className="size-2 shrink-0 rounded-full bg-emerald-500" aria-hidden />
+                      <span className="size-2 shrink-0 rounded-full bg-[#00D492]" aria-hidden />
                     )}
-                    <span className="min-w-0 flex-1 text-left">
+                    <span className="min-w-0 text-center">
                       <span className={hasCalendarConflict ? "line-through decoration-gray-300" : ""}>
                         {slot.label}
                       </span>

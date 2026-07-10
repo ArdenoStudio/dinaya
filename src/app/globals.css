@@ -181,8 +181,11 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
 
   .dark [data-booking-theme] {
     --booking-accent-hover: color-mix(in srgb, var(--booking-accent) 78%, white);
-    --booking-accent-muted: color-mix(in srgb, var(--booking-accent) 14%, black);
-    --booking-accent-soft: color-mix(in srgb, var(--booking-accent) 24%, black);
+    /* Mix toward an elevated gray, not pure black — a dark/low-luminance
+       accent (e.g. near-black brand colors) would otherwise mix down to a
+       tint indistinguishable from the black page canvas. */
+    --booking-accent-muted: color-mix(in srgb, var(--booking-accent) 22%, #2c2c30);
+    --booking-accent-soft: color-mix(in srgb, var(--booking-accent) 34%, #2c2c30);
     --booking-accent-shadow: color-mix(in srgb, var(--booking-accent) 45%, transparent);
     --booking-accent-on-dark: color-mix(in srgb, var(--booking-accent) 65%, white);
 

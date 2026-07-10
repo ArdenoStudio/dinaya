@@ -12,6 +12,7 @@ import {
   publicLogoUrl,
   removeOtherKindVariants,
 } from "@/lib/supabase-storage";
+import { detectImageMimeType, extensionForMimeType } from "@/lib/image-upload-validation";
 
 const MAX_BYTES = 4 * 1024 * 1024;
 const MAX_GALLERY_IMAGES = 12;
@@ -73,13 +74,18 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  const ext = file.type === "image/jpeg" ? "jpg" : file.type.split("/")[1];
-  const path = storagePath(businessId, kind, ext);
   const buffer = Buffer.from(await file.arrayBuffer());
+  const detectedType = detectImageMimeType(buffer);
+  if (!detectedType || !ALLOWED_TYPES.has(detectedType)) {
+    return NextResponse.json({ error: "Only JPEG, PNG, WebP, and GIF images are allowed." }, { status: 400 });
+  }
+
+  const ext = extensionForMimeType(detectedType);
+  const path = storagePath(businessId, kind, ext);
 
   const storage = createBusinessLogosStorage(storageConfig);
   const { error } = await storage.upload(path, buffer, {
-    contentType: file.type,
+    contentType: detectedType,
     upsert: kind !== "gallery",
   });
   if (error) {
