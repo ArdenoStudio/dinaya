@@ -36,9 +36,20 @@ const PRIMARY: BottomNavItem[] = [
   { href: "/dashboard/clients", label: "Clients", icon: Users, routeId: "clients" },
 ];
 
+const focusRingClass =
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-950";
+
 function isActive(item: { exact?: boolean; href: string }, pathname: string): boolean {
   if (item.exact) return pathname === item.href;
   return pathname === item.href || pathname.startsWith(`${item.href}/`);
+}
+
+function getSheetFocusables(sheet: HTMLElement) {
+  return Array.from(
+    sheet.querySelectorAll<HTMLElement>(
+      'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
+    ),
+  ).filter((el) => el.tabIndex !== -1 && !el.hasAttribute("disabled"));
 }
 
 type DashboardBottomNavProps = {
@@ -62,7 +73,10 @@ export function DashboardBottomNav({
 }: DashboardBottomNavProps) {
   const [moreOpen, setMoreOpen] = useState(false);
   const sheetId = useId();
+  const titleId = useId();
   const closeRef = useRef<HTMLButtonElement>(null);
+  const moreTriggerRef = useRef<HTMLButtonElement>(null);
+  const sheetRef = useRef<HTMLDivElement>(null);
   const moreActive = moreSections.some((section) =>
     section.items.some((item) => isActive(item, activeHref)),
   );
@@ -70,18 +84,49 @@ export function DashboardBottomNav({
   useEffect(() => {
     if (!moreOpen) return;
 
-    const previousOverflow = document.body.style.overflow;
+    const scrollY = window.scrollY;
+    const previous = {
+      overflow: document.body.style.overflow,
+      position: document.body.style.position,
+      top: document.body.style.top,
+      width: document.body.style.width,
+    };
+
     document.body.style.overflow = "hidden";
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = "100%";
     closeRef.current?.focus();
+    const triggerEl = moreTriggerRef.current;
 
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") setMoreOpen(false);
+      if (event.key === "Escape") {
+        setMoreOpen(false);
+        return;
+      }
+      if (event.key !== "Tab" || !sheetRef.current) return;
+      const focusables = getSheetFocusables(sheetRef.current);
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     }
 
     window.addEventListener("keydown", onKeyDown);
     return () => {
-      document.body.style.overflow = previousOverflow;
+      document.body.style.overflow = previous.overflow;
+      document.body.style.position = previous.position;
+      document.body.style.top = previous.top;
+      document.body.style.width = previous.width;
+      window.scrollTo(0, scrollY);
       window.removeEventListener("keydown", onKeyDown);
+      triggerEl?.focus();
     };
   }, [moreOpen]);
 
@@ -102,21 +147,27 @@ export function DashboardBottomNav({
             onClick={() => setMoreOpen(false)}
           />
           <div
+            ref={sheetRef}
             id={sheetId}
             role="dialog"
             aria-modal="true"
-            aria-label="More dashboard pages"
-            className="absolute inset-x-0 bottom-0 z-[61] flex max-h-[min(85vh,40rem)] flex-col rounded-t-[1.25rem] border border-neutral-200 bg-white shadow-[0_-8px_40px_rgba(0,0,0,0.12)] dark:border-neutral-700 dark:bg-neutral-950"
+            aria-labelledby={titleId}
+            className="absolute inset-x-0 bottom-0 z-[61] flex max-h-[min(85dvh,40rem)] flex-col rounded-t-[1.25rem] border border-neutral-200 bg-white pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_40px_rgba(0,0,0,0.12)] dark:border-neutral-700 dark:bg-neutral-950"
           >
             <div className="flex shrink-0 flex-col items-center pt-2">
               <div className="h-1 w-10 rounded-full bg-neutral-300 dark:bg-neutral-600" aria-hidden="true" />
               <div className="flex w-full items-center justify-between px-4 pb-2 pt-3">
-                <p className="text-base font-semibold tracking-tight">More</p>
+                <p id={titleId} className="text-base font-semibold tracking-tight">
+                  More
+                </p>
                 <button
                   ref={closeRef}
                   type="button"
                   aria-label="Close"
-                  className="flex size-11 items-center justify-center rounded-full bg-neutral-100 text-neutral-600 transition-transform active:scale-95 dark:bg-neutral-800 dark:text-neutral-300"
+                  className={cn(
+                    "flex size-11 items-center justify-center rounded-full bg-neutral-100 text-neutral-600 transition-transform active:scale-95 dark:bg-neutral-800 dark:text-neutral-300",
+                    focusRingClass,
+                  )}
                   onClick={() => setMoreOpen(false)}
                 >
                   <X className="size-4" aria-hidden="true" />
@@ -124,7 +175,7 @@ export function DashboardBottomNav({
               </div>
             </div>
 
-            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 pb-[calc(5.5rem+env(safe-area-inset-bottom))]">
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 pb-22">
               {moreSections.map((section) => (
                 <div key={section.label} className="mb-4">
                   <p className="mb-1.5 px-3 text-[0.7rem] font-semibold uppercase tracking-wider text-neutral-500">
@@ -142,6 +193,7 @@ export function DashboardBottomNav({
                             aria-current={active ? "page" : undefined}
                             className={cn(
                               "flex min-h-12 items-center gap-3 px-3.5 py-3 text-[15px] transition-colors active:bg-neutral-200/80 dark:active:bg-neutral-800",
+                              focusRingClass,
                               index > 0 && "border-t border-neutral-200/80 dark:border-neutral-800",
                               active
                                 ? "bg-primary/[0.06] font-semibold text-primary"
@@ -186,7 +238,10 @@ export function DashboardBottomNav({
                       href="/docs"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex min-h-12 items-center gap-3 px-3.5 py-3 text-[15px] font-medium text-neutral-900 active:bg-neutral-200/80 dark:text-neutral-100 dark:active:bg-neutral-800"
+                      className={cn(
+                        "flex min-h-12 items-center gap-3 px-3.5 py-3 text-[15px] font-medium text-neutral-900 active:bg-neutral-200/80 dark:text-neutral-100 dark:active:bg-neutral-800",
+                        focusRingClass,
+                      )}
                       onClick={() => setMoreOpen(false)}
                     >
                       <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-white text-neutral-600 shadow-sm dark:bg-neutral-800 dark:text-neutral-300">
@@ -199,7 +254,10 @@ export function DashboardBottomNav({
                     <li className="border-t border-neutral-200/80 dark:border-neutral-800">
                       <Link
                         href="/admin"
-                        className="flex min-h-12 items-center gap-3 px-3.5 py-3 text-[15px] font-medium text-primary active:bg-neutral-200/80 dark:active:bg-neutral-800"
+                        className={cn(
+                          "flex min-h-12 items-center gap-3 px-3.5 py-3 text-[15px] font-medium text-primary active:bg-neutral-200/80 dark:active:bg-neutral-800",
+                          focusRingClass,
+                        )}
                         onClick={() => {
                           trackDashboardNavClick({
                             href: "/admin",
@@ -223,7 +281,10 @@ export function DashboardBottomNav({
                         setMoreOpen(false);
                         onSignOut();
                       }}
-                      className="flex min-h-12 w-full items-center gap-3 px-3.5 py-3 text-left text-[15px] font-medium text-red-600 active:bg-neutral-200/80 dark:text-red-400 dark:active:bg-neutral-800"
+                      className={cn(
+                        "flex min-h-12 w-full items-center gap-3 px-3.5 py-3 text-left text-[15px] font-medium text-red-600 active:bg-neutral-200/80 dark:text-red-400 dark:active:bg-neutral-800",
+                        focusRingClass,
+                      )}
                     >
                       <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-red-50 text-red-600 dark:bg-red-950/50 dark:text-red-400">
                         <LogOut className="size-4" aria-hidden="true" />
@@ -254,6 +315,7 @@ export function DashboardBottomNav({
                 aria-current={active ? "page" : undefined}
                 className={cn(
                   "relative flex flex-col items-center justify-center gap-0.5 px-1 text-[0.6875rem] font-medium transition-colors active:scale-[0.96]",
+                  focusRingClass,
                   active ? "text-primary" : "text-neutral-500 dark:text-neutral-400",
                 )}
               >
@@ -269,15 +331,18 @@ export function DashboardBottomNav({
             );
           })}
           <button
+            ref={moreTriggerRef}
             type="button"
             onClick={() => setMoreOpen((open) => !open)}
             className={cn(
               "relative flex flex-col items-center justify-center gap-0.5 px-1 text-[0.6875rem] font-medium transition-colors active:scale-[0.96]",
+              focusRingClass,
               moreOpen || moreActive ? "text-primary" : "text-neutral-500 dark:text-neutral-400",
             )}
             aria-expanded={moreOpen}
             aria-controls={sheetId}
             aria-haspopup="dialog"
+            aria-current={moreActive && !moreOpen ? "page" : undefined}
           >
             {moreActive && !moreOpen ? (
               <span

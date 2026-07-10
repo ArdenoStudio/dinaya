@@ -26,6 +26,7 @@ Skim [_shared/BRAND.md](../_shared/BRAND.md) and [_shared/PRODUCT.md](../_shared
 | Salon outreach, pitch, objections, DM scripts | `dinaya-head-of-sales` |
 | Copy, positioning, landing page text | `dinaya-brand-voice` |
 | Colors, typography, UI tokens, logo | `dinaya-visual-system` |
+| Mobile dashboard UX (≤430px), bottom nav, touch/safe-area loop | `dinaya-mobile-ux-ultra` |
 | UI ship review, accessibility, craft | `apple-design-head` |
 | Booking page, slots, availability, holds | `dinaya-booking-engine` |
 | PayHere, payments, webhooks | `dinaya-payhere` |
@@ -64,5 +65,5 @@ Skim [_shared/BRAND.md](../_shared/BRAND.md) and [_shared/PRODUCT.md](../_shared
 ## Do not
 
 - Implement code from the hub — route only
-- Duplicate `apple-design-head` for UI — use it for ship review
+- Duplicate `apple-design-head` for UI — use it for ship review; use `dinaya-mobile-ux-ultra` for phone dashboard fix-score loops
 - Give generic startup advice without Dinaya context

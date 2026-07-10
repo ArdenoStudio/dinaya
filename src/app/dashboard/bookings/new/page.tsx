@@ -4,6 +4,15 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { format, addDays } from "date-fns";
+import {
+  DashboardField,
+  DashboardInput,
+} from "@/components/dashboard/DashboardField";
+import {
+  dashboardInputClass,
+  dashboardPrimaryActionClass,
+} from "@/lib/dashboard-ui";
+import { cn } from "@/lib/utils";
 
 type Service = { id: string; name: string; durationMinutes: number; priceLkr: number };
 type Staff = { id: string; name: string };
@@ -29,14 +38,16 @@ export default function NewBookingPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-  // Load services on mount
   useEffect(() => {
     fetch("/api/dashboard/services").then((r) => r.json()).then(setServices);
   }, []);
 
-  // Load staff when service changes
   useEffect(() => {
-    if (!serviceId) { setStaffList([]); setStaffId(""); return; }
+    if (!serviceId) {
+      setStaffList([]);
+      setStaffId("");
+      return;
+    }
     fetch(`/api/dashboard/services/${serviceId}/staff`)
       .then((r) => r.json())
       .then(setStaffList);
@@ -44,23 +55,30 @@ export default function NewBookingPage() {
     setSlot(null);
   }, [serviceId]);
 
-  // Load slots when staff + date change
   useEffect(() => {
-    if (!staffId || !date || !serviceId) { setSlots([]); return; }
+    if (!staffId || !date || !serviceId) {
+      setSlots([]);
+      return;
+    }
     setLoadingSlots(true);
     setSlot(null);
     fetch(`/api/availability?staffId=${staffId}&date=${date}&serviceId=${serviceId}`)
       .then((r) => r.json())
-      .then((data) => { setSlots(data.slots ?? []); setLoadingSlots(false); });
+      .then((data) => {
+        setSlots(data.slots ?? []);
+        setLoadingSlots(false);
+      });
   }, [staffId, date, serviceId]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!slot) { setError("Please select a time slot."); return; }
+    if (!slot) {
+      setError("Please select a time slot.");
+      return;
+    }
     setSaving(true);
     setError("");
 
-    // Get businessId from session via a light API call
     const sessionRes = await fetch("/api/auth/session");
     const session = await sessionRes.json();
     const businessId = session?.user?.businessId;
@@ -83,90 +101,105 @@ export default function NewBookingPage() {
     });
 
     const data = await res.json();
-    if (!res.ok) { setError(data.error ?? "Something went wrong."); setSaving(false); return; }
+    if (!res.ok) {
+      setError(data.error ?? "Something went wrong.");
+      setSaving(false);
+      return;
+    }
     router.push(`/dashboard/bookings/${data.bookingId}`);
   }
 
   const selectedService = services.find((s) => s.id === serviceId);
+  const canConfirm = Boolean(slot && clientName && clientPhone);
 
   return (
-    <div className="max-w-2xl">
-      <div className="flex items-center gap-3 mb-6">
-        <Link href="/dashboard/bookings" className="text-muted-foreground hover:text-foreground text-sm">
+    <div className="max-w-2xl pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0">
+      <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+        <Link
+          href="/dashboard/bookings"
+          className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
+        >
           ← Bookings
         </Link>
-        <span className="text-muted-foreground">/</span>
-        <h1 className="font-cal text-2xl">New booking</h1>
+        <h1 className="font-cal text-xl sm:text-2xl">New booking</h1>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 dark:text-red-300 text-sm rounded-md px-4 py-2">{error}</div>
-        )}
+        {error ? (
+          <div className="rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700 dark:text-red-300">
+            {error}
+          </div>
+        ) : null}
 
-        {/* Step 1: Service */}
-        <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-5 space-y-4">
-          <h2 className="font-medium text-sm">1. Service</h2>
-          <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-4 rounded-xl border bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900">
+          <h2 className="text-sm font-medium">1. Service</h2>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {services.filter((s) => s).map((s) => (
               <button
                 key={s.id}
                 type="button"
                 onClick={() => setServiceId(s.id)}
-                className={`text-left p-3 rounded-lg border text-sm transition-colors ${
-                  serviceId === s.id ? "border-primary bg-primary/5" : "hover:border-primary/40"
-                }`}
+                className={cn(
+                  "min-h-11 rounded-lg border p-3 text-left text-sm transition-colors",
+                  serviceId === s.id
+                    ? "border-primary bg-primary/5"
+                    : "hover:border-primary/40",
+                )}
               >
                 <p className="font-medium">{s.name}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">{s.durationMinutes} min</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">{s.durationMinutes} min</p>
               </button>
             ))}
-            {services.length === 0 && (
-              <p className="text-sm text-muted-foreground col-span-2">
-                No services yet. <Link href="/dashboard/services/new" className="text-primary hover:underline">Add one first →</Link>
+            {services.length === 0 ? (
+              <p className="col-span-full text-sm text-muted-foreground">
+                No services yet.{" "}
+                <Link href="/dashboard/services/new" className="text-primary hover:underline">
+                  Add one first →
+                </Link>
               </p>
-            )}
+            ) : null}
           </div>
         </div>
 
-        {/* Step 2: Staff */}
-        {serviceId && (
-          <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-5 space-y-4">
-            <h2 className="font-medium text-sm">2. Staff member</h2>
-            <div className="grid grid-cols-2 gap-3">
+        {serviceId ? (
+          <div className="space-y-4 rounded-xl border bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900">
+            <h2 className="text-sm font-medium">2. Staff member</h2>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {staffList.map((s) => (
                 <button
                   key={s.id}
                   type="button"
                   onClick={() => setStaffId(s.id)}
-                  className={`text-left p-3 rounded-lg border text-sm transition-colors ${
-                    staffId === s.id ? "border-primary bg-primary/5" : "hover:border-primary/40"
-                  }`}
+                  className={cn(
+                    "min-h-11 rounded-lg border p-3 text-left text-sm transition-colors",
+                    staffId === s.id
+                      ? "border-primary bg-primary/5"
+                      : "hover:border-primary/40",
+                  )}
                 >
                   <p className="font-medium">{s.name}</p>
                 </button>
               ))}
-              {staffList.length === 0 && (
-                <p className="text-sm text-muted-foreground col-span-2">No staff assigned to this service.</p>
-              )}
+              {staffList.length === 0 ? (
+                <p className="col-span-full text-sm text-muted-foreground">
+                  No staff assigned to this service.
+                </p>
+              ) : null}
             </div>
           </div>
-        )}
+        ) : null}
 
-        {/* Step 3: Date + Time */}
-        {staffId && (
-          <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-5 space-y-4">
-            <h2 className="font-medium text-sm">3. Date & time</h2>
-            <div className="flex gap-3 items-center">
-              <input
-                type="date"
-                value={date}
-                min={format(new Date(), "yyyy-MM-dd")}
-                max={format(addDays(new Date(), 90), "yyyy-MM-dd")}
-                onChange={(e) => setDate(e.target.value)}
-                className="border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-              />
-            </div>
+        {staffId ? (
+          <div className="space-y-4 rounded-xl border bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900">
+            <h2 className="text-sm font-medium">3. Date & time</h2>
+            <input
+              type="date"
+              value={date}
+              min={format(new Date(), "yyyy-MM-dd")}
+              max={format(addDays(new Date(), 90), "yyyy-MM-dd")}
+              onChange={(e) => setDate(e.target.value)}
+              className={cn(dashboardInputClass, "mt-0 w-auto min-h-11")}
+            />
             {loadingSlots ? (
               <p className="text-sm text-muted-foreground">Loading slots…</p>
             ) : slots.length === 0 ? (
@@ -178,11 +211,12 @@ export default function NewBookingPage() {
                     key={s.startUtc}
                     type="button"
                     onClick={() => setSlot(s)}
-                    className={`px-3 py-1.5 rounded-md border text-sm transition-colors ${
+                    className={cn(
+                      "min-h-11 rounded-md border px-4 text-sm transition-colors",
                       slot?.startUtc === s.startUtc
                         ? "border-primary bg-primary text-primary-foreground"
-                        : "hover:border-primary/40"
-                    }`}
+                        : "hover:border-primary/40",
+                    )}
                   >
                     {s.label}
                   </button>
@@ -190,68 +224,70 @@ export default function NewBookingPage() {
               </div>
             )}
           </div>
-        )}
+        ) : null}
 
-        {/* Step 4: Client */}
-        {slot && (
-          <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-5 space-y-4">
-            <h2 className="font-medium text-sm">4. Client details</h2>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-xs text-muted-foreground block mb-1">Name *</label>
-                <input
+        {slot ? (
+          <div className="space-y-4 rounded-xl border bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900">
+            <h2 className="text-sm font-medium">4. Client details</h2>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <DashboardField htmlFor="client-name" label="Name" required>
+                <DashboardInput
+                  id="client-name"
                   required
                   value={clientName}
                   onChange={(e) => setClientName(e.target.value)}
-                  className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
                 />
-              </div>
-              <div>
-                <label className="text-xs text-muted-foreground block mb-1">Phone *</label>
-                <input
+              </DashboardField>
+              <DashboardField htmlFor="client-phone" label="Phone" required>
+                <DashboardInput
+                  id="client-phone"
                   required
+                  type="tel"
+                  inputMode="tel"
                   value={clientPhone}
                   onChange={(e) => setClientPhone(e.target.value)}
-                  className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
                 />
-              </div>
-              <div>
-                <label className="text-xs text-muted-foreground block mb-1">Email</label>
-                <input
+              </DashboardField>
+              <DashboardField htmlFor="client-email" label="Email" optional>
+                <DashboardInput
+                  id="client-email"
                   type="email"
                   value={clientEmail}
                   onChange={(e) => setClientEmail(e.target.value)}
-                  className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
                 />
-              </div>
-              <div>
-                <label className="text-xs text-muted-foreground block mb-1">Notes</label>
-                <input
+              </DashboardField>
+              <DashboardField htmlFor="client-notes" label="Notes" optional>
+                <DashboardInput
+                  id="client-notes"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
                 />
-              </div>
+              </DashboardField>
             </div>
           </div>
-        )}
+        ) : null}
 
-        {/* Summary + submit */}
-        {slot && clientName && clientPhone && (
-          <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 flex items-center justify-between">
-            <div className="text-sm">
-              <p className="font-medium">{selectedService?.name} with {staffList.find((s) => s.id === staffId)?.name}</p>
-              <p className="text-muted-foreground">{format(new Date(slot.startUtc), "d MMM yyyy")} at {slot.label}</p>
+        {canConfirm ? (
+          <>
+            <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm">
+              <p className="font-medium">
+                {selectedService?.name} with {staffList.find((s) => s.id === staffId)?.name}
+              </p>
+              <p className="text-muted-foreground">
+                {format(new Date(slot!.startUtc), "d MMM yyyy")} at {slot!.label}
+              </p>
             </div>
-            <button
-              type="submit"
-              disabled={saving}
-              className="bg-primary text-primary-foreground px-6 py-2 rounded-md text-sm font-medium hover:bg-primary/90 disabled:opacity-60"
-            >
-              {saving ? "Booking…" : "Confirm booking"}
-            </button>
-          </div>
-        )}
+            <div className="sticky bottom-[calc(3.5rem+env(safe-area-inset-bottom))] z-10 -mx-4 border-t bg-background/95 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 md:static md:mx-0 md:border-0 md:bg-transparent md:px-0 md:py-0 md:backdrop-blur-none">
+              <button
+                type="submit"
+                disabled={saving}
+                className={cn(dashboardPrimaryActionClass, "w-full justify-center")}
+              >
+                {saving ? "Booking…" : "Confirm booking"}
+              </button>
+            </div>
+          </>
+        ) : null}
       </form>
     </div>
   );

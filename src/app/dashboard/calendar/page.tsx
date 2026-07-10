@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
   format,
@@ -73,25 +73,8 @@ function eventHeightPx(startsAt: string, endsAt: string): number {
   return Math.max(MIN_EVENT_HEIGHT, durationHours * HOUR_HEIGHT);
 }
 
-function usePreferredView(): CalendarView {
-  const [view, setView] = useState<CalendarView>("week");
-  useEffect(() => {
-    const mq = window.matchMedia("(min-width: 1024px)");
-    const apply = () => {
-      const next: CalendarView = mq.matches ? "week" : "day";
-      setView(next);
-      trackDashboardCalendarView({ view: next });
-    };
-    apply();
-    mq.addEventListener("change", apply);
-    return () => mq.removeEventListener("change", apply);
-  }, []);
-  return view;
-}
-
 export default function CalendarPage() {
-  const preferred = usePreferredView();
-  const [view, setView] = useState<CalendarView>(preferred);
+  const [view, setView] = useState<CalendarView>("day");
   const [weekStart, setWeekStart] = useState(() =>
     startOfWeek(new Date(), { weekStartsOn: 1 }),
   );
@@ -101,10 +84,28 @@ export default function CalendarPage() {
   const [selectedStaffId, setSelectedStaffId] = useState("");
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
+  const [reloadToken, setReloadToken] = useState(0);
+  const hydratedView = useRef(false);
+
+  // Prefer week on large screens once; never leave week active below lg
+  useEffect(() => {
+    if (hydratedView.current) return;
+    hydratedView.current = true;
+    if (typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches) {
+      setView("week");
+    }
+  }, []);
 
   useEffect(() => {
-    setView(preferred);
-  }, [preferred]);
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const sync = () => {
+      setView((v) => (!mq.matches && v === "week" ? "day" : v));
+    };
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
 
   const days = useMemo(
     () => Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)),
@@ -135,7 +136,7 @@ export default function CalendarPage() {
         setLoadError(true);
         setLoading(false);
       });
-  }, [rangeStart, rangeEnd, selectedStaffId]);
+  }, [rangeStart, rangeEnd, selectedStaffId, reloadToken]);
 
   function bookingsForDay(day: Date) {
     return bookings
@@ -153,6 +154,15 @@ export default function CalendarPage() {
   }
 
   function changeView(next: CalendarView) {
+    if (
+      next === "week" &&
+      typeof window !== "undefined" &&
+      !window.matchMedia("(min-width: 1024px)").matches
+    ) {
+      setView("day");
+      trackDashboardCalendarView({ view: "day" });
+      return;
+    }
     setView(next);
     trackDashboardCalendarView({ view: next });
   }
@@ -182,10 +192,13 @@ export default function CalendarPage() {
                   </select>
                 </label>
               ) : null}
-              <Link href="/dashboard/bookings" className={cn(buttonVariants({ variant: "outline" }))}>
+              <Link
+                href="/dashboard/bookings"
+                className={cn(buttonVariants({ variant: "outline" }), "hidden min-h-11 sm:inline-flex")}
+              >
                 List view
               </Link>
-              <Link href="/dashboard/bookings/new" className={cn(buttonVariants())}>
+              <Link href="/dashboard/bookings/new" className={cn(buttonVariants(), "min-h-11")}>
                 New booking
               </Link>
             </div>
@@ -231,8 +244,9 @@ export default function CalendarPage() {
                 key={option}
                 type="button"
                 onClick={() => changeView(option)}
+                aria-pressed={view === option}
                 className={cn(
-                  "rounded-md px-3 py-1.5 text-xs font-medium capitalize sm:text-sm",
+                  "inline-flex min-h-11 items-center rounded-md px-3 text-sm font-medium capitalize transition-transform active:scale-[0.96] motion-reduce:active:scale-100",
                   view === option
                     ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground hover:bg-muted",
@@ -249,16 +263,28 @@ export default function CalendarPage() {
       {loadError ? (
         <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-6 text-sm">
           <p className="font-medium text-destructive">Could not load calendar</p>
-          <p className="mt-1 text-muted-foreground">Check your connection and refresh the page.</p>
+          <p className="mt-1 text-muted-foreground">Check your connection and try again.</p>
+          <button
+            type="button"
+            onClick={() => setReloadToken((n) => n + 1)}
+            className={cn(buttonVariants({ variant: "outline" }), "mt-4 min-h-11")}
+          >
+            Try again
+          </button>
         </div>
       ) : loading ? (
         <DashboardTableSkeleton rows={8} />
       ) : view === "agenda" ? (
         <div className="space-y-2 rounded-xl border bg-card p-3 dark:border-neutral-800 dark:bg-neutral-900">
           {dayBookings.length === 0 ? (
-            <p className="px-2 py-8 text-center text-sm text-muted-foreground">
-              No bookings on {format(selectedDay, "d MMM")}.
-            </p>
+            <div className="flex flex-col items-center gap-3 px-2 py-10 text-center">
+              <p className="text-sm text-muted-foreground">
+                No bookings on {format(selectedDay, "d MMM")}.
+              </p>
+              <Link href="/dashboard/bookings/new" className={cn(buttonVariants(), "min-h-11")}>
+                Create booking
+              </Link>
+            </div>
           ) : (
             dayBookings.map((b) => (
               <Link
@@ -266,13 +292,16 @@ export default function CalendarPage() {
                 href={`/dashboard/bookings/${b.id}`}
                 onClick={() => trackDashboardCalendarEventOpen({ bookingId: b.id })}
                 className={cn(
-                  "flex min-h-14 items-center justify-between gap-3 rounded-lg border px-3 py-3",
+                  "flex min-h-14 items-center justify-between gap-3 rounded-lg border px-3 py-3 active:opacity-80",
                   STATUS_BG[b.status],
                 )}
               >
                 <div className="min-w-0">
                   <p className="truncate font-medium">{b.clientName}</p>
-                  <p className="truncate text-sm opacity-80">{b.serviceName}</p>
+                  <p className="truncate text-sm opacity-80">
+                    {b.serviceName}
+                    <span className="ml-1.5 capitalize opacity-70">· {b.status.replace("_", " ")}</span>
+                  </p>
                 </div>
                 <p className="shrink-0 text-sm tabular-nums">
                   {format(new Date(b.startsAt), "h:mm a")}
@@ -282,7 +311,17 @@ export default function CalendarPage() {
           )}
         </div>
       ) : view === "day" ? (
-        <div className="flex-1 overflow-auto rounded-xl border bg-card dark:border-neutral-800 dark:bg-neutral-900">
+        <div className="relative flex-1 overflow-auto rounded-xl border bg-card dark:border-neutral-800 dark:bg-neutral-900">
+          {dayBookings.length === 0 ? (
+            <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-3 bg-card/90 px-4 text-center dark:bg-neutral-900/90">
+              <p className="text-sm text-muted-foreground">
+                No bookings on {format(selectedDay, "d MMM")}.
+              </p>
+              <Link href="/dashboard/bookings/new" className={cn(buttonVariants(), "min-h-11")}>
+                Create booking
+              </Link>
+            </div>
+          ) : null}
           <div className="grid grid-cols-[48px_1fr]">
             <div className="border-r dark:border-neutral-800">
               {Array.from({ length: TOTAL_HOURS }, (_, i) => (
@@ -313,11 +352,15 @@ export default function CalendarPage() {
                     key={b.id}
                     href={`/dashboard/bookings/${b.id}`}
                     onClick={() => trackDashboardCalendarEventOpen({ bookingId: b.id })}
-                    className={`absolute left-2 right-2 z-20 flex min-h-11 flex-col justify-center overflow-hidden rounded border px-2 py-1 text-sm transition-opacity hover:opacity-80 ${STATUS_BG[b.status]}`}
+                    className={`absolute left-2 right-2 z-20 flex min-h-11 flex-col justify-center overflow-hidden rounded border px-2 py-1 text-sm transition-opacity active:opacity-80 ${STATUS_BG[b.status]}`}
                     style={{ top: `${top}%`, height }}
                   >
                     <p className="truncate font-medium">{b.clientName}</p>
-                    <p className="truncate opacity-75">{b.serviceName}</p>
+                    <p className="truncate opacity-75">
+                      <span className="tabular-nums">{format(new Date(b.startsAt), "h:mm a")}</span>
+                      {" · "}
+                      {b.serviceName}
+                    </p>
                   </Link>
                 );
               })}

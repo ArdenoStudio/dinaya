@@ -380,20 +380,20 @@ export function SetupWizard() {
   }
 
   return (
-    <div className="min-h-screen bg-stone-100 dark:bg-neutral-950">
-      <header className="border-b bg-white px-6 py-4 dark:border-neutral-800 dark:bg-neutral-900">
-        <div className="mx-auto flex max-w-2xl items-center justify-between gap-4">
+    <div className="min-h-dvh bg-stone-100 dark:bg-neutral-950">
+      <header className="border-b bg-white px-4 py-4 dark:border-neutral-800 dark:bg-neutral-900 sm:px-6">
+        <div className="mx-auto flex max-w-2xl flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <Logo size="sm" />
-          <div className="flex items-center gap-3">
-            <span className="text-xs font-medium text-muted-foreground">
-              {step} of 4 — booking page setup
+          <div className="flex items-center justify-between gap-3 sm:justify-end">
+            <span className="truncate text-xs font-medium text-muted-foreground">
+              Step {step} of 4
             </span>
             <AuthThemeToggle />
           </div>
         </div>
       </header>
 
-      <main className="mx-auto max-w-2xl px-6 py-10">
+      <main className="mx-auto max-w-2xl scroll-pb-28 px-6 py-10 pb-[calc(6rem+env(safe-area-inset-bottom))]">
         <div className="mb-8">
           <p className="text-xs font-semibold uppercase tracking-widest text-primary">
             Your booking page in 5 minutes
@@ -476,13 +476,15 @@ export function SetupWizard() {
                   {error}
                 </p>
               ) : null}
-              <button
-                type="submit"
-                disabled={saving}
-                className={cn(dashboardPrimaryActionClass, "w-full justify-center")}
-              >
-                {saving ? currentStep.savingCta : currentStep.cta}
-              </button>
+              <div className="sticky bottom-0 -mx-6 mt-6 border-t border-border bg-card px-6 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className={cn(dashboardPrimaryActionClass, "w-full justify-center")}
+                >
+                  {saving ? currentStep.savingCta : currentStep.cta}
+                </button>
+              </div>
             </form>
           )}
 
@@ -500,7 +502,7 @@ export function SetupWizard() {
                   onChange={(e) => setService((s) => ({ ...s, name: e.target.value }))}
                 />
               </DashboardField>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <DashboardField htmlFor="duration" label="Duration (min)" required>
                   <DashboardInput
                     id="duration"
@@ -535,7 +537,7 @@ export function SetupWizard() {
                   {error}
                 </p>
               ) : null}
-              <div className="flex gap-3">
+              <div className="sticky bottom-0 -mx-6 mt-6 flex gap-3 border-t border-border bg-card px-6 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
                 <button type="button" onClick={() => setStep(1)} className={dashboardOutlineActionClass}>
                   Back
                 </button>
@@ -614,7 +616,7 @@ export function SetupWizard() {
                   {error}
                 </p>
               ) : null}
-              <div className="flex gap-3">
+              <div className="sticky bottom-0 -mx-6 mt-6 flex gap-3 border-t border-border bg-card px-6 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
                 <button type="button" onClick={() => setStep(2)} className={dashboardOutlineActionClass}>
                   Back
                 </button>
@@ -692,7 +694,7 @@ export function SetupWizard() {
                   {error}
                 </p>
               ) : null}
-              <div className="flex gap-3">
+              <div className="sticky bottom-0 -mx-6 mt-6 flex gap-3 border-t border-border bg-card px-6 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
                 <button type="button" onClick={() => setStep(3)} className={dashboardOutlineActionClass}>
                   Back
                 </button>

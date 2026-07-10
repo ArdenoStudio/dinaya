@@ -3,6 +3,11 @@
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
+import {
+  dashboardInputClass,
+  dashboardPrimaryActionClass,
+} from "@/lib/dashboard-ui";
+import { cn } from "@/lib/utils";
 
 type Booking = {
   id: string;
@@ -121,15 +126,24 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
-        <Link href="/dashboard/clients" className="text-muted-foreground hover:text-foreground text-sm">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-3">
+        <Link
+          href="/dashboard/clients"
+          className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
+        >
           ← Clients
         </Link>
-        <span className="text-muted-foreground">/</span>
-        <h1 className="font-cal text-2xl">{client.name}</h1>
-        <span className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize ${STAGE_STYLES[client.stage]}`}>
-          {client.stage}
-        </span>
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
+          <h1 className="min-w-0 truncate font-cal text-xl sm:text-2xl">{client.name}</h1>
+          <span
+            className={cn(
+              "shrink-0 rounded-full px-2 py-0.5 text-xs font-medium capitalize",
+              STAGE_STYLES[client.stage],
+            )}
+          >
+            {client.stage}
+          </span>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -160,11 +174,11 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
           <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-5 space-y-3">
             <h2 className="font-medium text-sm">CRM</h2>
             <div>
-              <label className="text-xs text-muted-foreground block mb-1">Stage</label>
+              <label className="mb-1 block text-xs text-muted-foreground">Stage</label>
               <select
                 value={editStage}
                 onChange={(e) => setEditStage(e.target.value as typeof editStage)}
-                className="w-full border rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                className={dashboardInputClass}
               >
                 {STAGES.map((s) => (
                   <option key={s} value={s} className="capitalize">
@@ -174,18 +188,19 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
               </select>
             </div>
             <div>
-              <label className="text-xs text-muted-foreground block mb-1">Internal notes</label>
+              <label className="mb-1 block text-xs text-muted-foreground">Internal notes</label>
               <textarea
                 rows={4}
                 value={editInternalNotes}
                 onChange={(e) => setEditInternalNotes(e.target.value)}
-                className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+                className={cn(dashboardInputClass, "resize-none")}
               />
             </div>
             <button
+              type="button"
               onClick={saveProfile}
               disabled={saving}
-              className="w-full bg-primary text-primary-foreground py-1.5 rounded-md text-sm font-medium hover:bg-primary/90 disabled:opacity-60"
+              className={cn(dashboardPrimaryActionClass, "w-full justify-center")}
             >
               {saving ? "Saving…" : "Save"}
             </button>
@@ -202,30 +217,79 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
             {bookings.length === 0 ? (
               <p className="px-5 py-6 text-sm text-muted-foreground">No bookings yet.</p>
             ) : (
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b bg-muted/20">
-                    <th className="text-left px-4 py-2 font-medium text-muted-foreground text-xs">Date</th>
-                    <th className="text-left px-4 py-2 font-medium text-muted-foreground text-xs">Service</th>
-                    <th className="text-left px-4 py-2 font-medium text-muted-foreground text-xs">Staff</th>
-                    <th className="text-left px-4 py-2 font-medium text-muted-foreground text-xs">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {bookings.map((b, i) => (
-                    <tr key={b.id} className={`border-b last:border-0 ${i % 2 === 1 ? "bg-muted/10" : ""}`}>
-                      <td className="px-4 py-2.5 text-xs">{format(new Date(b.startsAt), "d MMM yyyy, h:mm a")}</td>
-                      <td className="px-4 py-2.5 text-xs">{b.serviceName}</td>
-                      <td className="px-4 py-2.5 text-xs">{b.staffName}</td>
-                      <td className="px-4 py-2.5">
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize ${BOOKING_STATUS_STYLES[b.status] ?? ""}`}>
-                          {b.status}
-                        </span>
-                      </td>
-                    </tr>
+              <>
+                <ul className="divide-y md:hidden">
+                  {bookings.map((b) => (
+                    <li key={b.id}>
+                      <Link
+                        href={`/dashboard/bookings/${b.id}`}
+                        className="flex min-h-11 flex-col gap-1 px-5 py-4 active:bg-muted/40"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <p className="text-sm font-medium tabular-nums">
+                            {format(new Date(b.startsAt), "d MMM yyyy, h:mm a")}
+                          </p>
+                          <span
+                            className={cn(
+                              "shrink-0 rounded-full px-2 py-0.5 text-xs font-medium capitalize",
+                              BOOKING_STATUS_STYLES[b.status] ?? "",
+                            )}
+                          >
+                            {b.status.replace("_", " ")}
+                          </span>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {b.serviceName} · {b.staffName}
+                        </p>
+                      </Link>
+                    </li>
                   ))}
-                </tbody>
-              </table>
+                </ul>
+                <div className="hidden overflow-x-auto md:block">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b bg-muted/20">
+                        <th className="px-4 py-2 text-left text-xs font-medium text-muted-foreground">
+                          Date
+                        </th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-muted-foreground">
+                          Service
+                        </th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-muted-foreground">
+                          Staff
+                        </th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-muted-foreground">
+                          Status
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {bookings.map((b, i) => (
+                        <tr
+                          key={b.id}
+                          className={`border-b last:border-0 ${i % 2 === 1 ? "bg-muted/10" : ""}`}
+                        >
+                          <td className="px-4 py-2.5 text-xs tabular-nums">
+                            {format(new Date(b.startsAt), "d MMM yyyy, h:mm a")}
+                          </td>
+                          <td className="px-4 py-2.5 text-xs">{b.serviceName}</td>
+                          <td className="px-4 py-2.5 text-xs">{b.staffName}</td>
+                          <td className="px-4 py-2.5">
+                            <span
+                              className={cn(
+                                "rounded-full px-2 py-0.5 text-xs font-medium capitalize",
+                                BOOKING_STATUS_STYLES[b.status] ?? "",
+                              )}
+                            >
+                              {b.status.replace("_", " ")}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
             )}
           </div>
 
@@ -236,18 +300,22 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
             </div>
             <div className="p-5 space-y-3">
               {/* Add note */}
-              <div className="flex gap-2">
+              <div className="flex flex-col gap-2 sm:flex-row">
                 <textarea
                   rows={2}
                   placeholder="Add a note…"
                   value={noteBody}
                   onChange={(e) => setNoteBody(e.target.value)}
-                  className="flex-1 border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+                  className={cn(dashboardInputClass, "min-h-11 flex-1 resize-none")}
                 />
                 <button
+                  type="button"
                   onClick={addNote}
                   disabled={addingNote || !noteBody.trim()}
-                  className="bg-primary text-primary-foreground px-4 rounded-md text-sm font-medium hover:bg-primary/90 disabled:opacity-60 self-start mt-0.5 py-2"
+                  className={cn(
+                    dashboardPrimaryActionClass,
+                    "shrink-0 justify-center self-stretch sm:self-end",
+                  )}
                 >
                   {addingNote ? "…" : "Add"}
                 </button>
