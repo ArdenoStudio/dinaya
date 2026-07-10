@@ -119,6 +119,83 @@ export function trackOnboardingComplete(params: { businessSlug?: string } = {}) 
   });
 }
 
+export function trackOnboardingSetupStart(params: {
+  resumeStep?: number;
+  businessSlug?: string;
+}) {
+  trackEvent("onboarding_setup_start", {
+    resume_step: params.resumeStep,
+    business_slug: params.businessSlug,
+  });
+}
+
+export function trackOnboardingStepComplete(params: {
+  step: number;
+  businessSlug?: string;
+}) {
+  trackEvent("onboarding_step_complete", {
+    step: params.step,
+    business_slug: params.businessSlug,
+  });
+}
+
+export function trackOnboardingLinkCopy(params: {
+  source: "setup_wizard" | "checklist" | "celebration";
+}) {
+  trackEvent("onboarding_link_copy", { source: params.source });
+}
+
+export function trackOnboardingWhatsappShare(params: {
+  source: "setup_wizard" | "checklist" | "celebration";
+}) {
+  trackEvent("onboarding_whatsapp_share", { source: params.source });
+}
+
+export function trackOnboardingTestBookClick(params: { businessSlug?: string } = {}) {
+  trackEvent("onboarding_test_book_click", {
+    business_slug: params.businessSlug,
+  });
+}
+
+export function trackDashboardNavClick(params: {
+  routeId?: string;
+  href: string;
+  surface: "bottom_tab" | "more_sheet" | "tablet_rail" | "sidebar" | "mobile_menu";
+}) {
+  trackEvent("dashboard_nav_click", {
+    route_id: params.routeId,
+    href: params.href,
+    surface: params.surface,
+  });
+}
+
+export function trackDashboardCtaClick(params: { ctaId: string; page?: string }) {
+  trackEvent("dashboard_cta_click", {
+    cta_id: params.ctaId,
+    page: params.page,
+  });
+}
+
+export function trackDashboardCalendarView(params: { view: "week" | "day" | "agenda" }) {
+  trackEvent("dashboard_calendar_view", { view: params.view });
+}
+
+export function trackDashboardCalendarEventOpen(params: { bookingId?: string } = {}) {
+  trackEvent("dashboard_calendar_event_open", {
+    booking_id: params.bookingId,
+  });
+}
+
+export function trackActivationFirstBooking(params: {
+  businessSlug?: string;
+  daysToActivate?: number;
+}) {
+  trackEvent("activation_first_booking", {
+    business_slug: params.businessSlug,
+    days_to_activate: params.daysToActivate,
+  });
+}
+
 export function trackPlanUpgradeStart(params: { plan: string; interval: string }) {
   trackEvent("plan_upgrade_start", {
     plan: params.plan,

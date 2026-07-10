@@ -36,9 +36,9 @@ const STAGE_STYLES: Record<Stage, string> = {
 };
 
 const STAGE_DOT: Record<Stage, string> = {
-  lead: "bg-blue-50 dark:bg-blue-950/400",
+  lead: "bg-blue-500",
   prospect: "bg-violet-500",
-  active: "bg-emerald-50 dark:bg-emerald-950/400",
+  active: "bg-emerald-500",
   churned: "bg-gray-400",
 };
 

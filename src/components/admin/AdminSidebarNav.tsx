@@ -14,6 +14,7 @@ import {
   Settings,
   ShieldCheck,
   Tags,
+  TrendingUp,
   Users,
   Webhook,
   type LucideIcon,
@@ -41,6 +42,7 @@ const navGroups: { label: string; links: NavLinkConfig[] }[] = [
     links: [
       { href: "/admin/subscriptions", label: "Subscriptions", icon: CreditCard },
       { href: "/admin/plans", label: "Plans", icon: Tags },
+      { href: "/admin/acquisition", label: "Acquisition", icon: TrendingUp },
       { href: "/admin/referrals", label: "Referrals", icon: Gift },
     ],
   },

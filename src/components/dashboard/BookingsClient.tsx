@@ -104,22 +104,29 @@ function BookingActions({
   row,
   updating,
   onAction,
+  compact = false,
 }: {
   row: BookingRow;
   updating: string | null;
   onAction: (bookingId: string, status: BookingRow["status"]) => void;
+  /** Mobile cards: hide View (card is tappable) and cap status actions */
+  compact?: boolean;
 }) {
   const actions = ACTIONS[row.status] ?? [];
+  const visibleActions = compact ? actions.slice(0, 1) : actions;
   const isUpdating = updating === row.id;
+  const actionClass = "min-h-11";
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <Link
-        href={`/dashboard/bookings/${row.id}`}
-        className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
-      >
-        View
-      </Link>
+      {!compact ? (
+        <Link
+          href={`/dashboard/bookings/${row.id}`}
+          className={cn(buttonVariants({ variant: "outline" }), actionClass)}
+        >
+          View
+        </Link>
+      ) : null}
       <a
         href={whatsappUrl(
           row.clientPhone,
@@ -131,17 +138,17 @@ function BookingActions({
         )}
         target="_blank"
         rel="noopener noreferrer"
-        className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+        className={cn(buttonVariants({ variant: "outline" }), actionClass)}
       >
         WhatsApp
       </a>
-      {actions.map((action) => (
+      {visibleActions.map((action) => (
         <Button
           key={action.next}
           type="button"
-          size="sm"
           variant={action.variant ?? "outline"}
           disabled={isUpdating}
+          className={actionClass}
           onClick={() => onAction(row.id, action.next)}
         >
           {isUpdating ? "Updating…" : action.label}
@@ -218,17 +225,34 @@ export function BookingsClient({ api }: { api: BookingsApi }) {
       <DashboardPageHeader
         title="Bookings"
         actions={
-          <div className="flex flex-wrap gap-2">
-            <a href={api.exportUrl(tab)} className={cn(buttonVariants({ variant: "outline" }))}>
-              <Download className="size-3.5" aria-hidden="true" />
-              Export CSV
-            </a>
-            <Link href="/dashboard/calendar" className={cn(buttonVariants({ variant: "outline" }))}>
-              Calendar
-            </Link>
-            <Link href="/dashboard/bookings/new" className={cn(buttonVariants())}>
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap">
+            <Link
+              href="/dashboard/bookings/new"
+              className={cn(buttonVariants(), "min-h-11 w-full justify-center sm:w-auto")}
+            >
               New booking
             </Link>
+            <div className="flex gap-2">
+              <Link
+                href="/dashboard/calendar"
+                className={cn(
+                  buttonVariants({ variant: "outline" }),
+                  "min-h-11 flex-1 justify-center sm:flex-none",
+                )}
+              >
+                Calendar
+              </Link>
+              <a
+                href={api.exportUrl(tab)}
+                className={cn(
+                  buttonVariants({ variant: "outline" }),
+                  "min-h-11 flex-1 justify-center sm:flex-none",
+                )}
+              >
+                <Download className="size-3.5" aria-hidden="true" />
+                Export
+              </a>
+            </div>
           </div>
         }
       />
@@ -264,47 +288,52 @@ export function BookingsClient({ api }: { api: BookingsApi }) {
               key={row.id}
               className="rounded-xl border border-border bg-card p-4 dark:border-neutral-800 dark:bg-neutral-900"
             >
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  {row.clientId ? (
-                    <Link
-                      href={`/dashboard/clients/${row.clientId}`}
-                      className="font-medium hover:text-primary hover:underline"
-                    >
-                      {row.clientName}
-                    </Link>
-                  ) : (
+              <Link
+                href={`/dashboard/bookings/${row.id}`}
+                className="block -m-1 rounded-lg p-1 active:bg-muted/30"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
                     <p className="font-medium">{row.clientName}</p>
-                  )}
-                  <p className="text-sm text-muted-foreground">{row.clientPhone}</p>
+                    <p className="text-sm text-muted-foreground">{row.clientPhone}</p>
+                  </div>
+                  <StatusBadge status={row.status} />
                 </div>
-                <StatusBadge status={row.status} />
-              </div>
-              <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-                <div>
-                  <dt className="text-xs text-muted-foreground">Service</dt>
-                  <dd>{row.serviceName}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs text-muted-foreground">Staff</dt>
-                  <dd>{row.staffName}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs text-muted-foreground">When</dt>
-                  <dd>{format(new Date(row.startsAt), "d MMM yyyy, h:mm a")}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs text-muted-foreground">Payment</dt>
-                  <dd>
-                    {row.amountLkr ? `LKR ${row.amountLkr.toLocaleString()}` : "—"}
-                    {row.paymentStatus ? (
-                      <span className="block text-xs capitalize text-muted-foreground">{row.paymentStatus}</span>
-                    ) : null}
-                  </dd>
-                </div>
-              </dl>
+                <dl className="mt-3 grid grid-cols-1 gap-y-2 text-sm sm:grid-cols-2 sm:gap-x-4">
+                  <div>
+                    <dt className="text-xs text-muted-foreground">Service</dt>
+                    <dd>{row.serviceName}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-xs text-muted-foreground">Staff</dt>
+                    <dd>{row.staffName}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-xs text-muted-foreground">When</dt>
+                    <dd className="tabular-nums">
+                      {format(new Date(row.startsAt), "d MMM yyyy, h:mm a")}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-xs text-muted-foreground">Payment</dt>
+                    <dd>
+                      {row.amountLkr ? `LKR ${row.amountLkr.toLocaleString()}` : "—"}
+                      {row.paymentStatus ? (
+                        <span className="block text-xs capitalize text-muted-foreground">
+                          {row.paymentStatus}
+                        </span>
+                      ) : null}
+                    </dd>
+                  </div>
+                </dl>
+              </Link>
               <div className="mt-4 border-t pt-4">
-                <BookingActions row={row} updating={updating} onAction={handleAction} />
+                <BookingActions
+                  row={row}
+                  updating={updating}
+                  onAction={handleAction}
+                  compact
+                />
               </div>
             </article>
           )}
@@ -314,7 +343,7 @@ export function BookingsClient({ api }: { api: BookingsApi }) {
               title="No bookings here yet"
               description="New bookings from your booking page or manual entries will appear here."
               action={
-                <Link href="/dashboard/bookings/new" className={cn(buttonVariants())}>
+                <Link href="/dashboard/bookings/new" className={cn(buttonVariants(), "min-h-11")}>
                   Create booking
                 </Link>
               }

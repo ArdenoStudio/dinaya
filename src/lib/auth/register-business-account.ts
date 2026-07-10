@@ -85,6 +85,9 @@ export async function registerBusinessAccount(input: RegisterInput): Promise<{ b
     businessType,
     language,
     referrerCode,
+    utmSource,
+    utmMedium,
+    utmCampaign,
   } = input;
   const selectedBusinessType = businessType ?? "other";
   const selectedLanguage = language ?? "en";
@@ -146,6 +149,9 @@ export async function registerBusinessAccount(input: RegisterInput): Promise<{ b
         language: selectedLanguage,
         referralCode: slug,
         referredByBusinessId,
+        signupUtmSource: utmSource || null,
+        signupUtmMedium: utmMedium || null,
+        signupUtmCampaign: utmCampaign || null,
         plan: "trial",
         planExpiresAt: addDays(new Date(), TRIAL_LENGTH_DAYS),
         cancellationPolicy: "Please contact the business as early as possible if you need to cancel or reschedule.",

@@ -584,6 +584,12 @@ export async function POST(req: NextRequest) {
     console.error("Activity log write failed:", error);
   });
 
+  void import("@/lib/admin-acquisition")
+    .then(({ markFirstBookingAt }) => markFirstBookingAt(businessId))
+    .catch((error) => {
+      console.error("first_booking_at update failed:", error);
+    });
+
   // Fire webhook for booking creation
   void dispatchWebhooks(businessId, "booking.created", {
     bookingId: booking.id,

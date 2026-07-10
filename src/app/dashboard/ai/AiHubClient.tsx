@@ -163,6 +163,19 @@ export default function AiHubClient() {
     return <p className="text-sm text-muted-foreground">Loading AI hub…</p>;
   }
 
+  const messagingReadyHint = (
+    <div className="rounded-xl border border-amber-500/30 bg-amber-50 p-4 text-sm text-amber-950 dark:bg-amber-950/30 dark:text-amber-100">
+      <p className="font-medium">Messaging setup required</p>
+      <p className="mt-1 text-amber-900/80 dark:text-amber-100/80">
+        Reactivation and WhatsApp sends need messaging configured by Dinaya. You can still draft content and
+        toggle branch features — sends will fail until WhatsApp/SMS is live.
+      </p>
+      <Link href="/dashboard/automations" className="mt-2 inline-flex font-medium text-primary hover:underline">
+        Open automations →
+      </Link>
+    </div>
+  );
+
   return (
     <div className="space-y-6">
       <div>
@@ -173,6 +186,8 @@ export default function AiHubClient() {
       </div>
 
       {error && <p className="text-sm text-destructive">{error}</p>}
+
+      {messagingReadyHint}
 
       <section className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
         <div className="flex flex-wrap items-start justify-between gap-4">

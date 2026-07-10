@@ -15,6 +15,7 @@ Dev-only Cursor agent skills for **dinaya.lk**. Not bundled for production.
 | Salon sales pitch | `dinaya-head-of-sales` |
 | Copy / positioning | `dinaya-brand-voice` |
 | Colors / tokens | `dinaya-visual-system` |
+| Mobile dashboard UX loop | `dinaya-mobile-ux-ultra` |
 | UI ship review | `apple-design-head` |
 | Booking / slots | `dinaya-booking-engine` |
 | PayHere | `dinaya-payhere` |
@@ -42,8 +43,8 @@ Dev-only Cursor agent skills for **dinaya.lk**. Not bundled for production.
 
 ## Pack structure
 
-- **22 skills** total (20 `dinaya-*` + `apple-design-head` + `dag-task-runner`)
-- Scored skills use rounds → P0/P1/P2 → SHIP gate (≥85)
+- **23 skills** total (21 `dinaya-*` + `apple-design-head` + `dag-task-runner`)
+- Scored skills use rounds → P0/P1/P2 → SHIP gate (≥85; mobile ultra ≥93 · 0 P0)
 - Engineering skills end with `npm run verify`
 
 ## Master plan
