@@ -99,34 +99,31 @@ export function SlotListPanel({
                   <button
                     key={slot.startUtc}
                     type="button"
-                    disabled={hasCalendarConflict}
                     aria-pressed={isSelected}
                     aria-label={`${slot.label}${
                       hasCalendarConflict ? `, ${copy.calendarConflict}` : ""
                     }`}
+                    title={hasCalendarConflict ? copy.calendarConflict : undefined}
                     onClick={() => onSelect(slot)}
                     className={`flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-medium transition-colors ${
-                      hasCalendarConflict
-                        ? "cursor-not-allowed border-border bg-muted text-muted-foreground"
-                        : isSelected
+                      isSelected
                         ? "booking-bg-accent border-transparent text-white booking-shadow-accent"
                         : "border-[var(--booking-accent-soft)] bg-[var(--booking-accent-muted)] text-foreground hover:border-[var(--booking-accent)] hover:bg-[var(--booking-accent-soft)]"
                     }`}
                   >
-                    {!hasCalendarConflict && !isSelected && (
-                      <span className="size-2 shrink-0 rounded-full bg-[#00D492]" aria-hidden />
+                    {/* Cal.com-style overlay indicator: warning dot when the
+                        slot overlaps a personal calendar event, green when
+                        free — the slot stays bookable either way. */}
+                    {!isSelected && (
+                      <span
+                        className={`size-2 shrink-0 rounded-full ${
+                          hasCalendarConflict ? "bg-amber-500" : "bg-[#00D492]"
+                        }`}
+                        aria-hidden
+                      />
                     )}
-                    <span className="min-w-0 text-center">
-                      <span className={hasCalendarConflict ? "line-through decoration-gray-300" : ""}>
-                        {slot.label}
-                      </span>
-                      {hasCalendarConflict && (
-                        <span className="mt-0.5 block text-[10px] font-normal no-underline">
-                          {copy.calendarConflict}
-                        </span>
-                      )}
-                    </span>
-                    {isSelected && !hasCalendarConflict && (
+                    <span className="min-w-0 text-center">{slot.label}</span>
+                    {isSelected && (
                       <Icon name="check" className="shrink-0 text-xs opacity-90" />
                     )}
                   </button>

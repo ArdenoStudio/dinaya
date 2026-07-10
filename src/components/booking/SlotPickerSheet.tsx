@@ -6,6 +6,7 @@ import { Icon } from "@/components/ui/Icon";
 import type { BookingCopy } from "@/lib/i18n";
 import type { GoogleCalendarOverlay } from "./useGoogleCalendarOverlay";
 import { CalendarOverlayControl } from "./CalendarOverlayControl";
+import { useBookingThemeVars } from "./useBookingThemeVars";
 import { SlotListPanel } from "./SlotListPanel";
 import type { SlotEmptyState, SlotOption } from "./TimeSlotGrid";
 
@@ -40,11 +41,15 @@ export function SlotPickerSheet({
     ? format(parseISO(selectedDate + "T12:00:00"), "EEEE, d MMMM")
     : null;
 
+  const themeVars = useBookingThemeVars(open);
+
   return (
     <Dialog.Root open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
         <Dialog.Content
+          data-booking-theme=""
+          style={themeVars ?? undefined}
           className="fixed bottom-0 left-0 right-0 z-50 max-h-[85svh] overflow-y-auto rounded-t-2xl bg-white dark:bg-neutral-900 shadow-2xl focus:outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom duration-300"
           aria-describedby={undefined}
         >
@@ -81,7 +86,7 @@ export function SlotPickerSheet({
           <div className="px-5 py-4">
             {calendarOverlay ? (
               <div className="mb-4">
-                <CalendarOverlayControl copy={copy} overlay={calendarOverlay} compact />
+                <CalendarOverlayControl copy={copy} overlay={calendarOverlay} />
               </div>
             ) : null}
             <SlotListPanel

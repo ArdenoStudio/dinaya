@@ -23,7 +23,6 @@ interface Props {
   minDate: Date;
   maxDate?: Date;
   dayStatus?: Record<string, MonthDayStatus>;
-  personalBusyDates?: Record<string, number>;
   nextAvailableDate?: string;
   onSelect: (dateStr: string) => void;
   onMonthChange?: (month: string) => void;
@@ -35,7 +34,6 @@ export default function MonthCalendar({
   minDate,
   maxDate,
   dayStatus,
-  personalBusyDates,
   nextAvailableDate,
   onSelect,
   onMonthChange,
@@ -131,7 +129,6 @@ export default function MonthCalendar({
           const isNextAvailable =
             nextAvailableDate === dateStr && !isSelected && !disabled && inMonth;
           const status = dayStatus?.[dateStr];
-          const personalBusyCount = personalBusyDates?.[dateStr] ?? 0;
           return (
             <button
               key={dateStr}
@@ -157,23 +154,20 @@ export default function MonthCalendar({
               }`}
             >
               {format(day, "d")}
+              {/* Secondary hint: business has open slots. Deliberately faint —
+                  it fires on almost every enabled day. Personal calendar
+                  conflicts are surfaced on the time slots (cal.com-style),
+                  not on the month grid. */}
               {inMonth && status === "available" && !isSelected && (
                 <span
                   aria-hidden
-                  className="absolute bottom-1 left-1/2 size-1 -translate-x-1/2 rounded-full booking-bg-accent"
+                  className="absolute bottom-1 left-1/2 size-1 -translate-x-1/2 rounded-full booking-bg-accent opacity-40"
                 />
               )}
               {inMonth && status === "full" && !isSelected && (
                 <span
                   aria-hidden
                   className="absolute bottom-1 left-1/2 size-1 -translate-x-1/2 rounded-full bg-muted-foreground/30"
-                />
-              )}
-              {inMonth && personalBusyCount > 0 && !isSelected && (
-                <span
-                  aria-hidden="true"
-                  title={`${personalBusyCount} busy calendar period${personalBusyCount === 1 ? "" : "s"}`}
-                  className="absolute right-1 top-1 size-1.5 rounded-full bg-muted-foreground ring-2 ring-background"
                 />
               )}
             </button>

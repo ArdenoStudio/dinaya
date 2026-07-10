@@ -103,21 +103,23 @@ export default function TimeSlotGrid({
                 <button
                   key={slot.startUtc}
                   type="button"
-                  disabled={hasCalendarConflict}
                   onClick={() => onSelect(slot)}
                   aria-pressed={isSelected}
                   aria-label={`${slot.label}${isSelected ? ", selected" : ""}${
                     hasCalendarConflict ? `, ${copy.calendarConflict}` : ""
                   }`}
-                  className={`w-full min-h-11 rounded-lg px-2 py-2.5 text-base font-semibold tabular-nums transition-[transform,background-color,border-color,box-shadow] duration-150 ease-out active:scale-[0.96] motion-reduce:active:scale-100 md:text-sm ${
-                    hasCalendarConflict
-                      ? "cursor-not-allowed border border-border bg-muted text-muted-foreground line-through"
-                      : isSelected
+                  className={`flex w-full min-h-11 items-center justify-center gap-1.5 rounded-lg px-2 py-2.5 text-base font-semibold tabular-nums transition-[transform,background-color,border-color,box-shadow] duration-150 ease-out active:scale-[0.96] motion-reduce:active:scale-100 md:text-sm ${
+                    isSelected
                       ? "bg-[var(--booking-accent)] text-white shadow-sm ring-2 ring-[var(--booking-accent-soft)]"
                       : "border border-border bg-secondary/40 text-foreground ring-1 ring-white/5 hover:border-[var(--booking-accent)] hover:bg-[var(--booking-accent-muted)]/40"
                   }`}
                   title={hasCalendarConflict ? copy.calendarConflict : undefined}
                 >
+                  {/* Cal.com-style overlay indicator: warning dot on slots that
+                      overlap a personal calendar event; slot stays bookable. */}
+                  {hasCalendarConflict && !isSelected && (
+                    <span className="size-2 shrink-0 rounded-full bg-amber-500" aria-hidden />
+                  )}
                   {slot.label}
                 </button>
               );
