@@ -1,7 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { BookingPagePreviewPanel } from "@/components/dashboard/BookingPagePreviewPanel";
 import { BookingPageThemeEditor } from "@/components/dashboard/BookingPageThemeEditor";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { buildThemeEditorPreviewUrl } from "@/lib/booking/theme-editor-preview";
+import { buildPublicBookingUrl } from "@/lib/booking-url";
+import { cn } from "@/lib/utils";
 
 type ThemeBusiness = {
   accentColor: string | null;
@@ -24,26 +29,72 @@ type ThemeBusiness = {
 };
 
 export function BookingPageEditor({ business }: { business: ThemeBusiness }) {
+  const bookingUrl = buildPublicBookingUrl({
+    slug: business.slug,
+    customDomain: business.customDomain,
+    customDomainVerified: business.customDomainVerified,
+  });
+
   const initialPreview = useMemo(
-    () => `/embed/book/${business.slug}?embed=1&hideGallery=0`,
-    [business.slug],
+    () =>
+      buildThemeEditorPreviewUrl(business.slug, {
+        accentColor: business.accentColor ?? "#2563eb",
+        bookingPageBackground: (business.bookingPageBackground || "white") as "white",
+        bookingPageBackgroundColor: business.bookingPageBackgroundColor ?? "#f2f2f7",
+        bookingPanelBackground: (business.bookingPanelBackground || "white") as "white",
+        bookingHeroOverlay: (business.bookingHeroOverlay || "light") as "light",
+        bookingHeroOverlayOpacity: business.bookingHeroOverlayOpacity ?? 60,
+        logoUrl: business.logoUrl ?? "",
+        heroBannerUrl: business.galleryImages?.[0] ?? "",
+        galleryRest: business.galleryImages?.slice(1) ?? [],
+        hideDinayaBranding: business.hideDinayaBranding,
+      }),
+    [business],
   );
+
   const [previewSrc, setPreviewSrc] = useState(initialPreview);
+  const [accentColor, setAccentColor] = useState(business.accentColor ?? "#2563eb");
+  const [mobilePane, setMobilePane] = useState<"edit" | "preview">("edit");
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[1fr_1fr]">
-      <BookingPageThemeEditor business={business} onPreviewChange={setPreviewSrc} />
-      <div className="rounded-xl border bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900 xl:sticky xl:top-6 xl:self-start">
-        <div className="mb-3 flex items-center justify-between gap-3">
-          <h2 className="font-semibold">Live preview</h2>
-          <span className="text-xs text-muted-foreground">Updates as you edit</span>
+    <div className="space-y-4">
+      <div className="xl:hidden">
+        <ToggleGroup
+          value={[mobilePane]}
+          onValueChange={(values) => {
+            const next = values[values.length - 1];
+            if (next === "edit" || next === "preview") setMobilePane(next);
+          }}
+          variant="outline"
+          className="w-full"
+        >
+          <ToggleGroupItem value="edit" className="min-h-11 flex-1">
+            Edit
+          </ToggleGroupItem>
+          <ToggleGroupItem value="preview" className="min-h-11 flex-1">
+            Preview
+          </ToggleGroupItem>
+        </ToggleGroup>
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-[1fr_1fr]">
+        <div className={cn(mobilePane === "preview" && "hidden xl:block")}>
+          <BookingPageThemeEditor
+            business={business}
+            onPreviewChange={(src) => {
+              setPreviewSrc(src);
+              const accent = new URL(src, "http://localhost").searchParams.get("previewAccent");
+              if (accent) setAccentColor(accent);
+            }}
+          />
         </div>
-        <iframe
-          key={previewSrc}
-          src={previewSrc}
-          title="Booking page preview"
-          className="h-[min(80vh,900px)] w-full rounded-lg border"
-        />
+        <div className={cn(mobilePane === "edit" && "hidden xl:block")}>
+          <BookingPagePreviewPanel
+            previewSrc={previewSrc}
+            accentColor={accentColor}
+            bookingUrl={bookingUrl}
+          />
+        </div>
       </div>
     </div>
   );

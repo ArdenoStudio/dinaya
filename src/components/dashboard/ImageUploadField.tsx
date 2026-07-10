@@ -21,6 +21,7 @@ type Props = {
   previewClassName?: string;
   previewShape?: "square" | "wide" | "circle";
   allowUrl?: boolean;
+  onCroppedBlob?: (blob: Blob) => void;
 };
 
 export function ImageUploadField({
@@ -34,6 +35,7 @@ export function ImageUploadField({
   previewClassName,
   previewShape = "square",
   allowUrl = true,
+  onCroppedBlob,
 }: Props) {
   const inputId = useId();
   const [uploading, setUploading] = useState(false);
@@ -177,7 +179,10 @@ const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
           aspectRatio={aspectRatio}
           outputWidth={outputWidth}
           shape={previewShape === "circle" ? "circle" : "rectangle"}
-          onConfirm={uploadBlob}
+          onConfirm={(blob) => {
+            onCroppedBlob?.(blob);
+            void uploadBlob(blob);
+          }}
         />
       ) : null}
     </div>
