@@ -14,6 +14,7 @@ export default defineConfig([
     ".next/**",
     "apps/desktop/dist/**",
     "apps/desktop/src-tauri/target/**",
+    "apple-ultra-skills/**",
     "node_modules/**",
     "next-env.d.ts",
     "tsconfig.tsbuildinfo",

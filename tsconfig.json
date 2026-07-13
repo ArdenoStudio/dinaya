@@ -42,6 +42,7 @@
     "node_modules",
     "apps/desktop",
     "apps/video",
+    "apple-ultra-skills",
     "dinaya-status",
     "dinaya-uptime-monitor",
     "e2e",
