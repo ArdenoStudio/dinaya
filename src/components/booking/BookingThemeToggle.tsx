@@ -2,11 +2,12 @@
 
 import { ThemeToggle } from "@/components/ThemeToggle";
 
-/** Fixed theme control for public booking pages (hub + wizard). */
+/** Theme control for public booking pages — icon on phone, labeled pill from md+. */
 export function BookingThemeToggle() {
   return (
-    <div className="fixed right-4 top-4 z-50 md:right-6 md:top-6">
-      <ThemeToggle variant="pill" />
+    <div className="fixed right-3 top-3 z-50 md:right-6 md:top-6">
+      <ThemeToggle className="md:hidden" variant="icon" />
+      <ThemeToggle className="hidden md:inline-flex" variant="pill" />
     </div>
   );
 }

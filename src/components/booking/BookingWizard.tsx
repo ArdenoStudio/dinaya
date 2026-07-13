@@ -607,7 +607,7 @@ function BookingWizardInner({
 
   const breadcrumbBlock =
     showBreadcrumb ? (
-      <div className="mb-3 flex justify-start px-4 md:mb-4 md:px-0">
+      <div className="mb-3 flex justify-start px-4 pr-14 md:mb-4 md:px-0 md:pr-0">
         <BookingBreadcrumb items={breadcrumbItems} />
       </div>
     ) : null;
@@ -683,17 +683,16 @@ function BookingWizardInner({
             <div className="grid w-full min-w-0 max-w-full grid-cols-1 gap-0 lg:grid-cols-[minmax(14rem,16rem)_minmax(0,1fr)] lg:items-stretch lg:divide-x lg:divide-border xl:grid-cols-[minmax(15rem,17rem)_minmax(0,1fr)]">
               <BookingPanel
                 area="meta"
-                className="border-b border-border pb-4 lg:sticky lg:top-0 lg:z-[1] lg:self-start lg:border-0 lg:px-5 lg:pb-6 lg:pt-6 xl:px-6"
+                className="border-b border-border pb-3 pt-1 lg:sticky lg:top-0 lg:z-[1] lg:self-start lg:border-0 lg:px-5 lg:pb-6 lg:pt-6 xl:px-6"
                 {...panelMotion}
               >
                 <ServiceMetaPanel {...metaPanelProps} />
               </BookingPanel>
 
               <BookingPanel area="main" className="relative z-0 min-w-0 lg:py-0" {...panelMotion}>
-                {state.service ? (
+                {state.service && (choiceDateLabel || state.timeLabel || showContactForm) ? (
                   <div className="border-b border-border py-3 lg:hidden">
                     <BookingChoiceSummary
-                      serviceName={state.service?.name}
                       staffLabel={staffSummaryLabel}
                       dateLabel={choiceDateLabel}
                       timeLabel={state.timeLabel || null}
@@ -709,6 +708,14 @@ function BookingWizardInner({
                       slotTaken={copy.slotTaken}
                       slotTakenAction={copy.slotTakenAction}
                     />
+                  </div>
+                ) : null}
+                {!showContactForm && canPickSlots && !selectedSlot ? (
+                  <div className="border-b border-border px-0 pb-3 pt-3 lg:hidden">
+                    <h2 className="font-cal text-xl tracking-tight text-foreground">
+                      {copy.pickDateTime}
+                    </h2>
+                    <p className="mt-1 text-sm text-muted-foreground">{copy.chooseDate}</p>
                   </div>
                 ) : null}
                 <BookingMainStepTransition stepKey={showContactForm ? "confirm" : "dateTime"}>

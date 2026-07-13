@@ -26,7 +26,7 @@ const base = {
 };
 
 describe("buildBookingBreadcrumbItems", () => {
-  it("shows All services / service name when picking a time from the hub", () => {
+  it("shows All services / service / Date & Time when picking a time from the hub", () => {
     const items = buildBookingBreadcrumbItems({
       ...base,
       showContactForm: false,
@@ -34,7 +34,8 @@ describe("buildBookingBreadcrumbItems", () => {
 
     expect(items).toEqual([
       { label: "All services", href: "/book/test" },
-      { label: "Haircut", current: true },
+      { label: "Haircut" },
+      { label: "Date & Time", current: true },
     ]);
   });
 
@@ -107,7 +108,8 @@ describe("buildBookingBreadcrumbItems", () => {
     });
 
     expect(items[0]).toEqual({ label: "Choose a service", onClick: expect.any(Function) });
-    expect(items[1]).toEqual({ label: "Haircut", current: true });
+    expect(items[1]).toEqual({ label: "Haircut", onClick: expect.any(Function) });
+    expect(items[2]).toEqual({ label: "Date & Time", current: true });
   });
 
   it("uses onBackToHub click when provided", () => {
