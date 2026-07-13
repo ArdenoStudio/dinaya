@@ -690,7 +690,8 @@ function BookingWizardInner({
               </BookingPanel>
 
               <BookingPanel area="main" className="relative z-0 min-w-0 lg:py-0" {...panelMotion}>
-                {state.service && (choiceDateLabel || state.timeLabel || showContactForm) ? (
+                {state.service &&
+                (showContactForm || Boolean(state.timeLabel) || Boolean(selectedSlot)) ? (
                   <div className="border-b border-border py-3 lg:hidden">
                     <BookingChoiceSummary
                       staffLabel={staffSummaryLabel}
