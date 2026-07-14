@@ -616,28 +616,29 @@ function BookingWizardInner({
     };
   }, [showBreadcrumb]);
 
-  const breadcrumbChrome = showBreadcrumb ? (
-    <div
-      className={cn(
-        // Padding on the outer shell only — keep min-h / items-center on the inner row
-        // so the 44px theme control and crumb text share one baseline.
-        "w-full px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-3",
-        "md:mb-4 md:px-0 md:pb-0 md:pt-0",
-      )}
-    >
-      <div className="flex min-h-11 items-center gap-3">
-        <div className="min-w-0 flex-1">
-          <BookingBreadcrumb items={breadcrumbItems} />
+  const renderBreadcrumbChrome = () =>
+    showBreadcrumb ? (
+      <div
+        className={cn(
+          // Padding on the outer shell only — keep min-h / items-center on the inner row
+          // so the 44px theme control and crumb text share one baseline.
+          "w-full px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-3",
+          "md:mb-4 md:px-0 md:pb-0 md:pt-0",
+        )}
+      >
+        <div className="flex min-h-11 items-center gap-3">
+          <div className="min-w-0 flex-1">
+            <BookingBreadcrumb items={breadcrumbItems} />
+          </div>
+          <BookingThemeToggle inline className="md:hidden" />
         </div>
-        <BookingThemeToggle inline className="md:hidden" />
       </div>
-    </div>
-  ) : null;
+    ) : null;
 
   const bookerCard = (
       <div className="w-full min-w-0 max-w-full booking-panel-surface rounded-none border-x-0 shadow-none lg:overflow-visible lg:rounded-xl lg:border lg:border-border lg:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)] dark:lg:shadow-none dark:lg:ring-1 dark:lg:ring-white/10">
         {/* Mobile breadcrumb chrome — first in the panel so top padding is intentional */}
-        {showBreadcrumb ? <div className="md:hidden">{breadcrumbChrome}</div> : null}
+        {showBreadcrumb ? <div className="md:hidden">{renderBreadcrumbChrome()}</div> : null}
 
         <BookingAttributionCapture businessId={business.id} />
         <BookingDealsSection
