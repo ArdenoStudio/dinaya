@@ -67,6 +67,11 @@ export function buildBookingBreadcrumbItems({
     return items;
   }
 
-  items.push({ label: service.name, current: true });
+  // Date/time step — service is parent crumb; current job is picking a slot
+  items.push({
+    label: service.name,
+    onClick: lockServiceSelection ? undefined : onBackToServices,
+  });
+  items.push({ label: copy.dateTime, current: true });
   return items;
 }

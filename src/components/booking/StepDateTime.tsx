@@ -330,11 +330,15 @@ export default function StepDateTime({
       <div className="flex min-w-0 w-full max-w-full flex-col lg:grid lg:min-h-[24rem] lg:grid-cols-[minmax(0,1fr)_minmax(15rem,0.95fr)] lg:divide-x lg:divide-border/80 xl:grid-cols-[minmax(0,1fr)_minmax(16rem,0.95fr)]">
         <section className="min-w-0 flex-1 py-0 lg:pr-6">
           <div className="mb-3 flex items-center justify-between gap-2 md:mb-4">
-            <p className="text-sm font-medium text-foreground md:sr-only">{copy.chooseDate}</p>
+            {!hideHeading ? (
+              <p className="text-sm font-medium text-foreground md:sr-only">{copy.chooseDate}</p>
+            ) : (
+              <span className="md:hidden" aria-hidden />
+            )}
             <button
               type="button"
               onClick={() => setShowMobileCalendar((v) => !v)}
-              className="text-xs font-medium booking-text-accent md:hidden"
+              className="inline-flex min-h-11 items-center text-xs font-medium booking-text-accent md:hidden"
             >
               {showMobileCalendar ? copy.quickDates : copy.fullCalendar}
             </button>
