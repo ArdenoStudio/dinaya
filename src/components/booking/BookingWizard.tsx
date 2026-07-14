@@ -619,17 +619,18 @@ function BookingWizardInner({
   const breadcrumbChrome = showBreadcrumb ? (
     <div
       className={cn(
-        "flex w-full items-center gap-3",
-        // Mobile: balanced top/bottom padding, shared row with theme toggle (min 44px).
-        "min-h-11 px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-3",
-        // Desktop: sit above the card as before.
-        "md:mb-4 md:min-h-0 md:px-0 md:pb-0 md:pt-0",
+        // Padding on the outer shell only — keep min-h / items-center on the inner row
+        // so the 44px theme control and crumb text share one baseline.
+        "w-full px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-3",
+        "md:mb-4 md:px-0 md:pb-0 md:pt-0",
       )}
     >
-      <div className="flex min-h-11 min-w-0 flex-1 items-center md:min-h-0">
-        <BookingBreadcrumb items={breadcrumbItems} />
+      <div className="flex min-h-11 items-center gap-3">
+        <div className="min-w-0 flex-1">
+          <BookingBreadcrumb items={breadcrumbItems} />
+        </div>
+        <BookingThemeToggle inline className="md:hidden" />
       </div>
-      <BookingThemeToggle inline className="md:hidden" />
     </div>
   ) : null;
 

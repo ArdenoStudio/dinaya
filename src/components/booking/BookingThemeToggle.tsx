@@ -26,7 +26,7 @@ export function BookingThemeToggle({ inline = false, className }: Props) {
   return (
     <div
       className={cn(
-        "fixed right-3 top-[max(0.75rem,env(safe-area-inset-top))] z-50 md:right-6 md:top-6",
+        "fixed right-3 top-[max(1rem,env(safe-area-inset-top))] z-50 md:right-6 md:top-6",
         // Breadcrumb chrome owns the mobile toggle — avoid a second, misaligned control.
         "max-md:[html[data-booking-chrome]_&]:hidden",
         className,
