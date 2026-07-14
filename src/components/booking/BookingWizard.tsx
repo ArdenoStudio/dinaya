@@ -25,9 +25,11 @@ import { BookingWizardSkeleton } from "./BookingWizardSkeleton";
 import BookingBranding from "./BookingBranding";
 import { BookingChoiceSummary } from "./BookingChoiceSummary";
 import { BookingBreadcrumb } from "./BookingBreadcrumb";
+import { BookingThemeToggle } from "./BookingThemeToggle";
 import { BookingPanel } from "./BookingPanel";
 import { buildBookingBreadcrumbItems } from "./booking-breadcrumb";
 import { bookingPanelMotion } from "@/lib/booking/booking-motion";
+import { cn } from "@/lib/utils";
 import {
   BookingMainStepTransition,
   BookingStepTransition,
@@ -605,15 +607,37 @@ function BookingWizardInner({
 
   const accentPanel = theme.panelBackground === "accent";
 
-  const breadcrumbBlock =
-    showBreadcrumb ? (
-      <div className="mb-3 flex justify-start px-4 pr-14 md:mb-4 md:px-0 md:pr-0">
+  // Signal page-level fixed theme toggle to hide on mobile — chrome row owns it.
+  useEffect(() => {
+    if (!showBreadcrumb) return;
+    document.documentElement.dataset.bookingChrome = "1";
+    return () => {
+      delete document.documentElement.dataset.bookingChrome;
+    };
+  }, [showBreadcrumb]);
+
+  const breadcrumbChrome = showBreadcrumb ? (
+    <div
+      className={cn(
+        "flex w-full items-center gap-3",
+        // Mobile: balanced top/bottom padding, shared row with theme toggle (min 44px).
+        "min-h-11 px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-3",
+        // Desktop: sit above the card as before.
+        "md:mb-4 md:min-h-0 md:px-0 md:pb-0 md:pt-0",
+      )}
+    >
+      <div className="flex min-h-11 min-w-0 flex-1 items-center md:min-h-0">
         <BookingBreadcrumb items={breadcrumbItems} />
       </div>
-    ) : null;
+      <BookingThemeToggle inline className="md:hidden" />
+    </div>
+  ) : null;
 
   const bookerCard = (
       <div className="w-full min-w-0 max-w-full booking-panel-surface rounded-none border-x-0 shadow-none lg:overflow-visible lg:rounded-xl lg:border lg:border-border lg:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)] dark:lg:shadow-none dark:lg:ring-1 dark:lg:ring-white/10">
+        {/* Mobile breadcrumb chrome — first in the panel so top padding is intentional */}
+        {showBreadcrumb ? <div className="md:hidden">{breadcrumbChrome}</div> : null}
+
         <BookingAttributionCapture businessId={business.id} />
         <BookingDealsSection
           deals={activeDeals}
@@ -621,7 +645,13 @@ function BookingWizardInner({
           onSelectDeal={applyDeal}
         />
 
-        <div className="px-4 py-4 md:px-0 md:py-0">
+        <div
+          className={cn(
+            "px-4 md:px-0 md:py-0",
+            // Avoid stacking py-4 on top of chrome — that made crumbs look flush and meta far below.
+            showBreadcrumb ? "pb-4 pt-1 md:pt-0" : "py-4",
+          )}
+        >
           <BookingStepTransition step={wizardStep}>
           {!state.service ? (
             <div className="mx-auto w-full max-w-lg">
@@ -683,7 +713,7 @@ function BookingWizardInner({
             <div className="grid w-full min-w-0 max-w-full grid-cols-1 gap-0 lg:grid-cols-[minmax(14rem,16rem)_minmax(0,1fr)] lg:items-stretch lg:divide-x lg:divide-border xl:grid-cols-[minmax(15rem,17rem)_minmax(0,1fr)]">
               <BookingPanel
                 area="meta"
-                className="border-b border-border pb-3 pt-1 lg:sticky lg:top-0 lg:z-[1] lg:self-start lg:border-0 lg:px-5 lg:pb-6 lg:pt-6 xl:px-6"
+                className="border-b border-border pb-3 pt-0 lg:sticky lg:top-0 lg:z-[1] lg:self-start lg:border-0 lg:px-5 lg:pb-6 lg:pt-6 xl:px-6"
                 {...panelMotion}
               >
                 <ServiceMetaPanel {...metaPanelProps} />
@@ -796,6 +826,10 @@ function BookingWizardInner({
       </div>
     ) : null;
 
+  // Desktop: breadcrumb sits above the card. Mobile chrome is inside the panel.
+  const desktopBreadcrumb =
+    showBreadcrumb ? <div className="hidden md:block">{breadcrumbChrome}</div> : null;
+
   if (centeredBookerLayout) {
     return (
       <BookingTheme
@@ -803,7 +837,7 @@ function BookingWizardInner({
         embed={embedMode}
         className="w-full"
       >
-        {breadcrumbBlock}
+        {desktopBreadcrumb}
         {bookerCard}
         {brandingBlock}
       </BookingTheme>
@@ -812,7 +846,7 @@ function BookingWizardInner({
 
   return (
     <BookingTheme theme={theme} embed={embedMode}>
-      {breadcrumbBlock}
+      {desktopBreadcrumb}
       {bookerCard}
       {brandingBlock}
     </BookingTheme>
