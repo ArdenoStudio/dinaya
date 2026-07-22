@@ -37,6 +37,8 @@ const CLICK_TARGET_LABELS = {
   "bookings-refund": "Refund action",
   "billing-upgrade": "Upgrade button",
   "integrations-connect": "Connect button",
+  "deals-new-deal": "New deal button",
+  "deals-row": "deal row",
   "booking-service-card": "service card",
   "booking-time-slot": "time slot",
   "booking-confirm-pay": "Confirm & Pay button",

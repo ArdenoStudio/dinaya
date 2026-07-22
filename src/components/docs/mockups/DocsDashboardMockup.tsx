@@ -1,9 +1,11 @@
 "use client";
 
-import { cn } from "@/lib/utils";
-import { DocsTargetHighlight } from "../DocsTargetHighlight";
-import { DocsCursor } from "../DocsCursor";
+import type { ReactNode } from "react";
+import { LogoIcon } from "@/components/Logo";
 import { Icon } from "@/components/ui/Icon";
+import { cn } from "@/lib/utils";
+import { DocsCursor } from "../DocsCursor";
+import { DocsTargetHighlight } from "../DocsTargetHighlight";
 import {
   DASHBOARD_NAV_GROUPS,
   resolveActiveNav,
@@ -27,6 +29,63 @@ function NavHotspot({ label }: { label: string }) {
   );
 }
 
+function Surface({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "rounded-2xl border border-black/[0.06] bg-white shadow-[0_1px_0_rgba(0,0,0,0.03)]",
+        "dark:border-white/[0.08] dark:bg-neutral-900 dark:shadow-none",
+        className,
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
+function PageHeader({
+  title,
+  subtitle,
+  action,
+}: {
+  title: string;
+  subtitle?: string;
+  action?: ReactNode;
+}) {
+  return (
+    <div className="mb-2.5 flex items-end justify-between gap-2">
+      <div className="min-w-0">
+        <h3 className="font-cal text-[13px] font-semibold tracking-tight text-gray-900 dark:text-gray-100">
+          {title}
+        </h3>
+        {subtitle ? (
+          <p className="mt-0.5 text-[9px] text-gray-500 dark:text-gray-400">{subtitle}</p>
+        ) : null}
+      </div>
+      {action}
+    </div>
+  );
+}
+
+function StatTile({ label, value }: { label: string; value: string }) {
+  return (
+    <Surface className="px-2.5 py-2">
+      <p className="text-[8px] font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">
+        {label}
+      </p>
+      <p className="mt-0.5 font-cal text-[12px] font-semibold tracking-tight text-gray-900 dark:text-gray-100">
+        {value}
+      </p>
+    </Surface>
+  );
+}
+
 export function DocsDashboardMockup({ variant, highlightNav, highlightTarget }: Props) {
   const activeNav = resolveActiveNav(variant);
   const highlight = highlightNav as DashboardNavLabel | undefined;
@@ -34,24 +93,42 @@ export function DocsDashboardMockup({ variant, highlightNav, highlightTarget }: 
   const showBookingActions =
     target("bookings-reschedule") || target("bookings-cancel") || target("bookings-refund");
 
-  const title =
-    activeNav === "Overview" && variant.includes("onboarding")
-      ? "Finish your setup"
-      : activeNav;
+  const isOnboarding = variant.includes("onboarding");
+  const isOverview = activeNav === "Overview" && !isOnboarding;
+  const isPayhere = variant.includes("payhere");
+  const isBilling = variant.includes("billing");
+  const isSettings =
+    variant.includes("settings") && !isPayhere && !isBilling && !variant.includes("integrations");
+
+  const title = isOnboarding
+    ? "Finish your setup"
+    : isPayhere
+      ? "Settings"
+      : isBilling
+        ? "Plan & billing"
+        : activeNav;
 
   return (
-    <div className="flex text-[10px]">
-      <aside className="relative flex w-[31%] shrink-0 flex-col border-r bg-gray-50 dark:bg-neutral-900/90">
-        <div className="border-b px-2.5 py-2">
-          <p className="font-cal text-[11px] font-semibold text-gray-900 dark:text-gray-100">Dinaya</p>
+    <div className="flex min-h-[320px] bg-[hsl(240_6%_94%)] text-[10px] dark:bg-[hsl(240_6%_6%)]">
+      <aside className="relative flex w-[34%] shrink-0 flex-col border-r border-black/[0.06] bg-white dark:border-white/[0.08] dark:bg-[hsl(240_5%_9%)]">
+        <div className="border-b border-black/[0.06] px-2.5 py-2.5 dark:border-white/[0.08]">
+          <div className="flex items-center gap-1.5 text-gray-900 dark:text-gray-100">
+            <LogoIcon className="size-3.5 shrink-0" />
+            <div className="min-w-0">
+              <p className="truncate font-cal text-[10px] font-semibold leading-none tracking-tight">
+                Dilini&apos;s Studio
+              </p>
+              <p className="mt-0.5 truncate text-[8px] text-gray-400">Free trial</p>
+            </div>
+          </div>
         </div>
         <nav className="flex-1 overflow-visible px-1.5 py-2">
           {DASHBOARD_NAV_GROUPS.map((group) => (
-            <div key={group.label} className="mb-2.5">
-              <p className="mb-1 px-1.5 text-[8px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+            <div key={group.label} className="mb-2">
+              <p className="mb-0.5 px-1.5 text-[7.5px] font-semibold uppercase tracking-[0.12em] text-gray-400 dark:text-gray-500">
                 {group.label}
               </p>
-              <ul className="space-y-0.5">
+              <ul className="space-y-px">
                 {group.items.map((item) => {
                   const isActive = item === activeNav;
                   const isHighlighted = item === highlight;
@@ -59,7 +136,7 @@ export function DocsDashboardMockup({ variant, highlightNav, highlightTarget }: 
                     <li key={item} className="relative">
                       <span
                         className={cn(
-                          "block rounded-md px-2 py-1 leading-tight",
+                          "block rounded-lg px-2 py-[3px] leading-tight",
                           isActive
                             ? "bg-primary/10 font-semibold text-primary"
                             : "text-gray-600 dark:text-gray-400",
@@ -76,29 +153,139 @@ export function DocsDashboardMockup({ variant, highlightNav, highlightTarget }: 
             </div>
           ))}
         </nav>
+        <div className="border-t border-black/[0.06] px-2.5 py-2 dark:border-white/[0.08]">
+          <p className="text-[8px] text-gray-400">Help & docs</p>
+        </div>
       </aside>
 
-      <main className="min-w-0 flex-1 overflow-hidden p-3">
-        <h3 className="font-cal text-[13px] font-semibold text-gray-900 dark:text-gray-100">{title}</h3>
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="flex items-center gap-2 border-b border-black/[0.06] bg-white/90 px-3 py-1.5 backdrop-blur-md dark:border-white/[0.08] dark:bg-[hsl(240_5%_9%)]/90">
+          <div className="flex min-w-0 flex-1 items-center gap-1.5 rounded-lg border border-black/[0.06] bg-[hsl(240_8%_96%)] px-2 py-1 dark:border-white/[0.08] dark:bg-[hsl(240_5%_8%)]">
+            <Icon name="search" className="text-[9px] text-gray-400" />
+            <span className="truncate text-[9px] text-gray-400">Search · ⌘K</span>
+          </div>
+          <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/15 text-[8px] font-semibold text-primary">
+            D
+          </span>
+        </header>
 
-        {variant.includes("onboarding") && (
-          <div className="mt-2 space-y-1.5">
-            {["Business info", "Add a service", "Add staff", "Set availability", "Connect PayHere", "Share link"].map(
-              (s, i) => {
+        <main className="min-w-0 flex-1 overflow-hidden bg-[hsl(240_8%_96%)] p-3 dark:bg-[hsl(240_5%_8%)]">
+          {!isOverview ? (
+            <PageHeader
+              title={title}
+              subtitle={
+                isOnboarding
+                  ? "Complete these steps to start taking bookings"
+                  : isBilling
+                    ? "Manage your plan and usage"
+                    : undefined
+              }
+              action={
+                variant.includes("bookings") ? (
+                  <DocsTargetHighlight
+                    active={target("bookings-new-booking")}
+                    label="New booking"
+                    variant="inline"
+                  >
+                    <span className="inline-flex items-center gap-1 rounded-full bg-primary px-2.5 py-1 text-[9px] font-medium text-white">
+                      + New booking
+                    </span>
+                  </DocsTargetHighlight>
+                ) : variant.includes("services") ? (
+                  <DocsTargetHighlight
+                    active={target("services-add-service")}
+                    label="+ Add service"
+                    variant="inline"
+                  >
+                    <span className="inline-flex rounded-full bg-primary px-2.5 py-1 text-[9px] font-medium text-white">
+                      + Add service
+                    </span>
+                  </DocsTargetHighlight>
+                ) : variant.includes("deals") ? (
+                  <DocsTargetHighlight
+                    active={target("deals-new-deal")}
+                    label="New deal"
+                    variant="inline"
+                  >
+                    <span className="inline-flex rounded-full bg-primary px-2.5 py-1 text-[9px] font-medium text-white">
+                      + New deal
+                    </span>
+                  </DocsTargetHighlight>
+                ) : null
+              }
+            />
+          ) : null}
+
+          {isOverview ? (
+            <div className="space-y-2.5">
+              <div className="flex items-end justify-between gap-2">
+                <div>
+                  <p className="text-[8px] font-medium uppercase tracking-[0.12em] text-gray-400">
+                    Wednesday, May 21
+                  </p>
+                  <h3 className="mt-1 font-cal text-[16px] font-semibold leading-none tracking-tight text-gray-900 dark:text-gray-100">
+                    Good day, Dilini
+                  </h3>
+                  <p className="mt-1 text-[9px] text-gray-500 dark:text-gray-400">
+                    4 appointments today · Rs. 8,500
+                  </p>
+                </div>
+                <span className="inline-flex items-center gap-1 rounded-full bg-primary px-2.5 py-1 text-[9px] font-medium text-white">
+                  + New booking
+                </span>
+              </div>
+              <Surface className="overflow-hidden">
+                <div className="flex items-center justify-between border-b border-black/[0.06] px-2.5 py-2 dark:border-white/[0.08]">
+                  <div>
+                    <p className="font-cal text-[11px] font-semibold tracking-tight">Today</p>
+                    <p className="text-[8px] text-gray-400">Tap an appointment to manage it</p>
+                  </div>
+                  <span className="text-[9px] font-medium text-primary">Calendar</span>
+                </div>
+                <div className="space-y-1 p-1.5">
+                  {[
+                    { time: "11:00", label: "Haircut · Anuki", status: "Confirmed" },
+                    { time: "14:00", label: "Facial · Ravi", status: "Confirmed" },
+                  ].map((row) => (
+                    <div
+                      key={row.time}
+                      className="flex items-center justify-between rounded-xl px-2 py-1.5"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="w-8 font-medium text-gray-500">{row.time}</span>
+                        <span className="text-gray-900 dark:text-gray-100">{row.label}</span>
+                      </div>
+                      <span className="text-[8px] font-medium text-emerald-600">{row.status}</span>
+                    </div>
+                  ))}
+                </div>
+              </Surface>
+            </div>
+          ) : null}
+
+          {isOnboarding ? (
+            <div className="space-y-1.5">
+              {[
+                "Business info",
+                "Add a service",
+                "Add staff",
+                "Set availability",
+                "Connect PayHere",
+                "Share link",
+              ].map((s, i) => {
                 const row = (
                   <div
                     className={cn(
-                      "flex items-center justify-between rounded-md border px-2 py-1.5",
-                      i < 2 ? "border-emerald-200 dark:border-emerald-800/50 bg-emerald-50 dark:bg-emerald-950/40" : "border-gray-100 dark:border-neutral-800 bg-white dark:bg-neutral-900",
+                      "flex items-center justify-between rounded-xl border px-2.5 py-1.5",
+                      i < 2
+                        ? "border-emerald-200 bg-emerald-50 dark:border-emerald-800/50 dark:bg-emerald-950/40"
+                        : "border-black/[0.06] bg-white dark:border-white/[0.08] dark:bg-neutral-900",
                     )}
                   >
-                    <span>{s}</span>
+                    <span className="text-gray-800 dark:text-gray-200">{s}</span>
                     <Icon
                       name={i < 2 ? "check-circle-fill" : "circle"}
-                      className={cn(
-                        "text-[10px]",
-                        i < 2 ? "text-emerald-600" : "text-gray-300",
-                      )}
+                      className={cn("text-[10px]", i < 2 ? "text-emerald-600" : "text-gray-300")}
                     />
                   </div>
                 );
@@ -114,300 +301,354 @@ export function DocsDashboardMockup({ variant, highlightNav, highlightTarget }: 
                   );
                 }
                 return <div key={s}>{row}</div>;
-              },
-            )}
-          </div>
-        )}
+              })}
+            </div>
+          ) : null}
 
-        {variant.includes("reviews") && (
-          <div className="mt-2 space-y-2">
-            <div className="grid grid-cols-3 gap-1.5">
-              {[
-                { n: "12", l: "Total" },
-                { n: "4.8", l: "Average" },
-                { n: "10", l: "Published" },
-              ].map((s) => (
-                <div key={s.l} className="rounded-lg border bg-white dark:border-neutral-800 dark:bg-neutral-900 py-2 text-center">
-                  <p className="font-cal text-[12px] font-semibold">{s.n}</p>
-                  <p className="text-[8px] text-gray-500 dark:text-gray-400">{s.l}</p>
+          {variant.includes("reviews") ? (
+            <div className="space-y-2">
+              <div className="grid grid-cols-3 gap-1.5">
+                <StatTile label="Total" value="12" />
+                <StatTile label="Average" value="4.8" />
+                <StatTile label="Published" value="10" />
+              </div>
+              <Surface className="p-2.5">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <p className="font-medium text-gray-900 dark:text-gray-100">Dilini Perera</p>
+                    <div className="mt-0.5 flex gap-0.5 text-amber-400">
+                      {[1, 2, 3, 4, 5].map((n) => (
+                        <Icon key={n} name="star-fill" className="text-[8px]" />
+                      ))}
+                    </div>
+                    <p className="mt-1 text-[9px] text-gray-500 dark:text-gray-400">
+                      Great service, will book again!
+                    </p>
+                  </div>
+                  <span className="h-4 w-7 shrink-0 rounded-full bg-primary" title="Publish toggle" />
                 </div>
+                <button type="button" className="mt-2 text-[9px] font-medium text-primary">
+                  Reply
+                </button>
+                <button type="button" className="mt-1 block text-[9px] text-violet-600">
+                  Generate reply (Growth)
+                </button>
+              </Surface>
+            </div>
+          ) : null}
+
+          {variant.includes("availability") ? (
+            <div className="space-y-1.5">
+              <DocsTargetHighlight active={target("availability-weekly-hours")} label="Weekly hours">
+                <Surface className="p-2.5">
+                  <p className="font-medium text-gray-800 dark:text-gray-200">Weekly hours</p>
+                  <p className="text-[9px] text-gray-500 dark:text-gray-400">Mon–Sat · 9:00 – 18:00</p>
+                </Surface>
+              </DocsTargetHighlight>
+              <DocsTargetHighlight active={target("availability-blocked-dates")} label="Blocked dates">
+                <div className="rounded-2xl border border-amber-200 bg-amber-50 p-2.5 dark:border-amber-800/50 dark:bg-amber-950/35">
+                  <p className="font-medium text-amber-900 dark:text-amber-200">Blocked dates</p>
+                  <p className="text-[9px] text-amber-800/90">May 25 – May 27 (Holiday)</p>
+                </div>
+              </DocsTargetHighlight>
+            </div>
+          ) : null}
+
+          {variant.includes("bookings") ? (
+            <div className="space-y-1.5">
+              {["Haircut · May 21, 11:00", "Facial · May 22, 14:00"].map((b, i) => (
+                <DocsTargetHighlight
+                  key={b}
+                  active={target("bookings-row") && i === 0}
+                  label="Booking row"
+                >
+                  <Surface className="flex items-center justify-between px-2.5 py-2">
+                    <span className="text-gray-900 dark:text-gray-100">{b}</span>
+                    <span className="text-[9px] font-medium text-emerald-600">Confirmed</span>
+                  </Surface>
+                </DocsTargetHighlight>
+              ))}
+              {showBookingActions ? (
+                <Surface className="space-y-1.5 p-2.5">
+                  <p className="text-[9px] font-medium text-gray-700 dark:text-gray-300">
+                    Haircut · May 21, 11:00
+                  </p>
+                  <div className="flex flex-wrap gap-1">
+                    <DocsTargetHighlight
+                      active={target("bookings-reschedule")}
+                      label="Reschedule"
+                      variant="inline"
+                    >
+                      <span className="rounded-lg border border-black/[0.08] px-1.5 py-0.5 text-[9px] dark:border-white/10">
+                        Reschedule
+                      </span>
+                    </DocsTargetHighlight>
+                    <DocsTargetHighlight
+                      active={target("bookings-cancel")}
+                      label="Cancel"
+                      variant="inline"
+                    >
+                      <span className="rounded-lg border border-red-200 px-1.5 py-0.5 text-[9px] text-red-600">
+                        Cancel
+                      </span>
+                    </DocsTargetHighlight>
+                    <DocsTargetHighlight
+                      active={target("bookings-refund")}
+                      label="Refund"
+                      variant="inline"
+                    >
+                      <span className="rounded-lg border border-black/[0.08] px-1.5 py-0.5 text-[9px] dark:border-white/10">
+                        Refund
+                      </span>
+                    </DocsTargetHighlight>
+                  </div>
+                </Surface>
+              ) : null}
+            </div>
+          ) : null}
+
+          {variant.includes("services") ? (
+            <div className="space-y-1.5">
+              {["Haircut — Rs. 2,500", "Facial — Rs. 3,800"].map((s, i) => (
+                <DocsTargetHighlight
+                  key={s}
+                  active={target("services-row") && i === 0}
+                  label="Deposit option"
+                >
+                  <Surface className="px-2.5 py-2 text-gray-900 dark:text-gray-100">{s}</Surface>
+                </DocsTargetHighlight>
               ))}
             </div>
-            <div className="rounded-lg border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-2">
-              <div className="flex items-start justify-between gap-2">
-                <div>
-                  <p className="font-medium text-gray-900 dark:text-gray-100">Dilini Perera</p>
-                  <div className="mt-0.5 flex gap-0.5 text-amber-400">
-                    {[1, 2, 3, 4, 5].map((n) => (
-                      <Icon key={n} name="star-fill" className="text-[8px]" />
-                    ))}
-                  </div>
-                  <p className="mt-1 text-[9px] text-gray-500 dark:text-gray-400">Great service, will book again!</p>
-                </div>
-                <span className="h-4 w-7 shrink-0 rounded-full bg-primary" title="Publish toggle" />
+          ) : null}
+
+          {variant.includes("staff") ? (
+            <div className="space-y-1.5">
+              <Surface className="px-2.5 py-2 font-medium text-gray-900 dark:text-gray-100">
+                Owner (you)
+              </Surface>
+              <div className="rounded-2xl border border-dashed border-black/[0.1] bg-white/70 px-2.5 py-2 text-gray-500 dark:border-white/15 dark:bg-neutral-900/60 dark:text-gray-400">
+                + Add staff member
               </div>
-              <button type="button" className="mt-2 text-[9px] font-medium text-primary">
-                Reply
-              </button>
-              {variant.includes("reviews") && highlight === undefined && (
-                <button type="button" className="mt-1 block text-[9px] text-violet-600">
-                  Generate reply (Max)
-                </button>
+            </div>
+          ) : null}
+
+          {variant.includes("locations") ? (
+            <div className="space-y-1.5">
+              <Surface className="px-2.5 py-2">
+                <p className="font-medium text-gray-900 dark:text-gray-100">Main branch</p>
+                <p className="text-[9px] text-gray-500 dark:text-gray-400">Colombo · Default</p>
+              </Surface>
+              <p className="text-[9px] text-amber-700 dark:text-amber-400">
+                1 / 1 locations on Free trial
+              </p>
+            </div>
+          ) : null}
+
+          {variant.includes("clients") ? (
+            <div className="space-y-1.5">
+              {["Anuki Silva", "Ravi Jayawardena"].map((name) => (
+                <Surface key={name} className="flex justify-between px-2.5 py-2">
+                  <span className="font-medium text-gray-900 dark:text-gray-100">{name}</span>
+                  <span className="text-[9px] text-gray-500 dark:text-gray-400">3 bookings</span>
+                </Surface>
+              ))}
+            </div>
+          ) : null}
+
+          {variant.includes("calendar") ? (
+            <Surface className="p-2.5">
+              <div className="grid grid-cols-7 gap-0.5 text-center text-[8px] text-gray-400 dark:text-gray-500">
+                {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => (
+                  <span key={`${d}-${i}`}>{d}</span>
+                ))}
+              </div>
+              <div className="mt-1.5 space-y-1">
+                <div className="rounded-lg bg-primary/15 px-1.5 py-1 text-[8px] font-medium text-primary">
+                  11:00 Haircut
+                </div>
+                <div className="rounded-lg bg-primary/10 px-1.5 py-1 text-[8px] font-medium text-primary">
+                  14:00 Facial
+                </div>
+              </div>
+            </Surface>
+          ) : null}
+
+          {variant.includes("payments") ? (
+            <div className="grid grid-cols-2 gap-1.5">
+              <StatTile label="This month" value="Rs. 45,200" />
+              <StatTile label="Pending" value="Rs. 3,200" />
+            </div>
+          ) : null}
+
+          {variant.includes("marketing") ? (
+            <div className="space-y-1.5">
+              <DocsTargetHighlight active={target("marketing-booking-link")} label="Booking link">
+                <Surface className="p-2.5">
+                  <p className="text-[9px] text-gray-500 dark:text-gray-400">Your booking link</p>
+                  <p className="font-medium text-primary">dilini.dinaya.lk</p>
+                </Surface>
+              </DocsTargetHighlight>
+              <div className="flex flex-wrap gap-1.5 pb-0.5">
+                <DocsTargetHighlight active={target("marketing-copy-link")} variant="inline">
+                  <span className="rounded-lg border border-black/[0.08] bg-white px-1.5 py-0.5 dark:border-white/10 dark:bg-neutral-900">
+                    Copy link
+                  </span>
+                </DocsTargetHighlight>
+                <DocsTargetHighlight
+                  active={target("marketing-qr-code")}
+                  label="QR code"
+                  variant="inline"
+                >
+                  <span className="rounded-lg border border-black/[0.08] bg-white px-1.5 py-0.5 dark:border-white/10 dark:bg-neutral-900">
+                    QR code
+                  </span>
+                </DocsTargetHighlight>
+                <DocsTargetHighlight
+                  active={target("marketing-whatsapp")}
+                  label="WhatsApp share"
+                  variant="inline"
+                >
+                  <span className="rounded-lg border border-black/[0.08] bg-white px-1.5 py-0.5 dark:border-white/10 dark:bg-neutral-900">
+                    WhatsApp
+                  </span>
+                </DocsTargetHighlight>
+              </div>
+              <DocsTargetHighlight active={target("marketing-directory")} label="Directory">
+                <div className="rounded-2xl border border-dashed border-black/[0.1] bg-white/70 p-2.5 text-[9px] text-gray-500 dark:border-white/15 dark:bg-neutral-900/60 dark:text-gray-400">
+                  Directory listing
+                </div>
+              </DocsTargetHighlight>
+              <DocsTargetHighlight active={target("marketing-embed")} label="Embed code">
+                <div className="rounded-2xl border border-dashed border-black/[0.1] bg-white/70 p-2.5 text-[9px] text-gray-500 dark:border-white/15 dark:bg-neutral-900/60 dark:text-gray-400">
+                  Embed widget · Book now button
+                </div>
+              </DocsTargetHighlight>
+            </div>
+          ) : null}
+
+          {variant.includes("deals") ? (
+            <div className="space-y-1.5">
+              <DocsTargetHighlight active={target("deals-row")} label="Deal">
+                <Surface className="p-2.5">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-gray-100">
+                        Midweek Haircut
+                      </p>
+                      <p className="text-[9px] text-gray-500 dark:text-gray-400">
+                        30% off · 8 slots left
+                      </p>
+                    </div>
+                    <span className="rounded-full bg-emerald-100 px-1.5 py-0.5 text-[8px] font-medium text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300">
+                      Live
+                    </span>
+                  </div>
+                </Surface>
+              </DocsTargetHighlight>
+              <Surface className="p-2.5">
+                <p className="font-medium text-gray-900 dark:text-gray-100">Quiet Tuesday Facial</p>
+                <p className="text-[9px] text-gray-500 dark:text-gray-400">
+                  20% off · Ends May 28
+                </p>
+              </Surface>
+            </div>
+          ) : null}
+
+          {variant.includes("ai") ? (
+            <div className="space-y-1.5">
+              {["Booking autopilot", "Smart reminders", "Review engine", "Reactivation"].map(
+                (w) => (
+                  <Surface
+                    key={w}
+                    className="flex items-center justify-between px-2.5 py-1.5"
+                  >
+                    <span className="text-gray-900 dark:text-gray-100">{w}</span>
+                    <span className="rounded-full bg-emerald-100 px-1.5 text-[8px] font-medium text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300">
+                      On
+                    </span>
+                  </Surface>
+                ),
               )}
             </div>
-          </div>
-        )}
+          ) : null}
 
-        {variant.includes("availability") && (
-          <div className="mt-2 space-y-1.5">
-            <DocsTargetHighlight active={target("availability-weekly-hours")} label="Weekly hours">
-              <div className="rounded-lg border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-2">
-                <p className="font-medium text-gray-800 dark:text-gray-200">Weekly hours</p>
-                <p className="text-[9px] text-gray-500 dark:text-gray-400">Mon–Sat · 9:00 – 18:00</p>
-              </div>
-            </DocsTargetHighlight>
-            <DocsTargetHighlight active={target("availability-blocked-dates")} label="Blocked dates">
-              <div className="rounded-lg border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-950/35 p-2">
-                <p className="font-medium text-amber-900 dark:text-amber-200">Blocked dates</p>
-                <p className="text-[9px] text-amber-800/90">May 25 – May 27 (Holiday)</p>
-              </div>
-            </DocsTargetHighlight>
-          </div>
-        )}
+          {variant.includes("reports") ? (
+            <Surface className="space-y-1.5 p-2.5">
+              <div className="h-14 rounded-xl bg-gradient-to-t from-primary/20 via-primary/5 to-transparent" />
+              <p className="text-[9px] text-gray-500 dark:text-gray-400">
+                Revenue & bookings · Last 30 days
+              </p>
+            </Surface>
+          ) : null}
 
-        {variant.includes("bookings") && (
-          <div className="mt-2 space-y-1">
-            <div className="flex justify-end">
-              <DocsTargetHighlight active={target("bookings-new-booking")} label="New booking" variant="inline">
-                <span className="rounded-md bg-primary px-2 py-0.5 text-[9px] font-medium text-white">
-                  + New booking
-                </span>
+          {isPayhere ? (
+            <Surface className="p-2.5">
+              <p className="font-medium text-gray-900 dark:text-gray-100">Payments · PayHere</p>
+              <p className="mt-1 text-[9px] text-gray-500 dark:text-gray-400">
+                Merchant ID · Sandbox
+              </p>
+              <span className="mt-2 inline-block rounded-full bg-amber-100 px-2 py-0.5 text-[9px] font-medium text-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
+                Connect account
+              </span>
+            </Surface>
+          ) : null}
+
+          {isBilling ? (
+            <Surface className="p-2.5">
+              <p className="font-medium text-gray-900 dark:text-gray-100">Plan: Free trial</p>
+              <p className="mt-0.5 text-[9px] text-gray-500 dark:text-gray-400">
+                Upgrade for AI, multi-staff, and custom domains
+              </p>
+              <DocsTargetHighlight active={target("billing-upgrade")} label="Upgrade">
+                <button
+                  type="button"
+                  className="mt-2 w-full rounded-full bg-primary py-1.5 text-[9px] font-medium text-white"
+                >
+                  Upgrade to Pro
+                </button>
               </DocsTargetHighlight>
+            </Surface>
+          ) : null}
+
+          {variant.includes("integrations") ? (
+            <div className="space-y-1.5">
+              <DocsTargetHighlight active={target("integrations-connect")} label="Connect">
+                <Surface className="flex items-center justify-between px-2.5 py-2">
+                  <span className="text-gray-900 dark:text-gray-100">Google Calendar</span>
+                  <span className="text-[9px] font-medium text-primary">Connect</span>
+                </Surface>
+              </DocsTargetHighlight>
+              <Surface className="px-2.5 py-2 text-gray-500 dark:text-gray-400">
+                API keys · Webhooks
+              </Surface>
             </div>
-            {["Haircut · May 21, 11:00", "Facial · May 22, 14:00"].map((b, i) => (
-              <DocsTargetHighlight
-                key={b}
-                active={target("bookings-row") && i === 0}
-                label="Booking row"
-              >
-                <div className="flex items-center justify-between rounded-lg border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 py-1.5">
-                  <span>{b}</span>
-                  <span className="text-[9px] font-medium text-emerald-600">Confirmed</span>
-                </div>
-              </DocsTargetHighlight>
-            ))}
-            {showBookingActions ? (
-              <div className="mt-1.5 rounded-lg border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-2 space-y-1">
-                <p className="text-[9px] font-medium text-gray-700 dark:text-gray-300">Haircut · May 21, 11:00</p>
-                <div className="flex flex-wrap gap-1">
-                  <DocsTargetHighlight active={target("bookings-reschedule")} label="Reschedule" variant="inline">
-                    <span className="rounded border px-1.5 py-0.5 text-[9px]">Reschedule</span>
-                  </DocsTargetHighlight>
-                  <DocsTargetHighlight active={target("bookings-cancel")} label="Cancel" variant="inline">
-                    <span className="rounded border border-red-200 px-1.5 py-0.5 text-[9px] text-red-600">
-                      Cancel
-                    </span>
-                  </DocsTargetHighlight>
-                  <DocsTargetHighlight active={target("bookings-refund")} label="Refund" variant="inline">
-                    <span className="rounded border px-1.5 py-0.5 text-[9px]">Refund</span>
-                  </DocsTargetHighlight>
-                </div>
-              </div>
-            ) : null}
-          </div>
-        )}
+          ) : null}
 
-        {variant.includes("services") && (
-          <div className="mt-2 space-y-1">
-            {["Haircut — Rs. 2,500", "Facial — Rs. 3,800"].map((s, i) => (
-              <DocsTargetHighlight key={s} active={target("services-row") && i === 0} label="Deposit option">
-                <div className="rounded-lg border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 py-1.5">{s}</div>
-              </DocsTargetHighlight>
-            ))}
-            <DocsTargetHighlight active={target("services-add-service")} label="+ Add service">
-              <button type="button" className="w-full rounded-lg bg-primary py-1 text-[9px] font-medium text-white">
-                + Add service
+          {variant.includes("automations") ? (
+            <div className="space-y-1.5">
+              <Surface className="p-2.5">
+                <p className="font-medium text-gray-900 dark:text-gray-100">Reminder before visit</p>
+                <p className="text-[9px] text-gray-500 dark:text-gray-400">
+                  Email · 24 hours before
+                </p>
+              </Surface>
+              <button type="button" className="text-[9px] font-medium text-primary">
+                + Add rule
               </button>
-            </DocsTargetHighlight>
-          </div>
-        )}
-
-        {variant.includes("staff") && (
-          <div className="mt-2 space-y-1">
-            <div className="rounded-lg border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 py-1.5 font-medium">Owner (you)</div>
-            <div className="rounded-lg border border-dashed bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 py-1.5 text-gray-500 dark:text-gray-400">
-              + Add staff member
             </div>
-          </div>
-        )}
+          ) : null}
 
-        {variant.includes("locations") && (
-          <div className="mt-2 space-y-1">
-            <div className="rounded-lg border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 py-1.5">
-              <p className="font-medium">Main branch</p>
-              <p className="text-[9px] text-gray-500 dark:text-gray-400">Colombo · Default</p>
-            </div>
-            <p className="text-[9px] text-amber-700">1 / 1 locations on Free trial</p>
-          </div>
-        )}
-
-        {variant.includes("clients") && (
-          <div className="mt-2 space-y-1">
-            {["Anuki Silva", "Ravi Jayawardena"].map((name) => (
-              <div key={name} className="flex justify-between rounded-lg border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 py-1.5">
-                <span className="font-medium">{name}</span>
-                <span className="text-[9px] text-gray-500 dark:text-gray-400">3 bookings</span>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {variant.includes("calendar") && (
-          <div className="mt-2 rounded-lg border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-2">
-            <div className="grid grid-cols-7 gap-0.5 text-center text-[8px] text-gray-400 dark:text-gray-500">
-              {["M", "T", "W", "T", "F", "S", "S"].map((d) => (
-                <span key={d}>{d}</span>
+          {isSettings ? (
+            <div className="space-y-1.5">
+              {["Business profile", "Booking policies", "Account"].map((s) => (
+                <Surface key={s} className="px-2.5 py-2 text-gray-900 dark:text-gray-100">
+                  {s}
+                </Surface>
               ))}
             </div>
-            <div className="mt-1 space-y-0.5">
-              <div className="rounded bg-primary/15 px-1 py-0.5 text-[8px] text-primary">11:00 Haircut</div>
-              <div className="rounded bg-primary/10 px-1 py-0.5 text-[8px] text-primary">14:00 Facial</div>
-            </div>
-          </div>
-        )}
-
-        {variant.includes("payments") && (
-          <div className="mt-2 grid grid-cols-2 gap-1.5">
-            {[
-              { n: "Rs. 45,200", l: "This month" },
-              { n: "Rs. 3,200", l: "Pending" },
-            ].map((s) => (
-              <div key={s.l} className="rounded-lg border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-2">
-                <p className="font-cal text-[11px] font-semibold">{s.n}</p>
-                <p className="text-[8px] text-gray-500 dark:text-gray-400">{s.l}</p>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {variant.includes("marketing") && (
-          <div className="mt-2 space-y-1.5">
-            <DocsTargetHighlight active={target("marketing-booking-link")} label="Booking link">
-              <div className="rounded-lg border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-2">
-                <p className="text-[9px] text-gray-500 dark:text-gray-400">Your booking link</p>
-                <p className="font-medium text-primary">yourname.dinaya.lk</p>
-              </div>
-            </DocsTargetHighlight>
-            <div className="flex flex-wrap gap-2 pb-1">
-              <DocsTargetHighlight active={target("marketing-copy-link")} variant="inline">
-                <span className="rounded border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-1.5 py-0.5">Copy link</span>
-              </DocsTargetHighlight>
-              <DocsTargetHighlight active={target("marketing-qr-code")} label="QR code" variant="inline">
-                <span className="rounded border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-1.5 py-0.5">QR code</span>
-              </DocsTargetHighlight>
-              <DocsTargetHighlight active={target("marketing-whatsapp")} label="WhatsApp share" variant="inline">
-                <span className="rounded border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-1.5 py-0.5">WhatsApp</span>
-              </DocsTargetHighlight>
-            </div>
-            <DocsTargetHighlight active={target("marketing-directory")} label="Directory">
-              <div className="rounded-lg border border-dashed bg-gray-50 dark:bg-neutral-900/60 p-2 text-[9px] text-gray-500 dark:text-gray-400">
-                Directory listing
-              </div>
-            </DocsTargetHighlight>
-            <DocsTargetHighlight active={target("marketing-embed")} label="Embed code">
-              <div className="rounded-lg border border-dashed bg-gray-50 dark:bg-neutral-900/60 p-2 text-[9px] text-gray-500 dark:text-gray-400">
-                Embed widget · Book now button
-              </div>
-            </DocsTargetHighlight>
-          </div>
-        )}
-
-        {variant.includes("ai") && (
-          <div className="mt-2 space-y-1">
-            {["Booking autopilot", "Smart reminders", "Review engine", "Reactivation"].map((w) => (
-              <div key={w} className="flex items-center justify-between rounded-lg border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 py-1">
-                <span>{w}</span>
-                <span className="rounded-full bg-emerald-100 px-1.5 text-[8px] text-emerald-700">On</span>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {variant.includes("reports") && (
-          <div className="mt-2 space-y-1.5">
-            <div className="h-12 rounded-lg border bg-gradient-to-t from-primary/20 to-white" />
-            <p className="text-[9px] text-gray-500 dark:text-gray-400">Revenue & bookings · Last 30 days</p>
-          </div>
-        )}
-
-        {variant.includes("payhere") && (
-          <div className="mt-2 rounded-lg border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-2">
-            <p className="font-medium">Payments · PayHere</p>
-            <p className="mt-1 text-[9px] text-gray-500 dark:text-gray-400">Merchant ID · Sandbox</p>
-            <span className="mt-1.5 inline-block rounded-full bg-amber-100 px-2 py-0.5 text-[9px] text-amber-800">
-              Connect account
-            </span>
-          </div>
-        )}
-
-        {variant.includes("billing") && (
-          <div className="mt-2 rounded-lg border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-2">
-            <p className="font-medium">Plan: Free trial</p>
-            <DocsTargetHighlight active={target("billing-upgrade")} label="Upgrade">
-              <button type="button" className="mt-2 w-full rounded-lg bg-primary py-1 text-[9px] font-medium text-white">
-                Upgrade to Pro
-              </button>
-            </DocsTargetHighlight>
-          </div>
-        )}
-
-        {variant.includes("integrations") && (
-          <div className="mt-2 space-y-1">
-            <DocsTargetHighlight active={target("integrations-connect")} label="Connect">
-              <div className="flex items-center justify-between rounded-lg border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 py-1.5">
-                <span>Google Calendar</span>
-                <span className="text-[9px] font-medium text-primary">Connect</span>
-              </div>
-            </DocsTargetHighlight>
-            <div className="rounded-lg border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 py-1.5 text-gray-500 dark:text-gray-400">API keys · Webhooks</div>
-          </div>
-        )}
-
-        {variant.includes("automations") && (
-          <div className="mt-2 space-y-1">
-            <div className="rounded-lg border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-2">
-              <p className="font-medium">Reminder before visit</p>
-              <p className="text-[9px] text-gray-500 dark:text-gray-400">Email · 24 hours before</p>
-            </div>
-            <button type="button" className="text-[9px] font-medium text-primary">
-              + Add rule
-            </button>
-          </div>
-        )}
-
-        {variant.includes("settings") && !variant.includes("payhere") && !variant.includes("billing") && (
-          <div className="mt-2 space-y-1">
-            {["Business profile", "Booking policies", "Account"].map((s) => (
-              <div key={s} className="rounded-lg border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 py-1.5">
-                {s}
-              </div>
-            ))}
-          </div>
-        )}
-
-        {activeNav === "Overview" && !variant.includes("onboarding") && (
-          <div className="mt-2 grid grid-cols-2 gap-1.5">
-            <div className="rounded-lg border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-2">
-              <p className="text-[9px] text-gray-500 dark:text-gray-400">Today</p>
-              <p className="font-cal text-[12px] font-semibold">4 bookings</p>
-            </div>
-            <div className="rounded-lg border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-2">
-              <p className="text-[9px] text-gray-500 dark:text-gray-400">Revenue</p>
-              <p className="font-cal text-[12px] font-semibold">Rs. 8,500</p>
-            </div>
-          </div>
-        )}
-      </main>
+          ) : null}
+        </main>
+      </div>
     </div>
   );
 }

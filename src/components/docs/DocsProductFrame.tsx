@@ -43,14 +43,14 @@ export function DocsProductFrame({
     >
       <div
         className={cn(
-          "flex items-center gap-2 border-b border-gray-200 dark:border-neutral-800/80 bg-gradient-to-b from-gray-50 to-gray-100/80 dark:from-neutral-900 dark:to-neutral-950 px-3",
+          "flex items-center gap-2 border-b border-black/[0.06] bg-[hsl(var(--dashboard-chrome))]/95 dark:border-white/[0.08] px-3",
           compact ? "py-1.5" : "py-2",
         )}
       >
         <span className="size-2.5 rounded-full bg-[#ff5f57]" />
         <span className="size-2.5 rounded-full bg-[#febc2e]" />
         <span className="size-2.5 rounded-full bg-[#28c840]" />
-        <div className="ml-1 flex min-w-0 flex-1 items-center gap-1.5 rounded-md border border-gray-200 dark:border-neutral-800/80 bg-white/90 dark:bg-neutral-800/90 px-2 py-0.5">
+        <div className="ml-1 flex min-w-0 flex-1 items-center gap-1.5 rounded-md border border-black/[0.06] bg-white/90 px-2 py-0.5 dark:border-white/[0.08] dark:bg-neutral-800/90">
           <span className="size-1.5 shrink-0 rounded-full bg-emerald-500" aria-hidden />
           <span className={cn("truncate font-mono text-gray-500 dark:text-gray-400", compact ? "text-[8px]" : "text-[10px]")}>
             dinaya.lk/dashboard
@@ -60,7 +60,7 @@ export function DocsProductFrame({
 
       {mockupId ? (
         <DocsSpotlight active={spotlightActive && !compact}>
-          <div className="relative w-full bg-white dark:bg-neutral-950">
+          <div className="relative w-full bg-[hsl(var(--dashboard-main))]">
             <DocsDashboardMockup
               variant={mockupId}
               highlightNav={compact ? undefined : highlightNav}

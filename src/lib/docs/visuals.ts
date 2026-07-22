@@ -14,6 +14,7 @@ export const DOCS_PREVIEW_MOCKUP_IDS = [
   "dashboard-reviews",
   "dashboard-payments",
   "dashboard-marketing",
+  "dashboard-deals",
   "dashboard-settings",
   "dashboard-integrations",
   "dashboard-payhere",

@@ -35,6 +35,7 @@ const liveTargets: LiveTarget[] = [
   { name: "dashboard-reviews", path: "/dashboard/reviews" },
   { name: "dashboard-payments", path: "/dashboard/payments" },
   { name: "dashboard-marketing", path: "/dashboard/marketing" },
+  { name: "dashboard-deals", path: "/dashboard/deals" },
   { name: "dashboard-settings", path: "/dashboard/settings" },
   { name: "dashboard-integrations", path: "/dashboard/settings/integrations" },
   { name: "dashboard-billing", path: "/dashboard/billing" },

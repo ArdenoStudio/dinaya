@@ -56,6 +56,11 @@ Optional `thumbnailMockupId` on `DocsGuide` overrides the hub card preview.
 
 ## Maintenance
 
-When dashboard UI changes, update mockups in `src/components/docs/mockups/` or re-run the screenshot script.
+When dashboard UI changes:
+
+1. Update `dashboard-nav-layout.ts` to mirror `dashboardRouteGroups`.
+2. Refresh mockup chrome/bodies in `src/components/docs/mockups/`.
+3. Re-run the screenshot script (preview mode is enough for hub thumbnails).
+4. Keep walkthrough steps on `type: "mockup"` so `highlightTarget` / `highlightNav` keep working.
 
 CI: trigger the **Docs screenshots** workflow manually after dashboard UI changes (requires `DATABASE_URL` and `AUTH_SECRET` secrets).
