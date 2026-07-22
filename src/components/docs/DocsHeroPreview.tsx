@@ -57,5 +57,5 @@ export function DocsHeroPreview() {
 }
 
 function cnStage() {
-  return `p-2.5 sm:p-4 ${docsStageSurface}`;
+  return `rounded-[1.5rem] p-2.5 sm:p-[0.65rem] ${docsStageSurface}`;
 }

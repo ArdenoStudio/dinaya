@@ -72,7 +72,12 @@ export function DocsPhoneFrame({
   if (!staged) return phone;
 
   return (
-    <div className={cn("flex justify-center px-4 py-6 sm:px-8 sm:py-8", docsStageSurface)}>
+    <div
+      className={cn(
+        "flex justify-center rounded-[1.5rem] px-4 py-6 sm:px-8 sm:py-8",
+        docsStageSurface,
+      )}
+    >
       {phone}
     </div>
   );

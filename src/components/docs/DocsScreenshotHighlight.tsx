@@ -1,5 +1,6 @@
 "use client";
 
+import { useId } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import type { DocsHighlightRect } from "@/lib/docs/highlight-rects";
 import { cn } from "@/lib/utils";
@@ -10,36 +11,65 @@ type Props = {
 };
 
 /**
- * Soft cutout over a live product screenshot.
- * Dim surroundings only — no floating badges or cartoon cursors.
+ * SVG mask spotlight — dims the frame and cuts clean rounded windows.
+ * No white glow rings (those read as misaligned “pills”).
  */
 export function DocsScreenshotHighlight({ rects, className }: Props) {
   const reduceMotion = useReducedMotion();
+  const uid = useId().replace(/:/g, "");
+  const maskId = `docs-hl-${uid}`;
+
   if (rects.length === 0) return null;
 
   return (
-    <div className={cn("pointer-events-none absolute inset-0 z-10", className)} aria-hidden>
-      {rects.map((rect, index) => {
-        const isPrimary = index === 0;
-        return (
-          <motion.div
-            key={`${rect.x}-${rect.y}-${index}`}
-            className="absolute rounded-lg"
-            style={{
-              left: `${rect.x}%`,
-              top: `${rect.y}%`,
-              width: `${rect.w}%`,
-              height: `${rect.h}%`,
-              boxShadow: isPrimary
-                ? "0 0 0 2px rgba(255,255,255,0.95), 0 10px 28px rgba(0,0,0,0.22), 0 0 0 9999px rgba(0,0,0,0.42)"
-                : "0 0 0 1.5px rgba(255,255,255,0.8), 0 6px 16px rgba(0,0,0,0.16)",
-            }}
-            initial={reduceMotion ? false : { opacity: 0, scale: 0.99 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.28, ease: [0.2, 0, 0, 1], delay: index * 0.04 }}
-          />
-        );
-      })}
-    </div>
+    <motion.div
+      className={cn("pointer-events-none absolute inset-0 z-10", className)}
+      aria-hidden
+      initial={reduceMotion ? false : { opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.28, ease: [0.2, 0, 0, 1] }}
+    >
+      <svg className="absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <defs>
+          <mask id={maskId} maskUnits="userSpaceOnUse">
+            {/* White = dim visible; black = clear hole */}
+            <rect x="0" y="0" width="100" height="100" fill="white" />
+            {rects.map((rect, index) => (
+              <rect
+                key={`${rect.x}-${rect.y}-${index}`}
+                x={rect.x}
+                y={rect.y}
+                width={rect.w}
+                height={rect.h}
+                rx={1.2}
+                ry={1.8}
+                fill="black"
+              />
+            ))}
+          </mask>
+        </defs>
+        <rect
+          x="0"
+          y="0"
+          width="100"
+          height="100"
+          fill="rgba(0,0,0,0.42)"
+          mask={`url(#${maskId})`}
+        />
+      </svg>
+      {/* DOM keylines stay circular under any aspect ratio */}
+      {rects.map((rect, index) => (
+        <div
+          key={`ring-${rect.x}-${rect.y}-${index}`}
+          className="absolute rounded-lg shadow-[inset_0_0_0_1.5px_rgba(255,255,255,0.7)]"
+          style={{
+            left: `${rect.x}%`,
+            top: `${rect.y}%`,
+            width: `${rect.w}%`,
+            height: `${rect.h}%`,
+          }}
+        />
+      ))}
+    </motion.div>
   );
 }
