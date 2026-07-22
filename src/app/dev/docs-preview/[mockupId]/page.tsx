@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
-import { DocsPhoneFrame } from "@/components/docs/DocsPhoneFrame";
-import { DocsProductFrame } from "@/components/docs/DocsProductFrame";
+import { DocsMockupCapture } from "@/components/docs/DocsMockupCapture";
 import {
   DOCS_PREVIEW_MOCKUP_IDS,
   type DocsPreviewMockupId,
@@ -24,11 +23,7 @@ export default async function DevDocsPreviewPage({ params }: Props) {
   return (
     <div className="min-h-screen bg-[hsl(240_8%_96%)] p-8 dark:bg-[hsl(240_5%_8%)]">
       <div data-docs-capture-root className="inline-block">
-        {mockupId.startsWith("booking-") ? (
-          <DocsPhoneFrame mockupId={mockupId} scale={0.9} />
-        ) : (
-          <DocsProductFrame mockupId={mockupId} variant="browser" />
-        )}
+        <DocsMockupCapture mockupId={mockupId} scale={0.9} />
       </div>
     </div>
   );

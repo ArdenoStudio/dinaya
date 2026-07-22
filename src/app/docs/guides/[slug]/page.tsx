@@ -61,12 +61,12 @@ export default async function GuidePage({ params }: Props) {
         <span className="text-foreground">{guide.title}</span>
       </nav>
 
-      <header className="mb-10 rounded-3xl border border-gray-200 dark:border-neutral-800 bg-gradient-to-br from-white via-slate-50 to-blue-50/60 px-6 py-6 shadow-sm shadow-gray-900/5 dark:shadow-black/20">
+      <header className="mb-10">
         <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2">
             {guide.planRequired ? <PlanBadge plan={guide.planRequired} /> : null}
-            <span className="text-xs text-muted-foreground">
-              {guide.estimatedMinutes} min read · {guide.steps.length} steps
+            <span className="text-xs tabular-nums text-muted-foreground">
+              {guide.estimatedMinutes} min · {guide.steps.length} steps
             </span>
           </div>
           <DocsAiActions
@@ -76,8 +76,8 @@ export default async function GuidePage({ params }: Props) {
             markdownPath={getGuideMarkdownPath(guide.slug)}
           />
         </div>
-        <h1 className="font-cal text-3xl md:text-4xl tracking-tight">{guide.title}</h1>
-        <p className="mt-3 text-muted-foreground text-sm leading-relaxed max-w-xl">
+        <h1 className="font-cal text-3xl tracking-tight text-balance md:text-4xl">{guide.title}</h1>
+        <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-pretty text-muted-foreground">
           {guide.description}
         </p>
         {guide.planRequired ? (

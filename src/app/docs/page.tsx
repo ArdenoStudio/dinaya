@@ -39,21 +39,17 @@ export default function DocsHubPage() {
 
   return (
     <div className="pb-16">
-      <div className="relative mb-12 overflow-hidden rounded-[1.85rem] border border-black/[0.05] bg-[hsl(240_6%_98%)] px-6 py-9 dark:border-white/[0.07] dark:bg-[hsl(240_6%_7%)]">
-        <div
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_70%_0%,hsl(220_10%_70%/_0.12),transparent_58%)] dark:bg-[radial-gradient(ellipse_at_70%_0%,hsl(0_0%_100%/_0.04),transparent_58%)]"
-          aria-hidden
-        />
+      <div className="relative mb-14 overflow-hidden rounded-[1.85rem] bg-[hsl(240_6%_97%)] px-6 py-10 shadow-[0_0_0_1px_rgba(0,0,0,0.05)] dark:bg-[hsl(240_6%_7%)] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.07)]">
         <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
           <div>
             <p className="mb-3 text-[0.7rem] font-medium uppercase tracking-[0.1em] text-muted-foreground">
               Documentation
             </p>
-            <h1 className="font-cal text-3xl tracking-tight text-balance text-gray-950 dark:text-white md:text-[2.5rem] md:leading-tight">
+            <h1 className="font-cal text-3xl tracking-tight text-balance text-foreground md:text-[2.5rem] md:leading-tight">
               Learn Dinaya
             </h1>
-            <p className="mt-2.5 max-w-xl text-[15px] leading-relaxed text-pretty text-gray-600 dark:text-gray-400">
-              Clear guides with product walkthroughs — setup, bookings, payments, and growth.
+            <p className="mt-2.5 max-w-xl text-[15px] leading-relaxed text-pretty text-muted-foreground">
+              Clear guides with live product walkthroughs — setup, bookings, payments, and growth.
             </p>
           </div>
           <DocsAiActions
@@ -71,7 +67,7 @@ export default function DocsHubPage() {
         <div className="grid gap-6 md:grid-cols-3 md:gap-8">
           {walkthroughCues.map((cue, index) => (
             <div key={cue.label} className="min-w-0">
-              <p className="text-[0.65rem] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+              <p className="text-[0.65rem] font-medium uppercase tracking-[0.1em] text-muted-foreground">
                 {String(index + 1).padStart(2, "0")}
               </p>
               <p className="mt-2 font-cal text-base tracking-tight text-gray-950 dark:text-white">
@@ -150,11 +146,11 @@ export default function DocsHubPage() {
                   <Link
                     key={slug}
                     href={`/docs/guides/${slug}`}
-                    className="group overflow-hidden rounded-2xl border border-black/[0.06] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.03),0_8px_20px_-12px_rgba(0,0,0,0.12)] transition-[transform,box-shadow,border-color] duration-150 ease-[cubic-bezier(0.2,0,0,1)] hover:border-black/[0.1] hover:shadow-[0_1px_2px_rgba(0,0,0,0.04),0_14px_28px_-14px_rgba(0,0,0,0.16)] active:scale-[0.99] motion-reduce:active:scale-100 dark:border-white/[0.08] dark:bg-neutral-900"
+                    className="group overflow-hidden rounded-2xl bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.06),0_1px_2px_rgba(0,0,0,0.03),0_10px_24px_-14px_rgba(0,0,0,0.14)] transition-[transform,box-shadow] duration-150 ease-[cubic-bezier(0.2,0,0,1)] hover:shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_1px_2px_rgba(0,0,0,0.04),0_16px_32px_-14px_rgba(0,0,0,0.18)] active:scale-[0.99] motion-reduce:active:scale-100 dark:bg-neutral-900 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08)]"
                   >
                     <DocsGuideThumbnail
                       mockupId={getGuidePreviewMockupId(g)}
-                      className="rounded-none rounded-t-2xl outline outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10"
+                      className="rounded-none rounded-t-2xl shadow-none"
                     />
                     <div className="p-4">
                     <p className="font-cal text-base tracking-tight text-balance">{g.title}</p>

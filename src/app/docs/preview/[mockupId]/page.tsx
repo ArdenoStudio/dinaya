@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
-import { DocsPhoneFrame } from "@/components/docs/DocsPhoneFrame";
-import { DocsProductFrame } from "@/components/docs/DocsProductFrame";
+import { DocsMockupCapture } from "@/components/docs/DocsMockupCapture";
 import {
   DOCS_PREVIEW_MOCKUP_IDS,
   type DocsPreviewMockupId,
@@ -21,12 +20,8 @@ export default async function DocsPreviewPage({ params }: Props) {
   if (!isPreviewMockupId(mockupId)) notFound();
 
   return (
-    <div data-docs-capture-root className="inline-block bg-white dark:bg-neutral-900 p-4">
-      {mockupId.startsWith("booking-") ? (
-        <DocsPhoneFrame mockupId={mockupId} scale={0.85} />
-      ) : (
-        <DocsProductFrame mockupId={mockupId} />
-      )}
+    <div data-docs-capture-root className="inline-block bg-white p-4 dark:bg-neutral-900">
+      <DocsMockupCapture mockupId={mockupId} scale={0.85} />
     </div>
   );
 }
