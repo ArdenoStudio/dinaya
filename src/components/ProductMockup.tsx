@@ -27,7 +27,10 @@ type PersonaData = {
 };
 
 const INITIAL_SELECTED_SLOT = 2;
-const PERSONA_ROTATE_MS = 4500;
+/** How long each “scene” holds before the next brand. */
+const PERSONA_ROTATE_MS = 5200;
+/** Crossfade / slide between brands — video-like dissolve. */
+const SCENE_TRANSITION = { duration: 0.65, ease: [0.22, 1, 0.36, 1] as const };
 
 const personas: PersonaData[] = [
   {
@@ -390,12 +393,10 @@ function CustomerBookingDesktop({
   persona,
   selectedSlot,
   onSelectSlot,
-  reduceMotion,
 }: {
   persona: PersonaData;
   selectedSlot: number;
   onSelectSlot: (index: number) => void;
-  reduceMotion: boolean;
 }) {
   const selectedService = persona.services.find((s) => s.selected)!;
   const selectedTime = persona.slots[selectedSlot]?.label ?? persona.slots[0].label;
@@ -414,42 +415,22 @@ function CustomerBookingDesktop({
           <div className="flex items-start gap-2.5">
             <BrandMark icon={persona.icon} />
             <div className="min-w-0 overflow-hidden">
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.div
-                  key={persona.id}
-                  initial={reduceMotion ? false : { opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={reduceMotion ? undefined : { opacity: 0, y: -4 }}
-                  transition={{ duration: 0.28, ease: [0.2, 0, 0, 1] }}
-                >
-                  <p className="truncate text-sm font-medium text-foreground">{persona.business}</p>
-                  <TrustLine persona={persona} />
-                </motion.div>
-              </AnimatePresence>
+              <p className="truncate text-sm font-medium text-foreground">{persona.business}</p>
+              <TrustLine persona={persona} />
             </div>
           </div>
 
           <div className="mt-4 border-t border-border/70 pt-4">
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div
-                key={`${persona.id}-service`}
-                initial={reduceMotion ? false : { opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={reduceMotion ? undefined : { opacity: 0 }}
-                transition={{ duration: 0.22 }}
-              >
-                <p className="text-base font-semibold leading-tight text-foreground">{selectedService.name}</p>
-                <p className="mt-1.5 text-[11px] leading-relaxed text-muted-foreground text-pretty">
-                  {persona.blurb}
-                </p>
-                <p className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <Icon name="clock" className="text-[10px]" />
-                  {selectedService.duration.replace(" min", "m")}
-                  <span className="text-muted-foreground/50">·</span>
-                  <span className="font-medium tabular-nums text-foreground">{selectedService.price}</span>
-                </p>
-              </motion.div>
-            </AnimatePresence>
+            <p className="text-base font-semibold leading-tight text-foreground">{selectedService.name}</p>
+            <p className="mt-1.5 text-[11px] leading-relaxed text-muted-foreground text-pretty">
+              {persona.blurb}
+            </p>
+            <p className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Icon name="clock" className="text-[10px]" />
+              {selectedService.duration.replace(" min", "m")}
+              <span className="text-muted-foreground/50">·</span>
+              <span className="font-medium tabular-nums text-foreground">{selectedService.price}</span>
+            </p>
           </div>
 
           <div className="mt-4 space-y-2 border-t border-border/70 pt-4 text-xs">
@@ -527,15 +508,43 @@ function CustomerBookingDesktop({
   );
 }
 
-function DemoFrame({ children, accent }: { children: ReactNode; accent: string }) {
+function DemoFrame({
+  children,
+  accent,
+  sceneKey,
+  playing,
+  reduceMotion,
+}: {
+  children: ReactNode;
+  accent: string;
+  sceneKey: string;
+  playing: boolean;
+  reduceMotion: boolean;
+}) {
   return (
     <div
-      className="aspect-[16/10] min-h-[300px] overflow-hidden rounded-2xl border border-border bg-card shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)] transition-[box-shadow] duration-500 ease-out dark:shadow-none dark:ring-1 dark:ring-white/10"
+      className="relative aspect-[16/10] min-h-[300px] overflow-hidden rounded-2xl border border-border bg-card transition-[box-shadow] duration-700 ease-out dark:ring-1 dark:ring-white/10"
       style={{
-        boxShadow: `0 8px 30px -12px color-mix(in srgb, ${accent} 28%, transparent), 0 0 0 1px color-mix(in srgb, ${accent} 12%, transparent)`,
+        boxShadow: `0 12px 40px -14px color-mix(in srgb, ${accent} 35%, transparent), 0 0 0 1px color-mix(in srgb, ${accent} 14%, transparent)`,
       }}
     >
-      {children}
+      <div className="absolute inset-0">{children}</div>
+
+      {/* Film-strip progress — fills while this brand is on screen */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[3px] bg-black/5 dark:bg-white/10">
+        {playing && !reduceMotion ? (
+          <motion.div
+            key={sceneKey}
+            className="h-full origin-left"
+            style={{ backgroundColor: accent }}
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: 1 }}
+            transition={{ duration: PERSONA_ROTATE_MS / 1000, ease: "linear" }}
+          />
+        ) : (
+          <div className="h-full w-0" style={{ backgroundColor: accent }} />
+        )}
+      </div>
     </div>
   );
 }
@@ -543,11 +552,13 @@ function DemoFrame({ children, accent }: { children: ReactNode; accent: string }
 function ThemeSwitcher({
   activeId,
   onSelect,
-  paused,
+  playing,
+  reduceMotion,
 }: {
   activeId: string;
   onSelect: (index: number) => void;
-  paused: boolean;
+  playing: boolean;
+  reduceMotion: boolean;
 }) {
   return (
     <div className="flex flex-col items-center gap-3">
@@ -565,14 +576,25 @@ function ThemeSwitcher({
               role="tab"
               aria-selected={active}
               onClick={() => onSelect(index)}
-              className={`inline-flex min-h-10 items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-[background-color,color,transform] duration-150 ease-out active:scale-[0.96] ${
+              className={`relative inline-flex min-h-10 items-center gap-2 overflow-hidden rounded-lg px-3 py-2 text-sm font-medium transition-[background-color,color,transform] duration-150 ease-out active:scale-[0.96] ${
                 active
                   ? "bg-foreground text-background"
                   : "text-muted-foreground hover:bg-muted/70 hover:text-foreground"
               }`}
             >
+              {active && playing && !reduceMotion ? (
+                <motion.span
+                  key={`progress-${p.id}`}
+                  className="pointer-events-none absolute inset-x-0 bottom-0 h-[2px] origin-left bg-background/50"
+                  initial={{ scaleX: 0 }}
+                  animate={{ scaleX: 1 }}
+                  transition={{ duration: PERSONA_ROTATE_MS / 1000, ease: "linear" }}
+                />
+              ) : null}
               <span
-                className="size-2.5 shrink-0 rounded-full ring-2 ring-white/40 dark:ring-black/30"
+                className={`size-2.5 shrink-0 rounded-full ring-2 ring-white/40 transition-transform duration-300 dark:ring-black/30 ${
+                  active ? "scale-110" : ""
+                }`}
                 style={{ backgroundColor: p.accent }}
                 aria-hidden
               />
@@ -582,15 +604,22 @@ function ThemeSwitcher({
         })}
       </div>
       <p className="text-center text-sm text-muted-foreground">
-        {paused ? (
-          <span>Theme paused — pick another look</span>
-        ) : (
+        {reduceMotion ? (
           <>
-            Your page, your colours —{" "}
+            Pick a look —{" "}
             <Link href={LANDING_LIVE_DEMO_PATH} className="font-medium text-primary hover:text-primary/80">
               open a live booking page
             </Link>
           </>
+        ) : playing ? (
+          <>
+            Autoplaying like a reel — hover the preview to pause ·{" "}
+            <Link href={LANDING_LIVE_DEMO_PATH} className="font-medium text-primary hover:text-primary/80">
+              open live page
+            </Link>
+          </>
+        ) : (
+          <>Paused — move away to keep playing</>
         )}
       </p>
     </div>
@@ -604,7 +633,7 @@ export default function ProductMockup({
 }) {
   const [selectedSlot, setSelectedSlot] = useState(INITIAL_SELECTED_SLOT);
   const [personaIndex, setPersonaIndex] = useState(0);
-  const [userPaused, setUserPaused] = useState(false);
+  const [hoverPaused, setHoverPaused] = useState(false);
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const reduceMotion = useReducedMotion();
@@ -612,6 +641,7 @@ export default function ProductMockup({
   const screenBg = mounted && resolvedTheme === "dark" ? "#000000" : "#f4f4f5";
   const persona = personas[personaIndex] ?? personas[0];
   const isHero = variant === "hero";
+  const playing = !reduceMotion && !hoverPaused;
 
   const onRotate = useEffectEvent(() => {
     setPersonaIndex((i) => (i + 1) % personas.length);
@@ -619,15 +649,15 @@ export default function ProductMockup({
   });
 
   useEffect(() => {
-    if (reduceMotion || userPaused) return;
+    if (!playing) return;
     const id = window.setInterval(() => onRotate(), PERSONA_ROTATE_MS);
     return () => window.clearInterval(id);
-  }, [reduceMotion, userPaused]);
+  }, [playing, personaIndex]);
 
   const selectPersona = (index: number) => {
     setPersonaIndex(index);
     setSelectedSlot(INITIAL_SELECTED_SLOT);
-    setUserPaused(true);
+    // Keep autoplay — jump to that scene like skipping in a video
   };
 
   const mobileScale = 0.72 * DEMO_SCALE;
@@ -683,18 +713,39 @@ export default function ProductMockup({
                   aria-selected={active}
                   aria-label={p.label}
                   onClick={() => selectPersona(index)}
-                  className={`size-9 rounded-full transition-[transform,box-shadow] duration-150 ease-out active:scale-[0.96] ${
+                  className={`relative size-9 overflow-hidden rounded-full transition-[transform,box-shadow] duration-150 ease-out active:scale-[0.96] ${
                     active ? "ring-2 ring-offset-2 ring-offset-background" : "opacity-70 hover:opacity-100"
                   }`}
                   style={{
                     backgroundColor: p.accent,
                     ["--tw-ring-color" as string]: p.accent,
                   }}
-                />
+                >
+                  {active && playing ? (
+                    <motion.span
+                      key={`m-progress-${p.id}`}
+                      className="absolute inset-x-0 bottom-0 h-[3px] origin-left bg-white/70"
+                      initial={{ scaleX: 0 }}
+                      animate={{ scaleX: 1 }}
+                      transition={{ duration: PERSONA_ROTATE_MS / 1000, ease: "linear" }}
+                    />
+                  ) : null}
+                </button>
               );
             })}
           </div>
-          <p className="text-center text-xs text-muted-foreground">{persona.business}</p>
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.p
+              key={persona.id}
+              initial={reduceMotion ? false : { opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={reduceMotion ? undefined : { opacity: 0 }}
+              transition={{ duration: 0.35 }}
+              className="text-center text-xs text-muted-foreground"
+            >
+              {persona.business}
+            </motion.p>
+          </AnimatePresence>
         </div>
       </div>
 
@@ -703,35 +754,82 @@ export default function ProductMockup({
           <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-wide text-primary">Live preview</p>
             <AnimatePresence mode="wait" initial={false}>
-              <motion.p
+              <motion.div
                 key={persona.id}
-                initial={reduceMotion ? false : { opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={reduceMotion ? undefined : { opacity: 0, y: -4 }}
-                transition={{ duration: 0.28, ease: [0.2, 0, 0, 1] }}
-                className="font-cal mt-1 text-xl tracking-tight text-foreground sm:text-2xl"
+                initial={reduceMotion ? false : { opacity: 0, y: 10, filter: "blur(4px)" }}
+                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                exit={reduceMotion ? undefined : { opacity: 0, y: -8, filter: "blur(4px)" }}
+                transition={SCENE_TRANSITION}
               >
-                {persona.business}
-              </motion.p>
+                <p className="font-cal mt-1 text-xl tracking-tight text-foreground sm:text-2xl">
+                  {persona.business}
+                </p>
+                <p className="mt-1 max-w-md text-sm text-muted-foreground text-pretty">{persona.blurb}</p>
+              </motion.div>
             </AnimatePresence>
-            <p className="mt-1 max-w-md text-sm text-muted-foreground text-pretty">{persona.blurb}</p>
           </div>
           <p className="text-xs text-muted-foreground tabular-nums">
-            Colours + name update with your brand
+            {playing ? "Playing · colours morph with each brand" : "Paused · move away to resume"}
           </p>
         </div>
 
-        <DemoFrame accent={persona.accent}>
-          <CustomerBookingDesktop
-            persona={persona}
-            selectedSlot={selectedSlot}
-            onSelectSlot={setSelectedSlot}
+        <div
+          onMouseEnter={() => setHoverPaused(true)}
+          onMouseLeave={() => setHoverPaused(false)}
+        >
+          <DemoFrame
+            accent={persona.accent}
+            sceneKey={persona.id}
+            playing={playing}
             reduceMotion={reduceMotion}
-          />
-        </DemoFrame>
+          >
+            <AnimatePresence mode="sync" initial={false}>
+              <motion.div
+                key={persona.id}
+                className="absolute inset-0"
+                initial={
+                  reduceMotion
+                    ? false
+                    : { opacity: 0, x: 28, filter: "blur(6px)", scale: 0.985 }
+                }
+                animate={{ opacity: 1, x: 0, filter: "blur(0px)", scale: 1 }}
+                exit={
+                  reduceMotion
+                    ? undefined
+                    : { opacity: 0, x: -24, filter: "blur(6px)", scale: 1.015 }
+                }
+                transition={SCENE_TRANSITION}
+              >
+                {/* Soft colour wash as the scene lands */}
+                {!reduceMotion ? (
+                  <motion.div
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0 z-10"
+                    style={{
+                      background: `radial-gradient(70% 60% at 50% 40%, ${persona.accent}22, transparent 70%)`,
+                    }}
+                    initial={{ opacity: 0.85 }}
+                    animate={{ opacity: 0 }}
+                    transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+                  />
+                ) : null}
+                <CustomerBookingDesktop
+                  persona={persona}
+                  selectedSlot={selectedSlot}
+                  onSelectSlot={setSelectedSlot}
+                />
+              </motion.div>
+            </AnimatePresence>
+          </DemoFrame>
+        </div>
 
         <div className="mt-5">
-          <ThemeSwitcher activeId={persona.id} onSelect={selectPersona} paused={userPaused || reduceMotion} />
+          <ThemeSwitcher
+            activeId={persona.id}
+            onSelect={selectPersona}
+            playing={playing}
+            reduceMotion={reduceMotion}
+          />
         </div>
       </div>
     </section>
