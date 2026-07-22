@@ -1,7 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { DashboardSection } from "@/components/dashboard/DashboardSection";
 import { API_KEY_SCOPES, type ApiKeyScope } from "@/lib/api-key-scopes";
+import {
+  dashboardCardClass,
+  dashboardInputClass,
+  dashboardOutlineActionClass,
+  dashboardPrimaryActionClass,
+  dashboardSectionMutedClass,
+} from "@/lib/dashboard-ui";
+import { cn } from "@/lib/utils";
 import {
   isVoiceReceptionistRolloutOpen,
   isVoiceScope,
@@ -101,13 +110,13 @@ export function ApiKeysClient() {
 
   return (
     <div className="space-y-6">
-      <form onSubmit={createKey} className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5 space-y-3">
-        <h2 className="font-semibold">Create API key</h2>
+      <DashboardSection title="Create API key">
+        <form onSubmit={createKey} className="space-y-3">
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Integration name"
-          className="w-full rounded-lg border px-3 py-2 text-sm"
+          className={dashboardInputClass}
           required
         />
         <div>
@@ -126,26 +135,29 @@ export function ApiKeysClient() {
             ))}
           </div>
         </div>
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className="text-sm text-destructive">{error}</p>}
         {rawKey && (
-          <div className="rounded-lg border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-950/40 p-3 text-sm">
+          <div className={cn(dashboardSectionMutedClass, "text-sm")}>
             Copy this key now — it won&apos;t be shown again:
             <code className="mt-2 block break-all font-mono text-xs">{rawKey}</code>
           </div>
         )}
-        <button type="submit" className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">
-          Generate key
-        </button>
-        <button
-          type="button"
-          onClick={() => void createDesktopKey()}
-          className="ml-2 rounded-lg border px-4 py-2 text-sm font-medium"
-        >
-          Connect Desktop
-        </button>
-      </form>
+        <div className="flex flex-wrap gap-2">
+          <button type="submit" className={dashboardPrimaryActionClass}>
+            Generate key
+          </button>
+          <button
+            type="button"
+            onClick={() => void createDesktopKey()}
+            className={dashboardOutlineActionClass}
+          >
+            Connect Desktop
+          </button>
+        </div>
+        </form>
+      </DashboardSection>
 
-      <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 divide-y">
+      <div className={cn(dashboardCardClass, "divide-y overflow-hidden")}>
         {loading ? (
           <p className="p-5 text-sm text-muted-foreground">Loading…</p>
         ) : keys.length === 0 ? (

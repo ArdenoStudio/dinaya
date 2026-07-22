@@ -7,8 +7,8 @@ import { StatCard } from "@/components/dashboard/StatCard";
 import { getReportsDashboardOverview } from "@/lib/dashboard/reports";
 import { getDealAnalytics } from "@/lib/deals/analytics";
 import { requireBusiness } from "@/lib/auth";
+import { DashboardSection } from "@/components/dashboard/DashboardSection";
 import { dashboardPageClass } from "@/lib/dashboard-ui";
-import { cn } from "@/lib/utils";
 import { BarChart3, CalendarDays, Star, Users } from "lucide-react";
 import { Suspense } from "react";
 
@@ -203,37 +203,21 @@ async function ReportsOverview({
       />
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
-          <h2 className="mb-4 font-semibold">Booking health summary</h2>
+        <DashboardSection title="Booking health summary">
           <div className="space-y-4">
             {[
-              {
-                label: "Completed",
-                value: metrics.completedBookings,
-                color: "bg-green-500",
-                text: "text-green-700",
-              },
-              {
-                label: "Cancelled",
-                value: metrics.cancelledBookings,
-                color: "bg-amber-400",
-                text: "text-amber-700",
-              },
-              {
-                label: "No-show",
-                value: metrics.noShows,
-                color: "bg-red-400",
-                text: "text-red-600",
-              },
+              { label: "Completed", value: metrics.completedBookings },
+              { label: "Cancelled", value: metrics.cancelledBookings },
+              { label: "No-show", value: metrics.noShows },
             ].map((item) => (
               <div key={item.label}>
                 <div className="mb-1.5 flex items-center justify-between text-sm">
                   <span className="font-medium">{item.label}</span>
-                  <span className={cn("font-semibold tabular-nums", item.text)}>{item.value}</span>
+                  <span className="font-semibold tabular-nums">{item.value}</span>
                 </div>
                 <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
                   <div
-                    className={cn("h-full rounded-full transition-[width] duration-300 ease-out", item.color)}
+                    className="h-full rounded-full bg-primary/50 transition-[width] duration-300 ease-out"
                     style={{ width: `${Math.round((item.value / maxHealthCount) * 100)}%` }}
                   />
                 </div>
@@ -250,10 +234,9 @@ async function ReportsOverview({
               </div>
             </div>
           </div>
-        </div>
+        </DashboardSection>
 
-        <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-sm lg:col-span-2">
-          <h2 className="mb-4 font-semibold">Bookings by source</h2>
+        <DashboardSection title="Bookings by source" className="lg:col-span-2">
           {breakdowns.bookingsBySource.length === 0 ? (
             <p className="text-sm text-muted-foreground">No bookings yet.</p>
           ) : (
@@ -274,10 +257,9 @@ async function ReportsOverview({
               ))}
             </div>
           )}
-        </div>
+        </DashboardSection>
 
-        <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-sm lg:col-span-2">
-          <h2 className="mb-4 font-semibold">Bookings by staff</h2>
+        <DashboardSection title="Bookings by staff" className="lg:col-span-2">
           {breakdowns.staffLoad.length === 0 ? (
             <p className="text-sm text-muted-foreground">No bookings yet.</p>
           ) : (
@@ -286,7 +268,7 @@ async function ReportsOverview({
                 <div key={row.label}>
                   <div className="mb-1.5 flex items-center justify-between text-sm">
                     <div className="flex items-center gap-2">
-                      <span className="flex size-6 items-center justify-center rounded-full bg-violet-50 text-xs font-semibold text-violet-600">
+                      <span className="flex size-6 items-center justify-center rounded-full bg-muted text-xs font-semibold text-muted-foreground">
                         {initialsFor(row.label)}
                       </span>
                       <span className="font-medium">{row.label}</span>
@@ -295,7 +277,7 @@ async function ReportsOverview({
                   </div>
                   <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
                     <div
-                      className="h-full rounded-full bg-violet-500/60"
+                      className="h-full rounded-full bg-primary/50"
                       style={{ width: `${Math.round((row.value / maxStaffCount) * 100)}%` }}
                     />
                   </div>
@@ -303,7 +285,7 @@ async function ReportsOverview({
               ))}
             </div>
           )}
-        </div>
+        </DashboardSection>
       </div>
 
       <DealAnalyticsPanel analytics={dealAnalytics} />

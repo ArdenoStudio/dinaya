@@ -4,6 +4,8 @@ import { CustomDomainPanel } from "@/components/dashboard/CustomDomainPanel";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
 import { GoogleCalendarDisconnect } from "@/components/dashboard/GoogleCalendarDisconnect";
 import { getIntegrationsDashboardList } from "@/lib/dashboard/integrations";
+import { dashboardCardClass, dashboardPageClass } from "@/lib/dashboard-ui";
+import { cn } from "@/lib/utils";
 
 export default async function IntegrationsPage() {
   const { businessId } = await requireOwner();
@@ -11,7 +13,7 @@ export default async function IntegrationsPage() {
   const domain = integrations.domain;
 
   return (
-    <div className="space-y-6">
+    <div className={dashboardPageClass}>
       <DashboardPageHeader
         title="Integrations"
         description="Connect payments, messaging, calendar sync, and external systems."
@@ -19,13 +21,13 @@ export default async function IntegrationsPage() {
 
       <div className="grid gap-4 md:grid-cols-2">
         {integrations.rows.map((item) => (
-          <div key={item.name} className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
+          <div key={item.name} className={cn(dashboardCardClass, "p-5")}>
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h2 className="font-semibold">{item.name}</h2>
                 <p className="mt-1 text-sm text-muted-foreground">{item.description}</p>
               </div>
-              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+              <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
                 {item.statusLabel}
               </span>
             </div>

@@ -2,8 +2,15 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
+import { DashboardSection } from "@/components/dashboard/DashboardSection";
 import { computeDiscountedPrice } from "@/lib/deals/pricing";
-import { dashboardInputClass } from "@/lib/dashboard-ui";
+import {
+  dashboardInputClass,
+  dashboardOutlineActionClass,
+  dashboardPageClass,
+  dashboardPrimaryActionClass,
+} from "@/lib/dashboard-ui";
 import { formatLkr } from "@/lib/utils";
 
 type ServiceOption = { id: string; name: string; priceLkr: number };
@@ -117,9 +124,14 @@ export function NewDealForm() {
   }
 
   return (
-    <div className="max-w-xl">
-      <h1 className="font-cal text-2xl mb-6">New deal</h1>
-      <form onSubmit={handleSubmit} className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-6 space-y-4">
+    <div className={dashboardPageClass}>
+      <DashboardPageHeader
+        title="New deal"
+        backHref="/dashboard/deals"
+        backLabel="Deals"
+      />
+      <DashboardSection>
+      <form onSubmit={handleSubmit} className="max-w-xl space-y-4">
         <div>
           <label className="text-sm font-medium">Service *</label>
           <select
@@ -237,7 +249,7 @@ export function NewDealForm() {
         </div>
 
         {selectedService && previewPrice !== null && (
-          <div className="rounded-lg bg-gray-50 dark:bg-neutral-900/60 px-4 py-3 text-sm">
+          <div className="rounded-lg bg-muted/40 px-4 py-3 text-sm">
             Clients pay <strong>{formatLkr(previewPrice)}</strong> instead of {formatLkr(selectedService.priceLkr)}.
           </div>
         )}
@@ -276,19 +288,20 @@ export function NewDealForm() {
           <button
             type="submit"
             disabled={loading}
-            className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50"
+            className={dashboardPrimaryActionClass}
           >
             {loading ? "Creating…" : "Publish deal"}
           </button>
           <button
             type="button"
             onClick={() => router.push("/dashboard/deals")}
-            className="rounded-md border px-4 py-2 text-sm"
+            className={dashboardOutlineActionClass}
           >
             Cancel
           </button>
         </div>
       </form>
+      </DashboardSection>
     </div>
   );
 }

@@ -36,10 +36,7 @@ export default async function PaymentsPage() {
               title="No payment records yet"
               description="Require payment on a service to collect deposits or full payment online."
               action={
-                <Link
-                  href="/dashboard/settings"
-                  className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-                >
+                <Link href="/dashboard/settings" className={dashboardPrimaryActionClass}>
                   Set up PayHere
                 </Link>
               }

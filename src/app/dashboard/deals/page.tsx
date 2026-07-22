@@ -57,10 +57,7 @@ export default async function DealsPage() {
             title="No deals yet"
             description="Create a time-limited discount to fill empty appointment slots."
             action={
-              <Link
-                href="/dashboard/deals/new"
-                className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-              >
+              <Link href="/dashboard/deals/new" className={dashboardPrimaryActionClass}>
                 Post your first deal
               </Link>
             }

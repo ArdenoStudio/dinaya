@@ -3,7 +3,16 @@
 import { useEffect, useState } from "react";
 import { Megaphone, Send } from "lucide-react";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
+import { DashboardSection } from "@/components/dashboard/DashboardSection";
 import { EmptyState } from "@/components/dashboard/EmptyState";
+import {
+  dashboardCardClass,
+  dashboardInputClass,
+  dashboardLabelClass,
+  dashboardPageClass,
+  dashboardPrimaryActionClass,
+} from "@/lib/dashboard-ui";
+import { cn } from "@/lib/utils";
 
 type BroadcastRow = {
   id: string;
@@ -114,118 +123,118 @@ export function BroadcastsClient() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className={dashboardPageClass}>
       <DashboardPageHeader
         title="Broadcasts"
         description="Send a one-time message to client segments by email, WhatsApp, or SMS. Clients who opted out are excluded."
       />
 
-      <form onSubmit={handleSubmit} className="space-y-4 rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
-        <h2 className="font-semibold">New broadcast</h2>
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          <label className="block sm:col-span-2">
-            <span className="text-sm font-medium">Campaign name</span>
-            <input
-              required
-              value={form.name}
-              onChange={(e) => setForm((current) => ({ ...current, name: e.target.value }))}
-              className="mt-1 h-10 w-full rounded-md border px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
-              placeholder="March promo"
-            />
-          </label>
-
-          <label className="block">
-            <span className="text-sm font-medium">Channel</span>
-            <select
-              value={form.channel}
-              onChange={(e) => setForm((current) => ({ ...current, channel: e.target.value as FormState["channel"] }))}
-              className="mt-1 h-10 w-full rounded-md border px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
-            >
-              <option value="email">Email</option>
-              <option value="whatsapp">WhatsApp</option>
-              <option value="sms">SMS</option>
-            </select>
-          </label>
-
-          <label className="block">
-            <span className="text-sm font-medium">Audience</span>
-            <select
-              value={form.audienceType}
-              onChange={(e) => setForm((current) => ({ ...current, audienceType: e.target.value as FormState["audienceType"] }))}
-              className="mt-1 h-10 w-full rounded-md border px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
-            >
-              <option value="all">All clients</option>
-              <option value="stage">By CRM stage</option>
-              <option value="tags">By tag</option>
-            </select>
-          </label>
-
-          {form.audienceType === "stage" ? (
-            <label className="block">
-              <span className="text-sm font-medium">Stage</span>
-              <select
-                value={form.stage}
-                onChange={(e) => setForm((current) => ({ ...current, stage: e.target.value as FormState["stage"] }))}
-                className="mt-1 h-10 w-full rounded-md border px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
-              >
-                <option value="lead">Lead</option>
-                <option value="prospect">Prospect</option>
-                <option value="active">Active</option>
-                <option value="churned">Churned</option>
-              </select>
-            </label>
-          ) : null}
-
-          {form.audienceType === "tags" ? (
+      <DashboardSection title="New broadcast">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
             <label className="block sm:col-span-2">
-              <span className="text-sm font-medium">Tags (comma-separated)</span>
+              <span className={dashboardLabelClass}>Campaign name</span>
               <input
                 required
-                value={form.tags}
-                onChange={(e) => setForm((current) => ({ ...current, tags: e.target.value }))}
-                className="mt-1 h-10 w-full rounded-md border px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
-                placeholder="vip, salon-regular"
+                value={form.name}
+                onChange={(e) => setForm((current) => ({ ...current, name: e.target.value }))}
+                className={dashboardInputClass}
+                placeholder="March promo"
               />
             </label>
-          ) : null}
 
-          {form.channel === "email" ? (
+            <label className="block">
+              <span className={dashboardLabelClass}>Channel</span>
+              <select
+                value={form.channel}
+                onChange={(e) => setForm((current) => ({ ...current, channel: e.target.value as FormState["channel"] }))}
+                className={dashboardInputClass}
+              >
+                <option value="email">Email</option>
+                <option value="whatsapp">WhatsApp</option>
+                <option value="sms">SMS</option>
+              </select>
+            </label>
+
+            <label className="block">
+              <span className={dashboardLabelClass}>Audience</span>
+              <select
+                value={form.audienceType}
+                onChange={(e) => setForm((current) => ({ ...current, audienceType: e.target.value as FormState["audienceType"] }))}
+                className={dashboardInputClass}
+              >
+                <option value="all">All clients</option>
+                <option value="stage">By CRM stage</option>
+                <option value="tags">By tag</option>
+              </select>
+            </label>
+
+            {form.audienceType === "stage" ? (
+              <label className="block">
+                <span className={dashboardLabelClass}>Stage</span>
+                <select
+                  value={form.stage}
+                  onChange={(e) => setForm((current) => ({ ...current, stage: e.target.value as FormState["stage"] }))}
+                  className={dashboardInputClass}
+                >
+                  <option value="lead">Lead</option>
+                  <option value="prospect">Prospect</option>
+                  <option value="active">Active</option>
+                  <option value="churned">Churned</option>
+                </select>
+              </label>
+            ) : null}
+
+            {form.audienceType === "tags" ? (
+              <label className="block sm:col-span-2">
+                <span className={dashboardLabelClass}>Tags (comma-separated)</span>
+                <input
+                  required
+                  value={form.tags}
+                  onChange={(e) => setForm((current) => ({ ...current, tags: e.target.value }))}
+                  className={dashboardInputClass}
+                  placeholder="vip, salon-regular"
+                />
+              </label>
+            ) : null}
+
+            {form.channel === "email" ? (
+              <label className="block sm:col-span-2">
+                <span className={dashboardLabelClass}>Email subject</span>
+                <input
+                  value={form.subject}
+                  onChange={(e) => setForm((current) => ({ ...current, subject: e.target.value }))}
+                  className={dashboardInputClass}
+                  placeholder="Special offer this week"
+                />
+              </label>
+            ) : null}
+
             <label className="block sm:col-span-2">
-              <span className="text-sm font-medium">Email subject</span>
-              <input
-                value={form.subject}
-                onChange={(e) => setForm((current) => ({ ...current, subject: e.target.value }))}
-                className="mt-1 h-10 w-full rounded-md border px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
-                placeholder="Special offer this week"
+              <span className={dashboardLabelClass}>Message</span>
+              <textarea
+                required
+                value={form.body}
+                onChange={(e) => setForm((current) => ({ ...current, body: e.target.value }))}
+                className={cn(dashboardInputClass, "min-h-28")}
+                placeholder="Hi {{name}}, we have a special offer for you this week…"
               />
             </label>
-          ) : null}
+          </div>
 
-          <label className="block sm:col-span-2">
-            <span className="text-sm font-medium">Message</span>
-            <textarea
-              required
-              value={form.body}
-              onChange={(e) => setForm((current) => ({ ...current, body: e.target.value }))}
-              className="mt-1 min-h-28 w-full rounded-md border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/30"
-              placeholder="Hi {{name}}, we have a special offer for you this week…"
-            />
-          </label>
-        </div>
+          {error ? <p className="text-sm text-destructive">{error}</p> : null}
+          {message ? <p className="text-sm text-muted-foreground">{message}</p> : null}
 
-        {error ? <p className="text-sm text-red-600">{error}</p> : null}
-        {message ? <p className="text-sm text-emerald-700">{message}</p> : null}
-
-        <button
-          type="submit"
-          disabled={sending}
-          className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
-        >
-          <Send className="size-4" aria-hidden="true" />
-          {sending ? "Sending…" : "Send broadcast"}
-        </button>
-      </form>
+          <button
+            type="submit"
+            disabled={sending}
+            className={dashboardPrimaryActionClass}
+          >
+            <Send className="size-4" aria-hidden="true" />
+            {sending ? "Sending…" : "Send broadcast"}
+          </button>
+        </form>
+      </DashboardSection>
 
       {loading ? (
         <p className="text-sm text-muted-foreground">Loading broadcasts…</p>
@@ -236,7 +245,7 @@ export function BroadcastsClient() {
           description="Send your first campaign to re-engage clients or announce a promotion."
         />
       ) : (
-        <div className="overflow-hidden rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
+        <div className={cn(dashboardCardClass, "overflow-hidden")}>
           <table className="min-w-full text-sm">
             <thead className="border-b bg-muted/40 text-left">
               <tr>

@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { businesses } from "@/db/schema";
 import { requireOwner } from "@/lib/auth";
 import { canUseFeature, resolveEffectivePlan } from "@/lib/plan";
+import { dashboardPageClass } from "@/lib/dashboard-ui";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 
@@ -51,7 +52,7 @@ export default async function SettingsPage() {
   const plan = resolveEffectivePlan({ storedPlan: business.plan, planExpiresAt: business.planExpiresAt });
 
   return (
-    <div className="space-y-6">
+    <div className={dashboardPageClass}>
       <DashboardPageHeader
         title="Settings"
         description="Business profile, booking policies, payments, and public page branding."

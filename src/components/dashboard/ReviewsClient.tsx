@@ -3,9 +3,19 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
+import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
 import { useDashboardCopy } from "@/components/dashboard/DashboardLocaleProvider";
 import { ConfirmDialog } from "@/components/dashboard/ConfirmDialog";
 import { Icon } from "@/components/ui/Icon";
+import {
+  dashboardCardClass,
+  dashboardInputClass,
+  dashboardOutlineActionClass,
+  dashboardPageClass,
+  dashboardPrimaryActionClass,
+  dashboardSectionMutedClass,
+} from "@/lib/dashboard-ui";
+import { cn } from "@/lib/utils";
 
 type Review = {
   id: string;
@@ -108,25 +118,20 @@ export function ReviewsClient({ canUseAiReplies }: { canUseAiReplies: boolean })
     : null;
 
   return (
-    <div>
-      <div className="mb-6 flex items-start justify-between">
-        <div>
-          <h1 className="font-cal text-2xl">{copy.title}</h1>
-          <p className="mt-0.5 text-sm text-muted-foreground">{copy.subtitle}</p>
-        </div>
-      </div>
+    <div className={dashboardPageClass}>
+      <DashboardPageHeader title={copy.title} description={copy.subtitle} />
 
       {reviewList.length > 0 && (
-        <div className="mb-6 grid grid-cols-3 gap-3">
-          <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-4 text-center">
+        <div className="grid grid-cols-3 gap-3">
+          <div className={cn(dashboardCardClass, "p-4 text-center")}>
             <p className="font-cal text-2xl">{reviewList.length}</p>
             <p className="mt-0.5 text-xs text-muted-foreground">{copy.totalReviews}</p>
           </div>
-          <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-4 text-center">
+          <div className={cn(dashboardCardClass, "p-4 text-center")}>
             <p className="font-cal text-2xl">{avgRating}</p>
             <p className="mt-0.5 text-xs text-muted-foreground">{copy.averageRating}</p>
           </div>
-          <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-4 text-center">
+          <div className={cn(dashboardCardClass, "p-4 text-center")}>
             <p className="font-cal text-2xl">{published}</p>
             <p className="mt-0.5 text-xs text-muted-foreground">{copy.published}</p>
           </div>
@@ -136,11 +141,11 @@ export function ReviewsClient({ canUseAiReplies }: { canUseAiReplies: boolean })
       {loading ? (
         <p className="text-sm text-muted-foreground">{copy.loading}</p>
       ) : loadError ? (
-        <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center dark:border-red-900 dark:bg-red-950/40">
-          <p className="text-sm text-red-800 dark:text-red-200">{loadError}</p>
+        <div className={cn(dashboardSectionMutedClass, "text-center")}>
+          <p className="text-sm text-destructive">{loadError}</p>
         </div>
       ) : reviewList.length === 0 ? (
-        <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-12 text-center">
+        <div className={cn(dashboardCardClass, "p-12 text-center")}>
           <Icon name="star" className="mb-3 block text-3xl text-muted-foreground/40" />
           <p className="text-sm font-medium">{copy.emptyTitle}</p>
           <p className="mt-1 text-xs text-muted-foreground">{copy.emptyBody}</p>
@@ -148,7 +153,7 @@ export function ReviewsClient({ canUseAiReplies }: { canUseAiReplies: boolean })
       ) : (
         <div className="space-y-4">
           {reviewList.map((review) => (
-            <div key={review.id} className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
+            <div key={review.id} className={cn(dashboardCardClass, "p-5")}>
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <p className="font-medium">{review.clientName}</p>
@@ -188,8 +193,8 @@ export function ReviewsClient({ canUseAiReplies }: { canUseAiReplies: boolean })
               </div>
 
               {review.ownerReply ? (
-                <div className="mt-4 rounded-lg border border-primary/10 bg-primary/5 p-3">
-                  <p className="text-xs font-semibold uppercase tracking-widest text-primary">{copy.reply}</p>
+                <div className="mt-4 rounded-lg border bg-muted/30 p-3">
+                  <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{copy.reply}</p>
                   <p className="mt-1 text-sm">{review.ownerReply}</p>
                 </div>
               ) : null}
@@ -210,14 +215,14 @@ export function ReviewsClient({ canUseAiReplies }: { canUseAiReplies: boolean })
                       value={replyDrafts[review.id] ?? ""}
                       onChange={(event) => setReplyDrafts((prev) => ({ ...prev, [review.id]: event.target.value }))}
                       placeholder={copy.replyPlaceholder}
-                      className="w-full rounded-lg border px-3 py-2.5 text-sm"
+                      className={dashboardInputClass}
                     />
                     <div className="flex flex-wrap items-center gap-2">
                       <button
                         type="button"
                         disabled={savingReplyId === review.id}
                         onClick={() => saveReply(review.id)}
-                        className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60"
+                        className={dashboardPrimaryActionClass}
                       >
                         {copy.saveReply}
                       </button>
@@ -226,17 +231,17 @@ export function ReviewsClient({ canUseAiReplies }: { canUseAiReplies: boolean })
                           type="button"
                           disabled={generatingReplyId === review.id}
                           onClick={() => generateReply(review.id)}
-                          className="rounded-lg border px-4 py-2 text-sm font-medium hover:border-primary/40 disabled:opacity-60"
+                          className={dashboardOutlineActionClass}
                         >
                           {copy.generateReply}
                         </button>
                       ) : (
-                        <Link href="/dashboard/billing" className="text-xs text-violet-700 hover:underline">
+                        <Link href="/dashboard/billing" className="text-xs text-primary hover:underline">
                           {copy.upgradeReply}
                         </Link>
                       )}
                       {savedReplyId === review.id ? (
-                        <span className="text-sm text-emerald-600">{copy.replySaved}</span>
+                        <span className="text-sm text-muted-foreground">{copy.replySaved}</span>
                       ) : null}
                     </div>
                   </div>

@@ -3,6 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { CheckCircle2, KeyRound, PhoneCall, Save, ShieldCheck } from "lucide-react";
 import {
+  dashboardCardClass,
+} from "@/lib/dashboard-ui";
+import { cn } from "@/lib/utils";
+import {
   VOICE_API_SCOPES,
   VOICE_LANGUAGES,
   voiceStatusLabel,
@@ -175,7 +179,7 @@ export function VoiceReceptionistClient() {
   return (
     <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
       <form onSubmit={save} className="space-y-5">
-        <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
+        <div className={cn(dashboardCardClass, "p-5")}>
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <h2 className="flex items-center gap-2 font-semibold">
@@ -235,7 +239,7 @@ export function VoiceReceptionistClient() {
           </div>
         </div>
 
-        <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
+        <div className={cn(dashboardCardClass, "p-5")}>
           <h2 className="font-semibold">Conversation rules</h2>
           <div className="mt-4 grid gap-4">
             {[
@@ -272,7 +276,7 @@ export function VoiceReceptionistClient() {
       </form>
 
       <aside className="space-y-4">
-        <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
+        <div className={cn(dashboardCardClass, "p-5")}>
           <h2 className="flex items-center gap-2 font-semibold">
             <ShieldCheck className="size-4 text-primary" aria-hidden="true" />
             Provider handoff
@@ -311,7 +315,7 @@ export function VoiceReceptionistClient() {
           </dl>
         </div>
 
-        <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
+        <div className={cn(dashboardCardClass, "p-5")}>
           <h2 className="flex items-center gap-2 font-semibold">
             <KeyRound className="size-4 text-primary" aria-hidden="true" />
             Voice API key
