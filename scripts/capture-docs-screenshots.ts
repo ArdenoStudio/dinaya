@@ -109,6 +109,59 @@ async function hideDevChrome(page: Page) {
       }
     `,
   }).catch(() => undefined);
+
+  await page.evaluate(() => {
+    document.querySelectorAll('a[href="/dashboard/billing"]').forEach((node) => {
+      const text = node.textContent ?? "";
+      if (/trial|subscribe|booking page is offline/i.test(text)) {
+        (node as HTMLElement).style.display = "none";
+      }
+    });
+
+    const rewrite = (value: string) =>
+      value
+        .replace(/https?:\/\/localhost:\d+/gi, "https://dinaya.lk")
+        .replace(/https?:\/\/127\.0\.0\.1:\d+/gi, "https://dinaya.lk")
+        .replace(/docs-demo-\d+/gi, "dilini");
+
+    document.querySelectorAll("input, textarea").forEach((node) => {
+      const el = node as HTMLInputElement | HTMLTextAreaElement;
+      if (el.value && /localhost|127\.0\.0\.1|docs-demo-/i.test(el.value)) {
+        el.value = rewrite(el.value);
+        el.setAttribute("value", el.value);
+      }
+    });
+
+    document.querySelectorAll("a[href], [href]").forEach((node) => {
+      const el = node as HTMLAnchorElement;
+      const href = el.getAttribute("href");
+      if (href && /localhost|127\.0\.0\.1|docs-demo-/i.test(href)) {
+        el.setAttribute("href", rewrite(href));
+      }
+    });
+
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    const nodes: Text[] = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode as Text);
+    for (const text of nodes) {
+      if (text.nodeValue && /localhost|127\.0\.0\.1|docs-demo-/i.test(text.nodeValue)) {
+        text.nodeValue = rewrite(text.nodeValue);
+      }
+    }
+
+    // Hide share/link cards that still expose local URLs after React hydration.
+    document.querySelectorAll("section, article, div").forEach((node) => {
+      const el = node as HTMLElement;
+      const text = el.textContent ?? "";
+      if (
+        el.childElementCount < 12 &&
+        /Share booking link/i.test(text) &&
+        /localhost|127\.0\.0\.1|docs-demo-/i.test(text)
+      ) {
+        el.style.visibility = "hidden";
+      }
+    });
+  }).catch(() => undefined);
 }
 
 async function settle(page: Page, ready?: RegExp) {
@@ -128,11 +181,15 @@ async function settle(page: Page, ready?: RegExp) {
     }
   }
   // Extra beat for client hydration after skeletons clear.
-  await page.waitForTimeout(800);
+  await page.waitForTimeout(900);
   await hideDevChrome(page);
 }
 
 async function screenshotPage(page: Page, name: string) {
+  // Re-run cleanup immediately before shutter — React can rehydrate localhost text.
+  await hideDevChrome(page);
+  await page.waitForTimeout(200);
+  await hideDevChrome(page);
   const file = path.join(outDir, `${name}.png`);
   await page.screenshot({ path: file, fullPage: false });
   console.log(`Saved ${file}`);
@@ -254,6 +311,19 @@ async function captureLive(page: Page) {
   await captureBookingFlow(page, account.slug);
 }
 
+async function capturePreviewMockup(page: Page, mockupId: string) {
+  // Use /dev/docs-preview — bare page without PublicNav / docs chrome.
+  await page.goto(`${baseURL}/dev/docs-preview/${mockupId}`, {
+    waitUntil: "domcontentloaded",
+  });
+  await page.waitForSelector("[data-docs-capture-root]");
+  await settle(page);
+  const root = page.locator("[data-docs-capture-root]");
+  const file = path.join(outDir, `${mockupId}.png`);
+  await root.screenshot({ path: file });
+  console.log(`Saved ${file} (preview mockup)`);
+}
+
 async function captureBookingFlow(page: Page, slug: string) {
   const bookingContext = page.context();
   const phone = await bookingContext.newPage();
@@ -265,20 +335,19 @@ async function captureBookingFlow(page: Page, slug: string) {
   await settle(phone, /Select a service|Choose a service|services/i);
   await screenshotPage(phone, "booking-service");
 
-  // Prefer selecting the first service card / continue if the wizard exposes it.
-  const serviceCard = phone.locator("button, a, [role='button']").filter({ hasText: /haircut|service|min|Rs\.|LKR/i }).first();
-  if (await serviceCard.count()) {
-    await serviceCard.click().catch(() => undefined);
-    await settle(phone);
+  // Open the first service detail / booking flow.
+  const serviceLink = phone.locator("a[href*='/book/']").filter({ hasText: /LKR|min/i }).first();
+  if (await serviceLink.count()) {
+    await serviceLink.click().catch(() => undefined);
+  } else {
+    await phone
+      .locator("button, a, [role='button']")
+      .filter({ hasText: /haircut|Buzz|Layer|LKR/i })
+      .first()
+      .click()
+      .catch(() => undefined);
   }
-
-  // Time step — try common CTAs or date chips.
-  const continueBtn = phone.getByRole("button", { name: /continue|next|pick a time|choose time/i }).first();
-  if (await continueBtn.count()) {
-    await continueBtn.click().catch(() => undefined);
-    await settle(phone);
-  }
-  await settle(phone, /time|date|available|Pick/i);
+  await settle(phone, /time|date|staff|available|Pick|Continue/i);
   await screenshotPage(phone, "booking-time");
 
   const slot = phone.locator("button").filter({ hasText: /^\d{1,2}:\d{2}/ }).first();
@@ -287,44 +356,23 @@ async function captureBookingFlow(page: Page, slug: string) {
     await settle(phone);
   }
 
-  const toConfirm = phone.getByRole("button", { name: /continue|next|confirm|details/i }).first();
+  const toConfirm = phone.getByRole("button", { name: /continue|next|confirm|details|book/i }).first();
   if (await toConfirm.count()) {
     await toConfirm.click().catch(() => undefined);
     await settle(phone);
   }
   await screenshotPage(phone, "booking-confirm");
 
-  // Manage / review pages may 404 without a real booking — fall back to confirm frame.
-  await phone.goto(`${bookBase}/manage`).catch(() => undefined);
-  await settle(phone);
-  if (phone.url().includes("/manage")) {
-    await screenshotPage(phone, "booking-manage");
-  } else {
-    fs.copyFileSync(path.join(outDir, "booking-confirm.png"), path.join(outDir, "booking-manage.png"));
-    console.log("Saved booking-manage.png (fallback copy of booking-confirm)");
-  }
-
-  await phone.goto(`${bookBase}/review`).catch(() => undefined);
-  await settle(phone);
-  if (phone.url().includes("/review")) {
-    await screenshotPage(phone, "booking-review");
-  } else {
-    fs.copyFileSync(path.join(outDir, "booking-confirm.png"), path.join(outDir, "booking-review.png"));
-    console.log("Saved booking-review.png (fallback copy of booking-confirm)");
-  }
+  // Manage / review need real booking tokens — use polished phone mockups instead of 404s.
+  await capturePreviewMockup(page, "booking-manage");
+  await capturePreviewMockup(page, "booking-review");
 
   await phone.close();
 }
 
 async function capturePreview(page: Page) {
   for (const mockupId of DOCS_PREVIEW_MOCKUP_IDS) {
-    await page.goto(`${baseURL}/docs/preview/${mockupId}`);
-    await page.waitForSelector("[data-docs-capture-root]");
-    await settle(page);
-    const root = page.locator("[data-docs-capture-root]");
-    const file = path.join(outDir, `${mockupId}.png`);
-    await root.screenshot({ path: file });
-    console.log(`Saved ${file}`);
+    await capturePreviewMockup(page, mockupId);
   }
 }
 
@@ -334,7 +382,7 @@ async function main() {
   const browser = await chromium.launch();
   const context = await browser.newContext({
     viewport: { width: 1280, height: 800 },
-    deviceScaleFactor: 1,
+    deviceScaleFactor: 2,
   });
   const page = await context.newPage();
 

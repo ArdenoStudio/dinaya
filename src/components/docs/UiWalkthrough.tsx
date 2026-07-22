@@ -60,9 +60,13 @@ function StepVisual({ step }: { step: GuideStep }) {
   if (step.visual.type === "mockup") {
     const screenshot = getScreenshotForMockup(step.visual.mockupId);
     const isBooking = step.visual.mockupId.startsWith("booking-");
+    const needsInteractiveHighlight = Boolean(
+      step.highlightNav || step.highlightTarget,
+    );
 
-    // Prefer real captured screenshots in walkthroughs when assets exist.
-    if (screenshot) {
+    // Guided steps need real DOM marks — use React mockups when highlighting.
+    // Clean product shots are for ambient / no-highlight steps only.
+    if (screenshot && !needsInteractiveHighlight) {
       if (isBooking) {
         return (
           <DocsPhoneFrame
@@ -77,6 +81,7 @@ function StepVisual({ step }: { step: GuideStep }) {
           src={screenshot}
           alt={`${step.visual.mockupId} screenshot`}
           hotspots={step.hotspots}
+          variant="shot"
         />
       );
     }
@@ -94,6 +99,7 @@ function StepVisual({ step }: { step: GuideStep }) {
         mockupId={step.visual.mockupId}
         highlightNav={step.highlightNav}
         highlightTarget={step.highlightTarget}
+        variant="browser"
       />
     );
   }
@@ -114,6 +120,7 @@ function StepVisual({ step }: { step: GuideStep }) {
         src={step.visual.src}
         alt={step.visual.alt}
         hotspots={step.hotspots}
+        variant="shot"
       />
     );
   }
@@ -238,22 +245,24 @@ export function UiWalkthrough({ steps }: Props) {
         </div>
       </div>
 
-      <div className="grid gap-8 rounded-2xl border border-gray-200 dark:border-neutral-800 bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5 shadow-sm shadow-gray-900/5 dark:shadow-black/20 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:items-start">
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.2fr)] lg:items-start lg:gap-10">
         <div className="order-2 lg:order-1">
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={activeStep}
-              initial={{ opacity: 0, x: -8 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 8 }}
-              transition={{ duration: 0.22, ease: "easeOut" }}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.2, ease: [0.2, 0, 0, 1] }}
             >
-              <h2 className="font-cal text-xl tracking-tight text-balance text-gray-950">{step.title}</h2>
+              <h2 className="font-cal text-2xl tracking-tight text-balance text-gray-950 dark:text-white">
+                {step.title}
+              </h2>
               <DocsRichText
                 text={step.body}
-                className="mt-3 text-sm leading-relaxed text-muted-foreground"
+                className="mt-3 text-[15px] leading-relaxed text-muted-foreground"
               />
-              <DocsCallout variant="tip" className="mt-4">
+              <DocsCallout variant="tip" className="mt-5">
                 {actionHint}
               </DocsCallout>
             </motion.div>

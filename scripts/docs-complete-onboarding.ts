@@ -34,6 +34,9 @@ async function main() {
       phone: "+94771234567",
       address: "42 Galle Road, Colombo 03",
       description: "Haircuts, colour, and bridal styling in Colombo.",
+      // Unlocks the clean Today overview (no setup checklist / localhost link).
+      payhereEnabled: true,
+      payhereMerchantId: "docs-demo-merchant",
     })
     .where(eq(businesses.id, user.businessId));
 

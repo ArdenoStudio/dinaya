@@ -31,14 +31,23 @@ export function DocsPhoneFrame({
   className,
 }: Props) {
   const { resolvedTheme } = useTheme();
-  const screenBg = resolvedTheme === "dark" ? "#0a0a0a" : "#f2f2f7";
-  const spotlightActive = Boolean(highlightTarget) && !src;
+  const screenBg = resolvedTheme === "dark" ? "#0a0a0a" : "#f6f7fb";
+  const isShot = Boolean(src);
+  const spotlightActive = Boolean(highlightTarget) && !isShot;
 
   return (
     <div className={cn("relative mx-auto w-fit pb-3", className)}>
       <div className={cn("relative", docsFloorShadow, "rounded-[2.5rem]")}>
         <DocsSpotlight active={spotlightActive}>
-          <IPhoneMockup model="15" color="black" scale={scale} screenBg={screenBg}>
+          <IPhoneMockup
+            model="15"
+            color="black"
+            scale={scale}
+            screenBg={screenBg}
+            safeArea={!isShot}
+            showHomeIndicator={!isShot}
+            showDynamicIsland
+          >
             <div className="relative h-full w-full overflow-hidden">
               {src ? (
                 <>
@@ -46,8 +55,9 @@ export function DocsPhoneFrame({
                     src={src}
                     alt={alt}
                     fill
+                    unoptimized
                     className="object-cover object-top"
-                    sizes="390px"
+                    sizes="393px"
                   />
                   {hotspots.map((h, i) => (
                     <DocsHotspot key={`${h.x}-${h.y}-${i}`} hotspot={h} />
