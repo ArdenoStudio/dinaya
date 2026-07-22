@@ -11,18 +11,21 @@ export function DocsSidebar() {
 
   return (
     <aside className="hidden lg:block w-64 shrink-0">
-      <nav className="sticky top-24 space-y-6 rounded-2xl border border-gray-200 dark:border-neutral-800 bg-white dark:border-neutral-800 dark:bg-neutral-900/80 p-4 text-sm shadow-sm shadow-gray-900/5 dark:shadow-black/20 backdrop-blur" aria-label="Documentation">
-        <div className="border-b border-gray-100 dark:border-neutral-800 pb-3">
+      <nav
+        className="sticky top-24 space-y-7 rounded-2xl border border-black/[0.06] bg-white/90 p-4 text-sm shadow-[0_1px_2px_rgba(0,0,0,0.03),0_10px_24px_-16px_rgba(0,0,0,0.12)] backdrop-blur dark:border-white/[0.08] dark:bg-neutral-900/80"
+        aria-label="Documentation"
+      >
+        <div className="border-b border-black/[0.05] pb-3 dark:border-white/[0.07]">
           <Link
             href="/docs"
             className={cn(
               "font-cal text-base tracking-tight",
-              pathname === "/docs" ? "text-primary" : "text-gray-900 dark:text-gray-100 hover:text-primary",
+              pathname === "/docs" ? "text-primary" : "text-foreground hover:text-primary",
             )}
           >
             Documentation
           </Link>
-          <p className="mt-1 text-xs text-muted-foreground">
+          <p className="mt-1 text-xs tabular-nums text-muted-foreground">
             {allGuides.length} guides
           </p>
         </div>
@@ -32,10 +35,10 @@ export function DocsSidebar() {
           if (guides.length === 0) return null;
           return (
             <div key={cat.id}>
-              <p className="mb-2 text-[0.68rem] font-semibold uppercase tracking-wider text-muted-foreground">
+              <p className="mb-2 text-[0.65rem] font-medium uppercase tracking-[0.1em] text-foreground/40">
                 {cat.label}
               </p>
-              <ul className="space-y-1">
+              <ul className="space-y-0.5">
                 {guides.map((g) => {
                   const href = `/docs/guides/${g.slug}`;
                   const active = pathname === href;
@@ -44,10 +47,10 @@ export function DocsSidebar() {
                       <Link
                         href={href}
                         className={cn(
-                          "block rounded-md px-2 py-1.5 leading-snug transition-colors",
+                          "block rounded-lg px-2 py-1.5 leading-snug transition-colors duration-150 ease-[cubic-bezier(0.2,0,0,1)]",
                           active
-                            ? "bg-primary/10 font-medium text-primary"
-                            : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:bg-neutral-900/60 hover:text-gray-900 dark:text-gray-100",
+                            ? "bg-foreground/[0.06] font-medium text-foreground dark:bg-white/[0.08]"
+                            : "text-foreground/70 hover:bg-foreground/[0.03] hover:text-foreground",
                         )}
                       >
                         {g.title}
@@ -60,20 +63,20 @@ export function DocsSidebar() {
           );
         })}
 
-        <div className="border-t border-gray-100 dark:border-neutral-800 pt-4 space-y-2">
-          <Link href="/docs.md" className="block text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:text-gray-100">
+        <div className="space-y-2 border-t border-black/[0.05] pt-4 dark:border-white/[0.07]">
+          <Link href="/docs.md" className="block text-foreground/55 transition-colors hover:text-foreground">
             View Markdown docs
           </Link>
-          <Link href="/llms.txt" className="block text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:text-gray-100">
+          <Link href="/llms.txt" className="block text-foreground/55 transition-colors hover:text-foreground">
             LLM docs index
           </Link>
-          <Link href="/help" className="block text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:text-gray-100">
+          <Link href="/help" className="block text-foreground/55 transition-colors hover:text-foreground">
             FAQ / Help center
           </Link>
-          <Link href="/docs/reference/plan-limits" className="block text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:text-gray-100">
+          <Link href="/docs/reference/plan-limits" className="block text-foreground/55 transition-colors hover:text-foreground">
             Plan limits
           </Link>
-          <Link href="/contact" className="block text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:text-gray-100">
+          <Link href="/contact" className="block text-foreground/55 transition-colors hover:text-foreground">
             Contact support
           </Link>
         </div>

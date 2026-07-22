@@ -154,7 +154,7 @@ export default function DocsHubPage() {
                   >
                     <DocsGuideThumbnail
                       mockupId={getGuidePreviewMockupId(g)}
-                      className="rounded-none rounded-t-2xl outline-none"
+                      className="rounded-none rounded-t-2xl outline outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10"
                     />
                     <div className="p-4">
                     <p className="font-cal text-base tracking-tight text-balance">{g.title}</p>

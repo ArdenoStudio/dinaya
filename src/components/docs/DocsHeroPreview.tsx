@@ -24,10 +24,10 @@ export function DocsHeroPreview() {
   const screenshot = getScreenshotForMockup(mockupId);
 
   return (
-    <div className="relative mx-auto mt-9 max-w-3xl">
+    <div className="relative mx-auto mt-10 max-w-3xl px-1 sm:px-3">
       {/* Atmosphere — soft light falloff, no purple/blue glow */}
       <div
-        className="pointer-events-none absolute -inset-x-10 -inset-y-8 rounded-[2.75rem] bg-[radial-gradient(ellipse_at_50%_0%,hsl(220_12%_70%/_0.18),transparent_62%)] dark:bg-[radial-gradient(ellipse_at_50%_0%,hsl(220_10%_100%/_0.06),transparent_62%)]"
+        className="pointer-events-none absolute -inset-x-8 -inset-y-7 rounded-[2.75rem] bg-[radial-gradient(ellipse_at_50%_0%,hsl(220_12%_70%/_0.16),transparent_62%)] dark:bg-[radial-gradient(ellipse_at_50%_0%,hsl(220_10%_100%/_0.06),transparent_62%)]"
         aria-hidden
       />
       <AnimatePresence mode="wait" initial={false}>
@@ -37,6 +37,7 @@ export function DocsHeroPreview() {
           animate={{ opacity: 1, y: 0 }}
           exit={reduceMotion ? undefined : { opacity: 0, y: -5 }}
           transition={docsSpring}
+          className="relative"
         >
           <DocsProductFrame
             src={screenshot}
