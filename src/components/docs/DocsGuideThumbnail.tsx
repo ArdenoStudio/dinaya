@@ -28,7 +28,7 @@ export function DocsGuideThumbnail({ mockupId, screenshotSrc, className }: Props
     );
   }
 
-  if (isBooking && mockupId) {
+  if (isBooking) {
     return (
       <div
         className={cn(
@@ -37,7 +37,11 @@ export function DocsGuideThumbnail({ mockupId, screenshotSrc, className }: Props
         )}
       >
         <div className="pointer-events-none origin-bottom scale-[0.42]">
-          <DocsPhoneFrame mockupId={mockupId} scale={0.55} />
+          <DocsPhoneFrame
+            mockupId={screenshot ? undefined : mockupId}
+            src={screenshot}
+            scale={0.55}
+          />
         </div>
       </div>
     );

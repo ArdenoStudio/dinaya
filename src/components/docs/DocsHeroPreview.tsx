@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { docsSpring } from "@/lib/docs/design-tokens";
+import { getScreenshotForMockup } from "@/lib/docs/visuals";
 import { DocsProductFrame } from "./DocsProductFrame";
 
 const HERO_MOCKUPS = [
@@ -22,6 +23,7 @@ export function DocsHeroPreview() {
   }, []);
 
   const mockupId = HERO_MOCKUPS[index];
+  const screenshot = getScreenshotForMockup(mockupId);
 
   return (
     <div className="relative mx-auto mt-6 max-w-2xl">
@@ -34,7 +36,11 @@ export function DocsHeroPreview() {
           exit={{ opacity: 0, y: -8, scale: 0.99 }}
           transition={docsSpring}
         >
-          <DocsProductFrame mockupId={mockupId} />
+          <DocsProductFrame
+            src={screenshot}
+            mockupId={screenshot ? undefined : mockupId}
+            alt={`${mockupId} screenshot`}
+          />
         </motion.div>
       </AnimatePresence>
     </div>

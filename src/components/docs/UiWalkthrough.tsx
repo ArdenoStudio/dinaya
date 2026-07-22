@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import type { GuideStep } from "@content/docs/types";
 import { docsSpring } from "@/lib/docs/design-tokens";
+import { getScreenshotForMockup } from "@/lib/docs/visuals";
 import { DocsRichText } from "@/lib/docs/rich-text";
 import { DocsPhoneFrame } from "./DocsPhoneFrame";
 import { DocsProductFrame } from "./DocsProductFrame";
@@ -57,7 +58,30 @@ function StepVisual({ step }: { step: GuideStep }) {
   }
 
   if (step.visual.type === "mockup") {
-    if (step.visual.mockupId.startsWith("booking-")) {
+    const screenshot = getScreenshotForMockup(step.visual.mockupId);
+    const isBooking = step.visual.mockupId.startsWith("booking-");
+
+    // Prefer real captured screenshots in walkthroughs when assets exist.
+    if (screenshot) {
+      if (isBooking) {
+        return (
+          <DocsPhoneFrame
+            src={screenshot}
+            alt={`${step.visual.mockupId} screenshot`}
+            hotspots={step.hotspots}
+          />
+        );
+      }
+      return (
+        <DocsProductFrame
+          src={screenshot}
+          alt={`${step.visual.mockupId} screenshot`}
+          hotspots={step.hotspots}
+        />
+      );
+    }
+
+    if (isBooking) {
       return (
         <DocsPhoneFrame
           mockupId={step.visual.mockupId}
@@ -75,6 +99,16 @@ function StepVisual({ step }: { step: GuideStep }) {
   }
 
   if (step.visual.type === "screenshot") {
+    const isBookingSrc = step.visual.src.includes("booking-");
+    if (isBookingSrc) {
+      return (
+        <DocsPhoneFrame
+          src={step.visual.src}
+          alt={step.visual.alt}
+          hotspots={step.hotspots}
+        />
+      );
+    }
     return (
       <DocsProductFrame
         src={step.visual.src}

@@ -133,6 +133,7 @@ async function main() {
     `\nDone — ${business.name} (${business.slug}): added ${added} stylists. Active staff: ${totalStaff}.`,
   );
   console.log("Open the booking page and pick a haircut to see the stylist step.");
+  process.exit(0);
 }
 
 main().catch((error) => {
