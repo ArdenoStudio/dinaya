@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 
 export default function DocsLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white via-slate-50/40 to-white">
+    <div className="min-h-screen bg-[linear-gradient(180deg,hsl(240_8%_99%)_0%,hsl(0_0%_100%)_42%,hsl(240_6%_98%)_100%)]">
       <PublicNav />
       <div className="max-w-6xl mx-auto px-6 public-page-offset pb-10 flex gap-10">
         <DocsSidebar />

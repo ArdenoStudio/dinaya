@@ -36,8 +36,15 @@ export function DocsPhoneFrame({
   const spotlightActive = Boolean(highlightTarget) && !isShot;
 
   return (
-    <div className={cn("relative mx-auto w-fit pb-3", className)}>
-      <div className={cn("relative", docsFloorShadow, "rounded-[2.5rem]")}>
+    <div className={cn("relative mx-auto w-fit pb-4", className)}>
+      <div
+        className={cn(
+          "relative rounded-[2.6rem]",
+          docsFloorShadow,
+          // Soft contact shadow under the device — reads as resting on surface
+          "after:pointer-events-none after:absolute after:inset-x-[18%] after:-bottom-2 after:h-3 after:rounded-full after:bg-black/10 after:blur-md after:content-[''] dark:after:bg-black/40",
+        )}
+      >
         <DocsSpotlight active={spotlightActive}>
           <IPhoneMockup
             model="15"

@@ -2,11 +2,7 @@
 
 import Image from "next/image";
 import type { DocsHotspot } from "@content/docs/types";
-import {
-  docsFrameShadow,
-  docsShotShadow,
-  docsTrafficLights,
-} from "@/lib/docs/design-tokens";
+import { docsFrameShadow, docsShotShadow } from "@/lib/docs/design-tokens";
 import { cn } from "@/lib/utils";
 import { DocsHotspot as HotspotOverlay } from "./DocsHotspot";
 import { DocsDashboardMockup } from "./mockups/DocsDashboardMockup";
@@ -50,9 +46,10 @@ export function DocsProductFrame({
         "overflow-hidden bg-white dark:bg-neutral-900",
         isShot
           ? cn(
-              "rounded-[1.25rem] ring-1 ring-black/[0.06] dark:ring-white/[0.08]",
+              // Outer 22 / inner content sits flush — soft marketing frame
+              "rounded-[1.375rem] dark:ring-white/[0.08]",
               docsShotShadow,
-              compact && "rounded-xl",
+              compact && "rounded-[0.9rem]",
             )
           : cn(
               "rounded-2xl border border-black/[0.06] dark:border-white/[0.08]",
@@ -65,31 +62,23 @@ export function DocsProductFrame({
       {!isShot ? (
         <div
           className={cn(
-            "flex items-center gap-2 border-b border-black/[0.06] bg-[hsl(var(--dashboard-chrome))]/95 px-3 dark:border-white/[0.08]",
+            "flex items-center gap-2 border-b border-black/[0.05] bg-[hsl(var(--dashboard-chrome))]/90 px-3 dark:border-white/[0.07]",
             compact ? "py-1.5" : "py-2",
           )}
         >
-          <span
-            className="size-2.5 rounded-full"
-            style={{ backgroundColor: docsTrafficLights.close }}
-          />
-          <span
-            className="size-2.5 rounded-full"
-            style={{ backgroundColor: docsTrafficLights.minimize }}
-          />
-          <span
-            className="size-2.5 rounded-full"
-            style={{ backgroundColor: docsTrafficLights.zoom }}
-          />
-          <div className="ml-1 flex min-w-0 flex-1 items-center gap-1.5 rounded-md border border-black/[0.06] bg-white/90 px-2 py-0.5 dark:border-white/[0.08] dark:bg-neutral-800/90">
-            <span className="size-1.5 shrink-0 rounded-full bg-emerald-500" aria-hidden />
+          {/* Monochrome chrome dots — signal "window" without fake OS controls */}
+          <span className="size-2.5 rounded-full bg-black/15 dark:bg-white/20" />
+          <span className="size-2.5 rounded-full bg-black/15 dark:bg-white/20" />
+          <span className="size-2.5 rounded-full bg-black/15 dark:bg-white/20" />
+          <div className="ml-1 flex min-w-0 flex-1 items-center gap-1.5 rounded-md border border-black/[0.05] bg-white/85 px-2 py-0.5 dark:border-white/[0.08] dark:bg-neutral-800/90">
+            <span className="size-1.5 shrink-0 rounded-full bg-emerald-500/80" aria-hidden />
             <span
               className={cn(
                 "truncate font-mono text-gray-500 dark:text-gray-400",
                 compact ? "text-[8px]" : "text-[10px]",
               )}
             >
-              dinaya.lk/dashboard
+              dilini.dinaya.lk/dashboard
             </span>
           </div>
         </div>
@@ -108,8 +97,8 @@ export function DocsProductFrame({
       ) : (
         <div
           className={cn(
-            "relative w-full bg-[hsl(240_8%_96%)] dark:bg-[hsl(240_5%_8%)]",
-            isShot ? "aspect-[16/10]" : "aspect-[16/10]",
+            "relative w-full bg-[hsl(240_6%_96%)] dark:bg-[hsl(240_5%_8%)]",
+            "aspect-[16/10]",
           )}
         >
           {src ? (
@@ -119,8 +108,9 @@ export function DocsProductFrame({
               fill
               unoptimized
               className={cn(
-                "image-depth",
-                isShot ? "object-cover object-left-top" : "object-cover object-top",
+                "object-cover object-left-top",
+                // Pure black/white image outline — never tinted neutrals
+                "outline outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10",
               )}
               sizes={compact ? "220px" : "(max-width: 768px) 100vw, 560px"}
               priority={!compact}

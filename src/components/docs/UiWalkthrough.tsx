@@ -185,58 +185,72 @@ export function UiWalkthrough({ steps }: Props) {
   const progress = ((activeStep + 1) / steps.length) * 100;
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-2">
+    <div className="space-y-7">
+      <div className="space-y-3">
         <div className="flex items-center justify-between gap-4">
-          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+          <p className="text-[0.7rem] font-medium uppercase tracking-[0.1em] text-muted-foreground tabular-nums">
             Step {activeStep + 1} of {steps.length}
           </p>
-          <div className="flex gap-1">
+          <div className="flex items-center gap-1.5">
             {steps.map((_, i) => (
               <button
                 key={i}
                 type="button"
                 aria-label={`Go to step ${i + 1}`}
                 onClick={() => goTo(i)}
-                className={`h-1.5 rounded-full transition-[width,background-color] duration-200 ${
-                  i === activeStep ? "w-6 bg-primary" : "w-1.5 bg-gray-300 hover:bg-gray-400"
-                }`}
-              />
+                className="relative flex h-10 w-10 items-center justify-center"
+              >
+                <span
+                  className={`block h-1 rounded-full transition-[width,background-color] duration-200 ease-[cubic-bezier(0.2,0,0,1)] ${
+                    i === activeStep
+                      ? "w-5 bg-foreground/70"
+                      : "w-1.5 bg-foreground/15 hover:bg-foreground/30"
+                  }`}
+                />
+              </button>
             ))}
           </div>
         </div>
-        <div className="h-1 overflow-hidden rounded-full bg-gray-100 dark:bg-neutral-800">
+        <div className="h-px overflow-hidden bg-black/[0.06] dark:bg-white/[0.08]">
           <motion.div
-            className="h-full rounded-full bg-primary"
+            className="h-full bg-foreground/40"
             animate={{ width: `${progress}%` }}
-            transition={docsSpring}
+            transition={{ duration: 0.25, ease: [0.2, 0, 0, 1] }}
           />
         </div>
       </div>
 
       <div className="-mx-1 overflow-x-auto px-1 pb-1">
-        <div className="flex min-w-max gap-2" aria-label="Walkthrough step list">
+        <div className="flex min-w-max gap-1.5" aria-label="Walkthrough step list">
           {steps.map((item, i) => (
             <button
               key={item.title}
               type="button"
               aria-current={i === activeStep ? "step" : undefined}
               onClick={() => goTo(i)}
-              className={`flex h-16 w-40 shrink-0 items-start gap-2 rounded-xl border px-3 py-2 text-left transition-[transform,box-shadow,border-color,background-color] duration-150 ease-out active:scale-[0.99] motion-reduce:active:scale-100 ${
+              className={`flex h-14 w-[9.5rem] shrink-0 items-start gap-2.5 rounded-xl px-3 py-2 text-left transition-[transform,background-color,color] duration-150 ease-[cubic-bezier(0.2,0,0,1)] active:scale-[0.96] motion-reduce:active:scale-100 ${
                 i === activeStep
-                  ? "border-primary bg-primary/5 shadow-sm shadow-primary/10"
-                  : "border-gray-200 dark:border-neutral-800 bg-white shadow-sm shadow-gray-900/5 dark:shadow-black/20 hover:border-primary/30 hover:bg-gray-50 dark:bg-neutral-900/60"
+                  ? "bg-foreground/[0.06] dark:bg-white/[0.08]"
+                  : "bg-transparent hover:bg-foreground/[0.03] dark:hover:bg-white/[0.04]"
               }`}
             >
               <span
-                className={`flex size-6 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold tabular-nums ${
-                  i === activeStep ? "bg-primary text-white" : "bg-gray-100 dark:bg-neutral-800 text-gray-600 dark:text-gray-400"
+                className={`mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold tabular-nums ${
+                  i === activeStep
+                    ? "bg-foreground text-background"
+                    : "bg-foreground/[0.08] text-foreground/55 dark:bg-white/10"
                 }`}
               >
                 {i + 1}
               </span>
               <span className="min-w-0">
-                <span className="block text-xs font-semibold leading-snug text-gray-900 dark:text-gray-100 line-clamp-2 text-pretty">
+                <span
+                  className={`block text-xs font-medium leading-snug line-clamp-2 text-pretty ${
+                    i === activeStep
+                      ? "text-foreground"
+                      : "text-foreground/60"
+                  }`}
+                >
                   {item.title}
                 </span>
               </span>
@@ -268,12 +282,12 @@ export function UiWalkthrough({ steps }: Props) {
             </motion.div>
           </AnimatePresence>
 
-          <div className="mt-6 flex flex-wrap gap-2">
+          <div className="mt-7 flex flex-wrap gap-2">
             <button
               type="button"
               disabled={activeStep === 0}
               onClick={() => goTo(activeStep - 1)}
-              className="inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-sm font-medium transition-transform duration-150 ease-out active:scale-[0.96] motion-reduce:active:scale-100 disabled:opacity-40 hover:bg-gray-50 dark:bg-neutral-900/60"
+              className="inline-flex min-h-10 items-center gap-1.5 rounded-xl border border-black/[0.08] bg-white px-3.5 py-2 text-sm font-medium transition-[transform,background-color] duration-150 ease-[cubic-bezier(0.2,0,0,1)] active:scale-[0.96] motion-reduce:active:scale-100 disabled:opacity-35 hover:bg-foreground/[0.03] dark:border-white/10 dark:bg-neutral-900/60"
             >
               <Icon name="arrow-left" className="text-xs" />
               Previous
@@ -282,7 +296,7 @@ export function UiWalkthrough({ steps }: Props) {
               <button
                 type="button"
                 onClick={() => goTo(activeStep + 1)}
-                className="inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white transition-[transform,background-color] duration-150 ease-out hover:bg-primary/90 active:scale-[0.96] motion-reduce:active:scale-100"
+                className="inline-flex min-h-10 items-center gap-1.5 rounded-xl bg-primary px-3.5 py-2 pr-3 text-sm font-medium text-white transition-[transform,background-color] duration-150 ease-[cubic-bezier(0.2,0,0,1)] hover:bg-primary/90 active:scale-[0.96] motion-reduce:active:scale-100"
               >
                 Next
                 <Icon name="arrow-right" className="text-xs" />
@@ -290,7 +304,7 @@ export function UiWalkthrough({ steps }: Props) {
             ) : (
               <a
                 href="/docs"
-                className="inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white transition-[transform,background-color] duration-150 ease-out hover:bg-primary/90 active:scale-[0.96] motion-reduce:active:scale-100"
+                className="inline-flex min-h-10 items-center gap-1.5 rounded-xl bg-primary px-3.5 py-2 pr-3 text-sm font-medium text-white transition-[transform,background-color] duration-150 ease-[cubic-bezier(0.2,0,0,1)] hover:bg-primary/90 active:scale-[0.96] motion-reduce:active:scale-100"
               >
                 Back to docs
               </a>

@@ -14,35 +14,36 @@ const services = [
   { name: "Facial Treatment", duration: "60 min", price: "Rs. 3,800", selected: false },
 ];
 
+const panelClass =
+  "rounded-xl border border-border bg-card p-2 dark:border-white/10";
+
 export function DocsBookingMockup({ variant, highlightTarget }: Props) {
   const step = variant.replace("booking-", "");
   const target = (id: string) => highlightTarget === id;
 
   return (
-    <div className="relative flex h-full flex-col overflow-hidden bg-[#f6f7fb] text-[11px] dark:bg-neutral-950">
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-[radial-gradient(120%_80%_at_20%_0%,rgba(37,99,235,0.28),transparent_70%),linear-gradient(180deg,#1e3a8a_0%,#2563eb_55%,transparent_100%)]"
-        aria-hidden
-      />
-
-      <div className="relative px-3 pb-3 pt-10">
+    <div
+      data-booking-theme=""
+      className="relative flex h-full flex-col overflow-hidden bg-[var(--booking-page-bg,#fff)] text-[11px] text-foreground dark:bg-background"
+    >
+      <div className="border-b border-border px-3 py-2.5">
         <div className="flex items-center gap-2.5">
-          <div className="flex size-9 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/25 backdrop-blur-sm">
-            <Icon name="scissors" className="text-sm text-white" />
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[var(--booking-accent-muted)] text-sm font-bold text-[var(--booking-accent)]">
+            D
           </div>
-          <div>
-            <p className="font-cal text-[13px] font-semibold tracking-tight text-white">
+          <div className="min-w-0">
+            <p className="truncate font-cal text-[13px] font-semibold tracking-tight text-foreground">
               Dilini&apos;s Studio
             </p>
-            <p className="text-[9px] text-white/75">dilini.dinaya.lk</p>
+            <p className="truncate text-[9px] text-muted-foreground">dilini.dinaya.lk</p>
           </div>
         </div>
       </div>
 
-      <div className="relative flex-1 space-y-2 px-2.5 pb-2.5">
+      <div className="flex-1 space-y-1.5 overflow-hidden px-2.5 py-2">
         {step === "service" && (
-          <div className="space-y-1.5">
-            <p className="px-0.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-white/80">
+          <div className="space-y-1">
+            <p className="px-0.5 text-[9px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
               Choose service
             </p>
             {services.map((s) => (
@@ -53,17 +54,33 @@ export function DocsBookingMockup({ variant, highlightTarget }: Props) {
               >
                 <div
                   className={cn(
-                    "rounded-2xl border bg-white/95 p-2.5 shadow-[0_8px_24px_rgba(15,23,42,0.08)] backdrop-blur-sm dark:border-neutral-800 dark:bg-neutral-900/95",
+                    "flex items-start gap-2 rounded-[1.25rem] border p-2 text-left",
                     s.selected
-                      ? "border-primary ring-1 ring-primary/30"
-                      : "border-transparent",
+                      ? "border-[var(--booking-accent)] bg-[var(--booking-accent-muted)]/50 ring-2 ring-[var(--booking-accent-soft)]"
+                      : "border-border/50 bg-card",
                   )}
                 >
-                  <div className="flex justify-between gap-2">
-                    <p className="font-semibold text-gray-900 dark:text-gray-100">{s.name}</p>
-                    <p className="shrink-0 font-bold text-primary">{s.price}</p>
+                  <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[var(--booking-accent-muted)] text-[10px] font-bold text-[var(--booking-accent)]">
+                    {s.name.charAt(0)}
                   </div>
-                  <p className="mt-0.5 text-gray-400 dark:text-gray-500">{s.duration}</p>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex justify-between gap-2">
+                      <p
+                        className={cn(
+                          "font-medium",
+                          s.selected
+                            ? "text-[var(--booking-accent)]"
+                            : "text-foreground",
+                        )}
+                      >
+                        {s.name}
+                      </p>
+                      <p className="shrink-0 font-semibold text-[var(--booking-accent)]">
+                        {s.price}
+                      </p>
+                    </div>
+                    <p className="mt-0.5 text-[10px] text-muted-foreground">{s.duration}</p>
+                  </div>
                 </div>
               </DocsTargetHighlight>
             ))}
@@ -71,11 +88,11 @@ export function DocsBookingMockup({ variant, highlightTarget }: Props) {
         )}
 
         {step === "time" && (
-          <div className="rounded-2xl border border-white/40 bg-white/95 p-2.5 shadow-[0_8px_24px_rgba(15,23,42,0.08)] dark:border-neutral-800 dark:bg-neutral-900/95">
-            <p className="mb-2 text-[9px] font-semibold uppercase tracking-[0.12em] text-gray-400 dark:text-gray-500">
+          <div className={panelClass}>
+            <p className="mb-1.5 text-[9px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
               Pick a time
             </p>
-            <div className="grid grid-cols-3 gap-1.5">
+            <div className="grid grid-cols-3 gap-1">
               {["9:00", "10:30", "11:00", "2:00", "3:30"].map((t, i) => (
                 <DocsTargetHighlight
                   key={t}
@@ -85,10 +102,10 @@ export function DocsBookingMockup({ variant, highlightTarget }: Props) {
                 >
                   <span
                     className={cn(
-                      "block rounded-xl py-1.5 text-center",
+                      "block rounded-lg py-1.5 text-center text-[10px] font-semibold tabular-nums",
                       i === 2
-                        ? "bg-primary font-semibold text-white"
-                        : "bg-gray-100 text-gray-700 dark:bg-neutral-800 dark:text-gray-300",
+                        ? "bg-[var(--booking-accent)] text-white ring-2 ring-[var(--booking-accent-soft)]"
+                        : "border border-border bg-secondary/40 text-foreground",
                     )}
                   >
                     {t}
@@ -100,16 +117,16 @@ export function DocsBookingMockup({ variant, highlightTarget }: Props) {
         )}
 
         {step === "confirm" && (
-          <div className="space-y-2">
-            <div className="rounded-2xl border border-white/40 bg-white/95 p-2.5 shadow-[0_8px_24px_rgba(15,23,42,0.08)] dark:border-neutral-800 dark:bg-neutral-900/95">
-              <p className="font-semibold text-gray-900 dark:text-gray-100">Haircut & Style</p>
-              <p className="text-gray-500 dark:text-gray-400">Thu May 15 · 11:00</p>
-              <p className="mt-1 font-medium text-primary">Rs. 2,500</p>
+          <div className="space-y-1.5">
+            <div className={panelClass}>
+              <p className="font-semibold text-foreground">Haircut & Style</p>
+              <p className="text-muted-foreground">Thu May 15 · 11:00</p>
+              <p className="mt-0.5 font-medium text-[var(--booking-accent)]">Rs. 2,500</p>
             </div>
             <DocsTargetHighlight active={target("booking-confirm-pay")} label="Confirm & Pay">
               <button
                 type="button"
-                className="w-full rounded-2xl bg-primary py-3 font-bold text-white shadow-[0_10px_24px_rgba(37,99,235,0.35)]"
+                className="w-full rounded-xl bg-[var(--booking-accent)] py-2.5 text-[11px] font-semibold text-white"
               >
                 Confirm & Pay
               </button>
@@ -118,17 +135,17 @@ export function DocsBookingMockup({ variant, highlightTarget }: Props) {
         )}
 
         {step === "manage" && (
-          <div className="space-y-2 rounded-2xl border border-white/40 bg-white/95 p-2.5 shadow-[0_8px_24px_rgba(15,23,42,0.08)] dark:border-neutral-800 dark:bg-neutral-900/95">
-            <p className="font-semibold text-gray-900 dark:text-gray-100">Your appointment</p>
-            <p className="text-gray-500 dark:text-gray-400">Haircut · May 15, 11:00</p>
-            <div className="flex gap-1.5">
+          <div className={cn(panelClass, "space-y-1.5")}>
+            <p className="font-semibold text-foreground">Your appointment</p>
+            <p className="text-muted-foreground">Haircut · May 15, 11:00</p>
+            <div className="flex gap-1">
               <DocsTargetHighlight
                 active={target("booking-reschedule")}
                 label="Reschedule"
                 variant="inline"
                 className="flex-1"
               >
-                <span className="block rounded-xl border border-black/[0.08] py-1.5 text-center dark:border-white/10">
+                <span className="block rounded-lg border border-border py-1.5 text-center dark:border-white/10">
                   Reschedule
                 </span>
               </DocsTargetHighlight>
@@ -138,7 +155,7 @@ export function DocsBookingMockup({ variant, highlightTarget }: Props) {
                 variant="inline"
                 className="flex-1"
               >
-                <span className="block rounded-xl border border-red-200 py-1.5 text-center text-red-600">
+                <span className="block rounded-lg border border-red-200 py-1.5 text-center text-red-600">
                   Cancel
                 </span>
               </DocsTargetHighlight>
@@ -147,20 +164,20 @@ export function DocsBookingMockup({ variant, highlightTarget }: Props) {
         )}
 
         {step === "review" && (
-          <div className="rounded-2xl border border-white/40 bg-white/95 p-2.5 shadow-[0_8px_24px_rgba(15,23,42,0.08)] dark:border-neutral-800 dark:bg-neutral-900/95">
-            <p className="font-semibold text-gray-900 dark:text-gray-100">Rate your visit</p>
+          <div className={panelClass}>
+            <p className="font-semibold text-foreground">Rate your visit</p>
             <DocsTargetHighlight
               active={target("booking-stars")}
               label="Star rating"
               placement="below"
             >
-              <div className="my-2 flex gap-1 text-amber-400">
+              <div className="my-1.5 flex gap-0.5 text-amber-400">
                 {[1, 2, 3, 4, 5].map((n) => (
-                  <Icon key={n} name="star-fill" />
+                  <Icon key={n} name="star-fill" className="text-[11px]" />
                 ))}
               </div>
             </DocsTargetHighlight>
-            <div className="h-12 rounded-xl border border-black/[0.06] bg-gray-50 dark:border-white/10 dark:bg-neutral-900/60" />
+            <div className="h-10 rounded-lg border border-border bg-muted/30 dark:border-white/10 dark:bg-neutral-900/60" />
           </div>
         )}
       </div>

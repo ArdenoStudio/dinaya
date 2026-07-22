@@ -39,20 +39,20 @@ export default function DocsHubPage() {
 
   return (
     <div className="pb-16">
-      <div className="relative mb-10 overflow-hidden rounded-[1.75rem] border border-black/[0.06] bg-[hsl(240_8%_98%)] px-6 py-8 dark:border-white/[0.08] dark:bg-[hsl(240_6%_7%)]">
+      <div className="relative mb-12 overflow-hidden rounded-[1.85rem] border border-black/[0.05] bg-[hsl(240_6%_98%)] px-6 py-9 dark:border-white/[0.07] dark:bg-[hsl(240_6%_7%)]">
         <div
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(37,99,235,0.07),transparent_55%)]"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_70%_0%,hsl(220_10%_70%/_0.12),transparent_58%)] dark:bg-[radial-gradient(ellipse_at_70%_0%,hsl(0_0%_100%/_0.04),transparent_58%)]"
           aria-hidden
         />
         <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
           <div>
-            <p className="mb-3 text-[0.7rem] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+            <p className="mb-3 text-[0.7rem] font-medium uppercase tracking-[0.1em] text-muted-foreground">
               Documentation
             </p>
-            <h1 className="font-cal text-3xl tracking-tight text-balance text-gray-950 dark:text-white md:text-4xl">
+            <h1 className="font-cal text-3xl tracking-tight text-balance text-gray-950 dark:text-white md:text-[2.5rem] md:leading-tight">
               Learn Dinaya
             </h1>
-            <p className="mt-2 max-w-xl text-sm leading-relaxed text-pretty text-gray-600 dark:text-gray-400">
+            <p className="mt-2.5 max-w-xl text-[15px] leading-relaxed text-pretty text-gray-600 dark:text-gray-400">
               Clear guides with product walkthroughs — setup, bookings, payments, and growth.
             </p>
           </div>
@@ -150,19 +150,24 @@ export default function DocsHubPage() {
                   <Link
                     key={slug}
                     href={`/docs/guides/${slug}`}
-                    className="group overflow-hidden rounded-2xl border border-gray-200 dark:border-neutral-800 bg-gradient-to-br from-blue-50/50 to-white shadow-sm shadow-gray-900/5 dark:shadow-black/20 transition-[transform,box-shadow,border-color] duration-150 ease-out hover:border-primary/30 hover:shadow-md active:scale-[0.99] motion-reduce:active:scale-100"
+                    className="group overflow-hidden rounded-2xl border border-black/[0.06] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.03),0_8px_20px_-12px_rgba(0,0,0,0.12)] transition-[transform,box-shadow,border-color] duration-150 ease-[cubic-bezier(0.2,0,0,1)] hover:border-black/[0.1] hover:shadow-[0_1px_2px_rgba(0,0,0,0.04),0_14px_28px_-14px_rgba(0,0,0,0.16)] active:scale-[0.99] motion-reduce:active:scale-100 dark:border-white/[0.08] dark:bg-neutral-900"
                   >
-                    <DocsGuideThumbnail mockupId={getGuidePreviewMockupId(g)} className="rounded-none border-0 border-b" />
+                    <DocsGuideThumbnail
+                      mockupId={getGuidePreviewMockupId(g)}
+                      className="rounded-none rounded-t-2xl outline-none"
+                    />
                     <div className="p-4">
-                    <p className="font-cal text-base tracking-tight">{g.title}</p>
-                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{g.description}</p>
+                    <p className="font-cal text-base tracking-tight text-balance">{g.title}</p>
+                    <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground text-pretty">
+                      {g.description}
+                    </p>
                     <div className="mt-3 flex items-center justify-between gap-3">
-                      <p className="text-[11px] text-primary font-medium">
+                      <p className="text-[11px] font-medium tabular-nums text-muted-foreground">
                         {g.estimatedMinutes} min · {g.steps.length} steps
                       </p>
-                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary group-hover:underline">
+                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary">
                         Open guide
-                        <Icon name="arrow-right" className="text-[10px]" />
+                        <Icon name="arrow-right" className="text-[10px] transition-transform duration-150 group-hover:translate-x-0.5" />
                       </span>
                     </div>
                     </div>

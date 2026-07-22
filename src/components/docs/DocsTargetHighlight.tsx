@@ -38,7 +38,7 @@ export function DocsTargetHighlight({
       {active ? (
         <>
           <span
-            className="pointer-events-none absolute inset-0 z-10 -m-0.5 rounded-[inherit] ring-2 ring-primary/80 ring-offset-2 ring-offset-[hsl(var(--dashboard-main))]"
+            className="pointer-events-none absolute inset-0 z-10 -m-px rounded-[inherit] ring-2 ring-primary/50 ring-offset-2 ring-offset-[hsl(var(--dashboard-main))]"
             aria-hidden
           />
           {cursorPlacement === "right" ? (

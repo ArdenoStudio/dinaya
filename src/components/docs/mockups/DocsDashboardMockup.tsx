@@ -3,6 +3,12 @@
 import type { ReactNode } from "react";
 import { LogoIcon } from "@/components/Logo";
 import { Icon } from "@/components/ui/Icon";
+import {
+  dashboardCardClass,
+  dashboardChromeClass,
+  dashboardMainCanvasClass,
+  dashboardShellCanvasClass,
+} from "@/lib/dashboard-ui";
 import { cn } from "@/lib/utils";
 import { DocsCursor } from "../DocsCursor";
 import { DocsTargetHighlight } from "../DocsTargetHighlight";
@@ -22,7 +28,7 @@ function NavHotspot({ label }: { label: string }) {
   return (
     <span className="pointer-events-none absolute -right-1 top-1/2 z-20 flex -translate-y-1/2 translate-x-1 items-center">
       <DocsCursor className="relative shrink-0" />
-      <span className="ml-1 whitespace-nowrap rounded-md bg-gray-950 px-2 py-0.5 font-cal text-[9px] font-medium text-white shadow-lg">
+      <span className="ml-1 whitespace-nowrap rounded-md bg-gray-950/95 px-2 py-0.5 font-cal text-[9px] font-medium text-white shadow-md">
         {label}
       </span>
     </span>
@@ -39,8 +45,8 @@ function Surface({
   return (
     <div
       className={cn(
-        "rounded-2xl border border-black/[0.06] bg-white shadow-[0_1px_0_rgba(0,0,0,0.03)]",
-        "dark:border-white/[0.08] dark:bg-neutral-900 dark:shadow-none",
+        dashboardCardClass,
+        "shadow-[0_1px_0_rgba(0,0,0,0.03)] dark:shadow-none",
         className,
       )}
     >
@@ -109,8 +115,8 @@ export function DocsDashboardMockup({ variant, highlightNav, highlightTarget }: 
         : activeNav;
 
   return (
-    <div className="flex min-h-[320px] bg-[hsl(240_6%_94%)] text-[10px] dark:bg-[hsl(240_6%_6%)]">
-      <aside className="relative flex w-[34%] shrink-0 flex-col border-r border-black/[0.06] bg-white dark:border-white/[0.08] dark:bg-[hsl(240_5%_9%)]">
+    <div className={cn("flex min-h-[320px] text-[10px]", dashboardShellCanvasClass)}>
+      <aside className="dashboard-sidebar relative flex w-[34%] shrink-0 flex-col border-r border-black/[0.06] dark:border-white/[0.08]">
         <div className="border-b border-black/[0.06] px-2.5 py-2.5 dark:border-white/[0.08]">
           <div className="flex items-center gap-1.5 text-gray-900 dark:text-gray-100">
             <LogoIcon className="size-3.5 shrink-0" />
@@ -118,14 +124,14 @@ export function DocsDashboardMockup({ variant, highlightNav, highlightTarget }: 
               <p className="truncate font-cal text-[10px] font-semibold leading-none tracking-tight">
                 Dilini&apos;s Studio
               </p>
-              <p className="mt-0.5 truncate text-[8px] text-gray-400">Free trial</p>
+              <p className="mt-0.5 truncate text-[8px] text-gray-500 dark:text-gray-400">Free trial</p>
             </div>
           </div>
         </div>
         <nav className="flex-1 overflow-visible px-1.5 py-2">
           {DASHBOARD_NAV_GROUPS.map((group) => (
             <div key={group.label} className="mb-2">
-              <p className="mb-0.5 px-1.5 text-[7.5px] font-semibold uppercase tracking-[0.12em] text-gray-400 dark:text-gray-500">
+              <p className="mb-0.5 px-1.5 text-[8px] font-semibold uppercase tracking-[0.1em] text-gray-500 dark:text-gray-400">
                 {group.label}
               </p>
               <ul className="space-y-px">
@@ -136,11 +142,13 @@ export function DocsDashboardMockup({ variant, highlightNav, highlightTarget }: 
                     <li key={item} className="relative">
                       <span
                         className={cn(
-                          "block rounded-lg px-2 py-[3px] leading-tight",
+                          "block rounded-xl px-2 py-[3px] leading-tight",
                           isActive
-                            ? "bg-primary/10 font-semibold text-primary"
-                            : "text-gray-600 dark:text-gray-400",
-                          isHighlighted && !isActive && "ring-2 ring-primary/40 ring-offset-1",
+                            ? "bg-primary/10 font-medium text-primary"
+                            : "font-normal text-gray-700 dark:text-gray-300",
+                          isHighlighted &&
+                            !isActive &&
+                            "ring-2 ring-primary/45 ring-offset-1 ring-offset-[hsl(var(--dashboard-sidebar))]",
                         )}
                       >
                         {item}
@@ -154,22 +162,27 @@ export function DocsDashboardMockup({ variant, highlightNav, highlightTarget }: 
           ))}
         </nav>
         <div className="border-t border-black/[0.06] px-2.5 py-2 dark:border-white/[0.08]">
-          <p className="text-[8px] text-gray-400">Help & docs</p>
+          <p className="text-[8px] text-gray-500 dark:text-gray-400">Help & docs</p>
         </div>
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center gap-2 border-b border-black/[0.06] bg-white/90 px-3 py-1.5 backdrop-blur-md dark:border-white/[0.08] dark:bg-[hsl(240_5%_9%)]/90">
-          <div className="flex min-w-0 flex-1 items-center gap-1.5 rounded-lg border border-black/[0.06] bg-[hsl(240_8%_96%)] px-2 py-1 dark:border-white/[0.08] dark:bg-[hsl(240_5%_8%)]">
-            <Icon name="search" className="text-[9px] text-gray-400" />
-            <span className="truncate text-[9px] text-gray-400">Search · ⌘K</span>
+        <header
+          className={cn(
+            "flex items-center gap-2 border-b px-3 py-1.5",
+            dashboardChromeClass,
+          )}
+        >
+          <div className="flex min-w-0 flex-1 items-center gap-1.5 rounded-xl border border-black/[0.06] bg-[hsl(var(--dashboard-main))] px-2 py-1 dark:border-white/10">
+            <Icon name="search" className="text-[9px] text-muted-foreground" />
+            <span className="truncate text-[9px] text-muted-foreground">Search · ⌘K</span>
           </div>
-          <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/15 text-[8px] font-semibold text-primary">
+          <span className="flex size-5 shrink-0 items-center justify-center rounded-lg bg-muted text-[8px] font-semibold text-muted-foreground">
             D
           </span>
         </header>
 
-        <main className="min-w-0 flex-1 overflow-hidden bg-[hsl(240_8%_96%)] p-3 dark:bg-[hsl(240_5%_8%)]">
+        <main className={cn("min-w-0 flex-1 overflow-hidden p-3", dashboardMainCanvasClass)}>
           {!isOverview ? (
             <PageHeader
               title={title}
@@ -187,7 +200,7 @@ export function DocsDashboardMockup({ variant, highlightNav, highlightTarget }: 
                     label="New booking"
                     variant="inline"
                   >
-                    <span className="inline-flex items-center gap-1 rounded-full bg-primary px-2.5 py-1 text-[9px] font-medium text-white">
+                    <span className="inline-flex items-center gap-1 rounded-xl bg-primary px-2.5 py-1 text-[9px] font-medium text-white">
                       + New booking
                     </span>
                   </DocsTargetHighlight>
@@ -197,7 +210,7 @@ export function DocsDashboardMockup({ variant, highlightNav, highlightTarget }: 
                     label="+ Add service"
                     variant="inline"
                   >
-                    <span className="inline-flex rounded-full bg-primary px-2.5 py-1 text-[9px] font-medium text-white">
+                    <span className="inline-flex rounded-xl bg-primary px-2.5 py-1 text-[9px] font-medium text-white">
                       + Add service
                     </span>
                   </DocsTargetHighlight>
@@ -207,7 +220,7 @@ export function DocsDashboardMockup({ variant, highlightNav, highlightTarget }: 
                     label="New deal"
                     variant="inline"
                   >
-                    <span className="inline-flex rounded-full bg-primary px-2.5 py-1 text-[9px] font-medium text-white">
+                    <span className="inline-flex rounded-xl bg-primary px-2.5 py-1 text-[9px] font-medium text-white">
                       + New deal
                     </span>
                   </DocsTargetHighlight>
@@ -230,7 +243,7 @@ export function DocsDashboardMockup({ variant, highlightNav, highlightTarget }: 
                     4 appointments today · Rs. 8,500
                   </p>
                 </div>
-                <span className="inline-flex items-center gap-1 rounded-full bg-primary px-2.5 py-1 text-[9px] font-medium text-white">
+                <span className="inline-flex items-center gap-1 rounded-xl bg-primary px-2.5 py-1 text-[9px] font-medium text-white">
                   + New booking
                 </span>
               </div>
@@ -325,12 +338,12 @@ export function DocsDashboardMockup({ variant, highlightNav, highlightTarget }: 
                       Great service, will book again!
                     </p>
                   </div>
-                  <span className="h-4 w-7 shrink-0 rounded-full bg-primary" title="Publish toggle" />
+                  <span className="h-4 w-7 shrink-0 rounded-md bg-primary" title="Publish toggle" />
                 </div>
                 <button type="button" className="mt-2 text-[9px] font-medium text-primary">
                   Reply
                 </button>
-                <button type="button" className="mt-1 block text-[9px] text-violet-600">
+                <button type="button" className="mt-1 block text-[9px] text-muted-foreground">
                   Generate reply (Growth)
                 </button>
               </Surface>
@@ -539,7 +552,7 @@ export function DocsDashboardMockup({ variant, highlightNav, highlightTarget }: 
                         30% off · 8 slots left
                       </p>
                     </div>
-                    <span className="rounded-full bg-emerald-100 px-1.5 py-0.5 text-[8px] font-medium text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300">
+                    <span className="rounded-md bg-emerald-100 px-1.5 py-0.5 text-[8px] font-medium text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300">
                       Live
                     </span>
                   </div>
@@ -563,7 +576,7 @@ export function DocsDashboardMockup({ variant, highlightNav, highlightTarget }: 
                     className="flex items-center justify-between px-2.5 py-1.5"
                   >
                     <span className="text-gray-900 dark:text-gray-100">{w}</span>
-                    <span className="rounded-full bg-emerald-100 px-1.5 text-[8px] font-medium text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300">
+                    <span className="rounded-md bg-emerald-100 px-1.5 text-[8px] font-medium text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300">
                       On
                     </span>
                   </Surface>
@@ -587,7 +600,7 @@ export function DocsDashboardMockup({ variant, highlightNav, highlightTarget }: 
               <p className="mt-1 text-[9px] text-gray-500 dark:text-gray-400">
                 Merchant ID · Sandbox
               </p>
-              <span className="mt-2 inline-block rounded-full bg-amber-100 px-2 py-0.5 text-[9px] font-medium text-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
+              <span className="mt-2 inline-block rounded-lg bg-amber-100 px-2 py-0.5 text-[9px] font-medium text-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
                 Connect account
               </span>
             </Surface>
@@ -602,7 +615,7 @@ export function DocsDashboardMockup({ variant, highlightNav, highlightTarget }: 
               <DocsTargetHighlight active={target("billing-upgrade")} label="Upgrade">
                 <button
                   type="button"
-                  className="mt-2 w-full rounded-full bg-primary py-1.5 text-[9px] font-medium text-white"
+                  className="mt-2 w-full rounded-xl bg-primary py-1.5 text-[9px] font-medium text-white"
                 >
                   Upgrade to Pro
                 </button>

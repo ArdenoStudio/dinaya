@@ -17,6 +17,13 @@ import { DOCS_PREVIEW_MOCKUP_IDS } from "../src/lib/docs/visuals";
 const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? "http://127.0.0.1:3001";
 const outDir = path.join(process.cwd(), "public/docs/screenshots");
 const mode = process.env.DOCS_CAPTURE_MODE ?? "live";
+/** Comma-separated screenshot names, e.g. `dashboard-overview,dashboard-marketing`. */
+const onlyNames = new Set(
+  (process.env.DOCS_CAPTURE_ONLY ?? "")
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean),
+);
 
 type LiveTarget = {
   name: string;
@@ -120,25 +127,30 @@ async function hideDevChrome(page: Page) {
 
     const rewrite = (value: string) =>
       value
-        .replace(/https?:\/\/localhost:\d+/gi, "https://dinaya.lk")
-        .replace(/https?:\/\/127\.0\.0\.1:\d+/gi, "https://dinaya.lk")
-        .replace(/docs-demo-\d+/gi, "dilini");
+        .replace(/https?:\/\/(?:localhost|127\.0\.0\.1):\d+/gi, "https://dilini.dinaya.lk")
+        .replace(/(?:localhost|127\.0\.0\.1):\d+/gi, "dilini.dinaya.lk")
+        .replace(/docs-demo-\d+/gi, "dilini")
+        .replace(/https:\/\/dilini\.dinaya\.lk\/book\/dilini/gi, "https://dilini.dinaya.lk");
 
-    document.querySelectorAll("input, textarea").forEach((node) => {
-      const el = node as HTMLInputElement | HTMLTextAreaElement;
-      if (el.value && /localhost|127\.0\.0\.1|docs-demo-/i.test(el.value)) {
-        el.value = rewrite(el.value);
-        el.setAttribute("value", el.value);
+    const scrubNode = (node: Element) => {
+      const el = node as HTMLInputElement & HTMLAnchorElement & HTMLElement;
+      if ("value" in el && typeof el.value === "string" && /localhost|127\.0\.0\.1|docs-demo-/i.test(el.value)) {
+        const next = rewrite(el.value);
+        el.value = next;
+        el.setAttribute("value", next);
+        // Freeze against React rehydration flashing localhost again.
+        el.setAttribute("readonly", "true");
       }
-    });
-
-    document.querySelectorAll("a[href], [href]").forEach((node) => {
-      const el = node as HTMLAnchorElement;
-      const href = el.getAttribute("href");
+      const href = el.getAttribute?.("href");
       if (href && /localhost|127\.0\.0\.1|docs-demo-/i.test(href)) {
         el.setAttribute("href", rewrite(href));
       }
-    });
+      if (el.childElementCount === 0 && el.textContent && /localhost|127\.0\.0\.1|docs-demo-/i.test(el.textContent)) {
+        el.textContent = rewrite(el.textContent);
+      }
+    };
+
+    document.querySelectorAll("input, textarea, a[href], [href], code, span, p, button").forEach(scrubNode);
 
     const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
     const nodes: Text[] = [];
@@ -149,18 +161,7 @@ async function hideDevChrome(page: Page) {
       }
     }
 
-    // Hide share/link cards that still expose local URLs after React hydration.
-    document.querySelectorAll("section, article, div").forEach((node) => {
-      const el = node as HTMLElement;
-      const text = el.textContent ?? "";
-      if (
-        el.childElementCount < 12 &&
-        /Share booking link/i.test(text) &&
-        /localhost|127\.0\.0\.1|docs-demo-/i.test(text)
-      ) {
-        el.style.visibility = "hidden";
-      }
-    });
+    // Never hide large layout ancestors — that blanks whole dashboard pages.
   }).catch(() => undefined);
 }
 
@@ -185,11 +186,49 @@ async function settle(page: Page, ready?: RegExp) {
   await hideDevChrome(page);
 }
 
+async function freezeCleanDom(page: Page) {
+  // String form avoids tsx injecting `__name` helpers into the browser context.
+  // Clone body after scrub so React cannot rehydrate localhost into the shot.
+  await page.evaluate(`(() => {
+    function rewrite(value) {
+      return String(value)
+        .replace(/https?:\\/\\/(?:localhost|127\\.0\\.0\\.1):\\d+/gi, "https://dilini.dinaya.lk")
+        .replace(/(?:localhost|127\\.0\\.0\\.1):\\d+/gi, "dilini.dinaya.lk")
+        .replace(/docs-demo-\\d+/gi, "dilini")
+        .replace(/https:\\/\\/dilini\\.dinaya\\.lk\\/book\\/dilini\\/?/gi, "https://dilini.dinaya.lk");
+    }
+    var clone = document.body.cloneNode(true);
+    var walker = document.createTreeWalker(clone, NodeFilter.SHOW_TEXT);
+    var nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    for (var i = 0; i < nodes.length; i++) {
+      var text = nodes[i];
+      if (text.nodeValue && /localhost|127\\.0\\.0\\.1|docs-demo-/i.test(text.nodeValue)) {
+        text.nodeValue = rewrite(text.nodeValue);
+      }
+    }
+    clone.querySelectorAll("input, textarea").forEach(function (node) {
+      var el = node;
+      var current = el.value || el.getAttribute("value") || "";
+      if (/localhost|127\\.0\\.0\\.1|docs-demo-/i.test(current)) {
+        var next = rewrite(current || "https://dilini.dinaya.lk");
+        el.value = next.indexOf("http") === 0 ? next : "https://" + next;
+        el.setAttribute("value", el.value);
+      }
+    });
+    clone.querySelectorAll("[href]").forEach(function (node) {
+      var href = node.getAttribute("href");
+      if (href && /localhost|127\\.0\\.0\\.1|docs-demo-/i.test(href)) {
+        node.setAttribute("href", rewrite(href));
+      }
+    });
+    document.body.replaceWith(clone);
+  })()`);
+}
+
 async function screenshotPage(page: Page, name: string) {
-  // Re-run cleanup immediately before shutter — React can rehydrate localhost text.
   await hideDevChrome(page);
-  await page.waitForTimeout(200);
-  await hideDevChrome(page);
+  await freezeCleanDom(page);
   const file = path.join(outDir, `${name}.png`);
   await page.screenshot({ path: file, fullPage: false });
   console.log(`Saved ${file}`);
@@ -271,6 +310,10 @@ async function signInViaApi(page: Page, email: string, password: string) {
   console.log("Signed in via credentials API");
 }
 
+function shouldCapture(name: string) {
+  return onlyNames.size === 0 || onlyNames.has(name);
+}
+
 async function captureLive(page: Page) {
   const account = await registerDemoAccount();
   console.log(`Registered demo business ${account.slug}`);
@@ -280,7 +323,7 @@ async function captureLive(page: Page) {
 
   // Capture setup wizard before marking onboarding complete.
   const onboarding = liveTargets.find((t) => t.name === "dashboard-onboarding");
-  if (onboarding) {
+  if (onboarding && shouldCapture(onboarding.name)) {
     console.log(`Capturing ${onboarding.name} (${onboarding.path})`);
     await page.goto(`${baseURL}${onboarding.path}`, {
       waitUntil: "domcontentloaded",
@@ -297,18 +340,60 @@ async function captureLive(page: Page) {
 
   for (const target of liveTargets) {
     if (target.name === "dashboard-onboarding") continue;
+    if (!shouldCapture(target.name)) continue;
     console.log(`Capturing ${target.name} (${target.path})`);
     await page.goto(`${baseURL}${target.path}`, { waitUntil: "domcontentloaded", timeout: 90_000 });
     await settle(page, target.ready);
+    if (target.name === "dashboard-marketing") {
+      await page
+        .getByText(/^Loading/i)
+        .first()
+        .waitFor({ state: "hidden", timeout: 20_000 })
+        .catch(() => undefined);
+      // Live preview iframe often stays blank in headless — drop it so the shot
+      // focuses on Share + Directory (the guide-relevant controls).
+      await page.evaluate(`(() => {
+        document.querySelectorAll("iframe").forEach(function (iframe) {
+          var title = (iframe.getAttribute("title") || "").toLowerCase();
+          if (title.indexOf("preview") !== -1 || title.indexOf("booking") !== -1) {
+            var node = iframe;
+            for (var i = 0; i < 6 && node; i++) {
+              if (node.tagName === "SECTION" || (node.className && String(node.className).indexOf("DashboardSection") !== -1)) {
+                node.remove();
+                return;
+              }
+              node = node.parentElement;
+            }
+            iframe.remove();
+          }
+        });
+      })()`);
+      await page.waitForTimeout(400);
+      await hideDevChrome(page);
+    }
     await screenshotPage(page, target.name);
   }
 
   // PayHere lives under Settings in the product UI.
-  const payhereFile = path.join(outDir, "dashboard-payhere.png");
-  fs.copyFileSync(path.join(outDir, "dashboard-settings.png"), payhereFile);
-  console.log(`Saved ${payhereFile} (copy of dashboard-settings)`);
+  if (shouldCapture("dashboard-payhere") || shouldCapture("dashboard-settings")) {
+    const settingsFile = path.join(outDir, "dashboard-settings.png");
+    const payhereFile = path.join(outDir, "dashboard-payhere.png");
+    if (fs.existsSync(settingsFile)) {
+      fs.copyFileSync(settingsFile, payhereFile);
+      console.log(`Saved ${payhereFile} (copy of dashboard-settings)`);
+    }
+  }
 
-  await captureBookingFlow(page, account.slug);
+  const bookingNames = [
+    "booking-service",
+    "booking-time",
+    "booking-confirm",
+    "booking-manage",
+    "booking-review",
+  ];
+  if (onlyNames.size === 0 || bookingNames.some((name) => onlyNames.has(name))) {
+    await captureBookingFlow(page, account.slug);
+  }
 }
 
 async function capturePreviewMockup(page: Page, mockupId: string) {

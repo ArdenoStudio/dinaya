@@ -16,7 +16,7 @@ export function DocsHeroPreview() {
     if (reduceMotion) return;
     const timer = window.setInterval(() => {
       setIndex((current) => (current + 1) % HERO_SHOTS.length);
-    }, 5200);
+    }, 5600);
     return () => window.clearInterval(timer);
   }, [reduceMotion]);
 
@@ -24,17 +24,18 @@ export function DocsHeroPreview() {
   const screenshot = getScreenshotForMockup(mockupId);
 
   return (
-    <div className="relative mx-auto mt-8 max-w-3xl">
+    <div className="relative mx-auto mt-9 max-w-3xl">
+      {/* Atmosphere — soft light falloff, no purple/blue glow */}
       <div
-        className="pointer-events-none absolute -inset-x-8 -inset-y-6 rounded-[2.5rem] bg-[radial-gradient(ellipse_at_top,rgba(37,99,235,0.08),transparent_60%)]"
+        className="pointer-events-none absolute -inset-x-10 -inset-y-8 rounded-[2.75rem] bg-[radial-gradient(ellipse_at_50%_0%,hsl(220_12%_70%/_0.18),transparent_62%)] dark:bg-[radial-gradient(ellipse_at_50%_0%,hsl(220_10%_100%/_0.06),transparent_62%)]"
         aria-hidden
       />
       <AnimatePresence mode="wait" initial={false}>
         <motion.div
           key={mockupId}
-          initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+          initial={reduceMotion ? false : { opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={reduceMotion ? undefined : { opacity: 0, y: -6 }}
+          exit={reduceMotion ? undefined : { opacity: 0, y: -5 }}
           transition={docsSpring}
         >
           <DocsProductFrame
@@ -45,6 +46,18 @@ export function DocsHeroPreview() {
           />
         </motion.div>
       </AnimatePresence>
+      {!reduceMotion ? (
+        <div className="mt-4 flex items-center justify-center gap-1.5" aria-hidden>
+          {HERO_SHOTS.map((id, i) => (
+            <span
+              key={id}
+              className={`h-1 rounded-full transition-[width,background-color] duration-300 ease-[cubic-bezier(0.2,0,0,1)] ${
+                i === index ? "w-5 bg-foreground/55" : "w-1 bg-foreground/15"
+              }`}
+            />
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }
