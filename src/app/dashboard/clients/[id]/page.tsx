@@ -5,10 +5,15 @@ import Link from "next/link";
 import { format } from "date-fns";
 import { useDashboardToast } from "@/components/dashboard/ToastProvider";
 import { DashboardLoadingPanel } from "@/components/dashboard/DashboardLoadingPanel";
+import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
+import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import {
   dashboardInputClass,
   dashboardOutlineActionClass,
+  dashboardPageClass,
   dashboardPrimaryActionClass,
+  dashboardSectionClass,
+  dashboardSurfaceClass,
 } from "@/lib/dashboard-ui";
 import { cn } from "@/lib/utils";
 import { whatsappUrl } from "@/lib/whatsapp";
@@ -46,14 +51,6 @@ const STAGE_STYLES: Record<string, string> = {
   prospect: "bg-purple-100 text-purple-700",
   active: "bg-green-100 text-green-700",
   churned: "bg-gray-100 dark:bg-neutral-800 text-gray-500 dark:text-gray-400",
-};
-
-const BOOKING_STATUS_STYLES: Record<string, string> = {
-  pending: "bg-yellow-100 text-yellow-800",
-  confirmed: "bg-green-100 text-green-800",
-  cancelled: "bg-red-100 text-red-800",
-  completed: "bg-blue-100 text-blue-800",
-  no_show: "bg-gray-100 dark:bg-neutral-800 text-gray-800 dark:text-gray-200",
 };
 
 export default function ClientDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -150,7 +147,11 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
   }
 
   if (loading) {
-    return <DashboardLoadingPanel rows={4} />;
+    return (
+      <div className={dashboardPageClass}>
+        <DashboardLoadingPanel rows={4} />
+      </div>
+    );
   }
 
   if (!client) {
@@ -158,30 +159,26 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
   }
 
   return (
-    <div>
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-3">
-        <Link
-          href="/dashboard/clients"
-          className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-        >
-          ← Clients
-        </Link>
-        <div className="flex min-w-0 flex-wrap items-center gap-2">
-          <h1 className="min-w-0 truncate font-cal text-xl sm:text-2xl">{client.name}</h1>
+    <div className={dashboardPageClass}>
+      <DashboardPageHeader
+        backHref="/dashboard/clients"
+        backLabel="Clients"
+        title={client.name}
+        actions={
           <span
             className={cn(
-              "shrink-0 rounded-full px-2 py-0.5 text-xs font-medium capitalize",
+              "shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium capitalize",
               STAGE_STYLES[client.stage],
             )}
           >
             {client.stage}
           </span>
-        </div>
-      </div>
+        }
+      />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="space-y-4 lg:col-span-1">
-          <div className="space-y-3 rounded-xl border bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900">
+          <div className={cn(dashboardSectionClass, "space-y-3")}>
             <h2 className="text-sm font-medium">Contact</h2>
             <div>
               <p className="text-xs text-muted-foreground">Phone</p>
@@ -213,7 +210,7 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
             </div>
           </div>
 
-          <div className="space-y-3 rounded-xl border bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900">
+          <div className={cn(dashboardSectionClass, "space-y-3")}>
             <h2 className="text-sm font-medium">CRM</h2>
             <div>
               <label className="mb-1 block text-xs text-muted-foreground">Stage</label>
@@ -238,7 +235,7 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
                 className={cn(dashboardInputClass, "resize-none")}
               />
             </div>
-            <div className="sticky bottom-[calc(3.5rem+env(safe-area-inset-bottom))] z-10 -mx-5 border-t bg-white/95 px-5 py-3 backdrop-blur supports-[backdrop-filter]:bg-white/80 dark:bg-neutral-900/95 md:static md:mx-0 md:border-0 md:bg-transparent md:px-0 md:py-0 md:backdrop-blur-none">
+            <div className="sticky bottom-[calc(3.5rem+env(safe-area-inset-bottom))] z-10 -mx-5 border-t border-border/60 bg-background/95 px-5 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 md:static md:mx-0 md:border-0 md:bg-transparent md:px-0 md:py-0 md:backdrop-blur-none">
               <button
                 type="button"
                 onClick={saveProfile}
@@ -252,7 +249,7 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
         </div>
 
         <div className="space-y-5 lg:col-span-2">
-          <div className="overflow-hidden rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
+          <div className={cn(dashboardSurfaceClass, "overflow-hidden")}>
             <div className="border-b px-5 py-4">
               <h2 className="text-sm font-medium">Booking history ({bookings.length})</h2>
             </div>
@@ -279,14 +276,7 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
                           <p className="text-sm font-medium tabular-nums">
                             {format(new Date(b.startsAt), "d MMM yyyy, h:mm a")}
                           </p>
-                          <span
-                            className={cn(
-                              "shrink-0 rounded-full px-2 py-0.5 text-xs font-medium capitalize",
-                              BOOKING_STATUS_STYLES[b.status] ?? "",
-                            )}
-                          >
-                            {b.status.replace("_", " ")}
-                          </span>
+                          <StatusBadge status={b.status} />
                         </div>
                         <p className="text-sm text-muted-foreground">
                           {b.serviceName} · {b.staffName}
@@ -325,14 +315,7 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
                           <td className="px-4 py-2.5 text-xs">{b.serviceName}</td>
                           <td className="px-4 py-2.5 text-xs">{b.staffName}</td>
                           <td className="px-4 py-2.5">
-                            <span
-                              className={cn(
-                                "rounded-full px-2 py-0.5 text-xs font-medium capitalize",
-                                BOOKING_STATUS_STYLES[b.status] ?? "",
-                              )}
-                            >
-                              {b.status.replace("_", " ")}
-                            </span>
+                            <StatusBadge status={b.status} />
                           </td>
                         </tr>
                       ))}
@@ -343,7 +326,7 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
             )}
           </div>
 
-          <div className="overflow-hidden rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
+          <div className={cn(dashboardSurfaceClass, "overflow-hidden")}>
             <div className="border-b px-5 py-4">
               <h2 className="text-sm font-medium">Notes</h2>
             </div>

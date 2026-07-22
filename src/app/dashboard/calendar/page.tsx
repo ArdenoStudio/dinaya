@@ -18,6 +18,14 @@ import {
   DashboardTableSkeleton,
 } from "@/components/dashboard/DashboardLoadingPanel";
 import { statusSurfaceStyles } from "@/lib/dashboard-status";
+import {
+  dashboardCardClass,
+  dashboardChromeClass,
+  dashboardOutlineActionClass,
+  dashboardPageClass,
+  dashboardPrimaryActionClass,
+  dashboardSurfaceClass,
+} from "@/lib/dashboard-ui";
 import { buttonVariants } from "@/components/ui/button";
 import {
   trackDashboardCalendarEventOpen,
@@ -172,8 +180,14 @@ export default function CalendarPage() {
   }
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="sticky top-0 z-20 -mx-4 mb-4 space-y-3 border-b bg-background/95 px-4 pb-3 pt-1 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:-mx-6 sm:px-6 lg:static lg:mx-0 lg:border-0 lg:bg-transparent lg:px-0 lg:pb-0 lg:pt-0 lg:backdrop-blur-none">
+    <div className={cn(dashboardPageClass, "flex h-full flex-col")}>
+      <div
+        className={cn(
+          "sticky top-0 z-20 -mx-4 mb-4 space-y-3 border-b px-4 pb-3 pt-1 sm:-mx-6 sm:px-6 lg:static lg:mx-0 lg:border-0 lg:px-0 lg:pb-0 lg:pt-0",
+          dashboardChromeClass,
+          "lg:bg-transparent lg:backdrop-blur-none",
+        )}
+      >
         <DashboardPageHeader
           title="Calendar"
           actions={
@@ -198,11 +212,11 @@ export default function CalendarPage() {
               ) : null}
               <Link
                 href="/dashboard/bookings"
-                className={cn(buttonVariants({ variant: "outline" }), "hidden min-h-11 sm:inline-flex")}
+                className={cn(dashboardOutlineActionClass, "hidden sm:inline-flex")}
               >
                 List view
               </Link>
-              <Link href="/dashboard/bookings/new" className={cn(buttonVariants(), "min-h-11")}>
+              <Link href="/dashboard/bookings/new" className={dashboardPrimaryActionClass}>
                 New booking
               </Link>
             </div>
@@ -242,7 +256,7 @@ export default function CalendarPage() {
               ? `${format(weekStart, "d MMM")} – ${format(addDays(weekStart, 6), "d MMM yyyy")}`
               : format(selectedDay, "EEE d MMM yyyy")}
           </span>
-          <div className="ml-auto flex rounded-lg border p-1 dark:border-neutral-800">
+          <div className={cn(dashboardCardClass, "ml-auto flex p-1")}>
             {(["day", "agenda", "week"] as const).map((option) => (
               <button
                 key={option}
@@ -284,13 +298,13 @@ export default function CalendarPage() {
           </div>
         </>
       ) : view === "agenda" ? (
-        <div className="space-y-2 rounded-xl border bg-card p-3 dark:border-neutral-800 dark:bg-neutral-900">
+        <div className={cn(dashboardSurfaceClass, "space-y-2 p-3")}>
           {dayBookings.length === 0 ? (
             <div className="flex flex-col items-center gap-3 px-2 py-10 text-center">
               <p className="text-sm text-muted-foreground">
                 No bookings on {format(selectedDay, "d MMM")}.
               </p>
-              <Link href="/dashboard/bookings/new" className={cn(buttonVariants(), "min-h-11")}>
+              <Link href="/dashboard/bookings/new" className={dashboardPrimaryActionClass}>
                 Create booking
               </Link>
             </div>
@@ -320,24 +334,24 @@ export default function CalendarPage() {
           )}
         </div>
       ) : view === "day" ? (
-        <div className="relative flex-1 overflow-auto rounded-xl border bg-card dark:border-neutral-800 dark:bg-neutral-900">
+        <div className={cn(dashboardSurfaceClass, "relative flex-1 overflow-auto")}>
           {dayBookings.length === 0 ? (
-            <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-3 bg-card/90 px-4 text-center dark:bg-neutral-900/90">
+            <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-3 bg-card/90 px-4 text-center">
               <p className="text-sm text-muted-foreground">
                 No bookings on {format(selectedDay, "d MMM")}.
               </p>
-              <Link href="/dashboard/bookings/new" className={cn(buttonVariants(), "min-h-11")}>
+              <Link href="/dashboard/bookings/new" className={dashboardPrimaryActionClass}>
                 Create booking
               </Link>
             </div>
           ) : null}
           <div className="grid grid-cols-[48px_1fr]">
-            <div className="border-r dark:border-neutral-800">
+            <div className="border-r border-border/60">
               {Array.from({ length: TOTAL_HOURS }, (_, i) => (
                 <div
                   key={i}
                   style={{ height: HOUR_HEIGHT }}
-                  className="flex items-start justify-end border-b pr-2 pt-1 dark:border-neutral-800"
+                  className="flex items-start justify-end border-b border-border/60 pr-2 pt-1"
                 >
                   <span className="text-xs text-muted-foreground">
                     {format(new Date().setHours(START_HOUR + i, 0, 0, 0), "h a")}
@@ -377,8 +391,8 @@ export default function CalendarPage() {
           </div>
         </div>
       ) : (
-        <div className="flex-1 overflow-auto rounded-xl border bg-card dark:border-neutral-800 dark:bg-neutral-900">
-          <div className="sticky top-0 z-10 grid grid-cols-[48px_repeat(7,1fr)] border-b bg-card dark:border-neutral-800 dark:bg-neutral-900">
+        <div className={cn(dashboardSurfaceClass, "flex-1 overflow-auto")}>
+          <div className="sticky top-0 z-10 grid grid-cols-[48px_repeat(7,1fr)] border-b bg-card">
             <div className="border-r" />
             {days.map((day) => {
               const isToday = isSameDay(day, today);

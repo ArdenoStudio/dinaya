@@ -196,7 +196,7 @@ export function DashboardBottomNav({
                   <p className="mb-1.5 px-3 text-[0.7rem] font-semibold uppercase tracking-wider text-neutral-500">
                     {section.label}
                   </p>
-                  <ul className="overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-50 dark:border-neutral-800 dark:bg-neutral-900">
+                  <ul className="overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-50 dark:border-border/60 dark:bg-card">
                     {section.items.map((item, index) => {
                       const Icon = item.icon;
                       const active = isActive(item, activeHref);
@@ -241,7 +241,7 @@ export function DashboardBottomNav({
                 <p className="mb-1.5 px-3 text-[0.7rem] font-semibold uppercase tracking-wider text-neutral-500">
                   Account
                 </p>
-                <ul className="overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-50 dark:border-neutral-800 dark:bg-neutral-900">
+                <ul className="overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-50 dark:border-border/60 dark:bg-card">
                   <li className="px-3.5 py-3">
                     <p className="truncate text-[15px] font-medium text-neutral-900 dark:text-neutral-100">
                       {userEmail}

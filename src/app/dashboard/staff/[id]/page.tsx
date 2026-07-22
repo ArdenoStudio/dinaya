@@ -3,6 +3,17 @@
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
+import {
+  dashboardCardClass,
+  dashboardInputClass,
+  dashboardLabelClass,
+  dashboardOutlineActionClass,
+  dashboardPageClass,
+  dashboardPrimaryActionClass,
+  dashboardSectionClass,
+} from "@/lib/dashboard-ui";
+import { cn } from "@/lib/utils";
 
 type Service = { id: string; name: string };
 type LocationOption = { id: string; name: string };
@@ -114,66 +125,65 @@ export default function EditStaffPage({ params }: { params: Promise<{ id: string
     router.push("/dashboard/staff");
   }
 
-  if (loading) return <p className="text-sm text-muted-foreground">Loading...</p>;
+  if (loading) return <p className={cn(dashboardPageClass, "text-sm text-muted-foreground")}>Loading...</p>;
   if (!form) {
     return (
-      <div className="max-w-xl rounded-lg border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-6">
-        <p className="text-sm text-muted-foreground">Staff member not found.</p>
-        <Link href="/dashboard/staff" className="mt-4 inline-flex text-sm text-primary hover:underline">
-          Back to staff
-        </Link>
+      <div className={dashboardPageClass}>
+        <div className={cn(dashboardCardClass, "max-w-xl p-6")}>
+          <p className="text-sm text-muted-foreground">Staff member not found.</p>
+          <Link href="/dashboard/staff" className="mt-4 inline-flex text-sm text-primary hover:underline">
+            Back to staff
+          </Link>
+        </div>
       </div>
     );
   }
 
-  const inputClass = "mt-1 w-full rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/30";
-
   return (
-    <div className="max-w-xl">
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <Link href="/dashboard/staff" className="text-sm text-muted-foreground hover:text-foreground">
-            Staff
-          </Link>
-          <h1 className="font-cal text-2xl">Edit team member</h1>
-        </div>
-        <button
-          type="button"
-          onClick={handleDelete}
-          disabled={deleting}
-          className="rounded-md border border-destructive/30 px-3 py-2 text-sm font-medium text-destructive hover:bg-destructive/5 disabled:opacity-50"
-        >
-          {deleting ? "Deleting..." : "Delete"}
-        </button>
-      </div>
+    <div className={dashboardPageClass}>
+      <DashboardPageHeader
+        title="Edit team member"
+        backHref="/dashboard/staff"
+        backLabel="Staff"
+        actions={
+          <button
+            type="button"
+            onClick={handleDelete}
+            disabled={deleting}
+            className={cn(dashboardOutlineActionClass, "border-destructive/30 text-destructive hover:bg-destructive/5")}
+          >
+            {deleting ? "Deleting..." : "Delete"}
+          </button>
+        }
+      />
 
-      <form onSubmit={handleSave} className="space-y-5 rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-6">
+      <form onSubmit={handleSave} className={cn(dashboardSectionClass, "max-w-xl space-y-5")}>
         <div>
-          <label className="text-sm font-medium">Name *</label>
+          <label className={dashboardLabelClass}>Name *</label>
           <input
             required
             value={form.name}
             onChange={(e) => setForm((current) => current && { ...current, name: e.target.value })}
-            className={inputClass}
+            className={dashboardInputClass}
           />
         </div>
 
         <div>
-          <label className="text-sm font-medium">Short bio</label>
+          <label className={dashboardLabelClass}>Short bio</label>
           <textarea
             value={form.bio}
             onChange={(e) => setForm((current) => current && { ...current, bio: e.target.value })}
-            className={`${inputClass} resize-none`}
+            className={cn(dashboardInputClass, "resize-none")}
             rows={3}
           />
         </div>
 
         <div>
-          <label className="text-sm font-medium">Avatar URL</label>
+          <label className={dashboardLabelClass}>Avatar URL</label>
           <input
             value={form.avatarUrl}
             onChange={(e) => setForm((current) => current && { ...current, avatarUrl: e.target.value })}
-            className={inputClass}
+            className={dashboardInputClass}
             placeholder="https://..."
           />
         </div>
@@ -189,7 +199,7 @@ export default function EditStaffPage({ params }: { params: Promise<{ id: string
         </label>
 
         <div>
-          <p className="text-sm font-medium">Can perform</p>
+          <p className={dashboardLabelClass}>Can perform</p>
           <div className="mt-2 space-y-2">
             {services.length === 0 ? (
               <p className="text-sm text-muted-foreground">No services yet.</p>
@@ -212,7 +222,7 @@ export default function EditStaffPage({ params }: { params: Promise<{ id: string
         
         {locations.length > 1 && (
           <div>
-            <p className="text-sm font-medium">Works at</p>
+            <p className={dashboardLabelClass}>Works at</p>
             <div className="mt-2 space-y-2">
               {locations.map((loc) => (
                 <label key={loc.id} className="flex cursor-pointer items-center gap-2 text-sm">
@@ -229,16 +239,20 @@ export default function EditStaffPage({ params }: { params: Promise<{ id: string
           </div>
         )}
 
-{error && <p className="rounded-md border border-destructive/20 bg-destructive/5 px-3 py-2 text-sm text-destructive">{error}</p>}
+        {error && (
+          <p className="rounded-md border border-destructive/20 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+            {error}
+          </p>
+        )}
 
-        <div className="flex items-center gap-3 pt-2">
-          <button type="button" onClick={() => router.back()} className="text-sm text-muted-foreground hover:text-foreground">
+        <div className="flex flex-wrap items-center gap-3 pt-2">
+          <button type="button" onClick={() => router.back()} className={dashboardOutlineActionClass}>
             Cancel
           </button>
           <button
             type="submit"
             disabled={saving}
-            className="ml-auto rounded-md bg-primary px-5 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+            className={cn(dashboardPrimaryActionClass, "ml-auto")}
           >
             {saving ? "Saving..." : "Save changes"}
           </button>

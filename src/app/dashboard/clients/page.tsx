@@ -5,15 +5,18 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Users, UserCheck, UserPlus, Sparkles } from "lucide-react";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
+import { DashboardLoadingPanel } from "@/components/dashboard/DashboardLoadingPanel";
 import { DashboardStatGrid } from "@/components/dashboard/DashboardStatGrid";
 import { EmptyState } from "@/components/dashboard/EmptyState";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { Icon } from "@/components/ui/Icon";
 import {
   dashboardFilterPillClass,
+  dashboardInputClass,
   dashboardOutlineActionClass,
   dashboardPageClass,
   dashboardPrimaryActionClass,
+  dashboardSurfaceClass,
 } from "@/lib/dashboard-ui";
 import { cn } from "@/lib/utils";
 
@@ -179,7 +182,7 @@ export default function ClientsPage() {
             value={q}
             onChange={(e) => setQ(e.target.value)}
             aria-label="Search customers"
-            className="w-full rounded-lg border bg-background py-2.5 pl-9 pr-8 text-base transition-shadow placeholder:text-muted-foreground/60 focus-visible:border-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 sm:text-sm dark:bg-neutral-900"
+            className={cn(dashboardInputClass, "mt-0 py-2.5 pl-9 pr-8")}
           />
           {q ? (
             <button
@@ -209,22 +212,7 @@ export default function ClientsPage() {
 
       {/* List */}
       {loading ? (
-        <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 overflow-hidden">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <div
-              key={i}
-              className="flex items-center gap-4 px-5 py-4 border-b last:border-0"
-            >
-              <div className="w-9 h-9 rounded-full bg-muted/40 animate-pulse shrink-0" />
-              <div className="flex-1 space-y-2">
-                <div className="h-3 w-36 bg-muted/40 rounded animate-pulse" />
-                <div className="h-2.5 w-52 bg-muted/30 rounded animate-pulse" />
-              </div>
-              <div className="hidden md:block h-5 w-14 bg-muted/30 rounded-full animate-pulse" />
-              <div className="h-5 w-16 bg-muted/30 rounded-full animate-pulse" />
-            </div>
-          ))}
-        </div>
+        <DashboardLoadingPanel rows={5} />
       ) : showEmptyAll ? (
         <EmptyState
           icon={Users}
@@ -247,7 +235,7 @@ export default function ClientsPage() {
           }
         />
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-border/80 bg-card shadow-sm">
+        <div className={cn(dashboardSurfaceClass, "overflow-hidden")}>
           {/* Header row (desktop) */}
           <div className="hidden md:grid grid-cols-[1fr_190px_140px_130px_72px] gap-4 px-5 py-2.5 border-b bg-muted/20 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
             <div>Customer</div>

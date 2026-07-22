@@ -21,7 +21,7 @@ export function StatusBadge({
       className={cn(
         "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium capitalize",
         statusStyles[status] ??
-          "border-slate-300 bg-white text-slate-700 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300",
+          "border-border bg-card text-muted-foreground",
         className,
       )}
     >

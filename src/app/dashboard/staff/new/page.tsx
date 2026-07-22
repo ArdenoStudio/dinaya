@@ -2,6 +2,17 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
+import {
+  dashboardErrorAlertClass,
+  dashboardInputClass,
+  dashboardLabelClass,
+  dashboardOutlineActionClass,
+  dashboardPageClass,
+  dashboardPrimaryActionClass,
+  dashboardSectionClass,
+} from "@/lib/dashboard-ui";
+import { cn } from "@/lib/utils";
 
 interface Service { id: string; name: string; }
 interface LocationOption { id: string; name: string; }
@@ -49,24 +60,29 @@ export default function NewStaffPage() {
   }
 
   return (
-    <div className="max-w-lg">
-      <h1 className="font-cal text-2xl mb-6">New team member</h1>
-      <form onSubmit={handleSubmit} className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-6 space-y-4">
+    <div className={dashboardPageClass}>
+      <DashboardPageHeader
+        title="New team member"
+        backHref="/dashboard/staff"
+        backLabel="Staff"
+      />
+
+      <form onSubmit={handleSubmit} className={cn(dashboardSectionClass, "max-w-lg space-y-4")}>
         <div>
-          <label className="text-sm font-medium">Name *</label>
+          <label className={dashboardLabelClass}>Name *</label>
           <input required value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-            className="mt-1 w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            className={dashboardInputClass}
             placeholder="Kamala Silva" />
         </div>
         <div>
-          <label className="text-sm font-medium">Short bio</label>
+          <label className={dashboardLabelClass}>Short bio</label>
           <textarea value={form.bio} onChange={(e) => setForm((f) => ({ ...f, bio: e.target.value }))}
-            className="mt-1 w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none" rows={2}
+            className={cn(dashboardInputClass, "resize-none")} rows={2}
             placeholder="5 years experience in…" />
         </div>
         {services.length > 0 && (
           <div>
-            <label className="text-sm font-medium">Can perform</label>
+            <label className={dashboardLabelClass}>Can perform</label>
             <div className="mt-2 space-y-1">
               {services.map((s) => (
                 <label key={s.id} className="flex items-center gap-2 cursor-pointer">
@@ -81,7 +97,7 @@ export default function NewStaffPage() {
         
         {locations.length > 1 && (
           <div>
-            <label className="text-sm font-medium">Works at</label>
+            <label className={dashboardLabelClass}>Works at</label>
             <div className="mt-2 space-y-1">
               {locations.map((loc) => (
                 <label key={loc.id} className="flex items-center gap-2 cursor-pointer">
@@ -95,11 +111,12 @@ export default function NewStaffPage() {
           </div>
         )}
 
-        {error && <p className="text-destructive text-sm">{error}</p>}
-        <div className="flex gap-3 pt-2">
-          <button type="button" onClick={() => router.back()} className="text-sm text-muted-foreground hover:text-foreground">Cancel</button>
-          <button type="submit" disabled={loading}
-            className="ml-auto bg-primary text-primary-foreground px-5 py-2 rounded-md text-sm font-medium hover:bg-primary/90 disabled:opacity-50">
+        {error && <p className={dashboardErrorAlertClass}>{error}</p>}
+        <div className="flex flex-wrap gap-3 pt-2">
+          <button type="button" onClick={() => router.back()} className={dashboardOutlineActionClass}>
+            Cancel
+          </button>
+          <button type="submit" disabled={loading} className={cn(dashboardPrimaryActionClass, "ml-auto")}>
             {loading ? "Saving…" : "Save"}
           </button>
         </div>

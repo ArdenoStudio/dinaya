@@ -14,6 +14,7 @@ import { useDashboardToast } from "@/components/dashboard/ToastProvider";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   dashboardFilterPillClass,
+  dashboardCardClass,
   dashboardOutlineActionClass,
   dashboardPrimaryActionClass,
 } from "@/lib/dashboard-ui";
@@ -258,7 +259,7 @@ export function BookingsClient({ api }: { api: BookingsApi }) {
           mobileCard={(row) => (
             <article
               key={row.id}
-              className="rounded-xl border border-border bg-card p-4 dark:border-neutral-800 dark:bg-neutral-900"
+              className={cn(dashboardCardClass, "p-4")}
             >
               <Link
                 href={`/dashboard/bookings/${row.id}`}

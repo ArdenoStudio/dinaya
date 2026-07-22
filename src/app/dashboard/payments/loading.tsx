@@ -13,7 +13,7 @@ export default function PaymentsLoading() {
       </div>
 
       {/* Table */}
-      <div className="overflow-hidden rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
+      <div className="overflow-hidden rounded-xl border bg-card border-border/60">
         <table className="w-full">
           <thead className="bg-muted/40">
             <tr>

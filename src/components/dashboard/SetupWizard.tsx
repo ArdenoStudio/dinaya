@@ -122,7 +122,7 @@ function BookingPreviewFrame({ bookingUrl }: { bookingUrl: string }) {
       <iframe
         src={bookingUrl}
         title="Booking page preview"
-        className="h-64 w-full border-0 bg-white dark:bg-neutral-900"
+        className="h-64 w-full border-0 bg-card"
         onLoad={() => setLoaded(true)}
         onError={() => setFailed(true)}
       />
@@ -357,7 +357,7 @@ export function SetupWizard() {
   if (loadFailed) {
     return (
       <div className="flex min-h-screen flex-col bg-stone-100 dark:bg-neutral-950">
-        <header className="border-b bg-white px-6 py-4 dark:border-neutral-800 dark:bg-neutral-900">
+        <header className="border-b bg-white px-6 py-4 dark:border-border/60 dark:bg-card">
           <div className="mx-auto flex max-w-2xl items-center justify-between gap-4">
             <Logo size="sm" />
             <AuthThemeToggle />
@@ -381,7 +381,7 @@ export function SetupWizard() {
 
   return (
     <div className="min-h-dvh bg-stone-100 dark:bg-neutral-950">
-      <header className="border-b bg-white px-4 py-4 dark:border-neutral-800 dark:bg-neutral-900 sm:px-6">
+      <header className="border-b bg-white px-4 py-4 dark:border-border/60 dark:bg-card sm:px-6">
         <div className="mx-auto flex max-w-2xl flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <Logo size="sm" />
           <div className="flex items-center justify-between gap-3 sm:justify-end">

@@ -37,7 +37,7 @@ export function ServiceBookingLinks({
   }
 
   return (
-    <div className="rounded-xl border bg-white p-5">
+    <div className="rounded-2xl border border-border/60 bg-card p-5">
       <h2 className="mb-3 font-semibold">Per-service booking links</h2>
       <div className="space-y-3">
         {services.map((service) => {
