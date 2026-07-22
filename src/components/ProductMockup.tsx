@@ -168,14 +168,16 @@ const DEMO_SCALE = 1.2;
 function demoAccentStyle(accent: string): CSSProperties {
   return {
     ["--demo-accent" as string]: accent,
-    /* Bold brand surfaces — “white” becomes a strong tint of the accent */
-    ["--demo-surface" as string]: `color-mix(in srgb, ${accent} 16%, white)`,
-    ["--demo-surface-deep" as string]: `color-mix(in srgb, ${accent} 28%, white)`,
-    ["--demo-canvas" as string]: `color-mix(in srgb, ${accent} 22%, white)`,
+    /* Former “white” chrome → bold brand colour */
+    ["--demo-surface" as string]: accent,
+    ["--demo-surface-deep" as string]: `color-mix(in srgb, ${accent} 82%, black)`,
+    ["--demo-canvas" as string]: `color-mix(in srgb, ${accent} 88%, black)`,
     ["--demo-accent-soft" as string]: `color-mix(in srgb, ${accent} 22%, transparent)`,
-    ["--demo-accent-ring" as string]: `color-mix(in srgb, ${accent} 45%, transparent)`,
-    ["--demo-slot" as string]: `color-mix(in srgb, ${accent} 12%, white)`,
-    ["--demo-slot-border" as string]: `color-mix(in srgb, ${accent} 35%, white)`,
+    ["--demo-accent-ring" as string]: `color-mix(in srgb, ${accent} 55%, white)`,
+    ["--demo-slot" as string]: "rgba(255,255,255,0.14)",
+    ["--demo-slot-border" as string]: "rgba(255,255,255,0.28)",
+    ["--demo-on-accent" as string]: "#ffffff",
+    ["--demo-on-accent-muted" as string]: "rgba(255,255,255,0.78)",
   };
 }
 
@@ -219,18 +221,16 @@ function CalendarDay({ cell }: { cell: DayCell }) {
     <div
       className={`relative mx-auto flex size-7 items-center justify-center rounded-lg text-[9px] font-medium tabular-nums transition-[background-color,color,transform,box-shadow] duration-300 ease-out xl:size-8 xl:rounded-xl xl:text-[10px] ${
         isSelected
-          ? "text-white shadow-md"
+          ? "bg-white shadow-md"
           : isBooked
-            ? "cursor-not-allowed text-muted-foreground/35 line-through"
-            : d
-              ? "text-foreground hover:bg-muted"
-              : ""
+            ? "cursor-not-allowed text-white/30 line-through"
+            : "text-white/90 hover:bg-white/10"
       }`}
-      style={isSelected ? { backgroundColor: "var(--demo-accent)" } : undefined}
+      style={isSelected ? { color: "var(--demo-accent)" } : undefined}
     >
       {d}
       {isAvailable && !isSelected ? (
-        <span className="absolute bottom-0.5 size-1 rounded-full" style={{ backgroundColor: "var(--demo-accent)" }} />
+        <span className="absolute bottom-0.5 size-1 rounded-full bg-white" />
       ) : null}
     </div>
   );
@@ -328,34 +328,34 @@ function PhoneDateTimeScreen({
         </div>
       </div>
 
-      <div className="mx-[14px] mt-3 flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl bg-white/85 shadow-sm">
+      <div
+        className="mx-[14px] mt-3 flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl shadow-sm"
+        style={{ backgroundColor: "var(--demo-surface-deep)" }}
+      >
         <div className="px-3 pb-[10px] pt-3">
-          <p className="text-[15px] font-semibold leading-tight text-foreground">{selectedService.name}</p>
-          <p className="mt-[6px] flex items-center gap-[6px] text-[11px] text-foreground/60">
-            <Icon name="clock" className="text-[11px]" style={{ color: "var(--demo-accent)" }} />
+          <p className="text-[15px] font-semibold leading-tight text-white">{selectedService.name}</p>
+          <p className="mt-[6px] flex items-center gap-[6px] text-[11px] text-white/75">
+            <Icon name="clock" className="text-[11px] text-white" />
             {selectedService.duration.replace(" min", "m")}
-            <span className="text-foreground/30">·</span>
-            <span className="font-medium tabular-nums text-foreground">{selectedService.price}</span>
+            <span className="text-white/35">·</span>
+            <span className="font-medium tabular-nums text-white">{selectedService.price}</span>
           </p>
         </div>
 
         <div
-          className="border-y py-[10px] px-3 transition-[background-color] duration-500"
-          style={{
-            backgroundColor: "var(--demo-surface)",
-            borderColor: "var(--demo-slot-border)",
-          }}
+          className="border-y border-white/15 py-[10px] px-3 transition-[background-color] duration-500"
+          style={{ backgroundColor: "var(--demo-accent)" }}
         >
           <div className="mb-2 flex items-center justify-between">
-            <span className="text-[11px] font-semibold text-foreground">May 2025</span>
-            <div className="flex gap-1" style={{ color: "var(--demo-accent)" }}>
+            <span className="text-[11px] font-semibold text-white">May 2025</span>
+            <div className="flex gap-1 text-white">
               <Icon name="chevron-left" className="text-[9px]" />
               <Icon name="chevron-right" className="text-[9px]" />
             </div>
           </div>
           <div className="grid grid-cols-7 gap-0.5 text-center">
             {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => (
-              <div key={`${d}-${i}`} className="pb-0.5 text-[7px] font-semibold text-foreground/45">
+              <div key={`${d}-${i}`} className="pb-0.5 text-[7px] font-semibold text-white/55">
                 {d}
               </div>
             ))}
@@ -366,7 +366,7 @@ function PhoneDateTimeScreen({
         </div>
 
         <div className="flex-1 overflow-y-auto px-3 py-[10px]">
-          <p className="mb-2 text-[11px] font-semibold text-foreground">Thu 15 · Available times</p>
+          <p className="mb-2 text-[11px] font-semibold text-white">Thu 15 · Available times</p>
           <div className="grid grid-cols-2 gap-1.5">
             {persona.slots.map((slot, i) => (
               <SlotButton
@@ -382,8 +382,8 @@ function PhoneDateTimeScreen({
         <div className="px-3 pb-[16px] pt-[10px]">
           <button
             type="button"
-            className="w-full rounded-xl py-[12px] text-[13px] font-semibold text-white shadow-md transition-[transform,background-color] duration-300 ease-out active:scale-[0.96] motion-reduce:active:scale-100"
-            style={{ backgroundColor: "var(--demo-accent)" }}
+            className="w-full rounded-xl bg-white py-[12px] text-[13px] font-semibold shadow-md transition-[transform,background-color] duration-300 ease-out active:scale-[0.96] motion-reduce:active:scale-100"
+            style={{ color: "var(--demo-accent)" }}
           >
             Continue · {selectedTime}
           </button>
@@ -411,25 +411,18 @@ function SlotButton({
       type="button"
       onClick={onSelect}
       className={`flex min-h-[34px] w-full items-center gap-1.5 rounded-lg border px-2 py-1.5 text-[10px] font-medium tabular-nums transition-[transform,background-color,border-color,box-shadow,color] duration-300 ease-out active:scale-[0.96] motion-reduce:active:scale-100 ${
-        selected ? "border-transparent text-white shadow-md" : "text-foreground"
+        selected ? "border-transparent bg-white shadow-md" : "text-white"
       }`}
       style={
         selected
-          ? { backgroundColor: "var(--demo-accent)" }
+          ? { color: "var(--demo-accent)" }
           : {
               backgroundColor: "var(--demo-slot)",
               borderColor: "var(--demo-slot-border)",
-              color: "var(--demo-accent)",
             }
       }
     >
-      {!selected ? (
-        <span
-          className="size-1.5 shrink-0 rounded-full"
-          style={{ backgroundColor: "var(--demo-accent)" }}
-          aria-hidden
-        />
-      ) : null}
+      {!selected ? <span className="size-1.5 shrink-0 rounded-full bg-white" aria-hidden /> : null}
       <span className="min-w-0 flex-1 truncate text-left">{label}</span>
       {selected ? <Icon name="check" className="shrink-0 text-[8px] opacity-90" /> : null}
     </button>
@@ -503,30 +496,27 @@ function CustomerBookingDesktop({
         </aside>
 
         <div
-          className="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)_minmax(0,11rem)] divide-x xl:grid-cols-[minmax(0,1fr)_minmax(0,12.5rem)]"
-          style={{
-            backgroundColor: "var(--demo-surface)",
-            ["borderColor" as string]: "var(--demo-slot-border)",
-          }}
+          className="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)_minmax(0,11rem)] divide-x divide-white/15 xl:grid-cols-[minmax(0,1fr)_minmax(0,12.5rem)]"
+          style={{ backgroundColor: "var(--demo-accent)" }}
         >
           <div
             className="p-3.5 xl:px-4"
             style={{ backgroundColor: "var(--demo-surface-deep)" }}
           >
             <div className="mb-3 flex items-center justify-between">
-              <span className="text-[11px] font-semibold text-foreground">May 2025</span>
-              <div className="flex gap-1" style={{ color: "var(--demo-accent)" }}>
-                <span className="flex size-6 items-center justify-center rounded-lg bg-white/50">
+              <span className="text-[11px] font-semibold text-white">May 2025</span>
+              <div className="flex gap-1 text-white">
+                <span className="flex size-6 items-center justify-center rounded-lg bg-white/15">
                   <Icon name="chevron-left" className="text-[9px]" />
                 </span>
-                <span className="flex size-6 items-center justify-center rounded-lg bg-white/50">
+                <span className="flex size-6 items-center justify-center rounded-lg bg-white/15">
                   <Icon name="chevron-right" className="text-[9px]" />
                 </span>
               </div>
             </div>
             <div className="grid grid-cols-7 gap-1 text-center">
               {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
-                <div key={d} className="pb-1 text-[8px] font-semibold tracking-wide text-foreground/50">
+                <div key={d} className="pb-1 text-[8px] font-semibold tracking-wide text-white/55">
                   {d}
                 </div>
               ))}
@@ -536,17 +526,12 @@ function CustomerBookingDesktop({
             </div>
           </div>
 
-          <div className="p-3.5 xl:px-4" style={{ backgroundColor: "var(--demo-surface)" }}>
+          <div className="p-3.5 xl:px-4" style={{ backgroundColor: "var(--demo-accent)" }}>
             <div className="mb-2 flex items-baseline justify-between gap-2">
-              <p className="text-xs font-semibold text-foreground">Thu 15</p>
-              <p className="text-[10px] font-medium" style={{ color: "var(--demo-accent)" }}>
-                Available times
-              </p>
+              <p className="text-xs font-semibold text-white">Thu 15</p>
+              <p className="text-[10px] font-medium text-white/75">Available times</p>
             </div>
-            <p
-              className="mb-1.5 text-[9px] font-semibold uppercase tracking-wide"
-              style={{ color: "var(--demo-accent)" }}
-            >
+            <p className="mb-1.5 text-[9px] font-semibold uppercase tracking-wide text-white/70">
               Morning
             </p>
             <div className="grid grid-cols-2 gap-1.5">
@@ -559,10 +544,7 @@ function CustomerBookingDesktop({
                 />
               ))}
             </div>
-            <p
-              className="mb-1.5 mt-2.5 text-[9px] font-semibold uppercase tracking-wide"
-              style={{ color: "var(--demo-accent)" }}
-            >
+            <p className="mb-1.5 mt-2.5 text-[9px] font-semibold uppercase tracking-wide text-white/70">
               Afternoon
             </p>
             <div className="grid grid-cols-2 gap-1.5">
@@ -603,8 +585,8 @@ function DemoFrame({
     <div
       className="relative aspect-[16/10] min-h-[300px] overflow-hidden rounded-2xl transition-[box-shadow,background-color] duration-700 ease-out"
       style={{
-        backgroundColor: `color-mix(in srgb, ${accent} 18%, white)`,
-        boxShadow: `0 16px 48px -16px color-mix(in srgb, ${accent} 55%, transparent), 0 0 0 1px color-mix(in srgb, ${accent} 28%, transparent)`,
+        backgroundColor: accent,
+        boxShadow: `0 18px 52px -14px color-mix(in srgb, ${accent} 70%, transparent), 0 0 0 1px color-mix(in srgb, ${accent} 40%, black)`,
       }}
     >
       <div className="absolute inset-0">{children}</div>
