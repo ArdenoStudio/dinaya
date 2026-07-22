@@ -15,10 +15,10 @@ export const upgradePlanGuide: DocsGuide = {
       visual: { type: "mockup", mockupId: "dashboard-billing" },
     },
     {
-      title: "Open Billing",
-      body: "In your dashboard, go to Settings → Billing. Choose monthly or annual billing for Starter, Pro, or Growth.",
+      title: "Open Plan & billing",
+      body: "In your dashboard, open Configure → Plan & billing. Choose monthly or annual billing for Starter, Pro, or Growth.",
       visual: { type: "mockup", mockupId: "dashboard-billing" },
-      highlightNav: "Settings",
+      highlightNav: "Plan & billing",
     },
     {
       title: "Pay with PayHere",

@@ -19,6 +19,8 @@ export const DASHBOARD_TARGETS = [
   "bookings-refund",
   "billing-upgrade",
   "integrations-connect",
+  "deals-new-deal",
+  "deals-row",
 ] as const;
 
 export const BOOKING_TARGETS = [

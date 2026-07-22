@@ -37,6 +37,8 @@ export type DocsMockupTarget =
   | "bookings-refund"
   | "billing-upgrade"
   | "integrations-connect"
+  | "deals-new-deal"
+  | "deals-row"
   | "booking-service-card"
   | "booking-time-slot"
   | "booking-confirm-pay"
@@ -62,10 +64,13 @@ export type DashboardNavHighlight =
   | "Reviews"
   | "Payments"
   | "Marketing"
+  | "Deals"
+  | "Broadcasts"
   | "AI Hub"
   | "Reports"
   | "Integrations"
   | "Automations"
+  | "Plan & billing"
   | "Settings";
 
 export type GuideStep = {

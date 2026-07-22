@@ -24,37 +24,32 @@ export default function DocsHubPage() {
 
   const walkthroughCues = [
     {
-      icon: "compass",
       label: "Choose a guide",
       text: "Start from a topic card, search result, or the docs sidebar.",
     },
     {
-      icon: "cursor-fill",
-      label: "Follow the pointer",
-      text: "Every walkthrough highlights the exact menu item, button, or field.",
+      label: "Watch the mark",
+      text: "Guided steps light up the exact menu item or button in the product preview.",
     },
     {
-      icon: "arrow-right-circle",
       label: "Move step by step",
-      text: "Use the large step buttons or Next to continue without getting lost.",
+      text: "Use Next when you are ready — each step stays focused on one action.",
     },
   ];
 
   return (
     <div className="pb-16">
-      <div className="relative mb-10 overflow-hidden rounded-3xl border border-gray-200 dark:border-neutral-800 bg-gradient-to-br from-white via-slate-50 to-blue-50/70 px-6 py-8 shadow-sm shadow-gray-900/5 dark:shadow-black/20">
-        <div className="pointer-events-none absolute -right-24 -top-24 h-56 w-56 rounded-full bg-blue-200/30 blur-3xl" />
+      <div className="relative mb-14 overflow-hidden rounded-[1.85rem] bg-[hsl(240_6%_97%)] px-6 py-10 shadow-[0_0_0_1px_rgba(0,0,0,0.05)] dark:bg-[hsl(240_6%_7%)] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.07)]">
         <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
           <div>
-            <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 dark:bg-blue-950/40 px-3 py-1 text-xs font-semibold text-blue-700">
-              <Icon name="book" className="text-xs" />
+            <p className="mb-3 text-[0.7rem] font-medium uppercase tracking-[0.1em] text-muted-foreground">
               Documentation
-            </span>
-            <h1 className="font-cal text-3xl tracking-tight text-balance text-gray-950 md:text-4xl">
+            </p>
+            <h1 className="font-cal text-3xl tracking-tight text-balance text-foreground md:text-[2.5rem] md:leading-tight">
               Learn Dinaya
             </h1>
-            <p className="mt-2 max-w-xl text-sm leading-relaxed text-pretty text-gray-600 dark:text-gray-400">
-              Step-by-step guides with UI walkthroughs for setup, operations, growth, and integrations.
+            <p className="mt-2.5 max-w-xl text-[15px] leading-relaxed text-pretty text-muted-foreground">
+              Clear guides with live product walkthroughs — setup, bookings, payments, and growth.
             </p>
           </div>
           <DocsAiActions
@@ -68,24 +63,22 @@ export default function DocsHubPage() {
         <DocsHeroPreview />
       </div>
 
-      <section className="mb-8 rounded-2xl border border-gray-200 dark:border-neutral-800 bg-white dark:border-neutral-800 dark:bg-neutral-900 p-3 shadow-sm shadow-gray-900/5 dark:shadow-black/20" aria-label="How documentation walkthroughs work">
-        <div className="grid gap-2 md:grid-cols-3">
+      <section className="mb-10" aria-label="How documentation walkthroughs work">
+        <div className="grid gap-6 md:grid-cols-3 md:gap-8">
           {walkthroughCues.map((cue, index) => (
-            <div key={cue.label} className="flex gap-3 rounded-xl border border-gray-100 dark:border-neutral-800 bg-gradient-to-b from-white to-gray-50/70 px-3 py-3">
-              <span className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-blue-100 bg-blue-50 dark:bg-blue-950/40 text-primary">
-                <Icon name={cue.icon} className="text-sm" />
-              </span>
-              <div>
-                <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                  {index + 1}. {cue.label}
-                </p>
-                <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{cue.text}</p>
-              </div>
+            <div key={cue.label} className="min-w-0">
+              <p className="text-[0.65rem] font-medium uppercase tracking-[0.1em] text-muted-foreground">
+                {String(index + 1).padStart(2, "0")}
+              </p>
+              <p className="mt-2 font-cal text-base tracking-tight text-gray-950 dark:text-white">
+                {cue.label}
+              </p>
+              <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{cue.text}</p>
             </div>
           ))}
         </div>
-        <p className="mt-3 text-center text-[11px] font-medium text-muted-foreground">
-          {allGuides.length} guides with {totalSteps} guided steps
+        <p className="mt-6 text-xs text-muted-foreground">
+          {allGuides.length} guides · {totalSteps} guided steps
         </p>
       </section>
 
@@ -153,19 +146,24 @@ export default function DocsHubPage() {
                   <Link
                     key={slug}
                     href={`/docs/guides/${slug}`}
-                    className="group overflow-hidden rounded-2xl border border-gray-200 dark:border-neutral-800 bg-gradient-to-br from-blue-50/50 to-white shadow-sm shadow-gray-900/5 dark:shadow-black/20 transition-[transform,box-shadow,border-color] duration-150 ease-out hover:border-primary/30 hover:shadow-md active:scale-[0.99] motion-reduce:active:scale-100"
+                    className="group overflow-hidden rounded-2xl bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.06),0_1px_2px_rgba(0,0,0,0.03),0_10px_24px_-14px_rgba(0,0,0,0.14)] transition-[transform,box-shadow] duration-150 ease-[cubic-bezier(0.2,0,0,1)] hover:shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_1px_2px_rgba(0,0,0,0.04),0_16px_32px_-14px_rgba(0,0,0,0.18)] active:scale-[0.99] motion-reduce:active:scale-100 dark:bg-neutral-900 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08)]"
                   >
-                    <DocsGuideThumbnail mockupId={getGuidePreviewMockupId(g)} className="rounded-none border-0 border-b" />
+                    <DocsGuideThumbnail
+                      mockupId={getGuidePreviewMockupId(g)}
+                      className="rounded-none rounded-t-2xl shadow-none"
+                    />
                     <div className="p-4">
-                    <p className="font-cal text-base tracking-tight">{g.title}</p>
-                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{g.description}</p>
+                    <p className="font-cal text-base tracking-tight text-balance">{g.title}</p>
+                    <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground text-pretty">
+                      {g.description}
+                    </p>
                     <div className="mt-3 flex items-center justify-between gap-3">
-                      <p className="text-[11px] text-primary font-medium">
+                      <p className="text-[11px] font-medium tabular-nums text-muted-foreground">
                         {g.estimatedMinutes} min · {g.steps.length} steps
                       </p>
-                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary group-hover:underline">
+                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary">
                         Open guide
-                        <Icon name="arrow-right" className="text-[10px]" />
+                        <Icon name="arrow-right" className="text-[10px] transition-transform duration-150 group-hover:translate-x-0.5" />
                       </span>
                     </div>
                     </div>

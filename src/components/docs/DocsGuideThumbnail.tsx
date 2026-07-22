@@ -1,9 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import { getScreenshotForMockup } from "@/lib/docs/visuals";
 import { cn } from "@/lib/utils";
-import { DocsPhoneFrame } from "./DocsPhoneFrame";
-import { DocsProductFrame } from "./DocsProductFrame";
 
 type Props = {
   mockupId?: string;
@@ -11,49 +10,22 @@ type Props = {
   className?: string;
 };
 
+/**
+ * Hub / related-guide thumbnail — bare product crop, no nested chrome or scale hacks.
+ */
 export function DocsGuideThumbnail({ mockupId, screenshotSrc, className }: Props) {
   const isBooking = mockupId?.startsWith("booking-");
   const screenshot = screenshotSrc ?? (mockupId ? getScreenshotForMockup(mockupId) : undefined);
 
-  if (screenshot && !isBooking) {
+  if (!screenshot) {
     return (
       <div
         className={cn(
-          "relative h-32 overflow-hidden rounded-xl border border-gray-200 dark:border-neutral-800/80 bg-gray-50 dark:bg-neutral-900/60 shadow-inner",
+          "flex h-32 items-center justify-center rounded-[0.9rem] bg-[hsl(240_6%_96%)] text-xs text-muted-foreground shadow-[0_0_0_1px_rgba(0,0,0,0.06)] dark:bg-[hsl(240_5%_8%)] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08)]",
           className,
         )}
       >
-        <DocsProductFrame src={screenshot} compact className="pointer-events-none h-full border-0 shadow-none" />
-      </div>
-    );
-  }
-
-  if (isBooking && mockupId) {
-    return (
-      <div
-        className={cn(
-          "relative flex h-32 items-end justify-center overflow-hidden rounded-xl border border-gray-200 dark:border-neutral-800/80 bg-gradient-to-b from-slate-50 to-white",
-          className,
-        )}
-      >
-        <div className="pointer-events-none origin-bottom scale-[0.42]">
-          <DocsPhoneFrame mockupId={mockupId} scale={0.55} />
-        </div>
-      </div>
-    );
-  }
-
-  if (mockupId) {
-    return (
-      <div
-        className={cn(
-          "relative h-32 overflow-hidden rounded-xl border border-gray-200 dark:border-neutral-800/80 bg-gray-50 dark:bg-neutral-900/60",
-          className,
-        )}
-      >
-        <div className="pointer-events-none origin-top-left scale-[0.48]">
-          <DocsProductFrame mockupId={mockupId} compact className="w-[208%] border-0 shadow-none" />
-        </div>
+        Guide preview
       </div>
     );
   }
@@ -61,11 +33,26 @@ export function DocsGuideThumbnail({ mockupId, screenshotSrc, className }: Props
   return (
     <div
       className={cn(
-        "flex h-32 items-center justify-center rounded-xl border border-dashed border-gray-200 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-900/60 text-xs text-muted-foreground",
+        "relative h-32 overflow-hidden rounded-[0.9rem] bg-[hsl(240_6%_96%)]",
+        "shadow-[0_0_0_1px_rgba(0,0,0,0.08)] dark:bg-[hsl(240_5%_8%)] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.1)]",
         className,
       )}
     >
-      Guide preview
+      <Image
+        src={screenshot}
+        alt=""
+        fill
+        unoptimized
+        className={cn(
+          isBooking ? "object-cover object-top" : "object-cover object-left-top",
+          "outline outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10",
+        )}
+        sizes="280px"
+      />
+      <div
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-black/[0.08] via-black/[0.02] to-transparent dark:from-black/45"
+        aria-hidden
+      />
     </div>
   );
 }

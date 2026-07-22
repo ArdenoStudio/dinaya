@@ -12,6 +12,9 @@ export const dinayaDealsGuide: DocsGuide = {
     {
       title: "Create a deal",
       body: "Open Dashboard → Deals → New deal. Choose the service, discount (10–50%), slot count, claim window, and appointment window.",
+      visual: { type: "mockup", mockupId: "dashboard-deals" },
+      highlightNav: "Deals",
+      highlightTarget: "deals-new-deal",
     },
     {
       title: "Get discovered",
@@ -22,11 +25,13 @@ export const dinayaDealsGuide: DocsGuide = {
     {
       title: "Track performance",
       body: "View aggregate deal analytics on Dashboard → Reports. Each deal shows impressions, redemptions, and conversion on the Deals page.",
-      highlightNav: "Reports",
+      visual: { type: "mockup", mockupId: "dashboard-deals" },
+      highlightTarget: "deals-row",
     },
     {
       title: "Smart suggestions (Growth)",
       body: "Growth and Managed Max plans receive demand-aware suggestions when Dinaya finds quiet slots from your bookings, history, and connected Google Calendar busy time. Publish in one click or customize before sending.",
+      visual: { type: "mockup", mockupId: "dashboard-deals" },
     },
   ],
 };

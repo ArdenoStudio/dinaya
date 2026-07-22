@@ -16,17 +16,25 @@
 
 ## Screenshots
 
+Guide walkthroughs, hub cards, and the docs hero **prefer real PNGs** from
+`public/docs/screenshots/` whenever a matching mockup ID exists. React mockups
+remain as a fallback (and for `/docs/preview/*` capture).
+
 Run with the dev server up:
 
 ```bash
-# Real dashboard (requires DATABASE_URL)
-PLAYWRIGHT_BASE_URL=http://localhost:3000 DOCS_CAPTURE_MODE=live npx tsx scripts/capture-docs-screenshots.ts
+# Real dashboard + booking (requires DATABASE_URL) — preferred for docs assets
+PLAYWRIGHT_BASE_URL=http://127.0.0.1:3001 DOCS_CAPTURE_MODE=live npm run docs:screenshots
 
-# Mockup previews (no database)
-PLAYWRIGHT_BASE_URL=http://localhost:3000 DOCS_CAPTURE_MODE=preview npx tsx scripts/capture-docs-screenshots.ts
+# Mockup previews only (no database)
+PLAYWRIGHT_BASE_URL=http://127.0.0.1:3001 DOCS_CAPTURE_MODE=preview npm run docs:screenshots
 ```
 
-Outputs to `public/docs/screenshots/`. Then switch a guide step to:
+Live mode registers a demo business, seeds services/staff/availability, then
+captures dashboard pages at desktop size and the public booking flow at phone size.
+
+Guides can keep `visual: { type: "mockup", mockupId: "dashboard-bookings" }` —
+the walkthrough renders the matching screenshot automatically. Explicit:
 
 ```ts
 visual: { type: "screenshot", src: "/docs/screenshots/dashboard-bookings.png" }
@@ -47,15 +55,20 @@ Rendered by `DocsRichText` in the walkthrough.
 | Component | Purpose |
 |-----------|---------|
 | `DocsProductFrame` | Branded browser chrome + dashboard mockup or screenshot |
-| `DocsPhoneFrame` | iPhone frame for booking flow mockups |
+| `DocsPhoneFrame` | iPhone frame for booking flow mockups or mobile screenshots |
 | `DocsSpotlight` | Dims non-highlighted areas during walkthrough steps |
 | `DocsGuideThumbnail` | Scaled preview for docs hub and related-guide cards |
-| `DocsHeroPreview` | Rotating hero mockup on `/docs` |
+| `DocsHeroPreview` | Rotating hero screenshot/mockup on `/docs` |
 
 Optional `thumbnailMockupId` on `DocsGuide` overrides the hub card preview.
 
 ## Maintenance
 
-When dashboard UI changes, update mockups in `src/components/docs/mockups/` or re-run the screenshot script.
+When dashboard UI changes:
+
+1. Update `dashboard-nav-layout.ts` to mirror `dashboardRouteGroups` (mockup fallback).
+2. Re-run **live** screenshot capture so hub/walkthrough PNGs match the real UI.
+3. Optionally refresh mockup chrome in `src/components/docs/mockups/` for preview fallback.
+4. Keep guide steps on `type: "mockup"` mockup IDs — screenshots are resolved automatically.
 
 CI: trigger the **Docs screenshots** workflow manually after dashboard UI changes (requires `DATABASE_URL` and `AUTH_SECRET` secrets).

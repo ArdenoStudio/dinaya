@@ -2,13 +2,13 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import type { GuideStep } from "@content/docs/types";
-import { docsSpring } from "@/lib/docs/design-tokens";
+import { docsEase } from "@/lib/docs/design-tokens";
+import { getScreenshotForMockup } from "@/lib/docs/visuals";
 import { DocsRichText } from "@/lib/docs/rich-text";
 import { DocsPhoneFrame } from "./DocsPhoneFrame";
 import { DocsProductFrame } from "./DocsProductFrame";
-import { DocsCallout } from "./DocsCallout";
 import { Icon } from "@/components/ui/Icon";
 
 type Props = {
@@ -37,6 +37,8 @@ const CLICK_TARGET_LABELS = {
   "bookings-refund": "Refund action",
   "billing-upgrade": "Upgrade button",
   "integrations-connect": "Connect button",
+  "deals-new-deal": "New deal button",
+  "deals-row": "deal row",
   "booking-service-card": "service card",
   "booking-time-slot": "time slot",
   "booking-confirm-pay": "Confirm & Pay button",
@@ -45,72 +47,71 @@ const CLICK_TARGET_LABELS = {
   "booking-cancel": "Cancel button",
 } satisfies Record<HighlightTarget, string>;
 
+function resolveStepSrc(step: GuideStep): string | undefined {
+  if (!step.visual) return undefined;
+  if (step.visual.type === "screenshot") return step.visual.src;
+  if (step.visual.type === "mockup") return getScreenshotForMockup(step.visual.mockupId);
+  return undefined;
+}
+
 function StepVisual({ step }: { step: GuideStep }) {
-  if (!step.visual) {
+  const src = resolveStepSrc(step);
+  if (!src) {
     return (
-      <div className="flex aspect-[16/10] items-center justify-center rounded-2xl border border-dashed border-gray-200 dark:border-neutral-800 bg-gradient-to-b from-gray-50 to-white text-sm text-muted-foreground">
+      <div className="flex aspect-[16/10] items-center justify-center rounded-2xl bg-[hsl(240_6%_96%)] text-sm text-muted-foreground shadow-[0_0_0_1px_rgba(0,0,0,0.06)] dark:bg-[hsl(240_5%_10%)]">
         Follow the steps on the left
       </div>
     );
   }
 
-  if (step.visual.type === "mockup") {
-    if (step.visual.mockupId.startsWith("booking-")) {
-      return (
-        <DocsPhoneFrame
-          mockupId={step.visual.mockupId}
-          highlightTarget={step.highlightTarget}
-        />
-      );
-    }
+  const isBooking =
+    src.includes("booking-") ||
+    (step.visual?.type === "mockup" && step.visual.mockupId.startsWith("booking-"));
+
+  if (isBooking) {
     return (
-      <DocsProductFrame
-        mockupId={step.visual.mockupId}
-        highlightNav={step.highlightNav}
+      <DocsPhoneFrame
+        src={src}
+        alt={step.title}
         highlightTarget={step.highlightTarget}
-      />
-    );
-  }
-
-  if (step.visual.type === "screenshot") {
-    return (
-      <DocsProductFrame
-        src={step.visual.src}
-        alt={step.visual.alt}
         hotspots={step.hotspots}
+        staged
+        scale={0.82}
       />
     );
   }
 
-  return null;
+  return (
+    <DocsProductFrame
+      src={src}
+      alt={step.title}
+      highlightNav={step.highlightNav}
+      highlightTarget={step.highlightTarget}
+      hotspots={step.hotspots}
+      staged
+    />
+  );
 }
 
 function getStepActionHint(step: GuideStep) {
   const targetLabel = step.highlightTarget ? CLICK_TARGET_LABELS[step.highlightTarget] : null;
-  const hotspotLabel = step.hotspots?.find((hotspot) => hotspot.label)?.label ?? null;
 
   if (step.highlightNav && targetLabel) {
-    return `Open ${step.highlightNav} in the dashboard side menu, then use the highlighted ${targetLabel}.`;
+    return `Open ${step.highlightNav} in the side menu, then use the highlighted ${targetLabel}.`;
   }
-
   if (step.highlightNav) {
-    return `Open ${step.highlightNav} in the dashboard side menu. The pointer marks it in the preview.`;
+    return `Open ${step.highlightNav} in the dashboard side menu — marked in the preview.`;
   }
-
   if (targetLabel) {
     return `Use the highlighted ${targetLabel}.`;
   }
-
-  if (hotspotLabel) {
-    return `Use the highlighted ${hotspotLabel}.`;
-  }
-
-  return "Read this step first, then continue to the next guided action.";
+  return null;
 }
 
 export function UiWalkthrough({ steps }: Props) {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const reduceMotion = useReducedMotion();
   const initial = Math.min(
     Math.max(0, parseInt(searchParams.get("step") ?? "0", 10) || 0),
     steps.length - 1,
@@ -142,130 +143,149 @@ export function UiWalkthrough({ steps }: Props) {
   const progress = ((activeStep + 1) / steps.length) * 100;
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-2">
-        <div className="flex items-center justify-between gap-4">
-          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+    <div className="grid items-start gap-8 lg:grid-cols-[minmax(17rem,0.62fr)_minmax(0,1.55fr)] lg:gap-10">
+      {/* Copy column */}
+      <div className="order-2 space-y-5 lg:order-1">
+        <div className="flex items-center gap-3">
+          <p className="shrink-0 text-[0.7rem] font-medium uppercase tracking-[0.1em] text-muted-foreground tabular-nums">
             Step {activeStep + 1} of {steps.length}
           </p>
-          <div className="flex gap-1">
-            {steps.map((_, i) => (
+          <div className="h-px w-16 overflow-hidden bg-black/[0.08] dark:bg-white/[0.1]">
+            <motion.div
+              className="h-full bg-foreground/50"
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 0.25, ease: docsEase }}
+            />
+          </div>
+        </div>
+
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={activeStep}
+            initial={reduceMotion ? false : { opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={reduceMotion ? undefined : { opacity: 0, y: -4 }}
+            transition={{ duration: 0.22, ease: docsEase }}
+          >
+            <h2 className="font-cal text-2xl tracking-tight text-balance text-foreground">
+              {step.title}
+            </h2>
+            <DocsRichText
+              text={step.body}
+              className="mt-3 text-[15px] leading-relaxed text-muted-foreground text-pretty"
+            />
+            {actionHint ? (
+              <p className="mt-4 text-sm leading-relaxed text-foreground/70">
+                <span className="font-medium text-foreground">Look for: </span>
+                {actionHint}
+              </p>
+            ) : null}
+          </motion.div>
+        </AnimatePresence>
+
+        <ol className="hidden space-y-1 lg:block" aria-label="Walkthrough steps">
+          {steps.map((item, i) => {
+            const done = i < activeStep;
+            const current = i === activeStep;
+            return (
+              <li key={item.title}>
+                <button
+                  type="button"
+                  aria-current={current ? "step" : undefined}
+                  onClick={() => goTo(i)}
+                  className={`flex w-full min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-[background-color,color,transform] duration-150 ease-[cubic-bezier(0.2,0,0,1)] active:scale-[0.98] motion-reduce:active:scale-100 ${
+                    current
+                      ? "bg-foreground/[0.06] text-foreground dark:bg-white/[0.08]"
+                      : "text-foreground/55 hover:bg-foreground/[0.03] hover:text-foreground"
+                  }`}
+                >
+                  <span
+                    className={`flex size-6 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold tabular-nums ${
+                      current
+                        ? "bg-foreground text-background"
+                        : done
+                          ? "bg-foreground/15 text-foreground/70"
+                          : "bg-foreground/[0.06] text-foreground/45"
+                    }`}
+                  >
+                    {done && !current ? <Icon name="check" className="text-[10px]" /> : i + 1}
+                  </span>
+                  <span className="min-w-0 text-sm font-medium leading-snug line-clamp-2 text-pretty">
+                    {item.title}
+                  </span>
+                </button>
+              </li>
+            );
+          })}
+        </ol>
+
+        <div className="-mx-1 overflow-x-auto px-1 pb-1 lg:hidden">
+          <div className="flex min-w-max gap-1.5" aria-label="Walkthrough steps">
+            {steps.map((item, i) => (
               <button
-                key={i}
+                key={item.title}
                 type="button"
-                aria-label={`Go to step ${i + 1}`}
+                aria-current={i === activeStep ? "step" : undefined}
                 onClick={() => goTo(i)}
-                className={`h-1.5 rounded-full transition-[width,background-color] duration-200 ${
-                  i === activeStep ? "w-6 bg-primary" : "w-1.5 bg-gray-300 hover:bg-gray-400"
+                className={`flex h-12 min-w-[2.75rem] shrink-0 items-center justify-center gap-2 rounded-full px-3.5 text-xs font-medium transition-[background-color,color,transform] duration-150 ease-[cubic-bezier(0.2,0,0,1)] active:scale-[0.96] ${
+                  i === activeStep
+                    ? "bg-foreground text-background"
+                    : "bg-foreground/[0.06] text-foreground/60"
                 }`}
-              />
+              >
+                <span className="tabular-nums">{i + 1}</span>
+                {i === activeStep ? (
+                  <span className="max-w-[8rem] truncate">{item.title}</span>
+                ) : null}
+              </button>
             ))}
           </div>
         </div>
-        <div className="h-1 overflow-hidden rounded-full bg-gray-100 dark:bg-neutral-800">
+
+        <div className="flex flex-wrap gap-2 pt-1">
+          <button
+            type="button"
+            disabled={activeStep === 0}
+            onClick={() => goTo(activeStep - 1)}
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-white px-3.5 py-2 text-sm font-medium shadow-[0_0_0_1px_rgba(0,0,0,0.08)] transition-[transform,background-color] duration-150 ease-[cubic-bezier(0.2,0,0,1)] active:scale-[0.96] motion-reduce:active:scale-100 disabled:opacity-35 hover:bg-foreground/[0.03] dark:bg-neutral-900 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.1)]"
+          >
+            <Icon name="arrow-left" className="text-xs" />
+            Previous
+          </button>
+          {activeStep < steps.length - 1 ? (
+            <button
+              type="button"
+              onClick={() => goTo(activeStep + 1)}
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-primary px-3.5 py-2 pr-3 text-sm font-medium text-white transition-[transform,background-color] duration-150 ease-[cubic-bezier(0.2,0,0,1)] hover:bg-primary/90 active:scale-[0.96] motion-reduce:active:scale-100"
+            >
+              Next
+              <Icon name="arrow-right" className="text-xs" />
+            </button>
+          ) : (
+            <a
+              href="/docs"
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-primary px-3.5 py-2 pr-3 text-sm font-medium text-white transition-[transform,background-color] duration-150 ease-[cubic-bezier(0.2,0,0,1)] hover:bg-primary/90 active:scale-[0.96] motion-reduce:active:scale-100"
+            >
+              Back to docs
+            </a>
+          )}
+        </div>
+      </div>
+
+      {/* Visual — tops align with copy; fills its column */}
+      <div className="order-1 min-w-0 lg:order-2 lg:sticky lg:top-24">
+        <AnimatePresence mode="wait" initial={false}>
           <motion.div
-            className="h-full rounded-full bg-primary"
-            animate={{ width: `${progress}%` }}
-            transition={docsSpring}
-          />
-        </div>
-      </div>
-
-      <div className="-mx-1 overflow-x-auto px-1 pb-1">
-        <div className="flex min-w-max gap-2" aria-label="Walkthrough step list">
-          {steps.map((item, i) => (
-            <button
-              key={item.title}
-              type="button"
-              aria-current={i === activeStep ? "step" : undefined}
-              onClick={() => goTo(i)}
-              className={`flex h-16 w-40 shrink-0 items-start gap-2 rounded-xl border px-3 py-2 text-left transition-[transform,box-shadow,border-color,background-color] duration-150 ease-out active:scale-[0.99] motion-reduce:active:scale-100 ${
-                i === activeStep
-                  ? "border-primary bg-primary/5 shadow-sm shadow-primary/10"
-                  : "border-gray-200 dark:border-neutral-800 bg-white shadow-sm shadow-gray-900/5 dark:shadow-black/20 hover:border-primary/30 hover:bg-gray-50 dark:bg-neutral-900/60"
-              }`}
-            >
-              <span
-                className={`flex size-6 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold tabular-nums ${
-                  i === activeStep ? "bg-primary text-white" : "bg-gray-100 dark:bg-neutral-800 text-gray-600 dark:text-gray-400"
-                }`}
-              >
-                {i + 1}
-              </span>
-              <span className="min-w-0">
-                <span className="block text-xs font-semibold leading-snug text-gray-900 dark:text-gray-100 line-clamp-2 text-pretty">
-                  {item.title}
-                </span>
-              </span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="grid gap-8 rounded-2xl border border-gray-200 dark:border-neutral-800 bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5 shadow-sm shadow-gray-900/5 dark:shadow-black/20 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:items-start">
-        <div className="order-2 lg:order-1">
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={activeStep}
-              initial={{ opacity: 0, x: -8 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 8 }}
-              transition={{ duration: 0.22, ease: "easeOut" }}
-            >
-              <h2 className="font-cal text-xl tracking-tight text-balance text-gray-950">{step.title}</h2>
-              <DocsRichText
-                text={step.body}
-                className="mt-3 text-sm leading-relaxed text-muted-foreground"
-              />
-              <DocsCallout variant="tip" className="mt-4">
-                {actionHint}
-              </DocsCallout>
-            </motion.div>
-          </AnimatePresence>
-
-          <div className="mt-6 flex flex-wrap gap-2">
-            <button
-              type="button"
-              disabled={activeStep === 0}
-              onClick={() => goTo(activeStep - 1)}
-              className="inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-sm font-medium transition-transform duration-150 ease-out active:scale-[0.96] motion-reduce:active:scale-100 disabled:opacity-40 hover:bg-gray-50 dark:bg-neutral-900/60"
-            >
-              <Icon name="arrow-left" className="text-xs" />
-              Previous
-            </button>
-            {activeStep < steps.length - 1 ? (
-              <button
-                type="button"
-                onClick={() => goTo(activeStep + 1)}
-                className="inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white transition-[transform,background-color] duration-150 ease-out hover:bg-primary/90 active:scale-[0.96] motion-reduce:active:scale-100"
-              >
-                Next
-                <Icon name="arrow-right" className="text-xs" />
-              </button>
-            ) : (
-              <a
-                href="/docs"
-                className="inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white transition-[transform,background-color] duration-150 ease-out hover:bg-primary/90 active:scale-[0.96] motion-reduce:active:scale-100"
-              >
-                Back to docs
-              </a>
-            )}
-          </div>
-        </div>
-
-        <div className="order-1 lg:order-2 lg:sticky lg:top-28">
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={`visual-${activeStep}`}
-              initial={{ opacity: 0, y: 10, scale: 0.99 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -6, scale: 0.99 }}
-              transition={docsSpring}
-            >
-              <StepVisual step={step} />
-            </motion.div>
-          </AnimatePresence>
-        </div>
+            key={`visual-${activeStep}`}
+            initial={reduceMotion ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={reduceMotion ? undefined : { opacity: 0 }}
+            transition={{ duration: 0.28, ease: docsEase }}
+            className="w-full"
+          >
+            <StepVisual step={step} />
+          </motion.div>
+        </AnimatePresence>
       </div>
     </div>
   );
