@@ -381,13 +381,18 @@ function DemoFrame({ children }: { children: ReactNode }) {
   );
 }
 
-export default function ProductMockup() {
+export default function ProductMockup({
+  variant = "default",
+}: {
+  variant?: "default" | "hero";
+}) {
   const [selectedSlot, setSelectedSlot] = useState(INITIAL_SELECTED_SLOT);
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   const screenBg = mounted && resolvedTheme === "dark" ? "#000000" : "#f4f4f5";
   const persona = primaryPersona;
+  const isHero = variant === "hero";
 
   const mobileScale = 0.72 * DEMO_SCALE;
   const mobileOuterWidth = 417;
@@ -396,10 +401,16 @@ export default function ProductMockup() {
   const mobileScaledHeight = Math.round(mobileOuterHeight * mobileScale);
 
   return (
-    <section className="relative mx-auto max-w-[77rem] overflow-x-clip px-6 pb-16 md:px-12 lg:px-16">
-      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden="true">
-        <div className="absolute top-1/2 left-1/2 h-[320px] w-[480px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-50/80 blur-2xl dark:bg-blue-950/20" />
-      </div>
+    <section
+      className={`relative mx-auto max-w-[77rem] overflow-x-clip px-6 md:px-12 lg:px-16 ${
+        isHero ? "pb-10 md:pb-14" : "pb-16"
+      }`}
+    >
+      {!isHero ? (
+        <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden="true">
+          <div className="absolute top-1/2 left-1/2 h-[320px] w-[480px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-50/80 blur-2xl dark:bg-blue-950/20" />
+        </div>
+      ) : null}
 
       <div className="flex flex-col items-center md:hidden">
         <div
