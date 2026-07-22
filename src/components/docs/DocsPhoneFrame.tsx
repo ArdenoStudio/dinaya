@@ -5,7 +5,7 @@ import { useTheme } from "next-themes";
 import type { DocsHotspot as DocsHotspotType, DocsMockupTarget } from "@content/docs/types";
 import IPhoneMockup from "@/components/ui/iphone-mockup";
 import { docsFloorShadow, docsStageSurface } from "@/lib/docs/design-tokens";
-import { resolveHighlightRects } from "@/lib/docs/highlight-rects";
+import { resolveHighlightRects, shotIdFromSrc } from "@/lib/docs/highlight-rects";
 import { cn } from "@/lib/utils";
 import { DocsHotspot } from "./DocsHotspot";
 import { DocsScreenshotHighlight } from "./DocsScreenshotHighlight";
@@ -35,7 +35,10 @@ export function DocsPhoneFrame({
 }: Props) {
   const { resolvedTheme } = useTheme();
   const screenBg = resolvedTheme === "dark" ? "#0a0a0a" : "#f6f7fb";
-  const rects = resolveHighlightRects({ highlightTarget });
+  const rects = resolveHighlightRects({
+    highlightTarget,
+    shotId: shotIdFromSrc(src),
+  });
 
   const phone = (
     <div className={cn("relative mx-auto w-fit", className)}>

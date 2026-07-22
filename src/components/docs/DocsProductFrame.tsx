@@ -3,7 +3,7 @@
 import Image from "next/image";
 import type { DashboardNavHighlight, DocsHotspot, DocsMockupTarget } from "@content/docs/types";
 import { docsShotShadow, docsStageSurface } from "@/lib/docs/design-tokens";
-import { resolveHighlightRects } from "@/lib/docs/highlight-rects";
+import { resolveHighlightRects, shotIdFromSrc } from "@/lib/docs/highlight-rects";
 import { cn } from "@/lib/utils";
 import { DocsHotspot as HotspotOverlay } from "./DocsHotspot";
 import { DocsScreenshotHighlight } from "./DocsScreenshotHighlight";
@@ -33,7 +33,11 @@ export function DocsProductFrame({
   compact = false,
   staged = false,
 }: Props) {
-  const rects = resolveHighlightRects({ highlightNav, highlightTarget });
+  const rects = resolveHighlightRects({
+    highlightNav,
+    highlightTarget,
+    shotId: shotIdFromSrc(src),
+  });
   const hasHighlight = rects.length > 0;
 
   const shot = (

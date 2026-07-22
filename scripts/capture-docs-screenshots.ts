@@ -186,6 +186,19 @@ async function settle(page: Page, ready?: RegExp) {
   await hideDevChrome(page);
 }
 
+/** Scroll the active sidebar row into view so below-fold items (AI, Settings, …) appear in shots. */
+async function scrollActiveNavIntoView(page: Page) {
+  await page.evaluate(`(() => {
+    var active = document.querySelector('aside [aria-current="page"]');
+    var nav = document.querySelector('aside nav');
+    if (!active || !nav) return;
+    var top = active.offsetTop - nav.clientHeight / 2 + active.offsetHeight / 2;
+    nav.scrollTop = Math.max(0, top);
+    active.scrollIntoView({ block: "center", inline: "nearest" });
+  })()`);
+  await page.waitForTimeout(250);
+}
+
 async function freezeCleanDom(page: Page) {
   // String form avoids tsx injecting `__name` helpers into the browser context.
   // Clone body after scrub so React cannot rehydrate localhost into the shot.
@@ -222,13 +235,48 @@ async function freezeCleanDom(page: Page) {
         node.setAttribute("href", rewrite(href));
       }
     });
+    // Cloning can change flex/overflow math — re-scroll active nav on the clone.
+    var activeLabel =
+      (document.querySelector('aside [aria-current="page"]') &&
+        document.querySelector('aside [aria-current="page"]').textContent) ||
+      "";
     document.body.replaceWith(clone);
+    var clonedNav = document.querySelector("aside nav");
+    var clonedActive = document.querySelector('aside [aria-current="page"]');
+    if (!clonedActive && activeLabel && clonedNav) {
+      var spans = clonedNav.querySelectorAll("span");
+      for (var s = 0; s < spans.length; s++) {
+        if ((spans[s].textContent || "").trim() === activeLabel.trim()) {
+          clonedActive = spans[s].closest("a, button") || spans[s];
+          break;
+        }
+      }
+    }
+    if (clonedNav && clonedActive) {
+      var top =
+        clonedActive.offsetTop - clonedNav.clientHeight / 2 + clonedActive.offsetHeight / 2;
+      clonedNav.scrollTop = Math.max(0, top);
+      if (typeof clonedActive.scrollIntoView === "function") {
+        clonedActive.scrollIntoView({ block: "center", inline: "nearest" });
+      }
+    }
   })()`);
 }
 
-async function screenshotPage(page: Page, name: string) {
+async function screenshotPage(
+  page: Page,
+  name: string,
+  opts: { freeze?: boolean } = {},
+) {
+  const freeze = opts.freeze !== false;
   await hideDevChrome(page);
-  await freezeCleanDom(page);
+  if (name.startsWith("dashboard-")) {
+    await scrollActiveNavIntoView(page);
+  }
+  // freezeCleanDom replaces <body> — only use when no further interaction is needed.
+  if (freeze) {
+    await freezeCleanDom(page);
+  }
   const file = path.join(outDir, `${name}.png`);
   await page.screenshot({ path: file, fullPage: false });
   console.log(`Saved ${file}`);
@@ -409,6 +457,24 @@ async function capturePreviewMockup(page: Page, mockupId: string) {
   console.log(`Saved ${file} (preview mockup)`);
 }
 
+/**
+ * Capture booking manage/review as bare screen content (no phone bezel).
+ * DocsPhoneFrame adds the bezel in the guide UI — capturing a framed mockup
+ * would nest phones. Bypass DocsMockupCapture's screenshot short-circuit.
+ */
+async function captureBookingScreenMockup(page: Page, mockupId: "booking-manage" | "booking-review") {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(`${baseURL}/dev/docs-preview/${mockupId}?screenOnly=1`, {
+    waitUntil: "domcontentloaded",
+  });
+  await page.waitForSelector("[data-docs-capture-root] [data-booking-theme]");
+  await settle(page);
+  const root = page.locator("[data-docs-capture-root]");
+  const file = path.join(outDir, `${mockupId}.png`);
+  await root.screenshot({ path: file });
+  console.log(`Saved ${file} (booking screen mockup)`);
+}
+
 async function captureBookingFlow(page: Page, slug: string) {
   const bookingContext = page.context();
   const phone = await bookingContext.newPage();
@@ -418,41 +484,89 @@ async function captureBookingFlow(page: Page, slug: string) {
 
   await phone.goto(bookBase, { waitUntil: "domcontentloaded" });
   await settle(phone, /Select a service|Choose a service|services/i);
-  await screenshotPage(phone, "booking-service");
+  if (shouldCapture("booking-service")) {
+    // Don't freeze — service cards are buttons and we still need to click through.
+    await screenshotPage(phone, "booking-service", { freeze: false });
+  }
 
-  // Open the first service detail / booking flow.
-  const serviceLink = phone.locator("a[href*='/book/']").filter({ hasText: /LKR|min/i }).first();
-  if (await serviceLink.count()) {
-    await serviceLink.click().catch(() => undefined);
+  // Hub cards are <button>; deep-link fallback exists for some services.
+  const serviceButton = phone
+    .locator("button")
+    .filter({ hasText: /LKR|Rs\.?/i })
+    .first();
+  const serviceLink = phone.locator(`a[href^="/book/${slug}/"]`).first();
+  if ((await serviceButton.count()) > 0) {
+    await serviceButton.click();
+  } else if ((await serviceLink.count()) > 0) {
+    await serviceLink.click();
   } else {
-    await phone
-      .locator("button, a, [role='button']")
-      .filter({ hasText: /haircut|Buzz|Layer|LKR/i })
-      .first()
-      .click()
-      .catch(() => undefined);
+    throw new Error("No booking service control found for capture");
   }
-  await settle(phone, /time|date|staff|available|Pick|Continue/i);
-  await screenshotPage(phone, "booking-time");
+  await phone
+    .waitForURL(new RegExp(`/book/${slug}/[^/]+`), { timeout: 30_000 })
+    .catch(() => undefined);
+  await settle(phone, /time|date|staff|available|Pick|Continue|When|slot|Select a time|Pick a date/i);
 
-  const slot = phone.locator("button").filter({ hasText: /^\d{1,2}:\d{2}/ }).first();
-  if (await slot.count()) {
-    await slot.click().catch(() => undefined);
-    await settle(phone);
+  // Mobile flow hides slots behind an "Available times" sheet trigger.
+  const openSlots = phone
+    .locator("button:has-text('Available times'), [role='button']:has-text('Available times')")
+    .first();
+  if (await openSlots.count()) {
+    await openSlots.click({ force: true }).catch(() => undefined);
+    await phone.waitForTimeout(700);
   }
 
-  const toConfirm = phone.getByRole("button", { name: /continue|next|confirm|details|book/i }).first();
-  if (await toConfirm.count()) {
-    await toConfirm.click().catch(() => undefined);
-    await settle(phone);
+  if (shouldCapture("booking-time")) {
+    await screenshotPage(phone, "booking-time", { freeze: false });
   }
-  await screenshotPage(phone, "booking-confirm");
 
-  // Manage / review need real booking tokens — use polished phone mockups instead of 404s.
-  await capturePreviewMockup(page, "booking-manage");
-  await capturePreviewMockup(page, "booking-review");
+  // Sheet slots often report as not visible to Playwright — click via DOM.
+  // Retry once if the confirm form did not appear (sheet can close without selecting).
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const clickedSlot = await phone.evaluate(`(() => {
+      var btn = Array.prototype.find.call(document.querySelectorAll("button"), function (b) {
+        return /^\\d{1,2}:\\d{2}/.test((b.textContent || "").trim());
+      });
+      if (!btn) return false;
+      btn.click();
+      return true;
+    })()`);
+    if (!clickedSlot) {
+      console.warn("No time slot button found — booking-confirm may still be on time step");
+      break;
+    }
+    await phone.waitForTimeout(1200);
+    const onConfirm = await phone.evaluate(`(() => {
+      return Array.prototype.some.call(document.querySelectorAll("button"), function (b) {
+        return /Confirm booking/i.test(b.textContent || "");
+      });
+    })()`);
+    if (onConfirm) break;
+    if (attempt === 0) {
+      const reopen = phone
+        .locator("button:has-text('Available times'), [role='button']:has-text('Available times')")
+        .first();
+      if (await reopen.count()) {
+        await reopen.click({ force: true }).catch(() => undefined);
+        await phone.waitForTimeout(700);
+      }
+    }
+  }
+  await settle(phone, /confirm|pay|details|name|phone|Your details|Review|Confirm booking/i);
+  if (shouldCapture("booking-confirm")) {
+    await screenshotPage(phone, "booking-confirm", { freeze: false });
+  }
+
+  // Manage / review need real booking tokens — bare screen mockups (no nested bezel).
+  if (shouldCapture("booking-manage")) {
+    await captureBookingScreenMockup(page, "booking-manage");
+  }
+  if (shouldCapture("booking-review")) {
+    await captureBookingScreenMockup(page, "booking-review");
+  }
 
   await phone.close();
+  await page.setViewportSize({ width: 1280, height: 800 });
 }
 
 async function capturePreview(page: Page) {
