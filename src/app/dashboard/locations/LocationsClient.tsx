@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
 import { Icon } from "@/components/ui/Icon";
-import { dashboardPrimaryActionClass } from "@/lib/dashboard-ui";
+import { dashboardPageClass, dashboardPrimaryActionClass } from "@/lib/dashboard-ui";
 
 type LocationRow = {
   id: string;
@@ -94,29 +95,31 @@ export default function LocationsClient({ plan, locationLimit }: Props) {
   }
 
   return (
-    <div>
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="font-cal text-2xl">Locations</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+    <div className={dashboardPageClass}>
+      <DashboardPageHeader
+        title="Locations"
+        description={
+          <>
             Manage branches for your booking page and dashboard.
             {locationLimit !== null && (
               <span className="ml-1">
                 ({locations.length}/{locationLimit} on {plan} plan)
               </span>
             )}
-          </p>
-        </div>
-        {!atLimit && (
-          <button
-            type="button"
-            onClick={() => setShowForm((v) => !v)}
-            className={dashboardPrimaryActionClass}
-          >
-            <Icon name="plus" className="text-xs" /> Add location
-          </button>
-        )}
-      </div>
+          </>
+        }
+        actions={
+          !atLimit ? (
+            <button
+              type="button"
+              onClick={() => setShowForm((v) => !v)}
+              className={dashboardPrimaryActionClass}
+            >
+              <Icon name="plus" className="text-xs" /> Add location
+            </button>
+          ) : undefined
+        }
+      />
 
       {atLimit && (
         <div className="mb-4 rounded-lg border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-950/40 px-4 py-3 text-sm text-amber-900 dark:text-amber-200">
@@ -129,7 +132,7 @@ export default function LocationsClient({ plan, locationLimit }: Props) {
       )}
 
       {showForm && (
-        <form onSubmit={handleCreate} className="mb-6 rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-6 space-y-4 max-w-lg">
+        <form onSubmit={handleCreate} className="mb-6 max-w-lg space-y-4 rounded-2xl border border-border/80 bg-card p-6 shadow-sm">
           <h2 className="font-medium">New branch</h2>
           <div>
             <label className="text-sm font-medium">Name *</label>
@@ -176,11 +179,11 @@ export default function LocationsClient({ plan, locationLimit }: Props) {
       {loading ? (
         <p className="text-sm text-muted-foreground">Loading…</p>
       ) : locations.length === 0 ? (
-        <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-12 text-center text-muted-foreground">
+        <div className="rounded-2xl border border-border/80 bg-card p-12 text-center text-muted-foreground shadow-sm">
           No locations yet. Add your first branch to get started.
         </div>
       ) : (
-        <div className="divide-y rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
+        <div className="divide-y rounded-2xl border border-border/80 bg-card shadow-sm">
           {locations.map((loc) => (
             <div key={loc.id} className="flex flex-wrap items-center gap-4 px-5 py-4 hover:bg-muted/20">
               <div className="min-w-0 flex-1">

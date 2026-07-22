@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
+import { dashboardPageClass } from "@/lib/dashboard-ui";
 import { AI_FEATURES, AI_FEATURE_META, type AiFeatureKey } from "@/lib/plan-features";
 
 function parseLocationAiConfig(raw: unknown): Record<string, boolean> {
@@ -177,19 +179,17 @@ export default function AiHubClient() {
   );
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="font-cal text-2xl">AI Growth Hub</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Configure Growth AI tools per branch. Branch-level workflow controls are included.
-        </p>
-      </div>
+    <div className={dashboardPageClass}>
+      <DashboardPageHeader
+        title="AI Growth Hub"
+        description="Configure Growth AI tools per branch. Branch-level workflow controls are included."
+      />
 
       {error && <p className="text-sm text-destructive">{error}</p>}
 
       {messagingReadyHint}
 
-      <section className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
+      <section className="rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <h2 className="font-semibold">Client Reactivation Campaign</h2>
@@ -229,7 +229,7 @@ export default function AiHubClient() {
       </section>
 
       {locations.length === 0 ? (
-        <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-8 text-center text-muted-foreground">
+        <div className="rounded-2xl border border-border/80 bg-card p-8 text-center text-muted-foreground shadow-sm">
           Add a location first to configure branch AI.{" "}
           <Link href="/dashboard/locations" className="text-primary hover:underline">
             Manage locations
@@ -238,7 +238,7 @@ export default function AiHubClient() {
       ) : (
         <div className="grid gap-6">
           {locations.map((loc) => (
-            <section key={loc.id} className="overflow-hidden rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
+            <section key={loc.id} className="overflow-hidden rounded-2xl border border-border/80 bg-card shadow-sm">
               <div className="border-b bg-muted/30 px-5 py-4">
                 <div className="flex flex-wrap items-center gap-2">
                   <h2 className="font-semibold">{loc.name}</h2>
@@ -279,7 +279,7 @@ export default function AiHubClient() {
         </div>
       )}
 
-      <section className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
+      <section className="rounded-2xl border border-border/80 bg-card shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b px-5 py-4">
           <div>
             <h2 className="font-semibold">30-day content machine</h2>
@@ -341,7 +341,7 @@ export default function AiHubClient() {
         )}
       </section>
 
-      <section className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
+      <section className="rounded-2xl border border-border/80 bg-card shadow-sm">
         <div className="border-b px-5 py-4">
           <h2 className="font-semibold">Workflow history</h2>
           <p className="mt-0.5 text-xs text-muted-foreground">

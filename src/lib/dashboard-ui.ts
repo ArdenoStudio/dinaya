@@ -3,23 +3,36 @@ import { buttonVariants } from "@/components/ui/button";
 
 /** Shared dashboard form + surface tokens (Apple HIG aligned). */
 export const dashboardInputClass = cn(
-  "mt-1 w-full rounded-lg border border-input bg-background px-3 py-2.5 text-base sm:text-sm",
+  "mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-base sm:text-sm",
   "placeholder:text-muted-foreground/60",
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
-  "dark:border-neutral-700 dark:bg-neutral-900",
 );
 
 export const dashboardLabelClass = "text-sm font-medium text-foreground";
 
-export const dashboardSectionClass =
-  "rounded-xl border border-border bg-card p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-900";
+export const dashboardPageClass = "space-y-6";
+
+export const dashboardSectionClass = cn(
+  "rounded-2xl border border-border/80 bg-card p-5 shadow-sm",
+  "dark:border-border/60",
+);
+
+export const dashboardSectionMutedClass = cn(
+  "rounded-2xl border border-border/70 bg-muted/30 p-5",
+  "dark:bg-muted/20",
+);
+
+export const dashboardCardClass = cn(
+  "rounded-2xl border border-border/80 bg-card shadow-sm",
+  "dark:border-border/60",
+);
 
 export const dashboardFilterPillClass = (active: boolean) =>
   cn(
     "min-h-11 rounded-full border px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
     active
       ? "border-primary bg-primary/5 text-primary"
-      : "border-border bg-background text-muted-foreground hover:border-primary/30 hover:text-foreground dark:border-neutral-700",
+      : "border-border bg-background text-muted-foreground hover:border-primary/30 hover:text-foreground",
   );
 
 export const dashboardFocusRing =
@@ -39,15 +52,27 @@ export function shouldShowPlanBanner(activeHref: string, plan: string): boolean 
 }
 
 export const dashboardPrimaryActionClass = cn(
-  buttonVariants(),
-  "inline-flex min-h-11 items-center gap-1.5",
+  buttonVariants({ size: "touch" }),
+  "inline-flex items-center gap-1.5",
 );
 
 export const dashboardOutlineActionClass = cn(
-  buttonVariants({ variant: "outline" }),
-  "inline-flex min-h-11 items-center gap-1.5",
+  buttonVariants({ variant: "outline", size: "touch" }),
+  "inline-flex items-center gap-1.5",
 );
 
 /** Inline form errors — readable on light and dark surfaces (WCAG AA body text). */
 export const dashboardErrorAlertClass =
   "text-sm text-red-700 dark:text-red-400";
+
+/** Soft page canvas behind dashboard chrome (replaces stacked neutral grays). */
+export const dashboardShellCanvasClass =
+  "bg-[hsl(var(--dashboard-canvas))] text-foreground";
+
+export const dashboardMainCanvasClass =
+  "bg-[hsl(var(--dashboard-main))] text-foreground";
+
+export const dashboardChromeClass = cn(
+  "border-border/70 bg-[hsl(var(--dashboard-chrome))]/90 backdrop-blur-md",
+  "dark:border-border/50",
+);

@@ -1,11 +1,13 @@
 import { ProGate } from "@/components/ProGate";
 import { AnalyticsCharts } from "@/components/dashboard/AnalyticsCharts";
+import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
 import { DealAnalyticsPanel } from "@/components/dashboard/DealAnalyticsPanel";
 import { ReportsToolbar } from "@/components/dashboard/ReportsToolbar";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { getReportsDashboardOverview } from "@/lib/dashboard/reports";
 import { getDealAnalytics } from "@/lib/deals/analytics";
 import { requireBusiness } from "@/lib/auth";
+import { dashboardPageClass } from "@/lib/dashboard-ui";
 import { cn } from "@/lib/utils";
 import { BarChart3, CalendarDays, Star, Users } from "lucide-react";
 import { Suspense } from "react";
@@ -136,14 +138,16 @@ async function ReportsOverview({
   ].filter((item) => item.value > 0);
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="font-cal text-2xl">Analytics & Reports</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Revenue trends, booking patterns, client spend, and staff workload
-          {range?.from && range?.to ? ` · ${range.from} → ${range.to}` : ""}.
-        </p>
-      </div>
+    <div className={dashboardPageClass}>
+      <DashboardPageHeader
+        title="Analytics & Reports"
+        description={
+          <>
+            Revenue trends, booking patterns, client spend, and staff workload
+            {range?.from && range?.to ? ` · ${range.from} → ${range.to}` : ""}.
+          </>
+        }
+      />
 
       <Suspense fallback={null}>
         <ReportsToolbar
@@ -199,7 +203,7 @@ async function ReportsOverview({
       />
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
+        <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
           <h2 className="mb-4 font-semibold">Booking health summary</h2>
           <div className="space-y-4">
             {[
@@ -248,7 +252,7 @@ async function ReportsOverview({
           </div>
         </div>
 
-        <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5 lg:col-span-2">
+        <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-sm lg:col-span-2">
           <h2 className="mb-4 font-semibold">Bookings by source</h2>
           {breakdowns.bookingsBySource.length === 0 ? (
             <p className="text-sm text-muted-foreground">No bookings yet.</p>
@@ -272,7 +276,7 @@ async function ReportsOverview({
           )}
         </div>
 
-        <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5 lg:col-span-2">
+        <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-sm lg:col-span-2">
           <h2 className="mb-4 font-semibold">Bookings by staff</h2>
           {breakdowns.staffLoad.length === 0 ? (
             <p className="text-sm text-muted-foreground">No bookings yet.</p>

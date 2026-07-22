@@ -8,12 +8,20 @@ import { notFound } from "next/navigation";
 import { DirectorySettings } from "@/components/dashboard/DirectorySettings";
 import { ReferralSettings } from "@/components/dashboard/ReferralSettings";
 import { ServiceBookingLinks } from "@/components/dashboard/ServiceBookingLinks";
+import { DashboardCopyField } from "@/components/dashboard/DashboardCopyField";
+import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
+import { DashboardSection } from "@/components/dashboard/DashboardSection";
 import { buildPublicBookingUrl, getAppBaseUrl } from "@/lib/booking-url";
 import {
   buildEmbedIframeSnippet,
   buildEmbedModalSnippet,
   buildEmbedScriptSnippet,
 } from "@/lib/booking/embed";
+import {
+  dashboardOutlineActionClass,
+  dashboardPageClass,
+  dashboardPrimaryActionClass,
+} from "@/lib/dashboard-ui";
 
 export default async function MarketingPage() {
   const { businessId } = await requireOwner();
@@ -66,21 +74,16 @@ export default async function MarketingPage() {
   const reviewsEmbedSnippet = `<iframe src="${reviewsEmbedUrl}" width="100%" height="420" style="border:0;border-radius:8px"></iframe>`;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="font-cal text-2xl">Marketing</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Share your booking page across WhatsApp, Instagram, posters, and your website.
-          </p>
-        </div>
-        <Link
-          href="/dashboard/booking-page"
-          className="rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-        >
-          Edit booking page
-        </Link>
-      </div>
+    <div className={dashboardPageClass}>
+      <DashboardPageHeader
+        title="Marketing"
+        description="Share your booking page across WhatsApp, Instagram, posters, and your website."
+        actions={
+          <Link href="/dashboard/booking-page" className={dashboardPrimaryActionClass}>
+            Edit booking page
+          </Link>
+        }
+      />
 
       <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
         <div className="space-y-6">
@@ -95,18 +98,30 @@ export default async function MarketingPage() {
             referralBookings={Number(referralBookings ?? 0)}
           />
 
-          <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
-            <h2 className="mb-3 font-semibold">Share tools</h2>
-            <code className="block truncate rounded-md border bg-muted/30 px-3 py-2 text-sm text-primary">
+          <DashboardSection title="Share tools">
+            <code className="block truncate rounded-xl border bg-muted/30 px-3 py-2 text-sm text-primary">
               {bookingUrl}
             </code>
             <div className="mt-3 flex flex-wrap gap-2">
-              <a href={bookingUrl} target="_blank" rel="noopener noreferrer" className="rounded-md border px-3 py-2 text-xs font-medium hover:border-primary/40">Open</a>
-              <a href={`https://wa.me/?text=${encodeURIComponent(whatsappSnippet)}`} target="_blank" rel="noopener noreferrer" className="rounded-md border px-3 py-2 text-xs font-medium hover:border-primary/40">WhatsApp share</a>
-              <a href={qrPng} target="_blank" rel="noopener noreferrer" className="rounded-md border px-3 py-2 text-xs font-medium hover:border-primary/40">QR PNG</a>
-              <a href={qrSvg} target="_blank" rel="noopener noreferrer" className="rounded-md border px-3 py-2 text-xs font-medium hover:border-primary/40">QR SVG</a>
+              <a href={bookingUrl} target="_blank" rel="noopener noreferrer" className={dashboardOutlineActionClass}>
+                Open
+              </a>
+              <a
+                href={`https://wa.me/?text=${encodeURIComponent(whatsappSnippet)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={dashboardOutlineActionClass}
+              >
+                WhatsApp share
+              </a>
+              <a href={qrPng} target="_blank" rel="noopener noreferrer" className={dashboardOutlineActionClass}>
+                QR PNG
+              </a>
+              <a href={qrSvg} target="_blank" rel="noopener noreferrer" className={dashboardOutlineActionClass}>
+                QR SVG
+              </a>
             </div>
-          </div>
+          </DashboardSection>
 
           <ServiceBookingLinks
             slug={business.slug}
@@ -115,51 +130,52 @@ export default async function MarketingPage() {
             services={serviceList}
           />
 
-          <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
-            <h2 className="mb-3 font-semibold">QR poster</h2>
+          <DashboardSection title="QR poster">
             <Image
               src={qrPng}
               alt="Booking page QR code"
               width={208}
               height={208}
               unoptimized
-              className="mx-auto size-52 rounded-lg border p-3"
+              className="mx-auto size-52 rounded-xl border bg-background p-3"
             />
             <p className="mt-3 text-center text-xs text-muted-foreground">
               Add this to your counter, Instagram story, or printed price list.
             </p>
-          </div>
+          </DashboardSection>
 
-          <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
-            <h2 className="mb-3 font-semibold">Snippets</h2>
-            <label className="text-xs font-medium text-muted-foreground">WhatsApp / Facebook</label>
-            <textarea readOnly value={whatsappSnippet} className="mt-1 h-20 w-full resize-none rounded-md border p-2 text-sm" />
-            <label className="mt-4 block text-xs font-medium text-muted-foreground">Instagram bio</label>
-            <textarea readOnly value={instagramSnippet} className="mt-1 h-20 w-full resize-none rounded-md border p-2 text-sm" />
-            <label className="mt-4 block text-xs font-medium text-muted-foreground">Website embed (iframe)</label>
-            <textarea readOnly value={embedSnippet} className="mt-1 h-24 w-full resize-none rounded-md border p-2 font-mono text-xs" />
-            <label className="mt-4 block text-xs font-medium text-muted-foreground">Embed script (inline widget)</label>
-            <textarea readOnly value={embedScriptSnippet} className="mt-1 h-32 w-full resize-none rounded-md border p-2 font-mono text-xs" />
-            <label className="mt-4 block text-xs font-medium text-muted-foreground">Book now modal button</label>
-            <textarea readOnly value={embedModalSnippet} className="mt-1 h-24 w-full resize-none rounded-md border p-2 font-mono text-xs" />
-            <label className="mt-4 block text-xs font-medium text-muted-foreground">Reviews widget embed</label>
-            <textarea readOnly value={reviewsEmbedSnippet} className="mt-1 h-24 w-full resize-none rounded-md border p-2 font-mono text-xs" />
-          </div>
+          <DashboardSection id="marketing-embed" title="Snippets">
+            <div className="space-y-4">
+              <DashboardCopyField label="WhatsApp / Facebook" value={whatsappSnippet} mono={false} rows={3} />
+              <DashboardCopyField label="Instagram bio" value={instagramSnippet} mono={false} rows={3} />
+              <DashboardCopyField label="Website embed (iframe)" value={embedSnippet} rows={4} />
+              <DashboardCopyField label="Embed script (inline widget)" value={embedScriptSnippet} rows={6} />
+              <DashboardCopyField label="Book now modal button" value={embedModalSnippet} rows={5} />
+              <DashboardCopyField label="Reviews widget embed" value={reviewsEmbedSnippet} rows={3} />
+            </div>
+          </DashboardSection>
         </div>
 
-        <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="font-semibold">Live preview</h2>
-            <a href={`${bookingUrl}?preview=1`} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">
+        <DashboardSection
+          title="Live preview"
+          className="hidden lg:block"
+          action={
+            <a
+              href={`${bookingUrl}?preview=1`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-medium text-primary hover:underline"
+            >
               Open full page
             </a>
-          </div>
+          }
+        >
           <iframe
             src={`${getAppBaseUrl().replace(/\/$/, "")}/embed/book/${business.slug}?embed=1`}
             title={`${business.name} booking page preview`}
-            className="h-[720px] w-full rounded-lg border"
+            className="h-[720px] w-full rounded-xl border"
           />
-        </div>
+        </DashboardSection>
       </div>
     </div>
   );

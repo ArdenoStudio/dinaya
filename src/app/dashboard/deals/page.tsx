@@ -5,11 +5,12 @@ import { db } from "@/db";
 import { businesses } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { getDealsDashboardList } from "@/lib/dashboard/deals";
+import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
 import { DealsClient } from "@/components/dashboard/DealsClient";
 import { DealSuggestionsCard } from "@/components/dashboard/DealSuggestionsCard";
 import { EmptyState } from "@/components/dashboard/EmptyState";
 import { Icon } from "@/components/ui/Icon";
-import { dashboardPrimaryActionClass } from "@/lib/dashboard-ui";
+import { dashboardPageClass, dashboardPrimaryActionClass } from "@/lib/dashboard-ui";
 import { Tag } from "lucide-react";
 
 export default async function DealsPage() {
@@ -28,18 +29,16 @@ export default async function DealsPage() {
 
   return (
     <ProGate businessId={businessId} feature="deals">
-      <div className="space-y-6">
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <h1 className="font-cal text-2xl">Dinaya Deals</h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Post flash discounts on slow slots. Clients discover deals on Dinaya and book at the discounted price.
-            </p>
-          </div>
-          <Link href="/dashboard/deals/new" className={dashboardPrimaryActionClass}>
-            <Icon name="plus" className="text-xs" /> New deal
-          </Link>
-        </div>
+      <div className={dashboardPageClass}>
+        <DashboardPageHeader
+          title="Dinaya Deals"
+          description="Post flash discounts on slow slots. Clients discover deals on Dinaya and book at the discounted price."
+          actions={
+            <Link href="/dashboard/deals/new" className={dashboardPrimaryActionClass}>
+              <Icon name="plus" className="text-xs" /> New deal
+            </Link>
+          }
+        />
 
         {!business?.directoryListed && (
           <div className="rounded-xl border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-950/40 px-4 py-3 text-sm text-amber-900 dark:text-amber-200">

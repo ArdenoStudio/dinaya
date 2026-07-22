@@ -17,6 +17,7 @@ import {
   DashboardLoadingPanel,
   DashboardTableSkeleton,
 } from "@/components/dashboard/DashboardLoadingPanel";
+import { statusSurfaceStyles } from "@/lib/dashboard-status";
 import { buttonVariants } from "@/components/ui/button";
 import {
   trackDashboardCalendarEventOpen,
@@ -45,11 +46,11 @@ type Booking = {
 type CalendarView = "day" | "agenda" | "week";
 
 const STATUS_BG: Record<string, string> = {
-  pending: "bg-yellow-100 border-yellow-300 text-yellow-900 dark:bg-yellow-950/40 dark:border-yellow-800 dark:text-yellow-100",
-  confirmed: "bg-green-100 border-green-300 text-green-900 dark:bg-green-950/40 dark:border-green-800 dark:text-green-100",
-  cancelled: "bg-red-50 border-red-200 text-red-700 opacity-60 dark:bg-red-950/30 dark:border-red-900 dark:text-red-300",
-  completed: "bg-blue-100 border-blue-300 text-blue-900 dark:bg-blue-950/40 dark:border-blue-800 dark:text-blue-100",
-  no_show: "bg-gray-100 border-gray-300 text-gray-600 opacity-60 dark:bg-neutral-800 dark:border-neutral-700 dark:text-gray-400",
+  pending: statusSurfaceStyles.pending,
+  confirmed: statusSurfaceStyles.confirmed,
+  cancelled: `${statusSurfaceStyles.cancelled} opacity-60`,
+  completed: statusSurfaceStyles.completed,
+  no_show: `${statusSurfaceStyles.no_show} opacity-70`,
 };
 
 const START_HOUR = 7;

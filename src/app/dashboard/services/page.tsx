@@ -2,28 +2,35 @@ import Link from "next/link";
 import { formatLkr } from "@/lib/utils";
 import { requireOwner } from "@/lib/auth";
 import { getServicesDashboardList } from "@/lib/dashboard/services";
-import { Icon } from "@/components/ui/Icon";
+import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
 import { EmptyState } from "@/components/dashboard/EmptyState";
+import { Icon } from "@/components/ui/Icon";
 import { Scissors } from "lucide-react";
-import { dashboardOutlineActionClass, dashboardPrimaryActionClass } from "@/lib/dashboard-ui";
+import {
+  dashboardOutlineActionClass,
+  dashboardPageClass,
+  dashboardPrimaryActionClass,
+} from "@/lib/dashboard-ui";
 
 export default async function ServicesPage() {
   const { businessId } = await requireOwner();
   const { rows: list } = await getServicesDashboardList(businessId, { limit: 200 });
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="font-cal text-2xl">Services</h1>
-        <div className="flex items-center gap-2">
-          <Link href="/dashboard/services/router" className={dashboardOutlineActionClass}>
-            Booking router
-          </Link>
-          <Link href="/dashboard/services/new" className={dashboardPrimaryActionClass}>
-            <Icon name="plus" className="text-xs" /> Add service
-          </Link>
-        </div>
-      </div>
+    <div className={dashboardPageClass}>
+      <DashboardPageHeader
+        title="Services"
+        actions={
+          <>
+            <Link href="/dashboard/services/router" className={dashboardOutlineActionClass}>
+              Booking router
+            </Link>
+            <Link href="/dashboard/services/new" className={dashboardPrimaryActionClass}>
+              <Icon name="plus" className="text-xs" /> Add service
+            </Link>
+          </>
+        }
+      />
 
       {list.length === 0 ? (
         <EmptyState
@@ -40,7 +47,7 @@ export default async function ServicesPage() {
           }
         />
       ) : (
-        <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 divide-y">
+        <div className="divide-y rounded-2xl border border-border/80 bg-card shadow-sm">
           {list.map((s) => (
             <div key={s.id} className="flex items-center justify-between px-5 py-4 hover:bg-muted/20 transition-colors">
               <div className="flex-1 min-w-0">

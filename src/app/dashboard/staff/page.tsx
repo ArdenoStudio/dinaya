@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { requireOwner } from "@/lib/auth";
 import { getStaffDashboardList } from "@/lib/dashboard/staff";
+import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
 import { StaffInviteForm } from "@/components/dashboard/StaffInviteForm";
 import { EmptyState } from "@/components/dashboard/EmptyState";
 import { Icon } from "@/components/ui/Icon";
-import { dashboardPrimaryActionClass } from "@/lib/dashboard-ui";
+import { dashboardPageClass, dashboardPrimaryActionClass } from "@/lib/dashboard-ui";
 import { UserRoundCheck } from "lucide-react";
 
 export default async function StaffPage() {
@@ -12,13 +13,15 @@ export default async function StaffPage() {
   const { rows: list } = await getStaffDashboardList(businessId, { limit: 200 });
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="font-cal text-2xl">Staff</h1>
-        <Link href="/dashboard/staff/new" className={dashboardPrimaryActionClass}>
-          <Icon name="plus" className="text-xs" /> Add staff
-        </Link>
-      </div>
+    <div className={dashboardPageClass}>
+      <DashboardPageHeader
+        title="Staff"
+        actions={
+          <Link href="/dashboard/staff/new" className={dashboardPrimaryActionClass}>
+            <Icon name="plus" className="text-xs" /> Add staff
+          </Link>
+        }
+      />
 
       <StaffInviteForm />
 
@@ -37,7 +40,7 @@ export default async function StaffPage() {
           }
         />
       ) : (
-        <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 divide-y">
+        <div className="divide-y rounded-2xl border border-border/80 bg-card shadow-sm">
           {list.map((s) => (
             <div key={s.id} className="flex items-center gap-4 px-5 py-4 hover:bg-muted/20 transition-colors">
               <div className="w-10 h-10 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center flex-shrink-0 text-sm">

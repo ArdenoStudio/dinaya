@@ -3,9 +3,18 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { Users, UserCheck, UserPlus, Sparkles } from "lucide-react";
+import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
+import { DashboardStatGrid } from "@/components/dashboard/DashboardStatGrid";
+import { EmptyState } from "@/components/dashboard/EmptyState";
+import { StatCard } from "@/components/dashboard/StatCard";
 import { Icon } from "@/components/ui/Icon";
-import { buttonVariants } from "@/components/ui/button";
-import { dashboardFilterPillClass, dashboardPrimaryActionClass } from "@/lib/dashboard-ui";
+import {
+  dashboardFilterPillClass,
+  dashboardOutlineActionClass,
+  dashboardPageClass,
+  dashboardPrimaryActionClass,
+} from "@/lib/dashboard-ui";
 import { cn } from "@/lib/utils";
 
 type Stage = "lead" | "prospect" | "active" | "churned";
@@ -47,8 +56,8 @@ const AVATAR_COLORS = [
   "bg-violet-100 text-violet-700",
   "bg-emerald-100 text-emerald-700",
   "bg-amber-100 text-amber-700",
-  "bg-rose-100 text-rose-700",
-  "bg-cyan-100 text-cyan-700",
+  "bg-sky-100 text-sky-700",
+  "bg-indigo-100 text-indigo-700",
 ];
 
 function initials(name: string) {
@@ -126,99 +135,39 @@ export default function ClientsPage() {
     setStage("");
   }
 
-  const statCards = [
-    {
-      label: "Total customers",
-      value: stats.total,
-      icon: "people",
-      iconColor: "text-primary",
-      iconBg: "bg-primary/10",
-      accent: "bg-primary",
-    },
-    {
-      label: "Active",
-      value: stats.active,
-      icon: "person-check",
-      iconColor: "text-emerald-600",
-      iconBg: "bg-emerald-50 dark:bg-emerald-950/40",
-      accent: "bg-emerald-50 dark:bg-emerald-950/400",
-    },
-    {
-      label: "Leads",
-      value: stats.leads,
-      icon: "person-plus",
-      iconColor: "text-blue-600",
-      iconBg: "bg-blue-50 dark:bg-blue-950/40",
-      accent: "bg-blue-50 dark:bg-blue-950/400",
-    },
-    {
-      label: "Prospects",
-      value: stats.prospects,
-      icon: "stars",
-      iconColor: "text-violet-600",
-      iconBg: "bg-violet-50",
-      accent: "bg-violet-500",
-    },
-  ];
-
   const isFiltering = !loading && (q || stage);
   const showEmptyAll = !loading && allClients.length === 0 && !isFiltering;
   const showEmptyFiltered = !loading && clients.length === 0 && isFiltering;
 
   return (
-    <div>
-      {/* Header */}
-      <div className="flex items-start justify-between mb-8 gap-4 flex-wrap">
-        <div>
-          <h1 className="font-cal text-3xl tracking-tight">Clients</h1>
-          <p className="text-muted-foreground mt-1 text-sm">
-            Manage your customer list, track leads, and grow your business.
-          </p>
-        </div>
-        <div className="flex gap-2 shrink-0">
-          <button
-            onClick={exportCsv}
-            disabled={clients.length === 0}
-            className={cn(
-              buttonVariants({ variant: "outline" }),
-              "disabled:cursor-not-allowed disabled:opacity-40",
-            )}
-          >
-            <Icon name="download" className="text-xs" /> Export CSV
-          </button>
-          <Link href="/dashboard/clients/new" className={cn(buttonVariants())}>
-            <Icon name="plus" className="text-xs" /> Add customer
-          </Link>
-        </div>
-      </div>
+    <div className={dashboardPageClass}>
+      <DashboardPageHeader
+        size="lg"
+        title="Clients"
+        description="Manage your customer list, track leads, and grow your business."
+        actions={
+          <>
+            <button
+              type="button"
+              onClick={exportCsv}
+              disabled={clients.length === 0}
+              className={cn(dashboardOutlineActionClass, "disabled:cursor-not-allowed disabled:opacity-40")}
+            >
+              <Icon name="download" className="text-xs" /> Export CSV
+            </button>
+            <Link href="/dashboard/clients/new" className={dashboardPrimaryActionClass}>
+              <Icon name="plus" className="text-xs" /> Add customer
+            </Link>
+          </>
+        }
+      />
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-        {statCards.map((s) => (
-          <div key={s.label} className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 overflow-hidden">
-            <div className={`h-[3px] w-full ${s.accent}`} />
-            <div className="p-4 flex items-start gap-3">
-              <div
-                className={`flex items-center justify-center w-9 h-9 rounded-lg shrink-0 ${s.iconBg}`}
-              >
-                <Icon name={s.icon} className={`text-sm ${s.iconColor}`} />
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs text-muted-foreground truncate leading-tight">
-                  {s.label}
-                </p>
-                {loading && !allClients.length ? (
-                  <div className="h-7 w-10 bg-muted/40 rounded animate-pulse mt-1.5" />
-                ) : (
-                  <p className="text-2xl font-bold mt-0.5 tracking-tight tabular-nums">
-                    {s.value}
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+      <DashboardStatGrid>
+        <StatCard label="Total customers" value={loading ? "—" : stats.total} icon={Users} tone="cobalt" />
+        <StatCard label="Active" value={loading ? "—" : stats.active} icon={UserCheck} tone="emerald" />
+        <StatCard label="Leads" value={loading ? "—" : stats.leads} icon={UserPlus} tone="cobalt" />
+        <StatCard label="Prospects" value={loading ? "—" : stats.prospects} icon={Sparkles} tone="violet" />
+      </DashboardStatGrid>
 
       {/* Filters */}
       <div className="flex flex-wrap gap-2.5 items-center mb-4">
@@ -276,36 +225,28 @@ export default function ClientsPage() {
           ))}
         </div>
       ) : showEmptyAll ? (
-        <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-14 text-center">
-          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-            <Icon name="people" className="text-[1.15rem] text-primary" />
-          </div>
-          <h3 className="font-semibold text-base mb-1">No customers yet</h3>
-          <p className="text-sm text-muted-foreground mb-5 max-w-xs mx-auto">
-            Start by adding your first customer, or share your booking page to collect them automatically.
-          </p>
-          <Link href="/dashboard/clients/new" className={dashboardPrimaryActionClass}>
-            <Icon name="plus" className="text-xs" /> Add your first customer
-          </Link>
-        </div>
+        <EmptyState
+          icon={Users}
+          title="No customers yet"
+          description="Start by adding your first customer, or share your booking page to collect them automatically."
+          action={
+            <Link href="/dashboard/clients/new" className={dashboardPrimaryActionClass}>
+              <Icon name="plus" className="text-xs" /> Add your first customer
+            </Link>
+          }
+        />
       ) : showEmptyFiltered ? (
-        <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-14 text-center">
-          <div className="w-12 h-12 rounded-full bg-muted/40 flex items-center justify-center mx-auto mb-4">
-            <Icon name="search" className="text-[1.15rem] text-muted-foreground" />
-          </div>
-          <h3 className="font-semibold text-base mb-1">No matches found</h3>
-          <p className="text-sm text-muted-foreground mb-5">
-            Try adjusting your search or stage filter.
-          </p>
-          <button
-            onClick={clearFilters}
-            className="inline-flex items-center gap-1.5 border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:border-gray-300 dark:border-neutral-700 hover:text-foreground transition-colors"
-          >
-            <Icon name="x-lg" className="text-xs" /> Clear filters
-          </button>
-        </div>
+        <EmptyState
+          title="No matches found"
+          description="Try adjusting your search or stage filter."
+          action={
+            <button type="button" onClick={clearFilters} className={dashboardOutlineActionClass}>
+              <Icon name="x-lg" className="text-xs" /> Clear filters
+            </button>
+          }
+        />
       ) : (
-        <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 overflow-hidden">
+        <div className="overflow-hidden rounded-2xl border border-border/80 bg-card shadow-sm">
           {/* Header row (desktop) */}
           <div className="hidden md:grid grid-cols-[1fr_190px_140px_130px_72px] gap-4 px-5 py-2.5 border-b bg-muted/20 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
             <div>Customer</div>
