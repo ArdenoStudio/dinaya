@@ -2,8 +2,15 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { formatLkr } from "@/lib/utils";
+import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { computeDiscountedPrice } from "@/lib/deals/pricing";
+import {
+  dashboardCardClass,
+  dashboardInputClass,
+  dashboardOutlineActionClass,
+  dashboardPrimaryActionClass,
+} from "@/lib/dashboard-ui";
+import { formatLkr, cn } from "@/lib/utils";
 
 type DealDisplayStatus = "active" | "upcoming" | "expired" | "cancelled" | "sold_out";
 
@@ -23,14 +30,6 @@ type DealRow = {
   status: string;
   displayStatus: DealDisplayStatus;
   impressionCount: number;
-};
-
-const STATUS_STYLES: Record<string, string> = {
-  active: "bg-green-100 text-green-700",
-  upcoming: "bg-blue-100 text-blue-700",
-  expired: "bg-gray-100 dark:bg-neutral-800 text-gray-600 dark:text-gray-400",
-  cancelled: "bg-gray-100 dark:bg-neutral-800 text-gray-500 dark:text-gray-400",
-  sold_out: "bg-amber-100 text-amber-700",
 };
 
 function formatWindow(start: string | Date, end: string | Date): string {
@@ -129,7 +128,7 @@ export function DealsClient({ initialDeals }: { initialDeals: DealRow[] }) {
   }
 
   return (
-    <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 divide-y">
+    <div className={cn(dashboardCardClass, "divide-y overflow-hidden")}>
       {deals.map((deal) => {
         const discounted = computeDiscountedPrice(deal.servicePriceLkr, deal.discountPercent);
         const canCancel = !["cancelled", "expired", "sold_out"].includes(deal.displayStatus);
@@ -143,12 +142,10 @@ export function DealsClient({ initialDeals }: { initialDeals: DealRow[] }) {
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 flex-wrap">
                   <p className="font-medium">{deal.serviceName}</p>
-                  <span className="text-xs font-semibold rounded-full bg-primary/10 text-primary px-2 py-0.5">
+                  <span className="text-xs font-semibold rounded-full bg-muted px-2 py-0.5 text-muted-foreground">
                     {deal.discountPercent}% OFF
                   </span>
-                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_STYLES[deal.displayStatus] ?? STATUS_STYLES.expired}`}>
-                    {deal.displayStatus.replace("_", " ")}
-                  </span>
+                  <StatusBadge status={deal.displayStatus} />
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">
                   {formatLkr(deal.servicePriceLkr)} → {formatLkr(discounted)} · {deal.slotsRedeemed}/{deal.slotsTotal} redeemed
@@ -169,7 +166,7 @@ export function DealsClient({ initialDeals }: { initialDeals: DealRow[] }) {
                   <button
                     type="button"
                     onClick={() => startEdit(deal)}
-                    className="text-xs px-2.5 py-1 rounded border font-medium text-muted-foreground hover:text-foreground"
+                    className={dashboardOutlineActionClass}
                   >
                     Edit
                   </button>
@@ -179,7 +176,7 @@ export function DealsClient({ initialDeals }: { initialDeals: DealRow[] }) {
                     type="button"
                     onClick={() => cancelDeal(deal.id)}
                     disabled={cancellingId === deal.id}
-                    className="text-xs px-2.5 py-1 rounded border font-medium text-muted-foreground hover:text-foreground hover:border-red-300 disabled:opacity-50"
+                    className={cn(dashboardOutlineActionClass, "text-xs disabled:opacity-50")}
                   >
                     Cancel
                   </button>
@@ -196,7 +193,7 @@ export function DealsClient({ initialDeals }: { initialDeals: DealRow[] }) {
                       type="datetime-local"
                       value={editForm.dealWindowEnd}
                       onChange={(e) => setEditForm((prev) => ({ ...prev, dealWindowEnd: e.target.value }))}
-                      className="mt-1 w-full rounded-md border px-2 py-1.5 text-sm"
+                      className={dashboardInputClass}
                     />
                   </label>
                   <label className="block text-xs">
@@ -205,7 +202,7 @@ export function DealsClient({ initialDeals }: { initialDeals: DealRow[] }) {
                       type="datetime-local"
                       value={editForm.apptWindowEnd}
                       onChange={(e) => setEditForm((prev) => ({ ...prev, apptWindowEnd: e.target.value }))}
-                      className="mt-1 w-full rounded-md border px-2 py-1.5 text-sm"
+                      className={dashboardInputClass}
                     />
                   </label>
                   <label className="block text-xs">
@@ -216,24 +213,24 @@ export function DealsClient({ initialDeals }: { initialDeals: DealRow[] }) {
                       max={20}
                       value={editForm.slotsTotal}
                       onChange={(e) => setEditForm((prev) => ({ ...prev, slotsTotal: Number(e.target.value) }))}
-                      className="mt-1 w-full rounded-md border px-2 py-1.5 text-sm"
+                      className={dashboardInputClass}
                     />
                   </label>
                 </div>
-                {editError && <p className="text-xs text-red-600">{editError}</p>}
+                {editError && <p className="text-xs text-destructive">{editError}</p>}
                 <div className="flex gap-2">
                   <button
                     type="button"
                     onClick={() => saveEdit(deal.id)}
                     disabled={savingId === deal.id}
-                    className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground disabled:opacity-50"
+                    className={dashboardPrimaryActionClass}
                   >
                     {savingId === deal.id ? "Saving…" : "Save changes"}
                   </button>
                   <button
                     type="button"
                     onClick={() => setEditingId(null)}
-                    className="rounded-md border px-3 py-1.5 text-xs"
+                    className={dashboardOutlineActionClass}
                   >
                     Close
                   </button>

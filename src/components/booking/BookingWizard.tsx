@@ -830,7 +830,7 @@ function BookingWizardInner({
 
   // Desktop: breadcrumb sits above the card. Mobile chrome is inside the panel.
   const desktopBreadcrumb =
-    showBreadcrumb ? <div className="hidden md:block">{breadcrumbChrome}</div> : null;
+    showBreadcrumb ? <div className="hidden md:block">{renderBreadcrumbChrome()}</div> : null;
 
   if (centeredBookerLayout) {
     return (

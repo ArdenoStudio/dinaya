@@ -39,7 +39,7 @@ export function DashboardListRow({
 
   const className = cn(
     "flex min-h-14 w-full items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 text-left transition-colors",
-    "hover:border-primary/20 hover:bg-muted/30 dark:border-neutral-800 dark:bg-neutral-900",
+    "hover:border-primary/20 hover:bg-muted/30 dark:border-border/60 dark:bg-card",
     dashboardFocusRing,
   );
 

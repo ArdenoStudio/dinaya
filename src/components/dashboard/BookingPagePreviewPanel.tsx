@@ -84,7 +84,7 @@ export function BookingPagePreviewPanel({
               src={previewSrc}
               title="Booking page preview"
               onLoad={() => setLoading(false)}
-              className="h-[min(65vh,640px)] w-full rounded-xl border bg-white"
+              className="h-[min(65vh,640px)] w-full rounded-2xl border border-border/60 bg-card"
             />
           </div>
         </div>

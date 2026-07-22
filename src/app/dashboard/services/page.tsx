@@ -2,28 +2,37 @@ import Link from "next/link";
 import { formatLkr } from "@/lib/utils";
 import { requireOwner } from "@/lib/auth";
 import { getServicesDashboardList } from "@/lib/dashboard/services";
-import { Icon } from "@/components/ui/Icon";
+import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
 import { EmptyState } from "@/components/dashboard/EmptyState";
+import { Icon } from "@/components/ui/Icon";
 import { Scissors } from "lucide-react";
-import { dashboardOutlineActionClass, dashboardPrimaryActionClass } from "@/lib/dashboard-ui";
+import {
+  dashboardOutlineActionClass,
+  dashboardPageClass,
+  dashboardPrimaryActionClass,
+  dashboardSurfaceClass,
+} from "@/lib/dashboard-ui";
+import { cn } from "@/lib/utils";
 
 export default async function ServicesPage() {
   const { businessId } = await requireOwner();
   const { rows: list } = await getServicesDashboardList(businessId, { limit: 200 });
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="font-cal text-2xl">Services</h1>
-        <div className="flex items-center gap-2">
-          <Link href="/dashboard/services/router" className={dashboardOutlineActionClass}>
-            Booking router
-          </Link>
-          <Link href="/dashboard/services/new" className={dashboardPrimaryActionClass}>
-            <Icon name="plus" className="text-xs" /> Add service
-          </Link>
-        </div>
-      </div>
+    <div className={dashboardPageClass}>
+      <DashboardPageHeader
+        title="Services"
+        actions={
+          <>
+            <Link href="/dashboard/services/router" className={dashboardOutlineActionClass}>
+              Booking router
+            </Link>
+            <Link href="/dashboard/services/new" className={dashboardPrimaryActionClass}>
+              <Icon name="plus" className="text-xs" /> Add service
+            </Link>
+          </>
+        }
+      />
 
       {list.length === 0 ? (
         <EmptyState
@@ -31,18 +40,15 @@ export default async function ServicesPage() {
           title="No services yet"
           description="Add the services clients can book — price, duration, and deposit rules."
           action={
-            <Link
-              href="/dashboard/services/new"
-              className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-            >
-              Add your first service
+            <Link href="/dashboard/services/new" className={dashboardPrimaryActionClass}>
+              <Icon name="plus" className="text-xs" /> Add your first service
             </Link>
           }
         />
       ) : (
-        <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 divide-y">
+        <div className={cn(dashboardSurfaceClass, "divide-y overflow-hidden")}>
           {list.map((s) => (
-            <div key={s.id} className="flex items-center justify-between px-5 py-4 hover:bg-muted/20 transition-colors">
+            <div key={s.id} className="flex items-center justify-between px-5 py-4 transition-colors hover:bg-muted/20">
               <div className="flex-1 min-w-0">
                 <p className="font-medium">{s.name}</p>
                 {s.description && (
@@ -73,12 +79,17 @@ export default async function ServicesPage() {
                 </div>
               </div>
               <div className="flex items-center gap-3 ml-4 shrink-0">
-                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${s.isActive ? "bg-green-100 text-green-700" : "bg-gray-100 dark:bg-neutral-800 text-gray-500 dark:text-gray-400"}`}>
+                <span
+                  className={cn(
+                    "rounded-full px-2 py-0.5 text-xs font-medium",
+                    s.isActive ? "bg-green-100 text-green-700" : "bg-muted text-muted-foreground",
+                  )}
+                >
                   {s.isActive ? "Active" : "Inactive"}
                 </span>
                 <Link
                   href={`/dashboard/services/${s.id}`}
-                  className="flex items-center gap-1 text-xs px-2.5 py-1 rounded border font-medium text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
+                  className={cn(dashboardOutlineActionClass, "gap-1 px-2.5 py-1 text-xs")}
                 >
                   <Icon name="pencil" /> Edit
                 </Link>

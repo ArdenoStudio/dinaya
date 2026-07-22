@@ -26,7 +26,7 @@ export function DashboardConfirmDialog({
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-40 bg-black/25" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-[min(28rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 rounded-xl border bg-card p-5 shadow-xl dark:border-neutral-800 dark:bg-neutral-900">
+        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-[min(28rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 rounded-xl border bg-card p-5 shadow-xl dark:border-border/60 dark:bg-card">
           <Dialog.Title className="text-base font-semibold">{title}</Dialog.Title>
           <Dialog.Description className="mt-2 text-sm leading-6 text-muted-foreground">
             {description}

@@ -4,6 +4,12 @@ import { businesses, subscriptions } from "@/db/schema";
 import { eq, and, inArray, desc } from "drizzle-orm";
 import { requireOwner } from "@/lib/auth";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
+import { DashboardSection } from "@/components/dashboard/DashboardSection";
+import { StatusBadge } from "@/components/dashboard/StatusBadge";
+import {
+  dashboardPageClass,
+} from "@/lib/dashboard-ui";
+import { cn } from "@/lib/utils";
 import {
   annualSavingsPercent,
   getPlanConfigAsync,
@@ -50,9 +56,9 @@ function PlanPricing({
       <div className="mt-4 space-y-1">
         <div className="flex items-baseline gap-2">
           <span className="text-3xl font-bold tracking-tight">Rs {formatRs(monthlyLkr)}</span>
-          <span className="text-sm text-neutral-500">/ month</span>
+          <span className="text-sm text-muted-foreground">/ month</span>
         </div>
-        <p className="text-sm text-neutral-600">
+        <p className="text-sm text-muted-foreground">
           or Rs {formatRs(annualLkr)} / year
           {savings > 0 && (
             <span className="ml-1 font-medium text-emerald-700">· save {savings}%</span>
@@ -68,7 +74,7 @@ function PlanPricing({
           savings={savings}
         />
       ) : (
-        <p className="mt-5 text-sm text-neutral-600">
+        <p className="mt-5 text-sm text-muted-foreground">
           {targetLabel} checkout is not open yet. Contact support for early access.
         </p>
       )}
@@ -125,7 +131,7 @@ export default async function BillingPage({
     plan === "trial" ? trialDaysLeftFrom(business?.planExpiresAt) : null;
 
   return (
-    <div className="max-w-3xl space-y-6">
+    <div className={cn(dashboardPageClass, "max-w-3xl")}>
       <BillingReturnBanner
         success={params.success === "1"}
         cancelled={params.cancelled === "1"}
@@ -135,15 +141,14 @@ export default async function BillingPage({
         description="Manage your Dinaya plan and subscription."
       />
 
-      <section className="rounded-xl border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900">
+      <DashboardSection title="Current plan">
         <div className="flex items-center justify-between">
           <div>
-            <div className="text-xs uppercase tracking-wider text-neutral-500">Current plan</div>
-            <div className="mt-1 text-xl font-semibold">
+            <div className="text-xl font-semibold">
               {planDisplayName(plan)}
             </div>
             {business?.planExpiresAt && (
-              <div className="mt-1 text-sm text-neutral-500">
+              <div className="mt-1 text-sm text-muted-foreground">
                 {isPaid ? "Renews" : "Expires"} on{" "}
                 {business.planExpiresAt.toLocaleDateString(undefined, {
                   year: "numeric",
@@ -153,7 +158,7 @@ export default async function BillingPage({
               </div>
             )}
             {activeSub && (
-              <div className="mt-1 text-sm text-neutral-500">
+              <div className="mt-1 text-sm text-muted-foreground">
                 {activeSub.status === "pending"
                   ? "Checkout in progress"
                   : `Billed ${activeSub.billingInterval === "annual" ? "annually" : "monthly"}`}
@@ -161,141 +166,131 @@ export default async function BillingPage({
             )}
           </div>
           {isPaid && activeSub?.status === "past_due" && (
-            <span className="rounded-full bg-amber-50 dark:bg-amber-950/40 px-3 py-1 text-xs font-medium text-amber-700 ring-1 ring-amber-500/30">
-              Payment past due
-            </span>
+            <StatusBadge status="past_due" className="shrink-0" />
           )}
         </div>
-      </section>
+      </DashboardSection>
 
       {plan === "trial" && (
-        <section className="rounded-xl border border-blue-200 bg-blue-50 dark:bg-blue-950/40 p-6">
-          <h2 className="text-lg font-semibold text-blue-900">
-            {trialDaysLeft !== null && trialDaysLeft > 0
+        <DashboardSection
+          muted
+          title={
+            trialDaysLeft !== null && trialDaysLeft > 0
               ? `${trialDaysLeft} ${trialDaysLeft === 1 ? "day" : "days"} left in your free trial`
-              : "Your free trial ends today"}
-          </h2>
-          <p className="mt-1 text-sm text-blue-900/80">
+              : "Your free trial ends today"
+          }
+        >
+          <p className="text-sm text-muted-foreground">
             Your trial includes Starter and Pro tools, with Growth previews kept limited.
             Subscribe before it ends to keep your booking page online without interruption.
           </p>
-        </section>
+        </DashboardSection>
       )}
 
       {plan === "expired" && (
-        <section className="rounded-xl border border-red-200 bg-red-50 dark:border-red-900/50 dark:bg-red-950/40 p-6">
-          <h2 className="text-lg font-semibold text-red-900">Your free trial has ended</h2>
-          <p className="mt-1 text-sm text-red-900/80">
+        <DashboardSection muted title="Your free trial has ended">
+          <p className="text-sm text-muted-foreground">
             Your public booking page is offline and new bookings are paused. Your data is safe —
             subscribe to a plan below to reactivate your account.
           </p>
-        </section>
+        </DashboardSection>
       )}
 
       {(plan === "trial" || plan === "expired") && (
         <>
-          <section className="rounded-xl border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900">
-            <h2 className="text-lg font-semibold">Subscribe to Starter</h2>
-            <p className="mt-1 text-sm text-neutral-700">
-              Public booking page, PayHere payments, unlimited bookings, 1 branch, 2 staff, and 10 services.
-            </p>
+          <DashboardSection
+            title="Subscribe to Starter"
+            description="Public booking page, PayHere payments, unlimited bookings, 1 branch, 2 staff, and 10 services."
+          >
             <PlanPricing
               monthlyLkr={starterMonthlyPriceLkr}
               annualLkr={starterAnnualPriceLkr}
               targetPlan="starter"
               available={isPaidPlanAvailable("starter", config)}
             />
-          </section>
+          </DashboardSection>
 
-          <section className="rounded-xl border border-blue-200 bg-blue-50 dark:bg-blue-950/40 p-6">
-            <h2 className="text-lg font-semibold">Upgrade to Pro</h2>
-            <p className="mt-1 text-sm text-neutral-700">
-              Main plan for serious small businesses: 1 branch, 5 staff, reviews, reports, Google Calendar, and reminder credits.
-            </p>
+          <DashboardSection
+            title="Upgrade to Pro"
+            description="Main plan for serious small businesses: 1 branch, 5 staff, reviews, reports, Google Calendar, and reminder credits."
+          >
             <PlanPricing
               monthlyLkr={proMonthlyPriceLkr}
               annualLkr={proAnnualPriceLkr}
               targetPlan="pro"
               available={isPaidPlanAvailable("pro", config)}
             />
-          </section>
+          </DashboardSection>
 
-          <section className="rounded-xl border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-950/40 p-6">
-            <h2 className="text-lg font-semibold">Upgrade to Growth</h2>
-            <p className="mt-1 text-sm text-neutral-700">
-              Automation and AI growth: 3 branches, 15 staff, custom domain, branding removal, and AI workflows.
-            </p>
+          <DashboardSection
+            title="Upgrade to Growth"
+            description="Automation and AI growth: 3 branches, 15 staff, custom domain, branding removal, and AI workflows."
+          >
             <PlanPricing
               monthlyLkr={maxMonthlyPriceLkr}
               annualLkr={maxAnnualPriceLkr}
               targetPlan="max"
               available={isPaidPlanAvailable("max", config)}
             />
-            <p className="mt-3 text-xs text-neutral-500">
+            <p className="mt-3 text-xs text-muted-foreground">
               Cancel anytime — you keep your plan until the period ends.
             </p>
-          </section>
+          </DashboardSection>
         </>
       )}
 
       {plan === "starter" && (
         <>
-          <section className="rounded-xl border border-blue-200 bg-blue-50 dark:bg-blue-950/40 p-6">
-            <h2 className="text-lg font-semibold">Upgrade to Pro</h2>
-            <p className="mt-1 text-sm text-neutral-700">
-              Add reviews, reports, Google Calendar sync, automations, and reminder credits for a growing team.
-            </p>
+          <DashboardSection
+            title="Upgrade to Pro"
+            description="Add reviews, reports, Google Calendar sync, automations, and reminder credits for a growing team."
+          >
             <PlanPricing
               monthlyLkr={proMonthlyPriceLkr}
               annualLkr={proAnnualPriceLkr}
               targetPlan="pro"
               available={isPaidPlanAvailable("pro", config)}
             />
-          </section>
+          </DashboardSection>
 
-          <section className="rounded-xl border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-950/40 p-6">
-            <h2 className="text-lg font-semibold">Upgrade to Growth</h2>
-            <p className="mt-1 text-sm text-neutral-700">
-              Add AI workflows, custom domain, branding removal, and 3-branch scale.
-            </p>
+          <DashboardSection
+            title="Upgrade to Growth"
+            description="Add AI workflows, custom domain, branding removal, and 3-branch scale."
+          >
             <PlanPricing
               monthlyLkr={maxMonthlyPriceLkr}
               annualLkr={maxAnnualPriceLkr}
               targetPlan="max"
               available={isPaidPlanAvailable("max", config)}
             />
-          </section>
+          </DashboardSection>
         </>
       )}
 
       {plan === "pro" && (
-        <section className="rounded-xl border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-950/40 p-6">
-          <h2 className="text-lg font-semibold">Upgrade to Growth</h2>
-          <p className="mt-1 text-sm text-neutral-700">
-            Unlock AI growth workflows, custom domain, branding removal, and 3-branch scale. AI Voice Receptionist is coming later.
-          </p>
+        <DashboardSection
+          title="Upgrade to Growth"
+          description="Unlock AI growth workflows, custom domain, branding removal, and 3-branch scale. AI Voice Receptionist is coming later."
+        >
           <PlanPricing
             monthlyLkr={maxMonthlyPriceLkr}
             annualLkr={maxAnnualPriceLkr}
             targetPlan="max"
             available={isPaidPlanAvailable("max", config)}
           />
-        </section>
+        </DashboardSection>
       )}
 
       {isPaid && activeSub && (
-        <section className="rounded-xl border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900">
-          <h2 className="text-lg font-semibold">Manage subscription</h2>
-          <p className="mt-1 text-sm text-neutral-600">
-            Cancel anytime. You&apos;ll keep {planDisplayName(plan)} features until the current period ends.
-          </p>
-          <div className="mt-4">
-            <CancelButton plan={plan} />
-          </div>
-        </section>
+        <DashboardSection
+          title="Manage subscription"
+          description={`Cancel anytime. You'll keep ${planDisplayName(plan)} features until the current period ends.`}
+        >
+          <CancelButton plan={plan} />
+        </DashboardSection>
       )}
 
-      <p className="text-xs text-neutral-500">
+      <p className="text-xs text-muted-foreground">
         Questions about billing?{" "}
         <Link href="/contact" className="underline">Contact support</Link>.
       </p>

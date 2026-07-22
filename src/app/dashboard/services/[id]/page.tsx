@@ -3,7 +3,19 @@
 import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import { IntakeQuestionsEditor } from "@/components/dashboard/IntakeQuestionsEditor";
+import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
+import { DashboardSection } from "@/components/dashboard/DashboardSection";
 import type { IntakeQuestion } from "@/lib/intake";
+import {
+  dashboardErrorAlertClass,
+  dashboardInputClass,
+  dashboardLabelClass,
+  dashboardOutlineActionClass,
+  dashboardPageClass,
+  dashboardPrimaryActionClass,
+  dashboardSectionClass,
+} from "@/lib/dashboard-ui";
+import { cn } from "@/lib/utils";
 
 interface ServiceForm {
   name: string;
@@ -133,74 +145,76 @@ export default function EditServicePage({ params }: { params: Promise<{ id: stri
     setSavingStaff(false);
   }
 
-  if (loading) return <div className="text-muted-foreground text-sm">Loading…</div>;
-  if (!form) return <div className="text-muted-foreground text-sm">Service not found.</div>;
-
-  const inputCls = "mt-1 w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary";
-  const selectCls = inputCls;
+  if (loading) return <div className={cn(dashboardPageClass, "text-sm text-muted-foreground")}>Loading…</div>;
+  if (!form) return <div className={cn(dashboardPageClass, "text-sm text-muted-foreground")}>Service not found.</div>;
 
   return (
-    <div className="max-w-lg">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="font-cal text-2xl">Edit service</h1>
-        <button
-          onClick={handleDelete}
-          disabled={deleting}
-          className="text-sm text-destructive hover:underline disabled:opacity-50"
-        >
-          {deleting ? "Deleting…" : "Delete service"}
-        </button>
-      </div>
+    <div className={dashboardPageClass}>
+      <DashboardPageHeader
+        title="Edit service"
+        backHref="/dashboard/services"
+        backLabel="Services"
+        actions={
+          <button
+            type="button"
+            onClick={handleDelete}
+            disabled={deleting}
+            className="text-sm text-destructive hover:underline disabled:opacity-50"
+          >
+            {deleting ? "Deleting…" : "Delete service"}
+          </button>
+        }
+      />
 
-      <form onSubmit={handleSubmit} className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-6 space-y-4">
+      <form onSubmit={handleSubmit} className={cn(dashboardSectionClass, "max-w-lg space-y-4")}>
         <div>
-          <label className="text-sm font-medium">Service name *</label>
+          <label className={dashboardLabelClass}>Service name *</label>
           <input required value={form.name}
             onChange={(e) => setForm((f) => f && ({ ...f, name: e.target.value }))}
-            className={inputCls} placeholder="e.g. Haircut" />
+            className={dashboardInputClass} placeholder="e.g. Haircut" />
         </div>
 
         <div>
-          <label className="text-sm font-medium">Description</label>
+          <label className={dashboardLabelClass}>Description</label>
           <textarea value={form.description}
             onChange={(e) => setForm((f) => f && ({ ...f, description: e.target.value }))}
-            className={`${inputCls} resize-none`} rows={2} />
+            className={cn(dashboardInputClass, "resize-none")} rows={2} />
         </div>
 
         <div>
-          <label className="text-sm font-medium">Cover image URL</label>
+          <label className={dashboardLabelClass}>Cover image URL</label>
           <input
             value={form.imageUrl}
             onChange={(e) => setForm((f) => f && ({ ...f, imageUrl: e.target.value }))}
-            className={inputCls}
+            className={dashboardInputClass}
             placeholder="https://..."
           />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="text-sm font-medium">Duration (minutes) *</label>
+            <label className={dashboardLabelClass}>Duration (minutes) *</label>
             <input type="number" min={5} max={480} required value={form.durationMinutes}
               onChange={(e) => setForm((f) => f && ({ ...f, durationMinutes: parseInt(e.target.value) }))}
-              className={inputCls} />
+              className={dashboardInputClass} />
           </div>
           <div>
-            <label className="text-sm font-medium">Price (LKR)</label>
+            <label className={dashboardLabelClass}>Price (LKR)</label>
             <input type="number" min={0} value={form.priceLkr}
               onChange={(e) => setForm((f) => f && ({ ...f, priceLkr: parseInt(e.target.value) || 0 }))}
-              className={inputCls} />
+              className={dashboardInputClass} />
           </div>
         </div>
 
         <div>
-          <label className="text-sm font-medium">Buffer time</label>
+          <label className={dashboardLabelClass}>Buffer time</label>
           <p className="text-xs text-muted-foreground mb-2">Block time before/after each appointment.</p>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="text-xs text-muted-foreground">Before (minutes)</label>
               <select value={form.beforeBuffer}
                 onChange={(e) => setForm((f) => f && ({ ...f, beforeBuffer: parseInt(e.target.value) }))}
-                className={selectCls}>
+                className={dashboardInputClass}>
                 {[0, 5, 10, 15, 20, 30, 45, 60].map((m) => (
                   <option key={m} value={m}>{m === 0 ? "No buffer" : `${m} min`}</option>
                 ))}
@@ -210,7 +224,7 @@ export default function EditServicePage({ params }: { params: Promise<{ id: stri
               <label className="text-xs text-muted-foreground">After (minutes)</label>
               <select value={form.afterBuffer}
                 onChange={(e) => setForm((f) => f && ({ ...f, afterBuffer: parseInt(e.target.value) }))}
-                className={selectCls}>
+                className={dashboardInputClass}>
                 {[0, 5, 10, 15, 20, 30, 45, 60].map((m) => (
                   <option key={m} value={m}>{m === 0 ? "No buffer" : `${m} min`}</option>
                 ))}
@@ -220,11 +234,11 @@ export default function EditServicePage({ params }: { params: Promise<{ id: stri
         </div>
 
         <div>
-          <label className="text-sm font-medium">Minimum notice</label>
+          <label className={dashboardLabelClass}>Minimum notice</label>
           <p className="text-xs text-muted-foreground mb-2">How far in advance must clients book?</p>
           <select value={form.minimumNoticeHours}
             onChange={(e) => setForm((f) => f && ({ ...f, minimumNoticeHours: parseInt(e.target.value) }))}
-            className={selectCls}>
+            className={dashboardInputClass}>
             {[0, 1, 2, 4, 6, 12, 24, 48, 72].map((h) => (
               <option key={h} value={h}>{h === 0 ? "No minimum" : h < 24 ? `${h} hour${h > 1 ? "s" : ""}` : `${h / 24} day${h / 24 > 1 ? "s" : ""}`}</option>
             ))}
@@ -232,19 +246,19 @@ export default function EditServicePage({ params }: { params: Promise<{ id: stri
         </div>
 
         <div>
-          <label className="text-sm font-medium">Daily capacity</label>
+          <label className={dashboardLabelClass}>Daily capacity</label>
           <p className="text-xs text-muted-foreground mb-2">Max bookings per staff per day. Leave blank for unlimited.</p>
           <input type="number" min={1} max={100} value={form.dailyCapacity}
             onChange={(e) => setForm((f) => f && ({ ...f, dailyCapacity: e.target.value }))}
-            placeholder="Unlimited" className={inputCls} />
+            placeholder="Unlimited" className={dashboardInputClass} />
         </div>
 
         <div>
-          <label className="text-sm font-medium">Booking window</label>
+          <label className={dashboardLabelClass}>Booking window</label>
           <p className="text-xs text-muted-foreground mb-2">How far ahead can clients book this service?</p>
           <select value={form.maximumAdvanceDays}
             onChange={(e) => setForm((f) => f && ({ ...f, maximumAdvanceDays: parseInt(e.target.value) }))}
-            className={selectCls}>
+            className={dashboardInputClass}>
             {([[0, "No limit"], [7, "1 week"], [14, "2 weeks"], [30, "1 month"], [60, "2 months"], [90, "3 months"], [180, "6 months"], [365, "1 year"]] as [number, string][]).map(([d, labelText]) => (
               <option key={d} value={d}>{labelText}</option>
             ))}
@@ -257,7 +271,7 @@ export default function EditServicePage({ params }: { params: Promise<{ id: stri
         />
 
         <div>
-          <label className="text-sm font-medium">Success redirect URL</label>
+          <label className={dashboardLabelClass}>Success redirect URL</label>
           <p className="text-xs text-muted-foreground mb-2">
             Optional. Send clients here after booking (https:// URL or path like /thank-you).
           </p>
@@ -265,7 +279,7 @@ export default function EditServicePage({ params }: { params: Promise<{ id: stri
             value={form.successRedirectUrl}
             onChange={(e) => setForm((f) => f && ({ ...f, successRedirectUrl: e.target.value }))}
             placeholder="https://example.com/thank-you or /thank-you"
-            className={inputCls}
+            className={dashboardInputClass}
           />
         </div>
 
@@ -286,7 +300,7 @@ export default function EditServicePage({ params }: { params: Promise<{ id: stri
 
         {form.requiresPayment && (
           <div>
-            <label className="text-sm font-medium">Deposit percentage</label>
+            <label className={dashboardLabelClass}>Deposit percentage</label>
             <p className="text-xs text-muted-foreground mb-2">
               Use 0 for full payment, or collect a smaller deposit to reduce no-shows.
             </p>
@@ -296,30 +310,29 @@ export default function EditServicePage({ params }: { params: Promise<{ id: stri
               max={100}
               value={form.depositPercent}
               onChange={(e) => setForm((f) => f && ({ ...f, depositPercent: Math.min(100, Math.max(0, parseInt(e.target.value) || 0)) }))}
-              className={inputCls}
+              className={dashboardInputClass}
             />
           </div>
         )}
 
 
-        {error && <p className="text-destructive text-sm">{error}</p>}
+        {error && <p className={dashboardErrorAlertClass}>{error}</p>}
 
-        <div className="flex gap-3 pt-2">
-          <button type="button" onClick={() => router.back()}
-            className="text-sm text-muted-foreground hover:text-foreground">Cancel</button>
-          <button type="submit" disabled={saving}
-            className="ml-auto bg-primary text-primary-foreground px-5 py-2 rounded-md text-sm font-medium hover:bg-primary/90 disabled:opacity-50">
+        <div className="flex flex-wrap gap-3 pt-2">
+          <button type="button" onClick={() => router.back()} className={dashboardOutlineActionClass}>
+            Cancel
+          </button>
+          <button type="submit" disabled={saving} className={cn(dashboardPrimaryActionClass, "ml-auto")}>
             {saving ? "Saving…" : "Save changes"}
           </button>
         </div>
       </form>
 
-      {/* Staff assignment */}
-      <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-6 mt-6">
-        <h2 className="text-base font-semibold mb-1">Team members</h2>
-        <p className="text-xs text-muted-foreground mb-4">
-          Choose which staff members offer this service.
-        </p>
+      <DashboardSection
+        title="Team members"
+        description="Choose which staff members offer this service."
+        className="max-w-lg"
+      >
         {allStaff.length === 0 ? (
           <p className="text-sm text-muted-foreground">No staff members yet. Add staff first.</p>
         ) : (
@@ -339,14 +352,15 @@ export default function EditServicePage({ params }: { params: Promise<{ id: stri
         )}
         {allStaff.length > 0 && (
           <button
+            type="button"
             onClick={handleSaveStaff}
             disabled={savingStaff}
-            className="bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 disabled:opacity-50"
+            className={dashboardPrimaryActionClass}
           >
             {savingStaff ? "Saving…" : "Save team"}
           </button>
         )}
-      </div>
+      </DashboardSection>
     </div>
   );
 }

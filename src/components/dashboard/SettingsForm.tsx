@@ -123,7 +123,7 @@ export default function SettingsForm({ business }: Props) {
     <div className="space-y-5">
       <form onSubmit={handleSave} className="grid gap-5 xl:grid-cols-2">
         {/* Business info */}
-        <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-6 space-y-4">
+        <div className="rounded-2xl border border-border/60 bg-card dark:border-border/60 dark:bg-card p-6 space-y-4">
           <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Business info</p>
           <div>
             <label className="text-sm font-medium">Business name *</label>
@@ -214,7 +214,7 @@ export default function SettingsForm({ business }: Props) {
         </div>
 
         {/* Booking policies */}
-        <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-6 space-y-4">
+        <div className="rounded-2xl border border-border/60 bg-card dark:border-border/60 dark:bg-card p-6 space-y-4">
           <div className="flex items-center gap-2">
             <Icon name="shield-check" className="text-sm text-muted-foreground" />
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Booking trust</p>
@@ -245,7 +245,7 @@ export default function SettingsForm({ business }: Props) {
         </div>
 
         {/* Local payment fallback */}
-        <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-6 space-y-4">
+        <div className="rounded-2xl border border-border/60 bg-card dark:border-border/60 dark:bg-card p-6 space-y-4">
           <div className="flex items-center gap-2">
             <Icon name="bank" className="text-sm text-muted-foreground" />
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Local payment fallback</p>
@@ -275,7 +275,7 @@ export default function SettingsForm({ business }: Props) {
         </div>
 
         {/* Social links */}
-        <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-6 space-y-4">
+        <div className="rounded-2xl border border-border/60 bg-card dark:border-border/60 dark:bg-card p-6 space-y-4">
           <div className="flex items-center gap-2">
             <Icon name="share" className="text-sm text-muted-foreground" />
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Social links</p>
@@ -318,7 +318,7 @@ export default function SettingsForm({ business }: Props) {
           </div>
         </div>
 
-        <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-6 space-y-4 xl:col-span-2">
+        <div className="rounded-2xl border border-border/60 bg-card dark:border-border/60 dark:bg-card p-6 space-y-4 xl:col-span-2">
           <ImageUploadField
             label="Business logo"
             hint="Shown on your booking page next to your business name. Square logos work best."
@@ -332,7 +332,7 @@ export default function SettingsForm({ business }: Props) {
         </div>
 
         {/* Portfolio gallery */}
-        <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-6 space-y-4">
+        <div className="rounded-2xl border border-border/60 bg-card dark:border-border/60 dark:bg-card p-6 space-y-4">
           <div className="flex items-center gap-2">
             <Icon name="images" className="text-sm text-muted-foreground" />
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Portfolio gallery</p>
@@ -383,7 +383,7 @@ export default function SettingsForm({ business }: Props) {
         </div>
 
         {/* Booking page appearance */}
-        <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-6 space-y-3 xl:col-span-2">
+        <div className="rounded-2xl border border-border/60 bg-card dark:border-border/60 dark:bg-card p-6 space-y-3 xl:col-span-2">
           <div className="flex items-center gap-2">
             <Icon name="palette" className="text-sm text-muted-foreground" />
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Booking page look</p>
@@ -400,7 +400,7 @@ export default function SettingsForm({ business }: Props) {
         </div>
 
         {/* PayHere */}
-        <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-6 space-y-4">
+        <div className="rounded-2xl border border-border/60 bg-card dark:border-border/60 dark:bg-card p-6 space-y-4">
           <div className="flex items-center gap-2">
             <Icon name="credit-card" className="text-sm text-muted-foreground" />
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">PayHere</p>
@@ -452,7 +452,7 @@ export default function SettingsForm({ business }: Props) {
         </div>
 
         {/* PayPal */}
-        <div className="bg-white border rounded-xl p-6 space-y-4">
+        <div className="rounded-2xl border border-border/60 bg-card p-6 space-y-4">
           <div className="flex items-center gap-2">
             <Icon name="globe" className="text-sm text-muted-foreground" />
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">PayPal</p>
@@ -500,7 +500,7 @@ export default function SettingsForm({ business }: Props) {
         </div>
 
         {/* Data controls */}
-        <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-6 space-y-3">
+        <div className="rounded-2xl border border-border/60 bg-card dark:border-border/60 dark:bg-card p-6 space-y-3">
           <div className="flex items-center gap-2">
             <Icon name="download" className="text-sm text-muted-foreground" />
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Data controls</p>

@@ -1,9 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { Icon } from "@/components/ui/Icon";
+import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
 import { MAX_ROUTER_OPTIONS, type BookingRouter, type BookingRouterOption } from "@/lib/booking-router";
+import {
+  dashboardErrorAlertClass,
+  dashboardInputClass,
+  dashboardLabelClass,
+  dashboardPageClass,
+  dashboardPrimaryActionClass,
+  dashboardSectionClass,
+  dashboardSurfaceClass,
+} from "@/lib/dashboard-ui";
+import { cn } from "@/lib/utils";
 
 interface ServiceOption {
   id: string;
@@ -16,9 +26,6 @@ function newId(): string {
     ? crypto.randomUUID()
     : `o_${Math.round(performance.now() * 1000)}`;
 }
-
-const inputCls =
-  "w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary";
 
 export default function BookingRouterPage() {
   const [services, setServices] = useState<ServiceOption[]>([]);
@@ -72,28 +79,31 @@ export default function BookingRouterPage() {
     setTimeout(() => setSaved(false), 2000);
   }
 
-  if (loading) return <div className="text-muted-foreground text-sm">Loading…</div>;
+  if (loading) {
+    return <div className={cn(dashboardPageClass, "text-sm text-muted-foreground")}>Loading…</div>;
+  }
 
   return (
-    <div className="max-w-lg">
-      <div className="flex items-center gap-3 mb-2">
-        <Link href="/dashboard/services" className="flex items-center gap-1 text-muted-foreground hover:text-foreground text-sm">
-          <Icon name="arrow-left" className="text-xs" /> Services
-        </Link>
-        <span className="text-muted-foreground">/</span>
-        <h1 className="font-cal text-2xl">Booking router</h1>
-      </div>
-      <p className="text-sm text-muted-foreground mb-6">
-        Ask one question first on your booking page and send each answer to the right service
-        (e.g. &ldquo;Routine cleaning&rdquo; vs &ldquo;Tooth pain&rdquo;). <span className="font-medium">Pro plan.</span>
-      </p>
+    <div className={dashboardPageClass}>
+      <DashboardPageHeader
+        title="Booking router"
+        backHref="/dashboard/services"
+        backLabel="Services"
+        description={
+          <>
+            Ask one question first on your booking page and send each answer to the right service
+            (e.g. &ldquo;Routine cleaning&rdquo; vs &ldquo;Tooth pain&rdquo;).{" "}
+            <span className="font-medium">Pro plan.</span>
+          </>
+        }
+      />
 
       {services.length === 0 ? (
-        <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-6 text-sm text-muted-foreground">
+        <div className={cn(dashboardSurfaceClass, "max-w-lg p-6 text-sm text-muted-foreground")}>
           Add at least one service first, then come back to set up routing.
         </div>
       ) : (
-        <div className="bg-white border rounded-xl dark:border-neutral-800 dark:bg-neutral-900 p-6 space-y-4">
+        <div className={cn(dashboardSectionClass, "max-w-lg space-y-4")}>
           <label className="flex items-center gap-2 cursor-pointer">
             <input type="checkbox" checked={router.enabled}
               onChange={(e) => setRouter((r) => ({ ...r, enabled: e.target.checked }))} className="rounded" />
@@ -101,21 +111,21 @@ export default function BookingRouterPage() {
           </label>
 
           <div>
-            <label className="text-sm font-medium">Question</label>
+            <label className={dashboardLabelClass}>Question</label>
             <input value={router.question}
               onChange={(e) => setRouter((r) => ({ ...r, question: e.target.value }))}
-              placeholder="What brings you in today?" className={`mt-1 ${inputCls}`} />
+              placeholder="What brings you in today?" className={dashboardInputClass} />
           </div>
 
           <div className="space-y-2">
-            <p className="text-sm font-medium">Answers</p>
+            <p className={dashboardLabelClass}>Answers</p>
             {router.options.map((o, index) => (
               <div key={o.id} className="flex items-center gap-2">
                 <input value={o.label} onChange={(e) => setOption(index, { label: e.target.value })}
-                  placeholder="Answer (e.g. Routine cleaning)" className={inputCls} />
+                  placeholder="Answer (e.g. Routine cleaning)" className={dashboardInputClass} />
                 <span className="text-muted-foreground text-xs shrink-0">→</span>
                 <select value={o.serviceId} onChange={(e) => setOption(index, { serviceId: e.target.value })}
-                  className={`${inputCls} max-w-[40%]`}>
+                  className={cn(dashboardInputClass, "max-w-[40%]")}>
                   {services.map((s) => (
                     <option key={s.id} value={s.id}>{s.name}{s.isActive ? "" : " (hidden)"}</option>
                   ))}
@@ -131,10 +141,9 @@ export default function BookingRouterPage() {
             )}
           </div>
 
-          {error && <p className="text-destructive text-sm">{error}</p>}
-          <div className="flex items-center gap-3 pt-2">
-            <button onClick={save} disabled={saving}
-              className="bg-primary text-primary-foreground px-5 py-2 rounded-md text-sm font-medium hover:bg-primary/90 disabled:opacity-50">
+          {error && <p className={dashboardErrorAlertClass}>{error}</p>}
+          <div className="flex flex-wrap items-center gap-3 pt-2">
+            <button type="button" onClick={save} disabled={saving} className={dashboardPrimaryActionClass}>
               {saving ? "Saving…" : "Save router"}
             </button>
             {saved && (

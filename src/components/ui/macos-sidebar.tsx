@@ -113,22 +113,22 @@ export function MacOSSidebar({
   return (
     <div
       className={cn(
-        "flex bg-neutral-200 dark:bg-neutral-900 relative w-full overflow-hidden",
+        "dashboard-canvas relative flex w-full overflow-hidden",
         className,
       )}
     >
       <motion.aside
-        animate={{ width: isOpen ? 240 : 64 }}
+        animate={{ width: isOpen ? 248 : 64 }}
         transition={sidebarTransition}
         className={cn(
-          "hidden md:flex md:h-full md:max-h-full p-2 shrink-0 flex-col items-start transition-colors duration-300 ease-out",
-          isOpen ? "bg-neutral-100 dark:bg-neutral-800" : "bg-transparent",
+          "hidden shrink-0 flex-col items-start border-r border-black/[0.06] p-2 transition-colors duration-300 ease-out md:flex md:h-full md:max-h-full dark:border-white/[0.08]",
+          isOpen ? "dashboard-sidebar" : "bg-transparent",
         )}
         aria-label="Sidebar"
       >
         <div
           className={cn(
-            "flex items-center w-full text-neutral-700 dark:text-neutral-300 p-2 shrink-0",
+            "flex w-full shrink-0 items-center p-2 text-muted-foreground",
             isOpen ? "justify-between gap-3" : "justify-center",
           )}
         >
@@ -150,7 +150,7 @@ export function MacOSSidebar({
             type="button"
             layout
             aria-label={isOpen ? "Collapse sidebar" : "Expand sidebar"}
-            className="shrink-0 flex size-11 items-center justify-center rounded-md text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200/80 dark:hover:bg-neutral-700/80 transition-colors"
+            className="flex size-11 shrink-0 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-primary/5 hover:text-foreground"
             onClick={() => setIsOpen((open) => !open)}
           >
             <SidebarToggleIcon isOpen={isOpen} strokeWidth={2} className="size-6" />
@@ -171,7 +171,7 @@ export function MacOSSidebar({
                 {sections.map((section) => (
                   <div key={section.label ?? section.items[0]?.href} className="space-y-1">
                     {section.label ? (
-                      <p className="px-3 text-[0.68rem] font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
+                      <p className="px-3 text-[0.68rem] font-semibold uppercase tracking-wider text-muted-foreground">
                         {section.label}
                       </p>
                     ) : null}
@@ -189,7 +189,7 @@ export function MacOSSidebar({
                           <AnimatePresence>
                             {active ? (
                               <motion.div
-                                className="absolute inset-0 z-0 bg-neutral-200 dark:bg-neutral-700 rounded-md"
+                                className="absolute inset-0 z-0 rounded-xl bg-primary/10"
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
@@ -204,10 +204,10 @@ export function MacOSSidebar({
                             onNavigate={onNavigate}
                             onItemSelect={onItemSelect}
                             className={cn(
-                              "relative z-10 flex items-center gap-2.5 px-3 py-2.5 rounded-md tracking-tight transition-colors w-full text-left",
+                              "relative z-10 flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left tracking-tight transition-colors",
                               active
-                                ? "text-neutral-900 dark:text-neutral-100 font-medium"
-                                : "text-neutral-700 dark:text-neutral-200/70 hover:text-neutral-900 dark:hover:text-neutral-100",
+                                ? "font-medium text-primary"
+                                : "text-muted-foreground hover:text-foreground",
                             )}
                           >
                             {item.icon ? (
@@ -220,7 +220,7 @@ export function MacOSSidebar({
                             {hoveredKey === key && !active ? (
                               <motion.span
                                 layoutId="dashboard-sidebar-hover-bg"
-                                className="absolute inset-0 z-0 bg-neutral-200/50 dark:bg-neutral-900/50 rounded-md pointer-events-none"
+                                className="pointer-events-none absolute inset-0 z-0 rounded-xl bg-muted/70"
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
@@ -257,10 +257,10 @@ export function MacOSSidebar({
                         onNavigate={onNavigate}
                         onItemSelect={onItemSelect}
                         className={cn(
-                          "flex size-11 items-center justify-center rounded-md transition-colors",
+                          "flex size-11 items-center justify-center rounded-xl transition-colors",
                           active
-                            ? "bg-neutral-200 dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100"
-                            : "text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200/70 dark:hover:bg-neutral-700/70",
+                            ? "bg-primary/10 text-primary"
+                            : "text-muted-foreground hover:bg-muted hover:text-foreground",
                         )}
                       >
                         {item.icon ?? null}
@@ -279,7 +279,7 @@ export function MacOSSidebar({
           </div>
         ) : null}
         {!isOpen && collapsedFooter ? (
-          <div className="w-full shrink-0 border-t border-neutral-200/80 pt-3 dark:border-neutral-700/80">
+          <div className="w-full shrink-0 border-t border-border/70 pt-3">
             {collapsedFooter}
           </div>
         ) : null}

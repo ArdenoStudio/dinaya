@@ -8,9 +8,13 @@ import {
   DashboardField,
   DashboardInput,
 } from "@/components/dashboard/DashboardField";
+import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
 import {
+  dashboardErrorAlertClass,
   dashboardInputClass,
+  dashboardPageClass,
   dashboardPrimaryActionClass,
+  dashboardSectionClass,
 } from "@/lib/dashboard-ui";
 import { cn } from "@/lib/utils";
 
@@ -113,25 +117,21 @@ export default function NewBookingPage() {
   const canConfirm = Boolean(slot && clientName && clientPhone);
 
   return (
-    <div className="max-w-2xl pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0">
-      <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
-        <Link
-          href="/dashboard/bookings"
-          className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-        >
-          ← Bookings
-        </Link>
-        <h1 className="font-cal text-xl sm:text-2xl">New booking</h1>
-      </div>
+    <div className={cn(dashboardPageClass, "max-w-2xl pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0")}>
+      <DashboardPageHeader
+        backHref="/dashboard/bookings"
+        backLabel="Bookings"
+        title="New booking"
+      />
 
       <form onSubmit={handleSubmit} className="space-y-5">
         {error ? (
-          <div className="rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700 dark:text-red-300">
+          <div className={cn(dashboardErrorAlertClass, "rounded-md border border-red-200 bg-red-50 px-4 py-2 dark:border-red-900/50 dark:bg-red-950/30")}>
             {error}
           </div>
         ) : null}
 
-        <div className="space-y-4 rounded-xl border bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900">
+        <div className={cn(dashboardSectionClass, "space-y-4")}>
           <h2 className="text-sm font-medium">1. Service</h2>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {services.filter((s) => s).map((s) => (
@@ -162,7 +162,7 @@ export default function NewBookingPage() {
         </div>
 
         {serviceId ? (
-          <div className="space-y-4 rounded-xl border bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900">
+          <div className={cn(dashboardSectionClass, "space-y-4")}>
             <h2 className="text-sm font-medium">2. Staff member</h2>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {staffList.map((s) => (
@@ -190,7 +190,7 @@ export default function NewBookingPage() {
         ) : null}
 
         {staffId ? (
-          <div className="space-y-4 rounded-xl border bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900">
+          <div className={cn(dashboardSectionClass, "space-y-4")}>
             <h2 className="text-sm font-medium">3. Date & time</h2>
             <input
               type="date"
@@ -227,7 +227,7 @@ export default function NewBookingPage() {
         ) : null}
 
         {slot ? (
-          <div className="space-y-4 rounded-xl border bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900">
+          <div className={cn(dashboardSectionClass, "space-y-4")}>
             <h2 className="text-sm font-medium">4. Client details</h2>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <DashboardField htmlFor="client-name" label="Name" required>

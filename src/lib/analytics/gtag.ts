@@ -160,7 +160,7 @@ export function trackOnboardingTestBookClick(params: { businessSlug?: string } =
 export function trackDashboardNavClick(params: {
   routeId?: string;
   href: string;
-  surface: "bottom_tab" | "more_sheet" | "tablet_rail" | "sidebar" | "mobile_menu";
+  surface: "bottom_tab" | "more_sheet" | "tablet_rail" | "sidebar" | "mobile_menu" | "command";
 }) {
   trackEvent("dashboard_nav_click", {
     route_id: params.routeId,

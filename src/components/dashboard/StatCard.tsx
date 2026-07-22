@@ -1,25 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import { TrendingDown, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const toneStyles = {
-  amber: {
-    bar: "bg-amber-50 dark:bg-amber-950/40",
-    icon: "bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:bg-amber-950/50 dark:text-amber-300",
-  },
-  cobalt: {
-    bar: "bg-primary",
-    icon: "bg-blue-50 text-primary dark:bg-blue-950/40 dark:text-blue-300",
-  },
-  slate: {
-    bar: "bg-slate-500",
-    icon: "bg-slate-100 text-slate-600 dark:bg-neutral-800 dark:text-neutral-300",
-  },
-  violet: {
-    bar: "bg-violet-600",
-    icon: "bg-violet-50 text-violet-600 dark:bg-violet-950/50 dark:text-violet-300",
-  },
-};
+import { dashboardCardClass } from "@/lib/dashboard-ui";
 
 function parseDelta(delta?: React.ReactNode): {
   isUp: boolean | null;
@@ -33,40 +15,65 @@ function parseDelta(delta?: React.ReactNode): {
   return { isUp: null, text: delta };
 }
 
+/**
+ * Typography-led metric — no rainbow accent bars.
+ * Cobalt is the only interactive brand hue; deltas use emerald/red semantics.
+ */
 export function StatCard({
   delta,
   icon: Icon,
   label,
-  tone = "cobalt",
+  tone: _tone = "cobalt",
   value,
+  className,
+  compact = false,
 }: {
   delta?: React.ReactNode;
   icon?: LucideIcon;
   label: string;
-  tone?: keyof typeof toneStyles;
+  /** Kept for API compat; intentionally unused (no decorative tones). */
+  tone?: "amber" | "cobalt" | "emerald" | "slate" | "violet";
   value: React.ReactNode;
+  className?: string;
+  compact?: boolean;
 }) {
-  const styles = toneStyles[tone];
+  void _tone;
   const { isUp, text: deltaText } = parseDelta(delta);
 
   return (
-    <div className="overflow-hidden rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
-      <div className={cn("h-1", styles.bar)} />
-      <div className="flex items-start justify-between gap-4 p-5">
+    <div
+      className={cn(
+        dashboardCardClass,
+        compact ? "px-4 py-3" : "px-5 py-4",
+        className,
+      )}
+    >
+      <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          <p className="text-[0.7rem] font-medium uppercase tracking-[0.08em] text-muted-foreground">
             {label}
           </p>
-          <p className="mt-1.5 text-2xl font-semibold tracking-tight tabular-nums">{value}</p>
-          {delta && (
-            <div className="mt-2 flex items-center gap-1">
-              {isUp === true && <TrendingUp className="size-3 text-green-600" aria-hidden="true" />}
-              {isUp === false && <TrendingDown className="size-3 text-red-500" aria-hidden="true" />}
+          <p
+            className={cn(
+              "mt-1 font-semibold tracking-tight tabular-nums text-foreground",
+              compact ? "text-xl" : "text-2xl",
+            )}
+          >
+            {value}
+          </p>
+          {delta ? (
+            <div className="mt-1.5 flex items-center gap-1">
+              {isUp === true ? (
+                <TrendingUp className="size-3 text-emerald-600" aria-hidden="true" />
+              ) : null}
+              {isUp === false ? (
+                <TrendingDown className="size-3 text-red-500" aria-hidden="true" />
+              ) : null}
               <span
                 className={cn(
                   "text-xs font-medium tabular-nums",
                   isUp === true
-                    ? "text-green-600"
+                    ? "text-emerald-600"
                     : isUp === false
                       ? "text-red-500"
                       : "text-muted-foreground",
@@ -75,18 +82,13 @@ export function StatCard({
                 {deltaText}
               </span>
             </div>
-          )}
+          ) : null}
         </div>
-        {Icon && (
-          <div
-            className={cn(
-              "flex size-10 shrink-0 items-center justify-center rounded-lg",
-              styles.icon,
-            )}
-          >
-            <Icon className="size-5" aria-hidden="true" />
+        {Icon && !compact ? (
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+            <Icon className="size-4" aria-hidden="true" />
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );

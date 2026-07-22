@@ -96,21 +96,10 @@ export type DashboardOverviewData = {
   recentActivity: DashboardOverviewActivityItem[];
 };
 
-export const overviewStatusBorder: Record<string, string> = {
-  confirmed: "border-l-blue-500",
-  pending: "border-l-amber-400",
-  completed: "border-l-green-500",
-  no_show: "border-l-red-400",
-  cancelled: "border-l-slate-300",
-};
-
-export const overviewStatusBadge: Record<string, string> = {
-  confirmed: "bg-blue-50 dark:bg-blue-950/40 text-blue-700",
-  pending: "bg-amber-50 dark:bg-amber-950/40 text-amber-700",
-  completed: "bg-green-50 dark:bg-green-950/40 text-green-700 dark:text-green-300",
-  no_show: "bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-300",
-  cancelled: "bg-slate-100 dark:bg-neutral-800 text-slate-500 dark:text-slate-400",
-};
+export {
+  statusBorderStyles as overviewStatusBorder,
+  statusStyles as overviewStatusBadge,
+} from "@/lib/dashboard-status";
 
 export const overviewEntityIconMap: Record<string, LucideIcon> = {
   booking: CalendarCheck,

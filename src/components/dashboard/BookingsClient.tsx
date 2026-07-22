@@ -9,9 +9,15 @@ import { DashboardConfirmDialog } from "@/components/dashboard/DashboardConfirmD
 import { DashboardLoadingPanel, DashboardTableSkeleton } from "@/components/dashboard/DashboardLoadingPanel";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
 import { EmptyState } from "@/components/dashboard/EmptyState";
+import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { useDashboardToast } from "@/components/dashboard/ToastProvider";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { dashboardFilterPillClass } from "@/lib/dashboard-ui";
+import {
+  dashboardFilterPillClass,
+  dashboardCardClass,
+  dashboardOutlineActionClass,
+  dashboardPrimaryActionClass,
+} from "@/lib/dashboard-ui";
 import { cn } from "@/lib/utils";
 import { bookingReminderText, whatsappUrl } from "@/lib/whatsapp";
 
@@ -27,14 +33,6 @@ export type BookingRow = {
   status: "pending" | "confirmed" | "cancelled" | "completed" | "no_show";
   serviceName: string;
   staffName: string;
-};
-
-const STATUS_STYLES: Record<string, string> = {
-  pending: "bg-yellow-100 text-yellow-800 dark:bg-yellow-950/40 dark:text-yellow-200",
-  confirmed: "bg-green-100 text-green-800 dark:bg-green-950/40 dark:text-green-200",
-  cancelled: "bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-200",
-  completed: "bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-200",
-  no_show: "bg-gray-100 text-gray-600 dark:bg-neutral-800 dark:text-gray-400",
 };
 
 const TABS = [
@@ -90,15 +88,6 @@ export type BookingsApi = {
   exportUrl: (tab: BookingsTab) => string;
 };
 
-function StatusBadge({ status }: { status: BookingRow["status"] }) {
-  return (
-    <span
-      className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium capitalize ${STATUS_STYLES[status] ?? ""}`}
-    >
-      {status.replace("_", " ")}
-    </span>
-  );
-}
 
 function BookingActions({
   row,
@@ -221,38 +210,22 @@ export function BookingsClient({ api }: { api: BookingsApi }) {
   const confirmCopy = confirmState ? CONFIRM_COPY[confirmState.status] : null;
 
   return (
-    <div>
+    <div className="space-y-6">
       <DashboardPageHeader
         title="Bookings"
+        description="Confirm, message, and close out today’s appointments."
         actions={
           <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap">
             <Link
               href="/dashboard/bookings/new"
-              className={cn(buttonVariants(), "min-h-11 w-full justify-center sm:w-auto")}
+              className={cn(dashboardPrimaryActionClass, "w-full justify-center sm:w-auto")}
             >
               New booking
             </Link>
-            <div className="flex gap-2">
-              <Link
-                href="/dashboard/calendar"
-                className={cn(
-                  buttonVariants({ variant: "outline" }),
-                  "min-h-11 flex-1 justify-center sm:flex-none",
-                )}
-              >
-                Calendar
-              </Link>
-              <a
-                href={api.exportUrl(tab)}
-                className={cn(
-                  buttonVariants({ variant: "outline" }),
-                  "min-h-11 flex-1 justify-center sm:flex-none",
-                )}
-              >
-                <Download className="size-3.5" aria-hidden="true" />
-                Export
-              </a>
-            </div>
+            <a href={api.exportUrl(tab)} className={cn(dashboardOutlineActionClass, "justify-center")}>
+              <Download className="size-3.5" aria-hidden="true" />
+              Export
+            </a>
           </div>
         }
       />
@@ -286,7 +259,7 @@ export function BookingsClient({ api }: { api: BookingsApi }) {
           mobileCard={(row) => (
             <article
               key={row.id}
-              className="rounded-xl border border-border bg-card p-4 dark:border-neutral-800 dark:bg-neutral-900"
+              className={cn(dashboardCardClass, "p-4")}
             >
               <Link
                 href={`/dashboard/bookings/${row.id}`}
@@ -343,7 +316,7 @@ export function BookingsClient({ api }: { api: BookingsApi }) {
               title="No bookings here yet"
               description="New bookings from your booking page or manual entries will appear here."
               action={
-                <Link href="/dashboard/bookings/new" className={cn(buttonVariants(), "min-h-11")}>
+                <Link href="/dashboard/bookings/new" className={dashboardPrimaryActionClass}>
                   Create booking
                 </Link>
               }

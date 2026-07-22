@@ -41,7 +41,7 @@ export function OnboardingWizard({ steps, bookingUrl, whatsappShare }: Props) {
   const progress = Math.round((completed / steps.length) * 100);
 
   return (
-    <div className="overflow-hidden rounded-xl border bg-card p-6 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
+    <div className="overflow-hidden rounded-xl border bg-card p-6 shadow-sm dark:border-border/60 dark:bg-card">
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-widest text-primary">
@@ -106,7 +106,7 @@ export function OnboardingWizard({ steps, bookingUrl, whatsappShare }: Props) {
               "flex min-h-11 items-center justify-between rounded-lg border px-4 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
               step.done
                 ? "border-emerald-200 bg-emerald-50 dark:border-emerald-800/50 dark:bg-emerald-950/40"
-                : "bg-background hover:border-primary/30 dark:bg-neutral-900",
+                : "bg-background hover:border-primary/30",
             )}
           >
             <span>{step.label}</span>

@@ -81,7 +81,7 @@ export function AnalyticsCharts({
   return (
     <div className="grid gap-6 lg:grid-cols-2">
       {/* Revenue area chart */}
-      <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5 lg:col-span-2">
+      <div className="rounded-xl border bg-card border-border/60 p-5 lg:col-span-2">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-semibold">Revenue this week vs last week</h2>
           <div className="flex items-center gap-4 text-xs text-muted-foreground">
@@ -141,7 +141,7 @@ export function AnalyticsCharts({
       </div>
 
       {/* Services by revenue */}
-      <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
+      <div className="rounded-xl border bg-card border-border/60 p-5">
         <h2 className="mb-4 font-semibold">Bookings by service (revenue)</h2>
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
@@ -173,7 +173,7 @@ export function AnalyticsCharts({
       </div>
 
       {/* Busiest hours */}
-      <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
+      <div className="rounded-xl border bg-card border-border/60 p-5">
         <h2 className="mb-4 font-semibold">Busiest hours</h2>
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
@@ -194,7 +194,7 @@ export function AnalyticsCharts({
       </div>
 
       {/* Booking health donut */}
-      <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
+      <div className="rounded-xl border bg-card border-border/60 p-5">
         <h2 className="mb-4 font-semibold">Booking health</h2>
         <div className="h-52">
           <ResponsiveContainer width="100%" height="100%">
@@ -244,7 +244,7 @@ export function AnalyticsCharts({
       </div>
 
       {/* Top clients with fill bars */}
-      <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
+      <div className="rounded-xl border bg-card border-border/60 p-5">
         <h2 className="mb-4 font-semibold">Top clients by spend</h2>
         {topClients.length === 0 ? (
           <p className="text-sm text-muted-foreground">No paid bookings yet.</p>

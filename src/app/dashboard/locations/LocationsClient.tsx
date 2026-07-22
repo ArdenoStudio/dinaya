@@ -2,8 +2,19 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
 import { Icon } from "@/components/ui/Icon";
-import { dashboardPrimaryActionClass } from "@/lib/dashboard-ui";
+import {
+  dashboardErrorAlertClass,
+  dashboardInputClass,
+  dashboardLabelClass,
+  dashboardOutlineActionClass,
+  dashboardPageClass,
+  dashboardPrimaryActionClass,
+  dashboardSectionClass,
+  dashboardSurfaceClass,
+} from "@/lib/dashboard-ui";
+import { cn } from "@/lib/utils";
 
 type LocationRow = {
   id: string;
@@ -94,32 +105,34 @@ export default function LocationsClient({ plan, locationLimit }: Props) {
   }
 
   return (
-    <div>
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="font-cal text-2xl">Locations</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+    <div className={dashboardPageClass}>
+      <DashboardPageHeader
+        title="Locations"
+        description={
+          <>
             Manage branches for your booking page and dashboard.
             {locationLimit !== null && (
               <span className="ml-1">
                 ({locations.length}/{locationLimit} on {plan} plan)
               </span>
             )}
-          </p>
-        </div>
-        {!atLimit && (
-          <button
-            type="button"
-            onClick={() => setShowForm((v) => !v)}
-            className={dashboardPrimaryActionClass}
-          >
-            <Icon name="plus" className="text-xs" /> Add location
-          </button>
-        )}
-      </div>
+          </>
+        }
+        actions={
+          !atLimit ? (
+            <button
+              type="button"
+              onClick={() => setShowForm((v) => !v)}
+              className={dashboardPrimaryActionClass}
+            >
+              <Icon name="plus" className="text-xs" /> Add location
+            </button>
+          ) : undefined
+        }
+      />
 
       {atLimit && (
-        <div className="mb-4 rounded-lg border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-950/40 px-4 py-3 text-sm text-amber-900 dark:text-amber-200">
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800/50 dark:bg-amber-950/40 dark:text-amber-200">
           You&apos;ve reached your plan limit of {locationLimit} location{locationLimit === 1 ? "" : "s"}.{" "}
           <Link href="/dashboard/billing" className="font-medium underline">
             Upgrade
@@ -129,43 +142,43 @@ export default function LocationsClient({ plan, locationLimit }: Props) {
       )}
 
       {showForm && (
-        <form onSubmit={handleCreate} className="mb-6 rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-6 space-y-4 max-w-lg">
-          <h2 className="font-medium">New branch</h2>
+        <form onSubmit={handleCreate} className={cn(dashboardSectionClass, "max-w-lg space-y-4")}>
+          <h2 className="font-cal text-lg tracking-tight">New branch</h2>
           <div>
-            <label className="text-sm font-medium">Name *</label>
+            <label className={dashboardLabelClass}>Name *</label>
             <input
               required
               value={form.name}
               onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-              className="mt-1 w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className={dashboardInputClass}
               placeholder="Colombo 7 branch"
             />
           </div>
           <div>
-            <label className="text-sm font-medium">Address</label>
+            <label className={dashboardLabelClass}>Address</label>
             <input
               value={form.address}
               onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
-              className="mt-1 w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className={dashboardInputClass}
             />
           </div>
           <div>
-            <label className="text-sm font-medium">Phone</label>
+            <label className={dashboardLabelClass}>Phone</label>
             <input
               value={form.phone}
               onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
-              className="mt-1 w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className={dashboardInputClass}
             />
           </div>
-          {error && <p className="text-sm text-destructive">{error}</p>}
-          <div className="flex gap-3">
-            <button type="button" onClick={() => setShowForm(false)} className="text-sm text-muted-foreground">
+          {error && <p className={dashboardErrorAlertClass}>{error}</p>}
+          <div className="flex flex-wrap gap-3">
+            <button type="button" onClick={() => setShowForm(false)} className={dashboardOutlineActionClass}>
               Cancel
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="ml-auto rounded-md bg-primary px-5 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50"
+              className={cn(dashboardPrimaryActionClass, "ml-auto")}
             >
               {saving ? "Saving…" : "Create"}
             </button>
@@ -176,11 +189,11 @@ export default function LocationsClient({ plan, locationLimit }: Props) {
       {loading ? (
         <p className="text-sm text-muted-foreground">Loading…</p>
       ) : locations.length === 0 ? (
-        <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-12 text-center text-muted-foreground">
+        <div className={cn(dashboardSurfaceClass, "p-12 text-center text-muted-foreground")}>
           No locations yet. Add your first branch to get started.
         </div>
       ) : (
-        <div className="divide-y rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
+        <div className={cn(dashboardSurfaceClass, "divide-y overflow-hidden")}>
           {locations.map((loc) => (
             <div key={loc.id} className="flex flex-wrap items-center gap-4 px-5 py-4 hover:bg-muted/20">
               <div className="min-w-0 flex-1">
@@ -192,7 +205,7 @@ export default function LocationsClient({ plan, locationLimit }: Props) {
                     </span>
                   )}
                   {!loc.isActive && (
-                    <span className="rounded-full bg-gray-100 dark:bg-neutral-800 px-2 py-0.5 text-[10px] font-semibold uppercase text-gray-500 dark:text-gray-400">
+                    <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold uppercase text-muted-foreground">
                       Inactive
                     </span>
                   )}
@@ -207,7 +220,7 @@ export default function LocationsClient({ plan, locationLimit }: Props) {
                   <button
                     type="button"
                     onClick={() => void setDefault(loc.id)}
-                    className="rounded border px-2.5 py-1 text-xs font-medium text-muted-foreground hover:border-primary/40"
+                    className={cn(dashboardOutlineActionClass, "px-2.5 py-1 text-xs")}
                   >
                     Set default
                   </button>
@@ -215,7 +228,7 @@ export default function LocationsClient({ plan, locationLimit }: Props) {
                 <button
                   type="button"
                   onClick={() => void toggleActive(loc.id, loc.isActive)}
-                  className="rounded border px-2.5 py-1 text-xs font-medium text-muted-foreground hover:border-primary/40"
+                  className={cn(dashboardOutlineActionClass, "px-2.5 py-1 text-xs")}
                 >
                   {loc.isActive ? "Deactivate" : "Activate"}
                 </button>
@@ -225,7 +238,7 @@ export default function LocationsClient({ plan, locationLimit }: Props) {
         </div>
       )}
 
-      {!loading && error && !showForm && <p className="mt-4 text-sm text-destructive">{error}</p>}
+      {!loading && error && !showForm && <p className="text-sm text-destructive">{error}</p>}
     </div>
   );
 }

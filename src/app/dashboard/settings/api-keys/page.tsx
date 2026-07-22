@@ -2,12 +2,13 @@ import { requireOwner } from "@/lib/auth";
 import { ProGate } from "@/components/ProGate";
 import { ApiKeysClient } from "@/components/dashboard/ApiKeysClient";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
+import { dashboardPageClass } from "@/lib/dashboard-ui";
 
 export default async function ApiKeysPage() {
   const { businessId } = await requireOwner();
 
   return (
-    <div className="space-y-6">
+    <div className={dashboardPageClass}>
       <DashboardPageHeader
         title="API keys"
         description={

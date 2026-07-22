@@ -1,52 +1,65 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
-import { Activity } from "lucide-react";
+import { Activity, CalendarPlus } from "lucide-react";
 import { OnboardingWizard } from "@/components/dashboard/OnboardingWizard";
 import { OnboardingCelebration } from "@/components/dashboard/OnboardingCelebration";
-import { StatCard } from "@/components/dashboard/StatCard";
-import { Icon } from "@/components/ui/Icon";
+import { EmptyState } from "@/components/dashboard/EmptyState";
+import { StatusBadge } from "@/components/dashboard/StatusBadge";
+import { statusBorderStyles } from "@/lib/dashboard-status";
 import {
   formatOverviewActivityAge,
   overviewActionDot,
   overviewEntityIconMap,
-  overviewStatusBadge,
-  overviewStatusBorder,
   type DashboardOverviewData,
 } from "@/lib/dashboard/overview-data";
+import {
+  dashboardPageClass,
+  dashboardPrimaryActionClass,
+  dashboardSurfaceClass,
+} from "@/lib/dashboard-ui";
 import { cn } from "@/lib/utils";
 
 type DashboardOverviewProps = {
   data: DashboardOverviewData;
 };
 
+function liveContextLine(data: DashboardOverviewData): string {
+  const count = data.todayRows.length;
+  const revenue = data.stats.find((s) => /revenue|lkr/i.test(s.label))?.value;
+  const parts: string[] = [];
+  parts.push(
+    count === 0
+      ? "No appointments today"
+      : `${count} appointment${count === 1 ? "" : "s"} today`,
+  );
+  if (revenue != null && revenue !== "") {
+    parts.push(String(revenue));
+  }
+  return parts.join(" · ");
+}
+
 export function DashboardOverview({ data }: DashboardOverviewProps) {
   const firstName = data.businessName.split(" ")[0];
 
   return (
-    <div className="space-y-6">
-      <div>
-        <p className="mb-2 text-xs font-medium uppercase tracking-widest text-muted-foreground/60">
-          {data.greetingDate}
-        </p>
-        <h1 className="font-cal text-3xl tracking-tight">Good day, {firstName}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Today&apos;s bookings, revenue, and setup progress.</p>
-      </div>
-
-      {data.showStats ? (
-        <div className="grid gap-4 md:grid-cols-4">
-          {data.stats.map((stat) => (
-            <StatCard
-              key={stat.label}
-              label={stat.label}
-              value={stat.value}
-              icon={stat.icon}
-              tone={stat.tone}
-              delta={stat.delta}
-            />
-          ))}
+    <div className={dashboardPageClass}>
+      {/* Header — one primary CTA only */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="min-w-0">
+          <p className="text-[0.7rem] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+            {data.greetingDate}
+          </p>
+          <h1 className="mt-2 font-cal text-[2rem] leading-none tracking-tight sm:text-[2.5rem]">
+            Good day, {firstName}
+          </h1>
+          <p className="mt-2 text-sm text-muted-foreground">{liveContextLine(data)}</p>
         </div>
-      ) : null}
+        <Link href="/dashboard/bookings/new" className={cn(dashboardPrimaryActionClass, "self-start sm:self-auto")}>
+          <CalendarPlus className="size-4" aria-hidden="true" />
+          New booking
+        </Link>
+      </div>
 
       <Suspense fallback={null}>
         <OnboardingCelebration bookingUrl={data.bookingUrl} bookingDisplayUrl={data.bookingDisplayUrl} />
@@ -60,40 +73,41 @@ export function DashboardOverview({ data }: DashboardOverviewProps) {
         />
       ) : null}
 
-      <div className="grid gap-6 lg:grid-cols-[1.4fr_0.9fr]">
-        <div className="rounded-xl border bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-semibold">Today timeline</h2>
-            <Link href="/dashboard/calendar" className="text-sm text-primary hover:underline">
-              Calendar
-            </Link>
+      {/* Today document — the product surface */}
+      <section className={cn(dashboardSurfaceClass, "overflow-hidden")}>
+        <div className="flex items-center justify-between gap-3 border-b border-border/60 px-5 py-4">
+          <div>
+            <h2 className="font-cal text-lg tracking-tight">Today</h2>
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              Tap an appointment to confirm, message, or reschedule.
+            </p>
           </div>
+          <Link
+            href="/dashboard/calendar"
+            className="shrink-0 text-sm font-medium text-primary hover:underline"
+          >
+            Calendar
+          </Link>
+        </div>
+
+        <div className="p-2 sm:p-3">
           {data.todayRows.length === 0 ? (
-            <div className="rounded-lg bg-muted/30 p-4">
-              <p className="text-sm text-muted-foreground">No bookings today.</p>
-              {data.nextRows.length > 0 ? (
-                <div className="mt-4 space-y-2">
-                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    Next appointments
-                  </p>
-                  {data.nextRows.map((row) => (
-                    <Link
-                      key={row.id}
-                      href={`/dashboard/bookings/${row.id}`}
-                      className="block rounded-md border bg-white px-3 py-2 text-sm hover:border-primary/40 dark:border-neutral-800 dark:bg-neutral-900"
-                    >
-                      <span className="font-medium">{row.clientName}</span>
-                      <span className="text-muted-foreground">
-                        {" "}
-                        - {row.serviceName} on {format(row.startsAt, "d MMM, h:mm a")}
-                      </span>
-                    </Link>
-                  ))}
-                </div>
-              ) : null}
-            </div>
+            <EmptyState
+              className="border-0 bg-transparent shadow-none"
+              title="No bookings today"
+              description={
+                data.nextRows.length > 0
+                  ? "You’re clear for now — upcoming appointments are listed below."
+                  : "When clients book, they show up here with time and status."
+              }
+              action={
+                <Link href="/dashboard/bookings/new" className={dashboardPrimaryActionClass}>
+                  Create booking
+                </Link>
+              }
+            />
           ) : (
-            <div className="space-y-3">
+            <ul className="divide-y divide-border/50">
               {data.todayRows.map((row) => {
                 const initials = row.clientName
                   .split(" ")
@@ -101,120 +115,154 @@ export function DashboardOverview({ data }: DashboardOverviewProps) {
                   .map((n) => n[0])
                   .join("")
                   .toUpperCase();
-                const border = overviewStatusBorder[row.status] ?? "border-l-slate-200";
-                const badge = overviewStatusBadge[row.status] ?? "bg-muted text-muted-foreground";
+                const border = statusBorderStyles[row.status] ?? "border-l-border";
                 return (
-                  <Link
-                    key={row.id}
-                    href={`/dashboard/bookings/${row.id}`}
-                    className={cn(
-                      "flex items-center gap-3 rounded-lg border border-l-4 px-4 py-3 transition-shadow hover:shadow-sm",
-                      border,
-                    )}
-                  >
-                    <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
-                      {initials}
-                    </span>
-                    <span className="w-16 shrink-0 text-sm font-semibold tabular-nums text-primary">
-                      {format(row.startsAt, "h:mm a")}
-                    </span>
-                    <span className="min-w-0 flex-1 text-sm">
-                      <span className="font-medium">{row.clientName}</span>
-                      <span className="text-muted-foreground">
-                        {" "}
-                        · {row.serviceName} with {row.staffName}
+                  <li key={row.id}>
+                    <Link
+                      href={`/dashboard/bookings/${row.id}`}
+                      className={cn(
+                        "flex min-h-14 items-center gap-3 rounded-xl border-l-[3px] px-3 py-3 transition-colors hover:bg-muted/50 sm:px-4",
+                        border,
+                      )}
+                    >
+                      <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold text-foreground">
+                        {initials}
                       </span>
-                    </span>
-                    <span className={cn("shrink-0 rounded-full px-2 py-0.5 text-xs font-medium capitalize", badge)}>
-                      {row.status.replace("_", " ")}
-                    </span>
-                  </Link>
+                      <span className="w-[4.5rem] shrink-0 text-base font-semibold tabular-nums tracking-tight">
+                        {format(row.startsAt, "h:mm a")}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-sm font-medium">{row.clientName}</span>
+                        <span className="block truncate text-sm text-muted-foreground">
+                          {row.serviceName} · {row.staffName}
+                        </span>
+                      </span>
+                      <StatusBadge status={row.status} className="shrink-0" />
+                    </Link>
+                  </li>
                 );
               })}
-            </div>
+            </ul>
           )}
-        </div>
 
-        <div className="space-y-6">
-          {data.showShareCard ? (
-            <div className="rounded-xl border border-primary/15 bg-primary/[0.04] p-5">
-              <div className="mb-3 flex items-center gap-2.5">
-                <span className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                  <Icon name="link-45deg" className="text-sm" aria-hidden="true" />
-                </span>
-                <p className="text-sm font-semibold">Share booking link</p>
-              </div>
-              <code className="block truncate rounded-lg border border-primary/15 bg-white px-3 py-2 font-mono text-sm text-primary dark:bg-neutral-900">
-                {data.bookingDisplayUrl}
-              </code>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <a
-                  href={data.bookingUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="rounded-md border bg-white px-3 py-2 text-xs font-medium text-primary hover:bg-primary/5 dark:border-neutral-800 dark:bg-neutral-900"
-                >
-                  Open
-                </a>
-                <a
-                  href={data.whatsappShare}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="rounded-md border bg-white px-3 py-2 text-xs font-medium text-primary hover:bg-primary/5 dark:border-neutral-800 dark:bg-neutral-900"
-                >
-                  WhatsApp
-                </a>
+          {data.todayRows.length === 0 && data.nextRows.length > 0 ? (
+            <div className="mt-2 space-y-1 border-t border-border/50 px-2 pt-3 sm:px-3">
+              <p className="px-1 text-[0.7rem] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+                Coming up
+              </p>
+              {data.nextRows.map((row) => (
                 <Link
-                  href="/dashboard/marketing"
-                  className="rounded-md border bg-white px-3 py-2 text-xs font-medium text-primary hover:bg-primary/5 dark:border-neutral-800 dark:bg-neutral-900"
+                  key={row.id}
+                  href={`/dashboard/bookings/${row.id}`}
+                  className="flex min-h-11 items-center justify-between gap-3 rounded-lg px-2 py-2 text-sm hover:bg-muted/50"
                 >
-                  QR & embed
+                  <span className="min-w-0 truncate">
+                    <span className="font-medium">{row.clientName}</span>
+                    <span className="text-muted-foreground"> · {row.serviceName}</span>
+                  </span>
+                  <span className="shrink-0 tabular-nums text-muted-foreground">
+                    {format(row.startsAt, "d MMM, h:mm a")}
+                  </span>
                 </Link>
-              </div>
-              <textarea
-                readOnly
-                value={data.embedSnippet}
-                className="mt-3 h-16 w-full resize-none rounded-md border bg-white p-2 text-xs text-muted-foreground dark:border-neutral-800 dark:bg-neutral-900"
-              />
+              ))}
             </div>
           ) : null}
-
-          <div className="rounded-xl border bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900">
-            <h2 className="mb-4 font-semibold">Recent activity</h2>
-            {data.recentActivity.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No recent activity yet.</p>
-            ) : (
-              <div className="space-y-3">
-                {data.recentActivity.map((item, index) => {
-                  const EntityIcon = overviewEntityIconMap[item.entity] ?? Activity;
-                  const dot = overviewActionDot[item.action] ?? "bg-slate-300";
-                  return (
-                    <div
-                      key={`${item.entity}-${item.createdAt.toISOString()}-${index}`}
-                      className="flex items-start gap-3 border-b pb-3 last:border-b-0 last:pb-0"
-                    >
-                      <div className="relative mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full bg-muted">
-                        <EntityIcon className="size-3.5 text-muted-foreground" aria-hidden="true" />
-                        <span className={cn("absolute -right-0.5 -top-0.5 size-2 rounded-full ring-1 ring-white", dot)} />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium capitalize">
-                          {item.entity}{" "}
-                          <span className="font-normal text-muted-foreground">
-                            {item.action.replace(/_/g, " ")}
-                          </span>
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {formatOverviewActivityAge(item.createdAt)}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
         </div>
+      </section>
+
+      {/* Compact metrics — deferred below the ops surface */}
+      {data.showStats ? (
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          {data.stats.map((stat) => (
+            <div
+              key={stat.label}
+              className="rounded-xl border border-border/60 bg-card/80 px-4 py-3"
+            >
+              <p className="text-[0.65rem] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+                {stat.label}
+              </p>
+              <p className="mt-1 text-lg font-semibold tabular-nums tracking-tight">{stat.value}</p>
+              {stat.delta ? (
+                <p className="mt-0.5 text-xs text-muted-foreground tabular-nums">{stat.delta}</p>
+              ) : null}
+            </div>
+          ))}
+        </div>
+      ) : null}
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        {data.showShareCard ? (
+          <section className={cn(dashboardSurfaceClass, "p-5")}>
+            <h2 className="font-cal text-base tracking-tight">Share booking link</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Put this everywhere clients find you.
+            </p>
+            <code className="mt-3 block truncate rounded-xl bg-muted/60 px-3 py-2.5 font-mono text-sm text-foreground">
+              {data.bookingDisplayUrl}
+            </code>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <a
+                href={data.bookingUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-medium text-primary hover:bg-primary/5"
+              >
+                Open
+              </a>
+              <a
+                href={data.whatsappShare}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-medium text-primary hover:bg-primary/5"
+              >
+                WhatsApp
+              </a>
+              <Link
+                href="/dashboard/marketing"
+                className="inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-medium text-primary hover:bg-primary/5"
+              >
+                QR &amp; embed
+              </Link>
+            </div>
+          </section>
+        ) : null}
+
+        <section className={cn(dashboardSurfaceClass, "p-5")}>
+          <h2 className="font-cal text-base tracking-tight">Recent activity</h2>
+          {data.recentActivity.length === 0 ? (
+            <p className="mt-3 text-sm text-muted-foreground">No recent activity yet.</p>
+          ) : (
+            <ul className="mt-3 space-y-3">
+              {data.recentActivity.map((item, index) => {
+                const EntityIcon = overviewEntityIconMap[item.entity] ?? Activity;
+                const dot = overviewActionDot[item.action] ?? "bg-slate-300";
+                const label = `${item.entity} ${item.action.replace(/_/g, " ")}`;
+                return (
+                  <li
+                    key={`${item.entity}-${item.createdAt.toISOString()}-${index}`}
+                    className="flex items-start gap-3"
+                  >
+                    <div className="relative mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full bg-muted">
+                      <EntityIcon className="size-3.5 text-muted-foreground" aria-hidden="true" />
+                      <span
+                        className={cn(
+                          "absolute -right-0.5 -top-0.5 size-2 rounded-full ring-1 ring-card",
+                          dot,
+                        )}
+                      />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium capitalize">{label}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {formatOverviewActivityAge(item.createdAt)}
+                      </p>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </section>
       </div>
     </div>
   );

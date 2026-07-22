@@ -196,7 +196,7 @@ export function DashboardBottomNav({
                   <p className="mb-1.5 px-3 text-[0.7rem] font-semibold uppercase tracking-wider text-neutral-500">
                     {section.label}
                   </p>
-                  <ul className="overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-50 dark:border-neutral-800 dark:bg-neutral-900">
+                  <ul className="overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-50 dark:border-border/60 dark:bg-card">
                     {section.items.map((item, index) => {
                       const Icon = item.icon;
                       const active = isActive(item, activeHref);
@@ -241,7 +241,7 @@ export function DashboardBottomNav({
                 <p className="mb-1.5 px-3 text-[0.7rem] font-semibold uppercase tracking-wider text-neutral-500">
                   Account
                 </p>
-                <ul className="overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-50 dark:border-neutral-800 dark:bg-neutral-900">
+                <ul className="overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-50 dark:border-border/60 dark:bg-card">
                   <li className="px-3.5 py-3">
                     <p className="truncate text-[15px] font-medium text-neutral-900 dark:text-neutral-100">
                       {userEmail}
@@ -327,10 +327,10 @@ export function DashboardBottomNav({
 
       <nav
         data-dashboard-bottom-nav
-        className="fixed inset-x-0 bottom-0 z-[55] border-t border-neutral-200/90 bg-white/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-1px_0_rgba(0,0,0,0.04)] backdrop-blur-xl md:hidden dark:border-neutral-800 dark:bg-neutral-950/95"
+        className="fixed inset-x-0 bottom-0 z-[55] border-t border-border/80 bg-[hsl(var(--dashboard-chrome))]/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden"
         aria-label="Primary"
       >
-        <div className="grid h-14 grid-cols-5">
+        <div className="grid h-[3.75rem] grid-cols-5">
           {PRIMARY.map((item) => {
             const Icon = item.icon;
             const active = isActive(item, activeHref);
@@ -341,14 +341,14 @@ export function DashboardBottomNav({
                 onClick={() => handleNav(item.href, "bottom_tab", item.routeId)}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "relative flex flex-col items-center justify-center gap-0.5 px-1 text-[0.6875rem] font-medium transition-colors active:scale-[0.96]",
+                  "relative flex min-h-11 flex-col items-center justify-center gap-0.5 px-1 text-xs font-medium transition-colors active:scale-[0.96]",
                   focusRingClass,
-                  active ? "text-primary" : "text-neutral-500 dark:text-neutral-400",
+                  active ? "text-primary" : "text-muted-foreground",
                 )}
               >
                 {active ? (
                   <span
-                    className="absolute inset-x-3 top-1 h-0.5 rounded-full bg-primary"
+                    className="absolute inset-x-4 top-1.5 h-0.5 rounded-full bg-primary"
                     aria-hidden="true"
                   />
                 ) : null}
@@ -362,9 +362,9 @@ export function DashboardBottomNav({
             type="button"
             onClick={() => setMoreOpen((open) => !open)}
             className={cn(
-              "relative flex flex-col items-center justify-center gap-0.5 px-1 text-[0.6875rem] font-medium transition-colors active:scale-[0.96]",
+              "relative flex min-h-11 flex-col items-center justify-center gap-0.5 px-1 text-xs font-medium transition-colors active:scale-[0.96]",
               focusRingClass,
-              moreOpen || moreActive ? "text-primary" : "text-neutral-500 dark:text-neutral-400",
+              moreOpen || moreActive ? "text-primary" : "text-muted-foreground",
             )}
             aria-expanded={moreOpen}
             aria-controls={sheetId}
@@ -373,7 +373,7 @@ export function DashboardBottomNav({
           >
             {moreActive && !moreOpen ? (
               <span
-                className="absolute inset-x-3 top-1 h-0.5 rounded-full bg-primary"
+                className="absolute inset-x-4 top-1.5 h-0.5 rounded-full bg-primary"
                 aria-hidden="true"
               />
             ) : null}

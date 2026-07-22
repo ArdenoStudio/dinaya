@@ -3,7 +3,18 @@
 import { useState, useEffect } from "react";
 import { ConfirmDialog } from "@/components/dashboard/ConfirmDialog";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
+import { DashboardSection } from "@/components/dashboard/DashboardSection";
 import { EmptyState } from "@/components/dashboard/EmptyState";
+import {
+  dashboardCardClass,
+  dashboardInputClass,
+  dashboardLabelClass,
+  dashboardOutlineActionClass,
+  dashboardPageClass,
+  dashboardPrimaryActionClass,
+  dashboardSectionMutedClass,
+} from "@/lib/dashboard-ui";
+import { cn } from "@/lib/utils";
 import { Webhook } from "lucide-react";
 
 const ALL_EVENTS = [
@@ -87,7 +98,7 @@ export function WebhooksClient() {
   }
 
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className={cn(dashboardPageClass, "max-w-2xl")}>
       <DashboardPageHeader
         title="Webhooks"
         description="Get notified at a URL when booking events happen. Verified with an HMAC-SHA256 signature."
@@ -96,7 +107,7 @@ export function WebhooksClient() {
         actions={
           <button
             onClick={() => setShowForm((v) => !v)}
-            className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+            className={dashboardPrimaryActionClass}
           >
             + Add webhook
           </button>
@@ -104,28 +115,29 @@ export function WebhooksClient() {
       />
 
       {revealedSecret && (
-        <div className="mb-4 rounded-xl border border-yellow-200 bg-yellow-50 p-4">
-          <p className="mb-1 text-sm font-medium text-yellow-800">Save your signing secret — it won&apos;t be shown again.</p>
-          <code className="break-all rounded bg-yellow-100 px-2 py-1 text-xs">{revealedSecret}</code>
-          <button onClick={() => setRevealedSecret(null)} className="ml-3 text-xs text-yellow-700 hover:underline">Dismiss</button>
+        <div className={dashboardSectionMutedClass}>
+          <p className="mb-1 text-sm font-medium">Save your signing secret — it won&apos;t be shown again.</p>
+          <code className="break-all rounded bg-muted px-2 py-1 text-xs">{revealedSecret}</code>
+          <button onClick={() => setRevealedSecret(null)} className="ml-3 text-xs text-primary hover:underline">Dismiss</button>
         </div>
       )}
 
       {showForm && (
-        <form onSubmit={handleAdd} className="mb-6 space-y-4 rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
+        <DashboardSection title="Add webhook">
+        <form onSubmit={handleAdd} className="space-y-4">
           <div>
-            <label className="text-sm font-medium">Endpoint URL *</label>
+            <label className={dashboardLabelClass}>Endpoint URL *</label>
             <input
               required
               type="url"
               value={form.url}
               onChange={(e) => setForm((f) => ({ ...f, url: e.target.value }))}
               placeholder="https://your-server.com/webhooks/dinaya"
-              className="mt-1 w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className={dashboardInputClass}
             />
           </div>
           <div>
-            <label className="text-sm font-medium">Events to send</label>
+            <label className={dashboardLabelClass}>Events to send</label>
             <div className="mt-2 space-y-2">
               {ALL_EVENTS.map((ev) => (
                 <label key={ev.value} className="flex cursor-pointer items-center gap-2">
@@ -142,16 +154,17 @@ export function WebhooksClient() {
             </div>
           </div>
           <div className="flex gap-3">
-            <button type="button" onClick={() => setShowForm(false)} className="text-sm text-muted-foreground hover:text-foreground">Cancel</button>
+            <button type="button" onClick={() => setShowForm(false)} className={dashboardOutlineActionClass}>Cancel</button>
             <button
               type="submit"
               disabled={adding || !form.events.length}
-              className="ml-auto rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+              className={cn(dashboardPrimaryActionClass, "ml-auto disabled:opacity-50")}
             >
               {adding ? "Adding…" : "Add webhook"}
             </button>
           </div>
         </form>
+        </DashboardSection>
       )}
 
       {loading ? (
@@ -165,14 +178,14 @@ export function WebhooksClient() {
             <button
               type="button"
               onClick={() => setShowForm(true)}
-              className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+              className={dashboardPrimaryActionClass}
             >
               Add webhook
             </button>
           }
         />
       ) : (
-        <div className="divide-y rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
+        <div className={cn(dashboardCardClass, "divide-y overflow-hidden")}>
           {hooks.map((hook) => (
             <div key={hook.id} className="p-4">
               <div className="flex items-start justify-between gap-4">
@@ -186,8 +199,9 @@ export function WebhooksClient() {
                 </div>
                 <div className="flex shrink-0 items-center gap-3">
                   <button
+                    type="button"
                     onClick={() => toggleActive(hook)}
-                    className={`rounded-full border px-2 py-0.5 text-xs ${hook.isActive ? "border-green-300 bg-green-50 text-green-700" : "border-gray-200 dark:border-neutral-800 text-gray-500 dark:text-gray-400"}`}
+                    className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground"
                   >
                     {hook.isActive ? "Active" : "Paused"}
                   </button>

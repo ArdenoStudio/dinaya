@@ -2,6 +2,15 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
+import { DashboardSection } from "@/components/dashboard/DashboardSection";
+import { StatusBadge } from "@/components/dashboard/StatusBadge";
+import {
+  dashboardOutlineActionClass,
+  dashboardPageClass,
+  dashboardPrimaryActionClass,
+  dashboardSectionMutedClass,
+} from "@/lib/dashboard-ui";
 import { AI_FEATURES, AI_FEATURE_META, type AiFeatureKey } from "@/lib/plan-features";
 
 function parseLocationAiConfig(raw: unknown): Record<string, boolean> {
@@ -164,50 +173,45 @@ export default function AiHubClient() {
   }
 
   const messagingReadyHint = (
-    <div className="rounded-xl border border-amber-500/30 bg-amber-50 p-4 text-sm text-amber-950 dark:bg-amber-950/30 dark:text-amber-100">
+    <div className={dashboardSectionMutedClass}>
       <p className="font-medium">Messaging setup required</p>
-      <p className="mt-1 text-amber-900/80 dark:text-amber-100/80">
+      <p className="mt-1 text-sm text-muted-foreground">
         Reactivation and WhatsApp sends need messaging configured by Dinaya. You can still draft content and
         toggle branch features — sends will fail until WhatsApp/SMS is live.
       </p>
-      <Link href="/dashboard/automations" className="mt-2 inline-flex font-medium text-primary hover:underline">
+      <Link href="/dashboard/automations" className="mt-2 inline-flex text-sm font-medium text-primary hover:underline">
         Open automations →
       </Link>
     </div>
   );
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="font-cal text-2xl">AI Growth Hub</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Configure Growth AI tools per branch. Branch-level workflow controls are included.
-        </p>
-      </div>
+    <div className={dashboardPageClass}>
+      <DashboardPageHeader
+        title="AI Growth Hub"
+        description="Configure Growth AI tools per branch. Branch-level workflow controls are included."
+      />
 
       {error && <p className="text-sm text-destructive">{error}</p>}
 
       {messagingReadyHint}
 
-      <section className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <h2 className="font-semibold">Client Reactivation Campaign</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Find clients inactive 30+ days and send a personalised WhatsApp re-engagement message.
-            </p>
-          </div>
+      <DashboardSection
+        title="Client Reactivation Campaign"
+        description="Find clients inactive 30+ days and send a personalised WhatsApp re-engagement message."
+        action={
           <button
             type="button"
             onClick={() => void runReactivationNow()}
             disabled={reactivating}
-            className="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary/90 disabled:opacity-60"
+            className={dashboardPrimaryActionClass}
           >
             {reactivating ? "Running…" : "Run reactivation now"}
           </button>
-        </div>
+        }
+      >
         {reactivationResult ? (
-          <div className="mt-4 rounded-lg border bg-muted/20 p-4 text-sm">
+          <div className="rounded-lg border bg-muted/20 p-4 text-sm">
             <p>
               Checked {reactivationResult.stats.checked} · Sent {reactivationResult.stats.sent} · Skipped{" "}
               {reactivationResult.stats.skipped} · Failed {reactivationResult.stats.failed}
@@ -215,7 +219,7 @@ export default function AiHubClient() {
             {reactivationResult.previews.length > 0 ? (
               <ul className="mt-3 space-y-2">
                 {reactivationResult.previews.map((preview) => (
-                  <li key={preview.clientName} className="rounded border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-3">
+                  <li key={preview.clientName} className="rounded-lg border border-border/60 bg-card p-3">
                     <p className="font-medium">{preview.clientName} — {preview.status}</p>
                     {preview.body ? (
                       <p className="mt-1 text-xs text-muted-foreground">{preview.body}</p>
@@ -226,19 +230,19 @@ export default function AiHubClient() {
             ) : null}
           </div>
         ) : null}
-      </section>
+      </DashboardSection>
 
       {locations.length === 0 ? (
-        <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-8 text-center text-muted-foreground">
+        <DashboardSection className="text-center text-muted-foreground">
           Add a location first to configure branch AI.{" "}
           <Link href="/dashboard/locations" className="text-primary hover:underline">
             Manage locations
           </Link>
-        </div>
+        </DashboardSection>
       ) : (
         <div className="grid gap-6">
           {locations.map((loc) => (
-            <section key={loc.id} className="overflow-hidden rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
+            <DashboardSection key={loc.id} className="overflow-hidden p-0">
               <div className="border-b bg-muted/30 px-5 py-4">
                 <div className="flex flex-wrap items-center gap-2">
                   <h2 className="font-semibold">{loc.name}</h2>
@@ -274,28 +278,26 @@ export default function AiHubClient() {
                   );
                 })}
               </ul>
-            </section>
+            </DashboardSection>
           ))}
         </div>
       )}
 
-      <section className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b px-5 py-4">
-          <div>
-            <h2 className="font-semibold">30-day content machine</h2>
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              Generate Sri Lanka-local captions and approve before publishing to connected Meta channels.
-            </p>
-          </div>
+      <DashboardSection
+        title="30-day content machine"
+        description="Generate Sri Lanka-local captions and approve before publishing to connected Meta channels."
+        action={
           <button
             type="button"
             onClick={() => void generateContent(locations[0]?.id)}
             disabled={generating || locations.length === 0}
-            className="rounded-md bg-primary px-3 py-2 text-xs font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+            className={dashboardPrimaryActionClass}
           >
             {generating ? "Generating..." : "Generate 30 days"}
           </button>
-        </div>
+        }
+        className="overflow-hidden p-0"
+      >
         {content.length === 0 ? (
           <p className="p-5 text-sm text-muted-foreground">No content drafts yet.</p>
         ) : (
@@ -305,13 +307,13 @@ export default function AiHubClient() {
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
                     <p className="text-sm font-medium">{item.title}</p>
-                    <p className="text-xs text-muted-foreground">{item.contentDate} · {item.status}</p>
+                    <p className="text-xs text-muted-foreground">{item.contentDate} · <StatusBadge status={item.status} /></p>
                   </div>
                   <div className="flex gap-2">
                     <button
                       type="button"
                       onClick={() => navigator.clipboard?.writeText(item.caption)}
-                      className="rounded-md border px-2.5 py-1.5 text-xs font-medium hover:border-primary/40"
+                      className={dashboardOutlineActionClass}
                     >
                       Copy
                     </button>
@@ -319,7 +321,7 @@ export default function AiHubClient() {
                       type="button"
                       onClick={() => void updateContent(item.id, "approve")}
                       disabled={item.status === "approved" || item.status === "published"}
-                      className="rounded-md border px-2.5 py-1.5 text-xs font-medium hover:border-primary/40 disabled:opacity-50"
+                      className={dashboardOutlineActionClass}
                     >
                       Approve
                     </button>
@@ -327,7 +329,7 @@ export default function AiHubClient() {
                       type="button"
                       onClick={() => void updateContent(item.id, "publish")}
                       disabled={item.status !== "approved"}
-                      className="rounded-md bg-amber-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-amber-700 disabled:opacity-50"
+                      className={dashboardPrimaryActionClass}
                     >
                       Publish
                     </button>
@@ -339,15 +341,13 @@ export default function AiHubClient() {
             ))}
           </div>
         )}
-      </section>
+      </DashboardSection>
 
-      <section className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
-        <div className="border-b px-5 py-4">
-          <h2 className="font-semibold">Workflow history</h2>
-          <p className="mt-0.5 text-xs text-muted-foreground">
-            Provider failures and missing credentials are logged here instead of breaking the workflow.
-          </p>
-        </div>
+      <DashboardSection
+        title="Workflow history"
+        description="Provider failures and missing credentials are logged here instead of breaking the workflow."
+        className="overflow-hidden p-0"
+      >
         {runs.length === 0 ? (
           <p className="p-5 text-sm text-muted-foreground">No workflow runs yet.</p>
         ) : (
@@ -361,14 +361,12 @@ export default function AiHubClient() {
                   </p>
                   {run.error && <p className="mt-1 text-xs text-destructive">{run.error}</p>}
                 </div>
-                <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium capitalize text-muted-foreground">
-                  {run.status}
-                </span>
+                <StatusBadge status={run.status} />
               </div>
             ))}
           </div>
         )}
-      </section>
+      </DashboardSection>
 
       <p className="text-xs text-muted-foreground">
         AI copy uses the configured model provider when available. Without keys, Dinaya falls back to

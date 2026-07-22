@@ -1,7 +1,12 @@
 import Link from "next/link";
+import { format } from "date-fns";
+import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
+import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { db } from "@/db";
 import { bookings, clients, services } from "@/db/schema";
 import { requireBusiness } from "@/lib/auth";
+import { dashboardPageClass, dashboardSurfaceClass } from "@/lib/dashboard-ui";
+import { cn } from "@/lib/utils";
 import { eq, ilike, or, and, desc } from "drizzle-orm";
 
 export default async function DashboardSearchPage({
@@ -14,9 +19,11 @@ export default async function DashboardSearchPage({
 
   if (!q) {
     return (
-      <div className="space-y-4">
-        <h1 className="text-2xl font-semibold tracking-tight">Search</h1>
-        <p className="text-sm text-muted-foreground">Enter a search term from the header to find bookings, clients, or services.</p>
+      <div className={dashboardPageClass}>
+        <DashboardPageHeader
+          title="Search"
+          description="Enter a search term from the header to find bookings, clients, or services."
+        />
       </div>
     );
   }
@@ -74,25 +81,30 @@ export default async function DashboardSearchPage({
   const total = clientRows.length + bookingRows.length + serviceRows.length;
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Search results</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {total === 0 ? "No matches" : `${total} result${total === 1 ? "" : "s"}`} for &ldquo;{q}&rdquo;
-        </p>
-      </div>
+    <div className={dashboardPageClass}>
+      <DashboardPageHeader
+        title="Search results"
+        description={
+          total === 0
+            ? `No matches for “${q}”`
+            : `${total} result${total === 1 ? "" : "s"} for “${q}”`
+        }
+      />
 
       <section className="space-y-3">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Clients</h2>
         {clientRows.length === 0 ? (
           <p className="text-sm text-muted-foreground">No matching clients.</p>
         ) : (
-          <ul className="divide-y rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
+          <ul className={cn(dashboardSurfaceClass, "divide-y overflow-hidden")}>
             {clientRows.map((client) => (
               <li key={client.id}>
                 <Link href={`/dashboard/clients/${client.id}`} className="block px-4 py-3 hover:bg-muted/40">
                   <p className="font-medium">{client.name}</p>
-                  <p className="text-sm text-muted-foreground">{client.phone}{client.email ? ` · ${client.email}` : ""}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {client.phone}
+                    {client.email ? ` · ${client.email}` : ""}
+                  </p>
                 </Link>
               </li>
             ))}
@@ -105,14 +117,19 @@ export default async function DashboardSearchPage({
         {bookingRows.length === 0 ? (
           <p className="text-sm text-muted-foreground">No matching bookings.</p>
         ) : (
-          <ul className="divide-y rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
+          <ul className={cn(dashboardSurfaceClass, "divide-y overflow-hidden")}>
             {bookingRows.map((booking) => (
               <li key={booking.id}>
                 <Link href={`/dashboard/bookings/${booking.id}`} className="block px-4 py-3 hover:bg-muted/40">
-                  <p className="font-medium">{booking.clientName}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {booking.serviceName} · {booking.startsAt.toLocaleString()} · {booking.status}
-                  </p>
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="font-medium">{booking.clientName}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {booking.serviceName} · {format(booking.startsAt, "d MMM yyyy, h:mm a")}
+                      </p>
+                    </div>
+                    <StatusBadge status={booking.status} />
+                  </div>
                 </Link>
               </li>
             ))}
@@ -125,7 +142,7 @@ export default async function DashboardSearchPage({
         {serviceRows.length === 0 ? (
           <p className="text-sm text-muted-foreground">No matching services.</p>
         ) : (
-          <ul className="divide-y rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
+          <ul className={cn(dashboardSurfaceClass, "divide-y overflow-hidden")}>
             {serviceRows.map((service) => (
               <li key={service.id}>
                 <Link href={`/dashboard/services/${service.id}`} className="block px-4 py-3 hover:bg-muted/40">

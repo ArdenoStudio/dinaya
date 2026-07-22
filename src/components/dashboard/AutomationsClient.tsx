@@ -1,6 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { DashboardSection } from "@/components/dashboard/DashboardSection";
+import {
+  dashboardCardClass,
+  dashboardOutlineActionClass,
+} from "@/lib/dashboard-ui";
+import { cn } from "@/lib/utils";
 
 type Rule = {
   id: string;
@@ -76,7 +82,7 @@ export function AutomationsClient({ initialRules }: { initialRules: Rule[] }) {
             key={template.name}
             onClick={() => createTemplate(template)}
             disabled={saving === template.name}
-            className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-4 text-left hover:border-primary/40 disabled:opacity-50"
+            className={cn(dashboardCardClass, "p-4 text-left hover:border-primary/30 disabled:opacity-50")}
           >
             <p className="font-medium">{template.name}</p>
             <p className="mt-1 text-xs text-muted-foreground">
@@ -88,10 +94,7 @@ export function AutomationsClient({ initialRules }: { initialRules: Rule[] }) {
 
       {error && <p className="rounded-md border border-destructive/20 bg-destructive/5 px-3 py-2 text-sm text-destructive">{error}</p>}
 
-      <div className="rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900">
-        <div className="border-b px-5 py-4">
-          <h2 className="font-semibold">Rules</h2>
-        </div>
+      <DashboardSection title="Rules" className="overflow-hidden p-0">
         {rules.length === 0 ? (
           <p className="p-5 text-sm text-muted-foreground">No rules yet. Start from a template.</p>
         ) : (
@@ -106,9 +109,11 @@ export function AutomationsClient({ initialRules }: { initialRules: Rule[] }) {
                 </div>
                 <button
                   onClick={() => toggleRule(rule)}
-                  className={`rounded-full px-3 py-1 text-xs font-medium ${
-                    rule.isActive ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
-                  }`}
+                  className={cn(
+                    dashboardOutlineActionClass,
+                    "text-xs",
+                    rule.isActive && "border-primary/30 bg-primary/5 text-primary",
+                  )}
                 >
                   {rule.isActive ? "On" : "Off"}
                 </button>
@@ -116,7 +121,7 @@ export function AutomationsClient({ initialRules }: { initialRules: Rule[] }) {
             ))}
           </div>
         )}
-      </div>
+      </DashboardSection>
     </div>
   );
 }

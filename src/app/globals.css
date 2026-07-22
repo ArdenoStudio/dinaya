@@ -73,6 +73,11 @@ html.nav-open {
     --nav-glass-inset-mid: rgba(255, 255, 255, 0.8);
     --nav-glass-inset-soft: rgba(255, 255, 255, 0.6);
     --nav-glass-shadow-outer: rgba(0, 0, 0, 0.12);
+    /* Dashboard chrome — recessed canvas, white sidebar + content document */
+    --dashboard-canvas: 240 6% 94%;
+    --dashboard-main: 240 8% 96%;
+    --dashboard-chrome: 0 0% 100%;
+    --dashboard-sidebar: 0 0% 100%;
   }
 
   .dark {
@@ -103,6 +108,10 @@ html.nav-open {
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 220 84% 67%;
+    --dashboard-canvas: 240 6% 6%;
+    --dashboard-main: 240 5% 8%;
+    --dashboard-chrome: 240 5% 9%;
+    --dashboard-sidebar: 240 5% 9%;
   }
 }
 
@@ -127,6 +136,22 @@ html.nav-open {
 
   .surface-muted {
     @apply bg-gray-50 dark:bg-neutral-900/60;
+  }
+
+  .dashboard-canvas {
+    background-color: hsl(var(--dashboard-canvas));
+  }
+
+  .dashboard-main {
+    background-color: hsl(var(--dashboard-main));
+  }
+
+  .dashboard-chrome {
+    background-color: hsl(var(--dashboard-chrome));
+  }
+
+  .dashboard-sidebar {
+    background-color: hsl(var(--dashboard-sidebar));
   }
 
   .booking-panel-bg {
