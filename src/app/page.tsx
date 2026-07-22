@@ -4,7 +4,6 @@ import { LandingNav } from "@/components/LandingNav";
 import { LandingHero } from "@/components/LandingHero";
 import { LandingFooter } from "@/components/LandingFooter";
 import { LandingIndustries } from "@/components/LandingIndustries";
-import { LandingPricingTeaser } from "@/components/LandingPricingTeaser";
 import { LandingFinalCta } from "@/components/LandingFinalCta";
 import { Icon } from "@/components/ui/Icon";
 import { BeforeAfterToggle } from "@/components/BeforeAfterToggle";
@@ -110,8 +109,6 @@ export default function LandingPage() {
           ))}
         </div>
       </section>
-
-      <LandingPricingTeaser />
 
       <LandingIndustries />
 
