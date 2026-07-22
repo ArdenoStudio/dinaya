@@ -76,7 +76,7 @@ function StepVisual({ step }: { step: GuideStep }) {
         highlightTarget={step.highlightTarget}
         hotspots={step.hotspots}
         staged
-        scale={0.8}
+        scale={0.82}
       />
     );
   }
@@ -143,156 +143,149 @@ export function UiWalkthrough({ steps }: Props) {
   const progress = ((activeStep + 1) / steps.length) * 100;
 
   return (
-    <div className="space-y-8">
-      {/* Single quiet progress model */}
-      <div className="flex items-center justify-between gap-4">
-        <p className="text-[0.7rem] font-medium uppercase tracking-[0.1em] text-muted-foreground tabular-nums">
-          Step {activeStep + 1} of {steps.length}
-        </p>
-        <div className="h-px max-w-[12rem] flex-1 overflow-hidden bg-black/[0.06] dark:bg-white/[0.08]">
+    <div className="grid items-start gap-8 lg:grid-cols-[minmax(17rem,0.62fr)_minmax(0,1.55fr)] lg:gap-10">
+      {/* Copy column */}
+      <div className="order-2 space-y-5 lg:order-1">
+        <div className="flex items-center gap-3">
+          <p className="shrink-0 text-[0.7rem] font-medium uppercase tracking-[0.1em] text-muted-foreground tabular-nums">
+            Step {activeStep + 1} of {steps.length}
+          </p>
+          <div className="h-px w-16 overflow-hidden bg-black/[0.08] dark:bg-white/[0.1]">
+            <motion.div
+              className="h-full bg-foreground/50"
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 0.25, ease: docsEase }}
+            />
+          </div>
+        </div>
+
+        <AnimatePresence mode="wait" initial={false}>
           <motion.div
-            className="h-full bg-foreground/45"
-            animate={{ width: `${progress}%` }}
-            transition={{ duration: 0.25, ease: docsEase }}
-          />
+            key={activeStep}
+            initial={reduceMotion ? false : { opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={reduceMotion ? undefined : { opacity: 0, y: -4 }}
+            transition={{ duration: 0.22, ease: docsEase }}
+          >
+            <h2 className="font-cal text-2xl tracking-tight text-balance text-foreground">
+              {step.title}
+            </h2>
+            <DocsRichText
+              text={step.body}
+              className="mt-3 text-[15px] leading-relaxed text-muted-foreground text-pretty"
+            />
+            {actionHint ? (
+              <p className="mt-4 text-sm leading-relaxed text-foreground/70">
+                <span className="font-medium text-foreground">Look for: </span>
+                {actionHint}
+              </p>
+            ) : null}
+          </motion.div>
+        </AnimatePresence>
+
+        <ol className="hidden space-y-1 lg:block" aria-label="Walkthrough steps">
+          {steps.map((item, i) => {
+            const done = i < activeStep;
+            const current = i === activeStep;
+            return (
+              <li key={item.title}>
+                <button
+                  type="button"
+                  aria-current={current ? "step" : undefined}
+                  onClick={() => goTo(i)}
+                  className={`flex w-full min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-[background-color,color,transform] duration-150 ease-[cubic-bezier(0.2,0,0,1)] active:scale-[0.98] motion-reduce:active:scale-100 ${
+                    current
+                      ? "bg-foreground/[0.06] text-foreground dark:bg-white/[0.08]"
+                      : "text-foreground/55 hover:bg-foreground/[0.03] hover:text-foreground"
+                  }`}
+                >
+                  <span
+                    className={`flex size-6 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold tabular-nums ${
+                      current
+                        ? "bg-foreground text-background"
+                        : done
+                          ? "bg-foreground/15 text-foreground/70"
+                          : "bg-foreground/[0.06] text-foreground/45"
+                    }`}
+                  >
+                    {done && !current ? <Icon name="check" className="text-[10px]" /> : i + 1}
+                  </span>
+                  <span className="min-w-0 text-sm font-medium leading-snug line-clamp-2 text-pretty">
+                    {item.title}
+                  </span>
+                </button>
+              </li>
+            );
+          })}
+        </ol>
+
+        <div className="-mx-1 overflow-x-auto px-1 pb-1 lg:hidden">
+          <div className="flex min-w-max gap-1.5" aria-label="Walkthrough steps">
+            {steps.map((item, i) => (
+              <button
+                key={item.title}
+                type="button"
+                aria-current={i === activeStep ? "step" : undefined}
+                onClick={() => goTo(i)}
+                className={`flex h-12 min-w-[2.75rem] shrink-0 items-center justify-center gap-2 rounded-full px-3.5 text-xs font-medium transition-[background-color,color,transform] duration-150 ease-[cubic-bezier(0.2,0,0,1)] active:scale-[0.96] ${
+                  i === activeStep
+                    ? "bg-foreground text-background"
+                    : "bg-foreground/[0.06] text-foreground/60"
+                }`}
+              >
+                <span className="tabular-nums">{i + 1}</span>
+                {i === activeStep ? (
+                  <span className="max-w-[8rem] truncate">{item.title}</span>
+                ) : null}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-2 pt-1">
+          <button
+            type="button"
+            disabled={activeStep === 0}
+            onClick={() => goTo(activeStep - 1)}
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-white px-3.5 py-2 text-sm font-medium shadow-[0_0_0_1px_rgba(0,0,0,0.08)] transition-[transform,background-color] duration-150 ease-[cubic-bezier(0.2,0,0,1)] active:scale-[0.96] motion-reduce:active:scale-100 disabled:opacity-35 hover:bg-foreground/[0.03] dark:bg-neutral-900 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.1)]"
+          >
+            <Icon name="arrow-left" className="text-xs" />
+            Previous
+          </button>
+          {activeStep < steps.length - 1 ? (
+            <button
+              type="button"
+              onClick={() => goTo(activeStep + 1)}
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-primary px-3.5 py-2 pr-3 text-sm font-medium text-white transition-[transform,background-color] duration-150 ease-[cubic-bezier(0.2,0,0,1)] hover:bg-primary/90 active:scale-[0.96] motion-reduce:active:scale-100"
+            >
+              Next
+              <Icon name="arrow-right" className="text-xs" />
+            </button>
+          ) : (
+            <a
+              href="/docs"
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-primary px-3.5 py-2 pr-3 text-sm font-medium text-white transition-[transform,background-color] duration-150 ease-[cubic-bezier(0.2,0,0,1)] hover:bg-primary/90 active:scale-[0.96] motion-reduce:active:scale-100"
+            >
+              Back to docs
+            </a>
+          )}
         </div>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1.45fr)] lg:items-start lg:gap-10">
-        {/* Copy + step list */}
-        <div className="order-2 space-y-6 lg:order-1">
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={activeStep}
-              initial={reduceMotion ? false : { opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={reduceMotion ? undefined : { opacity: 0, y: -4 }}
-              transition={{ duration: 0.22, ease: docsEase }}
-            >
-              <h2 className="font-cal text-2xl tracking-tight text-balance text-foreground">
-                {step.title}
-              </h2>
-              <DocsRichText
-                text={step.body}
-                className="mt-3 text-[15px] leading-relaxed text-muted-foreground text-pretty"
-              />
-              {actionHint ? (
-                <p className="mt-4 text-sm leading-relaxed text-foreground/70">
-                  <span className="font-medium text-foreground">Look for: </span>
-                  {actionHint}
-                </p>
-              ) : null}
-            </motion.div>
-          </AnimatePresence>
-
-          {/* Vertical step list — desktop; horizontal compact on mobile */}
-          <ol className="hidden space-y-1 lg:block" aria-label="Walkthrough steps">
-            {steps.map((item, i) => {
-              const done = i < activeStep;
-              const current = i === activeStep;
-              return (
-                <li key={item.title}>
-                  <button
-                    type="button"
-                    aria-current={current ? "step" : undefined}
-                    onClick={() => goTo(i)}
-                    className={`flex w-full min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-[background-color,color,transform] duration-150 ease-[cubic-bezier(0.2,0,0,1)] active:scale-[0.98] motion-reduce:active:scale-100 ${
-                      current
-                        ? "bg-foreground/[0.06] text-foreground dark:bg-white/[0.08]"
-                        : "text-foreground/55 hover:bg-foreground/[0.03] hover:text-foreground"
-                    }`}
-                  >
-                    <span
-                      className={`flex size-6 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold tabular-nums ${
-                        current
-                          ? "bg-foreground text-background"
-                          : done
-                            ? "bg-foreground/15 text-foreground/70"
-                            : "bg-foreground/[0.06] text-foreground/45"
-                      }`}
-                    >
-                      {done && !current ? (
-                        <Icon name="check" className="text-[10px]" />
-                      ) : (
-                        i + 1
-                      )}
-                    </span>
-                    <span className="min-w-0 text-sm font-medium leading-snug line-clamp-2 text-pretty">
-                      {item.title}
-                    </span>
-                  </button>
-                </li>
-              );
-            })}
-          </ol>
-
-          <div className="-mx-1 overflow-x-auto px-1 pb-1 lg:hidden">
-            <div className="flex min-w-max gap-1.5" aria-label="Walkthrough steps">
-              {steps.map((item, i) => (
-                <button
-                  key={item.title}
-                  type="button"
-                  aria-current={i === activeStep ? "step" : undefined}
-                  onClick={() => goTo(i)}
-                  className={`flex h-12 min-w-[2.75rem] shrink-0 items-center justify-center gap-2 rounded-full px-3.5 text-xs font-medium transition-[background-color,color,transform] duration-150 ease-[cubic-bezier(0.2,0,0,1)] active:scale-[0.96] ${
-                    i === activeStep
-                      ? "bg-foreground text-background"
-                      : "bg-foreground/[0.06] text-foreground/60"
-                  }`}
-                >
-                  <span className="tabular-nums">{i + 1}</span>
-                  {i === activeStep ? (
-                    <span className="max-w-[8rem] truncate">{item.title}</span>
-                  ) : null}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex flex-wrap gap-2 pt-1">
-            <button
-              type="button"
-              disabled={activeStep === 0}
-              onClick={() => goTo(activeStep - 1)}
-              className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-white px-3.5 py-2 text-sm font-medium shadow-[0_0_0_1px_rgba(0,0,0,0.08)] transition-[transform,background-color] duration-150 ease-[cubic-bezier(0.2,0,0,1)] active:scale-[0.96] motion-reduce:active:scale-100 disabled:opacity-35 hover:bg-foreground/[0.03] dark:bg-neutral-900 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.1)]"
-            >
-              <Icon name="arrow-left" className="text-xs" />
-              Previous
-            </button>
-            {activeStep < steps.length - 1 ? (
-              <button
-                type="button"
-                onClick={() => goTo(activeStep + 1)}
-                className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-primary px-3.5 py-2 pr-3 text-sm font-medium text-white transition-[transform,background-color] duration-150 ease-[cubic-bezier(0.2,0,0,1)] hover:bg-primary/90 active:scale-[0.96] motion-reduce:active:scale-100"
-              >
-                Next
-                <Icon name="arrow-right" className="text-xs" />
-              </button>
-            ) : (
-              <a
-                href="/docs"
-                className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-primary px-3.5 py-2 pr-3 text-sm font-medium text-white transition-[transform,background-color] duration-150 ease-[cubic-bezier(0.2,0,0,1)] hover:bg-primary/90 active:scale-[0.96] motion-reduce:active:scale-100"
-              >
-                Back to docs
-              </a>
-            )}
-          </div>
-        </div>
-
-        {/* Visual stage */}
-        <div className="order-1 lg:order-2 lg:sticky lg:top-28">
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={`visual-${activeStep}`}
-              initial={reduceMotion ? false : { opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={reduceMotion ? undefined : { opacity: 0 }}
-              transition={{ duration: 0.28, ease: docsEase }}
-            >
-              <StepVisual step={step} />
-            </motion.div>
-          </AnimatePresence>
-        </div>
+      {/* Visual — tops align with copy; fills its column */}
+      <div className="order-1 min-w-0 lg:order-2 lg:sticky lg:top-24">
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={`visual-${activeStep}`}
+            initial={reduceMotion ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={reduceMotion ? undefined : { opacity: 0 }}
+            transition={{ duration: 0.28, ease: docsEase }}
+            className="w-full"
+          >
+            <StepVisual step={step} />
+          </motion.div>
+        </AnimatePresence>
       </div>
     </div>
   );

@@ -61,7 +61,7 @@ export function DocsScreenshotHighlight({ rects, className }: Props) {
       {rects.map((rect, index) => (
         <div
           key={`ring-${rect.x}-${rect.y}-${index}`}
-          className="absolute rounded-lg shadow-[inset_0_0_0_1.5px_rgba(255,255,255,0.7)]"
+          className="absolute rounded-md shadow-[inset_0_0_0_1px_rgba(255,255,255,0.45)]"
           style={{
             left: `${rect.x}%`,
             top: `${rect.y}%`,
