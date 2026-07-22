@@ -22,7 +22,7 @@ export const DOCS_NAV_RECTS: Record<DashboardNavHighlight, DocsHighlightRect> = 
   Availability: { x: 1.4, y: 42.4, w: 13.8, h: 3.6, label: "Availability" },
   Reviews: { x: 1.4, y: 49.0, w: 13.8, h: 3.6, label: "Reviews" },
   Payments: { x: 1.4, y: 52.6, w: 13.8, h: 3.6, label: "Payments" },
-  Marketing: { x: 1.2, y: 55.5, w: 14.2, h: 4.2, label: "Marketing" },
+  Marketing: { x: 1.5, y: 51.5, w: 13.5, h: 4.0, label: "Marketing" },
   Deals: { x: 1.4, y: 59.8, w: 13.8, h: 3.6, label: "Deals" },
   Broadcasts: { x: 1.4, y: 63.4, w: 13.8, h: 3.6, label: "Broadcasts" },
   "AI Hub": { x: 1.4, y: 70.0, w: 13.8, h: 3.6, label: "AI Hub" },

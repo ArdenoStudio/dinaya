@@ -17,9 +17,9 @@ export const docsCardSurface =
 export const docsHeroSurface =
   "rounded-[1.85rem] bg-[hsl(240_8%_97%)] shadow-[0_0_0_1px_rgba(0,0,0,0.05)] dark:bg-[hsl(240_6%_8%)] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.07)]";
 
-/** Studio stage behind product shots */
+/** Studio stage behind product shots — slightly deeper so product reads crisp */
 export const docsStageSurface =
-  "rounded-[1.5rem] bg-[radial-gradient(ellipse_at_50%_0%,hsl(220_10%_96%),hsl(240_8%_94%)_55%,hsl(240_6%_92%))] dark:bg-[radial-gradient(ellipse_at_50%_0%,hsl(240_6%_14%),hsl(240_6%_8%)_60%)]";
+  "rounded-[1.5rem] bg-[radial-gradient(ellipse_at_50%_18%,hsl(220_8%_94%),hsl(240_6%_90%)_62%,hsl(240_5%_88%))] dark:bg-[radial-gradient(ellipse_at_50%_18%,hsl(240_6%_16%),hsl(240_6%_9%)_62%)]";
 
 /** Interruptible spring — bounce must stay 0. */
 export const docsSpring = { type: "spring" as const, stiffness: 380, damping: 36, bounce: 0 };

@@ -10,7 +10,7 @@ export function DocsSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="hidden w-56 shrink-0 xl:block xl:w-60">
+    <aside className="hidden w-56 shrink-0 lg:block">
       <nav
         className="sticky top-24 space-y-7 rounded-2xl border border-black/[0.06] bg-white/90 p-4 text-sm shadow-[0_1px_2px_rgba(0,0,0,0.03),0_10px_24px_-16px_rgba(0,0,0,0.12)] backdrop-blur dark:border-white/[0.08] dark:bg-neutral-900/80"
         aria-label="Documentation"
