@@ -168,8 +168,14 @@ const DEMO_SCALE = 1.2;
 function demoAccentStyle(accent: string): CSSProperties {
   return {
     ["--demo-accent" as string]: accent,
-    ["--demo-accent-soft" as string]: `color-mix(in srgb, ${accent} 12%, transparent)`,
-    ["--demo-accent-ring" as string]: `color-mix(in srgb, ${accent} 40%, transparent)`,
+    /* Bold brand surfaces — “white” becomes a strong tint of the accent */
+    ["--demo-surface" as string]: `color-mix(in srgb, ${accent} 16%, white)`,
+    ["--demo-surface-deep" as string]: `color-mix(in srgb, ${accent} 28%, white)`,
+    ["--demo-canvas" as string]: `color-mix(in srgb, ${accent} 22%, white)`,
+    ["--demo-accent-soft" as string]: `color-mix(in srgb, ${accent} 22%, transparent)`,
+    ["--demo-accent-ring" as string]: `color-mix(in srgb, ${accent} 45%, transparent)`,
+    ["--demo-slot" as string]: `color-mix(in srgb, ${accent} 12%, white)`,
+    ["--demo-slot-border" as string]: `color-mix(in srgb, ${accent} 35%, white)`,
   };
 }
 
@@ -193,9 +199,9 @@ function DinayaBranding({ compact = false }: { compact?: boolean }) {
   );
 }
 
-function TrustLine({ persona, light = false }: { persona: PersonaData; light?: boolean }) {
+function TrustLine({ persona, onAccent = false }: { persona: PersonaData; onAccent?: boolean }) {
   return (
-    <p className={`text-xs mt-0.5 tabular-nums ${light ? "text-white/80" : "text-gray-500 dark:text-gray-400"}`}>
+    <p className={`mt-0.5 text-xs tabular-nums ${onAccent ? "text-white/85" : "text-foreground/55"}`}>
       {persona.trust.rating} ★ · {persona.trust.bookings} bookings
     </p>
   );
@@ -230,37 +236,61 @@ function CalendarDay({ cell }: { cell: DayCell }) {
   );
 }
 
-function BackPill({ label }: { label: string }) {
+function BackPill({ label, onAccent = false }: { label: string; onAccent?: boolean }) {
   return (
-    <span className="inline-flex items-center gap-1 rounded-full border border-border/70 bg-card/95 px-2.5 py-1 text-[10px] font-medium text-muted-foreground shadow-sm backdrop-blur-sm">
+    <span
+      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-medium shadow-sm backdrop-blur-sm ${
+        onAccent
+          ? "border border-white/25 bg-white/15 text-white"
+          : "border border-black/5 bg-white/90 text-foreground/70"
+      }`}
+    >
       <Icon name="chevron-left" className="text-[8px]" />
       {label}
     </span>
   );
 }
 
-function CategoryPill({ label }: { label: string }) {
+function CategoryPill({ label, onAccent = false }: { label: string; onAccent?: boolean }) {
   return (
-    <span className="inline-flex max-w-[9rem] shrink-0 items-center truncate rounded-full border border-border/60 bg-muted/35 px-2 py-0.5 text-[10px] font-medium text-muted-foreground dark:bg-muted/20">
+    <span
+      className={`inline-flex max-w-[9rem] shrink-0 items-center truncate rounded-full px-2 py-0.5 text-[10px] font-medium ${
+        onAccent
+          ? "border border-white/20 bg-white/10 text-white/90"
+          : "border border-black/5 bg-white/70 text-foreground/60"
+      }`}
+    >
       {label}
     </span>
   );
 }
 
-function BookingContextNav({ backLabel, categoryLabel }: { backLabel: string; categoryLabel: string }) {
+function BookingContextNav({
+  backLabel,
+  categoryLabel,
+  onAccent = false,
+}: {
+  backLabel: string;
+  categoryLabel: string;
+  onAccent?: boolean;
+}) {
   return (
     <nav aria-label="Booking context" className="flex min-w-0 items-center gap-2">
-      <BackPill label={backLabel} />
-      <CategoryPill label={categoryLabel} />
+      <BackPill label={backLabel} onAccent={onAccent} />
+      <CategoryPill label={categoryLabel} onAccent={onAccent} />
     </nav>
   );
 }
 
-function BrandMark({ icon }: { icon: string }) {
+function BrandMark({ icon, onAccent = false }: { icon: string; onAccent?: boolean }) {
   return (
     <div
       className="flex size-[36px] shrink-0 items-center justify-center rounded-full transition-[background-color,color] duration-300 ease-out xl:size-9"
-      style={{ backgroundColor: "var(--demo-accent-soft)", color: "var(--demo-accent)" }}
+      style={
+        onAccent
+          ? { backgroundColor: "rgba(255,255,255,0.2)", color: "#fff" }
+          : { backgroundColor: "var(--demo-accent)", color: "#fff" }
+      }
     >
       <Icon name={icon} className="text-[13px] xl:text-sm" />
     </div>
@@ -280,43 +310,52 @@ function PhoneDateTimeScreen({
   const selectedTime = persona.slots[selectedSlot]?.label ?? persona.slots[0].label;
 
   return (
-    <div className="flex h-full w-full flex-col bg-muted/40 dark:bg-black" style={demoAccentStyle(persona.accent)}>
-      <div className="px-[14px] pb-[8px] pt-[58px]">
-        <BookingContextNav backLabel="All services" categoryLabel={persona.categoryName} />
-      </div>
-
-      <div className="mx-[14px] flex min-h-0 flex-1 flex-col overflow-hidden">
-        <div className="pb-[10px]">
-          <div className="flex items-start gap-[10px]">
-            <BrandMark icon={persona.icon} />
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-[13px] font-medium text-foreground">{persona.business}</p>
-              <TrustLine persona={persona} />
-            </div>
-          </div>
-
-          <div className="mt-[12px] border-t border-border/70 pt-[12px]">
-            <p className="text-[15px] font-semibold leading-tight text-foreground">{selectedService.name}</p>
-            <p className="mt-[6px] flex items-center gap-[6px] text-[11px] text-muted-foreground">
-              <Icon name="clock" className="text-[11px]" />
-              {selectedService.duration.replace(" min", "m")}
-              <span className="text-muted-foreground/50">·</span>
-              <span className="font-medium tabular-nums text-foreground">{selectedService.price}</span>
-            </p>
+    <div
+      className="flex h-full w-full flex-col transition-[background-color] duration-500 ease-out"
+      style={{ ...demoAccentStyle(persona.accent), backgroundColor: "var(--demo-canvas)" }}
+    >
+      <div
+        className="px-[14px] pb-3 pt-[58px] transition-[background-color] duration-500 ease-out"
+        style={{ backgroundColor: "var(--demo-accent)" }}
+      >
+        <BookingContextNav backLabel="All services" categoryLabel={persona.categoryName} onAccent />
+        <div className="mt-3 flex items-start gap-[10px]">
+          <BrandMark icon={persona.icon} onAccent />
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-[13px] font-medium text-white">{persona.business}</p>
+            <TrustLine persona={persona} onAccent />
           </div>
         </div>
+      </div>
 
-        <div className="border-y border-border py-[10px]">
+      <div className="mx-[14px] mt-3 flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl bg-white/85 shadow-sm">
+        <div className="px-3 pb-[10px] pt-3">
+          <p className="text-[15px] font-semibold leading-tight text-foreground">{selectedService.name}</p>
+          <p className="mt-[6px] flex items-center gap-[6px] text-[11px] text-foreground/60">
+            <Icon name="clock" className="text-[11px]" style={{ color: "var(--demo-accent)" }} />
+            {selectedService.duration.replace(" min", "m")}
+            <span className="text-foreground/30">·</span>
+            <span className="font-medium tabular-nums text-foreground">{selectedService.price}</span>
+          </p>
+        </div>
+
+        <div
+          className="border-y py-[10px] px-3 transition-[background-color] duration-500"
+          style={{
+            backgroundColor: "var(--demo-surface)",
+            borderColor: "var(--demo-slot-border)",
+          }}
+        >
           <div className="mb-2 flex items-center justify-between">
             <span className="text-[11px] font-semibold text-foreground">May 2025</span>
-            <div className="flex gap-1 text-muted-foreground">
+            <div className="flex gap-1" style={{ color: "var(--demo-accent)" }}>
               <Icon name="chevron-left" className="text-[9px]" />
               <Icon name="chevron-right" className="text-[9px]" />
             </div>
           </div>
           <div className="grid grid-cols-7 gap-0.5 text-center">
             {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => (
-              <div key={`${d}-${i}`} className="pb-0.5 text-[7px] font-semibold text-muted-foreground">
+              <div key={`${d}-${i}`} className="pb-0.5 text-[7px] font-semibold text-foreground/45">
                 {d}
               </div>
             ))}
@@ -326,7 +365,7 @@ function PhoneDateTimeScreen({
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto py-[10px]">
+        <div className="flex-1 overflow-y-auto px-3 py-[10px]">
           <p className="mb-2 text-[11px] font-semibold text-foreground">Thu 15 · Available times</p>
           <div className="grid grid-cols-2 gap-1.5">
             {persona.slots.map((slot, i) => (
@@ -340,10 +379,10 @@ function PhoneDateTimeScreen({
           </div>
         </div>
 
-        <div className="border-t border-border pb-[16px] pt-[10px]">
+        <div className="px-3 pb-[16px] pt-[10px]">
           <button
             type="button"
-            className="w-full rounded-xl py-[12px] text-[13px] font-semibold text-white shadow-sm transition-[transform,background-color] duration-300 ease-out active:scale-[0.96] motion-reduce:active:scale-100"
+            className="w-full rounded-xl py-[12px] text-[13px] font-semibold text-white shadow-md transition-[transform,background-color] duration-300 ease-out active:scale-[0.96] motion-reduce:active:scale-100"
             style={{ backgroundColor: "var(--demo-accent)" }}
           >
             Continue · {selectedTime}
@@ -372,17 +411,25 @@ function SlotButton({
       type="button"
       onClick={onSelect}
       className={`flex min-h-[34px] w-full items-center gap-1.5 rounded-lg border px-2 py-1.5 text-[10px] font-medium tabular-nums transition-[transform,background-color,border-color,box-shadow,color] duration-300 ease-out active:scale-[0.96] motion-reduce:active:scale-100 ${
-        selected
-          ? "border-transparent text-white shadow-sm"
-          : "border-border bg-secondary/40 text-foreground ring-1 ring-white/5"
+        selected ? "border-transparent text-white shadow-md" : "text-foreground"
       }`}
       style={
         selected
           ? { backgroundColor: "var(--demo-accent)" }
-          : undefined
+          : {
+              backgroundColor: "var(--demo-slot)",
+              borderColor: "var(--demo-slot-border)",
+              color: "var(--demo-accent)",
+            }
       }
     >
-      {!selected ? <span className="size-1.5 shrink-0 rounded-full bg-emerald-500" aria-hidden /> : null}
+      {!selected ? (
+        <span
+          className="size-1.5 shrink-0 rounded-full"
+          style={{ backgroundColor: "var(--demo-accent)" }}
+          aria-hidden
+        />
+      ) : null}
       <span className="min-w-0 flex-1 truncate text-left">{label}</span>
       {selected ? <Icon name="check" className="shrink-0 text-[8px] opacity-90" /> : null}
     </button>
@@ -403,64 +450,83 @@ function CustomerBookingDesktop({
 
   return (
     <div
-      className="flex h-full flex-col overflow-hidden bg-muted/30 p-4 dark:bg-black sm:p-5"
-      style={demoAccentStyle(persona.accent)}
+      className="flex h-full flex-col overflow-hidden p-4 transition-[background-color] duration-500 ease-out sm:p-5"
+      style={{ ...demoAccentStyle(persona.accent), backgroundColor: "var(--demo-canvas)" }}
     >
       <div className="mb-3 shrink-0">
         <BookingContextNav backLabel="All services" categoryLabel={persona.categoryName} />
       </div>
 
-      <div className="flex min-h-0 flex-1 overflow-hidden rounded-xl border border-border bg-card shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)] dark:shadow-none dark:ring-1 dark:ring-white/10">
-        <aside className="flex w-[30%] max-w-[14rem] shrink-0 flex-col border-r border-border px-3.5 py-4 xl:max-w-[15rem] xl:px-4">
+      <div
+        className="flex min-h-0 flex-1 overflow-hidden rounded-xl shadow-[0_10px_36px_-14px_rgba(0,0,0,0.22)] ring-1"
+        style={{
+          backgroundColor: "var(--demo-surface)",
+          ["--tw-ring-color" as string]: "var(--demo-accent-ring)",
+        }}
+      >
+        {/* Bold brand sidebar — solid primary */}
+        <aside
+          className="flex w-[30%] max-w-[14rem] shrink-0 flex-col px-3.5 py-4 text-white transition-[background-color] duration-500 ease-out xl:max-w-[15rem] xl:px-4"
+          style={{ backgroundColor: "var(--demo-accent)" }}
+        >
           <div className="flex items-start gap-2.5">
-            <BrandMark icon={persona.icon} />
+            <BrandMark icon={persona.icon} onAccent />
             <div className="min-w-0 overflow-hidden">
-              <p className="truncate text-sm font-medium text-foreground">{persona.business}</p>
-              <TrustLine persona={persona} />
+              <p className="truncate text-sm font-medium text-white">{persona.business}</p>
+              <TrustLine persona={persona} onAccent />
             </div>
           </div>
 
-          <div className="mt-4 border-t border-border/70 pt-4">
-            <p className="text-base font-semibold leading-tight text-foreground">{selectedService.name}</p>
-            <p className="mt-1.5 text-[11px] leading-relaxed text-muted-foreground text-pretty">
+          <div className="mt-4 border-t border-white/20 pt-4">
+            <p className="text-base font-semibold leading-tight text-white">{selectedService.name}</p>
+            <p className="mt-1.5 text-[11px] leading-relaxed text-white/80 text-pretty">
               {persona.blurb}
             </p>
-            <p className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
+            <p className="mt-3 flex items-center gap-1.5 text-xs text-white/85">
               <Icon name="clock" className="text-[10px]" />
               {selectedService.duration.replace(" min", "m")}
-              <span className="text-muted-foreground/50">·</span>
-              <span className="font-medium tabular-nums text-foreground">{selectedService.price}</span>
+              <span className="text-white/40">·</span>
+              <span className="font-medium tabular-nums text-white">{selectedService.price}</span>
             </p>
           </div>
 
-          <div className="mt-4 space-y-2 border-t border-border/70 pt-4 text-xs">
-            <div className="flex items-center gap-2 text-muted-foreground">
+          <div className="mt-auto space-y-2 border-t border-white/20 pt-4 text-xs">
+            <div className="flex items-center gap-2 text-white/85">
               <Icon name="calendar3" className="shrink-0 text-[11px]" />
-              <span className="text-foreground">Thu, 15 May 2025</span>
+              <span className="text-white">Thu, 15 May 2025</span>
             </div>
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Icon name="clock" className="shrink-0 text-[11px]" style={{ color: "var(--demo-accent)" }} />
-              <span className="font-medium text-foreground">{selectedTime}</span>
+            <div className="flex items-center gap-2 text-white/85">
+              <Icon name="clock" className="shrink-0 text-[11px]" />
+              <span className="font-medium text-white">{selectedTime}</span>
             </div>
           </div>
         </aside>
 
-        <div className="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)_minmax(0,11rem)] divide-x divide-border xl:grid-cols-[minmax(0,1fr)_minmax(0,12.5rem)]">
-          <div className="p-3.5 xl:px-4">
+        <div
+          className="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)_minmax(0,11rem)] divide-x xl:grid-cols-[minmax(0,1fr)_minmax(0,12.5rem)]"
+          style={{
+            backgroundColor: "var(--demo-surface)",
+            ["borderColor" as string]: "var(--demo-slot-border)",
+          }}
+        >
+          <div
+            className="p-3.5 xl:px-4"
+            style={{ backgroundColor: "var(--demo-surface-deep)" }}
+          >
             <div className="mb-3 flex items-center justify-between">
               <span className="text-[11px] font-semibold text-foreground">May 2025</span>
-              <div className="flex gap-1">
-                <span className="flex size-6 items-center justify-center rounded-lg text-muted-foreground">
+              <div className="flex gap-1" style={{ color: "var(--demo-accent)" }}>
+                <span className="flex size-6 items-center justify-center rounded-lg bg-white/50">
                   <Icon name="chevron-left" className="text-[9px]" />
                 </span>
-                <span className="flex size-6 items-center justify-center rounded-lg text-muted-foreground">
+                <span className="flex size-6 items-center justify-center rounded-lg bg-white/50">
                   <Icon name="chevron-right" className="text-[9px]" />
                 </span>
               </div>
             </div>
             <div className="grid grid-cols-7 gap-1 text-center">
               {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
-                <div key={d} className="pb-1 text-[8px] font-semibold tracking-wide text-muted-foreground">
+                <div key={d} className="pb-1 text-[8px] font-semibold tracking-wide text-foreground/50">
                   {d}
                 </div>
               ))}
@@ -470,12 +536,19 @@ function CustomerBookingDesktop({
             </div>
           </div>
 
-          <div className="p-3.5 xl:px-4">
+          <div className="p-3.5 xl:px-4" style={{ backgroundColor: "var(--demo-surface)" }}>
             <div className="mb-2 flex items-baseline justify-between gap-2">
               <p className="text-xs font-semibold text-foreground">Thu 15</p>
-              <p className="text-[10px] text-muted-foreground">Available times</p>
+              <p className="text-[10px] font-medium" style={{ color: "var(--demo-accent)" }}>
+                Available times
+              </p>
             </div>
-            <p className="mb-1.5 text-[9px] font-semibold uppercase tracking-wide text-muted-foreground">Morning</p>
+            <p
+              className="mb-1.5 text-[9px] font-semibold uppercase tracking-wide"
+              style={{ color: "var(--demo-accent)" }}
+            >
+              Morning
+            </p>
             <div className="grid grid-cols-2 gap-1.5">
               {persona.slots.slice(0, 4).map((slot, i) => (
                 <SlotButton
@@ -486,7 +559,12 @@ function CustomerBookingDesktop({
                 />
               ))}
             </div>
-            <p className="mb-1.5 mt-2.5 text-[9px] font-semibold uppercase tracking-wide text-muted-foreground">Afternoon</p>
+            <p
+              className="mb-1.5 mt-2.5 text-[9px] font-semibold uppercase tracking-wide"
+              style={{ color: "var(--demo-accent)" }}
+            >
+              Afternoon
+            </p>
             <div className="grid grid-cols-2 gap-1.5">
               {persona.slots.slice(4).map((slot, i) => (
                 <SlotButton
@@ -523,9 +601,10 @@ function DemoFrame({
 }) {
   return (
     <div
-      className="relative aspect-[16/10] min-h-[300px] overflow-hidden rounded-2xl border border-border bg-card transition-[box-shadow] duration-700 ease-out dark:ring-1 dark:ring-white/10"
+      className="relative aspect-[16/10] min-h-[300px] overflow-hidden rounded-2xl transition-[box-shadow,background-color] duration-700 ease-out"
       style={{
-        boxShadow: `0 12px 40px -14px color-mix(in srgb, ${accent} 35%, transparent), 0 0 0 1px color-mix(in srgb, ${accent} 14%, transparent)`,
+        backgroundColor: `color-mix(in srgb, ${accent} 18%, white)`,
+        boxShadow: `0 16px 48px -16px color-mix(in srgb, ${accent} 55%, transparent), 0 0 0 1px color-mix(in srgb, ${accent} 28%, transparent)`,
       }}
     >
       <div className="absolute inset-0">{children}</div>
