@@ -22,9 +22,9 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
   return (
     <div className="min-h-screen bg-[linear-gradient(180deg,hsl(240_8%_99%)_0%,hsl(0_0%_100%)_42%,hsl(240_6%_98%)_100%)]">
       <PublicNav />
-      <div className="max-w-6xl mx-auto px-6 public-page-offset pb-10 flex gap-10">
+      <div className="mx-auto flex max-w-7xl gap-8 px-5 public-page-offset pb-12 sm:px-6 lg:gap-10">
         <DocsSidebar />
-        <div className="flex-1 min-w-0">
+        <div className="min-w-0 flex-1">
           <DocsMobileNav />
           {children}
         </div>

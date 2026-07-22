@@ -66,7 +66,7 @@ export function DocsProductFrame({
   if (!staged || compact) return shot;
 
   return (
-    <div className={cn("p-3 sm:p-5", docsStageSurface)}>
+    <div className={cn("p-2.5 sm:p-4", docsStageSurface)}>
       {shot}
     </div>
   );

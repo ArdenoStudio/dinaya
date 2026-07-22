@@ -10,14 +10,12 @@ type Props = {
 };
 
 /**
- * Soft mask spotlight over a live product screenshot.
- * Uses a single cutout ring + ambient dim — no cartoon cursor.
+ * Soft cutout over a live product screenshot.
+ * Dim surroundings only — no floating badges or cartoon cursors.
  */
 export function DocsScreenshotHighlight({ rects, className }: Props) {
   const reduceMotion = useReducedMotion();
   if (rects.length === 0) return null;
-
-  const primary = rects[0];
 
   return (
     <div className={cn("pointer-events-none absolute inset-0 z-10", className)} aria-hidden>
@@ -26,40 +24,22 @@ export function DocsScreenshotHighlight({ rects, className }: Props) {
         return (
           <motion.div
             key={`${rect.x}-${rect.y}-${index}`}
-            className="absolute rounded-[10px]"
+            className="absolute rounded-lg"
             style={{
               left: `${rect.x}%`,
               top: `${rect.y}%`,
               width: `${rect.w}%`,
               height: `${rect.h}%`,
-              // Punch clear window; primary also dims the rest of the frame
               boxShadow: isPrimary
-                ? "0 0 0 1.5px rgba(255,255,255,0.92), 0 12px 32px rgba(0,0,0,0.28), 0 0 0 9999px rgba(0,0,0,0.38)"
-                : "0 0 0 1.5px rgba(255,255,255,0.75), 0 8px 20px rgba(0,0,0,0.18)",
+                ? "0 0 0 2px rgba(255,255,255,0.95), 0 10px 28px rgba(0,0,0,0.22), 0 0 0 9999px rgba(0,0,0,0.42)"
+                : "0 0 0 1.5px rgba(255,255,255,0.8), 0 6px 16px rgba(0,0,0,0.16)",
             }}
-            initial={reduceMotion ? false : { opacity: 0, scale: 0.985 }}
+            initial={reduceMotion ? false : { opacity: 0, scale: 0.99 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.28, ease: [0.2, 0, 0, 1], delay: index * 0.05 }}
+            transition={{ duration: 0.28, ease: [0.2, 0, 0, 1], delay: index * 0.04 }}
           />
         );
       })}
-
-      {primary.label ? (
-        <motion.div
-          className="absolute z-20 max-w-[40%]"
-          style={{
-            left: `${Math.min(primary.x + primary.w + 1.4, 72)}%`,
-            top: `${Math.max(primary.y, 2)}%`,
-          }}
-          initial={reduceMotion ? false : { opacity: 0, y: 3 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.22, ease: [0.2, 0, 0, 1], delay: 0.1 }}
-        >
-          <span className="inline-flex items-center rounded-md bg-gray-950/90 px-2 py-1 text-[11px] font-medium tracking-tight text-white shadow-[0_4px_14px_rgba(0,0,0,0.28)]">
-            {primary.label}
-          </span>
-        </motion.div>
-      ) : null}
     </div>
   );
 }

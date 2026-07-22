@@ -9,7 +9,6 @@ import { getScreenshotForMockup } from "@/lib/docs/visuals";
 import { DocsRichText } from "@/lib/docs/rich-text";
 import { DocsPhoneFrame } from "./DocsPhoneFrame";
 import { DocsProductFrame } from "./DocsProductFrame";
-import { DocsCallout } from "./DocsCallout";
 import { Icon } from "@/components/ui/Icon";
 
 type Props = {
@@ -159,7 +158,7 @@ export function UiWalkthrough({ steps }: Props) {
         </div>
       </div>
 
-      <div className="grid gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.25fr)] lg:items-start lg:gap-12">
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1.45fr)] lg:items-start lg:gap-10">
         {/* Copy + step list */}
         <div className="order-2 space-y-6 lg:order-1">
           <AnimatePresence mode="wait" initial={false}>
@@ -178,9 +177,10 @@ export function UiWalkthrough({ steps }: Props) {
                 className="mt-3 text-[15px] leading-relaxed text-muted-foreground text-pretty"
               />
               {actionHint ? (
-                <DocsCallout variant="tip" className="mt-5">
+                <p className="mt-4 text-sm leading-relaxed text-foreground/70">
+                  <span className="font-medium text-foreground">Look for: </span>
                   {actionHint}
-                </DocsCallout>
+                </p>
               ) : null}
             </motion.div>
           </AnimatePresence>

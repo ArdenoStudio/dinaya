@@ -2,7 +2,7 @@
 
 /** Soft product-shot depth — Apple marketing style, not heavy card chrome. */
 export const docsShotShadow =
-  "shadow-[0_0_0_1px_rgba(0,0,0,0.05),0_2px_4px_rgba(0,0,0,0.03),0_16px_40px_-12px_rgba(0,0,0,0.14),0_40px_80px_-32px_rgba(0,0,0,0.18)]";
+  "shadow-[0_0_0_1px_rgba(0,0,0,0.06),0_2px_6px_rgba(0,0,0,0.04),0_18px_44px_-10px_rgba(0,0,0,0.18),0_48px_90px_-36px_rgba(0,0,0,0.22)]";
 
 export const docsFrameShadow =
   "shadow-[0_0_0_1px_rgba(0,0,0,0.05),0_8px_28px_rgba(0,0,0,0.05),0_2px_6px_rgba(0,0,0,0.04)]";

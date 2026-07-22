@@ -56,7 +56,7 @@ export function DocsPhoneFrame({
               alt={alt}
               fill
               unoptimized
-              className="object-contain object-top"
+              className="object-cover object-top"
               sizes="393px"
             />
             {rects.length > 0 ? <DocsScreenshotHighlight rects={rects} /> : null}
