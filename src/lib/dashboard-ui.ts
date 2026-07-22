@@ -12,19 +12,22 @@ export const dashboardLabelClass = "text-sm font-medium text-foreground";
 
 export const dashboardPageClass = "space-y-6";
 
-export const dashboardSectionClass = cn(
-  "rounded-2xl border border-border/80 bg-card p-5 shadow-sm",
-  "dark:border-border/60",
+/** Primary content document — inset white surface on recessed canvas. */
+export const dashboardSurfaceClass = cn(
+  "rounded-3xl border border-black/[0.06] bg-card shadow-[0_1px_0_rgba(0,0,0,0.03)]",
+  "dark:border-white/[0.08] dark:shadow-none",
 );
 
+export const dashboardSectionClass = cn(dashboardSurfaceClass, "p-5");
+
 export const dashboardSectionMutedClass = cn(
-  "rounded-2xl border border-border/70 bg-muted/30 p-5",
-  "dark:bg-muted/20",
+  "rounded-3xl border border-border/50 bg-muted/25 p-5",
+  "dark:bg-muted/15",
 );
 
 export const dashboardCardClass = cn(
-  "rounded-2xl border border-border/80 bg-card shadow-sm",
-  "dark:border-border/60",
+  "rounded-2xl border border-black/[0.06] bg-card",
+  "dark:border-white/[0.08]",
 );
 
 export const dashboardFilterPillClass = (active: boolean) =>

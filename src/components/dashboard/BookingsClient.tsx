@@ -12,7 +12,11 @@ import { EmptyState } from "@/components/dashboard/EmptyState";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { useDashboardToast } from "@/components/dashboard/ToastProvider";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { dashboardFilterPillClass, dashboardPrimaryActionClass } from "@/lib/dashboard-ui";
+import {
+  dashboardFilterPillClass,
+  dashboardOutlineActionClass,
+  dashboardPrimaryActionClass,
+} from "@/lib/dashboard-ui";
 import { cn } from "@/lib/utils";
 import { bookingReminderText, whatsappUrl } from "@/lib/whatsapp";
 
@@ -205,38 +209,22 @@ export function BookingsClient({ api }: { api: BookingsApi }) {
   const confirmCopy = confirmState ? CONFIRM_COPY[confirmState.status] : null;
 
   return (
-    <div>
+    <div className="space-y-6">
       <DashboardPageHeader
         title="Bookings"
+        description="Confirm, message, and close out today’s appointments."
         actions={
           <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap">
             <Link
               href="/dashboard/bookings/new"
-              className={cn(buttonVariants(), "min-h-11 w-full justify-center sm:w-auto")}
+              className={cn(dashboardPrimaryActionClass, "w-full justify-center sm:w-auto")}
             >
               New booking
             </Link>
-            <div className="flex gap-2">
-              <Link
-                href="/dashboard/calendar"
-                className={cn(
-                  buttonVariants({ variant: "outline" }),
-                  "min-h-11 flex-1 justify-center sm:flex-none",
-                )}
-              >
-                Calendar
-              </Link>
-              <a
-                href={api.exportUrl(tab)}
-                className={cn(
-                  buttonVariants({ variant: "outline" }),
-                  "min-h-11 flex-1 justify-center sm:flex-none",
-                )}
-              >
-                <Download className="size-3.5" aria-hidden="true" />
-                Export
-              </a>
-            </div>
+            <a href={api.exportUrl(tab)} className={cn(dashboardOutlineActionClass, "justify-center")}>
+              <Download className="size-3.5" aria-hidden="true" />
+              Export
+            </a>
           </div>
         }
       />

@@ -291,7 +291,14 @@ export function DashboardShell({
           activeHref={activeHref}
           sections={sidebarSections}
           className="min-h-0 flex-1"
-          header={<Logo href={navigation ? null : "/dashboard"} size="sm" />}
+          header={
+            <div className="min-w-0 space-y-0.5">
+              <Logo href={navigation ? null : "/dashboard"} size="sm" />
+              <p className="truncate px-0.5 text-xs font-medium text-muted-foreground">
+                {businessName}
+              </p>
+            </div>
+          }
           footer={accountFooter}
           collapsedFooter={collapsedAccountFooter}
           defaultOpen={tabletCollapsedDefault}
@@ -301,18 +308,12 @@ export function DashboardShell({
           }}
         >
           <header className={cn("sticky top-0 z-20 border-b", dashboardChromeClass)}>
-            <div className="flex h-16 items-center gap-3 px-4 sm:px-6 lg:px-8">
-              <div className="hidden md:block">
-                <p className="max-w-[13rem] truncate rounded-xl border border-border/70 bg-card px-3 py-2 text-sm font-medium">
-                  {businessName}
-                </p>
-              </div>
-
+            <div className="flex h-14 items-center gap-3 px-4 sm:px-6 lg:px-8">
               <div className="relative min-w-0 flex-1">
                 <button
                   type="button"
                   onClick={openCommand}
-                  className="flex h-11 w-full items-center gap-2 rounded-xl border border-border/70 bg-card px-3 text-left text-sm text-muted-foreground transition-colors hover:border-primary/30 hover:text-foreground"
+                  className="flex h-11 w-full items-center gap-2 rounded-xl border border-black/[0.06] bg-[hsl(var(--dashboard-main))] px-3 text-left text-sm text-muted-foreground transition-colors hover:border-primary/30 hover:text-foreground dark:border-white/10"
                 >
                   <Search className="size-4 shrink-0" aria-hidden="true" />
                   <span className="min-w-0 flex-1 truncate">{copy.layout.searchPlaceholder}</span>
@@ -341,13 +342,11 @@ export function DashboardShell({
                 ) : null}
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <ThemeToggle />
-                <div className="hidden items-center gap-2 rounded-xl border border-border/70 bg-card px-2.5 py-2 sm:flex">
-                  <UserCircle className="size-4 text-muted-foreground" aria-hidden="true" />
-                  <span className="max-w-[10rem] truncate text-sm">
-                    {userName ?? userEmail}
-                  </span>
+                <div className="hidden size-9 items-center justify-center rounded-full bg-muted sm:flex" title={userName ?? userEmail}>
+                  <UserCircle className="size-5 text-muted-foreground" aria-hidden="true" />
+                  <span className="sr-only">{userName ?? userEmail}</span>
                 </div>
               </div>
             </div>
@@ -358,11 +357,11 @@ export function DashboardShell({
           <DashboardToastProvider>
             <main
               className={cn(
-                "min-h-0 flex-1 overflow-auto pb-[calc(3.5rem+env(safe-area-inset-bottom)+0.75rem)] md:pb-0",
+                "min-h-0 flex-1 overflow-auto pb-[calc(3.75rem+env(safe-area-inset-bottom)+0.75rem)] md:pb-0",
                 dashboardMainCanvasClass,
               )}
             >
-              <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">{children}</div>
+              <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8">{children}</div>
             </main>
           </DashboardToastProvider>
         </MacOSSidebar>

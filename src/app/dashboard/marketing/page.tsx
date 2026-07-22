@@ -21,7 +21,9 @@ import {
   dashboardOutlineActionClass,
   dashboardPageClass,
   dashboardPrimaryActionClass,
+  dashboardSurfaceClass,
 } from "@/lib/dashboard-ui";
+import { cn } from "@/lib/utils";
 
 export default async function MarketingPage() {
   const { businessId } = await requireOwner();
@@ -85,7 +87,47 @@ export default async function MarketingPage() {
         }
       />
 
-      <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+      {/* Share hero — above the fold on mobile */}
+      <section className={cn(dashboardSurfaceClass, "p-5")}>
+        <h2 className="font-cal text-lg tracking-tight">Share</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          One link for Instagram, WhatsApp, and your site.
+        </p>
+        <code className="mt-4 block truncate rounded-xl bg-muted/60 px-3 py-3 font-mono text-sm">
+          {bookingUrl}
+        </code>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <a
+            href={`https://wa.me/?text=${encodeURIComponent(whatsappSnippet)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={dashboardPrimaryActionClass}
+          >
+            WhatsApp share
+          </a>
+          <a href={bookingUrl} target="_blank" rel="noopener noreferrer" className={dashboardOutlineActionClass}>
+            Open page
+          </a>
+          <a href={qrPng} target="_blank" rel="noopener noreferrer" className={dashboardOutlineActionClass}>
+            QR PNG
+          </a>
+          <a href={qrSvg} target="_blank" rel="noopener noreferrer" className={dashboardOutlineActionClass}>
+            QR SVG
+          </a>
+        </div>
+        <div className="mt-5 flex justify-center sm:justify-start">
+          <Image
+            src={qrPng}
+            alt="Booking page QR code"
+            width={160}
+            height={160}
+            unoptimized
+            className="size-40 rounded-2xl border border-border/60 bg-background p-3"
+          />
+        </div>
+      </section>
+
+      <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
         <div className="space-y-6">
           <DirectorySettings />
 
@@ -98,31 +140,6 @@ export default async function MarketingPage() {
             referralBookings={Number(referralBookings ?? 0)}
           />
 
-          <DashboardSection title="Share tools">
-            <code className="block truncate rounded-xl border bg-muted/30 px-3 py-2 text-sm text-primary">
-              {bookingUrl}
-            </code>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <a href={bookingUrl} target="_blank" rel="noopener noreferrer" className={dashboardOutlineActionClass}>
-                Open
-              </a>
-              <a
-                href={`https://wa.me/?text=${encodeURIComponent(whatsappSnippet)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={dashboardOutlineActionClass}
-              >
-                WhatsApp share
-              </a>
-              <a href={qrPng} target="_blank" rel="noopener noreferrer" className={dashboardOutlineActionClass}>
-                QR PNG
-              </a>
-              <a href={qrSvg} target="_blank" rel="noopener noreferrer" className={dashboardOutlineActionClass}>
-                QR SVG
-              </a>
-            </div>
-          </DashboardSection>
-
           <ServiceBookingLinks
             slug={business.slug}
             customDomain={business.customDomain}
@@ -130,21 +147,7 @@ export default async function MarketingPage() {
             services={serviceList}
           />
 
-          <DashboardSection title="QR poster">
-            <Image
-              src={qrPng}
-              alt="Booking page QR code"
-              width={208}
-              height={208}
-              unoptimized
-              className="mx-auto size-52 rounded-xl border bg-background p-3"
-            />
-            <p className="mt-3 text-center text-xs text-muted-foreground">
-              Add this to your counter, Instagram story, or printed price list.
-            </p>
-          </DashboardSection>
-
-          <DashboardSection id="marketing-embed" title="Snippets">
+          <DashboardSection id="marketing-embed" title="Website embeds">
             <div className="space-y-4">
               <DashboardCopyField label="WhatsApp / Facebook" value={whatsappSnippet} mono={false} rows={3} />
               <DashboardCopyField label="Instagram bio" value={instagramSnippet} mono={false} rows={3} />

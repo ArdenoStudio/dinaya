@@ -181,15 +181,16 @@ export default function ClientsPage() {
             aria-label="Search customers"
             className="w-full rounded-lg border bg-background py-2.5 pl-9 pr-8 text-base transition-shadow placeholder:text-muted-foreground/60 focus-visible:border-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 sm:text-sm dark:bg-neutral-900"
           />
-          {q && (
+          {q ? (
             <button
+              type="button"
               onClick={() => setQ("")}
               aria-label="Clear search"
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              className="absolute right-1 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
             >
               <Icon name="x-lg" className="text-xs" />
             </button>
-          )}
+          ) : null}
         </div>
         <div className="flex gap-1 flex-wrap" role="tablist" aria-label="Filter by stage">
           {STAGES.map((s) => (
