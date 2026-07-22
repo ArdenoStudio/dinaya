@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useEffect, type ReactNode } from "react";
+import { useState, useEffect, useEffectEvent, type CSSProperties, type ReactNode } from "react";
 import Link from "next/link";
 import { useTheme } from "next-themes";
+import { AnimatePresence, motion } from "motion/react";
 import IPhoneMockup from "@/components/ui/iphone-mockup";
 import { Icon } from "@/components/ui/Icon";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { LANDING_LIVE_DEMO_PATH } from "@/lib/landing-demo";
 
 type DayCell = { day: number | null; status?: "available" | "booked" | "selected" };
@@ -12,35 +14,138 @@ type DayCell = { day: number | null; status?: "available" | "booked" | "selected
 type Slot = { label: string; badge?: string };
 
 type PersonaData = {
+  id: string;
+  label: string;
   business: string;
+  blurb: string;
   icon: string;
   categoryName: string;
+  accent: string;
   services: { name: string; duration: string; price: string; selected: boolean }[];
   slots: Slot[];
   trust: { rating: number; bookings: number };
 };
 
 const INITIAL_SELECTED_SLOT = 2;
+const PERSONA_ROTATE_MS = 4500;
 
-const primaryPersona: PersonaData = {
-  business: "Dilini's Beauty Studio",
-  icon: "scissors",
-  categoryName: "Hair Services",
-  services: [
-    { name: "Haircut & Style", duration: "45 min", price: "Rs. 2,500", selected: true },
-    { name: "Facial Treatment", duration: "60 min", price: "Rs. 3,800", selected: false },
-    { name: "Eyebrow Threading", duration: "20 min", price: "Rs. 800", selected: false },
-  ],
-  slots: [
-    { label: "9:00 AM" },
-    { label: "10:30 AM" },
-    { label: "11:00 AM" },
-    { label: "2:00 PM" },
-    { label: "3:30 PM" },
-    { label: "4:00 PM", badge: "Last slot!" },
-  ],
-  trust: { rating: 4.9, bookings: 240 },
-};
+const personas: PersonaData[] = [
+  {
+    id: "salon",
+    label: "Salon",
+    business: "Dilini's Beauty Studio",
+    blurb: "Cut, colour, and styling — book the chair, not the chat.",
+    icon: "scissors",
+    categoryName: "Hair Services",
+    accent: "#2563eb",
+    services: [
+      { name: "Haircut & Style", duration: "45 min", price: "Rs. 2,500", selected: true },
+      { name: "Facial Treatment", duration: "60 min", price: "Rs. 3,800", selected: false },
+      { name: "Eyebrow Threading", duration: "20 min", price: "Rs. 800", selected: false },
+    ],
+    slots: [
+      { label: "9:00 AM" },
+      { label: "10:30 AM" },
+      { label: "11:00 AM" },
+      { label: "2:00 PM" },
+      { label: "3:30 PM" },
+      { label: "4:00 PM", badge: "Last slot!" },
+    ],
+    trust: { rating: 4.9, bookings: 240 },
+  },
+  {
+    id: "barber",
+    label: "Barber",
+    business: "Ridge & Blade",
+    blurb: "Fades, beard work, and walk-ins that actually stay on time.",
+    icon: "scissors",
+    categoryName: "Barber",
+    accent: "#0f766e",
+    services: [
+      { name: "Skin Fade", duration: "35 min", price: "Rs. 1,800", selected: true },
+      { name: "Beard Trim", duration: "20 min", price: "Rs. 900", selected: false },
+      { name: "Hot Towel Shave", duration: "40 min", price: "Rs. 2,200", selected: false },
+    ],
+    slots: [
+      { label: "10:00 AM" },
+      { label: "11:15 AM" },
+      { label: "12:30 PM" },
+      { label: "3:00 PM" },
+      { label: "4:15 PM" },
+      { label: "5:30 PM" },
+    ],
+    trust: { rating: 4.8, bookings: 186 },
+  },
+  {
+    id: "clinic",
+    label: "Clinic",
+    business: "Lotus Dental Care",
+    blurb: "Consults and cleanings with deposits — fewer no-shows.",
+    icon: "hospital",
+    categoryName: "Dental",
+    accent: "#0284c7",
+    services: [
+      { name: "Dental Check-up", duration: "30 min", price: "Rs. 3,500", selected: true },
+      { name: "Scaling & Polish", duration: "45 min", price: "Rs. 6,000", selected: false },
+      { name: "Whitening Consult", duration: "20 min", price: "Rs. 2,000", selected: false },
+    ],
+    slots: [
+      { label: "8:30 AM" },
+      { label: "9:45 AM" },
+      { label: "11:00 AM" },
+      { label: "1:30 PM" },
+      { label: "3:00 PM" },
+      { label: "4:15 PM" },
+    ],
+    trust: { rating: 4.9, bookings: 312 },
+  },
+  {
+    id: "tuition",
+    label: "Tuition",
+    business: "Keys & Scales Studio",
+    blurb: "Parents book the next lesson — you stop chasing WhatsApp groups.",
+    icon: "book-half",
+    categoryName: "Music lessons",
+    accent: "#7c3aed",
+    services: [
+      { name: "Piano — 45 min", duration: "45 min", price: "Rs. 2,000", selected: true },
+      { name: "Guitar — 30 min", duration: "30 min", price: "Rs. 1,500", selected: false },
+      { name: "Trial Lesson", duration: "30 min", price: "Rs. 1,000", selected: false },
+    ],
+    slots: [
+      { label: "3:00 PM" },
+      { label: "3:45 PM" },
+      { label: "4:30 PM" },
+      { label: "5:15 PM" },
+      { label: "6:00 PM" },
+      { label: "6:45 PM" },
+    ],
+    trust: { rating: 5.0, bookings: 98 },
+  },
+  {
+    id: "spa",
+    label: "Spa",
+    business: "Ambara Wellness",
+    blurb: "Massage and facials that feel like your brand, not a generic form.",
+    icon: "heart-pulse",
+    categoryName: "Wellness",
+    accent: "#059669",
+    services: [
+      { name: "Signature Massage", duration: "60 min", price: "Rs. 5,500", selected: true },
+      { name: "Deep Cleanse Facial", duration: "50 min", price: "Rs. 4,800", selected: false },
+      { name: "Head & Shoulder", duration: "30 min", price: "Rs. 2,800", selected: false },
+    ],
+    slots: [
+      { label: "10:00 AM" },
+      { label: "11:30 AM" },
+      { label: "1:00 PM" },
+      { label: "2:30 PM" },
+      { label: "4:00 PM" },
+      { label: "5:30 PM" },
+    ],
+    trust: { rating: 4.9, bookings: 167 },
+  },
+];
 
 const mockDays: DayCell[] = [
   { day: null }, { day: null }, { day: null },
@@ -56,6 +161,14 @@ const mockDays: DayCell[] = [
 
 /** Visual scale for the landing demo (~20% larger). */
 const DEMO_SCALE = 1.2;
+
+function demoAccentStyle(accent: string): CSSProperties {
+  return {
+    ["--demo-accent" as string]: accent,
+    ["--demo-accent-soft" as string]: `color-mix(in srgb, ${accent} 12%, transparent)`,
+    ["--demo-accent-ring" as string]: `color-mix(in srgb, ${accent} 40%, transparent)`,
+  };
+}
 
 function DinayaLogo({ size = 13 }: { size?: number }) {
   return (
@@ -79,7 +192,7 @@ function DinayaBranding({ compact = false }: { compact?: boolean }) {
 
 function TrustLine({ persona, light = false }: { persona: PersonaData; light?: boolean }) {
   return (
-    <p className={`text-xs mt-0.5 tabular-nums ${light ? "text-blue-200/90" : "text-gray-500 dark:text-gray-400"}`}>
+    <p className={`text-xs mt-0.5 tabular-nums ${light ? "text-white/80" : "text-gray-500 dark:text-gray-400"}`}>
       {persona.trust.rating} ★ · {persona.trust.bookings} bookings
     </p>
   );
@@ -95,19 +208,20 @@ function CalendarDay({ cell }: { cell: DayCell }) {
 
   return (
     <div
-      className={`relative mx-auto flex size-7 items-center justify-center rounded-lg text-[9px] font-medium tabular-nums transition-[background-color,transform,box-shadow] duration-150 ease-out xl:size-8 xl:rounded-xl xl:text-[10px] ${
+      className={`relative mx-auto flex size-7 items-center justify-center rounded-lg text-[9px] font-medium tabular-nums transition-[background-color,color,transform,box-shadow] duration-300 ease-out xl:size-8 xl:rounded-xl xl:text-[10px] ${
         isSelected
-          ? "bg-blue-600 text-white shadow-md"
+          ? "text-white shadow-md"
           : isBooked
             ? "cursor-not-allowed text-muted-foreground/35 line-through"
             : d
               ? "text-foreground hover:bg-muted"
               : ""
       }`}
+      style={isSelected ? { backgroundColor: "var(--demo-accent)" } : undefined}
     >
       {d}
       {isAvailable && !isSelected ? (
-        <span className="absolute bottom-0.5 size-1 rounded-full bg-blue-600" />
+        <span className="absolute bottom-0.5 size-1 rounded-full" style={{ backgroundColor: "var(--demo-accent)" }} />
       ) : null}
     </div>
   );
@@ -139,6 +253,17 @@ function BookingContextNav({ backLabel, categoryLabel }: { backLabel: string; ca
   );
 }
 
+function BrandMark({ icon }: { icon: string }) {
+  return (
+    <div
+      className="flex size-[36px] shrink-0 items-center justify-center rounded-full transition-[background-color,color] duration-300 ease-out xl:size-9"
+      style={{ backgroundColor: "var(--demo-accent-soft)", color: "var(--demo-accent)" }}
+    >
+      <Icon name={icon} className="text-[13px] xl:text-sm" />
+    </div>
+  );
+}
+
 function PhoneDateTimeScreen({
   persona,
   selectedSlot,
@@ -149,10 +274,10 @@ function PhoneDateTimeScreen({
   onSelectSlot: (index: number) => void;
 }) {
   const selectedService = persona.services.find((s) => s.selected)!;
-  const selectedTime = persona.slots[selectedSlot].label;
+  const selectedTime = persona.slots[selectedSlot]?.label ?? persona.slots[0].label;
 
   return (
-    <div className="flex h-full w-full flex-col bg-muted/40 dark:bg-black">
+    <div className="flex h-full w-full flex-col bg-muted/40 dark:bg-black" style={demoAccentStyle(persona.accent)}>
       <div className="px-[14px] pb-[8px] pt-[58px]">
         <BookingContextNav backLabel="All services" categoryLabel={persona.categoryName} />
       </div>
@@ -160,9 +285,7 @@ function PhoneDateTimeScreen({
       <div className="mx-[14px] flex min-h-0 flex-1 flex-col overflow-hidden">
         <div className="pb-[10px]">
           <div className="flex items-start gap-[10px]">
-            <div className="flex size-[36px] shrink-0 items-center justify-center rounded-full bg-blue-600/10 text-blue-600">
-              <Icon name={persona.icon} className="text-[13px]" />
-            </div>
+            <BrandMark icon={persona.icon} />
             <div className="min-w-0 flex-1">
               <p className="truncate text-[13px] font-medium text-foreground">{persona.business}</p>
               <TrustLine persona={persona} />
@@ -205,7 +328,7 @@ function PhoneDateTimeScreen({
           <div className="grid grid-cols-2 gap-1.5">
             {persona.slots.map((slot, i) => (
               <SlotButton
-                key={slot.label}
+                key={`${persona.id}-${slot.label}`}
                 label={slot.label}
                 selected={i === selectedSlot}
                 onSelect={() => onSelectSlot(i)}
@@ -217,7 +340,8 @@ function PhoneDateTimeScreen({
         <div className="border-t border-border pb-[16px] pt-[10px]">
           <button
             type="button"
-            className="w-full rounded-xl bg-blue-600 py-[12px] text-[13px] font-semibold text-white shadow-sm transition-transform duration-150 ease-out active:scale-[0.96] motion-reduce:active:scale-100"
+            className="w-full rounded-xl py-[12px] text-[13px] font-semibold text-white shadow-sm transition-[transform,background-color] duration-300 ease-out active:scale-[0.96] motion-reduce:active:scale-100"
+            style={{ backgroundColor: "var(--demo-accent)" }}
           >
             Continue · {selectedTime}
           </button>
@@ -244,11 +368,16 @@ function SlotButton({
     <button
       type="button"
       onClick={onSelect}
-      className={`flex min-h-[34px] w-full items-center gap-1.5 rounded-lg border px-2 py-1.5 text-[10px] font-medium tabular-nums transition-[transform,background-color,border-color,box-shadow] duration-150 ease-out active:scale-[0.96] motion-reduce:active:scale-100 ${
+      className={`flex min-h-[34px] w-full items-center gap-1.5 rounded-lg border px-2 py-1.5 text-[10px] font-medium tabular-nums transition-[transform,background-color,border-color,box-shadow,color] duration-300 ease-out active:scale-[0.96] motion-reduce:active:scale-100 ${
         selected
-          ? "border-transparent bg-blue-600 text-white shadow-sm"
-          : "border-border bg-secondary/40 text-foreground ring-1 ring-white/5 hover:border-blue-400/40"
+          ? "border-transparent text-white shadow-sm"
+          : "border-border bg-secondary/40 text-foreground ring-1 ring-white/5"
       }`}
+      style={
+        selected
+          ? { backgroundColor: "var(--demo-accent)" }
+          : undefined
+      }
     >
       {!selected ? <span className="size-1.5 shrink-0 rounded-full bg-emerald-500" aria-hidden /> : null}
       <span className="min-w-0 flex-1 truncate text-left">{label}</span>
@@ -261,16 +390,21 @@ function CustomerBookingDesktop({
   persona,
   selectedSlot,
   onSelectSlot,
+  reduceMotion,
 }: {
   persona: PersonaData;
   selectedSlot: number;
   onSelectSlot: (index: number) => void;
+  reduceMotion: boolean;
 }) {
   const selectedService = persona.services.find((s) => s.selected)!;
-  const selectedTime = persona.slots[selectedSlot].label;
+  const selectedTime = persona.slots[selectedSlot]?.label ?? persona.slots[0].label;
 
   return (
-    <div className="flex h-full flex-col overflow-hidden bg-muted/30 p-4 dark:bg-black sm:p-5">
+    <div
+      className="flex h-full flex-col overflow-hidden bg-muted/30 p-4 dark:bg-black sm:p-5"
+      style={demoAccentStyle(persona.accent)}
+    >
       <div className="mb-3 shrink-0">
         <BookingContextNav backLabel="All services" categoryLabel={persona.categoryName} />
       </div>
@@ -278,24 +412,44 @@ function CustomerBookingDesktop({
       <div className="flex min-h-0 flex-1 overflow-hidden rounded-xl border border-border bg-card shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)] dark:shadow-none dark:ring-1 dark:ring-white/10">
         <aside className="flex w-[30%] max-w-[14rem] shrink-0 flex-col border-r border-border px-3.5 py-4 xl:max-w-[15rem] xl:px-4">
           <div className="flex items-start gap-2.5">
-            <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-blue-600/10 text-blue-600">
-              <Icon name={persona.icon} className="text-sm" />
-            </div>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-medium text-foreground">{persona.business}</p>
-              <TrustLine persona={persona} />
+            <BrandMark icon={persona.icon} />
+            <div className="min-w-0 overflow-hidden">
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={persona.id}
+                  initial={reduceMotion ? false : { opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={reduceMotion ? undefined : { opacity: 0, y: -4 }}
+                  transition={{ duration: 0.28, ease: [0.2, 0, 0, 1] }}
+                >
+                  <p className="truncate text-sm font-medium text-foreground">{persona.business}</p>
+                  <TrustLine persona={persona} />
+                </motion.div>
+              </AnimatePresence>
             </div>
           </div>
 
           <div className="mt-4 border-t border-border/70 pt-4">
-            <p className="text-base font-semibold leading-tight text-foreground">{selectedService.name}</p>
-            <p className="mt-1.5 text-[11px] leading-relaxed text-muted-foreground">Professional cut and styling.</p>
-            <p className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
-              <Icon name="clock" className="text-[10px]" />
-              {selectedService.duration.replace(" min", "m")}
-              <span className="text-muted-foreground/50">·</span>
-              <span className="font-medium tabular-nums text-foreground">{selectedService.price}</span>
-            </p>
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={`${persona.id}-service`}
+                initial={reduceMotion ? false : { opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={reduceMotion ? undefined : { opacity: 0 }}
+                transition={{ duration: 0.22 }}
+              >
+                <p className="text-base font-semibold leading-tight text-foreground">{selectedService.name}</p>
+                <p className="mt-1.5 text-[11px] leading-relaxed text-muted-foreground text-pretty">
+                  {persona.blurb}
+                </p>
+                <p className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Icon name="clock" className="text-[10px]" />
+                  {selectedService.duration.replace(" min", "m")}
+                  <span className="text-muted-foreground/50">·</span>
+                  <span className="font-medium tabular-nums text-foreground">{selectedService.price}</span>
+                </p>
+              </motion.div>
+            </AnimatePresence>
           </div>
 
           <div className="mt-4 space-y-2 border-t border-border/70 pt-4 text-xs">
@@ -304,7 +458,7 @@ function CustomerBookingDesktop({
               <span className="text-foreground">Thu, 15 May 2025</span>
             </div>
             <div className="flex items-center gap-2 text-muted-foreground">
-              <Icon name="clock" className="shrink-0 text-[11px] text-blue-600" />
+              <Icon name="clock" className="shrink-0 text-[11px]" style={{ color: "var(--demo-accent)" }} />
               <span className="font-medium text-foreground">{selectedTime}</span>
             </div>
           </div>
@@ -344,7 +498,7 @@ function CustomerBookingDesktop({
             <div className="grid grid-cols-2 gap-1.5">
               {persona.slots.slice(0, 4).map((slot, i) => (
                 <SlotButton
-                  key={slot.label}
+                  key={`${persona.id}-${slot.label}`}
                   label={slot.label}
                   selected={i === selectedSlot}
                   onSelect={() => onSelectSlot(i)}
@@ -355,7 +509,7 @@ function CustomerBookingDesktop({
             <div className="grid grid-cols-2 gap-1.5">
               {persona.slots.slice(4).map((slot, i) => (
                 <SlotButton
-                  key={slot.label}
+                  key={`${persona.id}-${slot.label}`}
                   label={slot.label}
                   selected={i + 4 === selectedSlot}
                   onSelect={() => onSelectSlot(i + 4)}
@@ -373,10 +527,72 @@ function CustomerBookingDesktop({
   );
 }
 
-function DemoFrame({ children }: { children: ReactNode }) {
+function DemoFrame({ children, accent }: { children: ReactNode; accent: string }) {
   return (
-    <div className="aspect-[16/10] min-h-[300px] overflow-hidden rounded-2xl border border-border bg-card shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)] dark:shadow-none dark:ring-1 dark:ring-white/10">
+    <div
+      className="aspect-[16/10] min-h-[300px] overflow-hidden rounded-2xl border border-border bg-card shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)] transition-[box-shadow] duration-500 ease-out dark:shadow-none dark:ring-1 dark:ring-white/10"
+      style={{
+        boxShadow: `0 8px 30px -12px color-mix(in srgb, ${accent} 28%, transparent), 0 0 0 1px color-mix(in srgb, ${accent} 12%, transparent)`,
+      }}
+    >
       {children}
+    </div>
+  );
+}
+
+function ThemeSwitcher({
+  activeId,
+  onSelect,
+  paused,
+}: {
+  activeId: string;
+  onSelect: (index: number) => void;
+  paused: boolean;
+}) {
+  return (
+    <div className="flex flex-col items-center gap-3">
+      <div
+        className="inline-flex flex-wrap items-center justify-center gap-1.5 rounded-xl border border-border/80 bg-background/80 p-1.5 shadow-sm backdrop-blur-sm"
+        role="tablist"
+        aria-label="Preview booking page themes"
+      >
+        {personas.map((p, index) => {
+          const active = p.id === activeId;
+          return (
+            <button
+              key={p.id}
+              type="button"
+              role="tab"
+              aria-selected={active}
+              onClick={() => onSelect(index)}
+              className={`inline-flex min-h-10 items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-[background-color,color,transform] duration-150 ease-out active:scale-[0.96] ${
+                active
+                  ? "bg-foreground text-background"
+                  : "text-muted-foreground hover:bg-muted/70 hover:text-foreground"
+              }`}
+            >
+              <span
+                className="size-2.5 shrink-0 rounded-full ring-2 ring-white/40 dark:ring-black/30"
+                style={{ backgroundColor: p.accent }}
+                aria-hidden
+              />
+              {p.label}
+            </button>
+          );
+        })}
+      </div>
+      <p className="text-center text-sm text-muted-foreground">
+        {paused ? (
+          <span>Theme paused — pick another look</span>
+        ) : (
+          <>
+            Your page, your colours —{" "}
+            <Link href={LANDING_LIVE_DEMO_PATH} className="font-medium text-primary hover:text-primary/80">
+              open a live booking page
+            </Link>
+          </>
+        )}
+      </p>
     </div>
   );
 }
@@ -387,12 +603,32 @@ export default function ProductMockup({
   variant?: "default" | "hero";
 }) {
   const [selectedSlot, setSelectedSlot] = useState(INITIAL_SELECTED_SLOT);
+  const [personaIndex, setPersonaIndex] = useState(0);
+  const [userPaused, setUserPaused] = useState(false);
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const reduceMotion = useReducedMotion();
   useEffect(() => setMounted(true), []);
   const screenBg = mounted && resolvedTheme === "dark" ? "#000000" : "#f4f4f5";
-  const persona = primaryPersona;
+  const persona = personas[personaIndex] ?? personas[0];
   const isHero = variant === "hero";
+
+  const onRotate = useEffectEvent(() => {
+    setPersonaIndex((i) => (i + 1) % personas.length);
+    setSelectedSlot(INITIAL_SELECTED_SLOT);
+  });
+
+  useEffect(() => {
+    if (reduceMotion || userPaused) return;
+    const id = window.setInterval(() => onRotate(), PERSONA_ROTATE_MS);
+    return () => window.clearInterval(id);
+  }, [reduceMotion, userPaused]);
+
+  const selectPersona = (index: number) => {
+    setPersonaIndex(index);
+    setSelectedSlot(INITIAL_SELECTED_SLOT);
+    setUserPaused(true);
+  };
 
   const mobileScale = 0.72 * DEMO_SCALE;
   const mobileOuterWidth = 417;
@@ -435,23 +671,68 @@ export default function ProductMockup({
             />
           </IPhoneMockup>
         </div>
-        <p className="mt-4 text-center text-xs text-muted-foreground">Tap a time slot to preview the flow</p>
+        <div className="mt-5 flex flex-col items-center gap-2 px-2">
+          <div className="inline-flex items-center gap-2" role="tablist" aria-label="Preview booking page themes">
+            {personas.map((p, index) => {
+              const active = p.id === persona.id;
+              return (
+                <button
+                  key={p.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  aria-label={p.label}
+                  onClick={() => selectPersona(index)}
+                  className={`size-9 rounded-full transition-[transform,box-shadow] duration-150 ease-out active:scale-[0.96] ${
+                    active ? "ring-2 ring-offset-2 ring-offset-background" : "opacity-70 hover:opacity-100"
+                  }`}
+                  style={{
+                    backgroundColor: p.accent,
+                    ["--tw-ring-color" as string]: p.accent,
+                  }}
+                />
+              );
+            })}
+          </div>
+          <p className="text-center text-xs text-muted-foreground">{persona.business}</p>
+        </div>
       </div>
 
       <div className="mx-auto hidden max-w-5xl md:block">
-        <DemoFrame>
+        <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-xs font-semibold uppercase tracking-wide text-primary">Live preview</p>
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.p
+                key={persona.id}
+                initial={reduceMotion ? false : { opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={reduceMotion ? undefined : { opacity: 0, y: -4 }}
+                transition={{ duration: 0.28, ease: [0.2, 0, 0, 1] }}
+                className="font-cal mt-1 text-xl tracking-tight text-foreground sm:text-2xl"
+              >
+                {persona.business}
+              </motion.p>
+            </AnimatePresence>
+            <p className="mt-1 max-w-md text-sm text-muted-foreground text-pretty">{persona.blurb}</p>
+          </div>
+          <p className="text-xs text-muted-foreground tabular-nums">
+            Colours + name update with your brand
+          </p>
+        </div>
+
+        <DemoFrame accent={persona.accent}>
           <CustomerBookingDesktop
             persona={persona}
             selectedSlot={selectedSlot}
             onSelectSlot={setSelectedSlot}
+            reduceMotion={reduceMotion}
           />
         </DemoFrame>
-        <p className="mt-4 text-center text-sm text-muted-foreground">
-          Interactive preview —{" "}
-          <Link href={LANDING_LIVE_DEMO_PATH} className="font-medium text-primary hover:text-primary/80">
-            open the live booking page
-          </Link>
-        </p>
+
+        <div className="mt-5">
+          <ThemeSwitcher activeId={persona.id} onSelect={selectPersona} paused={userPaused || reduceMotion} />
+        </div>
       </div>
     </section>
   );
