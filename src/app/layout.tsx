@@ -17,9 +17,9 @@ const calSans = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Dinaya — Online Booking for Sri Lankan Businesses",
+  title: "Dinaya — Booking pages for Sri Lankan service businesses",
   description:
-    "Give your business a booking page with a 14-day free trial. No more WhatsApp back-and-forth. Clients self-book, you focus on your work.",
+    "Stop WhatsApp booking chaos. Get a real booking page in 5 minutes — PayHere deposits, reminders, and LKR pricing. 14-day free trial, no card required.",
 };
 
 export const viewport: Viewport = siteViewport;
