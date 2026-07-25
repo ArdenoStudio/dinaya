@@ -171,7 +171,7 @@ function demoAccentStyle(accent: string): CSSProperties {
     /* Former “white” chrome → bold brand colour */
     ["--demo-surface" as string]: accent,
     ["--demo-surface-deep" as string]: `color-mix(in srgb, ${accent} 82%, black)`,
-    ["--demo-canvas" as string]: `color-mix(in srgb, ${accent} 88%, black)`,
+    ["--demo-canvas" as string]: "#ffffff",
     ["--demo-accent-soft" as string]: `color-mix(in srgb, ${accent} 22%, transparent)`,
     ["--demo-accent-ring" as string]: `color-mix(in srgb, ${accent} 55%, white)`,
     ["--demo-slot" as string]: "rgba(255,255,255,0.14)",
@@ -443,8 +443,8 @@ function CustomerBookingDesktop({
 
   return (
     <div
-      className="flex h-full flex-col overflow-hidden p-4 transition-[background-color] duration-500 ease-out sm:p-5"
-      style={{ ...demoAccentStyle(persona.accent), backgroundColor: "var(--demo-canvas)" }}
+      className="flex h-full flex-col overflow-hidden bg-white p-4 sm:p-5"
+      style={demoAccentStyle(persona.accent)}
     >
       <div className="mb-3 shrink-0">
         <BookingContextNav backLabel="All services" categoryLabel={persona.categoryName} />
@@ -583,10 +583,9 @@ function DemoFrame({
 }) {
   return (
     <div
-      className="relative aspect-[16/10] min-h-[300px] overflow-hidden rounded-2xl transition-[box-shadow,background-color] duration-700 ease-out"
+      className="relative aspect-[16/10] min-h-[300px] overflow-hidden rounded-2xl border border-border bg-white transition-[box-shadow] duration-700 ease-out dark:bg-white"
       style={{
-        backgroundColor: accent,
-        boxShadow: `0 18px 52px -14px color-mix(in srgb, ${accent} 70%, transparent), 0 0 0 1px color-mix(in srgb, ${accent} 40%, black)`,
+        boxShadow: `0 18px 52px -14px color-mix(in srgb, ${accent} 45%, transparent), 0 0 0 1px color-mix(in srgb, ${accent} 18%, transparent)`,
       }}
     >
       <div className="absolute inset-0">{children}</div>
