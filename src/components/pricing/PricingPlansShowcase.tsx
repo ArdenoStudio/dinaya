@@ -174,8 +174,8 @@ export function PricingPlansShowcase({
                 {plan.description}
               </p>
 
-              {/* Fixed price band — LKR / amount / period share one baseline across cards */}
-              <div className="mt-5 grid h-14 grid-cols-[auto_minmax(0,1fr)_auto] items-end gap-x-1.5">
+              {/* Fixed price band — keep LKR + amount + period clustered */}
+              <div className="mt-5 flex h-14 items-end gap-1">
                 <span className="pb-1 text-sm font-medium text-muted-foreground">LKR</span>
                 <AnimatePresence mode="wait" initial={false}>
                   <motion.span
@@ -184,14 +184,16 @@ export function PricingPlansShowcase({
                     animate={{ opacity: 1, y: 0 }}
                     exit={reduceMotion ? undefined : { opacity: 0, y: -4 }}
                     transition={{ duration: 0.18, ease: [0.2, 0, 0, 1] }}
-                    className="min-w-0 text-4xl font-semibold leading-none tracking-tighter tabular-nums text-foreground"
+                    className="text-4xl font-semibold leading-none tracking-tighter tabular-nums text-foreground"
                   >
                     {priceLkr != null ? formatLkr(priceLkr) : "12,900"}
                   </motion.span>
                 </AnimatePresence>
-                <span className="pb-1 text-sm font-medium text-muted-foreground">
-                  {priceLkr != null ? `/${isYearly ? "year" : "mo"}` : ""}
-                </span>
+                {priceLkr != null ? (
+                  <span className="pb-1 text-sm font-medium text-muted-foreground">
+                    /{isYearly ? "year" : "mo"}
+                  </span>
+                ) : null}
               </div>
 
               <div className="mt-1.5 h-5">
