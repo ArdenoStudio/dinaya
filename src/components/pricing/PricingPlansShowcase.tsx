@@ -123,7 +123,7 @@ export function PricingPlansShowcase({
         </div>
       </div>
 
-      <div className="mx-auto grid max-w-7xl gap-4 px-6 pb-8 sm:grid-cols-2 xl:grid-cols-4 xl:gap-5 xl:pb-16 xl:items-stretch">
+      <div className="mx-auto grid max-w-7xl items-stretch gap-4 px-6 pb-8 sm:grid-cols-2 xl:grid-cols-4 xl:gap-5 xl:pb-16">
         {plans.map((plan, index) => {
           const priceLkr =
             plan.monthlyPriceLkr == null
@@ -133,6 +133,7 @@ export function PricingPlansShowcase({
                 : plan.monthlyPriceLkr;
           const ctaHref = plan.ctaHref || defaultCtaHref;
           const ctaLabel = plan.ctaLabel || defaultCtaLabel;
+          const badgeLabel = plan.popular ? "Most popular" : plan.badge;
 
           return (
             <motion.article
@@ -145,68 +146,68 @@ export function PricingPlansShowcase({
                 ease: [0.22, 1, 0.36, 1],
               }}
               className={cn(
-                "relative flex h-full flex-col rounded-2xl border bg-card p-6 shadow-sm transition-[transform,box-shadow,border-color] duration-200 ease-out",
+                "relative flex h-full flex-col rounded-2xl border bg-card p-6 pt-8 shadow-sm transition-[box-shadow,border-color] duration-200 ease-out",
                 plan.popular
-                  ? "z-10 border-primary/50 shadow-[0_12px_40px_-16px_hsl(220_82%_53%/0.45)] ring-1 ring-primary/20 xl:-mt-2 xl:mb-2 xl:pb-8"
+                  ? "z-10 border-primary/50 shadow-[0_12px_40px_-16px_hsl(220_82%_53%/0.45)] ring-1 ring-primary/20"
                   : "border-border hover:border-foreground/15 hover:shadow-md",
               )}
             >
-              {plan.popular ? (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-primary-foreground shadow-sm">
-                  Most popular
+              {/* Shared badge row so every card’s content starts on the same line */}
+              <div className="absolute inset-x-0 -top-3 flex h-6 justify-center px-6">
+                {badgeLabel ? (
+                  <span
+                    className={cn(
+                      "inline-flex items-center rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide",
+                      plan.popular
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "border border-border bg-background text-muted-foreground",
+                    )}
+                  >
+                    {badgeLabel}
+                  </span>
+                ) : null}
+              </div>
+
+              <h2 className="font-cal text-2xl tracking-tight">{plan.name}</h2>
+
+              <p className="mt-2 line-clamp-3 min-h-[3.75rem] text-sm leading-relaxed text-muted-foreground">
+                {plan.description}
+              </p>
+
+              {/* Fixed price band — LKR / amount / period share one baseline across cards */}
+              <div className="mt-5 grid h-14 grid-cols-[auto_minmax(0,1fr)_auto] items-end gap-x-1.5">
+                <span className="pb-1 text-sm font-medium text-muted-foreground">LKR</span>
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.span
+                    key={`${plan.name}-${priceLkr ?? "custom"}-${isYearly ? "y" : "m"}`}
+                    initial={reduceMotion ? false : { opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={reduceMotion ? undefined : { opacity: 0, y: -4 }}
+                    transition={{ duration: 0.18, ease: [0.2, 0, 0, 1] }}
+                    className="min-w-0 text-4xl font-semibold leading-none tracking-tighter tabular-nums text-foreground"
+                  >
+                    {priceLkr != null ? formatLkr(priceLkr) : "12,900"}
+                  </motion.span>
+                </AnimatePresence>
+                <span className="pb-1 text-sm font-medium text-muted-foreground">
+                  {priceLkr != null ? `/${isYearly ? "year" : "mo"}` : ""}
                 </span>
-              ) : plan.badge ? (
-                <span className="absolute -top-3 left-6 rounded-full border border-border bg-background px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                  {plan.badge}
-                </span>
-              ) : null}
+              </div>
 
-              <div className="text-left">
-                <h2 className="font-cal text-2xl tracking-tight">{plan.name}</h2>
-                <p className="mt-2 min-h-[2.75rem] text-sm leading-relaxed text-muted-foreground text-pretty">
-                  {plan.description}
-                </p>
-
-                <div className="mt-5 min-h-[2.75rem]">
-                  {priceLkr != null ? (
-                    <AnimatePresence mode="wait" initial={false}>
-                      <motion.p
-                        key={`${plan.name}-${priceLkr}-${isYearly ? "y" : "m"}`}
-                        initial={reduceMotion ? false : { opacity: 0, y: 6 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={reduceMotion ? undefined : { opacity: 0, y: -4 }}
-                        transition={{ duration: 0.18, ease: [0.2, 0, 0, 1] }}
-                        className="text-4xl font-semibold tracking-tighter text-foreground"
-                      >
-                        <span className="mr-1.5 text-sm font-medium tracking-normal text-muted-foreground">
-                          LKR
-                        </span>
-                        {formatLkr(priceLkr)}
-                        <span className="ml-1 text-sm font-medium tracking-normal text-muted-foreground">
-                          /{isYearly ? "year" : "mo"}
-                        </span>
-                      </motion.p>
-                    </AnimatePresence>
-                  ) : (
-                    <p className="text-3xl font-semibold tracking-tighter text-foreground">
-                      From LKR 12,900
-                    </p>
-                  )}
-                </div>
-
-                <div className="mt-1.5 min-h-[1.25rem]">
-                  {plan.annualSavingsPercent > 0 && isYearly ? (
-                    <p className="text-xs font-medium text-emerald-700 dark:text-emerald-400">
-                      Save {plan.annualSavingsPercent}% vs monthly
-                    </p>
-                  ) : null}
-                </div>
+              <div className="mt-1.5 h-5">
+                {priceLkr != null && plan.annualSavingsPercent > 0 && isYearly ? (
+                  <p className="text-xs font-medium text-emerald-700 dark:text-emerald-400">
+                    Save {plan.annualSavingsPercent}% vs monthly
+                  </p>
+                ) : priceLkr == null ? (
+                  <p className="text-xs text-muted-foreground">From · custom setup quote</p>
+                ) : null}
               </div>
 
               <Link
                 href={ctaHref}
                 className={cn(
-                  "mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-sm font-semibold transition-[transform,background-color,box-shadow] duration-150 ease-out active:scale-[0.96] motion-reduce:active:scale-100",
+                  "mt-5 inline-flex h-12 w-full shrink-0 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold transition-[transform,background-color,box-shadow] duration-150 ease-out active:scale-[0.96] motion-reduce:active:scale-100",
                   plan.popular
                     ? "bg-primary text-primary-foreground shadow-[0_2px_12px_rgba(37,99,235,0.28)] hover:bg-primary/95"
                     : "border border-border bg-background text-foreground hover:bg-muted/60",
@@ -216,21 +217,21 @@ export function PricingPlansShowcase({
                 <Icon name="arrow-right" className="text-sm" />
               </Link>
 
-              <div className="mt-6 flex flex-1 flex-col border-t border-border pt-5">
-                <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              <div className="mt-6 flex min-h-0 flex-1 flex-col border-t border-border pt-5">
+                <p className="mb-3 min-h-[2.5rem] text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   {plan.featureHeading.replace(/:$/, "")}
                 </p>
                 <ul className="space-y-2.5">
                   {plan.features.map((feature) => (
-                    <li key={feature} className="flex items-start gap-2.5 text-sm text-foreground/85">
+                    <li key={feature} className="grid grid-cols-[1rem_1fr] items-start gap-x-2.5 text-sm text-foreground/85">
                       <Icon
                         name="check-circle"
                         className={cn(
-                          "mt-0.5 shrink-0 text-base",
+                          "mt-0.5 text-base",
                           plan.popular ? "text-primary" : "text-foreground/40",
                         )}
                       />
-                      <span className="text-pretty">{feature}</span>
+                      <span className="leading-snug text-pretty">{feature}</span>
                     </li>
                   ))}
                 </ul>
