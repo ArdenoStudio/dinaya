@@ -1,14 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import NumberFlow from "@number-flow/react";
-import { motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 
 import { Icon } from "@/components/ui/Icon";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import type { PricingShowcasePlan } from "@/lib/pricing-page-content";
 import { cn } from "@/lib/utils";
+
+function formatLkr(amount: number) {
+  return amount.toLocaleString("en-LK");
+}
 
 type PricingPlansShowcaseProps = {
   plans: PricingShowcasePlan[];
@@ -66,12 +69,6 @@ function PricingSwitch({
       </span>
     </div>
   );
-}
-
-function formatPriceParts(amountLkr: number) {
-  return {
-    whole: Math.floor(amountLkr),
-  };
 }
 
 export function PricingPlansShowcase({
@@ -134,7 +131,6 @@ export function PricingPlansShowcase({
               : isYearly
                 ? plan.annualPriceLkr
                 : plan.monthlyPriceLkr;
-          const priceParts = priceLkr == null ? null : formatPriceParts(priceLkr);
           const ctaHref = plan.ctaHref || defaultCtaHref;
           const ctaLabel = plan.ctaLabel || defaultCtaLabel;
 
@@ -171,14 +167,22 @@ export function PricingPlansShowcase({
                   {plan.description}
                 </p>
 
-                <div className="mt-5 flex items-baseline gap-1.5">
-                  {priceParts ? (
+                <div className="mt-5 flex min-h-[2.75rem] items-baseline gap-1.5">
+                  {priceLkr != null ? (
                     <>
                       <span className="text-sm font-medium text-muted-foreground">LKR</span>
-                      <NumberFlow
-                        value={priceParts.whole}
-                        className="font-cal text-4xl tracking-tight tabular-nums text-foreground"
-                      />
+                      <AnimatePresence mode="wait" initial={false}>
+                        <motion.span
+                          key={`${plan.name}-${priceLkr}-${isYearly ? "y" : "m"}`}
+                          initial={reduceMotion ? false : { opacity: 0, y: 6 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={reduceMotion ? undefined : { opacity: 0, y: -4 }}
+                          transition={{ duration: 0.18, ease: [0.2, 0, 0, 1] }}
+                          className="font-cal text-4xl tracking-tight tabular-nums text-foreground"
+                        >
+                          {formatLkr(priceLkr)}
+                        </motion.span>
+                      </AnimatePresence>
                       <span className="text-sm text-muted-foreground">
                         /{isYearly ? "year" : "mo"}
                       </span>
