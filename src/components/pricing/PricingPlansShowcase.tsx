@@ -167,28 +167,30 @@ export function PricingPlansShowcase({
                   {plan.description}
                 </p>
 
-                <div className="mt-5 flex min-h-[2.75rem] items-baseline gap-1.5">
+                <div className="mt-5 min-h-[2.75rem]">
                   {priceLkr != null ? (
-                    <>
-                      <span className="text-sm font-medium text-muted-foreground">LKR</span>
-                      <AnimatePresence mode="wait" initial={false}>
-                        <motion.span
-                          key={`${plan.name}-${priceLkr}-${isYearly ? "y" : "m"}`}
-                          initial={reduceMotion ? false : { opacity: 0, y: 6 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={reduceMotion ? undefined : { opacity: 0, y: -4 }}
-                          transition={{ duration: 0.18, ease: [0.2, 0, 0, 1] }}
-                          className="font-cal text-4xl tracking-tight tabular-nums text-foreground"
-                        >
-                          {formatLkr(priceLkr)}
-                        </motion.span>
-                      </AnimatePresence>
-                      <span className="text-sm text-muted-foreground">
-                        /{isYearly ? "year" : "mo"}
-                      </span>
-                    </>
+                    <AnimatePresence mode="wait" initial={false}>
+                      <motion.p
+                        key={`${plan.name}-${priceLkr}-${isYearly ? "y" : "m"}`}
+                        initial={reduceMotion ? false : { opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={reduceMotion ? undefined : { opacity: 0, y: -4 }}
+                        transition={{ duration: 0.18, ease: [0.2, 0, 0, 1] }}
+                        className="text-4xl font-semibold tracking-tighter text-foreground"
+                      >
+                        <span className="mr-1.5 text-sm font-medium tracking-normal text-muted-foreground">
+                          LKR
+                        </span>
+                        {formatLkr(priceLkr)}
+                        <span className="ml-1 text-sm font-medium tracking-normal text-muted-foreground">
+                          /{isYearly ? "year" : "mo"}
+                        </span>
+                      </motion.p>
+                    </AnimatePresence>
                   ) : (
-                    <span className="font-cal text-3xl tracking-tight">From LKR 12,900</span>
+                    <p className="text-3xl font-semibold tracking-tighter text-foreground">
+                      From LKR 12,900
+                    </p>
                   )}
                 </div>
 
