@@ -253,8 +253,8 @@ export function UnderlayNav() {
                             onClick={close}
                             aria-current={isNavLinkActive(pathname, item) ? "page" : undefined}
                             className={[
-                              "block py-2.5 text-[clamp(1.6rem,8vw,2.2rem)] font-bold",
-                              "tracking-[-0.03em] leading-none transition-colors",
+                              "block py-2.5 text-[clamp(1.6rem,8vw,2.2rem)] font-medium",
+                              "tracking-[-0.02em] leading-none transition-colors",
                               isNavLinkActive(pathname, item) ? "text-primary" : "text-gray-900 dark:text-gray-100 hover:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500",
                             ].join(" ")}
                           >
@@ -333,8 +333,8 @@ export function UnderlayNav() {
                             onClick={close}
                             aria-current={isNavLinkActive(pathname, item) ? "page" : undefined}
                             className={[
-                              "block py-2.5 text-[clamp(1.15rem,2.5vw,1.5rem)] font-bold",
-                              "tracking-[-0.03em] leading-none transition-colors",
+                              "block py-2.5 text-[clamp(1.15rem,2.5vw,1.5rem)] font-medium",
+                              "tracking-[-0.02em] leading-none transition-colors",
                               isNavLinkActive(pathname, item) ? "text-primary" : "text-gray-900 dark:text-gray-100 hover:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500",
                             ].join(" ")}
                           >
@@ -359,7 +359,7 @@ export function UnderlayNav() {
                       transition={{ delay: isOpen ? 0.40 : 0, duration: 0.5, ease: "easeOut" }}
                     >
                       <Link href="/help" onClick={close} className="group flex flex-col gap-1">
-                        <span className="text-sm font-bold text-gray-900 dark:text-gray-100 group-hover:text-primary transition-colors">
+                        <span className="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-primary transition-colors">
                           Setting up AI Hub
                         </span>
                         <span className="text-[0.8rem] text-gray-500 dark:text-gray-400 leading-snug">
@@ -374,7 +374,7 @@ export function UnderlayNav() {
                       transition={{ delay: isOpen ? 0.44 : 0, duration: 0.5, ease: "easeOut" }}
                     >
                       <Link href="/help" onClick={close} className="group flex flex-col gap-1">
-                        <span className="text-sm font-bold text-gray-900 dark:text-gray-100 group-hover:text-primary transition-colors">
+                        <span className="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-primary transition-colors">
                           Google Calendar Sync
                         </span>
                         <span className="text-[0.8rem] text-gray-500 dark:text-gray-400 leading-snug">
@@ -389,7 +389,7 @@ export function UnderlayNav() {
                       transition={{ delay: isOpen ? 0.48 : 0, duration: 0.5, ease: "easeOut" }}
                     >
                       <Link href="/help" onClick={close} className="group flex flex-col gap-1">
-                        <span className="text-sm font-bold text-gray-900 dark:text-gray-100 group-hover:text-primary transition-colors">
+                        <span className="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-primary transition-colors">
                           Client Booking Tips
                         </span>
                         <span className="text-[0.8rem] text-gray-500 dark:text-gray-400 leading-snug">
@@ -416,7 +416,7 @@ export function UnderlayNav() {
                     <span className="self-start text-[0.6875rem] font-bold tracking-widest uppercase bg-primary text-white px-2.5 py-1 rounded-full">
                       {MARKETING_CTA_NAV}
                     </span>
-                    <p className="text-gray-900 dark:text-gray-100 font-bold text-base leading-snug">
+                    <p className="text-gray-900 dark:text-gray-100 font-medium text-base leading-snug">
                       Launch your booking page
                     </p>
                     <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">

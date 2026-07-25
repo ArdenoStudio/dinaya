@@ -27,11 +27,11 @@ export const metadata: Metadata = {
 
 function PlanCell({ value }: { value: string }) {
   return (
-    <td className="px-4 py-3 text-center text-sm text-gray-700 dark:text-gray-300">
+    <td className="px-4 py-3.5 text-center text-sm text-foreground/80">
       {value === "Yes" ? (
-        <Icon name="check" className="text-sm text-primary" />
+        <Icon name="check" className="mx-auto text-sm text-primary" />
       ) : value === "No" ? (
-        <span className="text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">-</span>
+        <span className="text-muted-foreground/50">—</span>
       ) : (
         value
       )}
@@ -110,129 +110,159 @@ export default async function PricingPage() {
         defaultCtaLabel={ctaLabel}
       />
 
-      <section className="px-6 py-14">
-        <div className="mx-auto max-w-6xl rounded-2xl border border-blue-200 dark:border-blue-900/50 bg-blue-50 dark:bg-blue-950/40 p-5 text-sm text-blue-950 dark:text-blue-100">
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <div>
-              <p className="font-semibold">Trial includes Starter + Pro features with a limited Growth preview.</p>
-              <p className="mt-1 text-blue-950 dark:text-blue-100/75 dark:text-blue-200/75">
-                No custom domain and no unlimited messaging during trial. AI Voice Receptionist is coming later.
-              </p>
-            </div>
-            <Link
-              href="/register"
-              className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline"
-            >
-              Try Dinaya free
-              <Icon name="arrow-right" className="text-sm" />
-            </Link>
+      <section className="px-6 pb-16 pt-4">
+        <div className="mx-auto flex max-w-6xl flex-col gap-4 rounded-2xl border border-primary/15 bg-primary/[0.04] px-6 py-5 dark:bg-primary/10 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="font-cal text-lg tracking-tight text-foreground">
+              Trial includes Starter + Pro features
+            </p>
+            <p className="mt-1 text-sm text-muted-foreground text-pretty">
+              Limited Growth preview. No custom domain or unlimited messaging during trial. AI Voice
+              Receptionist is coming later.
+            </p>
           </div>
+          <Link
+            href="/register"
+            className="inline-flex shrink-0 items-center gap-2 text-sm font-semibold text-primary transition-colors hover:text-primary/80"
+          >
+            Start free trial
+            <Icon name="arrow-right" className="text-sm" />
+          </Link>
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 pb-20">
-        <div className="mb-8 text-center">
-          <span className="relative text-sm font-semibold tracking-tight text-primary">
-            <span className="absolute top-0.5 -left-3 h-4 w-[3px] rounded-r-sm bg-primary" />
-            Compare plans
-          </span>
-          <h2 className="mt-3 font-cal text-3xl tracking-tight">What each plan gets</h2>
-        </div>
+      <section className="border-t border-border">
+        <div className="mx-auto max-w-7xl px-6 py-20">
+          <div className="mb-10 max-w-2xl">
+            <span className="relative text-sm font-semibold tracking-tight text-primary">
+              <span className="absolute top-0.5 -left-3 h-4 w-[3px] rounded-r-sm bg-primary" />
+              Compare plans
+            </span>
+            <h2 className="font-cal mt-3 text-3xl tracking-tight md:text-4xl">
+              What each plan gets
+            </h2>
+            <p className="mt-3 text-muted-foreground text-pretty">
+              Same booking page foundation — more reminders, automations, and growth tools as you scale.
+            </p>
+          </div>
 
-        <div className="overflow-hidden rounded-2xl border border-gray-200 dark:border-neutral-800">
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[860px] text-sm">
-              <thead className="bg-gray-50 dark:bg-neutral-900/60">
-                <tr>
-                  <th className="w-[28%] px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-400">Feature</th>
-                  <th className="px-4 py-3 text-center font-medium text-gray-600 dark:text-gray-400">Starter</th>
-                  <th className="px-4 py-3 text-center font-medium text-gray-600 dark:text-gray-400">Pro</th>
-                  <th className="px-4 py-3 text-center font-medium text-gray-600 dark:text-gray-400">Growth</th>
-                  <th className="px-4 py-3 text-center font-medium text-gray-600 dark:text-gray-400">Managed Max</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 dark:divide-neutral-800">
-                {comparisonRows.map(([feature, starter, pro, growth, managed]) => (
-                  <tr key={feature} className="hover:bg-gray-50 dark:hover:bg-neutral-900/60">
-                    <td className="px-4 py-3 font-medium text-gray-800 dark:text-gray-200">{feature}</td>
-                    <PlanCell value={starter} />
-                    <PlanCell value={pro} />
-                    <PlanCell value={growth} />
-                    <PlanCell value={managed} />
+          <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[860px] text-sm">
+                <thead>
+                  <tr className="border-b border-border bg-muted/40">
+                    <th className="w-[28%] px-4 py-3.5 text-left font-medium text-muted-foreground">
+                      Feature
+                    </th>
+                    <th className="px-4 py-3.5 text-center font-medium text-muted-foreground">Starter</th>
+                    <th className="px-4 py-3.5 text-center font-medium text-primary">Pro</th>
+                    <th className="px-4 py-3.5 text-center font-medium text-muted-foreground">Growth</th>
+                    <th className="px-4 py-3.5 text-center font-medium text-muted-foreground">
+                      Managed Max
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {comparisonRows.map(([feature, starter, pro, growth, managed]) => (
+                    <tr key={feature} className="transition-colors hover:bg-muted/30">
+                      <td className="px-4 py-3.5 font-medium text-foreground">{feature}</td>
+                      <PlanCell value={starter} />
+                      <PlanCell value={pro} />
+                      <PlanCell value={growth} />
+                      <PlanCell value={managed} />
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="mx-auto max-w-5xl px-6 pb-20">
-        <div className="mb-8 text-center">
-          <span className="relative text-sm font-semibold tracking-tight text-primary">
-            <span className="absolute top-0.5 -left-3 h-4 w-[3px] rounded-r-sm bg-primary" />
-            Add-ons
-          </span>
-          <h2 className="mt-3 font-cal text-3xl tracking-tight">Keep setup-heavy work outside base plans</h2>
-        </div>
+      <section className="border-t border-border">
+        <div className="mx-auto max-w-5xl px-6 py-20">
+          <div className="mb-10 max-w-2xl">
+            <span className="relative text-sm font-semibold tracking-tight text-primary">
+              <span className="absolute top-0.5 -left-3 h-4 w-[3px] rounded-r-sm bg-primary" />
+              Add-ons
+            </span>
+            <h2 className="font-cal mt-3 text-3xl tracking-tight md:text-4xl">
+              Extra help when you need it
+            </h2>
+            <p className="mt-3 text-muted-foreground text-pretty">
+              Keep setup-heavy work optional — not baked into every plan.
+            </p>
+          </div>
 
-        <div className="overflow-hidden rounded-2xl border border-gray-200 dark:border-neutral-800">
-          <table className="w-full text-sm">
-            <tbody className="divide-y divide-gray-200 dark:divide-neutral-800">
-              {addOns.map(([name, price]) => (
-                <tr key={name}>
-                  <td className="px-5 py-4 font-medium text-gray-800 dark:text-gray-200">{name}</td>
-                  <td className="px-5 py-4 text-right text-gray-700 dark:text-gray-300">{price}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-3xl px-6 pb-20">
-        <div className="mb-10 text-center">
-          <span className="relative text-sm font-semibold tracking-tight text-primary">
-            <span className="absolute top-0.5 -left-3 h-4 w-[3px] rounded-r-sm bg-primary" />
-            FAQ
-          </span>
-          <h2 className="mt-3 font-cal text-3xl tracking-tight">Questions, answered</h2>
-        </div>
-
-        <div className="divide-y divide-gray-200 dark:divide-neutral-800 border-y border-gray-200 dark:border-neutral-800">
-          {faqs.map((item) => (
-            <details key={item.q} className="group py-5">
-              <summary className="flex cursor-pointer list-none items-start justify-between gap-4">
-                <span className="font-cal text-base tracking-tight text-gray-900 dark:text-gray-100">{item.q}</span>
-                <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-gray-500 dark:text-gray-400 transition-colors group-open:border-primary group-open:bg-primary group-open:text-white">
-                  <Icon name="plus" className="text-xs transition-transform group-open:rotate-45" />
-                </span>
-              </summary>
-              <p className="mt-3 pr-10 text-sm leading-relaxed text-muted-foreground">
-                {"link" in item && item.link ? (
-                  <>
-                    {item.a.split(item.link.label)[0]}
-                    <Link
-                      href={item.link.href}
-                      className="text-primary underline underline-offset-2 hover:text-primary/80"
-                    >
-                      {item.link.label}
-                    </Link>
-                    {item.a.split(item.link.label)[1]}
-                  </>
-                ) : (
-                  item.a
-                )}
-              </p>
-            </details>
-          ))}
+          <ul className="divide-y divide-border rounded-2xl border border-border bg-card shadow-sm">
+            {addOns.map(([name, price]) => (
+              <li
+                key={name}
+                className="flex flex-wrap items-baseline justify-between gap-2 px-5 py-4 sm:px-6"
+              >
+                <span className="font-medium text-foreground">{name}</span>
+                <span className="text-sm tabular-nums text-muted-foreground">{price}</span>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 
-      <section className="px-6 pb-20">
-        <div className="mx-auto max-w-6xl rounded-3xl bg-gray-950 px-8 py-16 text-center text-white">
-          <h2 className="font-cal text-3xl tracking-tight md:text-4xl">Try Dinaya free for 14 days.</h2>
-          <p className="mx-auto mt-3 max-w-md text-white/70">
+      <section className="border-t border-border">
+        <div className="mx-auto max-w-3xl px-6 py-20">
+          <div className="mb-10 text-center">
+            <span className="relative text-sm font-semibold tracking-tight text-primary">
+              <span className="absolute top-0.5 -left-3 h-4 w-[3px] rounded-r-sm bg-primary" />
+              FAQ
+            </span>
+            <h2 className="font-cal mt-3 text-3xl tracking-tight md:text-4xl">Questions, answered</h2>
+          </div>
+
+          <div className="divide-y divide-border border-y border-border">
+            {faqs.map((item) => (
+              <details key={item.q} className="group py-5">
+                <summary className="flex cursor-pointer list-none items-start justify-between gap-4">
+                  <span className="font-cal text-base tracking-tight text-foreground">{item.q}</span>
+                  <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full border border-border text-muted-foreground transition-[background-color,border-color,color,transform] duration-150 group-open:border-primary group-open:bg-primary group-open:text-primary-foreground">
+                    <Icon
+                      name="plus"
+                      className="text-xs transition-transform duration-150 group-open:rotate-45"
+                    />
+                  </span>
+                </summary>
+                <p className="mt-3 pr-10 text-sm leading-relaxed text-muted-foreground text-pretty">
+                  {"link" in item && item.link ? (
+                    <>
+                      {item.a.split(item.link.label)[0]}
+                      <Link
+                        href={item.link.href}
+                        className="text-primary underline underline-offset-2 hover:text-primary/80"
+                      >
+                        {item.link.label}
+                      </Link>
+                      {item.a.split(item.link.label)[1]}
+                    </>
+                  ) : (
+                    item.a
+                  )}
+                </p>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="relative overflow-hidden px-6 pb-20">
+        <div className="relative mx-auto max-w-4xl overflow-hidden rounded-[2rem] px-8 py-16 text-center">
+          <div
+            className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(80%_70%_at_50%_0%,hsl(220_82%_53%/0.16),transparent_65%)]"
+            aria-hidden
+          />
+          <div className="pointer-events-none absolute inset-0 -z-10 rounded-[2rem] border border-border bg-muted/30" aria-hidden />
+          <h2 className="font-cal text-3xl tracking-tight text-balance md:text-4xl">
+            Try Dinaya free for 14 days.
+          </h2>
+          <p className="mx-auto mt-3 max-w-md text-muted-foreground text-pretty">
             No card required. Your booking page goes live instantly.
           </p>
           <CTAPrimaryButton href="/register" size="md" className="mt-8">
