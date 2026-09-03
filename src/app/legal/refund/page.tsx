@@ -35,11 +35,15 @@ export default function RefundPage() {
       <p>
         If a payment attempt fails during checkout, no charge is made to your account. If a charge
         appears without a confirmed booking, contact us immediately at{" "}
-        <a href="mailto:hello@dinaya.lk">hello@dinaya.lk</a> and we will investigate with PayHere.
+        <a href="mailto:hello@dinaya.lk">hello@dinaya.lk</a> and we will investigate with the business.
       </p>
       <p>
-        Approved booking refunds are returned to the original payment method (card or bank account)
-        via PayHere. Processing time is typically 5–10 business days depending on your bank.
+        Booking payments are made directly to the business&apos;s own PayHere or PayPal account —
+        Dinaya does not hold or process this money. Approved refunds are issued by the business
+        through their own PayHere or PayPal account back to your original payment method. Processing
+        time is typically 5–10 business days depending on your bank and payment provider. For
+        bookings paid by bank transfer or shown QR code, the business arranges the refund directly
+        with you.
       </p>
 
       <h2>5. Dinaya Subscriptions</h2>
@@ -73,7 +77,9 @@ export default function RefundPage() {
       <p>
         If you believe you were charged incorrectly or a refund was wrongly denied, email us at{" "}
         <a href="mailto:hello@dinaya.lk">hello@dinaya.lk</a> with your booking reference or
-        subscription order ID. We will mediate with the relevant business and PayHere on your behalf.
+        subscription order ID. We will mediate with the relevant business on your behalf. For booking
+        payments, Dinaya can flag the payment as refunded on your booking record, but the actual
+        refund transaction must be issued by the business through their own PayHere or PayPal account.
       </p>
 
       <h2>7. Contact</h2>
