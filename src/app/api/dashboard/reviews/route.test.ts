@@ -39,6 +39,9 @@ describe("GET /api/dashboard/reviews", () => {
     requireProMock.mockResolvedValue(undefined);
     getReviewsDashboardListMock.mockResolvedValue({
       rows: [{ id: "review_1", authorName: "Kasun", rating: 5 }],
+      hasMore: false,
+      nextCursor: null,
+      summary: { totalReviews: 1, averageRating: 5, publishedReviews: 1 },
     });
   });
 
@@ -77,7 +80,31 @@ describe("GET /api/dashboard/reviews", () => {
 
     expect(res.status).toBe(200);
     expect(requireProMock).toHaveBeenCalledWith("00000000-0000-4000-8000-000000000001", "reviews");
-    expect(getReviewsDashboardListMock).toHaveBeenCalledWith("00000000-0000-4000-8000-000000000001", { limit: 200 });
-    expect(body).toEqual([{ id: "review_1", authorName: "Kasun", rating: 5 }]);
+    expect(getReviewsDashboardListMock).toHaveBeenCalledWith("00000000-0000-4000-8000-000000000001", {
+      limit: 80,
+      cursor: null,
+    });
+    expect(body).toEqual({
+      reviews: [{ id: "review_1", authorName: "Kasun", rating: 5 }],
+      hasMore: false,
+      nextCursor: null,
+      summary: { totalReviews: 1, averageRating: 5, publishedReviews: 1 },
+    });
+  });
+
+  it("rejects an invalid cursor", async () => {
+    const req = new NextRequest("http://localhost/api/dashboard/reviews?cursor=not-a-date");
+    const res = await GET(req);
+    expect(res.status).toBe(400);
+  });
+
+  it("passes a valid cursor through to the list function", async () => {
+    const iso = "2026-01-01T00:00:00.000Z";
+    const req = new NextRequest(`http://localhost/api/dashboard/reviews?cursor=${iso}`);
+    await GET(req);
+    expect(getReviewsDashboardListMock).toHaveBeenCalledWith("00000000-0000-4000-8000-000000000001", {
+      limit: 80,
+      cursor: new Date(iso),
+    });
   });
 });

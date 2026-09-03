@@ -26,7 +26,16 @@ export async function GET(req: NextRequest) {
   const accessError = await requireReviews(businessId);
   if (accessError) return accessError;
 
-  const { rows } = await getReviewsDashboardList(businessId, { limit: 200 });
+  const cursorParam = new URL(req.url).searchParams.get("cursor");
+  const cursor = cursorParam ? new Date(cursorParam) : null;
+  if (cursorParam && Number.isNaN(cursor?.getTime())) {
+    return NextResponse.json({ error: "cursor must be a valid ISO datetime." }, { status: 400 });
+  }
 
-  return NextResponse.json(rows);
+  const { rows, hasMore, nextCursor, summary } = await getReviewsDashboardList(businessId, {
+    limit: 80,
+    cursor: cursor && !Number.isNaN(cursor.getTime()) ? cursor : null,
+  });
+
+  return NextResponse.json({ reviews: rows, hasMore, nextCursor, summary });
 }

@@ -1,4 +1,4 @@
-import { and, count, desc, eq, ilike, or, sql } from "drizzle-orm";
+import { and, count, desc, eq, ilike, lt, or, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { bookings, locations, reviews, services, staff } from "@/db/schema";
 
@@ -16,6 +16,8 @@ export type DashboardReviewsListOptions = {
   q?: string;
   rating?: number | null;
   status?: DashboardReviewStatusFilter;
+  /** Only include reviews created before this timestamp — for "next page" cursor pagination. */
+  cursor?: Date | null;
 };
 
 const DEFAULT_REVIEW_LIMIT = 80;
@@ -53,6 +55,7 @@ export async function getReviewsDashboardList(
       ? [sql`(${reviews.ownerReply} is not null and length(trim(${reviews.ownerReply})) > 0)`]
       : []),
     ...(rating ? [eq(reviews.rating, rating)] : []),
+    ...(options.cursor ? [lt(reviews.createdAt, options.cursor)] : []),
     ...(query
       ? [
           or(
@@ -103,9 +106,12 @@ export async function getReviewsDashboardList(
       .leftJoin(locations, eq(bookings.locationId, locations.id))
       .where(and(...filters))
       .orderBy(desc(reviews.createdAt))
-      .limit(limit),
+      .limit(limit + 1),
   ]);
   const summary = summaryRows[0];
+  const hasMore = rows.length > limit;
+  const page = hasMore ? rows.slice(0, limit) : rows;
+  const nextCursor = hasMore ? (page[page.length - 1]?.createdAt.toISOString() ?? null) : null;
 
   return {
     filters: {
@@ -114,7 +120,9 @@ export async function getReviewsDashboardList(
       rating,
       status,
     },
-    rows: rows.map((row) => ({
+    hasMore,
+    nextCursor,
+    rows: page.map((row) => ({
       booking: row.reviewBookingId
         ? {
             id: row.bookingId,

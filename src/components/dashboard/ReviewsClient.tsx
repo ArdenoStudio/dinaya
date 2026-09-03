@@ -28,6 +28,12 @@ type Review = {
   createdAt: string;
 };
 
+type ReviewsSummary = {
+  averageRating: number;
+  publishedReviews: number;
+  totalReviews: number;
+};
+
 function Stars({ rating }: { rating: number }) {
   return (
     <span className="inline-flex gap-0.5">
@@ -42,6 +48,10 @@ export function ReviewsClient({ canUseAiReplies }: { canUseAiReplies: boolean })
   const copy = useDashboardCopy().reviews;
   const [reviewList, setReviewList] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [summary, setSummary] = useState<ReviewsSummary | null>(null);
   const [loadError, setLoadError] = useState("");
   const [activeReplyId, setActiveReplyId] = useState<string | null>(null);
   const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({});
@@ -56,17 +66,43 @@ export function ReviewsClient({ canUseAiReplies }: { canUseAiReplies: boolean })
         if (!response.ok) {
           throw new Error(typeof data?.error === "string" ? data.error : "Could not load reviews.");
         }
-        if (!Array.isArray(data)) {
+        const fetchedReviews: Review[] = Array.isArray(data) ? data : data.reviews;
+        if (!Array.isArray(fetchedReviews)) {
           throw new Error("Could not load reviews.");
         }
-        setReviewList(data);
-        setReplyDrafts(Object.fromEntries(data.map((review: Review) => [review.id, review.ownerReply ?? ""])));
+        setReviewList(fetchedReviews);
+        setHasMore(Boolean(data.hasMore));
+        setCursor(data.nextCursor ?? null);
+        setSummary(data.summary ?? null);
+        setReplyDrafts(Object.fromEntries(fetchedReviews.map((review) => [review.id, review.ownerReply ?? ""])));
       })
       .catch((error: unknown) => {
         setLoadError(error instanceof Error ? error.message : "Could not load reviews.");
       })
       .finally(() => setLoading(false));
   }, []);
+
+  async function loadMoreReviews() {
+    if (!cursor || loadingMore) return;
+    setLoadingMore(true);
+    try {
+      const response = await fetch(`/api/dashboard/reviews?cursor=${encodeURIComponent(cursor)}`);
+      const data = await response.json();
+      if (!response.ok) throw new Error(typeof data?.error === "string" ? data.error : "Could not load more reviews.");
+      const fetchedReviews: Review[] = Array.isArray(data) ? data : data.reviews;
+      setReviewList((prev) => [...prev, ...fetchedReviews]);
+      setReplyDrafts((prev) => ({
+        ...prev,
+        ...Object.fromEntries(fetchedReviews.map((review) => [review.id, review.ownerReply ?? ""])),
+      }));
+      setHasMore(Boolean(data.hasMore));
+      setCursor(data.nextCursor ?? null);
+    } catch {
+      // Non-fatal — the existing list stays usable; the button just stays clickable to retry.
+    } finally {
+      setLoadingMore(false);
+    }
+  }
 
   async function togglePublished(id: string, current: boolean) {
     const response = await fetch(`/api/dashboard/reviews/${id}`, {
@@ -112,10 +148,16 @@ export function ReviewsClient({ canUseAiReplies }: { canUseAiReplies: boolean })
     setGeneratingReplyId(null);
   }
 
-  const published = reviewList.filter((review) => review.isPublished).length;
-  const avgRating = reviewList.length
-    ? (reviewList.reduce((sum, review) => sum + review.rating, 0) / reviewList.length).toFixed(1)
-    : null;
+  // Prefer the server's true aggregate (covers every review, not just the
+  // pages loaded so far) — falls back to the loaded subset only if it's
+  // somehow missing, so the stats never go blank.
+  const totalReviews = summary?.totalReviews ?? reviewList.length;
+  const published = summary?.publishedReviews ?? reviewList.filter((review) => review.isPublished).length;
+  const avgRating = summary
+    ? summary.averageRating.toFixed(1)
+    : reviewList.length
+      ? (reviewList.reduce((sum, review) => sum + review.rating, 0) / reviewList.length).toFixed(1)
+      : null;
 
   return (
     <div className={dashboardPageClass}>
@@ -124,7 +166,7 @@ export function ReviewsClient({ canUseAiReplies }: { canUseAiReplies: boolean })
       {reviewList.length > 0 && (
         <div className="grid grid-cols-3 gap-3">
           <div className={cn(dashboardCardClass, "p-4 text-center")}>
-            <p className="font-cal text-2xl">{reviewList.length}</p>
+            <p className="font-cal text-2xl">{totalReviews}</p>
             <p className="mt-0.5 text-xs text-muted-foreground">{copy.totalReviews}</p>
           </div>
           <div className={cn(dashboardCardClass, "p-4 text-center")}>
@@ -251,6 +293,19 @@ export function ReviewsClient({ canUseAiReplies }: { canUseAiReplies: boolean })
           ))}
         </div>
       )}
+
+      {!loading && hasMore ? (
+        <div className="flex justify-center pt-2">
+          <button
+            type="button"
+            className={cn(dashboardOutlineActionClass, "min-h-11")}
+            disabled={loadingMore}
+            onClick={loadMoreReviews}
+          >
+            {loadingMore ? "Loading…" : "Load more"}
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }
