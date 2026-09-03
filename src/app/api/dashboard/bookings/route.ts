@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireApiBusiness } from "@/lib/api-auth";
 import { db } from "@/db";
 import { bookings, payments, services, staff } from "@/db/schema";
-import { eq, and, desc, lt, gte, ne, ilike, or } from "drizzle-orm";
+import { eq, and, desc, lt, gt, gte, ne, ilike, or } from "drizzle-orm";
+
+const PAGE_SIZE = 50;
 
 const COLS = {
   id: bookings.id,
@@ -46,6 +48,13 @@ export async function GET(req: NextRequest) {
   const exportFormat = params.get("export");
   const now = new Date();
 
+  const cursorParam = params.get("cursor");
+  const cursor = cursorParam ? new Date(cursorParam) : null;
+  if (cursorParam && Number.isNaN(cursor?.getTime())) {
+    return NextResponse.json({ error: "cursor must be a valid ISO datetime." }, { status: 400 });
+  }
+  const isAscending = tab === "upcoming";
+
   const filters = [
     eq(bookings.businessId, businessId),
     ...(tab === "upcoming"  ? [gte(bookings.startsAt, now), ne(bookings.status, "cancelled")] : []),
@@ -58,6 +67,9 @@ export async function GET(req: NextRequest) {
     ...(serviceId ? [eq(bookings.serviceId, serviceId)] : []),
     ...(from ? [gte(bookings.startsAt, new Date(from))] : []),
     ...(to ? [lt(bookings.startsAt, new Date(to))] : []),
+    ...(cursor && !Number.isNaN(cursor.getTime())
+      ? [isAscending ? gt(bookings.startsAt, cursor) : lt(bookings.startsAt, cursor)]
+      : []),
     ...(query
       ? [
           or(
@@ -71,7 +83,9 @@ export async function GET(req: NextRequest) {
 
   const base = and(...filters);
 
-  const order = tab === "upcoming" ? bookings.startsAt : desc(bookings.startsAt);
+  const order = isAscending ? bookings.startsAt : desc(bookings.startsAt);
+  const isCsv = exportFormat === "csv";
+  const fetchLimit = isCsv ? 50000 : PAGE_SIZE + 1;
 
   const rows = await db
     .select(COLS)
@@ -81,7 +95,7 @@ export async function GET(req: NextRequest) {
     .leftJoin(payments, eq(payments.bookingId, bookings.id))
     .where(base)
     .orderBy(order)
-    .limit(exportFormat === "csv" ? 50000 : 100);
+    .limit(fetchLimit);
 
   if (exportFormat === "csv") {
     const header = ["date", "client", "phone", "email", "service", "staff", "status", "amount_lkr", "payment_status", "source"];
@@ -106,5 +120,9 @@ export async function GET(req: NextRequest) {
     });
   }
 
-  return NextResponse.json(rows);
+  const hasMore = rows.length > PAGE_SIZE;
+  const page = hasMore ? rows.slice(0, PAGE_SIZE) : rows;
+  const nextCursor = hasMore ? (page[page.length - 1]?.startsAt.toISOString() ?? null) : null;
+
+  return NextResponse.json({ bookings: page, hasMore, nextCursor });
 }

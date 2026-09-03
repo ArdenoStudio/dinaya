@@ -9,16 +9,26 @@ import {
 } from "@/components/dashboard/BookingsClient";
 import { buildDesktopApiPath, desktopApiRequest } from "../desktop-api";
 
+type DesktopBookingsResponse = {
+  rows: BookingRow[];
+  nextCursor: string | null;
+};
+
 const desktopBookingsApi: BookingsApi = {
-  async list(tab: BookingsTab) {
-    return desktopApiRequest<BookingRow[]>({
+  async list(tab: BookingsTab, cursor?: string | null) {
+    const response = await desktopApiRequest<DesktopBookingsResponse>({
       method: "GET",
       path: buildDesktopApiPath("/api/v1/desktop/bookings", {
-        compat: "web",
-        limit: 100,
+        limit: 50,
         tab,
+        ...(cursor ? { cursor } : {}),
       }),
     });
+    return {
+      bookings: response.rows,
+      hasMore: Boolean(response.nextCursor),
+      nextCursor: response.nextCursor,
+    };
   },
   async updateStatus(bookingId, status) {
     const updated = await desktopApiRequest<{ status: BookingRow["status"] }>({

@@ -82,8 +82,14 @@ const CONFIRM_COPY: Record<
   },
 };
 
+export type BookingsPage = {
+  bookings: BookingRow[];
+  hasMore: boolean;
+  nextCursor: string | null;
+};
+
 export type BookingsApi = {
-  list: (tab: BookingsTab) => Promise<BookingRow[]>;
+  list: (tab: BookingsTab, cursor?: string | null) => Promise<BookingsPage>;
   updateStatus: (bookingId: string, status: string) => Promise<{ status: BookingRow["status"] } | null>;
   exportUrl: (tab: BookingsTab) => string;
 };
@@ -152,6 +158,9 @@ export function BookingsClient({ api }: { api: BookingsApi }) {
   const [tab, setTab] = useState<BookingsTab>("upcoming");
   const [rows, setRows] = useState<BookingRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
+  const [cursor, setCursor] = useState<string | null>(null);
   const [updating, setUpdating] = useState<string | null>(null);
   const [confirmState, setConfirmState] = useState<{
     bookingId: string;
@@ -162,12 +171,16 @@ export function BookingsClient({ api }: { api: BookingsApi }) {
     setLoading(true);
     void api
       .list(tab)
-      .then((data) => {
-        setRows(data);
+      .then((page) => {
+        setRows(page.bookings);
+        setHasMore(page.hasMore);
+        setCursor(page.nextCursor);
         setLoading(false);
       })
       .catch(() => {
         setRows([]);
+        setHasMore(false);
+        setCursor(null);
         setLoading(false);
         showToast({
           title: "Could not load bookings",
@@ -175,6 +188,24 @@ export function BookingsClient({ api }: { api: BookingsApi }) {
         });
       });
   }, [api, tab, showToast]);
+
+  async function loadMore() {
+    if (!cursor || loadingMore) return;
+    setLoadingMore(true);
+    try {
+      const page = await api.list(tab, cursor);
+      setRows((prev) => [...prev, ...page.bookings]);
+      setHasMore(page.hasMore);
+      setCursor(page.nextCursor);
+    } catch {
+      showToast({
+        title: "Could not load more bookings",
+        description: "Check your connection and try again.",
+      });
+    } finally {
+      setLoadingMore(false);
+    }
+  }
 
   async function updateStatus(bookingId: string, status: BookingRow["status"]) {
     setUpdating(bookingId);
@@ -388,6 +419,14 @@ export function BookingsClient({ api }: { api: BookingsApi }) {
           ]}
         />
       )}
+
+      {!loading && hasMore ? (
+        <div className="flex justify-center pt-2">
+          <Button type="button" variant="outline" className="min-h-11" disabled={loadingMore} onClick={loadMore}>
+            {loadingMore ? "Loading…" : "Load more"}
+          </Button>
+        </div>
+      ) : null}
 
       {confirmState && confirmCopy ? (
         <DashboardConfirmDialog
