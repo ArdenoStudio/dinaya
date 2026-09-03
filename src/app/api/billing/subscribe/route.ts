@@ -2,7 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { businesses, subscriptions, users } from "@/db/schema";
 import { eq, and, inArray } from "drizzle-orm";
-import { buildRecurringFormData, PAYHERE_CHECKOUT_URL } from "@/lib/payhere-subscriptions";
+import {
+  buildRecurringFormData,
+  cancelPayhereSubscription,
+  PAYHERE_CHECKOUT_URL,
+} from "@/lib/payhere-subscriptions";
 import { parseSubscribeRequest } from "@/lib/billing-subscribe";
 import { generateOrderId } from "@/lib/utils";
 import { requireApiBusiness } from "@/lib/api-auth";
@@ -58,7 +62,12 @@ export async function POST(req: NextRequest) {
   }
 
   const [existingActive] = await db
-    .select({ id: subscriptions.id })
+    .select({
+      id: subscriptions.id,
+      plan: subscriptions.plan,
+      status: subscriptions.status,
+      payhereSubscriptionId: subscriptions.payhereSubscriptionId,
+    })
     .from(subscriptions)
     .where(and(
       eq(subscriptions.businessId, businessId),
@@ -67,10 +76,29 @@ export async function POST(req: NextRequest) {
     .limit(1);
 
   if (existingActive) {
-    return NextResponse.json(
-      { error: "A subscription is already in progress for this business." },
-      { status: 409 },
-    );
+    if (planRank(existingActive.plan as PaidPlan) >= planRank(targetPlan)) {
+      return NextResponse.json(
+        { error: "A subscription is already in progress for this business." },
+        { status: 409 },
+      );
+    }
+
+    // Upgrading to a higher plan: supersede the in-progress/active subscription.
+    // No proration — the new plan starts billing from today.
+    if (existingActive.payhereSubscriptionId) {
+      try {
+        await cancelPayhereSubscription(existingActive.payhereSubscriptionId);
+      } catch (err) {
+        return NextResponse.json(
+          { error: err instanceof Error ? err.message : "Could not cancel current subscription to upgrade." },
+          { status: 502 },
+        );
+      }
+    }
+    await db
+      .update(subscriptions)
+      .set({ status: "cancelled", cancelledAt: new Date() })
+      .where(eq(subscriptions.id, existingActive.id));
   }
 
   const config = await getPlanConfigAsync();
