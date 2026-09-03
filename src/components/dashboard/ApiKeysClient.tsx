@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ConfirmDialog } from "@/components/dashboard/ConfirmDialog";
 import { DashboardSection } from "@/components/dashboard/DashboardSection";
 import { API_KEY_SCOPES, type ApiKeyScope } from "@/lib/api-key-scopes";
 import {
@@ -103,7 +104,6 @@ export function ApiKeysClient() {
   }
 
   async function revoke(id: string) {
-    if (!confirm("Revoke this API key?")) return;
     await fetch(`/api/dashboard/api-keys/${id}`, { method: "DELETE" });
     await load();
   }
@@ -173,14 +173,24 @@ export function ApiKeysClient() {
                 </p>
                 <p className="text-xs text-muted-foreground">{key.scopes.join(", ")}</p>
               </div>
-              <button
-                type="button"
-                onClick={() => revoke(key.id)}
-                disabled={Boolean(key.revokedAt)}
-                className="text-xs text-red-600 hover:underline disabled:opacity-50"
-              >
-                {key.revokedAt ? "Revoked" : "Revoke"}
-              </button>
+              {key.revokedAt ? (
+                <span className="text-xs text-muted-foreground">Revoked</span>
+              ) : (
+                <ConfirmDialog
+                  title="Revoke API key"
+                  description={`Revoke "${key.name}"? Any integration using this key will stop working immediately.`}
+                  confirmLabel="Revoke"
+                  onConfirm={() => revoke(key.id)}
+                  trigger={
+                    <button
+                      type="button"
+                      className="text-xs text-red-600 hover:underline"
+                    >
+                      Revoke
+                    </button>
+                  }
+                />
+              )}
             </div>
           ))
         )}
