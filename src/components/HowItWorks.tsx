@@ -38,17 +38,17 @@ function OrbitNode({
     <div className="relative flex items-center justify-center">
       {/* Icon + white circle */}
       <Icon name={icon} className="z-10 text-[18px] text-gray-800 dark:text-gray-200" />
-      <div className="absolute size-10 rounded-full bg-white/60 ring-1 shadow-lg ring-black/5" />
+      <div className="absolute size-10 rounded-full bg-white ring-1 shadow-lg ring-black/5 dark:bg-neutral-800 dark:ring-white/10" />
 
       {/* Status badge */}
       <div className="absolute -top-5 left-4">
         <div className="flex gap-0.5">
           <div
-            className={`flex items-center justify-center rounded-l-full ${badgeBg} p-1 ring-1 ring-gray-200`}
+            className={`flex items-center justify-center rounded-l-full ${badgeBg} p-1 ring-1 ring-gray-200 dark:ring-white/10`}
           >
             <Icon name={badgeIcon} className="text-[9px] text-white" />
           </div>
-          <div className="rounded-r-full bg-white/70 py-0.5 pr-1.5 pl-1 text-[11px] whitespace-nowrap ring-1 ring-gray-200 text-gray-700 dark:text-gray-300 font-medium">
+          <div className="rounded-r-full bg-white py-0.5 pr-1.5 pl-1 text-[11px] whitespace-nowrap ring-1 ring-gray-200 text-gray-700 font-medium dark:bg-neutral-800 dark:ring-white/10 dark:text-gray-200">
             {badgeLabel}
           </div>
         </div>
