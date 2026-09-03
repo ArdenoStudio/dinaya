@@ -81,6 +81,7 @@ export async function getLocationsDashboardList(
     db
       .select({
         address: locations.address,
+        aiConfig: locations.aiConfig,
         createdAt: locations.createdAt,
         id: locations.id,
         isActive: locations.isActive,
@@ -166,6 +167,7 @@ export async function getLocationDashboardDetail(businessId: string, locationId:
   const [location] = await db
     .select({
       address: locations.address,
+      aiConfig: locations.aiConfig,
       createdAt: locations.createdAt,
       id: locations.id,
       isActive: locations.isActive,
