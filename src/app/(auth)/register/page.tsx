@@ -4,27 +4,18 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
+import { motion, type Variants } from "motion/react";
 import { slugify } from "@/lib/utils";
 import { trackSignup } from "@/lib/analytics/gtag";
 import { MARKETING_CTA_PRIMARY } from "@/lib/marketing-copy";
-import { Logo } from "@/components/Logo";
-import { AuthThemeToggle } from "@/components/AuthThemeToggle";
+import { AuthSplitShell } from "@/components/auth/AuthSplitShell";
+import {
+  authInputClassName,
+  authLabelClassName,
+  authPrimaryButtonClassName,
+} from "@/components/auth/auth-form-styles";
 import { Icon } from "@/components/ui/Icon";
-import { authFieldTransitionClassName, authSubmitButtonClassName } from "@/components/auth/auth-form-styles";
-import { dashboardInputClass } from "@/lib/dashboard-ui";
-
-const perks = [
-  "Your own booking page at yourname.dinaya.lk",
-  "Online payments with PayHere when you're ready",
-  "Staff scheduling & availability management",
-  "14-day free trial — no credit card needed",
-];
-
-const testimonial = {
-  quote: "Within a week of signing up, I had clients booking online and I stopped losing appointments to WhatsApp confusion.",
-  name: "Ruwani Perera",
-  role: "Owner, Glow Beauty Studio · Colombo",
-};
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 
 const businessTypes = [
   { value: "salon_barber", label: "Salon / barber", helper: "Starts with haircut, colour, and grooming services." },
@@ -37,8 +28,6 @@ const businessTypes = [
   { value: "other", label: "Other", helper: "Starts with a simple consultation and appointment setup." },
 ];
 
-const inputCls = `${dashboardInputClass} mt-1.5 ${authFieldTransitionClassName}`;
-
 function getPasswordStrength(pw: string): 0 | 1 | 2 | 3 {
   if (pw.length === 0) return 0;
   let score = 0;
@@ -50,18 +39,19 @@ function getPasswordStrength(pw: string): 0 | 1 | 2 | 3 {
 
 const strengthLabel = ["", "Weak", "Fair", "Strong"];
 const strengthColor = ["", "bg-red-400", "bg-amber-400", "bg-emerald-400"];
-const strengthText  = ["", "text-red-500", "text-amber-500", "text-emerald-600"];
+const strengthText = ["", "text-red-500", "text-amber-500", "text-emerald-600"];
 
 export default function RegisterPage() {
   const router = useRouter();
+  const reduceMotion = useReducedMotion();
   const [referrerCode, setReferrerCode] = useState("");
   const [utm, setUtm] = useState({ source: "", medium: "", campaign: "" });
-  const step1Ref   = useRef<HTMLInputElement>(null);
-  const step2Ref   = useRef<HTMLInputElement>(null);
+  const step1Ref = useRef<HTMLInputElement>(null);
+  const step2Ref = useRef<HTMLInputElement>(null);
   const slugTouched = useRef(false);
 
-  const [step, setStep]               = useState<1 | 2>(1);
-  const [form, setForm]               = useState({
+  const [step, setStep] = useState<1 | 2>(1);
+  const [form, setForm] = useState({
     name: "",
     email: "",
     password: "",
@@ -71,10 +61,12 @@ export default function RegisterPage() {
     language: "en",
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError]             = useState("");
-  const [loading, setLoading]         = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => { step1Ref.current?.focus(); }, []);
+  useEffect(() => {
+    step1Ref.current?.focus();
+  }, []);
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     setReferrerCode(params.get("ref")?.trim().toLowerCase() ?? "");
@@ -88,7 +80,30 @@ export default function RegisterPage() {
       setForm((f) => ({ ...f, email: emailFromQuery }));
     }
   }, []);
-  useEffect(() => { if (step === 2) step2Ref.current?.focus(); }, [step]);
+  useEffect(() => {
+    if (step === 2) step2Ref.current?.focus();
+  }, [step]);
+
+  const containerVariants: Variants = reduceMotion
+    ? { hidden: { opacity: 1 }, visible: { opacity: 1 } }
+    : {
+        hidden: { opacity: 0 },
+        visible: {
+          opacity: 1,
+          transition: { staggerChildren: 0.08, delayChildren: 0.12 },
+        },
+      };
+
+  const itemVariants: Variants = reduceMotion
+    ? { hidden: { opacity: 1, y: 0 }, visible: { opacity: 1, y: 0 } }
+    : {
+        hidden: { opacity: 0, y: 12 },
+        visible: {
+          opacity: 1,
+          y: 0,
+          transition: { type: "spring", stiffness: 300, damping: 24 },
+        },
+      };
 
   function handleBusinessNameChange(value: string) {
     setForm((f) => ({ ...f, businessName: value, slug: slugTouched.current ? f.slug : slugify(value) }));
@@ -157,263 +172,271 @@ export default function RegisterPage() {
   const strength = getPasswordStrength(form.password);
 
   return (
-    <div className="min-h-screen flex">
-      <AuthThemeToggle />
-
-      {/* ── Left branding panel ── */}
-      <div
-        className="hidden lg:flex lg:w-[52%] relative flex-col justify-between px-14 py-12 overflow-hidden"
-        style={{ background: "linear-gradient(145deg, #050d1f 0%, #070b18 55%, #09080f 100%)" }}
+    <AuthSplitShell>
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="w-full max-w-[420px]"
       >
-        {/* Dot grid */}
-        <div
-          className="pointer-events-none absolute inset-0"
-          style={{
-            backgroundImage: "radial-gradient(rgba(255,255,255,0.045) 1px, transparent 1px)",
-            backgroundSize: "22px 22px",
-          }}
-        />
-        {/* Cobalt Blue glow — top centre (primary brand) */}
-        <div
-          className="pointer-events-none absolute -top-32 left-1/4 w-[480px] h-[480px] rounded-full"
-          style={{ background: "rgba(26,110,232,0.18)", filter: "blur(110px)" }}
-        />
-        {/* Violet glow — top left (engagement) */}
-        <div
-          className="pointer-events-none absolute -top-40 -left-32 w-96 h-96 rounded-full"
-          style={{ background: "rgba(109,40,217,0.14)", filter: "blur(90px)" }}
-        />
-        {/* Amber glow — bottom right (booking) */}
-        <div
-          className="pointer-events-none absolute -bottom-32 -right-24 w-72 h-72 rounded-full"
-          style={{ background: "rgba(245,158,11,0.09)", filter: "blur(80px)" }}
-        />
-
-        <Logo size="lg" className="text-white relative z-10" />
-
-        <div className="relative z-10">
-          <p className="font-cal leading-[1.15] text-white mb-3" style={{ fontSize: "2.35rem" }}>
-            Your business,<br />
-            <span className="text-primary">bookable in minutes.</span>
+        <motion.div variants={itemVariants} className="mb-6 text-center lg:text-left">
+          <h1 className="mb-1 font-cal text-3xl tracking-tight text-foreground md:text-4xl">
+            {step === 1 ? "Create your account" : "Set up your booking page"}
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            {step === 1
+              ? "Start your 14-day free trial. No credit card needed."
+              : "This is your public page that clients will visit."}
           </p>
-          <p className="text-white/40 text-sm mb-8 leading-relaxed">
-            Join salons, clinics, and tutors across Sri Lanka who use Dinaya to fill their calendars — without the back-and-forth.
-          </p>
+        </motion.div>
 
-          <ul className="space-y-3 mb-9">
-            {perks.map((p) => (
-              <li key={p} className="flex items-start gap-3">
-                <Icon name="check-circle" className="text-sm text-primary shrink-0 mt-0.5" />
-                <span className="text-white/65 text-sm">{p}</span>
-              </li>
-            ))}
-          </ul>
-
-          {/* Glass pill testimonial */}
+        <motion.div variants={itemVariants} className="mb-6 flex items-center gap-1.5 justify-center lg:justify-start">
           <div
-            className="rounded-2xl px-4 py-3.5"
-            style={{
-              background: "rgba(255,255,255,0.04)",
-              border: "1px solid rgba(255,255,255,0.08)",
-              backdropFilter: "blur(8px)",
-            }}
-          >
-            <p className="text-white/50 text-xs italic leading-relaxed mb-2">
-              &ldquo;{testimonial.quote}&rdquo;
-            </p>
-            <p className="text-white/25 text-xs">{testimonial.name} · {testimonial.role}</p>
-          </div>
-        </div>
-
-        <p className="text-white/18 text-xs relative z-10" style={{ color: "rgba(255,255,255,0.18)" }}>
-          © {new Date().getFullYear()} Dinaya by Ardeno Studio
-        </p>
-      </div>
-
-      {/* ── Right form panel ── */}
-      <div className="flex-1 flex items-center justify-center px-4 py-12 bg-[#f5f4f1] dark:bg-neutral-950">
-        <div className="w-full max-w-sm">
-          {/* Mobile logo */}
-          <div className="lg:hidden mb-6 flex justify-center">
-            <Logo size="md" />
-          </div>
-
-          {/* Step dots */}
-          <div className="flex items-center gap-1.5 justify-center mb-5">
-            <div className={`h-1.5 rounded-full transition-[width,background-color] duration-300 ${step === 1 ? "w-6 bg-primary" : "w-3 bg-primary/60"}`} />
-            <div className={`h-1.5 rounded-full transition-[width,background-color] duration-300 ${step === 2 ? "w-6 bg-primary" : "w-3 bg-gray-300 dark:bg-neutral-600"}`} />
-          </div>
-
-          {/* Card */}
+            className={`h-1.5 rounded-full transition-[width,background-color] duration-300 ${step === 1 ? "w-6 bg-primary" : "w-3 bg-primary/60"}`}
+          />
           <div
-            className="bg-white dark:bg-neutral-900 rounded-2xl px-7 py-8"
-            style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.05), 0 8px 32px rgba(0,0,0,0.07)" }}
-          >
-            {step === 1 ? (
-              <>
-                <h1 className="font-cal text-2xl mb-1">Create your account</h1>
-                <p className="text-muted-foreground text-sm mb-6">Start your 14-day free trial. No credit card needed.</p>
+            className={`h-1.5 rounded-full transition-[width,background-color] duration-300 ${step === 2 ? "w-6 bg-primary" : "w-3 bg-border"}`}
+          />
+        </motion.div>
 
-                <form onSubmit={handleStep1} action="#" method="post" className="space-y-4" noValidate>
-                  <div>
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300" htmlFor="name">Your name</label>
-                    <input ref={step1Ref} id="name" name="name" required autoComplete="name"
-                      value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                      className={inputCls} placeholder="Amara Silva" />
-                  </div>
+        {step === 1 ? (
+          <form onSubmit={handleStep1} className="flex flex-col gap-4" noValidate>
+            <motion.div variants={itemVariants} className="flex flex-col gap-2">
+              <label htmlFor="name" className={authLabelClassName}>
+                Your name
+              </label>
+              <input
+                ref={step1Ref}
+                id="name"
+                name="name"
+                required
+                autoComplete="name"
+                value={form.name}
+                onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                className={authInputClassName}
+                placeholder="Amara Silva"
+              />
+            </motion.div>
 
-                  <div>
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300" htmlFor="email">Email</label>
-                    <input id="email" name="email" type="email" required autoComplete="email" inputMode="email"
-                      value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-                      className={inputCls} placeholder="you@example.com" />
-                  </div>
+            <motion.div variants={itemVariants} className="flex flex-col gap-2">
+              <label htmlFor="email" className={authLabelClassName}>
+                Email
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                required
+                autoComplete="email"
+                inputMode="email"
+                value={form.email}
+                onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+                className={authInputClassName}
+                placeholder="you@example.com"
+              />
+            </motion.div>
 
-                  <div>
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300" htmlFor="password">Password</label>
-                    <div className="relative mt-1.5">
-                      <input id="password" name="password" type={showPassword ? "text" : "password"}
-                        required minLength={8} autoComplete="new-password"
-                        value={form.password} onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
-                        className={`w-full border border-gray-200 dark:border-neutral-800 rounded-lg pl-3 pr-10 py-2.5 text-sm bg-white dark:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 placeholder:text-gray-300 dark:placeholder:text-neutral-600 ${authFieldTransitionClassName}`}
-                        placeholder="Min. 8 characters" />
-                      <button type="button" onClick={() => setShowPassword((s) => !s)}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-gray-300 hover:text-gray-500 dark:text-gray-400 rounded-md transition-colors"
-                        aria-label={showPassword ? "Hide password" : "Show password"} tabIndex={-1}>
-                        {showPassword ? <Icon name="eye-slash" className="text-sm" /> : <Icon name="eye" className="text-sm" />}
-                      </button>
-                    </div>
-                    {form.password.length > 0 && (
-                      <div className="mt-2">
-                        <div className="flex gap-1">
-                          {[1, 2, 3].map((i) => (
-                            <div key={i} className={`h-1 flex-1 rounded-full transition-[width,background-color] duration-300 ${i <= strength ? strengthColor[strength] : "bg-gray-100 dark:bg-neutral-800"}`} />
-                          ))}
-                        </div>
-                        <p className={`text-xs mt-1 ${strengthText[strength]}`}>
-                          {strengthLabel[strength]}
-                          {strength < 3 && (
-                            <span className="text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
-                              {strength === 1 && " — add numbers or symbols"}
-                              {strength === 2 && " — add a symbol to strengthen"}
-                            </span>
-                          )}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-
-                  {error && (
-                    <div role="alert" className="flex items-start gap-2 px-3 py-2.5 rounded-lg bg-red-50 border border-red-100 text-red-600 text-sm">
-                      <Icon name="exclamation-circle" className="text-sm mt-0.5 shrink-0" /><span>{error}</span>
-                    </div>
-                  )}
-
-                  <button
-                    type="button"
-                    onClick={handleStep1Continue}
-                    className={`${authSubmitButtonClassName} mt-1`}>
-                    Continue <Icon name="arrow-right" className="text-sm" />
-                  </button>
-                </form>
-              </>
-            ) : (
-              <>
-                <button type="button" onClick={() => { setStep(1); setError(""); }}
-                  className="flex items-center gap-1.5 text-sm text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:text-gray-300 mb-5 -ml-0.5 transition-colors">
-                  <Icon name="arrow-left" className="text-xs" /> Back
+            <motion.div variants={itemVariants} className="flex flex-col gap-2">
+              <label htmlFor="password" className={authLabelClassName}>
+                Password
+              </label>
+              <div className="relative">
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  required
+                  minLength={8}
+                  autoComplete="new-password"
+                  value={form.password}
+                  onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
+                  className={`${authInputClassName} pr-12`}
+                  placeholder="Min. 8 characters"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((s) => !s)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  tabIndex={-1}
+                >
+                  <Icon name={showPassword ? "eye-slash" : "eye"} className="text-sm" />
                 </button>
-
-                <h1 className="font-cal text-2xl mb-1">Set up your booking page</h1>
-                <p className="text-muted-foreground text-sm mb-6">This is your public page that clients will visit.</p>
-
-                <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-                  <div>
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300" htmlFor="businessName">Business name</label>
-                    <input ref={step2Ref} id="businessName" name="businessName" required autoComplete="organization"
-                      value={form.businessName} onChange={(e) => handleBusinessNameChange(e.target.value)}
-                      className={inputCls} placeholder="e.g. Glow Beauty Studio" />
+              </div>
+              {form.password.length > 0 && (
+                <div>
+                  <div className="flex gap-1">
+                    {[1, 2, 3].map((i) => (
+                      <div
+                        key={i}
+                        className={`h-1 flex-1 rounded-full transition-[width,background-color] duration-300 ${i <= strength ? strengthColor[strength] : "bg-border"}`}
+                      />
+                    ))}
                   </div>
-
-                  <div>
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300" htmlFor="slug">Your booking URL</label>
-                    <div className={`mt-1.5 flex items-center border border-gray-200 dark:border-neutral-800 rounded-lg overflow-hidden bg-white dark:bg-neutral-900 focus-within:ring-2 focus-within:ring-primary/40 ${authFieldTransitionClassName}`}>
-                      <input id="slug" name="slug" required value={form.slug}
-                        onChange={(e) => handleSlugChange(e.target.value)}
-                        className="flex-1 px-3 py-2.5 text-sm focus:outline-none placeholder:text-gray-300 dark:placeholder:text-neutral-600"
-                        placeholder="your-business" />
-                      <span className="bg-gray-50 dark:bg-neutral-900/60 text-gray-500 text-sm px-3 py-2.5 border-l border-gray-200 dark:border-neutral-800 whitespace-nowrap select-none">
-                        .dinaya.lk
+                  <p className={`text-xs mt-1 ${strengthText[strength]}`}>
+                    {strengthLabel[strength]}
+                    {strength < 3 && (
+                      <span className="text-muted-foreground">
+                        {strength === 1 && " — add numbers or symbols"}
+                        {strength === 2 && " — add a symbol to strengthen"}
                       </span>
-                    </div>
-                    {form.slug && (
-                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-1.5 flex items-center gap-1">
-                        <Icon name="check-circle" className="text-emerald-500" />
-                        Clients will book at <span className="font-medium text-gray-600 dark:text-gray-400">{form.slug}.dinaya.lk</span>
-                      </p>
                     )}
-                  </div>
+                  </p>
+                </div>
+              )}
+            </motion.div>
 
-                  <div>
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300" htmlFor="businessType">Business type</label>
-                    <select
-                      id="businessType"
-                      value={form.businessType}
-                      onChange={(e) => setForm((f) => ({ ...f, businessType: e.target.value }))}
-                      className={inputCls}
-                    >
-                      {businessTypes.map((type) => (
-                        <option key={type.value} value={type.value}>{type.label}</option>
-                      ))}
-                    </select>
-                    <p className="text-xs text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-1.5">
-                      {businessTypes.find((type) => type.value === form.businessType)?.helper}
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300" htmlFor="language">Booking page language</label>
-                    <select
-                      id="language"
-                      value={form.language}
-                      onChange={(e) => setForm((f) => ({ ...f, language: e.target.value }))}
-                      className={inputCls}
-                    >
-                      <option value="en">English</option>
-                      <option value="si">Sinhala</option>
-                      <option value="ta">Tamil</option>
-                    </select>
-                    <p className="text-xs text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-1.5">
-                      You can change this later in Settings.
-                    </p>
-                  </div>
-
-                  {error && (
-                    <div role="alert" className="flex items-start gap-2 px-3 py-2.5 rounded-lg bg-red-50 border border-red-100 text-red-600 text-sm">
-                      <Icon name="exclamation-circle" className="text-sm mt-0.5 shrink-0" /><span>{error}</span>
-                    </div>
-                  )}
-
-                  <button type="submit" disabled={loading}
-                    className={`${authSubmitButtonClassName} disabled:cursor-not-allowed mt-1`}>
-                    {loading && <Icon name="arrow-repeat" className="text-sm animate-spin" />}
-                    {loading ? "Creating…" : MARKETING_CTA_PRIMARY}
-                  </button>
-                </form>
-              </>
+            {error && (
+              <motion.div
+                variants={itemVariants}
+                role="alert"
+                className="flex items-start gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300"
+              >
+                <Icon name="exclamation-circle" className="mt-0.5 shrink-0 text-sm" />
+                <span>{error}</span>
+              </motion.div>
             )}
 
-            <div className="flex items-center justify-center gap-1.5 mt-4 text-xs text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
-              <Icon name="lock" /><span>Secure sign-up · No credit card required</span>
-            </div>
-          </div>
+            <motion.div variants={itemVariants}>
+              <button type="submit" className={authPrimaryButtonClassName}>
+                <span className="inline-flex items-center justify-center gap-2">
+                  Continue <Icon name="arrow-right" className="text-sm" />
+                </span>
+              </button>
+            </motion.div>
+          </form>
+        ) : (
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
+            <motion.button
+              variants={itemVariants}
+              type="button"
+              onClick={() => {
+                setStep(1);
+                setError("");
+              }}
+              className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors -mt-1 -ml-0.5"
+            >
+              <Icon name="arrow-left" className="text-xs" /> Back
+            </motion.button>
 
-          <p className="text-center text-sm text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-5">
-            Already have an account?{" "}
-            <Link href="/auth/signin" className="text-primary hover:underline font-medium">Sign in</Link>
-          </p>
-        </div>
-      </div>
-    </div>
+            <motion.div variants={itemVariants} className="flex flex-col gap-2">
+              <label htmlFor="businessName" className={authLabelClassName}>
+                Business name
+              </label>
+              <input
+                ref={step2Ref}
+                id="businessName"
+                name="businessName"
+                required
+                autoComplete="organization"
+                value={form.businessName}
+                onChange={(e) => handleBusinessNameChange(e.target.value)}
+                className={authInputClassName}
+                placeholder="e.g. Glow Beauty Studio"
+              />
+            </motion.div>
+
+            <motion.div variants={itemVariants} className="flex flex-col gap-2">
+              <label htmlFor="slug" className={authLabelClassName}>
+                Your booking URL
+              </label>
+              <div className="flex items-center overflow-hidden rounded-full border border-border bg-background focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-colors">
+                <input
+                  id="slug"
+                  name="slug"
+                  required
+                  value={form.slug}
+                  onChange={(e) => handleSlugChange(e.target.value)}
+                  className="flex-1 bg-transparent px-5 py-3 text-sm text-foreground focus:outline-none placeholder:text-muted-foreground/60"
+                  placeholder="your-business"
+                />
+                <span className="whitespace-nowrap border-l border-border px-4 py-3 text-sm text-muted-foreground select-none">
+                  .dinaya.lk
+                </span>
+              </div>
+              {form.slug && (
+                <p className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <Icon name="check-circle" className="text-emerald-500" />
+                  Clients will book at <span className="font-medium text-foreground">{form.slug}.dinaya.lk</span>
+                </p>
+              )}
+            </motion.div>
+
+            <motion.div variants={itemVariants} className="flex flex-col gap-2">
+              <label htmlFor="businessType" className={authLabelClassName}>
+                Business type
+              </label>
+              <select
+                id="businessType"
+                value={form.businessType}
+                onChange={(e) => setForm((f) => ({ ...f, businessType: e.target.value }))}
+                className={authInputClassName}
+              >
+                {businessTypes.map((type) => (
+                  <option key={type.value} value={type.value}>
+                    {type.label}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-muted-foreground">
+                {businessTypes.find((type) => type.value === form.businessType)?.helper}
+              </p>
+            </motion.div>
+
+            <motion.div variants={itemVariants} className="flex flex-col gap-2">
+              <label htmlFor="language" className={authLabelClassName}>
+                Booking page language
+              </label>
+              <select
+                id="language"
+                value={form.language}
+                onChange={(e) => setForm((f) => ({ ...f, language: e.target.value }))}
+                className={authInputClassName}
+              >
+                <option value="en">English</option>
+                <option value="si">Sinhala</option>
+                <option value="ta">Tamil</option>
+              </select>
+              <p className="text-xs text-muted-foreground">You can change this later in Settings.</p>
+            </motion.div>
+
+            {error && (
+              <motion.div
+                variants={itemVariants}
+                role="alert"
+                className="flex items-start gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300"
+              >
+                <Icon name="exclamation-circle" className="mt-0.5 shrink-0 text-sm" />
+                <span>{error}</span>
+              </motion.div>
+            )}
+
+            <motion.div variants={itemVariants}>
+              <button type="submit" disabled={loading} className={authPrimaryButtonClassName}>
+                <span className="inline-flex items-center justify-center gap-2">
+                  {loading && <Icon name="arrow-repeat" className="animate-spin text-sm" />}
+                  {loading ? "Creating…" : MARKETING_CTA_PRIMARY}
+                </span>
+              </button>
+            </motion.div>
+          </form>
+        )}
+
+        <motion.div
+          variants={itemVariants}
+          className="mt-4 flex items-center justify-center gap-1.5 text-xs text-muted-foreground lg:justify-start"
+        >
+          <Icon name="lock" className="text-xs" />
+          <span>Secure sign-up · No credit card required</span>
+        </motion.div>
+
+        <motion.p variants={itemVariants} className="mt-5 text-sm text-muted-foreground">
+          Already have an account?{" "}
+          <Link href="/auth/signin" className="font-semibold text-foreground hover:underline">
+            Sign in
+          </Link>
+        </motion.p>
+      </motion.div>
+    </AuthSplitShell>
   );
 }
