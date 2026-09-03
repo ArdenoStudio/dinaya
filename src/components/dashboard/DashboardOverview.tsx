@@ -40,7 +40,7 @@ function liveContextLine(data: DashboardOverviewData): string {
 }
 
 export function DashboardOverview({ data }: DashboardOverviewProps) {
-  const firstName = data.businessName.split(" ")[0];
+  const firstName = (data.ownerName ?? data.businessName).split(" ")[0];
 
   return (
     <div className={dashboardPageClass}>

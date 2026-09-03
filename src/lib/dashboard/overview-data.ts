@@ -8,8 +8,9 @@ import {
   payments,
   services,
   staff,
+  users,
 } from "@/db/schema";
-import { and, count, desc, eq, gte, lt, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, gte, lt, sql } from "drizzle-orm";
 import {
   addDays,
   endOfWeek,
@@ -81,6 +82,7 @@ export type DashboardOverviewActivityItem = {
 
 export type DashboardOverviewData = {
   businessName: string;
+  ownerName: string | null;
   greetingDate: string;
   stats: DashboardOverviewStat[];
   showStats: boolean;
@@ -159,6 +161,7 @@ export async function getDashboardOverviewData(businessId: string): Promise<Dash
     todayRows,
     nextRows,
     recentActivity,
+    [ownerUser],
   ] = await Promise.all([
     db
       .select({ todayBookings: count() })
@@ -240,6 +243,12 @@ export async function getDashboardOverviewData(businessId: string): Promise<Dash
       .orderBy(bookings.startsAt)
       .limit(3),
     safeRecentActivity(businessId),
+    db
+      .select({ name: users.name })
+      .from(users)
+      .where(and(eq(users.businessId, businessId), eq(users.role, "owner")))
+      .orderBy(asc(users.createdAt))
+      .limit(1),
   ]);
 
   const bookingUrl = buildPublicBookingUrl({
@@ -337,6 +346,7 @@ export async function getDashboardOverviewData(businessId: string): Promise<Dash
 
   return {
     businessName: business.name,
+    ownerName: ownerUser?.name ?? null,
     greetingDate: format(now, "EEEE, MMMM d"),
     stats,
     showStats: !(Number(totalBookings) === 0 && showOnboarding),

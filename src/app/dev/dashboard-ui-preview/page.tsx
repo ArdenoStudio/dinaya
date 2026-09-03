@@ -24,6 +24,7 @@ export const dynamic = "force-dynamic";
 
 const mockOverview: DashboardOverviewData = {
   businessName: "Wax in the City",
+  ownerName: "Amara",
   greetingDate: "Wednesday, 22 Jul",
   showStats: true,
   showOnboarding: false,
