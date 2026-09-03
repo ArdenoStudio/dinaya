@@ -32,6 +32,16 @@ import {
   trackDashboardCalendarView,
 } from "@/lib/analytics/gtag";
 import { cn } from "@/lib/utils";
+import {
+  CALENDAR_START_HOUR as START_HOUR,
+  CALENDAR_END_HOUR as END_HOUR,
+  CALENDAR_TOTAL_HOURS as TOTAL_HOURS,
+  CALENDAR_HOUR_HEIGHT as HOUR_HEIGHT,
+  topPercent,
+  layoutOverlaps,
+  cappedEventHeightPx,
+  type LaidOutItem,
+} from "@/lib/calendar-layout";
 
 type StaffMember = {
   id: string;
@@ -61,29 +71,12 @@ const STATUS_BG: Record<string, string> = {
   no_show: `${statusSurfaceStyles.no_show} opacity-70`,
 };
 
-const START_HOUR = 7;
-const END_HOUR = 21;
-const TOTAL_HOURS = END_HOUR - START_HOUR;
-const HOUR_HEIGHT = 56;
-const MIN_EVENT_HEIGHT = 44;
-
 const navButtonClass = cn(
   buttonVariants({ variant: "outline" }),
   "min-h-11 min-w-11 px-3",
 );
 
-function topPercent(startsAt: string): number {
-  const d = new Date(startsAt);
-  const hour = d.getHours() + d.getMinutes() / 60;
-  return Math.max(0, ((hour - START_HOUR) / TOTAL_HOURS) * 100);
-}
-
-function eventHeightPx(startsAt: string, endsAt: string): number {
-  const start = new Date(startsAt).getTime();
-  const end = new Date(endsAt).getTime();
-  const durationHours = Math.max(0.25, (end - start) / (1000 * 60 * 60));
-  return Math.max(MIN_EVENT_HEIGHT, durationHours * HOUR_HEIGHT);
-}
+type LaidOutBooking = LaidOutItem<Booking>;
 
 export default function CalendarPage() {
   const [view, setView] = useState<CalendarView>("day");
@@ -370,16 +363,24 @@ export default function CalendarPage() {
                   style={{ top: i * HOUR_HEIGHT }}
                 />
               ))}
-              {dayBookings.map((b) => {
+              {(() => {
+                const laidOut = layoutOverlaps(dayBookings);
+                return laidOut.map((b) => {
                 const top = topPercent(b.startsAt);
-                const height = eventHeightPx(b.startsAt, b.endsAt);
+                const height = cappedEventHeightPx(laidOut, b);
+                const widthPct = 100 / b.totalCols;
                 return (
                   <Link
                     key={b.id}
                     href={`/dashboard/bookings/${b.id}`}
                     onClick={() => trackDashboardCalendarEventOpen({ bookingId: b.id })}
-                    className={`absolute left-2 right-2 z-20 flex min-h-11 flex-col justify-center overflow-hidden rounded border px-2 py-1 text-sm transition-opacity active:opacity-80 ${STATUS_BG[b.status]}`}
-                    style={{ top: `${top}%`, height }}
+                    className={`absolute z-20 flex flex-col justify-center overflow-hidden rounded-md border px-2 py-1 text-sm shadow-sm transition-[opacity,box-shadow] hover:z-30 hover:shadow-md active:opacity-80 ${STATUS_BG[b.status]}`}
+                    style={{
+                      top: `${top}%`,
+                      height,
+                      left: `calc(${b.col * widthPct}% + 0.5rem)`,
+                      width: `calc(${widthPct}% - ${b.totalCols > 1 ? "0.25rem" : "1rem"})`,
+                    }}
                   >
                     <p className="truncate font-medium">{b.clientName}</p>
                     <p className="truncate opacity-75">
@@ -389,7 +390,8 @@ export default function CalendarPage() {
                     </p>
                   </Link>
                 );
-              })}
+                });
+              })()}
             </div>
           </div>
         </div>
@@ -467,23 +469,32 @@ export default function CalendarPage() {
                       })()
                     : null}
 
-                  {columnBookings.map((b) => {
+                  {(() => {
+                    const laidOut = layoutOverlaps(columnBookings);
+                    return laidOut.map((b) => {
                     const top = topPercent(b.startsAt);
-                    const height = eventHeightPx(b.startsAt, b.endsAt);
+                    const height = cappedEventHeightPx(laidOut, b);
+                    const widthPct = 100 / b.totalCols;
                     return (
                       <Link
                         key={b.id}
                         href={`/dashboard/bookings/${b.id}`}
                         onClick={() => trackDashboardCalendarEventOpen({ bookingId: b.id })}
-                        className={`absolute left-1 right-1 z-20 flex min-h-11 flex-col justify-center overflow-hidden rounded border px-1.5 py-1 text-xs transition-opacity hover:opacity-80 ${STATUS_BG[b.status]}`}
-                        style={{ top: `${top}%`, height }}
+                        className={`absolute z-20 flex flex-col justify-center overflow-hidden rounded-md border px-1.5 py-1 text-xs shadow-sm transition-[box-shadow] hover:z-30 hover:shadow-md ${STATUS_BG[b.status]}`}
+                        style={{
+                          top: `${top}%`,
+                          height,
+                          left: `calc(${b.col * widthPct}% + 0.25rem)`,
+                          width: `calc(${widthPct}% - ${b.totalCols > 1 ? "0.125rem" : "0.5rem"})`,
+                        }}
                         title={`${b.clientName} · ${b.serviceName}`}
                       >
                         <p className="truncate font-medium">{b.clientName}</p>
                         <p className="truncate opacity-75">{b.serviceName}</p>
                       </Link>
                     );
-                  })}
+                    });
+                  })()}
                 </div>
               );
             })}
