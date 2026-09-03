@@ -92,6 +92,8 @@ export async function getMergedSlotsForStaff({
   const dayEndUtc = fromZonedTime(endOfDay(localDate), timezone);
 
   const merged = new Map<string, SlotWithStaff>();
+  let staffSkippedForCapacity = 0;
+  let staffSkippedForClosure = 0;
 
   for (const staffId of staffIds) {
     if (dailyCapacity != null) {
@@ -109,6 +111,7 @@ export async function getMergedSlotsForStaff({
         );
 
       if (capacityRow && Number(capacityRow.value) >= dailyCapacity) {
+        staffSkippedForCapacity++;
         continue;
       }
     }
@@ -133,8 +136,14 @@ export async function getMergedSlotsForStaff({
         getActiveReservationsForStaff(staffId, dayStartUtc, dayEndUtc, sessionToken),
       ]);
 
-    if (!staffMember?.isActive) continue;
-    if (isStaffClosedOnDate({ date, staffAvailability, overrides })) continue;
+    if (!staffMember?.isActive) {
+      staffSkippedForClosure++;
+      continue;
+    }
+    if (isStaffClosedOnDate({ date, staffAvailability, overrides })) {
+      staffSkippedForClosure++;
+      continue;
+    }
 
     const blockedReservations = reservations.map((r) => ({
       startsAt: r.startsAt,
@@ -169,9 +178,16 @@ export async function getMergedSlotsForStaff({
     (a, b) => a.startUtc.getTime() - b.startUtc.getTime(),
   );
 
+  // Only report a specific reason when it actually explains why every
+  // eligible staff member produced zero slots — a mix of reasons (or plain
+  // "fully booked within normal hours") should fall through to the caller's
+  // generic empty state instead of claiming a cause that isn't accurate.
+  const allStaffAtCapacity = staffIds.length > 0 && staffSkippedForCapacity === staffIds.length;
+  const allStaffClosed = staffIds.length > 0 && staffSkippedForClosure === staffIds.length;
+
   return {
     slots,
-    closed: false,
-    capacityReached: slots.length === 0 && staffIds.length > 0,
+    closed: slots.length === 0 && allStaffClosed,
+    capacityReached: slots.length === 0 && allStaffAtCapacity,
   };
 }
