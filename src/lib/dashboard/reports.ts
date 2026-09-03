@@ -118,9 +118,23 @@ export async function getReportsDashboardOverview(
   const { endUtc, startUtc } = rangeBounds(range, timezone);
   const weeks = weekBounds(now, timezone);
   const hasBookingSource = await hasPublicColumn("bookings", "source").catch(() => false);
-  const localPaymentDate = sql<string>`to_char(${payments.createdAt} AT TIME ZONE ${timezone}, 'YYYY-MM-DD')`;
-  const localPaymentWeekday = sql<number>`extract(dow from ${payments.createdAt} AT TIME ZONE ${timezone})::int`;
-  const localBookingHour = sql<number>`extract(hour from ${bookings.startsAt} AT TIME ZONE ${timezone})::int`;
+  // Aliased so GROUP BY/ORDER BY can reference the output column name instead of
+  // repeating the raw expression — reusing the same sql`` template in multiple
+  // clauses re-parameterizes `timezone` separately each time, which Postgres
+  // then rejects ("must appear in the GROUP BY clause") since it can't prove
+  // two independently-parameterized expressions are identical.
+  const localPaymentDate = sql<string>`to_char(${payments.createdAt} AT TIME ZONE ${timezone}, 'YYYY-MM-DD')`.as(
+    "local_payment_date",
+  );
+  const localPaymentWeekday = sql<number>`extract(dow from ${payments.createdAt} AT TIME ZONE ${timezone})::int`.as(
+    "local_payment_weekday",
+  );
+  const localBookingHour = sql<number>`extract(hour from ${bookings.startsAt} AT TIME ZONE ${timezone})::int`.as(
+    "local_booking_hour",
+  );
+  const localPaymentDateRef = sql`local_payment_date`;
+  const localPaymentWeekdayRef = sql`local_payment_weekday`;
+  const localBookingHourRef = sql`local_booking_hour`;
   const bookingRange = and(
     eq(bookings.businessId, businessId),
     gte(bookings.startsAt, startUtc),
@@ -259,8 +273,8 @@ export async function getReportsDashboardOverview(
         .from(payments)
         .innerJoin(bookings, eq(bookings.id, payments.bookingId))
         .where(paymentRange)
-        .groupBy(localPaymentDate)
-        .orderBy(localPaymentDate),
+        .groupBy(localPaymentDateRef)
+        .orderBy(localPaymentDateRef),
       [] as Array<{ date: string; value: number }>,
     ),
     safeReportQuery(
@@ -277,7 +291,7 @@ export async function getReportsDashboardOverview(
           gte(payments.createdAt, weeks.currentStartUtc),
           lt(payments.createdAt, weeks.currentEndUtc),
         ))
-        .groupBy(localPaymentWeekday),
+        .groupBy(localPaymentWeekdayRef),
       [] as Array<{ dayIndex: number; revenue: number }>,
     ),
     safeReportQuery(
@@ -294,7 +308,7 @@ export async function getReportsDashboardOverview(
           gte(payments.createdAt, weeks.previousStartUtc),
           lt(payments.createdAt, weeks.currentStartUtc),
         ))
-        .groupBy(localPaymentWeekday),
+        .groupBy(localPaymentWeekdayRef),
       [] as Array<{ dayIndex: number; revenue: number }>,
     ),
     safeReportQuery(
@@ -305,7 +319,7 @@ export async function getReportsDashboardOverview(
         })
         .from(bookings)
         .where(bookingRange)
-        .groupBy(localBookingHour)
+        .groupBy(localBookingHourRef)
         .orderBy(desc(count(bookings.id)))
         .limit(8),
       [] as Array<{ hour: number; value: number }>,
