@@ -13,7 +13,7 @@ export function AuthSplitShell({ children }: Props) {
 
       <div className="flex w-full flex-col lg:w-1/2">
         <div className="absolute left-2 top-2 p-6 md:left-4 md:top-4 md:p-10">
-          <Logo href="/" size="lg" short />
+          <Logo href="/" size="lg" />
         </div>
 
         <div className="flex flex-1 items-center justify-center p-6 pb-10 pt-24 md:p-10 md:pt-28">
