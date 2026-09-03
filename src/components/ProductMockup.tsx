@@ -582,28 +582,30 @@ function DemoFrame({
   reduceMotion: boolean;
 }) {
   return (
-    <div
-      className="relative aspect-[16/10] min-h-[300px] overflow-hidden rounded-2xl border border-border bg-white transition-[box-shadow] duration-700 ease-out dark:bg-white"
-      style={{
-        boxShadow: `0 18px 52px -14px color-mix(in srgb, ${accent} 45%, transparent), 0 0 0 1px color-mix(in srgb, ${accent} 18%, transparent)`,
-      }}
-    >
-      <div className="absolute inset-0">{children}</div>
+    <div className="rounded-[28px] transition-[background-color,padding] duration-700 ease-out dark:bg-neutral-900 dark:p-3 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+      <div
+        className="relative aspect-[16/10] min-h-[300px] overflow-hidden rounded-2xl border border-border bg-white transition-[box-shadow] duration-700 ease-out dark:border-transparent dark:bg-white"
+        style={{
+          boxShadow: `0 18px 52px -14px color-mix(in srgb, ${accent} 45%, transparent), 0 0 0 1px color-mix(in srgb, ${accent} 18%, transparent)`,
+        }}
+      >
+        <div className="absolute inset-0">{children}</div>
 
-      {/* Film-strip progress — fills while this brand is on screen */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[3px] bg-black/5 dark:bg-white/10">
-        {playing && !reduceMotion ? (
-          <motion.div
-            key={sceneKey}
-            className="h-full origin-left"
-            style={{ backgroundColor: accent }}
-            initial={{ scaleX: 0 }}
-            animate={{ scaleX: 1 }}
-            transition={{ duration: PERSONA_ROTATE_MS / 1000, ease: "linear" }}
-          />
-        ) : (
-          <div className="h-full w-0" style={{ backgroundColor: accent }} />
-        )}
+        {/* Film-strip progress — fills while this brand is on screen */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[3px] bg-black/5 dark:bg-white/10">
+          {playing && !reduceMotion ? (
+            <motion.div
+              key={sceneKey}
+              className="h-full origin-left"
+              style={{ backgroundColor: accent }}
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: 1 }}
+              transition={{ duration: PERSONA_ROTATE_MS / 1000, ease: "linear" }}
+            />
+          ) : (
+            <div className="h-full w-0" style={{ backgroundColor: accent }} />
+          )}
+        </div>
       </div>
     </div>
   );
