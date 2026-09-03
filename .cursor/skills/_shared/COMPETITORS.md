@@ -2,18 +2,23 @@
 
 ## Local booking competitors
 
-| Player | Their angle | Dinaya wedge |
-|--------|-------------|--------------|
-| OrderNow Bookings | Broad verticals, 500+ businesses | Sharper positioning + concierge onboarding |
-| Servio.lk | Consumer marketplace, no-account booking | Link-first public pages + Deals discovery |
-| Linking.lk | App + directory | Simple shareable link everywhere |
-| Glamr / BeauTech / Bookr | Beauty ops, POS, payroll | SL-local, web-link-first, PayHere, growth workflows |
+| Player | Their angle | Verified scale (2026-08-07) | Dinaya wedge |
+|--------|-------------|------------------------------|--------------|
+| OrderNow Bookings | Broad verticals, salon-focused | **Real incumbent** — site claims "500+ Salons Use Us" (salon-specific, not just total businesses) | Sharper positioning + concierge onboarding. This is the main one to actually beat. |
+| Servio.lk | Consumer marketplace, no-account booking | **Not a functioning competitor yet** — homepage/search UI exists but its search API calls `http://localhost:4000/api/search`, which fails (`ERR_CONNECTION_REFUSED`) from production. No listings are actually browsable; likely an early/unfinished build, not a live marketplace with real salon inventory. | Low urgency — re-check periodically in case they ship a working backend. |
+| Linking.lk | App + directory | Not verified | Simple shareable link everywhere |
+| Glamr / BeauTech / Bookr | Beauty ops, POS, payroll | Not verified | SL-local, web-link-first, PayHere, growth workflows |
 
-## Global tools (not primary competitors)
+## Global tools
 
-| Player | Gap vs Dinaya |
-|--------|---------------|
-| Calendly / Fresha / Booksy | Not built for SL payments, WhatsApp habits, local setup |
+| Player | Gap vs Dinaya | Verified scale (2026-08-07) |
+|--------|---------------|------------------------------|
+| Fresha | Not built for SL-specific setup/workflows, but customers there already tolerate non-LKR payment — the "wrong currency" gap is smaller than assumed | **Thin but real presence** — Fresha's own SL landing pages show ~25 hair salons / 32 pros nationally, ~20 beauty salons in Colombo (4.0★ avg, ~4,385 reviews). Mostly Colombo. Not dominant, but a live, not hypothetical, competitor there. |
+| Calendly / Booksy | Not built for SL payments, WhatsApp habits, local setup | Not verified in SL |
+
+## Takeaway
+
+The local market is more open than this doc previously implied: Servio.lk is effectively non-functional, and Fresha's actual SL footprint is small. **OrderNow is the one real, proven-scale competitor** — competitive energy should go there, not toward "going global" or over-indexing on Fresha.
 
 ## Ticketing (events expansion)
 
