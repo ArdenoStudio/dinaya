@@ -165,13 +165,18 @@ const mockDays: DayCell[] = [
 /** Visual scale for the landing demo (~20% larger). */
 const DEMO_SCALE = 1.2;
 
-function demoAccentStyle(accent: string): CSSProperties {
+function demoAccentStyle(accent: string, isDark = false): CSSProperties {
   return {
     ["--demo-accent" as string]: accent,
     /* Former “white” chrome → bold brand colour */
     ["--demo-surface" as string]: accent,
     ["--demo-surface-deep" as string]: `color-mix(in srgb, ${accent} 82%, black)`,
-    ["--demo-canvas" as string]: "#ffffff",
+    ["--demo-canvas" as string]: isDark ? "#18181b" : "#ffffff",
+    ["--demo-chrome" as string]: isDark ? "#18181b" : "#ffffff",
+    ["--demo-chrome-text" as string]: isDark ? "#e4e4e7" : "#374151",
+    ["--demo-chrome-text-muted" as string]: isDark ? "#a1a1aa" : "#4b5563",
+    ["--demo-chrome-pill" as string]: isDark ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.9)",
+    ["--demo-chrome-pill-border" as string]: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.05)",
     ["--demo-accent-soft" as string]: `color-mix(in srgb, ${accent} 22%, transparent)`,
     ["--demo-accent-ring" as string]: `color-mix(in srgb, ${accent} 55%, white)`,
     ["--demo-slot" as string]: "rgba(255,255,255,0.14)",
@@ -237,13 +242,22 @@ function CalendarDay({ cell }: { cell: DayCell }) {
 }
 
 function BackPill({ label, onAccent = false }: { label: string; onAccent?: boolean }) {
+  if (onAccent) {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full border border-white/25 bg-white/15 px-2.5 py-1 text-[10px] font-medium text-white shadow-sm backdrop-blur-sm">
+        <Icon name="chevron-left" className="text-[8px]" />
+        {label}
+      </span>
+    );
+  }
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-medium shadow-sm backdrop-blur-sm ${
-        onAccent
-          ? "border border-white/25 bg-white/15 text-white"
-          : "border border-black/5 bg-white/90 text-gray-700"
-      }`}
+      className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-medium shadow-sm backdrop-blur-sm"
+      style={{
+        border: "1px solid var(--demo-chrome-pill-border)",
+        backgroundColor: "var(--demo-chrome-pill)",
+        color: "var(--demo-chrome-text)",
+      }}
     >
       <Icon name="chevron-left" className="text-[8px]" />
       {label}
@@ -252,13 +266,21 @@ function BackPill({ label, onAccent = false }: { label: string; onAccent?: boole
 }
 
 function CategoryPill({ label, onAccent = false }: { label: string; onAccent?: boolean }) {
+  if (onAccent) {
+    return (
+      <span className="inline-flex max-w-[9rem] shrink-0 items-center truncate rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-[10px] font-medium text-white/90">
+        {label}
+      </span>
+    );
+  }
   return (
     <span
-      className={`inline-flex max-w-[9rem] shrink-0 items-center truncate rounded-full px-2 py-0.5 text-[10px] font-medium ${
-        onAccent
-          ? "border border-white/20 bg-white/10 text-white/90"
-          : "border border-black/5 bg-white/70 text-gray-600"
-      }`}
+      className="inline-flex max-w-[9rem] shrink-0 items-center truncate rounded-full px-2 py-0.5 text-[10px] font-medium"
+      style={{
+        border: "1px solid var(--demo-chrome-pill-border)",
+        backgroundColor: "color-mix(in srgb, var(--demo-chrome-pill) 78%, transparent)",
+        color: "var(--demo-chrome-text-muted)",
+      }}
     >
       {label}
     </span>
@@ -301,10 +323,12 @@ function PhoneDateTimeScreen({
   persona,
   selectedSlot,
   onSelectSlot,
+  isDark = false,
 }: {
   persona: PersonaData;
   selectedSlot: number;
   onSelectSlot: (index: number) => void;
+  isDark?: boolean;
 }) {
   const selectedService = persona.services.find((s) => s.selected)!;
   const selectedTime = persona.slots[selectedSlot]?.label ?? persona.slots[0].label;
@@ -312,7 +336,7 @@ function PhoneDateTimeScreen({
   return (
     <div
       className="flex h-full w-full flex-col transition-[background-color] duration-500 ease-out"
-      style={{ ...demoAccentStyle(persona.accent), backgroundColor: "var(--demo-canvas)" }}
+      style={{ ...demoAccentStyle(persona.accent, isDark), backgroundColor: "var(--demo-canvas)" }}
     >
       <div
         className="px-[14px] pb-3 pt-[58px] transition-[background-color] duration-500 ease-out"
@@ -433,18 +457,20 @@ function CustomerBookingDesktop({
   persona,
   selectedSlot,
   onSelectSlot,
+  isDark = false,
 }: {
   persona: PersonaData;
   selectedSlot: number;
   onSelectSlot: (index: number) => void;
+  isDark?: boolean;
 }) {
   const selectedService = persona.services.find((s) => s.selected)!;
   const selectedTime = persona.slots[selectedSlot]?.label ?? persona.slots[0].label;
 
   return (
     <div
-      className="flex h-full flex-col overflow-hidden bg-white p-4 sm:p-5"
-      style={demoAccentStyle(persona.accent)}
+      className="flex h-full flex-col overflow-hidden p-4 transition-[background-color] duration-500 ease-out sm:p-5"
+      style={{ ...demoAccentStyle(persona.accent, isDark), backgroundColor: "var(--demo-chrome)" }}
     >
       <div className="mb-3 shrink-0">
         <BookingContextNav backLabel="All services" categoryLabel={persona.categoryName} />
@@ -582,30 +608,28 @@ function DemoFrame({
   reduceMotion: boolean;
 }) {
   return (
-    <div className="rounded-[28px] transition-[background-color,padding] duration-700 ease-out dark:bg-neutral-900 dark:p-3 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
-      <div
-        className="relative aspect-[16/10] min-h-[300px] overflow-hidden rounded-2xl border border-border bg-white transition-[box-shadow] duration-700 ease-out dark:border-transparent dark:bg-white"
-        style={{
-          boxShadow: `0 18px 52px -14px color-mix(in srgb, ${accent} 45%, transparent), 0 0 0 1px color-mix(in srgb, ${accent} 18%, transparent)`,
-        }}
-      >
-        <div className="absolute inset-0">{children}</div>
+    <div
+      className="relative aspect-[16/10] min-h-[300px] overflow-hidden rounded-2xl border border-border bg-white transition-[box-shadow,background-color] duration-700 ease-out dark:border-white/10 dark:bg-neutral-900"
+      style={{
+        boxShadow: `0 18px 52px -14px color-mix(in srgb, ${accent} 45%, transparent), 0 0 0 1px color-mix(in srgb, ${accent} 18%, transparent)`,
+      }}
+    >
+      <div className="absolute inset-0">{children}</div>
 
-        {/* Film-strip progress — fills while this brand is on screen */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[3px] bg-black/5 dark:bg-white/10">
-          {playing && !reduceMotion ? (
-            <motion.div
-              key={sceneKey}
-              className="h-full origin-left"
-              style={{ backgroundColor: accent }}
-              initial={{ scaleX: 0 }}
-              animate={{ scaleX: 1 }}
-              transition={{ duration: PERSONA_ROTATE_MS / 1000, ease: "linear" }}
-            />
-          ) : (
-            <div className="h-full w-0" style={{ backgroundColor: accent }} />
-          )}
-        </div>
+      {/* Film-strip progress — fills while this brand is on screen */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[3px] bg-black/5 dark:bg-white/10">
+        {playing && !reduceMotion ? (
+          <motion.div
+            key={sceneKey}
+            className="h-full origin-left"
+            style={{ backgroundColor: accent }}
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: 1 }}
+            transition={{ duration: PERSONA_ROTATE_MS / 1000, ease: "linear" }}
+          />
+        ) : (
+          <div className="h-full w-0" style={{ backgroundColor: accent }} />
+        )}
       </div>
     </div>
   );
@@ -701,6 +725,7 @@ export default function ProductMockup({
   const reduceMotion = useReducedMotion();
   useEffect(() => setMounted(true), []);
   const screenBg = mounted && resolvedTheme === "dark" ? "#000000" : "#f4f4f5";
+  const isDark = mounted && resolvedTheme === "dark";
   const persona = personas[personaIndex] ?? personas[0];
   const isHero = variant === "hero";
   const playing = !reduceMotion && !hoverPaused;
@@ -760,6 +785,7 @@ export default function ProductMockup({
               persona={persona}
               selectedSlot={selectedSlot}
               onSelectSlot={setSelectedSlot}
+              isDark={isDark}
             />
           </IPhoneMockup>
         </div>
@@ -879,6 +905,7 @@ export default function ProductMockup({
                   persona={persona}
                   selectedSlot={selectedSlot}
                   onSelectSlot={setSelectedSlot}
+                  isDark={isDark}
                 />
               </motion.div>
             </AnimatePresence>
