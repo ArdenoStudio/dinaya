@@ -302,10 +302,14 @@ export function DashboardShell({
           footer={accountFooter}
           collapsedFooter={collapsedAccountFooter}
           defaultOpen={tabletCollapsedDefault}
-          onItemSelect={(href) => {
-            trackDashboardNavClick({ href, surface: "sidebar" });
-            navigation?.navigate?.(href);
-          }}
+          onItemSelect={
+            navigation?.navigate
+              ? (href) => {
+                  trackDashboardNavClick({ href, surface: "sidebar" });
+                  navigation.navigate?.(href);
+                }
+              : undefined
+          }
         >
           <header className={cn("sticky top-0 z-20 border-b", dashboardChromeClass)}>
             <div className="flex h-14 items-center gap-3 px-4 sm:px-6 lg:px-8">
