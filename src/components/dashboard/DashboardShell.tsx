@@ -286,7 +286,7 @@ export function DashboardShell({
         </Link>
       ) : null}
 
-      <div data-dashboard-shell-inert className="min-h-0 flex-1">
+      <div data-dashboard-shell-inert className="flex min-h-0 flex-1 flex-col">
         <MacOSSidebar
           activeHref={activeHref}
           sections={sidebarSections}
