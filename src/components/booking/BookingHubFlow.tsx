@@ -349,7 +349,7 @@ export function BookingHubFlow({
       {flowBody}
       {showHub && !hideBranding ? (
         <div className="mt-3 flex justify-center px-4 pb-[max(1rem,env(safe-area-inset-bottom))] md:mt-4 md:px-0">
-          <BookingBranding copy={copy} />
+          <BookingBranding copy={copy} businessSlug={business.slug} />
         </div>
       ) : null}
     </div>

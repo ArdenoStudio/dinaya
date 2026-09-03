@@ -15,6 +15,8 @@ import { getBookingCopy } from "@/lib/i18n";
 import { buildBookingShareText, buildWhatsAppShareUrl } from "@/lib/booking-share";
 import { Icon } from "@/components/ui/Icon";
 import { hasPublicColumn } from "@/lib/dashboard/db-compat";
+import BookingBranding from "@/components/booking/BookingBranding";
+import { canUseFeature, resolveEffectivePlan } from "@/lib/plan";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -42,6 +44,9 @@ export default async function BookingConfirmedPage({ params, searchParams }: Pro
       businessTimezone: businesses.timezone,
       cancellationPolicy: businesses.cancellationPolicy,
       depositPolicy: businesses.depositPolicy,
+      businessPlan: businesses.plan,
+      businessPlanExpiresAt: businesses.planExpiresAt,
+      businessHideDinayaBranding: businesses.hideDinayaBranding,
       serviceName: services.name,
       ...(includeSuccessRedirect ? { successRedirectUrl: services.successRedirectUrl } : {}),
       staffName: staff.name,
@@ -56,6 +61,14 @@ export default async function BookingConfirmedPage({ params, searchParams }: Pro
 
   const copy = getBookingCopy(booking.businessLanguage);
   const timezone = booking.businessTimezone ?? "Asia/Colombo";
+
+  const effectivePlan = resolveEffectivePlan({
+    storedPlan: booking.businessPlan,
+    planExpiresAt: booking.businessPlanExpiresAt,
+  });
+  const hideBranding = Boolean(
+    booking.businessHideDinayaBranding && canUseFeature(effectivePlan, "publicBookingPageCustomization"),
+  );
 
   const [existingReview] = await db
     .select({ id: reviews.id })
@@ -219,6 +232,12 @@ export default async function BookingConfirmedPage({ params, searchParams }: Pro
           >
             ← {copy.backToBooking}
           </Link>
+
+          {!hideBranding && (
+            <div className="mt-5 flex justify-center">
+              <BookingBranding copy={copy} businessSlug={slug} />
+            </div>
+          )}
         </div>
 
         {isConfirmed && !existingReview ? (

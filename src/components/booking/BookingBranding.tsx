@@ -20,15 +20,17 @@ function DinayaMark({ size = 12 }: { size?: number }) {
 interface Props {
   copy: BookingCopy;
   hideBranding?: boolean;
+  businessSlug?: string;
 }
 
-export default function BookingBranding({ copy, hideBranding = false }: Props) {
+export default function BookingBranding({ copy, hideBranding = false, businessSlug }: Props) {
   if (hideBranding) return null;
+  const href = businessSlug
+    ? `/register?ref=${encodeURIComponent(businessSlug)}&utm_source=powered_by&utm_medium=booking_badge`
+    : "https://dinaya.lk";
   return (
     <Link
-      href="https://dinaya.lk"
-      target="_blank"
-      rel="noopener noreferrer"
+      href={href}
       className="inline-flex items-center gap-2 rounded-full border border-border/80 bg-white px-3.5 py-1.5 text-xs text-muted-foreground shadow-sm transition-colors hover:border-border hover:bg-white hover:text-foreground dark:border-neutral-700 dark:bg-neutral-900 dark:hover:bg-neutral-900"
     >
       <span>{copy.poweredBy}</span>
