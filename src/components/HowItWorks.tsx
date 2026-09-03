@@ -89,8 +89,8 @@ export function HowItWorks() {
               { icon: "phone",        label: "Client books on your page",        color: "bg-blue-600" },
               { icon: "credit-card",  label: "Payment collected automatically",  color: "bg-green-500" },
               { icon: "bell",         label: "You get an instant notification",  color: "bg-blue-600" },
-              { icon: "check-circle", label: "Appointment confirmed",            color: "bg-emerald-50 dark:bg-emerald-950/40" },
-              { icon: "star",         label: "Review request sent after visit",  color: "bg-amber-50 dark:bg-amber-950/40" },
+              { icon: "check-circle", label: "Appointment confirmed",            color: "bg-emerald-500" },
+              { icon: "star",         label: "Review request sent after visit",  color: "bg-amber-500" },
             ].map(({ icon, label, color }, i) => (
               <li key={i} className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
                 <span className={`flex size-6 shrink-0 items-center justify-center rounded-full ${color}`}>
@@ -142,7 +142,7 @@ export function HowItWorks() {
                 <OrbitNode
                   key="confirmed"
                   icon="bi-check-circle"
-                  badgeBg="bg-emerald-50 dark:bg-emerald-950/40"
+                  badgeBg="bg-emerald-500"
                   badgeIcon="bi-check-lg"
                   badgeLabel="Confirmed"
                   pingDelay="6s"
@@ -151,7 +151,7 @@ export function HowItWorks() {
                 <OrbitNode
                   key="review"
                   icon="bi-star"
-                  badgeBg="bg-amber-50 dark:bg-amber-950/40"
+                  badgeBg="bg-amber-500"
                   badgeIcon="bi-star"
                   badgeLabel="Review sent"
                   pingDelay="1s"
