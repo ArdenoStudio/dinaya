@@ -125,7 +125,10 @@ export default function CalendarPage() {
   );
 
   const rangeStart = view === "week" ? weekStart : selectedDay;
-  const rangeEnd = view === "week" ? addDays(weekStart, 7) : addDays(selectedDay, 1);
+  const rangeEnd = useMemo(
+    () => (view === "week" ? addDays(weekStart, 7) : addDays(selectedDay, 1)),
+    [view, weekStart, selectedDay],
+  );
 
   useEffect(() => {
     setLoading(true);
