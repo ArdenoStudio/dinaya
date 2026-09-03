@@ -7,12 +7,21 @@ import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader"
 import { DataTable } from "@/components/dashboard/DataTable";
 import { EmptyState } from "@/components/dashboard/EmptyState";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
-import { dashboardPageClass, dashboardPrimaryActionClass } from "@/lib/dashboard-ui";
+import { dashboardOutlineActionClass, dashboardPageClass, dashboardPrimaryActionClass } from "@/lib/dashboard-ui";
 import { CreditCard } from "lucide-react";
 
-export default async function PaymentsPage() {
+export default async function PaymentsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ cursor?: string }>;
+}) {
   const { businessId } = await requireOwner();
-  const { rows } = await getPaymentsDashboardList(businessId, { limit: 100 });
+  const { cursor: cursorParam } = await searchParams;
+  const cursor = cursorParam ? new Date(cursorParam) : null;
+  const { rows, hasMore, nextCursor } = await getPaymentsDashboardList(businessId, {
+    limit: 100,
+    cursor: cursor && !Number.isNaN(cursor.getTime()) ? cursor : null,
+  });
 
   return (
     <ProGate businessId={businessId} feature="payments">
@@ -69,6 +78,17 @@ export default async function PaymentsPage() {
             },
           ]}
         />
+
+        {hasMore && nextCursor ? (
+          <div className="flex justify-center pt-2">
+            <Link
+              href={`/dashboard/payments?cursor=${encodeURIComponent(nextCursor)}`}
+              className={dashboardOutlineActionClass}
+            >
+              Next page →
+            </Link>
+          </div>
+        ) : null}
       </div>
     </ProGate>
   );

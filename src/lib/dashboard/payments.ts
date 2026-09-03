@@ -1,4 +1,4 @@
-import { and, count, desc, eq, ilike, or, sql } from "drizzle-orm";
+import { and, count, desc, eq, ilike, lt, or, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { bookings, locations, payments, services, staff } from "@/db/schema";
 
@@ -12,6 +12,8 @@ export type DashboardPaymentsListOptions = {
   limit?: number;
   q?: string;
   status?: DashboardPaymentStatusFilter;
+  /** Only include payments created before this timestamp — for "next page" cursor pagination. */
+  cursor?: Date | null;
 };
 
 export type DashboardPaymentsList = Awaited<ReturnType<typeof getPaymentsDashboardList>>;
@@ -40,6 +42,7 @@ export async function getPaymentsDashboardList(
   const filters = [
     ...baseFilters,
     ...(status ? [eq(payments.status, status)] : []),
+    ...(options.cursor ? [lt(payments.createdAt, options.cursor)] : []),
     ...(query
       ? [
           or(
@@ -89,9 +92,12 @@ export async function getPaymentsDashboardList(
       .leftJoin(locations, eq(bookings.locationId, locations.id))
       .where(and(...filters))
       .orderBy(desc(payments.createdAt))
-      .limit(limit),
+      .limit(limit + 1),
   ]);
   const summary = summaryRows[0];
+  const hasMore = rows.length > limit;
+  const page = hasMore ? rows.slice(0, limit) : rows;
+  const nextCursor = hasMore ? (page[page.length - 1]?.createdAt.toISOString() ?? null) : null;
 
   return {
     filters: {
@@ -99,7 +105,9 @@ export async function getPaymentsDashboardList(
       q: query,
       status: options.status ?? "all",
     },
-    rows: rows.map((row) => ({
+    hasMore,
+    nextCursor,
+    rows: page.map((row) => ({
       amountLkr: row.amountLkr,
       bookingId: row.bookingId,
       bookingStatus: row.bookingStatus,
