@@ -242,7 +242,7 @@ function BackPill({ label, onAccent = false }: { label: string; onAccent?: boole
       className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-medium shadow-sm backdrop-blur-sm ${
         onAccent
           ? "border border-white/25 bg-white/15 text-white"
-          : "border border-black/5 bg-white/90 text-foreground/70"
+          : "border border-black/5 bg-white/90 text-gray-700"
       }`}
     >
       <Icon name="chevron-left" className="text-[8px]" />
@@ -257,7 +257,7 @@ function CategoryPill({ label, onAccent = false }: { label: string; onAccent?: b
       className={`inline-flex max-w-[9rem] shrink-0 items-center truncate rounded-full px-2 py-0.5 text-[10px] font-medium ${
         onAccent
           ? "border border-white/20 bg-white/10 text-white/90"
-          : "border border-black/5 bg-white/70 text-foreground/60"
+          : "border border-black/5 bg-white/70 text-gray-600"
       }`}
     >
       {label}
