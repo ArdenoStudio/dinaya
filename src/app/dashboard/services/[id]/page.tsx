@@ -2,6 +2,8 @@
 
 import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
+import * as Dialog from "@radix-ui/react-dialog";
+import { ConfirmDialog } from "@/components/dashboard/ConfirmDialog";
 import { IntakeQuestionsEditor } from "@/components/dashboard/IntakeQuestionsEditor";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
 import { DashboardSection } from "@/components/dashboard/DashboardSection";
@@ -51,6 +53,8 @@ export default function EditServicePage({ params }: { params: Promise<{ id: stri
   const [allStaff, setAllStaff] = useState<StaffMember[]>([]);
   const [assignedStaffIds, setAssignedStaffIds] = useState<string[]>([]);
   const [savingStaff, setSavingStaff] = useState(false);
+  const [forceDeactivateError, setForceDeactivateError] = useState<string | null>(null);
+  const [forcingDeactivate, setForcingDeactivate] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -99,21 +103,10 @@ export default function EditServicePage({ params }: { params: Promise<{ id: stri
     });
     if (!res.ok) {
       const d = await res.json();
-      if (res.status === 409 && form.isActive === false && window.confirm(d.error)) {
-        const forced = await fetch(`/api/dashboard/services/${id}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            ...form,
-            dailyCapacity: form.dailyCapacity === "" ? null : Number(form.dailyCapacity),
-            maximumAdvanceDays: form.maximumAdvanceDays || null,
-            forceDeactivate: true,
-          }),
-        });
-        if (forced.ok) {
-          router.push("/dashboard/services");
-          return;
-        }
+      if (res.status === 409 && form.isActive === false) {
+        setForceDeactivateError(d.error ?? "This service has upcoming bookings.");
+        setSaving(false);
+        return;
       }
       setError(d.error ?? "Error saving");
       setSaving(false);
@@ -122,8 +115,30 @@ export default function EditServicePage({ params }: { params: Promise<{ id: stri
     router.push("/dashboard/services");
   }
 
+  async function handleForceDeactivate() {
+    if (!form) return;
+    setForcingDeactivate(true);
+    const forced = await fetch(`/api/dashboard/services/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...form,
+        dailyCapacity: form.dailyCapacity === "" ? null : Number(form.dailyCapacity),
+        maximumAdvanceDays: form.maximumAdvanceDays || null,
+        forceDeactivate: true,
+      }),
+    });
+    setForcingDeactivate(false);
+    setForceDeactivateError(null);
+    if (forced.ok) {
+      router.push("/dashboard/services");
+    } else {
+      const d = await forced.json();
+      setError(d.error ?? "Error saving");
+    }
+  }
+
   async function handleDelete() {
-    if (!confirm("Delete this service? This cannot be undone.")) return;
     setDeleting(true);
     await fetch(`/api/dashboard/services/${id}`, { method: "DELETE" });
     router.push("/dashboard/services");
@@ -155,14 +170,21 @@ export default function EditServicePage({ params }: { params: Promise<{ id: stri
         backHref="/dashboard/services"
         backLabel="Services"
         actions={
-          <button
-            type="button"
-            onClick={handleDelete}
-            disabled={deleting}
-            className="text-sm text-destructive hover:underline disabled:opacity-50"
-          >
-            {deleting ? "Deleting…" : "Delete service"}
-          </button>
+          <ConfirmDialog
+            title="Delete service"
+            description="Delete this service? This cannot be undone."
+            confirmLabel="Delete"
+            onConfirm={handleDelete}
+            trigger={
+              <button
+                type="button"
+                disabled={deleting}
+                className="text-sm text-destructive hover:underline disabled:opacity-50"
+              >
+                {deleting ? "Deleting…" : "Delete service"}
+              </button>
+            }
+          />
         }
       />
 
@@ -361,6 +383,34 @@ export default function EditServicePage({ params }: { params: Promise<{ id: stri
           </button>
         )}
       </DashboardSection>
+
+      <Dialog.Root
+        open={forceDeactivateError !== null}
+        onOpenChange={(open) => !open && setForceDeactivateError(null)}
+      >
+        <Dialog.Portal>
+          <Dialog.Overlay className="fixed inset-0 z-40 bg-black/25" />
+          <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-[min(28rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 rounded-lg border bg-card border-border/60 p-5 shadow-xl">
+            <Dialog.Title className="text-base font-semibold">Deactivate service</Dialog.Title>
+            <Dialog.Description className="mt-2 text-sm leading-6 text-muted-foreground">
+              {forceDeactivateError}
+            </Dialog.Description>
+            <div className="mt-5 flex justify-end gap-2">
+              <Dialog.Close className="rounded-md border px-3 py-2 text-sm font-medium transition-colors hover:bg-muted">
+                Cancel
+              </Dialog.Close>
+              <button
+                type="button"
+                disabled={forcingDeactivate}
+                onClick={() => void handleForceDeactivate()}
+                className="rounded-md bg-red-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
+              >
+                {forcingDeactivate ? "Deactivating…" : "Deactivate anyway"}
+              </button>
+            </div>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
     </div>
   );
 }
