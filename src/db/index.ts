@@ -4,14 +4,19 @@ import * as schema from "./schema";
 
 type Db = PostgresJsDatabase<typeof schema>;
 
-let _db: Db | null = null;
+// Cached on `globalThis` (not a plain module-level variable) so the client and
+// its connection pool survive Next.js dev-mode module re-evaluation (Fast
+// Refresh / Turbopack HMR). A module-level singleton gets reset on every
+// reload, which silently opens a fresh pool each time and leaks connections
+// until the database's max-connections limit is hit.
+const globalForDb = globalThis as unknown as { _db?: Db };
 
 function getDb(): Db {
-  if (!_db) {
+  if (!globalForDb._db) {
     const client = postgres(process.env.DATABASE_URL!, { prepare: false });
-    _db = drizzle(client, { schema });
+    globalForDb._db = drizzle(client, { schema });
   }
-  return _db;
+  return globalForDb._db;
 }
 
 export const db: Db = new Proxy({} as Db, {
