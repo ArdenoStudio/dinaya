@@ -84,6 +84,7 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
         showToast({
           title: "Could not load client",
           description: "Check your connection and try again.",
+          variant: "error",
         });
       });
   }, [id, showToast]);
@@ -104,12 +105,14 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
         showToast({
           title: "Could not save client",
           description: "Try again or refresh the page.",
+          variant: "error",
         });
       }
     } catch {
       showToast({
         title: "Could not save client",
         description: "Check your connection and try again.",
+        variant: "error",
       });
     } finally {
       setSaving(false);
@@ -134,12 +137,14 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
         showToast({
           title: "Could not add note",
           description: "Try again in a moment.",
+          variant: "error",
         });
       }
     } catch {
       showToast({
         title: "Could not add note",
         description: "Check your connection and try again.",
+        variant: "error",
       });
     } finally {
       setAddingNote(false);

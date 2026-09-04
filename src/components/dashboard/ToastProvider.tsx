@@ -2,11 +2,16 @@
 
 import * as Toast from "@radix-ui/react-toast";
 import { createContext, useCallback, useContext, useMemo, useState } from "react";
+import { AlertCircle, CheckCircle2 } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+type ToastVariant = "success" | "error";
 
 type ToastMessage = {
   description?: string;
   id: number;
   title: string;
+  variant?: ToastVariant;
 };
 
 type ToastContextValue = {
@@ -27,24 +32,37 @@ export function DashboardToastProvider({ children }: { children: React.ReactNode
   return (
     <Toast.Provider swipeDirection="right">
       <ToastContext.Provider value={value}>{children}</ToastContext.Provider>
-      {messages.map((message) => (
-        <Toast.Root
-          key={message.id}
-          className="rounded-lg border bg-card border-border/60 p-4 shadow-lg"
-          onOpenChange={(open) => {
-            if (!open) {
-              setMessages((current) => current.filter((item) => item.id !== message.id));
-            }
-          }}
-        >
-          <Toast.Title className="text-sm font-semibold">{message.title}</Toast.Title>
-          {message.description && (
-            <Toast.Description className="mt-1 text-sm text-muted-foreground">
-              {message.description}
-            </Toast.Description>
-          )}
-        </Toast.Root>
-      ))}
+      {messages.map((message) => {
+        const isError = message.variant === "error";
+        const Icon = isError ? AlertCircle : CheckCircle2;
+        return (
+          <Toast.Root
+            key={message.id}
+            className={cn(
+              "flex items-start gap-2.5 rounded-lg border bg-card p-4 shadow-lg",
+              isError ? "border-destructive/30" : "border-border/60",
+            )}
+            onOpenChange={(open) => {
+              if (!open) {
+                setMessages((current) => current.filter((item) => item.id !== message.id));
+              }
+            }}
+          >
+            <Icon
+              className={cn("mt-0.5 size-4 shrink-0", isError ? "text-destructive" : "text-emerald-600 dark:text-emerald-400")}
+              aria-hidden="true"
+            />
+            <div className="min-w-0">
+              <Toast.Title className="text-sm font-semibold">{message.title}</Toast.Title>
+              {message.description && (
+                <Toast.Description className="mt-1 text-sm text-muted-foreground">
+                  {message.description}
+                </Toast.Description>
+              )}
+            </div>
+          </Toast.Root>
+        );
+      })}
       <Toast.Viewport className="fixed bottom-[calc(3.5rem+env(safe-area-inset-bottom)+0.5rem)] right-4 z-[70] flex w-[min(24rem,calc(100vw-2rem))] flex-col gap-2 md:bottom-4" />
     </Toast.Provider>
   );

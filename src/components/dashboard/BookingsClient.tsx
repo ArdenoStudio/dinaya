@@ -185,6 +185,7 @@ export function BookingsClient({ api }: { api: BookingsApi }) {
         showToast({
           title: "Could not load bookings",
           description: "Check your connection and try again.",
+          variant: "error",
         });
       });
   }, [api, tab, showToast]);
@@ -201,6 +202,7 @@ export function BookingsClient({ api }: { api: BookingsApi }) {
       showToast({
         title: "Could not load more bookings",
         description: "Check your connection and try again.",
+        variant: "error",
       });
     } finally {
       setLoadingMore(false);
@@ -218,12 +220,14 @@ export function BookingsClient({ api }: { api: BookingsApi }) {
         showToast({
           title: "Could not update booking",
           description: "Try again or refresh the page.",
+          variant: "error",
         });
       }
     } catch {
       showToast({
         title: "Could not update booking",
         description: "Check your connection and try again.",
+        variant: "error",
       });
     } finally {
       setUpdating(null);
