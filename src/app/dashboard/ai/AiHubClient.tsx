@@ -5,6 +5,7 @@ import Link from "next/link";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
 import { DashboardSection } from "@/components/dashboard/DashboardSection";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   dashboardOutlineActionClass,
   dashboardPageClass,
@@ -169,7 +170,37 @@ export default function AiHubClient() {
   }
 
   if (loading) {
-    return <p className="text-sm text-muted-foreground">Loading AI hub…</p>;
+    return (
+      <div className={dashboardPageClass}>
+        <DashboardPageHeader
+          title="AI Growth Hub"
+          description="Configure Growth AI tools per branch. Branch-level workflow controls are included."
+        />
+        <div
+          className="space-y-4"
+          aria-busy="true"
+          aria-live="polite"
+          role="status"
+        >
+          <span className="sr-only">Loading AI hub</span>
+          <Skeleton className="h-20 w-full rounded-2xl" />
+          <div className="rounded-2xl border border-border/60 bg-card p-5">
+            <Skeleton className="h-5 w-56" />
+            <Skeleton className="mt-2 h-4 w-80" />
+            <Skeleton className="mt-4 h-10 w-40 rounded-lg" />
+          </div>
+          <div className="rounded-2xl border border-border/60 bg-card p-5 space-y-3">
+            <Skeleton className="h-5 w-40" />
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="flex items-center gap-3 rounded-xl border border-border/50 px-3 py-2.5">
+                <Skeleton className="size-4 shrink-0 rounded" />
+                <Skeleton className="h-4 w-48" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
   }
 
   const messagingReadyHint = (
