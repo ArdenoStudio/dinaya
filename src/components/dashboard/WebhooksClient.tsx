@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { ConfirmDialog } from "@/components/dashboard/ConfirmDialog";
+import { DashboardLoadingPanel } from "@/components/dashboard/DashboardLoadingPanel";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
 import { DashboardSection } from "@/components/dashboard/DashboardSection";
 import { EmptyState } from "@/components/dashboard/EmptyState";
@@ -168,7 +169,7 @@ export function WebhooksClient() {
       )}
 
       {loading ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
+        <DashboardLoadingPanel rows={2} />
       ) : hooks.length === 0 ? (
         <EmptyState
           icon={Webhook}

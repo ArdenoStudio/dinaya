@@ -2,7 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { MapPin } from "lucide-react";
+import { DashboardLoadingPanel } from "@/components/dashboard/DashboardLoadingPanel";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
+import { EmptyState } from "@/components/dashboard/EmptyState";
 import { Icon } from "@/components/ui/Icon";
 import {
   dashboardErrorAlertClass,
@@ -187,11 +190,22 @@ export default function LocationsClient({ plan, locationLimit }: Props) {
       )}
 
       {loading ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
+        <DashboardLoadingPanel rows={2} />
       ) : locations.length === 0 ? (
-        <div className={cn(dashboardSurfaceClass, "p-12 text-center text-muted-foreground")}>
-          No locations yet. Add your first branch to get started.
-        </div>
+        <EmptyState
+          icon={MapPin}
+          title="No locations yet"
+          description="Add your first branch so clients can pick where to book."
+          action={
+            <button
+              type="button"
+              onClick={() => setShowForm(true)}
+              className={dashboardPrimaryActionClass}
+            >
+              <Icon name="plus" className="text-xs" /> Add location
+            </button>
+          }
+        />
       ) : (
         <div className={cn(dashboardSurfaceClass, "divide-y overflow-hidden")}>
           {locations.map((loc) => (

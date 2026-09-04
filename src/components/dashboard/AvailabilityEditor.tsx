@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import type { Staff } from "@/db/schema";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface AvailRow {
   id?: string;
@@ -177,7 +178,17 @@ export default function AvailabilityEditor({ staffList, dayNames }: Props) {
       <div className="rounded-2xl border border-border/60 bg-card dark:border-border/60 dark:bg-card p-6">
         <h2 className="font-medium mb-4">Weekly schedule</h2>
         {loading ? (
-          <p className="text-muted-foreground text-sm">Loading…</p>
+          <div className="space-y-3" aria-busy="true" aria-live="polite" role="status">
+            <span className="sr-only">Loading weekly schedule</span>
+            {dayNames.map((name) => (
+              <div key={name} className="flex items-center gap-3 rounded-xl border border-border/50 px-3 py-2.5">
+                <Skeleton className="size-4 shrink-0 rounded" />
+                <Skeleton className="h-4 w-16" />
+                <Skeleton className="ml-auto h-8 w-24 rounded-lg" />
+                <Skeleton className="h-8 w-24 rounded-lg" />
+              </div>
+            ))}
+          </div>
         ) : (
           <div className="space-y-3">
             {dayNames.map((name, day) => {
@@ -306,7 +317,12 @@ export default function AvailabilityEditor({ staffList, dayNames }: Props) {
 
         {/* Existing overrides list */}
         {overridesLoading ? (
-          <p className="text-muted-foreground text-sm">Loading…</p>
+          <div className="space-y-2" aria-busy="true" aria-live="polite" role="status">
+            <span className="sr-only">Loading date overrides</span>
+            {[1, 2].map((i) => (
+              <Skeleton key={i} className="h-11 w-full rounded-lg" />
+            ))}
+          </div>
         ) : overrides.length === 0 ? (
           <p className="text-muted-foreground text-sm">No date overrides set.</p>
         ) : (

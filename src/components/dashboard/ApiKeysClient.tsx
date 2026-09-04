@@ -1,8 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { KeyRound } from "lucide-react";
 import { ConfirmDialog } from "@/components/dashboard/ConfirmDialog";
+import { DashboardLoadingPanel } from "@/components/dashboard/DashboardLoadingPanel";
 import { DashboardSection } from "@/components/dashboard/DashboardSection";
+import { EmptyState } from "@/components/dashboard/EmptyState";
 import { API_KEY_SCOPES, type ApiKeyScope } from "@/lib/api-key-scopes";
 import {
   dashboardCardClass,
@@ -157,13 +160,17 @@ export function ApiKeysClient() {
         </form>
       </DashboardSection>
 
-      <div className={cn(dashboardCardClass, "divide-y overflow-hidden")}>
-        {loading ? (
-          <p className="p-5 text-sm text-muted-foreground">Loading…</p>
-        ) : keys.length === 0 ? (
-          <p className="p-5 text-sm text-muted-foreground">No API keys yet.</p>
-        ) : (
-          keys.map((key) => (
+      {loading ? (
+        <DashboardLoadingPanel rows={2} />
+      ) : keys.length === 0 ? (
+        <EmptyState
+          icon={KeyRound}
+          title="No API keys yet"
+          description="Generate a scoped key to connect a custom integration or the Dinaya desktop app."
+        />
+      ) : (
+        <div className={cn(dashboardCardClass, "divide-y overflow-hidden")}>
+          {keys.map((key) => (
             <div key={key.id} className="flex items-center justify-between gap-4 p-5">
               <div>
                 <p className="font-medium">{key.name}</p>
@@ -192,9 +199,9 @@ export function ApiKeysClient() {
                 />
               )}
             </div>
-          ))
-        )}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
