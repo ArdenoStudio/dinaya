@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { format } from "date-fns";
+import { Search } from "lucide-react";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
+import { EmptyState } from "@/components/dashboard/EmptyState";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { db } from "@/db";
 import { bookings, clients, services } from "@/db/schema";
@@ -20,9 +22,11 @@ export default async function DashboardSearchPage({
   if (!q) {
     return (
       <div className={dashboardPageClass}>
-        <DashboardPageHeader
-          title="Search"
-          description="Enter a search term from the header to find bookings, clients, or services."
+        <DashboardPageHeader title="Search" />
+        <EmptyState
+          icon={Search}
+          title="Search your business"
+          description="Use ⌘K (or the search bar above) to find bookings, clients, or services by name, phone, or email."
         />
       </div>
     );
