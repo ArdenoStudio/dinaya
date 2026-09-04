@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { ConfirmDialog } from "@/components/dashboard/ConfirmDialog";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { computeDiscountedPrice } from "@/lib/deals/pricing";
 import {
@@ -172,14 +173,21 @@ export function DealsClient({ initialDeals }: { initialDeals: DealRow[] }) {
                   </button>
                 )}
                 {canCancel && (
-                  <button
-                    type="button"
-                    onClick={() => cancelDeal(deal.id)}
-                    disabled={cancellingId === deal.id}
-                    className={cn(dashboardOutlineActionClass, "text-xs disabled:opacity-50")}
-                  >
-                    Cancel
-                  </button>
+                  <ConfirmDialog
+                    title="Cancel deal"
+                    description={`Cancel "${deal.serviceName}" (${deal.discountPercent}% off)? Clients will no longer be able to claim it.`}
+                    confirmLabel="Cancel deal"
+                    onConfirm={() => cancelDeal(deal.id)}
+                    trigger={
+                      <button
+                        type="button"
+                        disabled={cancellingId === deal.id}
+                        className={cn(dashboardOutlineActionClass, "text-xs disabled:opacity-50")}
+                      >
+                        {cancellingId === deal.id ? "Cancelling…" : "Cancel"}
+                      </button>
+                    }
+                  />
                 )}
               </div>
             </div>
