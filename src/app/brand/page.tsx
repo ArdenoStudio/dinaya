@@ -317,7 +317,7 @@ export default function BrandPage() {
               <div>
                 <p className="font-cal text-7xl tracking-tight text-gray-900 dark:text-gray-100 leading-none">Aa</p>
               </div>
-              <p className="font-cal text-base tracking-wide text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 leading-relaxed">
+              <p className="font-cal text-base tracking-wide text-gray-400 dark:text-gray-500 leading-relaxed">
                 A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
               </p>
               <p className="font-cal text-xl tracking-tight text-gray-800 dark:text-gray-200 leading-snug">
@@ -337,7 +337,7 @@ export default function BrandPage() {
               <div>
                 <p className="font-sans text-7xl font-light text-gray-900 dark:text-gray-100 leading-none">Aa</p>
               </div>
-              <p className="font-sans text-base text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 leading-relaxed tracking-wide">
+              <p className="font-sans text-base text-gray-400 dark:text-gray-500 leading-relaxed tracking-wide">
                 A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
               </p>
               <p className="font-sans text-base text-gray-700 dark:text-gray-300 leading-relaxed">

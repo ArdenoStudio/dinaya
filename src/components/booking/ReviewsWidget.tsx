@@ -24,7 +24,7 @@ export function ReviewsWidget({
           <div className="mt-1 flex items-center gap-2">
             <StarRating rating={avgRating} size="md" />
             <span className="font-semibold">{avgRating.toFixed(1)}</span>
-            <span className="text-sm text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+            <span className="text-sm text-gray-400 dark:text-gray-500">
               from {reviewCount} review{reviewCount !== 1 ? "s" : ""}
             </span>
           </div>
@@ -41,7 +41,7 @@ export function ReviewsWidget({
                 <p className="text-sm font-medium">{review.clientName}</p>
                 <StarRating rating={review.rating} />
               </div>
-              <p className="shrink-0 text-xs text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+              <p className="shrink-0 text-xs text-gray-400 dark:text-gray-500">
                 {new Date(review.createdAt).toLocaleDateString("en-LK", {
                   day: "numeric",
                   month: "short",

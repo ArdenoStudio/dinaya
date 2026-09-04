@@ -225,7 +225,7 @@ export default function SolutionsPage() {
                 <a
                   key={ind.id}
                   href={`#${ind.id}`}
-                  className="inline-flex items-center gap-2 rounded-full border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm hover:shadow-md hover:border-gray-300 dark:border-neutral-700 transition-[transform,box-shadow,border-color] duration-150 ease-out active:scale-[0.96] motion-reduce:active:scale-100"
+                  className="inline-flex items-center gap-2 rounded-full border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm hover:shadow-md hover:border-gray-300 dark:hover:border-neutral-700 transition-[transform,box-shadow,border-color] duration-150 ease-out active:scale-[0.96] motion-reduce:active:scale-100"
                 >
                   <span className={`flex h-5 w-5 items-center justify-center rounded-md ${ind.color.bg} text-white`}>
                     <Icon name={ind.icon} className="text-[10px]" />

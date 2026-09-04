@@ -56,7 +56,7 @@ export function HelpFaqSections() {
             </Link>
           </p>
           <div className="w-full max-w-xl mx-auto relative">
-            <Icon name="search" className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 text-sm pointer-events-none" />
+            <Icon name="search" className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 text-sm pointer-events-none" />
             <input
               type="text"
               value={search}
@@ -80,7 +80,7 @@ export function HelpFaqSections() {
 
       {!search && (
         <section className="max-w-4xl mx-auto px-6 py-10">
-          <h2 className="text-xs font-semibold tracking-widest uppercase text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 mb-4">
+          <h2 className="text-xs font-semibold tracking-widest uppercase text-gray-400 dark:text-gray-500 mb-4">
             Popular articles
           </h2>
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3">
@@ -91,7 +91,7 @@ export function HelpFaqSections() {
                   <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${cat.colorClasses.icon} text-white`}>
                     <Icon name={a.icon} className="text-xs" />
                   </span>
-                  <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:text-gray-100 leading-snug">{a.label}</span>
+                  <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100 leading-snug">{a.label}</span>
                   <Icon name="chevron-right" className="ml-auto text-xs text-gray-300" />
                 </>
               );
@@ -131,7 +131,7 @@ export function HelpFaqSections() {
               type="button"
               onClick={() => setActiveCategory(null)}
               className={`shrink-0 rounded-lg px-3 py-1.5 text-sm font-medium ${
-                activeCategory === null ? "bg-gray-900 text-white" : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:bg-neutral-800"
+                activeCategory === null ? "bg-gray-900 text-white" : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-neutral-800"
               }`}
             >
               All topics
@@ -145,7 +145,7 @@ export function HelpFaqSections() {
                   document.getElementById(cat.id)?.scrollIntoView({ behavior: "smooth" });
                 }}
                 className={`shrink-0 rounded-lg px-3 py-1.5 text-sm font-medium ${
-                  activeCategory === cat.id ? `${cat.colorClasses.accent} text-white` : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:bg-neutral-800"
+                  activeCategory === cat.id ? `${cat.colorClasses.accent} text-white` : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-neutral-800"
                 }`}
               >
                 {cat.label}

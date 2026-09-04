@@ -196,7 +196,7 @@ export function DocsAiActions({
                   <Icon name="chat-dots" className="text-[13px]" />
                   {provider.label}
                 </span>
-                <Icon name="arrow-up-right" className="text-[12px] text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500" />
+                <Icon name="arrow-up-right" className="text-[12px] text-gray-400 dark:text-gray-500" />
               </button>
             ))}
           </div>

@@ -210,7 +210,7 @@ function ResetPasswordForm() {
         </form>
       </div>
 
-      <p className="text-center text-sm text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-5">
+      <p className="text-center text-sm text-gray-400 dark:text-gray-500 mt-5">
         <Link href="/auth/signin" className="text-primary hover:underline font-medium">
           Back to sign in
         </Link>

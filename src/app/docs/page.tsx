@@ -83,7 +83,7 @@ export default function DocsHubPage() {
       </section>
 
       <div className="relative mb-10">
-        <Icon name="search" className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 text-sm" />
+        <Icon name="search" className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 text-sm" />
         <input
           type="search"
           value={search}
@@ -96,7 +96,7 @@ export default function DocsHubPage() {
 
       {search ? (
         <section>
-          <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 mb-4">
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-4">
             {results.length} result{results.length !== 1 ? "s" : ""}
           </h2>
           {results.length > 0 ? (
@@ -135,7 +135,7 @@ export default function DocsHubPage() {
       ) : (
         <>
           <section className="mb-12">
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 mb-4">
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-4">
               Start here
             </h2>
             <div className="grid sm:grid-cols-2 gap-3">
@@ -174,7 +174,7 @@ export default function DocsHubPage() {
           </section>
 
           <section className="mb-12" id="categories">
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 mb-4">
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-4">
               Browse by topic
             </h2>
             <div className="grid sm:grid-cols-2 gap-3">

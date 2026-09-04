@@ -28,7 +28,7 @@ const tagConfig = {
     label: "Fixed",
     badgeClass: "bg-amber-50 dark:bg-amber-950/40 text-amber-700 ring-1 ring-amber-200/80",
     iconBgClass: "bg-amber-50 dark:bg-amber-950/40 text-amber-600",
-    dotClass: "bg-amber-50 dark:bg-amber-950/400",
+    dotClass: "bg-amber-500",
   },
 } as const;
 
@@ -293,7 +293,7 @@ export default function WhatsNewPage() {
                 </Link>
                 <Link
                   href="/help"
-                  className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:text-gray-200 transition-colors px-2 py-2.5"
+                  className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors px-2 py-2.5"
                 >
                   Visit Help Centre
                   <Icon name="arrow-up-right" className="text-xs" />
@@ -327,7 +327,7 @@ export default function WhatsNewPage() {
               ))}
 
               {/* Legend */}
-              <div className="ml-auto hidden sm:flex items-center gap-4 text-xs text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
+              <div className="ml-auto hidden sm:flex items-center gap-4 text-xs text-gray-400 dark:text-gray-500">
                 <span className="flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-primary inline-block" />
                   New
@@ -398,7 +398,7 @@ export default function WhatsNewPage() {
                   </div>
 
                   {/* Section title */}
-                  <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 mb-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-4">
                     {release.highlight}
                   </p>
 
@@ -455,13 +455,13 @@ export default function WhatsNewPage() {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
-                className="py-20 text-center text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500"
+                className="py-20 text-center text-gray-400 dark:text-gray-500"
               >
                 <div className="w-12 h-12 rounded-xl bg-gray-100 dark:bg-neutral-800 flex items-center justify-center mx-auto mb-3">
-                  <Icon name="inbox" className="text-xl text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500" />
+                  <Icon name="inbox" className="text-xl text-gray-400 dark:text-gray-500" />
                 </div>
                 <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Nothing here yet</p>
-                <p className="text-xs text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-1">
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
                   Try a different filter to see updates.
                 </p>
               </motion.div>
@@ -484,7 +484,7 @@ export default function WhatsNewPage() {
             <div className="flex items-center gap-3 flex-shrink-0">
               <Link
                 href="/help"
-                className="inline-flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-neutral-800 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-4 py-2.5 rounded-lg hover:border-gray-300 dark:border-neutral-700 hover:shadow-sm transition-[transform,box-shadow,border-color] duration-150 ease-out active:scale-[0.96] motion-reduce:active:scale-100"
+                className="inline-flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-4 py-2.5 rounded-lg hover:border-gray-300 dark:hover:border-neutral-700 hover:shadow-sm transition-[transform,box-shadow,border-color] duration-150 ease-out active:scale-[0.96] motion-reduce:active:scale-100"
               >
                 <Icon name="chat-dots" className="text-xs" />
                 Contact us

@@ -25,7 +25,7 @@ export function LandingFooter() {
           {/* Brand & CTA */}
           <div className="flex flex-col mb-8 md:mb-0">
             <span className="font-cal text-3xl tracking-tight mb-5">Dinaya.lk</span>
-            <p className="text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 max-w-sm mb-8 leading-relaxed text-sm">
+            <p className="text-gray-400 dark:text-gray-500 max-w-sm mb-8 leading-relaxed text-sm">
               Online booking for Sri Lankan businesses. No WhatsApp chaos, no setup fees, no commissions.
             </p>
             <Link
@@ -116,7 +116,7 @@ export function LandingFooter() {
         <div className="flex flex-col sm:flex-row justify-between items-center gap-6 text-xs text-gray-500 dark:text-gray-400 pb-4 border-b border-white/10 mb-4">
           <div className="flex items-center gap-1.5">
             <span>© {new Date().getFullYear()} Dinaya by</span>
-            <span className="text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 hover:text-white transition-colors cursor-default">Ardeno Studio</span>
+            <span className="text-gray-400 dark:text-gray-500 hover:text-white transition-colors cursor-default">Ardeno Studio</span>
           </div>
           {/* Social Icons */}
           <div className="flex items-center gap-3">

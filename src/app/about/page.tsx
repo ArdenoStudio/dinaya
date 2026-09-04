@@ -121,7 +121,7 @@ export default function AboutPage() {
 
           <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100/60 p-8 flex flex-col gap-5">
             {[
-              { icon: "whatsapp", color: "text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500", label: "Before Dinaya", msg: "Hi are you free Thursday at 3? Actually maybe 3:30? Let me check… never mind I'll call" },
+              { icon: "whatsapp", color: "text-gray-400 dark:text-gray-500", label: "Before Dinaya", msg: "Hi are you free Thursday at 3? Actually maybe 3:30? Let me check… never mind I'll call" },
               { icon: "calendar-check", color: "text-primary", label: "After Dinaya", msg: "Booking confirmed — Thursday 3:30 PM · Deposit paid · Reminder set" },
             ].map((item) => (
               <div key={item.label} className="rounded-xl bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-800 p-5 shadow-sm">

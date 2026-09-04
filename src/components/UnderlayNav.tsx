@@ -237,7 +237,7 @@ export function UnderlayNav() {
 
                 {/* Nav links */}
                 <div>
-                  <p className="text-[0.6875rem] font-semibold tracking-[0.12em] text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase mb-4">
+                  <p className="text-[0.6875rem] font-semibold tracking-[0.12em] text-gray-400 dark:text-gray-500 uppercase mb-4">
                     Explore
                   </p>
                   <ul className="flex flex-col m-0 p-0 list-none">
@@ -255,7 +255,7 @@ export function UnderlayNav() {
                             className={[
                               "block py-2.5 text-[clamp(1.6rem,8vw,2.2rem)] font-medium",
                               "tracking-[-0.02em] leading-none transition-colors",
-                              isNavLinkActive(pathname, item) ? "text-primary" : "text-gray-900 dark:text-gray-100 hover:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500",
+                              isNavLinkActive(pathname, item) ? "text-primary" : "text-gray-900 dark:text-gray-100 hover:text-gray-400 dark:hover:text-gray-500",
                             ].join(" ")}
                           >
                             {item.label}
@@ -280,7 +280,7 @@ export function UnderlayNav() {
                   <Link
                     href="/auth/signin"
                     onClick={close}
-                    className="block text-center py-3.5 rounded-xl text-sm font-semibold border border-gray-200 dark:border-neutral-800 text-gray-700 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white dark:hover:bg-neutral-800/5 transition-colors"
+                    className="block text-center py-3.5 rounded-xl text-sm font-semibold border border-gray-200 dark:border-neutral-800 text-gray-700 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
                   >
                     Log in
                   </Link>
@@ -301,7 +301,7 @@ export function UnderlayNav() {
                   transition={{ delay: isOpen ? 0.58 : 0, duration: 0.3 }}
                 >
                   {QUICK_LINKS.map((l) => (
-                    <Link key={l.label} href={l.href} onClick={close} className="text-xs text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:text-gray-400 transition-colors">
+                    <Link key={l.label} href={l.href} onClick={close} className="text-xs text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors">
                       {l.label}
                     </Link>
                   ))}
@@ -317,7 +317,7 @@ export function UnderlayNav() {
 
                 {/* Column 1 — main nav links */}
                 <div>
-                  <p className="text-[0.6875rem] font-semibold tracking-[0.12em] text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase mb-4">
+                  <p className="text-[0.6875rem] font-semibold tracking-[0.12em] text-gray-400 dark:text-gray-500 uppercase mb-4">
                     Explore
                   </p>
                   <ul className="flex flex-col m-0 p-0 list-none">
@@ -335,7 +335,7 @@ export function UnderlayNav() {
                             className={[
                               "block py-2.5 text-[clamp(1.15rem,2.5vw,1.5rem)] font-medium",
                               "tracking-[-0.02em] leading-none transition-colors",
-                              isNavLinkActive(pathname, item) ? "text-primary" : "text-gray-900 dark:text-gray-100 hover:text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500",
+                              isNavLinkActive(pathname, item) ? "text-primary" : "text-gray-900 dark:text-gray-100 hover:text-gray-400 dark:hover:text-gray-500",
                             ].join(" ")}
                           >
                             {item.label}
@@ -349,7 +349,7 @@ export function UnderlayNav() {
 
                 {/* Column 2 — Popular Resources (Fills middle space) */}
                 <div className="hidden lg:block border-l border-gray-100 dark:border-neutral-800 pl-8">
-                  <p className="text-[0.6875rem] font-semibold tracking-[0.12em] text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase mb-4">
+                  <p className="text-[0.6875rem] font-semibold tracking-[0.12em] text-gray-400 dark:text-gray-500 uppercase mb-4">
                     Popular Guides
                   </p>
                   <div className="flex flex-col gap-6 mt-2">
@@ -452,7 +452,7 @@ function SubCol({
 }) {
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-[0.6875rem] font-semibold tracking-[0.12em] text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500 uppercase">
+      <p className="text-[0.6875rem] font-semibold tracking-[0.12em] text-gray-400 dark:text-gray-500 uppercase">
         {heading}
       </p>
       {items.map((item, i) => (
@@ -462,7 +462,7 @@ function SubCol({
           animate={isOpen ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 }}
           transition={{ delay: isOpen ? baseDelay + i * 0.05 : 0, duration: 0.45, ease: "easeOut" }}
         >
-          <Link href={item.href} onClick={onClose} className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:text-gray-100 transition-colors">
+          <Link href={item.href} onClick={onClose} className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors">
             {item.label}
           </Link>
         </motion.div>
