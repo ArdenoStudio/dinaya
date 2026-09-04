@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import type { Staff } from "@/db/schema";
 import { ConfirmDialog } from "@/components/dashboard/ConfirmDialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import { dashboardPrimaryActionClass } from "@/lib/dashboard-ui";
 
 interface AvailRow {
   id?: string;
@@ -240,8 +241,7 @@ export default function AvailabilityEditor({ staffList, dayNames }: Props) {
         )}
         {error && <p className="mt-3 rounded-md border border-destructive/20 bg-destructive/5 px-3 py-2 text-sm text-destructive">{error}</p>}
         <div className="mt-5 flex items-center gap-3">
-          <button onClick={handleSave} disabled={saving}
-            className="bg-primary text-primary-foreground px-5 py-2 rounded-md text-sm font-medium hover:bg-primary/90 disabled:opacity-50">
+          <button onClick={handleSave} disabled={saving} className={dashboardPrimaryActionClass}>
             {saving ? "Saving…" : "Save schedule"}
           </button>
           {saved && <span className="text-green-600 text-sm">Saved ✓</span>}
@@ -310,7 +310,7 @@ export default function AvailabilityEditor({ staffList, dayNames }: Props) {
           <button
             onClick={handleAddOverride}
             disabled={addingOverride || !newOverride.date}
-            className="bg-primary text-primary-foreground px-4 py-1.5 rounded-md text-sm font-medium hover:bg-primary/90 disabled:opacity-50"
+            className={dashboardPrimaryActionClass}
           >
             {addingOverride ? "Adding…" : "Add override"}
           </button>
