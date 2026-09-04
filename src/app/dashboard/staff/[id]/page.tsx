@@ -3,6 +3,7 @@
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { ConfirmDialog } from "@/components/dashboard/ConfirmDialog";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
 import {
   dashboardCardClass,
@@ -146,14 +147,21 @@ export default function EditStaffPage({ params }: { params: Promise<{ id: string
         backHref="/dashboard/staff"
         backLabel="Staff"
         actions={
-          <button
-            type="button"
-            onClick={handleDelete}
-            disabled={deleting}
-            className={cn(dashboardOutlineActionClass, "border-destructive/30 text-destructive hover:bg-destructive/5")}
-          >
-            {deleting ? "Deleting..." : "Delete"}
-          </button>
+          <ConfirmDialog
+            title="Delete team member"
+            description={`Delete ${form?.name || "this team member"}? Their past bookings stay on record, but this cannot be undone and they'll no longer be selectable for new appointments.`}
+            confirmLabel="Delete"
+            onConfirm={handleDelete}
+            trigger={
+              <button
+                type="button"
+                disabled={deleting}
+                className={cn(dashboardOutlineActionClass, "border-destructive/30 text-destructive hover:bg-destructive/5")}
+              >
+                {deleting ? "Deleting..." : "Delete"}
+              </button>
+            }
+          />
         }
       />
 
