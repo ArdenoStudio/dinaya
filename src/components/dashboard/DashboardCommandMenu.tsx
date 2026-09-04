@@ -156,6 +156,12 @@ export function DashboardCommandMenu({
     setActiveIndex(0);
   }, [query, open]);
 
+  useEffect(() => {
+    const activeKey = flatEntries[activeIndex]?.key;
+    if (!activeKey) return;
+    document.getElementById(activeKey)?.scrollIntoView({ block: "nearest" });
+  }, [activeIndex, flatEntries]);
+
   function onInputKeyDown(event: ReactKeyboardEvent<HTMLInputElement>) {
     if (event.key === "ArrowDown") {
       event.preventDefault();
