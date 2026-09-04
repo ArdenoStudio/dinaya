@@ -127,7 +127,7 @@ export function BeforeAfterToggle() {
               active === tab
                 ? tab === "with"
                   ? "text-white"
-                  : "text-gray-900 dark:text-gray-100"
+                  : "text-gray-900"
                 : "text-gray-500 dark:text-gray-400"
             }`}
           >

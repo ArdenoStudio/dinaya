@@ -86,7 +86,7 @@ export function PricingPlansShowcase({
     >
       <div className="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
         <div className="absolute inset-0 bg-[radial-gradient(100%_70%_at_50%_-15%,hsl(220_82%_53%/0.14),transparent_55%)] dark:bg-[radial-gradient(100%_70%_at_50%_-15%,hsl(220_82%_53%/0.2),transparent_55%)]" />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,hsl(220_30%_98%)_0%,transparent_40%,hsl(0_0%_100%)_100%)] dark:bg-[linear-gradient(180deg,hsl(220_20%_8%)_0%,transparent_45%,hsl(0_0%_4%)_100%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,hsl(220_30%_98%)_0%,transparent_40%,hsl(0_0%_100%)_100%)] dark:bg-[linear-gradient(180deg,hsl(240_6%_7%)_0%,transparent_45%,hsl(240_6%_7%)_100%)]" />
         <div
           className="absolute inset-0 opacity-[0.28] dark:opacity-[0.15]"
           style={{

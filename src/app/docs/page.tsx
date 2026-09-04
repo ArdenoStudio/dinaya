@@ -205,7 +205,7 @@ export default function DocsHubPage() {
                     <li key={g.slug}>
                       <Link
                         href={`/docs/guides/${g.slug}`}
-                        className="flex items-center gap-3 rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-4 py-3 shadow-sm shadow-gray-900/5 dark:shadow-black/20 transition-[box-shadow,border-color,background-color] duration-150 ease-out hover:border-primary/30 hover:bg-gray-50 dark:bg-neutral-900/60"
+                        className="flex items-center gap-3 rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-4 py-3 shadow-sm shadow-gray-900/5 dark:shadow-black/20 transition-[box-shadow,border-color,background-color] duration-150 ease-out hover:border-primary/30 hover:bg-gray-50 dark:hover:bg-neutral-900/60"
                       >
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">

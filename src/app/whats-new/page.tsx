@@ -318,7 +318,7 @@ export default function WhatsNewPage() {
                   className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-[transform,background-color,color,box-shadow] duration-200 ease-out active:scale-[0.96] motion-reduce:active:scale-100 ${
                     activeFilter === f.id
                       ? "bg-gray-900 text-white shadow-sm"
-                      : "bg-gray-100 dark:bg-neutral-800/80 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:bg-neutral-700 hover:text-gray-900 dark:text-gray-100"
+                      : "bg-gray-100 dark:bg-neutral-800/80 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-neutral-700 hover:text-gray-900 dark:hover:text-gray-100"
                   }`}
                 >
                   <Icon name={f.icon} className="text-[11px]" />

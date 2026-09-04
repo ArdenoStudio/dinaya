@@ -161,12 +161,12 @@ export function UnderlayNav() {
           >
             <span className="flex flex-col gap-[0.3em] w-[1rem]" aria-hidden="true">
               <motion.span
-                className="h-[1.5px] w-full bg-gray-900 dark:bg-gray-100 dark:bg-neutral-800 rounded-full origin-center"
+                className="h-[1.5px] w-full bg-gray-900 dark:bg-gray-100 rounded-full origin-center"
                 animate={isOpen ? { y: "0.265em", rotate: 45 } : { y: 0, rotate: 0 }}
                 transition={{ duration: 0.5, ease: BACK_OUT }}
               />
               <motion.span
-                className="h-[1.5px] w-full bg-gray-900 dark:bg-gray-100 dark:bg-neutral-800 rounded-full origin-center"
+                className="h-[1.5px] w-full bg-gray-900 dark:bg-gray-100 rounded-full origin-center"
                 animate={isOpen ? { y: "-0.265em", rotate: -45 } : { y: 0, rotate: 0 }}
                 transition={{ duration: 0.5, ease: BACK_OUT }}
               />

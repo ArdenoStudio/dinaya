@@ -70,7 +70,7 @@ export default async function AdminLayout({
       </aside>
 
       <div className="min-w-0">
-        <header className="sticky top-0 z-20 border-b bg-white dark:border-neutral-800 dark:bg-neutral-900/95 dark:border-neutral-800 dark:bg-neutral-950/95 backdrop-blur dark:border-neutral-800 dark:bg-neutral-950/95">
+        <header className="sticky top-0 z-20 border-b bg-white/95 backdrop-blur dark:border-neutral-800 dark:bg-neutral-950/95">
           <div className="flex h-16 items-center gap-3 px-4 sm:px-6 lg:px-8">
             <AdminThemeToggle />
             <details className="group lg:hidden">
