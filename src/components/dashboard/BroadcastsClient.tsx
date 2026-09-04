@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { Megaphone, Send } from "lucide-react";
+import { DashboardLoadingPanel } from "@/components/dashboard/DashboardLoadingPanel";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
 import { DashboardSection } from "@/components/dashboard/DashboardSection";
+import { DataTable, type DataTableColumn } from "@/components/dashboard/DataTable";
 import { EmptyState } from "@/components/dashboard/EmptyState";
 import {
-  dashboardCardClass,
   dashboardInputClass,
   dashboardLabelClass,
   dashboardPageClass,
@@ -237,7 +238,7 @@ export function BroadcastsClient() {
       </DashboardSection>
 
       {loading ? (
-        <p className="text-sm text-muted-foreground">Loading broadcasts…</p>
+        <DashboardLoadingPanel rows={3} />
       ) : rows.length === 0 ? (
         <EmptyState
           icon={Megaphone}
@@ -245,35 +246,47 @@ export function BroadcastsClient() {
           description="Send your first campaign to re-engage clients or announce a promotion."
         />
       ) : (
-        <div className={cn(dashboardCardClass, "overflow-hidden")}>
-          <table className="min-w-full text-sm">
-            <thead className="border-b bg-muted/40 text-left">
-              <tr>
-                <th className="px-4 py-3 font-medium">Campaign</th>
-                <th className="px-4 py-3 font-medium">Audience</th>
-                <th className="px-4 py-3 font-medium">Channel</th>
-                <th className="px-4 py-3 font-medium">Results</th>
-                <th className="px-4 py-3 font-medium">Sent</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {rows.map((row) => (
-                <tr key={row.id}>
-                  <td className="px-4 py-3 font-medium">{row.name}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{audienceLabel(row)}</td>
-                  <td className="px-4 py-3 capitalize">{row.channel}</td>
-                  <td className="px-4 py-3">
-                    {row.sentCount} sent · {row.skippedCount} skipped · {row.failedCount} failed
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground">
-                    {row.sentAt ? new Date(row.sentAt).toLocaleString() : "—"}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <DataTable
+          columns={broadcastColumns}
+          rows={rows}
+          getRowId={(row) => row.id}
+          mobileCard={(row) => (
+            <div key={row.id} className="rounded-2xl border border-border/80 bg-card p-4 shadow-sm">
+              <div className="flex items-center justify-between gap-3">
+                <p className="font-medium">{row.name}</p>
+                <span className="shrink-0 text-xs capitalize text-muted-foreground">{row.channel}</span>
+              </div>
+              <p className="mt-1 text-sm text-muted-foreground">{audienceLabel(row)}</p>
+              <p className="mt-2 text-sm">
+                {row.sentCount} sent · {row.skippedCount} skipped · {row.failedCount} failed
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {row.sentAt ? new Date(row.sentAt).toLocaleString() : "Not sent"}
+              </p>
+            </div>
+          )}
+        />
       )}
     </div>
   );
 }
+
+const broadcastColumns: DataTableColumn<BroadcastRow>[] = [
+  { key: "name", header: "Campaign", render: (row) => <span className="font-medium">{row.name}</span> },
+  { key: "audience", header: "Audience", render: (row) => <span className="text-muted-foreground">{audienceLabel(row)}</span> },
+  { key: "channel", header: "Channel", render: (row) => <span className="capitalize">{row.channel}</span> },
+  {
+    key: "results",
+    header: "Results",
+    render: (row) => `${row.sentCount} sent · ${row.skippedCount} skipped · ${row.failedCount} failed`,
+  },
+  {
+    key: "sentAt",
+    header: "Sent",
+    render: (row) => (
+      <span className="text-muted-foreground">
+        {row.sentAt ? new Date(row.sentAt).toLocaleString() : "—"}
+      </span>
+    ),
+  },
+];
