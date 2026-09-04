@@ -92,6 +92,8 @@ export function DashboardCommandMenu({
     });
   }, [items, query]);
 
+  const trimmedQuery = query.trim();
+
   function go(href: string) {
     onOpenChange(false);
     if (onNavigate) {
@@ -136,8 +138,33 @@ export function DashboardCommandMenu({
             </kbd>
           </div>
           <div className="max-h-[min(24rem,50vh)] overflow-y-auto p-2">
+            {trimmedQuery ? (
+              <div className="mb-2">
+                <ul className="space-y-0.5">
+                  <li>
+                    <button
+                      type="button"
+                      onClick={() => go(`/dashboard/search?q=${encodeURIComponent(trimmedQuery)}`)}
+                      className={cn(
+                        "flex min-h-11 w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm transition-colors",
+                        "hover:bg-primary/5 hover:text-foreground focus-visible:bg-primary/5 focus-visible:outline-none",
+                      )}
+                    >
+                      <span className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                        <Search className="size-4" aria-hidden="true" />
+                      </span>
+                      <span className="min-w-0 flex-1 truncate">
+                        Search bookings, clients &amp; services for <span className="font-semibold">&ldquo;{trimmedQuery}&rdquo;</span>
+                      </span>
+                    </button>
+                  </li>
+                </ul>
+              </div>
+            ) : null}
             {groups.length === 0 ? (
-              <p className="px-3 py-8 text-center text-sm text-muted-foreground">No matches.</p>
+              trimmedQuery ? null : (
+                <p className="px-3 py-8 text-center text-sm text-muted-foreground">No matches.</p>
+              )
             ) : (
               groups.map(([group, groupItems]) => (
                 <div key={group} className="mb-2 last:mb-0">
