@@ -37,7 +37,7 @@ export function BookingPagePreviewPanel({
     >
       <div className="relative z-10 mb-3 flex items-center justify-between gap-3">
         <div>
-          <h2 className="font-semibold text-foreground">Live preview</h2>
+          <h2 className="font-cal text-base tracking-tight text-foreground">Live preview</h2>
           <p className="text-xs text-muted-foreground">Updates as you edit</p>
         </div>
         <Link

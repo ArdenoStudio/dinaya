@@ -62,7 +62,7 @@ export default function HolidaysEditor() {
 
   return (
     <div className="rounded-2xl border border-border/60 bg-card p-5">
-      <h2 className="mb-1 font-semibold">Business holidays</h2>
+      <h2 className="mb-1 font-cal text-lg tracking-tight">Business holidays</h2>
       <p className="mb-4 text-sm text-muted-foreground">
         Block public holidays or set special hours for the whole business.
       </p>

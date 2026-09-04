@@ -83,7 +83,7 @@ export function AnalyticsCharts({
       {/* Revenue area chart */}
       <div className="rounded-xl border bg-card border-border/60 p-5 lg:col-span-2">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-semibold">Revenue this week vs last week</h2>
+          <h2 className="font-cal text-base tracking-tight">Revenue this week vs last week</h2>
           <div className="flex items-center gap-4 text-xs text-muted-foreground">
             <span className="flex items-center gap-1.5">
               <span className="inline-block size-2 rounded-full bg-primary" />
@@ -142,7 +142,7 @@ export function AnalyticsCharts({
 
       {/* Services by revenue */}
       <div className="rounded-xl border bg-card border-border/60 p-5">
-        <h2 className="mb-4 font-semibold">Bookings by service (revenue)</h2>
+        <h2 className="mb-4 font-cal text-base tracking-tight">Bookings by service (revenue)</h2>
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={revenueByService} layout="vertical" margin={{ left: 8, right: 16 }}>
@@ -174,7 +174,7 @@ export function AnalyticsCharts({
 
       {/* Busiest hours */}
       <div className="rounded-xl border bg-card border-border/60 p-5">
-        <h2 className="mb-4 font-semibold">Busiest hours</h2>
+        <h2 className="mb-4 font-cal text-base tracking-tight">Busiest hours</h2>
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={busiestHours}>
@@ -195,7 +195,7 @@ export function AnalyticsCharts({
 
       {/* Booking health donut */}
       <div className="rounded-xl border bg-card border-border/60 p-5">
-        <h2 className="mb-4 font-semibold">Booking health</h2>
+        <h2 className="mb-4 font-cal text-base tracking-tight">Booking health</h2>
         <div className="h-52">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
@@ -245,7 +245,7 @@ export function AnalyticsCharts({
 
       {/* Top clients with fill bars */}
       <div className="rounded-xl border bg-card border-border/60 p-5">
-        <h2 className="mb-4 font-semibold">Top clients by spend</h2>
+        <h2 className="mb-4 font-cal text-base tracking-tight">Top clients by spend</h2>
         {topClients.length === 0 ? (
           <p className="text-sm text-muted-foreground">No paid bookings yet.</p>
         ) : (

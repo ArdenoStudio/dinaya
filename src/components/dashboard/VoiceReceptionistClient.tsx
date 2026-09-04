@@ -182,7 +182,7 @@ export function VoiceReceptionistClient() {
         <div className={cn(dashboardCardClass, "p-5")}>
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <h2 className="flex items-center gap-2 font-semibold">
+              <h2 className="flex items-center gap-2 font-cal text-base tracking-tight">
                 <PhoneCall className="size-4 text-primary" aria-hidden="true" />
                 Call setup
               </h2>
@@ -240,7 +240,7 @@ export function VoiceReceptionistClient() {
         </div>
 
         <div className={cn(dashboardCardClass, "p-5")}>
-          <h2 className="font-semibold">Conversation rules</h2>
+          <h2 className="font-cal text-base tracking-tight">Conversation rules</h2>
           <div className="mt-4 grid gap-4">
             {[
               ["welcomeMessage", "Welcome message"],
@@ -277,7 +277,7 @@ export function VoiceReceptionistClient() {
 
       <aside className="space-y-4">
         <div className={cn(dashboardCardClass, "p-5")}>
-          <h2 className="flex items-center gap-2 font-semibold">
+          <h2 className="flex items-center gap-2 font-cal text-base tracking-tight">
             <ShieldCheck className="size-4 text-primary" aria-hidden="true" />
             Provider handoff
           </h2>
@@ -316,7 +316,7 @@ export function VoiceReceptionistClient() {
         </div>
 
         <div className={cn(dashboardCardClass, "p-5")}>
-          <h2 className="flex items-center gap-2 font-semibold">
+          <h2 className="flex items-center gap-2 font-cal text-base tracking-tight">
             <KeyRound className="size-4 text-primary" aria-hidden="true" />
             Voice API key
           </h2>

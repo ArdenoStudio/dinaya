@@ -71,7 +71,7 @@ export function DirectorySettings() {
     <form onSubmit={handleSave} className="rounded-xl border bg-card border-border/60 p-5">
       <div className="mb-4 flex items-start justify-between gap-4">
         <div>
-          <h2 className="font-semibold">Dinaya Directory</h2>
+          <h2 className="font-cal text-base tracking-tight">Dinaya Directory</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Opt in to be discovered on <Link href="/discover" className="text-primary hover:underline">dinaya.lk/discover</Link>. Free, no commission.
           </p>

@@ -177,7 +177,7 @@ export default function AvailabilityEditor({ staffList, dayNames }: Props) {
 
       {/* Weekly schedule */}
       <div className="rounded-2xl border border-border/60 bg-card dark:border-border/60 dark:bg-card p-6">
-        <h2 className="font-medium mb-4">Weekly schedule</h2>
+        <h2 className="font-cal text-lg tracking-tight mb-4">Weekly schedule</h2>
         {loading ? (
           <div className="space-y-3" aria-busy="true" aria-live="polite" role="status">
             <span className="sr-only">Loading weekly schedule</span>
@@ -250,7 +250,7 @@ export default function AvailabilityEditor({ staffList, dayNames }: Props) {
 
       {/* Date overrides */}
       <div className="rounded-2xl border border-border/60 bg-card dark:border-border/60 dark:bg-card p-6">
-        <h2 className="font-medium mb-1">Date overrides</h2>
+        <h2 className="font-cal text-lg tracking-tight mb-1">Date overrides</h2>
         <p className="text-xs text-muted-foreground mb-4">Block a holiday or set custom hours for a specific date.</p>
 
         {/* Add override form */}

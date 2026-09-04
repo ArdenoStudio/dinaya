@@ -30,7 +30,7 @@ export function ReferralSettings({
   return (
     <div className="rounded-xl border bg-card border-border/60 p-5 space-y-5">
       <div>
-        <h2 className="font-semibold">Referrals</h2>
+        <h2 className="font-cal text-base tracking-tight">Referrals</h2>
         <p className="mt-1 text-sm text-muted-foreground">
           Share tracked links so you know when bookings come from referrals, WhatsApp, or Instagram.
         </p>

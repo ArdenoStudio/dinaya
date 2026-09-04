@@ -125,7 +125,7 @@ export function CustomDomainPanel({
     <div className="rounded-xl border bg-card border-border/60 p-5 space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="font-semibold">Custom domain</h2>
+          <h2 className="font-cal text-base tracking-tight">Custom domain</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Use a branded booking domain such as book.yoursalon.lk. Pro plan required.
           </p>
