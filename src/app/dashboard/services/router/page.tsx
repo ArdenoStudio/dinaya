@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
+import { Skeleton } from "@/components/ui/skeleton";
 import { MAX_ROUTER_OPTIONS, type BookingRouter, type BookingRouterOption } from "@/lib/booking-router";
 import {
   dashboardErrorAlertClass,
@@ -79,10 +80,6 @@ export default function BookingRouterPage() {
     setTimeout(() => setSaved(false), 2000);
   }
 
-  if (loading) {
-    return <div className={cn(dashboardPageClass, "text-sm text-muted-foreground")}>Loading…</div>;
-  }
-
   return (
     <div className={dashboardPageClass}>
       <DashboardPageHeader
@@ -98,7 +95,18 @@ export default function BookingRouterPage() {
         }
       />
 
-      {services.length === 0 ? (
+      {loading ? (
+        <div className="max-w-lg space-y-4 rounded-3xl border border-black/[0.06] bg-card p-5 dark:border-white/[0.08]">
+          <Skeleton className="h-5 w-64" />
+          <Skeleton className="h-10 w-full rounded-lg" />
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-20" />
+            {[1, 2].map((i) => (
+              <Skeleton key={i} className="h-10 w-full rounded-lg" />
+            ))}
+          </div>
+        </div>
+      ) : services.length === 0 ? (
         <div className={cn(dashboardSurfaceClass, "max-w-lg p-6 text-sm text-muted-foreground")}>
           Add at least one service first, then come back to set up routing.
         </div>
