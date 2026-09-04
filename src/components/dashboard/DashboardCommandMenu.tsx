@@ -2,7 +2,7 @@
 
 import * as Dialog from "@radix-ui/react-dialog";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from "react";
 import {
   CalendarPlus,
   Search,
@@ -22,6 +22,14 @@ type CommandItem = {
   keywords?: string;
 };
 
+type FlatEntry = {
+  href: string;
+  label: ReactNode;
+  group: string;
+  icon: LucideIcon;
+  key: string;
+};
+
 type DashboardCommandMenuProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -38,6 +46,7 @@ export function DashboardCommandMenu({
   const role = useDashboardRole();
   const isOwner = role === "owner";
   const [query, setQuery] = useState("");
+  const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
     if (!open) setQuery("");
@@ -114,6 +123,53 @@ export function DashboardCommandMenu({
     return Array.from(map.entries());
   }, [filtered]);
 
+  const flatEntries = useMemo<FlatEntry[]>(() => {
+    const entries: FlatEntry[] = [];
+    if (trimmedQuery) {
+      entries.push({
+        href: `/dashboard/search?q=${encodeURIComponent(trimmedQuery)}`,
+        label: (
+          <>
+            Search bookings, clients &amp; services for <span className="font-semibold">&ldquo;{trimmedQuery}&rdquo;</span>
+          </>
+        ),
+        group: "Search",
+        icon: Search,
+        key: "search-fallback",
+      });
+    }
+    for (const [group, groupItems] of groups) {
+      for (const item of groupItems) {
+        entries.push({
+          href: item.href,
+          label: item.label,
+          group,
+          icon: item.icon,
+          key: `${group}-${item.href}-${item.label}`,
+        });
+      }
+    }
+    return entries;
+  }, [groups, trimmedQuery]);
+
+  useEffect(() => {
+    setActiveIndex(0);
+  }, [query, open]);
+
+  function onInputKeyDown(event: ReactKeyboardEvent<HTMLInputElement>) {
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setActiveIndex((current) => (flatEntries.length ? (current + 1) % flatEntries.length : 0));
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setActiveIndex((current) => (flatEntries.length ? (current - 1 + flatEntries.length) % flatEntries.length : 0));
+    } else if (event.key === "Enter") {
+      event.preventDefault();
+      const active = flatEntries[activeIndex];
+      if (active) go(active.href);
+    }
+  }
+
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
@@ -129,72 +185,71 @@ export function DashboardCommandMenu({
               autoFocus
               value={query}
               onChange={(event) => setQuery(event.target.value)}
+              onKeyDown={onInputKeyDown}
               placeholder="Jump to a page or action…"
               className="h-12 w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
               aria-label="Filter commands"
+              role="combobox"
+              aria-expanded="true"
+              aria-controls="dashboard-command-list"
+              aria-activedescendant={flatEntries[activeIndex]?.key}
             />
             <kbd className="hidden rounded-md border border-border px-1.5 py-0.5 text-[10px] text-muted-foreground sm:inline">
               ESC
             </kbd>
           </div>
-          <div className="max-h-[min(24rem,50vh)] overflow-y-auto p-2">
-            {trimmedQuery ? (
-              <div className="mb-2">
-                <ul className="space-y-0.5">
-                  <li>
-                    <button
-                      type="button"
-                      onClick={() => go(`/dashboard/search?q=${encodeURIComponent(trimmedQuery)}`)}
-                      className={cn(
-                        "flex min-h-11 w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm transition-colors",
-                        "hover:bg-primary/5 hover:text-foreground focus-visible:bg-primary/5 focus-visible:outline-none",
-                      )}
-                    >
-                      <span className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                        <Search className="size-4" aria-hidden="true" />
-                      </span>
-                      <span className="min-w-0 flex-1 truncate">
-                        Search bookings, clients &amp; services for <span className="font-semibold">&ldquo;{trimmedQuery}&rdquo;</span>
-                      </span>
-                    </button>
-                  </li>
-                </ul>
-              </div>
-            ) : null}
-            {groups.length === 0 ? (
-              trimmedQuery ? null : (
-                <p className="px-3 py-8 text-center text-sm text-muted-foreground">No matches.</p>
-              )
+          <div id="dashboard-command-list" role="listbox" className="max-h-[min(24rem,50vh)] overflow-y-auto p-2">
+            {flatEntries.length === 0 ? (
+              <p className="px-3 py-8 text-center text-sm text-muted-foreground">No matches.</p>
             ) : (
-              groups.map(([group, groupItems]) => (
-                <div key={group} className="mb-2 last:mb-0">
-                  <p className="px-2 py-1.5 text-[0.68rem] font-semibold uppercase tracking-wider text-muted-foreground">
-                    {group}
-                  </p>
-                  <ul className="space-y-0.5">
-                    {groupItems.map((item) => {
-                      const Icon = item.icon;
-                      return (
-                        <li key={`${group}-${item.href}-${item.label}`}>
-                          <button
-                            type="button"
-                            onClick={() => go(item.href)}
-                            className={cn(
-                              "flex min-h-11 w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm transition-colors",
-                              "hover:bg-primary/5 hover:text-foreground focus-visible:bg-primary/5 focus-visible:outline-none",
-                            )}
-                          >
-                            <span className="flex size-8 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-                              <Icon className="size-4" aria-hidden="true" />
-                            </span>
-                            <span className="min-w-0 flex-1 truncate font-medium">{item.label}</span>
-                          </button>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </div>
-              ))
+              (() => {
+                let runningIndex = -1;
+                const entriesByGroup = new Map<string, FlatEntry[]>();
+                for (const entry of flatEntries) {
+                  const list = entriesByGroup.get(entry.group) ?? [];
+                  list.push(entry);
+                  entriesByGroup.set(entry.group, list);
+                }
+                return Array.from(entriesByGroup.entries()).map(([group, groupEntries]) => (
+                  <div key={group} className="mb-2 last:mb-0">
+                    <p className="px-2 py-1.5 text-[0.68rem] font-semibold uppercase tracking-wider text-muted-foreground">
+                      {group}
+                    </p>
+                    <ul className="space-y-0.5">
+                      {groupEntries.map((entry) => {
+                        runningIndex += 1;
+                        const index = runningIndex;
+                        const Icon = entry.icon;
+                        const active = index === activeIndex;
+                        return (
+                          <li key={entry.key} id={entry.key} role="option" aria-selected={active}>
+                            <button
+                              type="button"
+                              onClick={() => go(entry.href)}
+                              onMouseEnter={() => setActiveIndex(index)}
+                              className={cn(
+                                "flex min-h-11 w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm transition-colors",
+                                active ? "bg-primary/5 text-foreground" : "hover:bg-primary/5 hover:text-foreground",
+                                "focus-visible:bg-primary/5 focus-visible:outline-none",
+                              )}
+                            >
+                              <span
+                                className={cn(
+                                  "flex size-8 items-center justify-center rounded-lg",
+                                  entry.group === "Search" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground",
+                                )}
+                              >
+                                <Icon className="size-4" aria-hidden="true" />
+                              </span>
+                              <span className="min-w-0 flex-1 truncate font-medium">{entry.label}</span>
+                            </button>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                ));
+              })()
             )}
           </div>
         </Dialog.Content>
