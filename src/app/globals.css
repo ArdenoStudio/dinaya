@@ -89,29 +89,32 @@ html.nav-open {
     --nav-glass-shadow-outer: rgba(0, 0, 0, 0.35);
     --gradient-color: #60a5fa;
     --sparkles-color: #ffffff;
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    /* True neutral dark palette (Apple systemGray-style — near-zero
+       saturation, elevation via lightness only), replacing the previous
+       saturated navy (222° 84%) that read as "blue" instead of black. */
+    --background: 240 6% 7%;
+    --foreground: 0 0% 95%;
+    --card: 240 5% 11%;
+    --card-foreground: 0 0% 95%;
+    --popover: 240 5% 14%;
+    --popover-foreground: 0 0% 95%;
     --primary: 220 82% 53%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 4% 16%;
+    --secondary-foreground: 0 0% 95%;
+    --muted: 240 4% 16%;
+    --muted-foreground: 240 5% 65%;
+    --accent: 240 4% 16%;
+    --accent-foreground: 0 0% 95%;
+    --destructive: 4 90% 58%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 240 4% 20%;
+    --input: 240 4% 16%;
     --ring: 220 84% 67%;
-    --dashboard-canvas: 240 6% 6%;
-    --dashboard-main: 240 5% 8%;
-    --dashboard-chrome: 240 5% 9%;
-    --dashboard-sidebar: 240 5% 9%;
+    --dashboard-canvas: 240 6% 7%;
+    --dashboard-main: 240 5% 9%;
+    --dashboard-chrome: 240 5% 11%;
+    --dashboard-sidebar: 240 5% 11%;
   }
 }
 
