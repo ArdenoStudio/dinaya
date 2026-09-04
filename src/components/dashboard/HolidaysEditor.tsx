@@ -1,7 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ConfirmDialog } from "@/components/dashboard/ConfirmDialog";
 import { Icon } from "@/components/ui/Icon";
+import { Skeleton } from "@/components/ui/skeleton";
+import { dashboardInputClass, dashboardPrimaryActionClass } from "@/lib/dashboard-ui";
+import { cn } from "@/lib/utils";
 
 type Holiday = {
   id: string;
@@ -69,7 +73,7 @@ export default function HolidaysEditor() {
           required
           value={date}
           onChange={(e) => setDate(e.target.value)}
-          className="rounded-lg border px-3 py-2 text-sm"
+          className={cn(dashboardInputClass, "mt-0")}
         />
         <input
           type="text"
@@ -77,12 +81,9 @@ export default function HolidaysEditor() {
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="e.g. Public holiday"
-          className="rounded-lg border px-3 py-2 text-sm"
+          className={cn(dashboardInputClass, "mt-0")}
         />
-        <button
-          type="submit"
-          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-        >
+        <button type="submit" className={dashboardPrimaryActionClass}>
           Add holiday
         </button>
       </form>
@@ -99,7 +100,12 @@ export default function HolidaysEditor() {
       {error ? <p className="mb-3 text-sm text-red-600">{error}</p> : null}
 
       {loading ? (
-        <p className="text-sm text-muted-foreground">Loading holidays…</p>
+        <div className="space-y-2" aria-busy="true" aria-live="polite" role="status">
+          <span className="sr-only">Loading holidays</span>
+          {[1, 2].map((i) => (
+            <Skeleton key={i} className="h-11 w-full rounded-lg" />
+          ))}
+        </div>
       ) : holidays.length === 0 ? (
         <p className="text-sm text-muted-foreground">No holidays added yet.</p>
       ) : (
@@ -118,14 +124,21 @@ export default function HolidaysEditor() {
                   </span>
                 ) : null}
               </div>
-              <button
-                type="button"
-                onClick={() => removeHoliday(holiday.id)}
-                className="text-muted-foreground hover:text-red-600"
-                aria-label="Remove holiday"
-              >
-                <Icon name="trash" className="text-sm" />
-              </button>
+              <ConfirmDialog
+                title="Remove holiday"
+                description={`Remove "${holiday.name}" (${holiday.date}) from your business holidays?`}
+                confirmLabel="Remove"
+                onConfirm={() => removeHoliday(holiday.id)}
+                trigger={
+                  <button
+                    type="button"
+                    className="text-muted-foreground hover:text-red-600"
+                    aria-label="Remove holiday"
+                  >
+                    <Icon name="trash" className="text-sm" />
+                  </button>
+                }
+              />
             </li>
           ))}
         </ul>

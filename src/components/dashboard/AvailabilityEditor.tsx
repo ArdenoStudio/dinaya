@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import type { Staff } from "@/db/schema";
+import { ConfirmDialog } from "@/components/dashboard/ConfirmDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface AvailRow {
@@ -340,12 +341,17 @@ export default function AvailabilityEditor({ staffList, dayNames }: Props) {
                   )}
                   {o.reason && <span className="ml-2 text-xs text-muted-foreground">{o.reason}</span>}
                 </div>
-                <button
-                  onClick={() => handleDeleteOverride(o.id)}
-                  className="text-xs text-muted-foreground hover:text-destructive"
-                >
-                  Remove
-                </button>
+                <ConfirmDialog
+                  title="Remove date override"
+                  description={`Remove the override for ${o.date}? Availability will fall back to the regular weekly schedule.`}
+                  confirmLabel="Remove"
+                  onConfirm={() => handleDeleteOverride(o.id)}
+                  trigger={
+                    <button className="text-xs text-muted-foreground hover:text-destructive">
+                      Remove
+                    </button>
+                  }
+                />
               </div>
             ))}
           </div>
