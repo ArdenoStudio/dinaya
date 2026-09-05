@@ -34,13 +34,11 @@ import {
 import { cn } from "@/lib/utils";
 import {
   CALENDAR_START_HOUR as START_HOUR,
-  CALENDAR_END_HOUR as END_HOUR,
   CALENDAR_TOTAL_HOURS as TOTAL_HOURS,
   CALENDAR_HOUR_HEIGHT as HOUR_HEIGHT,
   topPercent,
   layoutOverlaps,
   cappedEventHeightPx,
-  type LaidOutItem,
 } from "@/lib/calendar-layout";
 
 type StaffMember = {
@@ -75,8 +73,6 @@ const navButtonClass = cn(
   buttonVariants({ variant: "outline" }),
   "min-h-11 min-w-11 px-3",
 );
-
-type LaidOutBooking = LaidOutItem<Booking>;
 
 export default function CalendarPage() {
   const [view, setView] = useState<CalendarView>("day");
