@@ -34,7 +34,7 @@ const problems = [
 const timeline = [
   {
     period: "Q1 2024",
-    dot: "bg-amber-50 dark:bg-amber-950/400",
+    dot: "bg-amber-500",
     title: "The idea",
     desc: "Started with a simple question: why doesn't a booking tool exist that actually works for Sri Lankan businesses?",
   },
@@ -55,29 +55,6 @@ const timeline = [
     dot: "bg-blue-600",
     title: "Public launch",
     desc: "Dinaya went live. Real businesses, real bookings, and real feedback that keeps shaping the product.",
-  },
-];
-
-const principles = [
-  {
-    border: "border-l-blue-600",
-    title: "Sri Lankan by design",
-    desc: "PayHere, LKR, local language considerations — not bolted on after the fact. Built from day one for how business works here.",
-  },
-  {
-    border: "border-l-amber-500",
-    title: "Free to start",
-    desc: "Every business starts with a 14-day free trial — full access, no credit card. Premium plans exist; guilt-trips don't. You choose when and if you upgrade.",
-  },
-  {
-    border: "border-l-violet-500",
-    title: "Obsessively simple",
-    desc: "If it takes more than 5 minutes to set up, we redesign it — not the user's expectations. Simplicity is the product.",
-  },
-  {
-    border: "border-l-blue-600",
-    title: "Built in public",
-    desc: "We talk to users every week. Features are shaped by real conversations, not roadmap theatre or trend-chasing.",
   },
 ];
 
@@ -112,34 +89,36 @@ export default function OurStoryPage() {
       </section>
 
       {/* The Problem */}
-      <section className="max-w-6xl mx-auto px-6 pb-20 border-t pt-20">
-        <div className="mb-10">
-          <span className="relative text-sm font-semibold tracking-tight text-primary">
-            <span className="absolute top-0.5 -left-3 h-4 w-[3px] rounded-r-sm bg-primary" />
-            The problem
-          </span>
-          <h2 className="font-cal text-3xl md:text-4xl tracking-tight mt-3 max-w-2xl">
-            Running a business in Sri Lanka shouldn&apos;t mean living in your WhatsApp inbox.
-          </h2>
-        </div>
+      <div className="bg-gray-50/80 dark:bg-neutral-900/40 border-y border-gray-100 dark:border-neutral-800/60">
+        <section className="max-w-6xl mx-auto px-6 py-20">
+          <div className="mb-10">
+            <span className="relative text-sm font-semibold tracking-tight text-primary">
+              <span className="absolute top-0.5 -left-3 h-4 w-[3px] rounded-r-sm bg-primary" />
+              The problem
+            </span>
+            <h2 className="font-cal text-3xl md:text-4xl tracking-tight mt-3 max-w-2xl">
+              Running a business in Sri Lanka shouldn&apos;t mean living in your WhatsApp inbox.
+            </h2>
+          </div>
 
-        <div className="grid md:grid-cols-3 gap-px bg-gray-200 dark:bg-neutral-700/70 rounded-2xl overflow-hidden border border-gray-200 dark:border-neutral-800/70">
-          {problems.map((p) => (
-            <div key={p.title} className="bg-white dark:bg-neutral-900 p-8 hover:bg-gray-50 dark:hover:bg-neutral-800/80 transition-colors">
-              <div className="mb-5 inline-flex">
-                <div className="flex items-center justify-center size-11 rounded-xl bg-gray-100 dark:bg-neutral-800 text-gray-500 dark:text-gray-400">
-                  <Icon name={p.icon} className="text-[1.1rem]" />
+          <div className="grid md:grid-cols-3 gap-px bg-gray-200 dark:bg-neutral-700/70 rounded-2xl overflow-hidden border border-gray-200 dark:border-neutral-800/70">
+            {problems.map((p) => (
+              <div key={p.title} className="bg-white dark:bg-neutral-900 p-8 hover:bg-gray-50 dark:hover:bg-neutral-800/80 transition-colors">
+                <div className="mb-5 inline-flex">
+                  <div className="flex items-center justify-center size-11 rounded-xl bg-gray-100 dark:bg-neutral-800 text-gray-500 dark:text-gray-400">
+                    <Icon name={p.icon} className="text-[1.1rem]" />
+                  </div>
                 </div>
+                <h3 className="font-cal text-lg tracking-tight mb-2">{p.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{p.desc}</p>
               </div>
-              <h3 className="font-cal text-lg tracking-tight mb-2">{p.title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{p.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
+      </div>
 
       {/* The Spark */}
-      <section className="max-w-6xl mx-auto px-6 pb-20 border-t pt-20">
+      <section className="max-w-6xl mx-auto px-6 py-20">
         <div className="grid md:grid-cols-2 gap-16 items-start">
           <div>
             <span className="relative text-sm font-semibold tracking-tight text-primary">
@@ -195,90 +174,43 @@ export default function OurStoryPage() {
       </section>
 
       {/* Timeline */}
-      <section className="max-w-6xl mx-auto px-6 pb-20 border-t pt-20">
-        <div className="mb-12">
-          <span className="relative text-sm font-semibold tracking-tight text-primary">
-            <span className="absolute top-0.5 -left-3 h-4 w-[3px] rounded-r-sm bg-primary" />
-            The journey
-          </span>
-          <h2 className="font-cal text-3xl md:text-4xl tracking-tight mt-3 max-w-2xl">
-            From a WhatsApp screenshot to a product used by real businesses.
-          </h2>
-        </div>
+      <div className="bg-gradient-to-b from-blue-50/50 to-transparent dark:from-blue-950/10 dark:to-transparent">
+        <section className="max-w-6xl mx-auto px-6 py-20">
+          <div className="mb-12">
+            <span className="relative text-sm font-semibold tracking-tight text-primary">
+              <span className="absolute top-0.5 -left-3 h-4 w-[3px] rounded-r-sm bg-primary" />
+              The journey
+            </span>
+            <h2 className="font-cal text-3xl md:text-4xl tracking-tight mt-3 max-w-2xl">
+              From a WhatsApp screenshot to a product used by real businesses.
+            </h2>
+          </div>
 
-        <div className="max-w-2xl relative pl-8 border-l-2 border-gray-200 dark:border-neutral-800 space-y-10">
-          {timeline.map((item) => (
-            <div key={item.period} className="relative">
-              <span className={`absolute -left-[1.3rem] top-1 size-[14px] rounded-full border-2 border-white ${item.dot} shadow-sm`} />
-              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-1">
-                {item.period}
-              </p>
-              <h3 className="font-cal text-lg tracking-tight mb-1">{item.title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Philosophy */}
-      <section className="max-w-6xl mx-auto px-6 pb-20 border-t pt-20">
-        <div className="mb-12">
-          <span className="relative text-sm font-semibold tracking-tight text-primary">
-            <span className="absolute top-0.5 -left-3 h-4 w-[3px] rounded-r-sm bg-primary" />
-            Why we&apos;re different
-          </span>
-          <h2 className="font-cal text-3xl md:text-4xl tracking-tight mt-3">
-            Not adapted. Built from scratch, for here.
-          </h2>
-        </div>
-
-        <div className="grid md:grid-cols-2 gap-4">
-          {principles.map((p) => (
-            <div
-              key={p.title}
-              className={`rounded-2xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-7 flex gap-5 border-l-4 ${p.border} hover:shadow-md transition-shadow`}
-            >
-              <div>
-                <h3 className="font-cal text-lg tracking-tight mb-2">{p.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{p.desc}</p>
+          <div className="max-w-2xl relative pl-8 border-l-2 border-gray-200 dark:border-neutral-800 space-y-10">
+            {timeline.map((item) => (
+              <div key={item.period} className="relative">
+                <span className={`absolute -left-[1.3rem] top-1 size-[14px] rounded-full border-2 border-white dark:border-neutral-950 ${item.dot} shadow-sm`} />
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-1">
+                  {item.period}
+                </p>
+                <h3 className="font-cal text-lg tracking-tight mb-1">{item.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
               </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Team */}
-      <section className="max-w-6xl mx-auto px-6 pb-20 border-t pt-20">
-        <div className="max-w-3xl mx-auto text-center mb-10">
-          <span className="relative inline-block text-sm font-semibold tracking-tight text-primary">
-            <span className="absolute top-0.5 -left-3 h-4 w-[3px] rounded-r-sm bg-primary" />
-            The people
-          </span>
-          <h2 className="font-cal text-3xl md:text-4xl tracking-tight mt-3 mb-4">
-            A small team with an unreasonably large ambition.
-          </h2>
-          <p className="text-muted-foreground leading-relaxed">
-            Dinaya is built by Ardeno Studio, a Sri Lankan product studio. We&apos;re a small team
-            that believes local software should be world-class.
-          </p>
-        </div>
-
-        <div className="max-w-xl mx-auto rounded-2xl border border-gray-200 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-900/50 p-10 text-center">
-          <ArdenoStudioLogo size="xl" className="mx-auto mb-6 w-full max-w-xs" />
-          <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-            We build software that solves real problems for local businesses.
-          </p>
-          <div className="flex flex-wrap gap-3 justify-center">
-            {["Sri Lanka · 2024", "Public product · Dinaya", "Next product · TBA"].map((pill) => (
-              <span
-                key={pill}
-                className="inline-flex items-center rounded-full bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700 px-3 py-1 text-xs font-medium text-gray-600 dark:text-gray-400"
-              >
-                {pill}
-              </span>
             ))}
           </div>
-        </div>
+        </section>
+      </div>
+
+      {/* Team credit — kept deliberately short; /about owns the full team story */}
+      <section className="max-w-3xl mx-auto px-6 py-20 text-center">
+        <p className="text-muted-foreground leading-relaxed mb-6">
+          Dinaya is built by a small team at{" "}
+          <Link href="/about" className="text-foreground font-medium hover:text-primary transition-colors">
+            Ardeno Studio
+          </Link>
+          , a Sri Lankan product studio.
+        </p>
+        <ArdenoStudioLogo size="sm" className="mx-auto opacity-80" />
       </section>
 
       {/* CTA */}

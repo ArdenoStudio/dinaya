@@ -24,7 +24,7 @@ const channels = [
     ? [
         {
           icon: "whatsapp",
-          color: "bg-amber-50 dark:bg-amber-950/400",
+          color: "bg-amber-500",
           label: "WhatsApp",
           value: supportWhatsApp.label,
           desc: "Quickest way to reach us. Mon-Fri, 9 AM-6 PM.",
@@ -122,32 +122,38 @@ export default function ContactPage() {
       </section>
 
       {/* Contact channels */}
-      <section className="max-w-5xl mx-auto px-6 pb-20">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-gray-200 dark:bg-neutral-700/70 rounded-2xl overflow-hidden border border-gray-200 dark:border-neutral-800/70">
-          {channels.map((c) => (
-            <div key={c.label} className="group p-8 bg-white dark:bg-neutral-900 hover:bg-gray-50 dark:hover:bg-neutral-800/80 transition-colors">
-              <div className={`inline-flex items-center justify-center size-11 rounded-xl ${c.color} text-white mb-5`}>
-                <Icon name={c.icon} className="text-[1.1rem]" />
+      <div className="bg-gray-50/80 dark:bg-neutral-900/40 border-y border-gray-100 dark:border-neutral-800/60">
+        <section className="max-w-5xl mx-auto px-6 py-20">
+          <div
+            className={`grid grid-cols-1 gap-px bg-gray-200 dark:bg-neutral-700/70 rounded-2xl overflow-hidden border border-gray-200 dark:border-neutral-800/70 ${
+              channels.length >= 3 ? "md:grid-cols-3" : "sm:grid-cols-2 max-w-2xl mx-auto"
+            }`}
+          >
+            {channels.map((c) => (
+              <div key={c.label} className="group p-8 bg-white dark:bg-neutral-900 hover:bg-gray-50 dark:hover:bg-neutral-800/80 transition-colors">
+                <div className={`inline-flex items-center justify-center size-11 rounded-xl ${c.color} text-white mb-5`}>
+                  <Icon name={c.icon} className="text-[1.1rem]" />
+                </div>
+                <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-1">{c.label}</p>
+                {c.href ? (
+                  <a
+                    href={c.href}
+                    className="font-cal text-lg tracking-tight text-foreground hover:text-primary transition-colors block mb-2"
+                  >
+                    {c.value}
+                  </a>
+                ) : (
+                  <p className="font-cal text-lg tracking-tight mb-2">{c.value}</p>
+                )}
+                <p className="text-sm text-muted-foreground leading-relaxed">{c.desc}</p>
               </div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-1">{c.label}</p>
-              {c.href ? (
-                <a
-                  href={c.href}
-                  className="font-cal text-lg tracking-tight text-foreground hover:text-primary transition-colors block mb-2"
-                >
-                  {c.value}
-                </a>
-              ) : (
-                <p className="font-cal text-lg tracking-tight mb-2">{c.value}</p>
-              )}
-              <p className="text-sm text-muted-foreground leading-relaxed">{c.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
+      </div>
 
       {/* Form + FAQ */}
-      <section className="max-w-6xl mx-auto px-6 pb-20 border-t pt-20">
+      <section className="max-w-6xl mx-auto px-6 py-20">
         <div className="grid md:grid-cols-2 gap-16 items-start">
 
           {/* Form */}
@@ -183,7 +189,7 @@ export default function ContactPage() {
                 {status === "error" ? (
                   <div
                     role="alert"
-                    className="flex items-start gap-2 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700 dark:text-red-300"
+                    className="flex items-start gap-2 rounded-xl border border-red-100 dark:border-red-900/50 bg-red-50 dark:bg-red-950/40 px-4 py-3 text-sm text-red-700 dark:text-red-300"
                   >
                     <Icon name="exclamation-circle" className="mt-0.5 shrink-0 text-sm" />
                     <span>
@@ -298,15 +304,15 @@ export default function ContactPage() {
               ))}
             </div>
 
-            <div className="mt-6 rounded-xl border border-amber-100 bg-amber-50 dark:bg-amber-950/40 p-5 flex items-start gap-4">
-              <div className="flex-shrink-0 flex items-center justify-center size-9 rounded-lg bg-amber-50 dark:bg-amber-950/400 text-white mt-0.5">
+            <div className="mt-6 rounded-xl border border-amber-100 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-950/40 p-5 flex items-start gap-4">
+              <div className="flex-shrink-0 flex items-center justify-center size-9 rounded-lg bg-amber-500 text-white mt-0.5">
                 <Icon name="book" className="text-sm" />
               </div>
               <div>
                 <p className="text-sm font-semibold text-foreground mb-0.5">Help centre</p>
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   Step-by-step guides for setting up your booking page, managing staff, and more.{" "}
-                  <Link href="/help" className="text-amber-600 font-medium hover:underline underline-offset-4">
+                  <Link href="/help" className="text-amber-600 dark:text-amber-400 font-medium hover:underline underline-offset-4">
                     Browse articles →
                   </Link>
                 </p>

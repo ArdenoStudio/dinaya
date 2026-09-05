@@ -22,7 +22,7 @@ const values = [
   },
   {
     icon: "lightning-charge",
-    color: "bg-amber-50 dark:bg-amber-950/400",
+    color: "bg-amber-500",
     title: "Radically simple",
     desc: "If a salon owner in Kandy can't set it up in five minutes, we haven't done our job. Simplicity isn't a feature — it's the product.",
   },
@@ -89,55 +89,31 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Our story */}
-      <section id="story" className="max-w-6xl mx-auto px-6 pb-20">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
-          <div>
-            <span className="relative text-sm font-semibold tracking-tight text-primary">
-              <span className="absolute top-0.5 -left-3 h-4 w-[3px] rounded-r-sm bg-primary" />
-              Our story
-            </span>
-            <h2 className="font-cal text-3xl md:text-4xl tracking-tight mt-3 mb-5">
-              WhatsApp is a messenger,<br />not a booking system.
-            </h2>
-            <div className="space-y-4 text-muted-foreground leading-relaxed">
-              <p>
-                Walk into any salon, clinic, or tuition class in Sri Lanka and you&apos;ll find the
-                same scene: a phone buzzing with booking messages, a notebook of scribbled
-                appointments, and an owner spending hours a day just coordinating schedules.
-              </p>
-              <p>
-                We built Dinaya to change that. A booking page your clients can actually use.
-                Payments they can make without a bank transfer. Reminders that go out
-                automatically. No coding, no hidden fees, no commission on your earnings.
-              </p>
-              <p>
-                We started with Sri Lanka because we know Sri Lanka. The payment gateway, the
-                language, the way clients prefer to book — everything is designed for businesses
-                here, not adapted from a tool made for somewhere else.
-              </p>
-            </div>
+      {/* Read the full story — teaser, not a retelling */}
+      <div className="bg-gray-50/80 dark:bg-neutral-900/40 border-y border-gray-100 dark:border-neutral-800/60">
+        <section className="max-w-3xl mx-auto px-6 py-16 text-center">
+          <div className="inline-flex items-center justify-center size-12 rounded-2xl bg-primary/10 text-primary mb-5">
+            <Icon name="heart-fill" className="text-xl" />
           </div>
-
-          <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100/60 p-8 flex flex-col gap-5">
-            {[
-              { icon: "whatsapp", color: "text-gray-400 dark:text-gray-500", label: "Before Dinaya", msg: "Hi are you free Thursday at 3? Actually maybe 3:30? Let me check… never mind I'll call" },
-              { icon: "calendar-check", color: "text-primary", label: "After Dinaya", msg: "Booking confirmed — Thursday 3:30 PM · Deposit paid · Reminder set" },
-            ].map((item) => (
-              <div key={item.label} className="rounded-xl bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-800 p-5 shadow-sm">
-                <div className="flex items-center gap-2 mb-3">
-                  <Icon name={item.icon} className={`text-lg ${item.color}`} />
-                  <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">{item.label}</span>
-                </div>
-                <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{item.msg}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+          <h2 className="font-cal text-2xl md:text-3xl tracking-tight mb-3">
+            Curious how Dinaya started?
+          </h2>
+          <p className="text-muted-foreground max-w-lg mx-auto mb-6 leading-relaxed">
+            From 47 unread WhatsApp messages to a booking tool built for Sri Lankan businesses —
+            read the full journey.
+          </p>
+          <Link
+            href="/our-story"
+            className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline underline-offset-4"
+          >
+            Read our story
+            <Icon name="arrow-right" className="text-xs" />
+          </Link>
+        </section>
+      </div>
 
       {/* Values */}
-      <section className="max-w-6xl mx-auto px-6 pb-20 border-t pt-16">
+      <section className="max-w-6xl mx-auto px-6 py-20">
         <div className="text-center mb-12">
           <span className="relative text-sm font-semibold tracking-tight text-primary">
             <span className="absolute top-0.5 -left-3 h-4 w-[3px] rounded-r-sm bg-primary" />
@@ -164,22 +140,24 @@ export default function AboutPage() {
       </section>
 
       {/* Made by Ardeno Studio */}
-      <section className="max-w-4xl mx-auto px-6 pb-20">
-        <div className="rounded-2xl border border-gray-200 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-900/50 p-8 md:p-12 text-center">
-          <p className="text-xs font-semibold tracking-widest uppercase text-gray-400 dark:text-gray-500 mb-5">The team behind Dinaya</p>
-          <div className="flex items-center justify-center mb-6">
-            <ArdenoStudioLogo size="xl" className="w-full max-w-xs" />
+      <div className="bg-gradient-to-b from-blue-50/50 to-transparent dark:from-blue-950/10 dark:to-transparent">
+        <section className="max-w-4xl mx-auto px-6 py-20">
+          <div className="rounded-2xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/50 p-8 md:p-12 text-center shadow-sm">
+            <p className="text-xs font-semibold tracking-widest uppercase text-gray-400 dark:text-gray-500 mb-5">The team behind Dinaya</p>
+            <div className="flex items-center justify-center mb-6">
+              <ArdenoStudioLogo size="xl" className="w-full max-w-xs" />
+            </div>
+            <h2 className="font-cal text-2xl md:text-3xl tracking-tight mb-4">
+              Dinaya is a product by Ardeno Studio.
+            </h2>
+            <p className="text-muted-foreground max-w-xl mx-auto leading-relaxed">
+              Ardeno Studio is a Sri Lankan product studio focused on building software that
+              solves real problems for local businesses. Dinaya is our first public product —
+              and we&apos;re just getting started.
+            </p>
           </div>
-          <h2 className="font-cal text-2xl md:text-3xl tracking-tight mb-4">
-            Dinaya is a product by Ardeno Studio.
-          </h2>
-          <p className="text-muted-foreground max-w-xl mx-auto leading-relaxed">
-            Ardeno Studio is a Sri Lankan product studio focused on building software that
-            solves real problems for local businesses. Dinaya is our first public product —
-            and we&apos;re just getting started.
-          </p>
-        </div>
-      </section>
+        </section>
+      </div>
 
       {/* CTA */}
       <section className="px-6 pb-20">
