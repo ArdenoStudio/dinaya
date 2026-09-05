@@ -83,12 +83,18 @@ async function registerDemoAccount(): Promise<{
 }
 
 function runScript(args: string[]) {
+  // `npx` resolves to npx.cmd on Windows — spawnSync can't exec it directly
+  // without shell:true, which made every seed step here silently no-op
+  // (status: null) on Windows while looking like a normal exit.
   const result = spawnSync("npx", ["tsx", ...args], {
     stdio: "inherit",
     env: process.env,
     cwd: process.cwd(),
+    shell: process.platform === "win32",
   });
-  if (result.status !== 0) {
+  if (result.error) {
+    console.warn(`Seed warning: ${args.join(" ")} failed to spawn: ${result.error.message}`);
+  } else if (result.status !== 0) {
     console.warn(`Seed warning: ${args.join(" ")} exited ${result.status}`);
   }
 }

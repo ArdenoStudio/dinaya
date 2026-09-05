@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
 import type { DocsHotspot as DocsHotspotType, DocsMockupTarget } from "@content/docs/types";
 import IPhoneMockup from "@/components/ui/iphone-mockup";
@@ -34,7 +35,12 @@ export function DocsPhoneFrame({
   staged = false,
 }: Props) {
   const { resolvedTheme } = useTheme();
-  const screenBg = resolvedTheme === "dark" ? "#0a0a0a" : "#f6f7fb";
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  // Server always renders the light default; only switch after mount so the
+  // first client render matches SSR exactly and doesn't trigger a hydration
+  // mismatch (which was leaving stale phone-frame copies un-unmounted).
+  const screenBg = mounted && resolvedTheme === "dark" ? "#0a0a0a" : "#f6f7fb";
   const rects = resolveHighlightRects({
     highlightTarget,
     shotId: shotIdFromSrc(src),
