@@ -15,7 +15,8 @@ export default function HelpPage() {
       <HelpFaqSections />
       <section className="px-6 pb-20">
         <div className="max-w-4xl mx-auto">
-          <div className="relative overflow-hidden rounded-3xl border bg-gradient-to-br from-gray-950 via-gray-900 to-blue-950 px-8 py-14 shadow-xl">
+          <div className="relative overflow-hidden rounded-3xl border border-neutral-800 bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-900 px-8 py-14 shadow-xl">
+            <div className="pointer-events-none absolute -top-16 -right-16 size-56 rounded-full bg-primary/20 blur-3xl" />
             <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-8">
               <div>
                 <h2 className="font-cal text-2xl md:text-3xl tracking-tight text-white mb-2">

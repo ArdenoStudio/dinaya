@@ -150,7 +150,7 @@ export default function BrandPage() {
         </section>
       </FluidParticlesBackground>
       {/* Bottom fade mask */}
-      <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-white to-transparent pointer-events-none z-20" />
+      <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-white to-transparent dark:from-neutral-950 pointer-events-none z-20" />
       </div>
 
       {/* Logo */}
@@ -423,7 +423,7 @@ export default function BrandPage() {
             {/* Don't */}
             <FadeDiv className="rounded-2xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 shadow-sm p-7">
               <div className="flex items-center gap-2 mb-5">
-                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-red-50">
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-red-50 dark:bg-red-950/40">
                   <Icon name="x-lg" className="text-red-500 text-sm" />
                 </span>
                 <span className="font-semibold text-gray-900 dark:text-gray-100">Don&apos;t</span>

@@ -144,4 +144,5 @@ export type PopularHelpArticle = {
   label: string;
   cat: string;
   guideSlug?: string;
+  faqId?: string;
 };

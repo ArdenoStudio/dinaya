@@ -19,7 +19,10 @@ const NAV_LINKS = [
   { label: "Features",  href: "/features"  },
   { label: "Pricing",   href: "/pricing"   },
   { label: "Solutions", href: "/solutions" },
-  { label: "Discover",  href: "/discover", matchPrefix: true },
+  { label: "Directory", href: "/discover", matchPrefix: true },
+];
+
+const NAV_LINKS_SECONDARY = [
   { label: "Docs",      href: "/docs"      },
   { label: "Help",      href: "/help"      },
   { label: "Our Story", href: "/our-story" },
@@ -197,24 +200,46 @@ export function UnderlayNav() {
             <span className="invisible font-cal text-xl">Dinaya.lk</span>
           </div>
 
-          {/* Auth CTAs */}
-          <div className="flex items-center gap-2">
-            <ThemeToggle className="hidden sm:inline-flex" />
-            <Link
-              href="/auth/signin"
-              className="hidden sm:block text-base text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors
-                         px-4 py-2 rounded-full border border-gray-300 dark:border-neutral-600 hover:border-gray-400 dark:hover:border-neutral-500"
-            >
-              Log in
-            </Link>
-            <Link
-              href="/register"
-              className="text-base font-semibold bg-primary text-white
-                         px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors whitespace-nowrap"
-            >
-              {MARKETING_CTA_NAV}
-            </Link>
-          </div>
+          {/* Auth CTAs — Get started unmounts on desktop while the menu is open (the expanded panel repeats it);
+              Log in and the theme toggle glide right into the space it leaves behind. */}
+          <motion.div layout transition={{ type: "spring", stiffness: 180, damping: 26, mass: 1 }} className="flex items-center gap-2">
+            <motion.div layout transition={{ type: "spring", stiffness: 180, damping: 26, mass: 1 }}>
+              <ThemeToggle className="hidden sm:inline-flex" />
+            </motion.div>
+            <motion.div layout transition={{ type: "spring", stiffness: 180, damping: 26, mass: 1 }}>
+              <Link
+                href="/auth/signin"
+                className="hidden sm:block text-base text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors
+                           px-4 py-2 rounded-full border border-gray-300 dark:border-neutral-600 hover:border-gray-400 dark:hover:border-neutral-500"
+              >
+                Log in
+              </Link>
+            </motion.div>
+            <AnimatePresence initial={false}>
+              {!(isOpen && !layout.isMobile) && (
+                <motion.div
+                  key="get-started"
+                  layout
+                  style={{ overflow: "hidden" }}
+                  initial={{ opacity: 0, width: 0 }}
+                  animate={{
+                    opacity: 1,
+                    width: "auto",
+                    transition: { type: "spring", stiffness: 180, damping: 26, mass: 1 },
+                  }}
+                  exit={{ opacity: 0, width: 0, transition: { duration: 0.32, ease: "easeInOut" } }}
+                >
+                  <Link
+                    href="/register"
+                    className="block text-base font-semibold bg-primary text-white
+                               px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors whitespace-nowrap"
+                  >
+                    {MARKETING_CTA_NAV}
+                  </Link>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
         </div>
 
         {/* ── Expandable menu content ────────────────────────────────────── */}
@@ -253,7 +278,7 @@ export function UnderlayNav() {
                             onClick={close}
                             aria-current={isNavLinkActive(pathname, item) ? "page" : undefined}
                             className={[
-                              "block py-2.5 text-[clamp(1.6rem,8vw,2.2rem)] font-medium",
+                              "block py-2 text-[clamp(1.6rem,8vw,2.2rem)] font-medium",
                               "tracking-[-0.02em] leading-none transition-colors",
                               isNavLinkActive(pathname, item) ? "text-primary" : "text-gray-900 dark:text-gray-100 hover:text-gray-400 dark:hover:text-gray-500",
                             ].join(" ")}
@@ -261,10 +286,31 @@ export function UnderlayNav() {
                             {item.label}
                           </Link>
                         </motion.div>
-                        {i < NAV_LINKS.length - 1 && <div className="h-px bg-gray-100 dark:bg-neutral-800" />}
                       </li>
                     ))}
                   </ul>
+                  <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2">
+                    {NAV_LINKS_SECONDARY.map((item, i) => (
+                      <motion.div
+                        key={item.label}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={isOpen ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+                        transition={{ delay: isOpen ? 0.4 + i * 0.05 : 0, duration: 0.5, ease: "easeOut" }}
+                      >
+                        <Link
+                          href={item.href}
+                          onClick={close}
+                          aria-current={isNavLinkActive(pathname, item) ? "page" : undefined}
+                          className={[
+                            "text-sm font-medium transition-colors",
+                            isNavLinkActive(pathname, item) ? "text-primary" : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100",
+                          ].join(" ")}
+                        >
+                          {item.label}
+                        </Link>
+                      </motion.div>
+                    ))}
+                  </div>
                 </div>
 
                 {/* CTA buttons */}
@@ -313,7 +359,7 @@ export function UnderlayNav() {
             /* ── Desktop menu (original layout) ── */
             <div style={{ width: layout.open }}>
               <div className="mx-5 h-px bg-gray-200 dark:bg-neutral-700" />
-              <div className="px-5 pt-5 pb-6 grid grid-cols-[1.2fr_1fr_auto_auto] gap-8">
+              <div className="px-5 pt-5 pb-6 grid grid-cols-[auto_1fr_auto_auto] gap-8">
 
                 {/* Column 1 — main nav links */}
                 <div>
@@ -333,7 +379,7 @@ export function UnderlayNav() {
                             onClick={close}
                             aria-current={isNavLinkActive(pathname, item) ? "page" : undefined}
                             className={[
-                              "block py-2.5 text-[clamp(1.15rem,2.5vw,1.5rem)] font-medium",
+                              "block py-2 text-[clamp(1.15rem,2.5vw,1.5rem)] font-medium",
                               "tracking-[-0.02em] leading-none transition-colors",
                               isNavLinkActive(pathname, item) ? "text-primary" : "text-gray-900 dark:text-gray-100 hover:text-gray-400 dark:hover:text-gray-500",
                             ].join(" ")}
@@ -341,14 +387,35 @@ export function UnderlayNav() {
                             {item.label}
                           </Link>
                         </motion.div>
-                        {i < NAV_LINKS.length - 1 && <div className="h-px bg-gray-100 dark:bg-neutral-800" />}
                       </li>
                     ))}
                   </ul>
+                  <div className="mt-4 flex flex-col gap-2">
+                    {NAV_LINKS_SECONDARY.map((item, i) => (
+                      <motion.div
+                        key={item.label}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={isOpen ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+                        transition={{ delay: isOpen ? 0.35 + (NAV_LINKS.length + i) * 0.06 : 0, duration: 0.5, ease: "easeOut" }}
+                      >
+                        <Link
+                          href={item.href}
+                          onClick={close}
+                          aria-current={isNavLinkActive(pathname, item) ? "page" : undefined}
+                          className={[
+                            "text-sm font-medium transition-colors hover:underline underline-offset-4 decoration-gray-300 dark:decoration-neutral-600",
+                            isNavLinkActive(pathname, item) ? "text-primary" : "text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100",
+                          ].join(" ")}
+                        >
+                          {item.label}
+                        </Link>
+                      </motion.div>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Column 2 — Popular Resources (Fills middle space) */}
-                <div className="hidden lg:block border-l border-gray-100 dark:border-neutral-800 pl-8">
+                <div className="hidden lg:block border-l border-gray-100 dark:border-neutral-800 pl-8 min-w-[15rem]">
                   <p className="text-[0.6875rem] font-semibold tracking-[0.12em] text-gray-400 dark:text-gray-500 uppercase mb-4">
                     Popular Guides
                   </p>
@@ -401,7 +468,7 @@ export function UnderlayNav() {
                 </div>
 
                 {/* Column 3 — legal */}
-                <div className="flex flex-col gap-6 min-w-[8rem] pl-4">
+                <div className="flex flex-col gap-6 min-w-[8rem] pl-8 border-l border-gray-100 dark:border-neutral-800">
                   <SubCol heading="Legal"   items={QUICK_LINKS}   isOpen={isOpen} onClose={close} baseDelay={0.42} />
                 </div>
 

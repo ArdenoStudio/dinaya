@@ -13,6 +13,15 @@ export const metadata: Metadata = {
     "Everything in one booking link. Self-booking page, PayHere payments, SMS reminders, and client engagement tools for Sri Lankan businesses.",
 };
 
+// Fills a trailing incomplete row in a 3-col grid instead of leaving empty cells:
+// remainder 1 -> last card spans the full row; remainder 2 -> last card spans 2/3.
+function trailingSpanClass(index: number, total: number): string {
+  const remainder = total % 3;
+  if (remainder === 1 && index === total - 1) return "md:col-span-3";
+  if (remainder === 2 && index === total - 1) return "md:col-span-2";
+  return "";
+}
+
 const bookingFeatures = [
   {
     icon: "link-45deg",
@@ -222,8 +231,8 @@ export default function FeaturesPage() {
         </div>
 
         <div className="grid md:grid-cols-3 gap-px bg-gray-200 dark:bg-neutral-700/70 rounded-2xl overflow-hidden border border-gray-200 dark:border-neutral-800/70">
-          {bookingFeatures.map((f) => (
-            <div key={f.title} className="group relative p-7 bg-white dark:bg-neutral-900 hover:bg-gradient-to-br hover:from-amber-500/[0.03] hover:to-white dark:hover:to-neutral-900 transition-colors">
+          {bookingFeatures.map((f, i) => (
+            <div key={f.title} className={`group relative p-7 bg-white dark:bg-neutral-900 hover:bg-gradient-to-br hover:from-amber-500/[0.03] hover:to-white dark:hover:to-neutral-900 transition-colors ${trailingSpanClass(i, bookingFeatures.length)}`}>
               <div className="relative mb-5 inline-flex">
                 <div className="absolute inset-0 rounded-xl bg-amber-50 dark:bg-amber-950/30 blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-amber-500/15 to-amber-500/5">
@@ -239,41 +248,43 @@ export default function FeaturesPage() {
       </section>
 
       {/* Payments features */}
-      <section className="max-w-6xl mx-auto px-6 pb-20" id="payments">
-        <div className="mb-10">
-          <div className="inline-flex items-center gap-2 rounded-xl ring-1 ring-blue-100 dark:ring-blue-900/50 bg-blue-50 dark:bg-blue-950/40 px-3.5 py-2 mb-4">
-            <span className="flex h-6 w-6 items-center justify-center rounded-md bg-blue-600 text-white">
-              <Icon name="credit-card" className="text-xs" />
-            </span>
-            <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">Payments</span>
-          </div>
-          <h2 className="font-cal text-3xl md:text-4xl tracking-tight mb-3">
-            Get paid. Automatically.
-          </h2>
-          <p className="text-muted-foreground max-w-xl">
-            PayHere built right in. Collect deposits, full payments, or let clients pay on the day — your call.
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-px bg-gray-200 dark:bg-neutral-700/70 rounded-2xl overflow-hidden border border-gray-200 dark:border-neutral-800/70">
-          {paymentFeatures.map((f) => (
-            <div key={f.title} className="group relative p-7 bg-white dark:bg-neutral-900 hover:bg-gradient-to-br hover:from-blue-600/[0.03] hover:to-white dark:hover:to-neutral-900 transition-colors">
-              <div className="relative mb-5 inline-flex">
-                <div className="absolute inset-0 rounded-xl bg-blue-600/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-blue-600/15 to-blue-600/5">
-                  <Icon name={f.icon} className="text-[1.15rem] text-blue-600" />
-                </div>
-              </div>
-              <h3 className="font-cal text-lg mb-2 tracking-tight">{f.title}</h3>
-              <p className="text-muted-foreground text-sm leading-relaxed">{f.desc}</p>
-              <span className="absolute bottom-0 left-7 right-7 h-px bg-gradient-to-r from-transparent via-blue-600/40 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
+      <div className="bg-gray-50/80 dark:bg-neutral-900/40 border-y border-gray-100 dark:border-neutral-800/60">
+        <section className="max-w-6xl mx-auto px-6 py-20" id="payments">
+          <div className="mb-10">
+            <div className="inline-flex items-center gap-2 rounded-xl ring-1 ring-blue-100 dark:ring-blue-900/50 bg-blue-50 dark:bg-blue-950/40 px-3.5 py-2 mb-4">
+              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-blue-600 text-white">
+                <Icon name="credit-card" className="text-xs" />
+              </span>
+              <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">Payments</span>
             </div>
-          ))}
-        </div>
-      </section>
+            <h2 className="font-cal text-3xl md:text-4xl tracking-tight mb-3">
+              Get paid. Automatically.
+            </h2>
+            <p className="text-muted-foreground max-w-xl">
+              PayHere built right in. Collect deposits, full payments, or let clients pay on the day — your call.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-px bg-gray-200 dark:bg-neutral-700/70 rounded-2xl overflow-hidden border border-gray-200 dark:border-neutral-800/70">
+            {paymentFeatures.map((f) => (
+              <div key={f.title} className="group relative p-7 bg-white dark:bg-neutral-900 hover:bg-gradient-to-br hover:from-blue-600/[0.03] hover:to-white dark:hover:to-neutral-900 transition-colors">
+                <div className="relative mb-5 inline-flex">
+                  <div className="absolute inset-0 rounded-xl bg-blue-600/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-blue-600/15 to-blue-600/5">
+                    <Icon name={f.icon} className="text-[1.15rem] text-blue-600" />
+                  </div>
+                </div>
+                <h3 className="font-cal text-lg mb-2 tracking-tight">{f.title}</h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">{f.desc}</p>
+                <span className="absolute bottom-0 left-7 right-7 h-px bg-gradient-to-r from-transparent via-blue-600/40 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
 
       {/* Engagement features */}
-      <section className="max-w-6xl mx-auto px-6 pb-20" id="engagement">
+      <section className="max-w-6xl mx-auto px-6 pt-16 pb-20" id="engagement">
         <div className="mb-10">
           <div className="inline-flex items-center gap-2 rounded-xl ring-1 ring-violet-100 dark:ring-violet-900/50 bg-violet-50/50 dark:bg-violet-950/40 px-3.5 py-2 mb-4">
             <span className="flex h-6 w-6 items-center justify-center rounded-md bg-violet-500 text-white">
@@ -307,54 +318,56 @@ export default function FeaturesPage() {
       </section>
 
       {/* Max AI growth */}
-      <section className="max-w-6xl mx-auto px-6 pb-20" id="max-ai">
-        <div className="mb-10">
-          <div className="inline-flex items-center gap-2 rounded-xl ring-1 ring-amber-100 dark:ring-amber-900/50 bg-amber-50 dark:bg-amber-950/40 px-3.5 py-2 mb-4">
-            <span className="flex h-6 w-6 items-center justify-center rounded-md bg-amber-600 text-white">
-              <Icon name="stars" className="text-xs" />
-            </span>
-            <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">Growth AI</span>
-            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-800 dark:bg-amber-950/50 dark:text-amber-200">
-              Available on Growth
-            </span>
-          </div>
-          <h2 className="font-cal text-3xl md:text-4xl tracking-tight mb-3">
-            Growth on autopilot.
-          </h2>
-          <p className="text-muted-foreground max-w-xl">
-            Seven AI-powered Growth tools that fill your calendar, win back clients, and keep your social presence active — without adding hours to your week.
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-px bg-gray-200 dark:bg-neutral-700/70 rounded-2xl overflow-hidden border border-gray-200 dark:border-neutral-800/70">
-          {proAiFeatures.map((f) => (
-            <div key={f.title} className="group relative p-7 bg-white dark:bg-neutral-900 hover:bg-gradient-to-br hover:from-amber-500/[0.03] hover:to-white dark:hover:to-neutral-900 transition-colors">
-              <div className="relative mb-5 inline-flex">
-                <div className="absolute inset-0 rounded-xl bg-amber-50 dark:bg-amber-950/30 blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-amber-500/15 to-amber-500/5">
-                  <Icon name={f.icon} className="text-[1.15rem] text-amber-600" />
-                </div>
-              </div>
-              <h3 className="font-cal text-lg mb-2 tracking-tight">{f.title}</h3>
-              <p className="text-muted-foreground text-sm leading-relaxed">{f.desc}</p>
-              <span className="absolute bottom-0 left-7 right-7 h-px bg-gradient-to-r from-transparent via-amber-500/40 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
+      <div className="bg-gradient-to-b from-emerald-50/50 to-transparent dark:from-emerald-950/10 dark:to-transparent">
+        <section className="max-w-6xl mx-auto px-6 py-20" id="max-ai">
+          <div className="mb-10">
+            <div className="inline-flex items-center gap-2 rounded-xl ring-1 ring-emerald-100 dark:ring-emerald-900/50 bg-emerald-50 dark:bg-emerald-950/40 px-3.5 py-2 mb-4">
+              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-emerald-600 text-white">
+                <Icon name="stars" className="text-xs" />
+              </span>
+              <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">Growth AI</span>
+              <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-medium text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200">
+                Available on Growth
+              </span>
             </div>
-          ))}
-        </div>
+            <h2 className="font-cal text-3xl md:text-4xl tracking-tight mb-3">
+              Growth on autopilot.
+            </h2>
+            <p className="text-muted-foreground max-w-xl">
+              Seven AI-powered Growth tools that fill your calendar, win back clients, and keep your social presence active — without adding hours to your week.
+            </p>
+          </div>
 
-        <div className="mt-8 text-center">
-          <Link
-            href="/pricing"
-            className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
-          >
-            See Growth pricing
-            <Icon name="arrow-right" className="text-sm" />
-          </Link>
-        </div>
-      </section>
+          <div className="grid md:grid-cols-3 gap-px bg-gray-200 dark:bg-neutral-700/70 rounded-2xl overflow-hidden border border-gray-200 dark:border-neutral-800/70">
+            {proAiFeatures.map((f, i) => (
+              <div key={f.title} className={`group relative p-7 bg-white dark:bg-neutral-900 hover:bg-gradient-to-br hover:from-emerald-500/[0.03] hover:to-white dark:hover:to-neutral-900 transition-colors ${trailingSpanClass(i, proAiFeatures.length)}`}>
+                <div className="relative mb-5 inline-flex">
+                  <div className="absolute inset-0 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-500/15 to-emerald-500/5">
+                    <Icon name={f.icon} className="text-[1.15rem] text-emerald-600" />
+                  </div>
+                </div>
+                <h3 className="font-cal text-lg mb-2 tracking-tight">{f.title}</h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">{f.desc}</p>
+                <span className="absolute bottom-0 left-7 right-7 h-px bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-8 text-center">
+            <Link
+              href="/pricing"
+              className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
+            >
+              See Growth pricing
+              <Icon name="arrow-right" className="text-sm" />
+            </Link>
+          </div>
+        </section>
+      </div>
 
       {/* How it works */}
-      <section className="max-w-5xl mx-auto px-6 pb-20">
+      <section className="max-w-5xl mx-auto px-6 pt-16 pb-20">
         <div className="text-center mb-12">
           <span className="relative text-sm font-semibold tracking-tight text-primary">
             <span className="absolute top-0.5 -left-3 h-4 w-[3px] rounded-r-sm bg-primary" />
@@ -410,34 +423,44 @@ export default function FeaturesPage() {
             <h2 className="font-cal text-3xl mt-3 tracking-tight">All features, free to start.</h2>
           </div>
 
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-8 text-sm divide-y-0 md:[&>*:not(:first-child)]:border-l md:[&>*:not(:first-child)]:border-gray-200 md:dark:[&>*:not(:first-child)]:border-neutral-800 md:[&>*:not(:first-child)]:pl-8">
             {[
-              "Self-booking page",
-              "Custom availability",
-              "Buffer time",
-              "Shareable link",
-              "PayHere checkout",
-              "Deposit collection",
-              "Full payment",
-              "Refunds & cancellations",
-              "Revenue tracking",
-              "Invoice receipts",
-              "SMS reminders",
-              "Email confirmations",
-              "No-show protection",
-              "Client dashboard",
-              "Booking history",
-              "Rebooking nudges",
-              "Multi-staff calendar",
-              "Free product updates",
-            ].map((f) => (
-              <div key={f} className="flex items-center gap-2.5">
-                <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-primary/15">
-                  <Icon name="check" className="text-primary" style={{ fontSize: '0.625rem' }} />
-                </span>
-                <span className="text-gray-700 dark:text-gray-300">{f}</span>
+              {
+                heading: "Booking",
+                items: ["Self-booking page", "Custom availability", "Buffer time", "Multi-staff calendar", "Shareable link"],
+              },
+              {
+                heading: "Payments",
+                items: ["PayHere checkout", "Deposit collection", "Full payment", "Refunds & cancellations", "Revenue tracking", "Invoice receipts"],
+              },
+              {
+                heading: "Engagement",
+                items: ["SMS reminders", "Email confirmations", "No-show protection", "Client dashboard", "Booking history", "Rebooking nudges"],
+              },
+            ].map((group) => (
+              <div key={group.heading}>
+                <p className="text-xs font-semibold tracking-[0.08em] text-gray-400 dark:text-gray-500 uppercase mb-4">
+                  {group.heading}
+                </p>
+                <div className="flex flex-col gap-3">
+                  {group.items.map((f) => (
+                    <div key={f} className="flex items-center gap-2.5">
+                      <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-primary/15">
+                        <Icon name="check" className="text-primary" style={{ fontSize: '0.625rem' }} />
+                      </span>
+                      <span className="text-gray-700 dark:text-gray-300">{f}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             ))}
+          </div>
+
+          <div className="mt-10 pt-8 border-t border-gray-200 dark:border-neutral-800 flex items-center justify-center gap-2.5 text-sm">
+            <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-primary/15">
+              <Icon name="check" className="text-primary" style={{ fontSize: '0.625rem' }} />
+            </span>
+            <span className="text-gray-700 dark:text-gray-300">Free product updates, on every plan</span>
           </div>
         </div>
       </section>

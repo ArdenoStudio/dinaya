@@ -32,7 +32,7 @@ export function HelpFaqSections() {
 
   return (
     <>
-      <section className="relative overflow-hidden border-b bg-gradient-to-b from-blue-50/60 to-white dark:from-blue-950/30 dark:to-neutral-950 dark:border-neutral-800">
+      <section className="relative overflow-hidden border-b bg-gradient-to-b from-blue-50/60 to-white dark:from-neutral-900 dark:to-neutral-950 dark:border-neutral-800">
         <div
           className="pointer-events-none absolute inset-0 opacity-40"
           style={{
@@ -86,15 +86,6 @@ export function HelpFaqSections() {
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3">
             {popularHelpArticles.map((a) => {
               const cat = faqCategories.find((c) => c.id === a.cat)!;
-              const inner = (
-                <>
-                  <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${cat.colorClasses.icon} text-white`}>
-                    <Icon name={a.icon} className="text-xs" />
-                  </span>
-                  <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100 leading-snug">{a.label}</span>
-                  <Icon name="chevron-right" className="ml-auto text-xs text-gray-300" />
-                </>
-              );
               if (a.guideSlug) {
                 return (
                   <Link
@@ -102,7 +93,11 @@ export function HelpFaqSections() {
                     href={`/docs/guides/${a.guideSlug}`}
                     className="group flex items-center gap-3 rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-3.5 hover:border-primary/30 hover:shadow-sm transition-[transform,box-shadow,border-color] duration-150 ease-out active:scale-[0.96] motion-reduce:active:scale-100"
                   >
-                    {inner}
+                    <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${cat.colorClasses.icon} text-white`}>
+                      <Icon name={a.icon} className="text-xs" />
+                    </span>
+                    <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100 leading-snug">{a.label}</span>
+                    <Icon name="arrow-up-right" className="ml-auto text-xs text-gray-300" />
                   </Link>
                 );
               }
@@ -112,11 +107,21 @@ export function HelpFaqSections() {
                   type="button"
                   onClick={() => {
                     setActiveCategory(a.cat);
-                    document.getElementById(a.cat)?.scrollIntoView({ behavior: "smooth" });
+                    requestAnimationFrame(() => {
+                      const target = a.faqId
+                        ? document.getElementById(`faq-${a.faqId}`)
+                        : document.getElementById(a.cat);
+                      if (target instanceof HTMLDetailsElement) target.open = true;
+                      target?.scrollIntoView({ behavior: "smooth", block: "start" });
+                    });
                   }}
                   className="group flex items-center gap-3 rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-3.5 text-left hover:border-primary/30 hover:shadow-sm transition-[transform,box-shadow,border-color] duration-150 ease-out active:scale-[0.96] motion-reduce:active:scale-100 w-full"
                 >
-                  {inner}
+                  <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${cat.colorClasses.icon} text-white`}>
+                    <Icon name={a.icon} className="text-xs" />
+                  </span>
+                  <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100 leading-snug">{a.label}</span>
+                  <Icon name="chevron-down" className="ml-auto text-xs text-gray-300" />
                 </button>
               );
             })}
@@ -169,7 +174,7 @@ export function HelpFaqSections() {
             </div>
             <div className="rounded-2xl border border-gray-200 dark:border-neutral-800 overflow-hidden divide-y divide-gray-200 dark:divide-neutral-800">
               {cat.faqs.map((faq) => (
-                <details key={faq.id} className="group bg-white dark:bg-neutral-900">
+                <details key={faq.id} id={`faq-${faq.id}`} className="group scroll-mt-28 bg-white dark:bg-neutral-900">
                   <summary className="flex cursor-pointer list-none items-start justify-between gap-4 px-6 py-5 hover:bg-gray-50 dark:hover:bg-neutral-800/80">
                     <span className="font-cal text-base tracking-tight text-gray-900 dark:text-gray-100 leading-snug">{faq.q}</span>
                     <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border group-open:bg-primary group-open:text-white group-open:border-primary">

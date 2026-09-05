@@ -20,10 +20,10 @@ function SwatchItem({ swatch }: { swatch: Swatch }) {
       onClick={copy}
       title={`Copy ${swatch.hex}`}
     >
-      <p className={`font-bold text-sm mb-0.5 ${swatch.light ? "text-gray-900 dark:text-gray-100" : "text-white"}`}>
+      <p className={`font-bold text-sm mb-0.5 ${swatch.light ? "text-gray-900" : "text-white"}`}>
         {swatch.shade}
       </p>
-      <p className={`font-mono text-[11px] mb-2 ${swatch.light ? "text-gray-600 dark:text-gray-400" : "text-white/70"}`}>
+      <p className={`font-mono text-[11px] mb-2 ${swatch.light ? "text-gray-600" : "text-white/70"}`}>
         {swatch.hex.toUpperCase()}
       </p>
       <span

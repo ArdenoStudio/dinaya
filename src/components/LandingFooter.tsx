@@ -43,7 +43,6 @@ export function LandingFooter() {
             links={[
               { label: "Features", href: "/features" },
               { label: "Documentation", href: "/docs" },
-              { label: "Help center", href: "/help" },
               { label: "Pricing", href: "/pricing" },
               { label: "Solutions", href: "/solutions" },
               { label: MARKETING_CTA_NAV, href: "/register" },
@@ -65,7 +64,7 @@ export function LandingFooter() {
           <FooterColumn
             title="Resources"
             links={[
-              { label: "Getting started", href: "/register" },
+              { label: "Getting started", href: "/docs/guides/setup-booking-page" },
               { label: "Help center", href: "/help" },
               { label: "What's new", href: "/whats-new" },
             ]}
@@ -127,7 +126,7 @@ export function LandingFooter() {
                 aria-label={label}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white dark:hover:bg-neutral-800/15 border border-white/10 flex items-center justify-center text-gray-400 dark:text-gray-500 hover:text-white transition-[transform,background-color,border-color,color] duration-150 ease-out hover:scale-110 active:scale-[0.96] motion-reduce:active:scale-100"
+                className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white border border-white/10 flex items-center justify-center text-gray-400 hover:text-gray-900 transition-[transform,background-color,border-color,color] duration-150 ease-out hover:scale-110 active:scale-[0.96] motion-reduce:active:scale-100"
               >
                 <Icon name={name} size={14} />
               </a>

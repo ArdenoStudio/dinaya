@@ -226,8 +226,8 @@ export default function DocsHubPage() {
             );
           })}
 
-          <section className="rounded-3xl border border-gray-200 dark:border-neutral-800 bg-gradient-to-br from-gray-50 to-white p-6">
-            <h2 className="font-cal text-lg mb-2">Quick answers</h2>
+          <section className="rounded-3xl border border-gray-200 dark:border-neutral-800 bg-gradient-to-br from-gray-50 to-white dark:from-neutral-900 dark:to-neutral-900 p-6">
+            <h2 className="font-cal text-lg mb-2 text-gray-900 dark:text-gray-100">Quick answers</h2>
             <p className="text-sm text-muted-foreground mb-4">
               Prefer short FAQ-style answers? Visit the help center.
             </p>
@@ -235,10 +235,10 @@ export default function DocsHubPage() {
               <Link href="/help" className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90">
                 Help center
               </Link>
-              <Link href="/docs/reference/plan-limits" className="rounded-lg border px-4 py-2 text-sm font-medium hover:bg-white dark:hover:bg-neutral-800">
+              <Link href="/docs/reference/plan-limits" className="rounded-lg border border-gray-200 dark:border-neutral-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-neutral-800">
                 Plan limits
               </Link>
-              <Link href="/whats-new" className="rounded-lg border px-4 py-2 text-sm font-medium hover:bg-white dark:hover:bg-neutral-800">
+              <Link href="/whats-new" className="rounded-lg border border-gray-200 dark:border-neutral-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-neutral-800">
                 What&apos;s new
               </Link>
             </div>
