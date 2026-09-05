@@ -97,77 +97,61 @@ export default function ContactPage() {
     <main className="min-h-screen bg-white dark:bg-neutral-950">
       <PublicNav />
 
-      {/* Hero */}
-      <section className="max-w-4xl mx-auto px-6 public-page-offset pb-16 text-center">
-        <FadeContainer className="flex flex-col items-center">
-          <FadeDiv className="mb-6">
-            <span className="inline-flex items-center gap-2 rounded-full border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 shadow-sm">
-              <Icon name="chat-dots-fill" className="text-xs text-primary" />
-              Get in touch
-            </span>
-          </FadeDiv>
+      {/* Split — info pane (always dark, like the footer) + form pane */}
+      <section className="grid lg:grid-cols-2">
+        {/* Info pane */}
+        <div className="bg-neutral-950 text-white px-6 lg:px-16 public-page-offset pb-16 lg:pb-24">
+          <FadeContainer className="max-w-md lg:ml-auto lg:mr-12 xl:mr-20">
+            <FadeDiv className="mb-6">
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-medium text-white/80">
+                <Icon name="chat-dots-fill" className="text-xs text-primary" />
+                Get in touch
+              </span>
+            </FadeDiv>
 
-          <h1 className="font-cal text-5xl tracking-tight mb-5">
-            <FadeSpan>We&apos;d love to</FadeSpan>{" "}
-            <FadeSpan className="text-primary">hear from you.</FadeSpan>
-          </h1>
+            <h1 className="font-cal text-4xl md:text-5xl tracking-tight mb-5 text-balance">
+              <FadeSpan>We&apos;d love to hear</FadeSpan> <FadeSpan className="text-primary">from you.</FadeSpan>
+            </h1>
 
-          <FadeDiv>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Questions, feedback, partnership ideas, or just a hello — we read every message and
-              reply personally. No support bots, no ticket queues.
-            </p>
-          </FadeDiv>
-        </FadeContainer>
-      </section>
+            <FadeDiv>
+              <p className="text-white/60 leading-relaxed mb-12 max-w-sm">
+                Questions, feedback, partnership ideas, or just a hello — we read every message
+                and reply personally. No support bots, no ticket queues.
+              </p>
+            </FadeDiv>
 
-      {/* Contact channels */}
-      <div className="bg-gray-50/80 dark:bg-neutral-900/40 border-y border-gray-100 dark:border-neutral-800/60">
-        <section className="max-w-5xl mx-auto px-6 py-20">
-          <div
-            className={`grid grid-cols-1 gap-px bg-gray-200 dark:bg-neutral-700/70 rounded-2xl overflow-hidden border border-gray-200 dark:border-neutral-800/70 ${
-              channels.length >= 3 ? "md:grid-cols-3" : "sm:grid-cols-2 max-w-2xl mx-auto"
-            }`}
-          >
-            {channels.map((c) => (
-              <div key={c.label} className="group p-8 bg-white dark:bg-neutral-900 hover:bg-gray-50 dark:hover:bg-neutral-800/80 transition-colors">
-                <div className={`inline-flex items-center justify-center size-11 rounded-xl ${c.color} text-white mb-5`}>
-                  <Icon name={c.icon} className="text-[1.1rem]" />
-                </div>
-                <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-1">{c.label}</p>
-                {c.href ? (
-                  <a
-                    href={c.href}
-                    className="font-cal text-lg tracking-tight text-foreground hover:text-primary transition-colors block mb-2"
-                  >
-                    {c.value}
-                  </a>
-                ) : (
-                  <p className="font-cal text-lg tracking-tight mb-2">{c.value}</p>
-                )}
-                <p className="text-sm text-muted-foreground leading-relaxed">{c.desc}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-      </div>
+            <div className="space-y-7 divide-y divide-white/10">
+              {channels.map((c) => (
+                <FadeDiv key={c.label} className="flex items-start gap-4 pt-7 first:pt-0">
+                  <div className={`flex items-center justify-center size-10 rounded-xl ${c.color} text-white shrink-0`}>
+                    <Icon name={c.icon} className="text-base" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-widest text-white/40 mb-1">{c.label}</p>
+                    {c.href ? (
+                      <a href={c.href} className="font-cal text-lg tracking-tight text-white hover:text-primary transition-colors block mb-1">
+                        {c.value}
+                      </a>
+                    ) : (
+                      <p className="font-cal text-lg tracking-tight text-white mb-1">{c.value}</p>
+                    )}
+                    <p className="text-sm text-white/50 leading-relaxed">{c.desc}</p>
+                  </div>
+                </FadeDiv>
+              ))}
+            </div>
+          </FadeContainer>
+        </div>
 
-      {/* Form + FAQ */}
-      <section className="max-w-6xl mx-auto px-6 py-20">
-        <div className="grid md:grid-cols-2 gap-16 items-start">
-
-          {/* Form */}
-          <div>
-            <span className="relative text-sm font-semibold tracking-tight text-primary">
-              <span className="absolute top-0.5 -left-3 h-4 w-[3px] rounded-r-sm bg-primary" />
-              Send a message
-            </span>
-            <h2 className="font-cal text-3xl md:text-4xl tracking-tight mt-3 mb-8">
+        {/* Form pane */}
+        <div className="px-6 lg:px-16 public-page-offset pt-16 lg:pt-24 pb-16 lg:pb-24">
+          <div className="max-w-md lg:mr-auto lg:ml-12 xl:ml-20">
+            <h2 className="font-cal text-3xl md:text-4xl tracking-tight mb-8 text-balance">
               Drop us a line.
             </h2>
 
             {status === "sent" ? (
-              <div className="rounded-2xl border border-blue-100 bg-blue-50 dark:bg-blue-950/40 p-10 text-center flex flex-col items-center gap-4">
+              <div className="rounded-2xl border border-blue-100 bg-blue-50 dark:border-blue-900/40 dark:bg-blue-950/40 p-10 text-center flex flex-col items-center gap-4">
                 <div className="flex items-center justify-center size-14 rounded-full bg-blue-600 text-white">
                   <Icon name="check-lg" className="text-2xl" />
                 </div>
@@ -284,41 +268,35 @@ export default function ContactPage() {
               </form>
             )}
           </div>
+        </div>
+      </section>
 
-          {/* FAQ */}
-          <div>
-            <span className="relative text-sm font-semibold tracking-tight text-primary">
-              <span className="absolute top-0.5 -left-3 h-4 w-[3px] rounded-r-sm bg-primary" />
-              Common questions
-            </span>
-            <h2 className="font-cal text-3xl md:text-4xl tracking-tight mt-3 mb-8">
-              Quick answers.
-            </h2>
+      {/* FAQ */}
+      <section className="max-w-2xl mx-auto px-6 py-20 md:py-28">
+        <div className="text-center mb-14">
+          <p className="text-sm font-semibold tracking-[0.2em] uppercase text-primary mb-4">Common questions</p>
+          <h2 className="font-cal text-3xl md:text-4xl tracking-tight">Quick answers.</h2>
+        </div>
 
-            <div className="space-y-px rounded-2xl overflow-hidden border border-gray-200 dark:border-neutral-800/70 bg-gray-200 dark:bg-neutral-700/70">
-              {faqs.map((f) => (
-                <div key={f.q} className="bg-white dark:bg-neutral-900 px-7 py-6 hover:bg-gray-50 dark:hover:bg-neutral-800/80 transition-colors">
-                  <p className="font-semibold text-sm text-foreground mb-2">{f.q}</p>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{f.a}</p>
-                </div>
-              ))}
+        <div className="divide-y divide-gray-200 dark:divide-neutral-800 border-y border-gray-200 dark:border-neutral-800">
+          {faqs.map((f) => (
+            <div key={f.q} className="py-6">
+              <p className="font-semibold text-foreground mb-2">{f.q}</p>
+              <p className="text-muted-foreground leading-relaxed">{f.a}</p>
             </div>
+          ))}
+        </div>
 
-            <div className="mt-6 rounded-xl border border-amber-100 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-950/40 p-5 flex items-start gap-4">
-              <div className="flex-shrink-0 flex items-center justify-center size-9 rounded-lg bg-amber-500 text-white mt-0.5">
-                <Icon name="book" className="text-sm" />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-foreground mb-0.5">Help centre</p>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  Step-by-step guides for setting up your booking page, managing staff, and more.{" "}
-                  <Link href="/help" className="text-amber-600 dark:text-amber-400 font-medium hover:underline underline-offset-4">
-                    Browse articles →
-                  </Link>
-                </p>
-              </div>
-            </div>
+        <div className="mt-10 flex items-center gap-4 rounded-xl border border-gray-200 dark:border-neutral-800 p-5">
+          <div className="flex-shrink-0 flex items-center justify-center size-10 rounded-lg bg-amber-500 text-white">
+            <Icon name="book" className="text-sm" />
           </div>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            Need step-by-step guides instead?{" "}
+            <Link href="/help" className="text-foreground font-medium hover:text-primary transition-colors underline underline-offset-4">
+              Browse the Help centre →
+            </Link>
+          </p>
         </div>
       </section>
 

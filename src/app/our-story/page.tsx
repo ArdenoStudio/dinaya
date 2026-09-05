@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArdenoStudioLogo } from "@/components/ArdenoStudioLogo";
 import { PublicNav } from "@/components/PublicNav";
 import { FadeContainer, FadeDiv, FadeSpan } from "@/components/Fade";
+import { ScrollReveal } from "@/components/ScrollReveal";
 import { LandingFooter } from "@/components/LandingFooter";
 import { Icon } from "@/components/ui/Icon";
 import { MARKETING_CTA_PRIMARY } from "@/lib/marketing-copy";
@@ -58,6 +59,14 @@ const timeline = [
   },
 ];
 
+function ChapterNumber({ n }: { n: number }) {
+  return (
+    <div className="font-cal text-3xl sm:text-4xl text-gray-200 dark:text-neutral-800 tabular-nums pt-1" aria-hidden="true">
+      {String(n).padStart(2, "0")}
+    </div>
+  );
+}
+
 export default function OurStoryPage() {
   return (
     <main className="min-h-screen bg-white dark:bg-neutral-950">
@@ -73,7 +82,7 @@ export default function OurStoryPage() {
             </span>
           </FadeDiv>
 
-          <h1 className="font-cal text-4xl md:text-5xl tracking-tight mb-5">
+          <h1 className="font-cal text-4xl md:text-5xl tracking-tight mb-5 text-balance">
             <FadeSpan>We got tired of watching great businesses</FadeSpan>{" "}
             <FadeSpan className="text-primary">lose clients to WhatsApp chaos.</FadeSpan>
           </h1>
@@ -88,129 +97,112 @@ export default function OurStoryPage() {
         </FadeContainer>
       </section>
 
-      {/* The Problem */}
-      <div className="bg-gray-50/80 dark:bg-neutral-900/40 border-y border-gray-100 dark:border-neutral-800/60">
-        <section className="max-w-6xl mx-auto px-6 py-20">
-          <div className="mb-10">
-            <span className="relative text-sm font-semibold tracking-tight text-primary">
-              <span className="absolute top-0.5 -left-3 h-4 w-[3px] rounded-r-sm bg-primary" />
-              The problem
-            </span>
-            <h2 className="font-cal text-3xl md:text-4xl tracking-tight mt-3 max-w-2xl">
-              Running a business in Sri Lanka shouldn&apos;t mean living in your WhatsApp inbox.
-            </h2>
-          </div>
+      {/* Chapters — one continuous narrative spine */}
+      <section className="max-w-3xl mx-auto px-6 pb-24 md:pb-32">
+        <div className="space-y-20 md:space-y-28">
 
-          <div className="grid md:grid-cols-3 gap-px bg-gray-200 dark:bg-neutral-700/70 rounded-2xl overflow-hidden border border-gray-200 dark:border-neutral-800/70">
-            {problems.map((p) => (
-              <div key={p.title} className="bg-white dark:bg-neutral-900 p-8 hover:bg-gray-50 dark:hover:bg-neutral-800/80 transition-colors">
-                <div className="mb-5 inline-flex">
-                  <div className="flex items-center justify-center size-11 rounded-xl bg-gray-100 dark:bg-neutral-800 text-gray-500 dark:text-gray-400">
-                    <Icon name={p.icon} className="text-[1.1rem]" />
-                  </div>
-                </div>
-                <h3 className="font-cal text-lg tracking-tight mb-2">{p.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{p.desc}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-      </div>
-
-      {/* The Spark */}
-      <section className="max-w-6xl mx-auto px-6 py-20">
-        <div className="grid md:grid-cols-2 gap-16 items-start">
-          <div>
-            <span className="relative text-sm font-semibold tracking-tight text-primary">
-              <span className="absolute top-0.5 -left-3 h-4 w-[3px] rounded-r-sm bg-primary" />
-              How it started
-            </span>
-            <h2 className="font-cal text-3xl md:text-4xl tracking-tight mt-3 mb-8">
-              One conversation. 47 unread messages.
-            </h2>
-            <div className="space-y-5 text-muted-foreground leading-relaxed">
-              <p>
-                It started with a conversation in 2024. A friend who runs a small hair salon in
-                Colombo showed us her WhatsApp — 47 unread booking messages, all needing a manual
-                reply.
-              </p>
-              <p>
-                We looked at the tools that existed. Most were built for US or European markets:
-                prices in USD, payment gateways that don&apos;t work locally, interfaces that assume
-                your clients use Google Calendar.
-              </p>
-              <p>
-                So we built our own. We spent months talking to salon owners, tutors, clinic
-                managers, and fitness coaches across Sri Lanka. We asked one question over and
-                over: what would actually make your life easier?
-              </p>
-              <p>
-                The answer was always the same: something simple, something local, something free
-                to start. That became Dinaya.
-              </p>
+          {/* 01 — The problem */}
+          <ScrollReveal className="grid grid-cols-[3rem_1fr] sm:grid-cols-[5rem_1fr] gap-5 sm:gap-10">
+            <ChapterNumber n={1} />
+            <div className="border-l-2 border-gray-200 dark:border-neutral-800 pl-6 sm:pl-10">
+              <p className="text-sm font-semibold tracking-[0.2em] uppercase text-primary mb-3">The problem</p>
+              <h2 className="font-cal text-3xl md:text-4xl tracking-tight mb-8 text-balance">
+                Running a business in Sri Lanka shouldn&apos;t mean living in your WhatsApp inbox.
+              </h2>
+              <ul className="space-y-5">
+                {problems.map((p) => (
+                  <li key={p.title} className="flex gap-4">
+                    <Icon name={p.icon} className="text-lg text-gray-400 dark:text-gray-500 mt-1 shrink-0" />
+                    <div>
+                      <p className="font-semibold text-foreground">{p.title}</p>
+                      <p className="text-muted-foreground leading-relaxed">{p.desc}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
             </div>
-          </div>
+          </ScrollReveal>
 
-          <div className="rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/40 border border-blue-100/60 dark:border-blue-900/50 p-8 flex flex-col gap-6">
-            <p className="text-xs font-semibold uppercase tracking-widest text-primary/70 dark:text-primary/80">2024</p>
-            <blockquote className="font-cal text-xl tracking-tight text-gray-900 dark:text-gray-100 leading-snug">
-              &ldquo;47 unread booking messages. That was the moment we knew we had to build this.&rdquo;
-            </blockquote>
-            <p className="text-sm text-muted-foreground italic">
-              — The conversation that started Dinaya
-            </p>
-            <div className="flex flex-wrap gap-2 pt-2 border-t border-blue-100 dark:border-blue-900/50">
-              {["Sri Lanka first", "LKR pricing", "Zero commission"].map((pill) => (
-                <span
-                  key={pill}
-                  className="inline-flex items-center rounded-full bg-white dark:bg-neutral-900 border border-blue-100 dark:border-blue-900/50 px-3 py-1 text-xs font-medium text-primary"
-                >
-                  {pill}
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Timeline */}
-      <div className="bg-gradient-to-b from-blue-50/50 to-transparent dark:from-blue-950/10 dark:to-transparent">
-        <section className="max-w-6xl mx-auto px-6 py-20">
-          <div className="mb-12">
-            <span className="relative text-sm font-semibold tracking-tight text-primary">
-              <span className="absolute top-0.5 -left-3 h-4 w-[3px] rounded-r-sm bg-primary" />
-              The journey
-            </span>
-            <h2 className="font-cal text-3xl md:text-4xl tracking-tight mt-3 max-w-2xl">
-              From a WhatsApp screenshot to a product used by real businesses.
-            </h2>
-          </div>
-
-          <div className="max-w-2xl relative pl-8 border-l-2 border-gray-200 dark:border-neutral-800 space-y-10">
-            {timeline.map((item) => (
-              <div key={item.period} className="relative">
-                <span className={`absolute -left-[1.3rem] top-1 size-[14px] rounded-full border-2 border-white dark:border-neutral-950 ${item.dot} shadow-sm`} />
-                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-1">
-                  {item.period}
+          {/* 02 — The spark */}
+          <ScrollReveal className="grid grid-cols-[3rem_1fr] sm:grid-cols-[5rem_1fr] gap-5 sm:gap-10">
+            <ChapterNumber n={2} />
+            <div className="border-l-2 border-gray-200 dark:border-neutral-800 pl-6 sm:pl-10">
+              <p className="text-sm font-semibold tracking-[0.2em] uppercase text-primary mb-3">How it started</p>
+              <h2 className="font-cal text-3xl md:text-4xl tracking-tight mb-8 text-balance">
+                One conversation. 47 unread messages.
+              </h2>
+              <div className="space-y-5 text-muted-foreground leading-relaxed mb-10">
+                <p>
+                  It started with a conversation in 2024. A friend who runs a small hair salon in
+                  Colombo showed us her WhatsApp — 47 unread booking messages, all needing a
+                  manual reply.
                 </p>
-                <h3 className="font-cal text-lg tracking-tight mb-1">{item.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+                <p>
+                  We looked at the tools that existed. Most were built for US or European
+                  markets: prices in USD, payment gateways that don&apos;t work locally,
+                  interfaces that assume your clients use Google Calendar.
+                </p>
+                <p>
+                  So we built our own. We spent months talking to salon owners, tutors, clinic
+                  managers, and fitness coaches across Sri Lanka. We asked one question over and
+                  over: what would actually make your life easier?
+                </p>
+                <p>
+                  The answer was always the same: something simple, something local, something
+                  free to start. That became Dinaya.
+                </p>
               </div>
-            ))}
-          </div>
-        </section>
-      </div>
+              <blockquote className="border-l-2 border-primary pl-6">
+                <p className="font-cal text-2xl md:text-3xl tracking-tight text-foreground leading-snug mb-3 text-balance">
+                  &ldquo;47 unread booking messages. That was the moment we knew we had to build
+                  this.&rdquo;
+                </p>
+                <cite className="text-sm text-muted-foreground not-italic">
+                  — The conversation that started Dinaya
+                </cite>
+              </blockquote>
+            </div>
+          </ScrollReveal>
 
-      {/* Team credit — kept deliberately short; /about owns the full team story */}
-      <section className="max-w-3xl mx-auto px-6 py-20 text-center">
-        <p className="text-muted-foreground leading-relaxed mb-6">
-          Dinaya is built by a small team at{" "}
-          <Link href="/about" className="text-foreground font-medium hover:text-primary transition-colors">
-            Ardeno Studio
-          </Link>
-          , a Sri Lankan product studio.
-        </p>
-        <ArdenoStudioLogo size="sm" className="mx-auto opacity-80" />
+          {/* 03 — The journey */}
+          <ScrollReveal className="grid grid-cols-[3rem_1fr] sm:grid-cols-[5rem_1fr] gap-5 sm:gap-10">
+            <ChapterNumber n={3} />
+            <div className="border-l-2 border-gray-200 dark:border-neutral-800 pl-6 sm:pl-10">
+              <p className="text-sm font-semibold tracking-[0.2em] uppercase text-primary mb-3">The journey</p>
+              <h2 className="font-cal text-3xl md:text-4xl tracking-tight mb-10 text-balance">
+                From a WhatsApp screenshot to a product used by real businesses.
+              </h2>
+              <div className="space-y-8">
+                {timeline.map((item) => (
+                  <div key={item.period} className="relative pl-6">
+                    <span className={`absolute left-0 top-[0.4rem] size-2 rounded-full ${item.dot}`} />
+                    <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-1">
+                      {item.period}
+                    </p>
+                    <h3 className="font-cal text-lg tracking-tight mb-1">{item.title}</h3>
+                    <p className="text-muted-foreground leading-relaxed">{item.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </ScrollReveal>
+
+          {/* 04 — Today */}
+          <ScrollReveal className="grid grid-cols-[3rem_1fr] sm:grid-cols-[5rem_1fr] gap-5 sm:gap-10">
+            <ChapterNumber n={4} />
+            <div className="border-l-2 border-gray-200 dark:border-neutral-800 pl-6 sm:pl-10">
+              <p className="text-sm font-semibold tracking-[0.2em] uppercase text-primary mb-3">Today</p>
+              <p className="text-muted-foreground leading-relaxed mb-6 max-w-md">
+                Dinaya is built by a small team at{" "}
+                <Link href="/about" className="text-foreground font-medium hover:text-primary transition-colors">
+                  Ardeno Studio
+                </Link>
+                , a Sri Lankan product studio.
+              </p>
+              <ArdenoStudioLogo size="sm" className="opacity-80" />
+            </div>
+          </ScrollReveal>
+        </div>
       </section>
 
       {/* CTA */}

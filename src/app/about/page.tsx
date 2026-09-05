@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArdenoStudioLogo } from "@/components/ArdenoStudioLogo";
+import { LogoIcon } from "@/components/Logo";
 import { PublicNav } from "@/components/PublicNav";
 import { FadeContainer, FadeDiv, FadeSpan } from "@/components/Fade";
 import { LandingFooter } from "@/components/LandingFooter";
@@ -15,26 +16,18 @@ export const metadata: Metadata = {
 
 const values = [
   {
-    icon: "geo-alt-fill",
-    color: "bg-blue-600",
     title: "Built for Sri Lanka",
     desc: "Every decision — currency, payment gateway, language, pricing — is made with Sri Lankan businesses in mind. Not adapted from a global product.",
   },
   {
-    icon: "lightning-charge",
-    color: "bg-amber-500",
     title: "Radically simple",
     desc: "If a salon owner in Kandy can't set it up in five minutes, we haven't done our job. Simplicity isn't a feature — it's the product.",
   },
   {
-    icon: "shield-check",
-    color: "bg-violet-500",
     title: "Honest pricing",
     desc: "Start with a 14-day free trial. No hidden fees, no commission on your bookings, no USD subscriptions. You keep what you earn.",
   },
   {
-    icon: "people-fill",
-    color: "bg-blue-600",
     title: "Our users first",
     desc: "We talk to business owners every week. Features come from real problems, not roadmap guesswork. Your feedback shapes the product.",
   },
@@ -53,111 +46,108 @@ export default function AboutPage() {
       <PublicNav />
 
       {/* Hero */}
-      <section className="max-w-4xl mx-auto px-6 public-page-offset pb-16 text-center">
+      <section className="max-w-4xl mx-auto px-6 public-page-offset pb-14 text-center">
         <FadeContainer className="flex flex-col items-center">
-          <FadeDiv className="mb-6">
+          <FadeDiv className="mb-7">
             <span className="inline-flex items-center gap-2 rounded-full border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 shadow-sm">
               <Icon name="geo-alt-fill" className="text-xs text-primary" />
               Made in Sri Lanka
             </span>
           </FadeDiv>
 
-          <h1 className="font-cal text-5xl tracking-tight mb-5">
+          <h1 className="font-cal text-5xl md:text-6xl tracking-tight mb-6 text-balance">
             <FadeSpan>We built the booking tool</FadeSpan>{" "}
             <FadeSpan className="text-primary">Sri Lanka needed.</FadeSpan>
           </h1>
 
           <FadeDiv>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Dinaya started from a simple frustration: too many great Sri Lankan businesses were
-              losing clients to WhatsApp chaos. We set out to fix that — simple, fast, and built
-              for how business actually works here.
+            <p className="text-lg text-muted-foreground max-w-xl mx-auto leading-relaxed">
+              Too many great Sri Lankan businesses were losing clients to WhatsApp chaos.
+              We set out to fix that — simple, fast, and built for how business actually
+              works here.
             </p>
           </FadeDiv>
         </FadeContainer>
       </section>
 
-      {/* Stats strip */}
-      <section className="max-w-5xl mx-auto px-6 pb-20">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-gray-200 dark:bg-neutral-700/70 rounded-2xl overflow-hidden border border-gray-200 dark:border-neutral-800/70">
+      {/* Stat bar — one confident row, no cards */}
+      <section className="max-w-4xl mx-auto px-6 pb-24 md:pb-28">
+        <div className="flex flex-wrap items-stretch justify-center border-y border-gray-200 dark:border-neutral-800 divide-x divide-gray-200 dark:divide-neutral-800">
           {stats.map((s) => (
-            <div key={s.label} className="bg-white dark:bg-neutral-900 px-6 py-7 text-center">
-              <div className="font-cal text-3xl tracking-tight text-primary mb-1">{s.value}</div>
-              <div className="text-sm text-muted-foreground">{s.label}</div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Read the full story — teaser, not a retelling */}
-      <div className="bg-gray-50/80 dark:bg-neutral-900/40 border-y border-gray-100 dark:border-neutral-800/60">
-        <section className="max-w-3xl mx-auto px-6 py-16 text-center">
-          <div className="inline-flex items-center justify-center size-12 rounded-2xl bg-primary/10 text-primary mb-5">
-            <Icon name="heart-fill" className="text-xl" />
-          </div>
-          <h2 className="font-cal text-2xl md:text-3xl tracking-tight mb-3">
-            Curious how Dinaya started?
-          </h2>
-          <p className="text-muted-foreground max-w-lg mx-auto mb-6 leading-relaxed">
-            From 47 unread WhatsApp messages to a booking tool built for Sri Lankan businesses —
-            read the full journey.
-          </p>
-          <Link
-            href="/our-story"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline underline-offset-4"
-          >
-            Read our story
-            <Icon name="arrow-right" className="text-xs" />
-          </Link>
-        </section>
-      </div>
-
-      {/* Values */}
-      <section className="max-w-6xl mx-auto px-6 py-20">
-        <div className="text-center mb-12">
-          <span className="relative text-sm font-semibold tracking-tight text-primary">
-            <span className="absolute top-0.5 -left-3 h-4 w-[3px] rounded-r-sm bg-primary" />
-            What we believe
-          </span>
-          <h2 className="font-cal text-3xl md:text-4xl mt-3 tracking-tight">
-            The principles behind everything we build.
-          </h2>
-        </div>
-
-        <div className="grid md:grid-cols-2 gap-px bg-gray-200 dark:bg-neutral-700/70 rounded-2xl overflow-hidden border border-gray-200 dark:border-neutral-800/70">
-          {values.map((v) => (
-            <div key={v.title} className="group p-8 bg-white dark:bg-neutral-900 hover:bg-gray-50 dark:hover:bg-neutral-800/80 transition-colors">
-              <div className="mb-5 inline-flex">
-                <div className={`flex items-center justify-center size-11 rounded-xl ${v.color} text-white`}>
-                  <Icon name={v.icon} className="text-[1.1rem]" />
-                </div>
+            <div key={s.label} className="flex-1 basis-1/2 sm:basis-0 text-center px-4 py-7 md:py-9">
+              <div className="font-cal text-3xl md:text-4xl tracking-tight text-foreground mb-1.5 tabular-nums">
+                {s.value}
               </div>
-              <h3 className="font-cal text-xl mb-2 tracking-tight">{v.title}</h3>
-              <p className="text-muted-foreground text-sm leading-relaxed text-pretty">{v.desc}</p>
+              <div className="text-[11px] md:text-xs uppercase tracking-widest text-muted-foreground">
+                {s.label}
+              </div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Made by Ardeno Studio */}
-      <div className="bg-gradient-to-b from-blue-50/50 to-transparent dark:from-blue-950/10 dark:to-transparent">
-        <section className="max-w-4xl mx-auto px-6 py-20">
-          <div className="rounded-2xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/50 p-8 md:p-12 text-center shadow-sm">
-            <p className="text-xs font-semibold tracking-widest uppercase text-gray-400 dark:text-gray-500 mb-5">The team behind Dinaya</p>
-            <div className="flex items-center justify-center mb-6">
-              <ArdenoStudioLogo size="xl" className="w-full max-w-xs" />
+      {/* Manifesto — numbered, not carded */}
+      <section className="max-w-3xl mx-auto px-6 pb-24 md:pb-28">
+        <div className="mb-14 md:mb-16">
+          <p className="text-sm font-semibold tracking-[0.2em] uppercase text-primary mb-4">
+            What we believe
+          </p>
+          <h2 className="font-cal text-3xl md:text-5xl tracking-tight text-balance">
+            Four ideas behind everything we build.
+          </h2>
+        </div>
+
+        <div className="border-t border-gray-200 dark:border-neutral-800">
+          {values.map((v, i) => (
+            <div
+              key={v.title}
+              className="group grid grid-cols-[3rem_1fr] sm:grid-cols-[5rem_1fr] gap-4 sm:gap-8 py-8 md:py-10 border-b border-gray-200 dark:border-neutral-800"
+            >
+              <span className="font-cal text-3xl md:text-5xl tracking-tight text-gray-200 dark:text-neutral-800 group-hover:text-primary transition-colors duration-300 tabular-nums">
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <div>
+                <h3 className="font-cal text-xl md:text-2xl tracking-tight mb-2">{v.title}</h3>
+                <p className="text-muted-foreground leading-relaxed max-w-lg">{v.desc}</p>
+              </div>
             </div>
-            <h2 className="font-cal text-2xl md:text-3xl tracking-tight mb-4">
-              Dinaya is a product by Ardeno Studio.
-            </h2>
-            <p className="text-muted-foreground max-w-xl mx-auto leading-relaxed">
-              Ardeno Studio is a Sri Lankan product studio focused on building software that
-              solves real problems for local businesses. Dinaya is our first public product —
-              and we&apos;re just getting started.
+          ))}
+        </div>
+      </section>
+
+      {/* Read the full story — one confident break in the page */}
+      <section className="px-6 pb-24 md:pb-28">
+        <div className="max-w-4xl mx-auto">
+          <div className="relative overflow-hidden rounded-3xl bg-primary px-8 py-14 md:py-16 text-center">
+            <LogoIcon className="pointer-events-none absolute -right-8 -bottom-10 h-44 w-44 text-white/10" />
+            <p className="relative text-xs font-semibold uppercase tracking-[0.2em] text-white/70 mb-4">
+              The origin story
             </p>
+            <h2 className="relative font-cal text-2xl md:text-4xl tracking-tight text-white max-w-xl mx-auto mb-7 text-balance">
+              From 47 unread WhatsApp messages to the tool Sri Lanka needed.
+            </h2>
+            <Link
+              href="/our-story"
+              className="relative inline-flex items-center gap-2 bg-white text-primary px-6 py-3 rounded-xl font-semibold hover:bg-white/90 transition-colors"
+            >
+              Read our story
+              <Icon name="arrow-right" className="text-sm" />
+            </Link>
           </div>
-        </section>
-      </div>
+        </div>
+      </section>
+
+      {/* Team — a signature, not a feature card */}
+      <section className="max-w-md mx-auto px-6 pb-24 md:pb-28 text-center">
+        <p className="text-xs font-semibold tracking-widest uppercase text-gray-400 dark:text-gray-500 mb-6">
+          The team behind Dinaya
+        </p>
+        <ArdenoStudioLogo size="md" className="mx-auto mb-6" />
+        <p className="text-muted-foreground leading-relaxed">
+          A Sri Lankan product studio building software that solves real problems for local
+          businesses. Dinaya is our first public product — and we&apos;re just getting started.
+        </p>
+      </section>
 
       {/* CTA */}
       <section className="px-6 pb-20">
