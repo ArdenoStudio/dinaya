@@ -100,7 +100,7 @@ export default function ContactPage() {
       {/* Split — info pane (always dark, like the footer) + form pane */}
       <section className="grid lg:grid-cols-2">
         {/* Info pane */}
-        <div className="bg-neutral-950 text-white px-6 lg:px-16 public-page-offset pb-16 lg:pb-24">
+        <div className="bg-neutral-950 text-white px-6 lg:px-16 public-page-offset pb-16 lg:pb-24 lg:flex lg:flex-col lg:justify-center">
           <FadeContainer className="max-w-md lg:ml-auto lg:mr-12 xl:mr-20">
             <FadeDiv className="mb-6">
               <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-medium text-white/80">
@@ -144,7 +144,7 @@ export default function ContactPage() {
         </div>
 
         {/* Form pane */}
-        <div className="px-6 lg:px-16 public-page-offset pt-16 lg:pt-24 pb-16 lg:pb-24">
+        <div className="px-6 lg:px-16 public-page-offset pt-16 lg:pt-24 pb-16 lg:pb-24 lg:flex lg:flex-col lg:justify-center">
           <div className="max-w-md lg:mr-auto lg:ml-12 xl:ml-20">
             <h2 className="font-cal text-3xl md:text-4xl tracking-tight mb-8 text-balance">
               Drop us a line.
