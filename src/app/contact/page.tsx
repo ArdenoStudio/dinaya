@@ -97,13 +97,13 @@ export default function ContactPage() {
     <main className="min-h-screen bg-white dark:bg-neutral-950">
       <PublicNav />
 
-      {/* Split — info pane (always dark, like the footer) + form pane */}
-      <section className="grid lg:grid-cols-2">
+      {/* Split — info pane + form pane, divided by a hairline */}
+      <section className="grid lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-gray-200 dark:divide-neutral-800">
         {/* Info pane */}
-        <div className="bg-neutral-950 text-white px-6 lg:px-16 public-page-offset pb-16 lg:pb-24 lg:flex lg:flex-col lg:justify-center">
+        <div className="px-6 lg:px-16 public-page-offset pb-16 lg:pb-24 lg:flex lg:flex-col lg:justify-center">
           <FadeContainer className="max-w-md lg:ml-auto lg:mr-12 xl:mr-20">
             <FadeDiv className="mb-6">
-              <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-medium text-white/80">
+              <span className="inline-flex items-center gap-2 rounded-full border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 shadow-sm">
                 <Icon name="chat-dots-fill" className="text-xs text-primary" />
                 Get in touch
               </span>
@@ -114,28 +114,28 @@ export default function ContactPage() {
             </h1>
 
             <FadeDiv>
-              <p className="text-white/60 leading-relaxed mb-12 max-w-sm">
+              <p className="text-muted-foreground leading-relaxed mb-12 max-w-sm">
                 Questions, feedback, partnership ideas, or just a hello — we read every message
                 and reply personally. No support bots, no ticket queues.
               </p>
             </FadeDiv>
 
-            <div className="space-y-7 divide-y divide-white/10">
+            <div className="space-y-7 divide-y divide-gray-200 dark:divide-neutral-800">
               {channels.map((c) => (
                 <FadeDiv key={c.label} className="flex items-start gap-4 pt-7 first:pt-0">
                   <div className={`flex items-center justify-center size-10 rounded-xl ${c.color} text-white shrink-0`}>
                     <Icon name={c.icon} className="text-base" />
                   </div>
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-widest text-white/40 mb-1">{c.label}</p>
+                    <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-1">{c.label}</p>
                     {c.href ? (
-                      <a href={c.href} className="font-cal text-lg tracking-tight text-white hover:text-primary transition-colors block mb-1">
+                      <a href={c.href} className="font-cal text-lg tracking-tight text-foreground hover:text-primary transition-colors block mb-1">
                         {c.value}
                       </a>
                     ) : (
-                      <p className="font-cal text-lg tracking-tight text-white mb-1">{c.value}</p>
+                      <p className="font-cal text-lg tracking-tight text-foreground mb-1">{c.value}</p>
                     )}
-                    <p className="text-sm text-white/50 leading-relaxed">{c.desc}</p>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{c.desc}</p>
                   </div>
                 </FadeDiv>
               ))}
