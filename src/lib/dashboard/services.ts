@@ -2,6 +2,7 @@ import { and, asc, count, desc, eq, gte, ilike, inArray, or, sql, type SQL } fro
 import { db } from "@/db";
 import { bookings, services, staff, staffServices } from "@/db/schema";
 import type { IntakeQuestion } from "@/lib/intake";
+import type { ServicePriceVariant } from "@/lib/service-variants";
 import type { serviceUpdateSchema } from "@/lib/schemas/services";
 import { isoDateString, nullableIsoDateString } from "@/lib/dashboard/serialization";
 import type { z } from "@/lib/validation";
@@ -23,6 +24,7 @@ export type ServiceDashboardUpdatedService = {
   dailyCapacity: number | null;
   maximumAdvanceDays: number | null;
   intakeQuestions: IntakeQuestion[] | null;
+  priceVariants: ServicePriceVariant[] | null;
   depositPercent: number;
   description: string | null;
   imageUrl: string | null;
@@ -59,6 +61,7 @@ const serviceUpdateFields = [
   "dailyCapacity",
   "maximumAdvanceDays",
   "intakeQuestions",
+  "priceVariants",
   "successRedirectUrl",
 ] as const;
 
@@ -119,6 +122,7 @@ export async function getServicesDashboardList(
         minimumNoticeHours: services.minimumNoticeHours,
         name: services.name,
         priceLkr: services.priceLkr,
+        priceVariants: services.priceVariants,
         requiresPayment: services.requiresPayment,
       })
       .from(services)
@@ -195,6 +199,7 @@ export async function getServiceDashboardDetail(businessId: string, serviceId: s
       dailyCapacity: services.dailyCapacity,
       maximumAdvanceDays: services.maximumAdvanceDays,
       intakeQuestions: services.intakeQuestions,
+      priceVariants: services.priceVariants,
       depositPercent: services.depositPercent,
       description: services.description,
       imageUrl: services.imageUrl,
@@ -310,6 +315,7 @@ export async function updateServiceDashboardFields(
       dailyCapacity: services.dailyCapacity,
       maximumAdvanceDays: services.maximumAdvanceDays,
       intakeQuestions: services.intakeQuestions,
+      priceVariants: services.priceVariants,
       depositPercent: services.depositPercent,
       description: services.description,
       imageUrl: services.imageUrl,

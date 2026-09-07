@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { buildServiceBookingPath } from "@/lib/booking-url";
+import { minPriceVariantLkr } from "@/lib/service-variants";
 import {
   formatHubLocationLine,
   hubTagline,
@@ -152,6 +153,8 @@ export default function BookingServiceHub({
   function renderHubService(service: BookingService) {
     const href = buildServiceBookingPath(businessSlug, service.slug ?? service.id);
     const iconName = serviceIconName(service.name);
+    const minVariantPrice = minPriceVariantLkr(service.priceVariants);
+    const displayPriceLkr = minVariantPrice ?? service.priceLkr;
     const rowClassName = cn(
       "group flex min-h-[4.75rem] w-full items-start gap-3.5 rounded-[1.375rem] border border-border/50 px-3.5 py-4 text-left md:px-4 md:py-[1.125rem]",
       "transition-[transform,background-color,box-shadow,border-color] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]",
@@ -185,7 +188,8 @@ export default function BookingServiceHub({
                 {" "}
                 ·{" "}
               </span>
-              <BookingServicePrice priceLkr={service.priceLkr} />
+              {minVariantPrice != null ? `${copy.fromPrice} ` : ""}
+              <BookingServicePrice priceLkr={displayPriceLkr} />
             </p>
           </div>
 

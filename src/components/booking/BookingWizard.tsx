@@ -7,9 +7,11 @@ import { format, parseISO } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import type { Location, Staff } from "@/db/schema";
 import type { IntakeQuestion } from "@/lib/intake";
+import type { ServicePriceVariant } from "@/lib/service-variants";
 import type { BookingRouter } from "@/lib/booking-router";
 import StepService from "./StepService";
 import StepLocation from "./StepLocation";
+import StepVariant from "./StepVariant";
 import StepStaff from "./StepStaff";
 import StepDateTime from "./StepDateTime";
 import StepConfirm from "./StepConfirm";
@@ -120,6 +122,7 @@ export type BookingService = {
   requiresPayment: boolean;
   depositPercent: number;
   intakeQuestions: IntakeQuestion[];
+  priceVariants: ServicePriceVariant[];
   categoryId?: string | null;
   categoryName?: string | null;
 };
@@ -127,6 +130,7 @@ export type BookingService = {
 export type BookingState = {
   location: Pick<Location, "id" | "name" | "address"> | null;
   service: BookingService | null;
+  priceVariantId: string | null;
   staff: Staff | null;
   date: string;
   timeSlot: string;
@@ -206,10 +210,15 @@ function BookingWizardInner({
     const matchedStaff = urlState.staffId
       ? staff.find((s) => s.id === urlState.staffId) ?? staffSelection.staff
       : staffSelection.staff;
+    const matchedPriceVariantId =
+      urlState.variantId && preselected?.priceVariants?.some((v) => v.id === urlState.variantId)
+        ? urlState.variantId
+        : null;
 
     return {
       location: defaultLocation,
       service: preselected,
+      priceVariantId: matchedPriceVariantId,
       staff: matchedStaff,
       date: urlState.date || todayStr,
       timeSlot: urlState.slot || "",
@@ -266,6 +275,7 @@ function BookingWizardInner({
     date: state.date,
     slotStartUtc: state.timeSlot,
     staffId: state.staff?.id ?? null,
+    variantId: state.priceVariantId,
     dealId: selectedDealId,
     enabled: !embedMode && !instantNav,
     setParams: setUrlParams,
@@ -275,6 +285,7 @@ function BookingWizardInner({
     date: state.date,
     slotStartUtc: state.timeSlot,
     staffId: state.staff?.id ?? null,
+    variantId: state.priceVariantId,
     dealId: selectedDealId,
     enabled: instantNav && !embedMode,
   });
@@ -422,6 +433,7 @@ function BookingWizardInner({
       );
       update({
         service,
+        priceVariantId: null,
         staff: staffSelection.staff,
         date: todayStr,
         timeSlot: "",
@@ -463,6 +475,7 @@ function BookingWizardInner({
       update({
         location: location ?? null,
         service,
+        priceVariantId: null,
         staff: staffSelection.staff,
         date: todayStr,
         timeSlot: "",
@@ -496,7 +509,7 @@ function BookingWizardInner({
 
   const clearService = useCallback(() => {
     clearSlot();
-    update({ service: null, staff: null });
+    update({ service: null, priceVariantId: null, staff: null });
     setAnyStaff(false);
     setSelectedDealId(null);
     void slotHold.releaseHold();
@@ -506,6 +519,22 @@ function BookingWizardInner({
     clearSlot();
     setAnyStaff(false);
     update({ staff: null });
+  }, [clearSlot]);
+
+  const selectedPriceVariant = useMemo(
+    () => state.service?.priceVariants?.find((v) => v.id === state.priceVariantId) ?? null,
+    [state.service, state.priceVariantId],
+  );
+  const needsVariantPicker = Boolean(state.service?.priceVariants?.length);
+  const showVariantStep = Boolean(state.service && needsVariantPicker && !state.priceVariantId);
+
+  const selectPriceVariant = useCallback((variant: ServicePriceVariant) => {
+    update({ priceVariantId: variant.id });
+  }, []);
+
+  const clearPriceVariant = useCallback(() => {
+    clearSlot();
+    update({ priceVariantId: null });
   }, [clearSlot]);
 
   useEffect(() => {
@@ -525,6 +554,7 @@ function BookingWizardInner({
 
   const showStaffStep = Boolean(
     state.service &&
+      !showVariantStep &&
       needsStaffPicker &&
       !state.staff &&
       !anyStaff &&
@@ -533,6 +563,7 @@ function BookingWizardInner({
 
   const canPickSlots = Boolean(
     state.service &&
+      !showVariantStep &&
       eligibleStaffCount > 0 &&
       (state.staff || anyStaff || !needsStaffPicker),
   );
@@ -561,7 +592,10 @@ function BookingWizardInner({
     lockServiceSelection,
     avgRating,
     reviewCount,
+    priceVariant: selectedPriceVariant,
+    needsVariantPicker,
     onChangeStaff: needsStaffPicker && !showStaffStep ? clearStaffSelection : undefined,
+    onChangeVariant: needsVariantPicker && !showVariantStep ? clearPriceVariant : undefined,
     onSelectLocation: (location: Pick<Location, "id" | "name" | "address">) => {
       clearSlot();
       setAnyStaff(false);
@@ -582,11 +616,14 @@ function BookingWizardInner({
         showContactForm,
         showStaffStep,
         needsStaffPicker,
+        showVariantStep,
+        needsVariantPicker,
         hubHref,
         onBackToHub,
         lockServiceSelection,
         multiService: services.length > 1,
         onBackToServices: clearService,
+        onBackToVariant: clearPriceVariant,
         onBackToStaff: clearStaffSelection,
         onBackToDateTime: clearSlot,
       })
@@ -601,9 +638,11 @@ function BookingWizardInner({
 
   const wizardStep: WizardStep = !state.service
     ? "service"
-    : showStaffStep
-      ? "staff"
-      : "dateTime";
+    : showVariantStep
+      ? "variant"
+      : showStaffStep
+        ? "staff"
+        : "dateTime";
 
   const accentPanel = theme.panelBackground === "accent";
 
@@ -666,6 +705,7 @@ function BookingWizardInner({
                     update({
                       location,
                       service: null,
+                      priceVariantId: null,
                       staff: null,
                       timeSlot: "",
                       timeSlotEnd: "",
@@ -684,6 +724,21 @@ function BookingWizardInner({
                 onSelect={selectService}
               />
             </div>
+          ) : showVariantStep ? (
+            <>
+              <div className="border-b border-border py-3 lg:hidden">
+                <BookingChoiceSummary
+                  serviceName={state.service?.name}
+                  stepLabel={copy.chooseOption}
+                />
+              </div>
+              <StepVariant
+                service={state.service!}
+                selectedId={state.priceVariantId}
+                copy={copy}
+                onSelect={selectPriceVariant}
+              />
+            </>
           ) : showStaffStep ? (
             <>
               <div className="border-b border-border py-3 lg:hidden">
@@ -762,6 +817,7 @@ function BookingWizardInner({
                         state={state}
                         business={business}
                         copy={copy}
+                        priceVariant={selectedPriceVariant}
                         selectedDeal={selectedDeal}
                         sessionToken={slotHold.sessionToken}
                         slotUnavailable={slotHold.slotUnavailable}

@@ -23,11 +23,13 @@ import {
   type ConfirmFieldErrors,
 } from "./booking-confirm-validation";
 import type { IntakeQuestion } from "@/lib/intake";
+import type { ServicePriceVariant } from "@/lib/service-variants";
 
 interface Props {
   state: BookingState;
   business: BookingBusiness;
   copy: BookingCopy;
+  priceVariant?: ServicePriceVariant | null;
   selectedDeal?: DealListItem | null;
   sessionToken?: string;
   slotUnavailable?: boolean;
@@ -184,6 +186,7 @@ export default function StepConfirm({
   state,
   business,
   copy,
+  priceVariant = null,
   selectedDeal,
   sessionToken,
   slotUnavailable = false,
@@ -249,15 +252,16 @@ export default function StepConfirm({
     ],
   );
 
+  const effectiveBasePriceLkr = priceVariant?.priceLkr ?? service?.priceLkr ?? 0;
   const discountedPrice =
     service && selectedDeal
-      ? computeDiscountedPrice(service.priceLkr, selectedDeal.discountPercent)
-      : service?.priceLkr ?? 0;
+      ? computeDiscountedPrice(effectiveBasePriceLkr, selectedDeal.discountPercent)
+      : effectiveBasePriceLkr;
   const depositAmount =
     service && service.depositPercent > 0
       ? selectedDeal
         ? computeAmountDueFromDiscountedPrice(discountedPrice, service.depositPercent)
-        : Math.ceil((service.priceLkr * service.depositPercent) / 100)
+        : Math.ceil((effectiveBasePriceLkr * service.depositPercent) / 100)
       : discountedPrice;
   const dueNow =
     service?.requiresPayment && discountedPrice > 0
@@ -301,7 +305,7 @@ export default function StepConfirm({
 
   const hasManualPaymentFallback = Boolean(
     service?.requiresPayment &&
-      service.priceLkr > 0 &&
+      effectiveBasePriceLkr > 0 &&
       !business.payhereEnabled &&
       (business.bankTransferInstructions || business.lankaqrImageUrl),
   );
@@ -388,6 +392,7 @@ export default function StepConfirm({
       body: JSON.stringify({
         businessId: business.id,
         serviceId: state.service!.id,
+        priceVariantId: state.priceVariantId ?? null,
         staffId: state.staff!.id,
         locationId: state.location?.id ?? null,
         startsAt: state.timeSlot,
@@ -455,11 +460,12 @@ export default function StepConfirm({
         {yearLabel ? <p className="text-xs text-muted-foreground">{yearLabel}</p> : null}
         <p className="mt-3 text-sm text-foreground">
           {service?.name}
+          {priceVariant ? <span className="text-muted-foreground"> · {priceVariant.label}</span> : null}
           {state.staff ? <span className="text-muted-foreground"> · {state.staff.name}</span> : null}
         </p>
       </div>
 
-      {service && service.priceLkr > 0 && (
+      {service && effectiveBasePriceLkr > 0 && (
         <div className={panelCardCls}>
           <div className="flex items-center justify-between gap-3">
             <p className="text-sm text-muted-foreground">{copy.fullAmount}</p>
@@ -467,12 +473,12 @@ export default function StepConfirm({
               {selectedDeal ? (
                 <>
                   <span className="mr-2 text-sm font-normal text-muted-foreground line-through">
-                    {formatLkr(service.priceLkr)}
+                    {formatLkr(effectiveBasePriceLkr)}
                   </span>
                   {formatLkr(discountedPrice)}
                 </>
               ) : (
-                formatLkr(service.priceLkr)
+                formatLkr(effectiveBasePriceLkr)
               )}
             </p>
           </div>

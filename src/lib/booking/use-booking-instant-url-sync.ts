@@ -7,6 +7,7 @@ export function useBookingInstantUrlSync(input: {
   date: string;
   slotStartUtc: string;
   staffId: string | null;
+  variantId: string | null;
   dealId: string | null;
   enabled?: boolean;
 }) {
@@ -23,10 +24,11 @@ export function useBookingInstantUrlSync(input: {
     apply("date", input.date || "");
     apply("slot", input.slotStartUtc || "");
     apply("staffId", input.staffId || "", "staff");
+    apply("variantId", input.variantId || "");
     apply("dealId", input.dealId || "");
 
     const qs = params.toString();
     const href = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
     window.history.replaceState(window.history.state, "", href);
-  }, [input.date, input.slotStartUtc, input.staffId, input.dealId, input.enabled]);
+  }, [input.date, input.slotStartUtc, input.staffId, input.variantId, input.dealId, input.enabled]);
 }

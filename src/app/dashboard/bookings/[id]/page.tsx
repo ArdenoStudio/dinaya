@@ -20,6 +20,7 @@ import {
 import { cn } from "@/lib/utils";
 import { bookingReminderText, whatsappUrl } from "@/lib/whatsapp";
 import type { IntakeAnswer } from "@/lib/intake";
+import type { ServicePriceVariant } from "@/lib/service-variants";
 
 type Booking = {
   id: string;
@@ -33,6 +34,7 @@ type Booking = {
   notes: string | null;
   staffNotes: string | null;
   intakeAnswers: IntakeAnswer[] | null;
+  priceVariant: ServicePriceVariant | null;
   serviceName: string;
   serviceDuration: number;
   staffName: string;
@@ -184,6 +186,9 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
               <Icon name="scissors" className="mt-0.5 shrink-0 text-sm text-muted-foreground" />
               <div>
                 <p className="text-sm font-medium">{booking.serviceName}</p>
+                {booking.priceVariant ? (
+                  <p className="text-xs text-muted-foreground">{booking.priceVariant.label}</p>
+                ) : null}
                 <p className="flex items-center gap-1 text-xs text-muted-foreground">
                   <Icon name="clock" /> {booking.serviceDuration} min
                 </p>

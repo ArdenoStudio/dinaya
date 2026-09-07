@@ -261,7 +261,7 @@ export default async function PricingPage() {
             {faqs.map((item) => (
               <details key={item.q} className="group py-5">
                 <summary className="flex cursor-pointer list-none items-start justify-between gap-4">
-                  <span className="font-cal text-base tracking-tight text-foreground">{item.q}</span>
+                  <span className="text-base font-semibold text-foreground">{item.q}</span>
                   <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full border border-border text-muted-foreground transition-[background-color,border-color,color,transform] duration-150 group-open:border-primary group-open:bg-primary group-open:text-primary-foreground">
                     <Icon
                       name="plus"

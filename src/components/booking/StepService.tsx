@@ -16,6 +16,7 @@ import {
 import type { BookingService } from "./BookingWizard";
 import type { BookingCopy } from "@/lib/i18n";
 import type { BookingRouter } from "@/lib/booking-router";
+import { minPriceVariantLkr } from "@/lib/service-variants";
 
 interface Props {
   services: BookingService[];
@@ -38,10 +39,12 @@ function ServiceRow({
   onSelect: () => void;
   showCategory?: boolean;
 }) {
+  const minVariantPrice = minPriceVariantLkr(service.priceVariants);
+  const displayPriceLkr = minVariantPrice ?? service.priceLkr;
   const depositAmount =
     service.depositPercent > 0
-      ? Math.ceil((service.priceLkr * service.depositPercent) / 100)
-      : service.priceLkr;
+      ? Math.ceil((displayPriceLkr * service.depositPercent) / 100)
+      : displayPriceLkr;
 
   return (
     <button
@@ -76,14 +79,15 @@ function ServiceRow({
             <Icon name="clock" />
             {service.durationMinutes}m
           </Badge>
-          {service.priceLkr > 0 ? (
+          {displayPriceLkr > 0 ? (
             <Badge variant="outline" className="font-medium tabular-nums">
-              <BookingServicePrice priceLkr={service.priceLkr} />
+              {minVariantPrice != null ? `${copy.fromPrice} ` : ""}
+              <BookingServicePrice priceLkr={displayPriceLkr} />
             </Badge>
           ) : (
             <Badge variant="outline">Free</Badge>
           )}
-          {service.requiresPayment && service.priceLkr > 0 && service.depositPercent > 0 ? (
+          {service.requiresPayment && displayPriceLkr > 0 && service.depositPercent > 0 ? (
             <Badge variant="outline">
               {copy.depositDue}: {formatLkr(depositAmount)}
             </Badge>

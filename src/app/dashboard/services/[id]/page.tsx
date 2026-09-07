@@ -5,9 +5,11 @@ import { useRouter } from "next/navigation";
 import * as Dialog from "@radix-ui/react-dialog";
 import { ConfirmDialog } from "@/components/dashboard/ConfirmDialog";
 import { IntakeQuestionsEditor } from "@/components/dashboard/IntakeQuestionsEditor";
+import { PriceVariantsEditor } from "@/components/dashboard/PriceVariantsEditor";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
 import { DashboardSection } from "@/components/dashboard/DashboardSection";
 import type { IntakeQuestion } from "@/lib/intake";
+import { minPriceVariantLkr, type ServicePriceVariant } from "@/lib/service-variants";
 import {
   dashboardErrorAlertClass,
   dashboardInputClass,
@@ -34,6 +36,7 @@ interface ServiceForm {
   dailyCapacity: string | number;
   maximumAdvanceDays: number;
   intakeQuestions: IntakeQuestion[];
+  priceVariants: ServicePriceVariant[];
   successRedirectUrl: string;
 }
 
@@ -77,6 +80,7 @@ export default function EditServicePage({ params }: { params: Promise<{ id: stri
         dailyCapacity: d.dailyCapacity ?? "",
         maximumAdvanceDays: d.maximumAdvanceDays ?? 0,
         intakeQuestions: d.intakeQuestions ?? [],
+        priceVariants: d.priceVariants ?? [],
         successRedirectUrl: d.successRedirectUrl ?? "",
       });
       setAllStaff(Array.isArray(staffList) ? staffList : []);
@@ -225,8 +229,24 @@ export default function EditServicePage({ params }: { params: Promise<{ id: stri
             <input type="number" min={0} value={form.priceLkr}
               onChange={(e) => setForm((f) => f && ({ ...f, priceLkr: parseInt(e.target.value) || 0 }))}
               className={dashboardInputClass} />
+            {form.priceVariants.length > 0 && (
+              <p className="mt-1 text-xs text-muted-foreground">
+                Only shown as a fallback — clients pick from your price options below.
+              </p>
+            )}
           </div>
         </div>
+
+        <PriceVariantsEditor
+          value={form.priceVariants}
+          onChange={(priceVariants) =>
+            setForm((f) => {
+              if (!f) return f;
+              const min = minPriceVariantLkr(priceVariants);
+              return { ...f, priceVariants, priceLkr: min ?? f.priceLkr };
+            })
+          }
+        />
 
         <div>
           <label className={dashboardLabelClass}>Buffer time</label>

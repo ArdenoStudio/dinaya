@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { IntakeQuestionsEditor } from "@/components/dashboard/IntakeQuestionsEditor";
+import { PriceVariantsEditor } from "@/components/dashboard/PriceVariantsEditor";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
 import type { IntakeQuestion } from "@/lib/intake";
+import { minPriceVariantLkr, type ServicePriceVariant } from "@/lib/service-variants";
 import {
   dashboardErrorAlertClass,
   dashboardInputClass,
@@ -31,6 +33,7 @@ export default function NewServicePage() {
     dailyCapacity: "" as string | number,
     maximumAdvanceDays: 0,
     intakeQuestions: [] as IntakeQuestion[],
+    priceVariants: [] as ServicePriceVariant[],
     successRedirectUrl: "",
   });
   const [loading, setLoading] = useState(false);
@@ -88,8 +91,22 @@ export default function NewServicePage() {
             <input type="number" min={0} value={form.priceLkr}
               onChange={(e) => setForm((f) => ({ ...f, priceLkr: parseInt(e.target.value) || 0 }))}
               className={dashboardInputClass} />
+            {form.priceVariants.length > 0 && (
+              <p className="mt-1 text-xs text-muted-foreground">
+                Only shown as a fallback — clients pick from your price options below.
+              </p>
+            )}
           </div>
         </div>
+        <PriceVariantsEditor
+          value={form.priceVariants}
+          onChange={(priceVariants) =>
+            setForm((f) => {
+              const min = minPriceVariantLkr(priceVariants);
+              return { ...f, priceVariants, priceLkr: min ?? f.priceLkr };
+            })
+          }
+        />
         <div>
           <label className={dashboardLabelClass}>Buffer time</label>
           <p className="text-xs text-muted-foreground mb-2">Block time before/after each appointment for prep or cleanup.</p>

@@ -61,6 +61,7 @@ export default async function ClientBookingPage({ params }: Props) {
     requiresPayment: booking.requiresPayment,
     depositPercent: booking.depositPercent,
     intakeQuestions: [],
+    priceVariants: [],
   };
 
   const staffMember: Staff = {

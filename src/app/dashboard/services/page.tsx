@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { formatLkr } from "@/lib/utils";
+import { minPriceVariantLkr } from "@/lib/service-variants";
 import { requireOwner } from "@/lib/auth";
 import { getServicesDashboardList } from "@/lib/dashboard/services";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
@@ -61,7 +62,11 @@ export default async function ServicesPage() {
                   </span>
                   <span className="flex items-center gap-1">
                     <Icon name="credit-card" />
-                    {s.priceLkr > 0 ? formatLkr(s.priceLkr) : "Free"}
+                    {minPriceVariantLkr(s.priceVariants) != null
+                      ? `From ${formatLkr(minPriceVariantLkr(s.priceVariants)!)}`
+                      : s.priceLkr > 0
+                        ? formatLkr(s.priceLkr)
+                        : "Free"}
                   </span>
                   {s.requiresPayment && (
                     <span className="text-amber-600 font-medium">

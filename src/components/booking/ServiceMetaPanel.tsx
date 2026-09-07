@@ -7,6 +7,7 @@ import type { Location } from "@/db/schema";
 import type { BookingBusiness, BookingService } from "./BookingWizard";
 import type { BookingCopy } from "@/lib/i18n";
 import type { DealListItem } from "@/lib/deals/queries";
+import type { ServicePriceVariant } from "@/lib/service-variants";
 import { formatLkr } from "@/lib/utils";
 import { Icon } from "@/components/ui/Icon";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -35,7 +36,10 @@ interface ServiceMetaPanelProps {
   lockServiceSelection: boolean;
   avgRating?: number | null;
   reviewCount?: number;
+  priceVariant?: ServicePriceVariant | null;
+  needsVariantPicker?: boolean;
   onChangeStaff?: () => void;
+  onChangeVariant?: () => void;
   onSelectLocation: (location: Pick<Location, "id" | "name" | "address">) => void;
   onChangeService?: () => void;
 }
@@ -65,7 +69,10 @@ export function ServiceMetaPanel({
   lockServiceSelection,
   avgRating,
   reviewCount,
+  priceVariant = null,
+  needsVariantPicker = false,
   onChangeStaff,
+  onChangeVariant,
   onSelectLocation,
   onChangeService,
 }: ServiceMetaPanelProps) {
@@ -75,10 +82,11 @@ export function ServiceMetaPanel({
     ? format(parseISO(selectedDate + "T12:00:00"), "EEE, d MMM yyyy")
     : null;
 
+  const effectivePriceLkr = priceVariant?.priceLkr ?? service?.priceLkr ?? 0;
   const price =
-    service && selectedDeal && service.priceLkr > 0
-      ? computeDiscountedPrice(service.priceLkr, selectedDeal.discountPercent)
-      : service?.priceLkr ?? 0;
+    service && selectedDeal && effectivePriceLkr > 0
+      ? computeDiscountedPrice(effectivePriceLkr, selectedDeal.discountPercent)
+      : effectivePriceLkr;
 
   const staffLabel = staff && staff.name !== business.name ? staff.name : null;
   const rating = getBusinessRating(avgRating, reviewCount);
@@ -93,8 +101,8 @@ export function ServiceMetaPanel({
         ·
       </span>
       <BookingServicePrice
-        priceLkr={service.priceLkr}
-        displayPrice={selectedDeal && service.priceLkr > 0 ? price : undefined}
+        priceLkr={effectivePriceLkr}
+        displayPrice={selectedDeal && effectivePriceLkr > 0 ? price : undefined}
       />
     </div>
   ) : null;
@@ -218,6 +226,20 @@ export function ServiceMetaPanel({
                 </p>
               ) : null}
               <div className="mt-3">{durationPrice}</div>
+              {priceVariant ? (
+                <div className="mt-2 flex items-start justify-between gap-3">
+                  <p className="text-sm text-muted-foreground">{priceVariant.label}</p>
+                  {onChangeVariant && needsVariantPicker ? (
+                    <button
+                      type="button"
+                      onClick={onChangeVariant}
+                      className="shrink-0 text-xs font-medium booking-text-accent hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--booking-accent-soft)] focus-visible:ring-offset-2"
+                    >
+                      {copy.changeOption}
+                    </button>
+                  ) : null}
+                </div>
+              ) : null}
               {(staffLabel || anyStaff) && (
                 <div className="mt-3 flex items-start justify-between gap-3">
                   <p className="flex min-w-0 items-center gap-2 text-sm text-muted-foreground">
@@ -237,7 +259,7 @@ export function ServiceMetaPanel({
                   ) : null}
                 </div>
               )}
-              {service.depositPercent > 0 && service.priceLkr > 0 ? (
+              {service.depositPercent > 0 && effectivePriceLkr > 0 ? (
                 <p className="mt-3 text-xs font-medium text-foreground">
                   <span className="text-muted-foreground">{copy.depositDue}: </span>
                   <span className="booking-text-accent">

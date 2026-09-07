@@ -5,6 +5,7 @@ import { resolveServiceSlug } from "@/lib/service-slug";
 import { emptyReviewDistribution } from "@/lib/reviews-public";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
 import type { IntakeQuestion } from "@/lib/intake";
+import type { ServicePriceVariant } from "@/lib/service-variants";
 
 type JsonRow = Record<string, unknown>;
 
@@ -76,6 +77,7 @@ function mapService(row: JsonRow, intakeEnabled: boolean) {
     dailyCapacity: (row.daily_capacity as number | null) ?? null,
     maximumAdvanceDays: (row.maximum_advance_days as number | null) ?? null,
     intakeQuestions: intakeEnabled ? ((row.intake_questions as IntakeQuestion[] | null) ?? []) : [],
+    priceVariants: (row.price_variants as ServicePriceVariant[] | null) ?? [],
     createdAt: asDate(row.created_at) ?? new Date(),
     categoryId: (row.category_id as string | null) ?? null,
     categoryName: category?.name ?? null,

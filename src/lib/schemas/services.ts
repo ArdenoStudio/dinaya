@@ -1,5 +1,6 @@
 import { z } from "@/lib/validation";
 import { intakeQuestionsSchema } from "@/lib/intake";
+import { servicePriceVariantsSchema } from "@/lib/service-variants";
 
 export const serviceCreateSchema = z.object({
   name: z.string().trim().min(1).max(120),
@@ -15,6 +16,7 @@ export const serviceCreateSchema = z.object({
   dailyCapacity: z.coerce.number().int().min(1).max(1000).optional().nullable(),
   maximumAdvanceDays: z.coerce.number().int().min(1).max(365).optional().nullable(),
   intakeQuestions: intakeQuestionsSchema.optional().nullable(),
+  priceVariants: servicePriceVariantsSchema.optional().nullable(),
   successRedirectUrl: z
     .string()
     .trim()
@@ -47,6 +49,7 @@ export const serviceUpdateSchema = z
     dailyCapacity: z.coerce.number().int().min(1).max(1000).optional().nullable(),
     maximumAdvanceDays: z.coerce.number().int().min(1).max(365).optional().nullable(),
     intakeQuestions: intakeQuestionsSchema.optional().nullable(),
+    priceVariants: servicePriceVariantsSchema.optional().nullable(),
     successRedirectUrl: z
       .string()
       .trim()
