@@ -50,13 +50,13 @@ export function DocsGuideThumbnail({ mockupId, screenshotSrc, className }: Props
             <DocsBookingMockup variant={id} />
           </div>
         ) : (
-          <div className="w-[54rem]">
+          <div className="w-216">
             <DocsDashboardMockup variant={id} />
           </div>
         )}
       </div>
       <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-black/[0.08] via-black/[0.02] to-transparent dark:from-black/45"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-linear-to-t from-black/8 via-black/2 to-transparent dark:from-black/45"
         aria-hidden
       />
     </div>

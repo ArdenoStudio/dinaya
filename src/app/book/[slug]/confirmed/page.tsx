@@ -109,7 +109,7 @@ export default async function BookingConfirmedPage({ params, searchParams }: Pro
   return (
     <div className="booking-page-bg flex min-h-dvh items-start justify-center px-4 py-10 md:py-14">
       <div className="w-full max-w-md space-y-4">
-        <div className="rounded-2xl border border-border bg-card p-6 shadow-sm md:p-8">
+        <div className="rounded-2xl border border-border bg-card p-6 shadow-xs md:p-8">
           <div className="mb-4 flex justify-center">
             <div
               className={`flex size-12 items-center justify-center rounded-full ${
@@ -228,7 +228,7 @@ export default async function BookingConfirmedPage({ params, searchParams }: Pro
 
           <Link
             href={`/book/${slug}`}
-            className="mt-4 block text-center text-sm text-[var(--booking-accent)] hover:underline"
+            className="mt-4 block text-center text-sm booking-text-accent hover:underline"
           >
             ← {copy.backToBooking}
           </Link>

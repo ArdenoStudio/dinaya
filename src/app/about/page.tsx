@@ -49,7 +49,7 @@ export default function AboutPage() {
       <section className="max-w-4xl mx-auto px-6 public-page-offset pb-14 text-center">
         <FadeContainer className="flex flex-col items-center">
           <FadeDiv className="mb-7">
-            <span className="inline-flex items-center gap-2 rounded-full border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 shadow-sm">
+            <span className="inline-flex items-center gap-2 rounded-full border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 shadow-xs">
               <Icon name="geo-alt-fill" className="text-xs text-primary" />
               Made in Sri Lanka
             </span>
@@ -152,7 +152,7 @@ export default function AboutPage() {
       {/* CTA */}
       <section className="px-6 pb-20">
         <div className="max-w-6xl mx-auto">
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 px-8 py-16 text-center shadow-2xl shadow-blue-500/20">
+          <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-blue-600 via-blue-700 to-indigo-800 px-8 py-16 text-center shadow-2xl shadow-blue-500/20">
             <div className="pointer-events-none absolute -top-24 -right-24 size-64 rounded-full bg-white/10 blur-3xl" />
             <div className="pointer-events-none absolute -bottom-16 -left-16 size-48 rounded-full bg-primary/30 blur-3xl" />
             <div className="relative z-10">
@@ -172,7 +172,7 @@ export default function AboutPage() {
                 </Link>
                 <Link
                   href="/features"
-                  className="inline-flex items-center gap-2 bg-black/25 border border-white/35 text-white px-7 py-3.5 rounded-xl font-medium hover:bg-black/40 backdrop-blur-sm transition-colors"
+                  className="inline-flex items-center gap-2 bg-black/25 border border-white/35 text-white px-7 py-3.5 rounded-xl font-medium hover:bg-black/40 backdrop-blur-xs transition-colors"
                 >
                   See all features
                 </Link>

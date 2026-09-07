@@ -54,8 +54,8 @@ function ServiceRow({
         "group flex w-full items-start gap-3 rounded-[1.375rem] border p-3.5 text-left transition-[transform,background-color,box-shadow,border-color] duration-200",
         "motion-reduce:transition-none active:scale-[0.96] motion-reduce:active:scale-100",
         selected
-          ? "border-[var(--booking-accent)] bg-[var(--booking-accent-muted)]/50 shadow-sm ring-2 ring-[var(--booking-accent-soft)]"
-          : "border-border/50 hover:border-[var(--booking-accent)]/25 hover:bg-[var(--booking-accent-muted)] hover:shadow-sm",
+          ? "booking-border-accent bg-(--booking-accent-muted)/50 shadow-xs ring-2 ring-(--booking-accent-soft)"
+          : "border-border/50 hover:border-(--booking-accent)/25 hover:booking-bg-accent-muted hover:shadow-xs",
       )}
     >
       <BookingServiceThumb
@@ -65,7 +65,7 @@ function ServiceRow({
         size="sm"
       />
       <div className="min-w-0 flex-1">
-        <p className={cn("font-medium transition-colors duration-200", selected ? "text-[var(--booking-accent)]" : "text-foreground group-hover:text-[var(--booking-accent)]")}>
+        <p className={cn("font-medium transition-colors duration-200", selected ? "booking-text-accent" : "text-foreground group-hover:booking-text-accent")}>
           {service.name}
         </p>
         {showCategory && service.categoryName ? (
@@ -152,11 +152,11 @@ export default function StepService({ services, selected, copy, bookingRouter, o
                     "group flex w-full items-center justify-between gap-3 rounded-[1.375rem] border px-3.5 py-3 text-left transition-[transform,background-color,box-shadow,border-color] duration-200",
                     "motion-reduce:transition-none active:scale-[0.96] motion-reduce:active:scale-100",
                     isSelected
-                      ? "border-[var(--booking-accent)] bg-[var(--booking-accent-muted)]/50 shadow-sm ring-2 ring-[var(--booking-accent-soft)]"
-                      : "border-border/50 hover:border-[var(--booking-accent)]/25 hover:bg-[var(--booking-accent-muted)] hover:shadow-sm",
+                      ? "booking-border-accent bg-(--booking-accent-muted)/50 shadow-xs ring-2 ring-(--booking-accent-soft)"
+                      : "border-border/50 hover:border-(--booking-accent)/25 hover:booking-bg-accent-muted hover:shadow-xs",
                   )}
                 >
-                  <span className={cn("text-sm font-medium transition-colors duration-200", isSelected ? "text-[var(--booking-accent)]" : "text-foreground group-hover:text-[var(--booking-accent)]")}>
+                  <span className={cn("text-sm font-medium transition-colors duration-200", isSelected ? "booking-text-accent" : "text-foreground group-hover:booking-text-accent")}>
                     {o.label}
                   </span>
                   <BookingServiceArrow selected={isSelected} />

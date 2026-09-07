@@ -251,7 +251,7 @@ export function BroadcastsClient() {
           rows={rows}
           getRowId={(row) => row.id}
           mobileCard={(row) => (
-            <div key={row.id} className="rounded-2xl border border-border/80 bg-card p-4 shadow-sm">
+            <div key={row.id} className="rounded-2xl border border-border/80 bg-card p-4 shadow-xs">
               <div className="flex items-center justify-between gap-3">
                 <p className="font-medium">{row.name}</p>
                 <span className="shrink-0 text-xs capitalize text-muted-foreground">{row.channel}</span>

@@ -52,7 +52,7 @@ export function DocsMockupCapture({
     );
     if (!staged || compact) return phone;
     return (
-      <div className={cn("flex justify-center rounded-[1.5rem] px-4 py-6 sm:px-8 sm:py-8", docsStageSurface)}>
+      <div className={cn("flex justify-center rounded-3xl px-4 py-6 sm:px-8 sm:py-8", docsStageSurface)}>
         {phone}
       </div>
     );
@@ -61,7 +61,7 @@ export function DocsMockupCapture({
   const dashboard = (
     <div
       className={cn(
-        "overflow-hidden rounded-2xl border border-black/[0.06] bg-white dark:border-white/[0.08] dark:bg-neutral-900",
+        "overflow-hidden rounded-2xl border border-black/6 bg-white dark:border-white/8 dark:bg-neutral-900",
         docsFrameShadow,
       )}
     >
@@ -76,7 +76,7 @@ export function DocsMockupCapture({
 
   if (!staged || compact) return dashboard;
   return (
-    <div className={cn("p-2.5 sm:p-[0.65rem]", docsStageSurface, "rounded-[1.35rem] sm:rounded-[1.5rem]")}>
+    <div className={cn("p-2.5 sm:p-[0.65rem]", docsStageSurface, "rounded-[1.35rem] sm:rounded-3xl")}>
       {dashboard}
     </div>
   );
@@ -84,11 +84,11 @@ export function DocsMockupCapture({
 
 function BrowserChrome() {
   return (
-    <div className="flex items-center gap-2 border-b border-black/[0.05] bg-[hsl(var(--dashboard-chrome))]/90 px-3 py-2 dark:border-white/[0.07]">
+    <div className="flex items-center gap-2 border-b border-black/5 bg-[hsl(var(--dashboard-chrome))]/90 px-3 py-2 dark:border-white/[0.07]">
       <span className="size-2.5 rounded-full" style={{ backgroundColor: lights.close }} />
       <span className="size-2.5 rounded-full" style={{ backgroundColor: lights.minimize }} />
       <span className="size-2.5 rounded-full" style={{ backgroundColor: lights.zoom }} />
-      <div className="ml-1 flex min-w-0 flex-1 items-center rounded-md border border-black/[0.05] bg-white/85 px-2 py-0.5 dark:border-white/[0.08] dark:bg-neutral-800/90">
+      <div className="ml-1 flex min-w-0 flex-1 items-center rounded-md border border-black/5 bg-white/85 px-2 py-0.5 dark:border-white/8 dark:bg-neutral-800/90">
         <span className="truncate font-mono text-[10px] text-gray-500">dilini.dinaya.lk/dashboard</span>
       </div>
     </div>

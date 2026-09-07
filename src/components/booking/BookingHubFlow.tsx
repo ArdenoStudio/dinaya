@@ -229,7 +229,7 @@ export function BookingHubFlow({
   const flowBody = (
     <>
       {!centeredLayout && !hideSidebarSections && gallery.length > 0 && (
-        <Card className="overflow-hidden rounded-none border-x-0 border-t-0 shadow-none md:mb-6 md:rounded-xl md:border-x md:shadow-sm">
+        <Card className="overflow-hidden rounded-none border-x-0 border-t-0 shadow-none md:mb-6 md:rounded-xl md:border-x md:shadow-xs">
           <div
             className={`grid gap-0.5 overflow-hidden md:gap-2 ${
               gallery.length === 1
@@ -308,7 +308,7 @@ export function BookingHubFlow({
           className={`mt-0 overflow-hidden rounded-none border-x-0 shadow-none ${
             centeredLayout
               ? "mt-6 border-border/60 md:rounded-xl md:border-x md:shadow-none"
-              : "md:mt-6 md:rounded-xl md:border-x md:shadow-sm"
+              : "md:mt-6 md:rounded-xl md:border-x md:shadow-xs"
           }`}
         >
           <CardContent className="p-6">

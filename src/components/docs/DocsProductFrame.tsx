@@ -45,7 +45,7 @@ export function DocsProductFrame({
       className={cn(
         "relative w-full overflow-hidden bg-white dark:bg-neutral-900",
         // Captures are 2560×1600 — keep exact ratio so object-cover doesn't crop unevenly
-        "aspect-[16/10]",
+        "aspect-16/10",
         compact ? "rounded-xl" : "rounded-[1.05rem]",
         docsShotShadow,
         className,
@@ -57,7 +57,7 @@ export function DocsProductFrame({
         fill
         unoptimized
         // Exact aspect match → cover equals fill; pin top-left for stable highlight coords
-        className="object-cover object-left-top"
+        className="object-cover object-top-left"
         sizes={compact ? "280px" : "(max-width: 768px) 100vw, 720px"}
         priority={!compact}
       />
@@ -77,7 +77,7 @@ export function DocsProductFrame({
 
   // Concentric: outer 22px, pad 10px → inner ~12px (1.05rem)
   return (
-    <div className={cn("p-2.5 sm:p-[0.65rem]", docsStageSurface, "rounded-[1.35rem] sm:rounded-[1.5rem]")}>
+    <div className={cn("p-2.5 sm:p-[0.65rem]", docsStageSurface, "rounded-[1.35rem] sm:rounded-3xl")}>
       {shot}
     </div>
   );

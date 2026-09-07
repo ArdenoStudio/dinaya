@@ -108,7 +108,7 @@ export function SlotListPanel({
                     className={`flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-medium transition-colors ${
                       isSelected
                         ? "booking-bg-accent border-transparent text-white booking-shadow-accent"
-                        : "border-[var(--booking-accent-soft)] bg-[var(--booking-accent-muted)] text-foreground hover:border-[var(--booking-accent)] hover:bg-[var(--booking-accent-soft)]"
+                        : "border-(--booking-accent-soft) booking-bg-accent-muted text-foreground hover:booking-border-accent hover:booking-bg-accent-soft"
                     }`}
                   >
                     {/* Cal.com-style overlay indicator: warning dot when the
@@ -134,7 +134,7 @@ export function SlotListPanel({
         );
       })}
       <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-background to-transparent"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-linear-to-t from-background to-transparent"
         aria-hidden
       />
     </div>

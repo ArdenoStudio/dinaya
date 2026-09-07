@@ -7,7 +7,7 @@ type Props = {
 };
 
 const linkClass =
-  "inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border border-border/70 text-muted-foreground transition-colors hover:border-[var(--booking-accent)]/40 hover:text-[var(--booking-accent)]";
+  "inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border border-border/70 text-muted-foreground transition-colors hover:border-(--booking-accent)/40 hover:booking-text-accent";
 
 export function BookingSocialLinks({ instagramUrl, facebookUrl, websiteUrl }: Props) {
   if (!instagramUrl && !facebookUrl && !websiteUrl) return null;

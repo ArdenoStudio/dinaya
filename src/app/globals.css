@@ -1,43 +1,318 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
 
-/* Prevent horizontal scroll from full-bleed sections and scaled mockups */
-html,
-body {
-  overflow-x: clip;
-  max-width: 100%;
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --font-sans: var(--font-inter), sans-serif;
+  --font-cal: var(--font-cal), sans-serif;
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  --width-xs: 20rem;
+  --width-sm: 24rem;
+
+  --animate-scroll: scroll var(--animation-duration, 40s) linear infinite;
+  --animate-gradient: gradient 8s linear infinite;
+
+  @keyframes scroll {
+    to {
+      transform: translate(calc(-50% - 0.5rem));
+    }
+  }
+  @keyframes gradient {
+    0%,
+    100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
 }
 
-/* Scroll lock applied by UnderlayNav when the drawer is open */
-html.nav-open {
-  overflow-y: hidden;
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
 }
 
-@keyframes promo-gradient {
-  0%   { background-position: 0% 50%; }
-  50%  { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+@utility image-depth {
+  @apply outline-solid outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10;
 }
 
-.promo-card {
-  background-image: linear-gradient(135deg, #030712, #111827, #1e1b4b, #030712, #111827, #1e1b4b);
-  background-size: 100% 100%;
-  transition: background-size 0.3s ease;
+@utility surface-page {
+  @apply bg-white dark:bg-neutral-950;
 }
 
-.group:hover .promo-card {
-  background-size: 300% 300%;
-  animation: promo-gradient 4s ease infinite;
+@utility surface-card {
+  @apply bg-white dark:bg-neutral-900;
 }
 
-@keyframes grid-drift {
-  0%   { background-position: 0 0; }
-  100% { background-position: 0 -4rem; }
+@utility surface-muted {
+  @apply bg-gray-50 dark:bg-neutral-900/60;
 }
 
-.animate-grid-drift {
-  animation: grid-drift 4s linear infinite;
+@utility dashboard-canvas {
+  background-color: hsl(var(--dashboard-canvas));
+}
+
+@utility dashboard-main {
+  background-color: hsl(var(--dashboard-main));
+}
+
+@utility dashboard-chrome {
+  background-color: hsl(var(--dashboard-chrome));
+}
+
+@utility dashboard-sidebar {
+  background-color: hsl(var(--dashboard-sidebar));
+}
+
+@utility booking-panel-bg {
+  @apply bg-card;
+}
+
+@utility booking-sticky-bar {
+  @apply bg-background/95 backdrop-blur-md;
+}
+
+@utility public-page-offset {
+  padding-top: calc(
+    var(--public-nav-top) + var(--public-nav-height) + var(--public-nav-gap)
+  );
+}
+
+@utility public-page-offset-lg {
+  padding-top: calc(var(--public-nav-top) + var(--public-nav-height) + 2.75rem);
+}
+
+@utility dark {
+  & [data-booking-theme] {
+    --booking-accent-hover: color-mix(
+      in srgb,
+      var(--booking-accent) 78%,
+      white
+    );
+    /* Mix toward an elevated gray, not pure black — a dark/low-luminance
+       accent (e.g. near-black brand colors) would otherwise mix down to a
+       tint indistinguishable from the black page canvas. */
+    --booking-accent-muted: color-mix(
+      in srgb,
+      var(--booking-accent) 22%,
+      #2c2c30
+    );
+    --booking-accent-soft: color-mix(
+      in srgb,
+      var(--booking-accent) 34%,
+      #2c2c30
+    );
+    --booking-accent-shadow: color-mix(
+      in srgb,
+      var(--booking-accent) 45%,
+      transparent
+    );
+    --booking-accent-on-dark: color-mix(
+      in srgb,
+      var(--booking-accent) 65%,
+      white
+    );
+
+    /* Apple-style grouped surfaces: true black canvas, neutral elevated cards */
+    --background: 0 0% 0%;
+    --foreground: 0 0% 98%;
+    --card: 240 5% 11%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 5% 11%;
+    --popover-foreground: 0 0% 98%;
+    --secondary: 240 4% 16%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 4% 16%;
+    --muted-foreground: 240 4% 64%;
+    --accent: 240 4% 16%;
+    --accent-foreground: 0 0% 98%;
+    --border: 240 4% 22%;
+    --input: 240 4% 18%;
+  }
+}
+
+@utility booking-bg-accent {
+  background-color: var(--booking-accent);
+}
+
+@utility booking-bg-accent-hover {
+  &:hover {
+    background-color: var(--booking-accent-hover);
+  }
+}
+
+@utility booking-text-accent {
+  color: var(--booking-accent);
+}
+
+@utility booking-text-accent-on-dark {
+  color: var(--booking-accent-on-dark);
+}
+
+@utility booking-border-accent {
+  border-color: var(--booking-accent);
+}
+
+@utility booking-ring-accent {
+  --tw-ring-color: var(--booking-accent-ring);
+}
+
+@utility booking-shadow-accent {
+  box-shadow: 0 10px 25px -5px var(--booking-accent-shadow);
+}
+
+@utility booking-bg-accent-muted {
+  background-color: var(--booking-accent-muted);
+}
+
+@utility booking-bg-accent-soft {
+  background-color: var(--booking-accent-soft);
+}
+
+@utility booking-gradient-accent {
+  background-image: linear-gradient(
+    to right,
+    var(--booking-accent),
+    var(--booking-accent-hover)
+  );
+}
+
+@utility booking-page-bg {
+  background-color: var(--booking-page-bg);
+}
+
+@utility booking-panel-surface {
+  background-color: var(--booking-panel-bg);
+
+  /* Solid pink panel: readable text + solid white sub-surfaces (slots, inputs) */
+  [data-booking-theme][data-booking-panel='accent'] & {
+    --foreground: 330 28% 16%;
+    --muted-foreground: 330 14% 32%;
+    --card: 0 0% 100%;
+    --card-foreground: 330 28% 16%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 330 28% 16%;
+    --secondary: 0 0% 100%;
+    --secondary-foreground: 330 28% 16%;
+    --muted: 330 45% 94%;
+    --accent: 330 45% 94%;
+    --accent-foreground: 330 28% 16%;
+    --border: 330 30% 76%;
+    --input: 330 30% 76%;
+    color: hsl(var(--foreground));
+  }
+}
+
+@utility booking-hero-overlay {
+  background-color: color-mix(
+    in srgb,
+    var(--booking-hero-overlay) calc(var(--booking-hero-overlay-opacity) * 100%),
+    transparent
+  );
+}
+
+@layer utilities {
+  /* Prevent horizontal scroll from full-bleed sections and scaled mockups */
+  html,
+  body {
+    overflow-x: clip;
+    max-width: 100%;
+  }
+
+  /* Scroll lock applied by UnderlayNav when the drawer is open */
+  html.nav-open {
+    overflow-y: hidden;
+  }
+
+  @keyframes promo-gradient {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
+  .promo-card {
+    background-image: linear-gradient(
+      135deg,
+      #030712,
+      #111827,
+      #1e1b4b,
+      #030712,
+      #111827,
+      #1e1b4b
+    );
+    background-size: 100% 100%;
+    transition: background-size 0.3s ease;
+  }
+
+  .group:hover .promo-card {
+    background-size: 300% 300%;
+    animation: promo-gradient 4s ease infinite;
+  }
+
+  @keyframes grid-drift {
+    0% {
+      background-position: 0 0;
+    }
+    100% {
+      background-position: 0 -4rem;
+    }
+  }
+
+  .animate-grid-drift {
+    animation: grid-drift 4s linear infinite;
+  }
 }
 
 @layer base {
@@ -126,72 +401,27 @@ html.nav-open {
 }
 
 @layer utilities {
-  .image-depth {
-    @apply outline outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10;
+  /* Hide scrollbar globally but preserve scrolling functionality */
+  html,
+  body {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
   }
-  .surface-page {
-    @apply bg-white dark:bg-neutral-950;
-  }
-
-  .surface-card {
-    @apply bg-white dark:bg-neutral-900;
-  }
-
-  .surface-muted {
-    @apply bg-gray-50 dark:bg-neutral-900/60;
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
   }
 
-  .dashboard-canvas {
-    background-color: hsl(var(--dashboard-canvas));
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
 
-  .dashboard-main {
-    background-color: hsl(var(--dashboard-main));
-  }
-
-  .dashboard-chrome {
-    background-color: hsl(var(--dashboard-chrome));
-  }
-
-  .dashboard-sidebar {
-    background-color: hsl(var(--dashboard-sidebar));
-  }
-
-  .booking-panel-bg {
-    @apply bg-card;
-  }
-
-  .booking-sticky-bar {
-    @apply bg-background/95 backdrop-blur-md;
-  }
-
-  .public-page-offset {
-    padding-top: calc(var(--public-nav-top) + var(--public-nav-height) + var(--public-nav-gap));
-  }
-
-  .public-page-offset-lg {
-    padding-top: calc(var(--public-nav-top) + var(--public-nav-height) + 2.75rem);
-  }
+  /* Tenant-branded public booking surfaces */
 }
-
-/* Hide scrollbar globally but preserve scrolling functionality */
-html, body {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
-}
-html::-webkit-scrollbar, body::-webkit-scrollbar {
-  display: none; /* Chrome, Safari and Opera */
-}
-
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-
-/* Tenant-branded public booking surfaces */
 @layer components {
   [data-booking-theme] {
     --booking-accent: #2563eb;
@@ -205,80 +435,6 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
     --booking-accent-ring: color-mix(in srgb, var(--booking-accent) 28%, transparent);
     --booking-accent-shadow: color-mix(in srgb, var(--booking-accent) 35%, transparent);
     --booking-accent-on-dark: color-mix(in srgb, var(--booking-accent) 55%, white);
-  }
-
-  .dark [data-booking-theme] {
-    --booking-accent-hover: color-mix(in srgb, var(--booking-accent) 78%, white);
-    /* Mix toward an elevated gray, not pure black — a dark/low-luminance
-       accent (e.g. near-black brand colors) would otherwise mix down to a
-       tint indistinguishable from the black page canvas. */
-    --booking-accent-muted: color-mix(in srgb, var(--booking-accent) 22%, #2c2c30);
-    --booking-accent-soft: color-mix(in srgb, var(--booking-accent) 34%, #2c2c30);
-    --booking-accent-shadow: color-mix(in srgb, var(--booking-accent) 45%, transparent);
-    --booking-accent-on-dark: color-mix(in srgb, var(--booking-accent) 65%, white);
-
-    /* Apple-style grouped surfaces: true black canvas, neutral elevated cards */
-    --background: 0 0% 0%;
-    --foreground: 0 0% 98%;
-    --card: 240 5% 11%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 5% 11%;
-    --popover-foreground: 0 0% 98%;
-    --secondary: 240 4% 16%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 4% 16%;
-    --muted-foreground: 240 4% 64%;
-    --accent: 240 4% 16%;
-    --accent-foreground: 0 0% 98%;
-    --border: 240 4% 22%;
-    --input: 240 4% 18%;
-  }
-
-  .booking-bg-accent { background-color: var(--booking-accent); }
-  .booking-bg-accent-hover:hover { background-color: var(--booking-accent-hover); }
-  .booking-text-accent { color: var(--booking-accent); }
-  .booking-text-accent-on-dark { color: var(--booking-accent-on-dark); }
-  .booking-border-accent { border-color: var(--booking-accent); }
-  .booking-ring-accent { --tw-ring-color: var(--booking-accent-ring); }
-  .booking-shadow-accent { box-shadow: 0 10px 25px -5px var(--booking-accent-shadow); }
-  .booking-bg-accent-muted { background-color: var(--booking-accent-muted); }
-  .booking-bg-accent-soft { background-color: var(--booking-accent-soft); }
-  .booking-gradient-accent {
-    background-image: linear-gradient(to right, var(--booking-accent), var(--booking-accent-hover));
-  }
-
-  .booking-page-bg {
-    background-color: var(--booking-page-bg);
-  }
-
-  .booking-panel-surface {
-    background-color: var(--booking-panel-bg);
-  }
-
-  /* Solid pink panel: readable text + solid white sub-surfaces (slots, inputs) */
-  [data-booking-theme][data-booking-panel="accent"] .booking-panel-surface {
-    --foreground: 330 28% 16%;
-    --muted-foreground: 330 14% 32%;
-    --card: 0 0% 100%;
-    --card-foreground: 330 28% 16%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 330 28% 16%;
-    --secondary: 0 0% 100%;
-    --secondary-foreground: 330 28% 16%;
-    --muted: 330 45% 94%;
-    --accent: 330 45% 94%;
-    --accent-foreground: 330 28% 16%;
-    --border: 330 30% 76%;
-    --input: 330 30% 76%;
-    color: hsl(var(--foreground));
-  }
-
-  .booking-hero-overlay {
-    background-color: color-mix(
-      in srgb,
-      var(--booking-hero-overlay) calc(var(--booking-hero-overlay-opacity) * 100%),
-      transparent
-    );
   }
 }
 

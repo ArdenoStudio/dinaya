@@ -214,7 +214,7 @@ export function ReviewsClient({ canUseAiReplies }: { canUseAiReplies: boolean })
                     className={`relative inline-flex h-5 w-9 rounded-full transition-colors ${review.isPublished ? "bg-primary" : "bg-gray-200 dark:bg-neutral-700"}`}
                     aria-label={copy.visible}
                   >
-                    <span className={`absolute top-0.5 size-4 rounded-full bg-white shadow transition-transform ${review.isPublished ? "translate-x-4" : "translate-x-0.5"}`} />
+                    <span className={`absolute top-0.5 size-4 rounded-full bg-white shadow-sm transition-transform ${review.isPublished ? "translate-x-4" : "translate-x-0.5"}`} />
                   </button>
                   <ConfirmDialog
                     title="Delete review"

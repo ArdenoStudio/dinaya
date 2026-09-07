@@ -77,7 +77,7 @@ export default async function ClientBookingPage({ params }: Props) {
   return (
     <div className="booking-page-bg flex min-h-dvh items-start justify-center px-4 py-12">
       <div className="w-full max-w-md space-y-4">
-        <div className="rounded-2xl border border-gray-100 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-8 shadow-sm">
+        <div className="rounded-2xl border border-gray-100 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-8 shadow-xs">
           <p className="mb-2 text-xs font-medium uppercase tracking-widest text-muted-foreground">
             {copy.clientYourBooking}
           </p>

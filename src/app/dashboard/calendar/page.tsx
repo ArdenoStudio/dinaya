@@ -443,7 +443,7 @@ export default function CalendarPage() {
                     key={b.id}
                     href={`/dashboard/bookings/${b.id}`}
                     onClick={() => trackDashboardCalendarEventOpen({ bookingId: b.id })}
-                    className={`absolute z-20 flex flex-col justify-center overflow-hidden rounded-md border px-2 py-1 text-sm shadow-sm transition-[opacity,box-shadow] hover:z-30 hover:shadow-md active:opacity-80 ${STATUS_BG[b.status]}`}
+                    className={`absolute z-20 flex flex-col justify-center overflow-hidden rounded-md border px-2 py-1 text-sm shadow-xs transition-[opacity,box-shadow] hover:z-30 hover:shadow-md active:opacity-80 ${STATUS_BG[b.status]}`}
                     style={{
                       top: `${top}%`,
                       height,
@@ -549,7 +549,7 @@ export default function CalendarPage() {
                         key={b.id}
                         href={`/dashboard/bookings/${b.id}`}
                         onClick={() => trackDashboardCalendarEventOpen({ bookingId: b.id })}
-                        className={`absolute z-20 flex flex-col justify-center overflow-hidden rounded-md border px-1.5 py-1 text-xs shadow-sm transition-[box-shadow] hover:z-30 hover:shadow-md ${STATUS_BG[b.status]}`}
+                        className={`absolute z-20 flex flex-col justify-center overflow-hidden rounded-md border px-1.5 py-1 text-xs shadow-xs transition-shadow hover:z-30 hover:shadow-md ${STATUS_BG[b.status]}`}
                         style={{
                           top: `${top}%`,
                           height,

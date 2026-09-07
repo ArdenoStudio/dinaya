@@ -103,7 +103,7 @@ export default async function GuidePage({ params }: Props) {
               <li key={r.slug}>
                 <Link
                   href={`/docs/guides/${r.slug}`}
-                  className="block overflow-hidden rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:border-neutral-800 dark:bg-neutral-900 text-sm shadow-sm shadow-gray-900/5 dark:shadow-black/20 transition-[box-shadow,border-color] duration-150 ease-out hover:border-primary/30 hover:shadow-md"
+                  className="block overflow-hidden rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:border-neutral-800 dark:bg-neutral-900 text-sm shadow-xs shadow-gray-900/5 dark:shadow-black/20 transition-[box-shadow,border-color] duration-150 ease-out hover:border-primary/30 hover:shadow-md"
                 >
                   <DocsGuideThumbnail
                     mockupId={getGuidePreviewMockupId(r)}
@@ -120,7 +120,7 @@ export default async function GuidePage({ params }: Props) {
         </section>
       ) : null}
 
-      <section className="mt-10 rounded-3xl border border-gray-200 dark:border-neutral-800 bg-gradient-to-br from-gray-50 to-white p-6 text-center">
+      <section className="mt-10 rounded-3xl border border-gray-200 dark:border-neutral-800 bg-linear-to-br from-gray-50 to-white p-6 text-center">
         <p className="text-sm text-muted-foreground mb-3">Was this guide helpful?</p>
         <a
           href="mailto:support@dinaya.lk"

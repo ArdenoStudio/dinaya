@@ -65,7 +65,7 @@ export default async function AdminActivityPage({
             name="q"
             defaultValue={q}
             placeholder="Search action or business"
-            className="h-10 w-full rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 pl-9 pr-3 text-sm outline-none transition-shadow placeholder:text-muted-foreground/60 focus:ring-2 focus:ring-primary/30"
+            className="h-10 w-full rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 pl-9 pr-3 text-sm outline-hidden transition-shadow placeholder:text-muted-foreground/60 focus:ring-2 focus:ring-primary/30"
           />
         </div>
         <input
@@ -73,7 +73,7 @@ export default async function AdminActivityPage({
           name="entity"
           defaultValue={entity}
           placeholder="entity (e.g. booking)"
-          className="h-10 w-44 rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
+          className="h-10 w-44 rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 text-sm outline-hidden focus:ring-2 focus:ring-primary/30"
         />
         <button type="submit" className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">
           Apply

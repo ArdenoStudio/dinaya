@@ -110,8 +110,8 @@ export default function TimeSlotGrid({
                   }`}
                   className={`flex w-full min-h-11 items-center justify-center gap-1.5 rounded-lg px-2 py-2.5 text-base font-semibold tabular-nums transition-[transform,background-color,border-color,box-shadow] duration-150 ease-out active:scale-[0.96] motion-reduce:active:scale-100 md:text-sm ${
                     isSelected
-                      ? "bg-[var(--booking-accent)] text-white shadow-sm ring-2 ring-[var(--booking-accent-soft)]"
-                      : "border border-border bg-secondary/40 text-foreground ring-1 ring-white/5 hover:border-[var(--booking-accent)] hover:bg-[var(--booking-accent-muted)]/40"
+                      ? "booking-bg-accent text-white shadow-xs ring-2 ring-(--booking-accent-soft)"
+                      : "border border-border bg-secondary/40 text-foreground ring-1 ring-white/5 hover:booking-border-accent hover:bg-(--booking-accent-muted)/40"
                   }`}
                   title={hasCalendarConflict ? copy.calendarConflict : undefined}
                 >

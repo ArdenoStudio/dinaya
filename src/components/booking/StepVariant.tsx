@@ -8,7 +8,7 @@ import type { ServicePriceVariant } from "@/lib/service-variants";
 import { BookingServicePrice } from "./BookingServicePrice";
 
 const rowFocus =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--booking-accent-soft)] focus-visible:ring-offset-2";
+  "focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-(--booking-accent-soft) focus-visible:ring-offset-2";
 
 interface Props {
   service: BookingService;
@@ -46,7 +46,7 @@ export default function StepVariant({ service, selectedId, copy, onSelect }: Pro
                 rowFocus,
                 isSelected
                   ? "booking-border-accent booking-bg-accent-muted ring-2 booking-ring-accent"
-                  : "border-border bg-card hover:border-[var(--booking-accent)]/50 hover:bg-muted/30",
+                  : "border-border bg-card hover:border-(--booking-accent)/50 hover:bg-muted/30",
               )}
             >
               <div className="min-w-0 flex-1">
@@ -58,7 +58,7 @@ export default function StepVariant({ service, selectedId, copy, onSelect }: Pro
               <div
                 className={cn(
                   "flex size-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
-                  isSelected ? "border-[var(--booking-accent)] bg-[var(--booking-accent)]" : "border-muted-foreground/30",
+                  isSelected ? "booking-border-accent booking-bg-accent" : "border-muted-foreground/30",
                 )}
               >
                 {isSelected && <Icon name="check" className="text-white" style={{ fontSize: "0.75rem" }} />}

@@ -101,7 +101,7 @@ export function UnderlayNav() {
         {isOpen && (
           <motion.div
             key="backdrop"
-            className="fixed inset-0 z-[99]"
+            className="fixed inset-0 z-99"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -113,7 +113,7 @@ export function UnderlayNav() {
 
       {/* ── Expanding pill nav ───────────────────────────────────────────── */}
       <motion.header
-        className="fixed z-[100] text-gray-900 dark:text-gray-100 overflow-hidden"
+        className="fixed z-100 text-gray-900 dark:text-gray-100 overflow-hidden"
         initial={false}
         animate={{
           top:          mobileOpen ? 0 : 12,
@@ -153,7 +153,7 @@ export function UnderlayNav() {
         />
 
         {/* Always-visible pill bar */}
-        <div className="flex items-center justify-between h-[3.75rem] pl-5 sm:pl-6 pr-2 sm:pr-2">
+        <div className="flex items-center justify-between h-15 pl-5 sm:pl-6 pr-2 sm:pr-2">
 
           {/* Menu / Close toggle */}
           <button
@@ -162,7 +162,7 @@ export function UnderlayNav() {
             aria-label={isOpen ? "Close menu" : "Open menu"}
             className="flex items-center gap-2.5 -m-2 p-2 select-none relative z-10"
           >
-            <span className="flex flex-col gap-[0.3em] w-[1rem]" aria-hidden="true">
+            <span className="flex flex-col gap-[0.3em] w-4" aria-hidden="true">
               <motion.span
                 className="h-[1.5px] w-full bg-gray-900 dark:bg-gray-100 rounded-full origin-center"
                 animate={isOpen ? { y: "0.265em", rotate: 45 } : { y: 0, rotate: 0 }}
@@ -415,7 +415,7 @@ export function UnderlayNav() {
                 </div>
 
                 {/* Column 2 — Popular Resources (Fills middle space) */}
-                <div className="hidden lg:block border-l border-gray-100 dark:border-neutral-800 pl-8 min-w-[15rem]">
+                <div className="hidden lg:block border-l border-gray-100 dark:border-neutral-800 pl-8 min-w-60">
                   <p className="text-[0.6875rem] font-semibold tracking-[0.12em] text-gray-400 dark:text-gray-500 uppercase mb-4">
                     Popular Guides
                   </p>
@@ -468,7 +468,7 @@ export function UnderlayNav() {
                 </div>
 
                 {/* Column 3 — legal */}
-                <div className="flex flex-col gap-6 min-w-[8rem] pl-8 border-l border-gray-100 dark:border-neutral-800">
+                <div className="flex flex-col gap-6 min-w-32 pl-8 border-l border-gray-100 dark:border-neutral-800">
                   <SubCol heading="Legal"   items={QUICK_LINKS}   isOpen={isOpen} onClose={close} baseDelay={0.42} />
                 </div>
 

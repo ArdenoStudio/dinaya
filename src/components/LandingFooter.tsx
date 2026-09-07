@@ -16,8 +16,8 @@ export function LandingFooter() {
   return (
     <footer className="relative w-full min-w-0 bg-[#050505] text-white overflow-hidden pt-24 pb-8 mt-24 rounded-t-[2.5rem]">
       {/* Subtle top border glow */}
-      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-      <div className="absolute top-0 inset-x-1/4 h-[2px] bg-gradient-to-r from-transparent via-primary/50 to-transparent blur-sm" />
+      <div className="absolute top-0 inset-x-0 h-px bg-linear-to-r from-transparent via-white/20 to-transparent" />
+      <div className="absolute top-0 inset-x-1/4 h-[2px] bg-linear-to-r from-transparent via-primary/50 to-transparent blur-xs" />
 
       <div className="max-w-7xl mx-auto px-6 lg:px-10 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_1fr] gap-x-12 gap-y-0 md:gap-16 lg:gap-8 mb-24">

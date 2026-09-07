@@ -62,7 +62,7 @@ export function BrandColorPicker({ options, value, onChange, loading, contrastHi
                 {isSelected ? (
                   <Icon
                     name="check-lg"
-                    className={`absolute inset-0 m-auto text-sm drop-shadow-sm ${
+                    className={`absolute inset-0 m-auto text-sm drop-shadow-xs ${
                       light ? "text-foreground" : "text-white"
                     }`}
                     aria-hidden="true"
@@ -110,7 +110,7 @@ export function BrandColorPicker({ options, value, onChange, loading, contrastHi
               <DashboardInput
                 value={selected}
                 onChange={(e) => onChange(e.target.value)}
-                className={`${dashboardInputClass} max-w-[8rem] font-mono`}
+                className={`${dashboardInputClass} max-w-32 font-mono`}
                 pattern="^#[0-9a-fA-F]{6}$"
                 aria-label="Accent color hex value"
               />

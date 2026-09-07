@@ -165,7 +165,7 @@ export function HowItWorks() {
                     <DinayaMark className="size-10" />
                   </div>
                   {/* Spinning cobalt glow */}
-                  <div className="absolute inset-12 animate-[spin_8s_linear_infinite] rounded-full bg-gradient-to-t from-transparent via-blue-400 to-transparent blur-lg opacity-60" />
+                  <div className="absolute inset-12 animate-[spin_8s_linear_infinite] rounded-full bg-linear-to-t from-transparent via-blue-400 to-transparent blur-lg opacity-60" />
                 </div>
               </div>
             </Orbit>

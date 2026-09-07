@@ -38,7 +38,7 @@ function PricingSwitch({
   return (
     <div className="flex flex-col items-center gap-2">
       <div
-        className="relative inline-flex rounded-xl border border-border bg-muted/50 p-1 shadow-sm"
+        className="relative inline-flex rounded-xl border border-border bg-muted/50 p-1 shadow-xs"
         role="group"
         aria-label="Billing period"
       >
@@ -59,7 +59,7 @@ function PricingSwitch({
               {active ? (
                 <motion.span
                   layoutId="dinaya-pricing-period"
-                  className="absolute inset-0 rounded-lg bg-primary shadow-sm"
+                  className="absolute inset-0 rounded-lg bg-primary shadow-xs"
                   transition={{ type: "spring", stiffness: 480, damping: 34, bounce: 0 }}
                 />
               ) : null}
@@ -196,7 +196,7 @@ export function PricingPlansShowcase({
                 ease: [0.22, 1, 0.36, 1],
               }}
               className={cn(
-                "relative flex h-full flex-col rounded-2xl border bg-card p-6 pt-8 shadow-sm transition-[box-shadow,border-color] duration-200 ease-out",
+                "relative flex h-full flex-col rounded-2xl border bg-card p-6 pt-8 shadow-xs transition-[box-shadow,border-color] duration-200 ease-out",
                 plan.popular
                   ? "z-10 border-primary/50 shadow-[0_12px_40px_-16px_hsl(220_82%_53%/0.45)] ring-1 ring-primary/20"
                   : "border-border hover:border-foreground/15 hover:shadow-md",
@@ -209,7 +209,7 @@ export function PricingPlansShowcase({
                     className={cn(
                       "inline-flex items-center rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide",
                       plan.popular
-                        ? "bg-primary text-primary-foreground shadow-sm"
+                        ? "bg-primary text-primary-foreground shadow-xs"
                         : "border border-border bg-background text-muted-foreground",
                     )}
                   >
@@ -220,7 +220,7 @@ export function PricingPlansShowcase({
 
               <h2 className="font-cal text-2xl tracking-tight">{plan.name}</h2>
 
-              <p className="mt-2 line-clamp-3 min-h-[3.75rem] text-sm leading-relaxed text-muted-foreground">
+              <p className="mt-2 line-clamp-3 min-h-15 text-sm leading-relaxed text-muted-foreground">
                 {plan.description}
               </p>
 
@@ -287,7 +287,7 @@ export function PricingPlansShowcase({
               </div>
 
               <div className="mt-6 flex min-h-0 flex-1 flex-col border-t border-border pt-5">
-                <p className="mb-3 min-h-[2.5rem] text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                <p className="mb-3 min-h-10 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   {plan.featureHeading.replace(/:$/, "")}
                 </p>
                 <ul className="space-y-2.5">

@@ -30,9 +30,9 @@ export function DataTable<TRow>({
     return (
       <>
         <div className="space-y-2 xl:hidden">{rows.map((row) => mobileCard(row))}</div>
-        <div className="hidden overflow-hidden rounded-2xl border border-border/80 bg-card shadow-sm xl:block">
+        <div className="hidden overflow-hidden rounded-2xl border border-border/80 bg-card shadow-xs xl:block">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[46rem] text-sm">
+            <table className="w-full min-w-184 text-sm">
               {renderTableHead(columns)}
               {renderTableBody(columns, rows, getRowId)}
             </table>
@@ -43,9 +43,9 @@ export function DataTable<TRow>({
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-border/80 bg-card shadow-sm">
+    <div className="overflow-hidden rounded-2xl border border-border/80 bg-card shadow-xs">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[46rem] text-sm">
+        <table className="w-full min-w-184 text-sm">
           {renderTableHead(columns)}
           {renderTableBody(columns, rows, getRowId)}
         </table>

@@ -55,7 +55,7 @@ function WithoutPill({ item }: { item: typeof withoutItems[number] }) {
       className="flex items-center gap-2 origin-left"
     >
       {/* Pill — blue-grey scattered card look */}
-      <div className="flex flex-1 items-center gap-3 rounded-full bg-[#c8d0e0] dark:bg-neutral-700 border border-[#b8c2d6] dark:border-neutral-600 px-4 py-2.5 shadow-sm">
+      <div className="flex flex-1 items-center gap-3 rounded-full bg-[#c8d0e0] dark:bg-neutral-700 border border-[#b8c2d6] dark:border-neutral-600 px-4 py-2.5 shadow-xs">
         <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-white/50 dark:bg-white/10 border border-white/60 dark:border-white/20 text-[11px] font-semibold text-slate-500 dark:text-slate-300">
           {item.num}
         </span>
@@ -63,7 +63,7 @@ function WithoutPill({ item }: { item: typeof withoutItems[number] }) {
       </div>
 
       {/* Icon badge — floating detached */}
-      <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#c8d0e0] dark:bg-neutral-700 border border-[#b8c2d6] dark:border-neutral-600 shadow-sm">
+      <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#c8d0e0] dark:bg-neutral-700 border border-[#b8c2d6] dark:border-neutral-600 shadow-xs">
         <Icon name={item.icon} className="text-xs text-slate-500 dark:text-slate-300" />
       </span>
     </motion.div>
@@ -118,7 +118,7 @@ export function BeforeAfterToggle() {
   return (
     <div className="flex flex-col items-center gap-5">
       {/* Toggle */}
-      <div className="relative flex items-center gap-1 rounded-full border border-gray-200 dark:border-neutral-800 bg-gray-100 dark:bg-neutral-800 p-1 shadow-sm">
+      <div className="relative flex items-center gap-1 rounded-full border border-gray-200 dark:border-neutral-800 bg-gray-100 dark:bg-neutral-800 p-1 shadow-xs">
         {(["without", "with"] as const).map((tab) => (
           <button
             key={tab}
@@ -155,7 +155,7 @@ export function BeforeAfterToggle() {
 
       {/* Card */}
       <div
-        className="relative w-full max-w-sm rounded-2xl border border-gray-200 dark:border-neutral-700 bg-[#edf0f5] dark:bg-neutral-900 overflow-hidden p-5 shadow-sm dark:[background-image:radial-gradient(circle,rgb(64_64_64)_1px,transparent_1px)]"
+        className="relative w-full max-w-sm rounded-2xl border border-gray-200 dark:border-neutral-700 bg-[#edf0f5] dark:bg-neutral-900 overflow-hidden p-5 shadow-xs dark:bg-[radial-gradient(circle,rgb(64_64_64)_1px,transparent_1px)]"
         style={{
           minHeight: "290px",
           backgroundImage:
@@ -176,7 +176,7 @@ export function BeforeAfterToggle() {
               {[0, 1, 2, 3].map((i) => (
                 <div
                   key={i}
-                  className="absolute left-0 right-0 h-11 bg-slate-400/[0.06]"
+                  className="absolute left-0 right-0 h-11 bg-slate-400/6"
                   style={{ top: `${24 + i * 54}px` }}
                 />
               ))}

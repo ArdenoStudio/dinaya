@@ -12,7 +12,7 @@ export function DocsMobileNav() {
       <nav aria-label="Documentation guides" className="mb-4 flex flex-col gap-1">
         <Link
           href="/docs"
-          className="flex min-h-11 items-center rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm font-medium text-gray-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-gray-100"
+          className="flex min-h-11 items-center rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm font-medium text-gray-900 shadow-xs dark:border-neutral-800 dark:bg-neutral-900 dark:text-gray-100"
         >
           Documentation home
         </Link>
@@ -31,7 +31,7 @@ export function DocsMobileNav() {
       </label>
       <select
         id="docs-mobile-nav"
-        className="min-h-11 w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-base shadow-sm shadow-gray-900/5 dark:border-neutral-800 dark:bg-neutral-900 dark:shadow-black/20"
+        className="min-h-11 w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-base shadow-xs shadow-gray-900/5 dark:border-neutral-800 dark:bg-neutral-900 dark:shadow-black/20"
         defaultValue=""
         onChange={(e) => {
           if (e.target.value) router.push(e.target.value);

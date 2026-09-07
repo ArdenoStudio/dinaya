@@ -103,7 +103,7 @@ export default function ContactPage() {
         <div className="px-6 lg:px-16 public-page-offset pb-16 lg:pb-24 lg:flex lg:flex-col lg:justify-center">
           <FadeContainer className="max-w-md lg:ml-auto lg:mr-12 xl:mr-20">
             <FadeDiv className="mb-6">
-              <span className="inline-flex items-center gap-2 rounded-full border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 shadow-sm">
+              <span className="inline-flex items-center gap-2 rounded-full border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 shadow-xs">
                 <Icon name="chat-dots-fill" className="text-xs text-primary" />
                 Get in touch
               </span>
@@ -196,7 +196,7 @@ export default function ContactPage() {
                       value={form.name}
                       onChange={handleChange}
                       placeholder="Your name"
-                      className="rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-[border-color,box-shadow] duration-150 ease-out"
+                      className="rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-hidden focus:ring-2 focus:ring-primary/30 focus:border-primary transition-[border-color,box-shadow] duration-150 ease-out"
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
@@ -209,7 +209,7 @@ export default function ContactPage() {
                       value={form.email}
                       onChange={handleChange}
                       placeholder="you@example.com"
-                      className="rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-[border-color,box-shadow] duration-150 ease-out"
+                      className="rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-hidden focus:ring-2 focus:ring-primary/30 focus:border-primary transition-[border-color,box-shadow] duration-150 ease-out"
                     />
                   </div>
                 </div>
@@ -222,7 +222,7 @@ export default function ContactPage() {
                     required
                     value={form.subject}
                     onChange={handleChange}
-                    className="rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-[border-color,box-shadow] duration-150 ease-out appearance-none"
+                    className="rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 focus:outline-hidden focus:ring-2 focus:ring-primary/30 focus:border-primary transition-[border-color,box-shadow] duration-150 ease-out appearance-none"
                   >
                     <option value="" disabled>Select a topic…</option>
                     <option value="general">General enquiry</option>
@@ -244,7 +244,7 @@ export default function ContactPage() {
                     value={form.message}
                     onChange={handleChange}
                     placeholder="Tell us what's on your mind…"
-                    className="rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-[border-color,box-shadow] duration-150 ease-out resize-none"
+                    className="rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-hidden focus:ring-2 focus:ring-primary/30 focus:border-primary transition-[border-color,box-shadow] duration-150 ease-out resize-none"
                   />
                 </div>
 
@@ -288,7 +288,7 @@ export default function ContactPage() {
         </div>
 
         <div className="mt-10 flex items-center gap-4 rounded-xl border border-gray-200 dark:border-neutral-800 p-5">
-          <div className="flex-shrink-0 flex items-center justify-center size-10 rounded-lg bg-amber-500 text-white">
+          <div className="shrink-0 flex items-center justify-center size-10 rounded-lg bg-amber-500 text-white">
             <Icon name="book" className="text-sm" />
           </div>
           <p className="text-sm text-muted-foreground leading-relaxed">
@@ -303,7 +303,7 @@ export default function ContactPage() {
       {/* CTA */}
       <section className="px-6 pb-20">
         <div className="max-w-6xl mx-auto">
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 px-8 py-16 text-center shadow-2xl shadow-blue-500/20">
+          <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-blue-600 via-blue-700 to-indigo-800 px-8 py-16 text-center shadow-2xl shadow-blue-500/20">
             <div className="pointer-events-none absolute -top-24 -right-24 size-64 rounded-full bg-white/10 blur-3xl" />
             <div className="pointer-events-none absolute -bottom-16 -left-16 size-48 rounded-full bg-primary/30 blur-3xl" />
             <div className="relative z-10">
@@ -323,7 +323,7 @@ export default function ContactPage() {
                 </Link>
                 <Link
                   href="/features"
-                  className="inline-flex items-center gap-2 bg-black/25 border border-white/35 text-white px-7 py-3.5 rounded-xl font-medium hover:bg-black/40 backdrop-blur-sm transition-colors"
+                  className="inline-flex items-center gap-2 bg-black/25 border border-white/35 text-white px-7 py-3.5 rounded-xl font-medium hover:bg-black/40 backdrop-blur-xs transition-colors"
                 >
                   See all features
                 </Link>

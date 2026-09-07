@@ -22,7 +22,7 @@ export function AuthSplitShell({ children }: Props) {
       </div>
 
       <div className="hidden p-4 lg:block lg:w-1/2">
-        <div className="relative h-full min-h-[calc(100vh-2rem)] w-full overflow-hidden rounded-[2rem] border border-black/10">
+        <div className="relative h-full min-h-[calc(100vh-2rem)] w-full overflow-hidden rounded-4xl border border-black/10">
           <AuthHalftonePanelArt />
         </div>
       </div>

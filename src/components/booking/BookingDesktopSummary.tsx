@@ -35,8 +35,8 @@ export default function BookingDesktopSummary({
     return (
       <Card className="mt-6 border-dashed bg-muted/30">
         <CardContent className="flex items-start gap-3 p-5">
-          <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-[var(--booking-accent-muted)]">
-            <Icon name="calendar2-week" className="text-lg text-[var(--booking-accent)]" />
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-lg booking-bg-accent-muted">
+            <Icon name="calendar2-week" className="text-lg booking-text-accent" />
           </div>
           <div>
             <p className="text-sm font-medium text-foreground">{copy.selectServiceHint}</p>
@@ -67,7 +67,7 @@ export default function BookingDesktopSummary({
         </p>
         <ul className="space-y-3 text-sm">
           <li className="flex items-start gap-3">
-            <Icon name="scissors" className="mt-0.5 text-[var(--booking-accent)]" />
+            <Icon name="scissors" className="mt-0.5 booking-text-accent" />
             <div className="min-w-0 flex-1">
               <p className="font-semibold text-foreground">{service.name}</p>
               <p className="text-xs text-muted-foreground">
@@ -75,7 +75,7 @@ export default function BookingDesktopSummary({
                 {service.priceLkr > 0 ? ` · ${formatLkr(price)}` : " · Free"}
               </p>
               {service.requiresPayment && service.depositPercent > 0 && service.priceLkr > 0 && (
-                <p className="mt-0.5 text-[11px] font-medium text-[var(--booking-accent)]">
+                <p className="mt-0.5 text-[11px] font-medium booking-text-accent">
                   {copy.depositDue}: {formatLkr(depositPreview)}
                 </p>
               )}
@@ -83,7 +83,7 @@ export default function BookingDesktopSummary({
           </li>
           {(staff || anyStaff) && (
             <li className="flex items-center gap-3">
-              <Icon name="person" className="text-[var(--booking-accent)]" />
+              <Icon name="person" className="booking-text-accent" />
               <span className="text-foreground">
                 {anyStaff && !staff ? copy.anyAvailableStaff : staff?.name}
               </span>
@@ -91,7 +91,7 @@ export default function BookingDesktopSummary({
           )}
           {dateLabel && (
             <li className="flex items-center gap-3">
-              <Icon name="calendar3" className="text-[var(--booking-accent)]" />
+              <Icon name="calendar3" className="booking-text-accent" />
               <span className="text-foreground">{dateLabel}</span>
             </li>
           )}
@@ -103,7 +103,7 @@ export default function BookingDesktopSummary({
           )}
         </ul>
         {holdLabel ? (
-          <p className="mt-3 rounded-lg bg-[var(--booking-accent-muted)] px-3 py-2 text-xs font-medium text-[var(--booking-accent)]">
+          <p className="mt-3 rounded-lg booking-bg-accent-muted px-3 py-2 text-xs font-medium booking-text-accent">
             <Icon name="clock" className="mr-1.5" />
             {holdLabel}
           </p>

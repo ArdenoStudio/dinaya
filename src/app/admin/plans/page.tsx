@@ -187,7 +187,7 @@ export default async function AdminPlansPage() {
                 min={0}
                 step={10}
                 defaultValue={config.starterMonthlyPriceLkr}
-                className="mt-1 h-10 w-full rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
+                className="mt-1 h-10 w-full rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 text-sm outline-hidden focus:ring-2 focus:ring-primary/30"
               />
             </div>
             <div>
@@ -201,7 +201,7 @@ export default async function AdminPlansPage() {
                 min={0}
                 step={10}
                 defaultValue={config.starterAnnualPriceLkr}
-                className="mt-1 h-10 w-full rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
+                className="mt-1 h-10 w-full rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 text-sm outline-hidden focus:ring-2 focus:ring-primary/30"
               />
             </div>
             <div className="sm:col-span-2">
@@ -235,7 +235,7 @@ export default async function AdminPlansPage() {
                 min={0}
                 step={10}
                 defaultValue={config.proMonthlyPriceLkr}
-                className="mt-1 h-10 w-full rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
+                className="mt-1 h-10 w-full rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 text-sm outline-hidden focus:ring-2 focus:ring-primary/30"
               />
             </div>
             <div>
@@ -249,7 +249,7 @@ export default async function AdminPlansPage() {
                 min={0}
                 step={10}
                 defaultValue={config.proAnnualPriceLkr}
-                className="mt-1 h-10 w-full rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
+                className="mt-1 h-10 w-full rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 text-sm outline-hidden focus:ring-2 focus:ring-primary/30"
               />
             </div>
             <div className="sm:col-span-2">
@@ -286,7 +286,7 @@ export default async function AdminPlansPage() {
                 min={0}
                 step={10}
                 defaultValue={config.maxMonthlyPriceLkr}
-                className="mt-1 h-10 w-full rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
+                className="mt-1 h-10 w-full rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 text-sm outline-hidden focus:ring-2 focus:ring-primary/30"
               />
             </div>
             <div>
@@ -300,7 +300,7 @@ export default async function AdminPlansPage() {
                 min={0}
                 step={10}
                 defaultValue={config.maxAnnualPriceLkr}
-                className="mt-1 h-10 w-full rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
+                className="mt-1 h-10 w-full rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 text-sm outline-hidden focus:ring-2 focus:ring-primary/30"
               />
             </div>
             <div className="sm:col-span-2">
@@ -365,7 +365,7 @@ export default async function AdminPlansPage() {
                           name={`${planKey}.${limitKey}`}
                           defaultValue={limitInputValue(entitlements.limits[limitKey])}
                           placeholder="Unlimited"
-                          className="mt-1 h-9 w-full rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 text-sm outline-none focus:ring-2 focus:ring-primary/30"
+                          className="mt-1 h-9 w-full rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-2 text-sm outline-hidden focus:ring-2 focus:ring-primary/30"
                         />
                       </label>
                     ))}

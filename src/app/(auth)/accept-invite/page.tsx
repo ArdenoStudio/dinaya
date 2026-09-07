@@ -86,7 +86,7 @@ export default function AcceptInvitePage() {
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-neutral-950 flex items-center justify-center px-6">
       <AuthThemeToggle />
-      <div className="w-full max-w-md rounded-2xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-8 shadow-sm">
+      <div className="w-full max-w-md rounded-2xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-8 shadow-xs">
         <Logo href="/" size="sm" />
         <h1 className="mt-6 font-cal text-2xl tracking-tight">Accept your invite</h1>
         <p className="mt-2 text-sm text-muted-foreground">

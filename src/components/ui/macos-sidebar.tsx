@@ -121,7 +121,7 @@ export function MacOSSidebar({
         animate={{ width: isOpen ? 248 : 64 }}
         transition={sidebarTransition}
         className={cn(
-          "hidden shrink-0 flex-col items-start border-r border-black/[0.06] p-2 transition-colors duration-300 ease-out md:flex md:h-full md:max-h-full dark:border-white/[0.08]",
+          "hidden shrink-0 flex-col items-start border-r border-black/6 p-2 transition-colors duration-300 ease-out md:flex md:h-full md:max-h-full dark:border-white/8",
           isOpen ? "dashboard-sidebar" : "bg-transparent",
         )}
         aria-label="Sidebar"

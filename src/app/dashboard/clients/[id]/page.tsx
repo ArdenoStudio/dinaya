@@ -240,7 +240,7 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
                 className={cn(dashboardInputClass, "resize-none")}
               />
             </div>
-            <div className="sticky bottom-[calc(3.5rem+env(safe-area-inset-bottom))] z-10 -mx-5 border-t border-border/60 bg-background/95 px-5 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 md:static md:mx-0 md:border-0 md:bg-transparent md:px-0 md:py-0 md:backdrop-blur-none">
+            <div className="sticky bottom-[calc(3.5rem+env(safe-area-inset-bottom))] z-10 -mx-5 border-t border-border/60 bg-background/95 px-5 py-3 backdrop-blur-sm supports-backdrop-filter:bg-background/80 md:static md:mx-0 md:border-0 md:bg-transparent md:px-0 md:py-0 md:backdrop-blur-none">
               <button
                 type="button"
                 onClick={saveProfile}

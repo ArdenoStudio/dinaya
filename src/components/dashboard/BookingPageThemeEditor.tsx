@@ -336,7 +336,7 @@ export function BookingPageThemeEditor({ business, onPreviewChange }: Props) {
               type="text"
               value={form.bookingPageBackgroundColor}
               onChange={(e) => updateForm("bookingPageBackgroundColor", e.target.value)}
-              className={`${dashboardInputClass} max-w-[8rem] font-mono`}
+              className={`${dashboardInputClass} max-w-32 font-mono`}
               aria-label="Custom page background hex"
             />
           </div>
@@ -540,7 +540,7 @@ export function BookingPageThemeEditor({ business, onPreviewChange }: Props) {
           {galleryRest.length > 0 ? (
             <div className="mt-3 grid grid-cols-2 gap-2">
               {galleryRest.map((url) => (
-                <div key={url} className="group relative aspect-[4/3] overflow-hidden rounded-lg border bg-muted/20">
+                <div key={url} className="group relative aspect-4/3 overflow-hidden rounded-lg border bg-muted/20">
                   <GalleryThumb url={url} />
                   <button
                     type="button"
@@ -608,7 +608,7 @@ export function BookingPageThemeEditor({ business, onPreviewChange }: Props) {
         </section>
       </BlurFade>
 
-      <div className="sticky bottom-0 z-20 -mx-1 border-t bg-background/95 px-1 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+      <div className="sticky bottom-0 z-20 -mx-1 border-t bg-background/95 px-1 py-3 backdrop-blur-sm supports-backdrop-filter:bg-background/80">
         <div className="flex flex-wrap items-center gap-3">
           <Button type="submit" disabled={saving} className={dashboardPrimaryActionClass}>
             {saving ? "Saving…" : "Save changes"}

@@ -244,7 +244,7 @@ function CalendarDay({ cell }: { cell: DayCell }) {
 function BackPill({ label, onAccent = false }: { label: string; onAccent?: boolean }) {
   if (onAccent) {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full border border-white/25 bg-white/15 px-2.5 py-1 text-[10px] font-medium text-white shadow-sm backdrop-blur-sm">
+      <span className="inline-flex items-center gap-1 rounded-full border border-white/25 bg-white/15 px-2.5 py-1 text-[10px] font-medium text-white shadow-xs backdrop-blur-xs">
         <Icon name="chevron-left" className="text-[8px]" />
         {label}
       </span>
@@ -252,7 +252,7 @@ function BackPill({ label, onAccent = false }: { label: string; onAccent?: boole
   }
   return (
     <span
-      className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-medium shadow-sm backdrop-blur-sm"
+      className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-medium shadow-xs backdrop-blur-xs"
       style={{
         border: "1px solid var(--demo-chrome-pill-border)",
         backgroundColor: "var(--demo-chrome-pill)",
@@ -268,14 +268,14 @@ function BackPill({ label, onAccent = false }: { label: string; onAccent?: boole
 function CategoryPill({ label, onAccent = false }: { label: string; onAccent?: boolean }) {
   if (onAccent) {
     return (
-      <span className="inline-flex max-w-[9rem] shrink-0 items-center truncate rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-[10px] font-medium text-white/90">
+      <span className="inline-flex max-w-36 shrink-0 items-center truncate rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-[10px] font-medium text-white/90">
         {label}
       </span>
     );
   }
   return (
     <span
-      className="inline-flex max-w-[9rem] shrink-0 items-center truncate rounded-full px-2 py-0.5 text-[10px] font-medium"
+      className="inline-flex max-w-36 shrink-0 items-center truncate rounded-full px-2 py-0.5 text-[10px] font-medium"
       style={{
         border: "1px solid var(--demo-chrome-pill-border)",
         backgroundColor: "color-mix(in srgb, var(--demo-chrome-pill) 78%, transparent)",
@@ -353,7 +353,7 @@ function PhoneDateTimeScreen({
       </div>
 
       <div
-        className="mx-[14px] mt-3 flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl shadow-sm"
+        className="mx-[14px] mt-3 flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl shadow-xs"
         style={{ backgroundColor: "var(--demo-surface-deep)" }}
       >
         <div className="px-3 pb-[10px] pt-3">
@@ -485,7 +485,7 @@ function CustomerBookingDesktop({
       >
         {/* Bold brand sidebar — solid primary */}
         <aside
-          className="flex w-[30%] max-w-[14rem] shrink-0 flex-col px-3.5 py-4 text-white transition-[background-color] duration-500 ease-out xl:max-w-[15rem] xl:px-4"
+          className="flex w-[30%] max-w-56 shrink-0 flex-col px-3.5 py-4 text-white transition-[background-color] duration-500 ease-out xl:max-w-60 xl:px-4"
           style={{ backgroundColor: "var(--demo-accent)" }}
         >
           <div className="flex items-start gap-2.5">
@@ -609,7 +609,7 @@ function DemoFrame({
 }) {
   return (
     <div
-      className="relative aspect-[16/10] min-h-[300px] overflow-hidden rounded-2xl border border-border bg-white transition-[box-shadow,background-color] duration-700 ease-out dark:border-white/10 dark:bg-neutral-900"
+      className="relative aspect-16/10 min-h-[300px] overflow-hidden rounded-2xl border border-border bg-white transition-[box-shadow,background-color] duration-700 ease-out dark:border-white/10 dark:bg-neutral-900"
       style={{
         boxShadow: `0 18px 52px -14px color-mix(in srgb, ${accent} 45%, transparent), 0 0 0 1px color-mix(in srgb, ${accent} 18%, transparent)`,
       }}
@@ -649,7 +649,7 @@ function ThemeSwitcher({
   return (
     <div className="flex flex-col items-center gap-3">
       <div
-        className="inline-flex flex-wrap items-center justify-center gap-1.5 rounded-xl border border-border/80 bg-background/80 p-1.5 shadow-sm backdrop-blur-sm"
+        className="inline-flex flex-wrap items-center justify-center gap-1.5 rounded-xl border border-border/80 bg-background/80 p-1.5 shadow-xs backdrop-blur-xs"
         role="tablist"
         aria-label="Preview booking page themes"
       >
@@ -755,7 +755,7 @@ export default function ProductMockup({
 
   return (
     <section
-      className={`relative mx-auto max-w-[77rem] overflow-x-clip px-6 md:px-12 lg:px-16 ${
+      className={`relative mx-auto max-w-308 overflow-x-clip px-6 md:px-12 lg:px-16 ${
         isHero ? "pb-10 md:pb-14" : "pb-16"
       }`}
     >

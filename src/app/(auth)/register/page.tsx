@@ -347,7 +347,7 @@ export default function RegisterPage() {
                   required
                   value={form.slug}
                   onChange={(e) => handleSlugChange(e.target.value)}
-                  className="flex-1 bg-transparent px-5 py-3 text-sm text-foreground focus:outline-none placeholder:text-muted-foreground/60"
+                  className="flex-1 bg-transparent px-5 py-3 text-sm text-foreground focus:outline-hidden placeholder:text-muted-foreground/60"
                   placeholder="your-business"
                 />
                 <span className="whitespace-nowrap border-l border-border px-4 py-3 text-sm text-muted-foreground select-none">

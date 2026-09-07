@@ -32,7 +32,7 @@ export function HelpFaqSections() {
 
   return (
     <>
-      <section className="relative overflow-hidden border-b bg-gradient-to-b from-blue-50/60 to-white dark:from-neutral-900 dark:to-neutral-950 dark:border-neutral-800">
+      <section className="relative overflow-hidden border-b bg-linear-to-b from-blue-50/60 to-white dark:from-neutral-900 dark:to-neutral-950 dark:border-neutral-800">
         <div
           className="pointer-events-none absolute inset-0 opacity-40"
           style={{
@@ -42,7 +42,7 @@ export function HelpFaqSections() {
           }}
         />
         <div className="relative max-w-3xl mx-auto px-6 public-page-offset pb-20 text-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-blue-200 dark:border-blue-800/60 bg-white dark:bg-neutral-900 px-3 py-1 text-xs font-medium text-blue-700 dark:text-blue-300 shadow-sm mb-5">
+          <span className="inline-flex items-center gap-2 rounded-full border border-blue-200 dark:border-blue-800/60 bg-white dark:bg-neutral-900 px-3 py-1 text-xs font-medium text-blue-700 dark:text-blue-300 shadow-xs mb-5">
             <Icon name="question-circle" className="text-xs" />
             Help Center
           </span>
@@ -65,7 +65,7 @@ export function HelpFaqSections() {
                 setActiveCategory(null);
               }}
               placeholder="Search help topics — e.g. refund, availability"
-              className="w-full rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 pl-10 pr-4 py-3.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+              className="w-full rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 pl-10 pr-4 py-3.5 text-sm shadow-xs focus:outline-hidden focus:ring-2 focus:ring-primary/40"
             />
             {search && (
               <p className="text-xs text-muted-foreground mt-2 text-left pl-1">
@@ -91,7 +91,7 @@ export function HelpFaqSections() {
                   <Link
                     key={a.label}
                     href={`/docs/guides/${a.guideSlug}`}
-                    className="group flex items-center gap-3 rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-3.5 hover:border-primary/30 hover:shadow-sm transition-[transform,box-shadow,border-color] duration-150 ease-out active:scale-[0.96] motion-reduce:active:scale-100"
+                    className="group flex items-center gap-3 rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-3.5 hover:border-primary/30 hover:shadow-xs transition-[transform,box-shadow,border-color] duration-150 ease-out active:scale-[0.96] motion-reduce:active:scale-100"
                   >
                     <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${cat.colorClasses.icon} text-white`}>
                       <Icon name={a.icon} className="text-xs" />
@@ -115,7 +115,7 @@ export function HelpFaqSections() {
                       target?.scrollIntoView({ behavior: "smooth", block: "start" });
                     });
                   }}
-                  className="group flex items-center gap-3 rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-3.5 text-left hover:border-primary/30 hover:shadow-sm transition-[transform,box-shadow,border-color] duration-150 ease-out active:scale-[0.96] motion-reduce:active:scale-100 w-full"
+                  className="group flex items-center gap-3 rounded-xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-3.5 text-left hover:border-primary/30 hover:shadow-xs transition-[transform,box-shadow,border-color] duration-150 ease-out active:scale-[0.96] motion-reduce:active:scale-100 w-full"
                 >
                   <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${cat.colorClasses.icon} text-white`}>
                     <Icon name={a.icon} className="text-xs" />
@@ -130,7 +130,7 @@ export function HelpFaqSections() {
       )}
 
       {!search && (
-        <div className="sticky top-24 z-40 bg-white/90 backdrop-blur border-b dark:bg-neutral-950/90 dark:border-neutral-800">
+        <div className="sticky top-24 z-40 bg-white/90 backdrop-blur-sm border-b dark:bg-neutral-950/90 dark:border-neutral-800">
           <div className="max-w-4xl mx-auto px-6 flex gap-1 overflow-x-auto py-2">
             <button
               type="button"

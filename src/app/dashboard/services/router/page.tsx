@@ -96,7 +96,7 @@ export default function BookingRouterPage() {
       />
 
       {loading ? (
-        <div className="max-w-lg space-y-4 rounded-3xl border border-black/[0.06] bg-card p-5 dark:border-white/[0.08]">
+        <div className="max-w-lg space-y-4 rounded-3xl border border-black/6 bg-card p-5 dark:border-white/8">
           <Skeleton className="h-5 w-64" />
           <Skeleton className="h-10 w-full rounded-lg" />
           <div className="space-y-2">

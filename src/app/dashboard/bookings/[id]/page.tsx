@@ -332,7 +332,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
       </div>
 
       {booking.status === "pending" || booking.clientPhone ? (
-        <div className="sticky bottom-[calc(3.5rem+env(safe-area-inset-bottom))] z-10 -mx-4 mt-4 flex gap-2 border-t border-border/60 bg-background/95 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 md:hidden">
+        <div className="sticky bottom-[calc(3.5rem+env(safe-area-inset-bottom))] z-10 -mx-4 mt-4 flex gap-2 border-t border-border/60 bg-background/95 px-4 py-3 backdrop-blur-sm supports-backdrop-filter:bg-background/80 md:hidden">
           <a
             href={whatsappUrl(booking.clientPhone, waText)}
             target="_blank"

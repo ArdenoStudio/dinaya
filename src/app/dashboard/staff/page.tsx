@@ -41,7 +41,7 @@ export default async function StaffPage() {
         <div className={cn(dashboardSurfaceClass, "divide-y overflow-hidden")}>
           {list.map((s) => (
             <div key={s.id} className="flex items-center gap-4 px-5 py-4 transition-colors hover:bg-muted/20">
-              <div className="w-10 h-10 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center flex-shrink-0 text-sm">
+              <div className="w-10 h-10 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center shrink-0 text-sm">
                 {s.name.charAt(0).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">

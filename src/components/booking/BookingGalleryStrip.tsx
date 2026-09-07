@@ -39,13 +39,13 @@ function GalleryTile({ url, alt }: { url: string; alt: string }) {
   const [failed, setFailed] = useState(false);
   if (failed) return null;
   return (
-    <li className="relative aspect-[4/3] min-w-[9.5rem] overflow-hidden rounded-xl bg-muted sm:min-w-0">
+    <li className="relative aspect-4/3 min-w-38 overflow-hidden rounded-xl bg-muted sm:min-w-0">
       <Image
         src={url}
         alt={alt}
         fill
         sizes="(max-width: 768px) 40vw, 180px"
-        className="object-cover outline outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10"
+        className="object-cover outline-solid outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10"
         unoptimized={!isOptimizableRemoteImage(url)}
         onError={() => setFailed(true)}
       />

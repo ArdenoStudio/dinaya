@@ -90,7 +90,7 @@ export default async function AdminSettingsPage() {
               name="email"
               required
               placeholder="admin@example.com"
-              className="h-10 w-full rounded-md border px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
+              className="h-10 w-full rounded-md border px-3 text-sm outline-hidden focus:ring-2 focus:ring-primary/30"
             />
           </label>
           <button
@@ -131,7 +131,7 @@ export default async function AdminSettingsPage() {
                 ? "mb-4 rounded-md border border-rose-500/30 bg-rose-50 dark:bg-rose-950/40 p-3 text-sm text-rose-900 dark:text-rose-200"
                 : announcement.tone === "warning"
                 ? "mb-4 rounded-md border border-amber-500/30 bg-amber-50 dark:bg-amber-950/40 p-3 text-sm text-amber-900 dark:text-amber-200"
-                : "mb-4 rounded-md border border-primary/30 bg-primary/[0.04] p-3 text-sm"
+                : "mb-4 rounded-md border border-primary/30 bg-primary/4 p-3 text-sm"
             }
           >
             <p className="text-xs font-semibold uppercase tracking-wider opacity-70">
@@ -156,7 +156,7 @@ export default async function AdminSettingsPage() {
               rows={3}
               defaultValue={announcement?.message ?? ""}
               placeholder="e.g. Scheduled maintenance on Sunday 2:00 AM — bookings unaffected."
-              className="w-full rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-sm outline-none transition-shadow placeholder:text-muted-foreground/60 focus:ring-2 focus:ring-primary/30"
+              className="w-full rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-sm outline-hidden transition-shadow placeholder:text-muted-foreground/60 focus:ring-2 focus:ring-primary/30"
             />
             <p className="mt-1 text-xs text-muted-foreground">
               Leave blank and save to clear the announcement.
@@ -172,7 +172,7 @@ export default async function AdminSettingsPage() {
                 id="tone"
                 name="tone"
                 defaultValue={announcement?.tone ?? "info"}
-                className="h-10 rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
+                className="h-10 rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 text-sm outline-hidden focus:ring-2 focus:ring-primary/30"
               >
                 <option value="info">Info (cobalt)</option>
                 <option value="warning">Warning (amber)</option>

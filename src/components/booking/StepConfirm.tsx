@@ -55,8 +55,8 @@ interface Props {
 }
 
 const fieldBaseCls =
-  "mt-1.5 w-full min-h-11 rounded-xl border px-3 py-2.5 text-base transition-shadow placeholder:text-muted-foreground focus:outline-none focus:ring-2 md:text-sm";
-const fieldOkCls = `${fieldBaseCls} border-border bg-card focus:border-[var(--booking-accent)] focus:ring-[var(--booking-accent-soft)]`;
+  "mt-1.5 w-full min-h-11 rounded-xl border px-3 py-2.5 text-base transition-shadow placeholder:text-muted-foreground focus:outline-hidden focus:ring-2 md:text-sm";
+const fieldOkCls = `${fieldBaseCls} border-border bg-card focus:booking-border-accent focus:ring-(--booking-accent-soft)`;
 const fieldErrCls = `${fieldBaseCls} border-destructive bg-card focus:border-destructive focus:ring-destructive/25`;
 
 function fieldErrorId(field: string) {
@@ -631,7 +631,7 @@ export default function StepConfirm({
 
   const upsellNotice =
     upsell ? (
-      <div className="mt-4 rounded-xl border border-[var(--booking-accent-soft)] bg-[var(--booking-accent-muted)]/70 p-4 text-sm">
+      <div className="mt-4 rounded-xl border border-(--booking-accent-soft) bg-(--booking-accent-muted)/70 p-4 text-sm">
         <p className="font-medium text-foreground">Recommended add-on</p>
         <p className="mt-1 booking-text-accent">
           {upsell.reason} Ask about <span className="font-semibold">{upsell.name}</span>
@@ -659,7 +659,7 @@ export default function StepConfirm({
                 className={cn(
                   "flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border px-3 py-2.5 text-sm transition-colors",
                   selected
-                    ? "border-[var(--booking-accent)] bg-[var(--booking-accent-muted)] text-foreground"
+                    ? "booking-border-accent booking-bg-accent-muted text-foreground"
                     : onAccentPanel
                       ? "border-border/80 bg-white text-muted-foreground hover:bg-white/90"
                       : "border-border bg-card text-muted-foreground hover:bg-muted/50",
@@ -670,7 +670,7 @@ export default function StepConfirm({
                   name="paymentMethod"
                   checked={selected}
                   onChange={() => setPaymentMethod(option.id)}
-                  className="size-4 shrink-0 accent-[var(--booking-accent)]"
+                  className="size-4 shrink-0 accent-(--booking-accent)"
                 />
                 {option.label}
               </label>

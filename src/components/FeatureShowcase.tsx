@@ -97,7 +97,7 @@ function PaymentMockup() {
       <motion.div
         animate={notified ? { opacity: 1, y: 0 } : { opacity: 0.45, y: 4 }}
         transition={{ duration: 0.25 }}
-        className="flex items-center gap-2 rounded-full border border-white/60 bg-white/80 dark:border-neutral-700/60 dark:bg-neutral-900/80 px-3 py-2 shadow-sm w-fit mx-auto"
+        className="flex items-center gap-2 rounded-full border border-white/60 bg-white/80 dark:border-neutral-700/60 dark:bg-neutral-900/80 px-3 py-2 shadow-xs w-fit mx-auto"
         style={{ backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}
       >
         <div className="flex size-5 items-center justify-center rounded-full bg-primary/10">
@@ -189,7 +189,7 @@ function RemindersMockup() {
               : "0 1px 2px rgba(15,23,42,0.03)",
           }}
           transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
-          className="flex items-center gap-2.5 rounded-xl border border-white/60 bg-white/80 dark:border-neutral-700/60 dark:bg-neutral-900/80 px-3 py-2.5 shadow-sm"
+          className="flex items-center gap-2.5 rounded-xl border border-white/60 bg-white/80 dark:border-neutral-700/60 dark:bg-neutral-900/80 px-3 py-2.5 shadow-xs"
           style={{ backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)" }}
         >
           <motion.div
@@ -215,7 +215,7 @@ function RemindersMockup() {
               >
                 {status}
                 {isSending && (
-                  <span className="inline-flex items-center gap-[2px] ml-[1px]">
+                  <span className="inline-flex items-center gap-[2px] ml-px">
                     {[0, 1, 2].map((dot) => (
                       <motion.span
                         key={`${r.name}-dot-${dot}`}
@@ -268,11 +268,11 @@ function FeatureCard({ f, i, reduceMotion }: { f: typeof features[number]; i: nu
       whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-80px" }}
       transition={reduceMotion ? undefined : { duration: 0.55, ease: [0.22, 1, 0.36, 1], delay: (i % 2) * 0.12 }}
-      className="rounded-3xl overflow-hidden border border-gray-200/80 bg-white shadow-sm dark:border-neutral-700/50 dark:bg-neutral-900"
+      className="rounded-3xl overflow-hidden border border-gray-200/80 bg-white shadow-xs dark:border-neutral-700/50 dark:bg-neutral-900"
     >
       {/* Mockup area */}
       <div
-        className={`${f.mockupBg} px-8 py-10 flex items-center justify-center [background-image:radial-gradient(circle,rgba(0,0,0,0.05)_1px,transparent_1px)] dark:[background-image:radial-gradient(circle,rgba(255,255,255,0.06)_1px,transparent_1px)]`}
+        className={`${f.mockupBg} px-8 py-10 flex items-center justify-center bg-[radial-gradient(circle,rgba(0,0,0,0.05)_1px,transparent_1px)] dark:bg-[radial-gradient(circle,rgba(255,255,255,0.06)_1px,transparent_1px)]`}
         style={{
           backgroundSize: "20px 20px",
         }}

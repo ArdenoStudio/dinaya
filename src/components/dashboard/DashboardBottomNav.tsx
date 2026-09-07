@@ -38,7 +38,7 @@ const PRIMARY: BottomNavItem[] = [
 ];
 
 const focusRingClass =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-950";
+  "focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-950";
 
 function isActive(item: { exact?: boolean; href: string }, pathname: string): boolean {
   if (item.exact) return pathname === item.href;
@@ -154,7 +154,7 @@ export function DashboardBottomNav({
   return (
     <>
       {moreOpen ? (
-        <div className="fixed inset-0 z-[60] md:hidden" role="presentation">
+        <div className="fixed inset-0 z-60 md:hidden" role="presentation">
           <button
             type="button"
             aria-label="Close more menu"
@@ -167,7 +167,7 @@ export function DashboardBottomNav({
             role="dialog"
             aria-modal="true"
             aria-labelledby={titleId}
-            className="absolute inset-x-0 bottom-0 z-[61] flex max-h-[min(85dvh,40rem)] flex-col rounded-t-[1.25rem] border border-neutral-200 bg-white pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_40px_rgba(0,0,0,0.12)] dark:border-neutral-700 dark:bg-neutral-950"
+            className="absolute inset-x-0 bottom-0 z-61 flex max-h-[min(85dvh,40rem)] flex-col rounded-t-[1.25rem] border border-neutral-200 bg-white pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_40px_rgba(0,0,0,0.12)] dark:border-neutral-700 dark:bg-neutral-950"
           >
             <div className="flex shrink-0 flex-col items-center pt-2">
               <div className="h-1 w-10 rounded-full bg-neutral-300 dark:bg-neutral-600" aria-hidden="true" />
@@ -190,7 +190,7 @@ export function DashboardBottomNav({
               </div>
             </div>
 
-            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 pb-[5.5rem]">
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 pb-22">
               {moreSections.map((section) => (
                 <div key={section.label} className="mb-4">
                   <p className="mb-1.5 px-3 text-[0.7rem] font-semibold uppercase tracking-wider text-neutral-500">
@@ -211,7 +211,7 @@ export function DashboardBottomNav({
                               focusRingClass,
                               index > 0 && "border-t border-neutral-200/80 dark:border-neutral-800",
                               active
-                                ? "bg-primary/[0.06] font-semibold text-primary"
+                                ? "bg-primary/6 font-semibold text-primary"
                                 : "font-medium text-neutral-900 dark:text-neutral-100",
                             )}
                           >
@@ -220,7 +220,7 @@ export function DashboardBottomNav({
                                 "flex size-9 shrink-0 items-center justify-center rounded-xl",
                                 active
                                   ? "bg-primary/15 text-primary"
-                                  : "bg-white text-neutral-600 shadow-sm dark:bg-neutral-800 dark:text-neutral-300",
+                                  : "bg-white text-neutral-600 shadow-xs dark:bg-neutral-800 dark:text-neutral-300",
                               )}
                             >
                               <Icon className="size-4" aria-hidden="true" />
@@ -259,7 +259,7 @@ export function DashboardBottomNav({
                       )}
                       onClick={() => setMoreOpen(false)}
                     >
-                      <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-white text-neutral-600 shadow-sm dark:bg-neutral-800 dark:text-neutral-300">
+                      <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-white text-neutral-600 shadow-xs dark:bg-neutral-800 dark:text-neutral-300">
                         <BookOpen className="size-4" aria-hidden="true" />
                       </span>
                       Help &amp; docs
@@ -327,10 +327,10 @@ export function DashboardBottomNav({
 
       <nav
         data-dashboard-bottom-nav
-        className="fixed inset-x-0 bottom-0 z-[55] border-t border-border/80 bg-[hsl(var(--dashboard-chrome))]/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden"
+        className="fixed inset-x-0 bottom-0 z-55 border-t border-border/80 bg-[hsl(var(--dashboard-chrome))]/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden"
         aria-label="Primary"
       >
-        <div className="grid h-[3.75rem] grid-cols-5">
+        <div className="grid h-15 grid-cols-5">
           {PRIMARY.map((item) => {
             const Icon = item.icon;
             const active = isActive(item, activeHref);

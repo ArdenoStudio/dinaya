@@ -31,7 +31,7 @@ export default function BookingBranding({ copy, hideBranding = false, businessSl
   return (
     <Link
       href={href}
-      className="inline-flex items-center gap-2 rounded-full border border-border/80 bg-white px-3.5 py-1.5 text-xs text-muted-foreground shadow-sm transition-colors hover:border-border hover:bg-white hover:text-foreground dark:border-neutral-700 dark:bg-neutral-900 dark:hover:bg-neutral-900"
+      className="inline-flex items-center gap-2 rounded-full border border-border/80 bg-white px-3.5 py-1.5 text-xs text-muted-foreground shadow-xs transition-colors hover:border-border hover:bg-white hover:text-foreground dark:border-neutral-700 dark:bg-neutral-900 dark:hover:bg-neutral-900"
     >
       <span>{copy.poweredBy}</span>
       <span className="inline-flex items-center gap-1.5 font-medium text-foreground">

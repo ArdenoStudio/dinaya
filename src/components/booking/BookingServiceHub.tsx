@@ -156,11 +156,11 @@ export default function BookingServiceHub({
     const minVariantPrice = minPriceVariantLkr(service.priceVariants);
     const displayPriceLkr = minVariantPrice ?? service.priceLkr;
     const rowClassName = cn(
-      "group flex min-h-[4.75rem] w-full items-start gap-3.5 rounded-[1.375rem] border border-border/50 px-3.5 py-4 text-left md:px-4 md:py-[1.125rem]",
+      "group flex min-h-19 w-full items-start gap-3.5 rounded-[1.375rem] border border-border/50 px-3.5 py-4 text-left md:px-4 md:py-4.5",
       "transition-[transform,background-color,box-shadow,border-color] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]",
-      "hover:border-[var(--booking-accent)]/25 hover:bg-[var(--booking-accent-muted)] hover:shadow-sm",
+      "hover:border-(--booking-accent)/25 hover:booking-bg-accent-muted hover:shadow-xs",
       "active:scale-[0.96] motion-reduce:active:scale-100",
-      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--booking-accent-soft)]",
+      "focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-(--booking-accent-soft)",
     );
     const rowContent = (
       <>
@@ -171,7 +171,7 @@ export default function BookingServiceHub({
           />
 
           <div className="min-w-0 flex-1">
-            <p className="text-base font-semibold leading-snug text-foreground transition-colors duration-200 group-hover:text-[var(--booking-accent)]">
+            <p className="text-base font-semibold leading-snug text-foreground transition-colors duration-200 group-hover:booking-text-accent">
               {service.name}
             </p>
             {service.categoryName ? (
@@ -220,7 +220,7 @@ export default function BookingServiceHub({
     : "overflow-hidden rounded-2xl border-x-0 booking-panel-surface shadow-none md:border md:border-border/80 md:shadow-[0_12px_40px_-24px_rgba(15,23,42,0.28)] dark:md:shadow-none dark:md:ring-1 dark:md:ring-white/10";
 
   const contentShell = showHero
-    ? "relative z-10 -mt-5 flex flex-col rounded-t-2xl booking-panel-surface pt-14 md:-mt-6 md:pt-[4.25rem]"
+    ? "relative z-10 -mt-5 flex flex-col rounded-t-2xl booking-panel-surface pt-14 md:-mt-6 md:pt-17"
     : "flex flex-col";
 
   return (

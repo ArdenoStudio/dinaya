@@ -12,10 +12,10 @@ export function DocsSidebar() {
   return (
     <aside className="hidden w-56 shrink-0 lg:block">
       <nav
-        className="sticky top-24 space-y-7 rounded-2xl border border-black/[0.06] bg-white/90 p-4 text-sm shadow-[0_1px_2px_rgba(0,0,0,0.03),0_10px_24px_-16px_rgba(0,0,0,0.12)] backdrop-blur dark:border-white/[0.08] dark:bg-neutral-900/80"
+        className="sticky top-24 space-y-7 rounded-2xl border border-black/6 bg-white/90 p-4 text-sm shadow-[0_1px_2px_rgba(0,0,0,0.03),0_10px_24px_-16px_rgba(0,0,0,0.12)] backdrop-blur-sm dark:border-white/8 dark:bg-neutral-900/80"
         aria-label="Documentation"
       >
-        <div className="border-b border-black/[0.05] pb-3 dark:border-white/[0.07]">
+        <div className="border-b border-black/5 pb-3 dark:border-white/[0.07]">
           <Link
             href="/docs"
             className={cn(
@@ -35,7 +35,7 @@ export function DocsSidebar() {
           if (guides.length === 0) return null;
           return (
             <div key={cat.id}>
-              <p className="mb-2 text-[0.65rem] font-medium uppercase tracking-[0.1em] text-foreground/40">
+              <p className="mb-2 text-[0.65rem] font-medium uppercase tracking-widest text-foreground/40">
                 {cat.label}
               </p>
               <ul className="space-y-0.5">
@@ -49,8 +49,8 @@ export function DocsSidebar() {
                         className={cn(
                           "block rounded-lg px-2 py-1.5 leading-snug transition-colors duration-150 ease-[cubic-bezier(0.2,0,0,1)]",
                           active
-                            ? "bg-foreground/[0.06] font-medium text-foreground dark:bg-white/[0.08]"
-                            : "text-foreground/70 hover:bg-foreground/[0.03] hover:text-foreground",
+                            ? "bg-foreground/6 font-medium text-foreground dark:bg-white/8"
+                            : "text-foreground/70 hover:bg-foreground/3 hover:text-foreground",
                         )}
                       >
                         {g.title}
@@ -63,7 +63,7 @@ export function DocsSidebar() {
           );
         })}
 
-        <div className="space-y-2 border-t border-black/[0.05] pt-4 dark:border-white/[0.07]">
+        <div className="space-y-2 border-t border-black/5 pt-4 dark:border-white/[0.07]">
           <Link href="/docs.md" className="block text-foreground/55 transition-colors hover:text-foreground">
             View Markdown docs
           </Link>

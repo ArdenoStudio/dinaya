@@ -163,7 +163,7 @@ export default async function AdminVoicePage() {
                     <select
                       name="status"
                       defaultValue={integration.status}
-                      className="mt-1 h-10 w-full rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
+                      className="mt-1 h-10 w-full rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 text-sm outline-hidden focus:ring-2 focus:ring-primary/30"
                     >
                       {VOICE_STATUSES.map((status) => (
                         <option key={status} value={status}>{voiceStatusLabel(status)}</option>
@@ -175,7 +175,7 @@ export default async function AdminVoicePage() {
                     <input
                       name="providerName"
                       defaultValue={integration.providerName}
-                      className="mt-1 h-10 w-full rounded-md border px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
+                      className="mt-1 h-10 w-full rounded-md border px-3 text-sm outline-hidden focus:ring-2 focus:ring-primary/30"
                     />
                   </label>
                   <label className="block">
@@ -183,7 +183,7 @@ export default async function AdminVoicePage() {
                     <input
                       name="aiPhoneNumber"
                       defaultValue={integration.aiPhoneNumber ?? ""}
-                      className="mt-1 h-10 w-full rounded-md border px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
+                      className="mt-1 h-10 w-full rounded-md border px-3 text-sm outline-hidden focus:ring-2 focus:ring-primary/30"
                     />
                   </label>
                   <label className="block">
@@ -191,7 +191,7 @@ export default async function AdminVoicePage() {
                     <textarea
                       name="setupNotes"
                       defaultValue={integration.setupNotes ?? ""}
-                      className="mt-1 min-h-24 w-full rounded-md border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/30"
+                      className="mt-1 min-h-24 w-full rounded-md border px-3 py-2 text-sm outline-hidden focus:ring-2 focus:ring-primary/30"
                     />
                   </label>
                   <div className="space-y-2 text-sm">

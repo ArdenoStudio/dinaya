@@ -10,7 +10,7 @@ import type { BookingService } from "./BookingWizard";
 import { BookingServicePrice } from "./BookingServicePrice";
 
 const rowFocus =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--booking-accent-soft)] focus-visible:ring-offset-2";
+  "focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-(--booking-accent-soft) focus-visible:ring-offset-2";
 
 function formatDuration(minutes: number): string {
   if (minutes < 60) return `${minutes}m`;
@@ -80,7 +80,7 @@ export default function StepStaff({
                 rowFocus,
                 anyStaffSelected
                   ? "booking-border-accent booking-bg-accent-muted ring-2 booking-ring-accent"
-                  : "border-border bg-card hover:border-[var(--booking-accent)]/50 hover:bg-muted/30",
+                  : "border-border bg-card hover:border-(--booking-accent)/50 hover:bg-muted/30",
               )}
             >
               <div className="flex size-11 shrink-0 items-center justify-center rounded-full booking-bg-accent-muted booking-text-accent">
@@ -96,7 +96,7 @@ export default function StepStaff({
                 className={cn(
                   "flex size-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
                   anyStaffSelected
-                    ? "border-[var(--booking-accent)] bg-[var(--booking-accent)]"
+                    ? "booking-border-accent booking-bg-accent"
                     : "border-muted-foreground/30",
                 )}
               >
@@ -118,7 +118,7 @@ export default function StepStaff({
                   rowFocus,
                   isSelected
                     ? "booking-border-accent booking-bg-accent-muted ring-2 booking-ring-accent"
-                    : "border-border bg-card hover:border-[var(--booking-accent)]/50 hover:bg-muted/30",
+                    : "border-border bg-card hover:border-(--booking-accent)/50 hover:bg-muted/30",
                 )}
               >
                 <div className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-full booking-bg-accent-muted text-sm font-bold booking-text-accent">
@@ -145,7 +145,7 @@ export default function StepStaff({
                   className={cn(
                     "flex size-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
                     isSelected
-                      ? "border-[var(--booking-accent)] bg-[var(--booking-accent)]"
+                      ? "booking-border-accent booking-bg-accent"
                       : "border-muted-foreground/30",
                   )}
                 >

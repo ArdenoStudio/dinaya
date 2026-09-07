@@ -121,7 +121,7 @@ export function ServiceMetaPanel({
                   className="bg-white object-contain p-0.5"
                 />
               ) : null}
-              <AvatarFallback className="bg-[var(--booking-accent-muted)] text-xs font-semibold text-[var(--booking-accent)]">
+              <AvatarFallback className="booking-bg-accent-muted text-xs font-semibold booking-text-accent">
                 {business.name.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
@@ -171,7 +171,7 @@ export function ServiceMetaPanel({
                 className="bg-white object-contain p-0.5"
               />
             ) : null}
-            <AvatarFallback className="bg-[var(--booking-accent-muted)] text-sm font-semibold text-[var(--booking-accent)]">
+            <AvatarFallback className="booking-bg-accent-muted text-sm font-semibold booking-text-accent">
               {business.name.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
@@ -211,7 +211,7 @@ export function ServiceMetaPanel({
                 <button
                   type="button"
                   onClick={onChangeService}
-                  className="mb-3 flex min-h-11 items-center gap-1 text-xs text-[var(--booking-accent)] hover:underline"
+                  className="mb-3 flex min-h-11 items-center gap-1 text-xs booking-text-accent hover:underline"
                 >
                   <Icon name="chevron-left" className="text-[10px]" />
                   {copy.back}
@@ -233,7 +233,7 @@ export function ServiceMetaPanel({
                     <button
                       type="button"
                       onClick={onChangeVariant}
-                      className="shrink-0 text-xs font-medium booking-text-accent hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--booking-accent-soft)] focus-visible:ring-offset-2"
+                      className="shrink-0 text-xs font-medium booking-text-accent hover:underline focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-(--booking-accent-soft) focus-visible:ring-offset-2"
                     >
                       {copy.changeOption}
                     </button>
@@ -252,7 +252,7 @@ export function ServiceMetaPanel({
                     <button
                       type="button"
                       onClick={onChangeStaff}
-                      className="shrink-0 text-xs font-medium booking-text-accent hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--booking-accent-soft)] focus-visible:ring-offset-2"
+                      className="shrink-0 text-xs font-medium booking-text-accent hover:underline focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-(--booking-accent-soft) focus-visible:ring-offset-2"
                     >
                       {copy.changeStaff}
                     </button>
@@ -285,7 +285,7 @@ export function ServiceMetaPanel({
                 </div>
               ) : null}
               <div className="flex items-center gap-2 text-muted-foreground">
-                <Icon name="clock" className="size-3.5 shrink-0 text-[var(--booking-accent)]" />
+                <Icon name="clock" className="size-3.5 shrink-0 booking-text-accent" />
                 <span className="font-medium text-foreground">{timeLabel}</span>
               </div>
             </div>

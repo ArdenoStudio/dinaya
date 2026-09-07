@@ -28,7 +28,7 @@ export function ReviewForm({ token, clientName }: { token: string; clientName: s
 
   if (status === "done") {
     return (
-      <div className="rounded-2xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-8 text-center shadow-sm">
+      <div className="rounded-2xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-8 text-center shadow-xs">
         <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600">
           <Icon name="check-lg" aria-hidden="true" />
         </div>
@@ -39,7 +39,7 @@ export function ReviewForm({ token, clientName }: { token: string; clientName: s
   }
 
   return (
-    <div className="rounded-2xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-6 shadow-sm">
+    <div className="rounded-2xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-6 shadow-xs">
       <p className="text-sm text-muted-foreground">Hi {clientName},</p>
       <h1 className="mt-1 font-cal text-2xl">How was your visit?</h1>
       <div className="mt-6">
@@ -65,7 +65,7 @@ export function ReviewForm({ token, clientName }: { token: string; clientName: s
           value={comment}
           onChange={(event) => setComment(event.target.value)}
           rows={4}
-          className="mt-2 w-full resize-y rounded-xl border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/30"
+          className="mt-2 w-full resize-y rounded-xl border px-3 py-2 text-sm outline-hidden focus:ring-2 focus:ring-primary/30"
           placeholder="Share a few words about your experience..."
         />
       </label>

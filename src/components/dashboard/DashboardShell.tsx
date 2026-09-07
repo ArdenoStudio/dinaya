@@ -184,7 +184,7 @@ export function DashboardShell({
       {showAdminLink ? (
         <Link
           href="/admin"
-          className="flex min-h-11 items-center gap-2 rounded-xl border border-primary/20 bg-primary/[0.06] px-2 py-2 text-xs font-medium text-primary transition-colors hover:bg-primary/10"
+          className="flex min-h-11 items-center gap-2 rounded-xl border border-primary/20 bg-primary/6 px-2 py-2 text-xs font-medium text-primary transition-colors hover:bg-primary/10"
         >
           <ShieldCheck className="size-3.5" aria-hidden="true" />
           {copy.layout.platformAdmin}
@@ -317,7 +317,7 @@ export function DashboardShell({
                 <button
                   type="button"
                   onClick={openCommand}
-                  className="flex h-11 w-full items-center gap-2 rounded-xl border border-black/[0.06] bg-[hsl(var(--dashboard-main))] px-3 text-left text-sm text-muted-foreground transition-colors hover:border-primary/30 hover:text-foreground dark:border-white/10"
+                  className="flex h-11 w-full items-center gap-2 rounded-xl border border-black/6 dashboard-main px-3 text-left text-sm text-muted-foreground transition-colors hover:border-primary/30 hover:text-foreground dark:border-white/10"
                 >
                   <Search className="size-4 shrink-0" aria-hidden="true" />
                   <span className="min-w-0 flex-1 truncate">{copy.layout.searchPlaceholder}</span>

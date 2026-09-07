@@ -88,7 +88,7 @@ export function DashboardTodayRow({
           <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold text-foreground">
             {initials}
           </span>
-          <span className="w-[4.5rem] shrink-0 text-base font-semibold tabular-nums tracking-tight">
+          <span className="w-18 shrink-0 text-base font-semibold tabular-nums tracking-tight">
             {format(startsAtDate, "h:mm a")}
           </span>
           <span className="min-w-0 flex-1">

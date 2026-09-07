@@ -55,10 +55,10 @@ function OverlayErrorAlert({
 }
 
 const dialogOverlayClass =
-  "fixed inset-0 z-40 bg-black/40 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0";
+  "fixed inset-0 z-40 bg-black/40 backdrop-blur-xs data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0";
 
 const dialogContentClass =
-  "fixed left-1/2 top-1/2 z-50 w-[min(26rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 rounded-xl border border-border bg-white p-5 shadow-xl focus:outline-none dark:border-neutral-800 dark:bg-neutral-900 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95";
+  "fixed left-1/2 top-1/2 z-50 w-[min(26rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 rounded-xl border border-border bg-white p-5 shadow-xl focus:outline-hidden dark:border-neutral-800 dark:bg-neutral-900 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95";
 
 /**
  * Cal.com-style calendar overlay entry point: an inline switch with an
@@ -101,7 +101,7 @@ export function CalendarOverlayControl({
             overlay.toggle();
           }}
           aria-label={copy.overlayMyCalendar}
-          className="data-[checked]:bg-[var(--booking-accent)] data-[unchecked]:bg-muted-foreground/35"
+          className="data-checked:booking-bg-accent data-unchecked:bg-muted-foreground/35"
         />
         <Label
           htmlFor={switchId}
@@ -203,7 +203,7 @@ export function CalendarOverlayControl({
             </Dialog.Description>
             <div className="mt-4 rounded-xl border border-border px-4 py-3.5">
               <div className="flex items-center gap-3">
-                <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-card text-foreground shadow-sm ring-1 ring-border">
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-card text-foreground shadow-xs ring-1 ring-border">
                   <Icon name="google" className="text-base" aria-hidden="true" />
                 </span>
                 <div className="min-w-0 flex-1">
@@ -217,7 +217,7 @@ export function CalendarOverlayControl({
                   disabled={overlay.loading}
                   onCheckedChange={() => overlay.toggle()}
                   aria-label={copy.overlayMyCalendar}
-                  className="data-[checked]:bg-[var(--booking-accent)] data-[unchecked]:bg-muted-foreground/35"
+                  className="data-checked:booking-bg-accent data-unchecked:bg-muted-foreground/35"
                 />
               </div>
               <OverlayErrorAlert copy={copy} overlay={overlay} />

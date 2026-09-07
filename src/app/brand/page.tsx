@@ -110,7 +110,7 @@ const donts = [
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-1 text-xs font-medium text-gray-600 dark:text-gray-400 shadow-sm mb-4">
+    <span className="inline-flex items-center gap-1.5 rounded-full border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-1 text-xs font-medium text-gray-600 dark:text-gray-400 shadow-xs mb-4">
       {children}
     </span>
   );
@@ -150,7 +150,7 @@ export default function BrandPage() {
         </section>
       </FluidParticlesBackground>
       {/* Bottom fade mask */}
-      <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-white to-transparent dark:from-neutral-950 pointer-events-none z-20" />
+      <div className="absolute inset-x-0 bottom-0 h-32 bg-linear-to-t from-white to-transparent dark:from-neutral-950 pointer-events-none z-20" />
       </div>
 
       {/* Logo */}
@@ -172,7 +172,7 @@ export default function BrandPage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Default */}
             <FadeDiv className="flex flex-col">
-              <div className="flex-1 flex items-center justify-center rounded-2xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 shadow-sm h-44 p-6">
+              <div className="flex-1 flex items-center justify-center rounded-2xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 shadow-xs h-44 p-6">
                 <Logo size="lg" href="#" />
               </div>
               <div className="flex items-center justify-between mt-3 px-1">
@@ -185,7 +185,7 @@ export default function BrandPage() {
 
             {/* Icon only */}
             <FadeDiv className="flex flex-col">
-              <div className="flex-1 flex items-center justify-center rounded-2xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 shadow-sm h-44 p-6">
+              <div className="flex-1 flex items-center justify-center rounded-2xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 shadow-xs h-44 p-6">
                 <svg
                   width={48}
                   height={48}
@@ -208,7 +208,7 @@ export default function BrandPage() {
 
             {/* Dark */}
             <FadeDiv className="flex flex-col">
-              <div className="flex-1 flex items-center justify-center rounded-2xl bg-slate-950 shadow-sm h-44 p-6">
+              <div className="flex-1 flex items-center justify-center rounded-2xl bg-slate-950 shadow-xs h-44 p-6">
                 <span className="flex items-center gap-2 text-white text-xl">
                   <svg
                     width={30}
@@ -233,7 +233,7 @@ export default function BrandPage() {
 
             {/* Brand blue */}
             <FadeDiv className="flex flex-col">
-              <div className="flex-1 flex items-center justify-center rounded-2xl bg-blue-600 shadow-sm h-44 p-6">
+              <div className="flex-1 flex items-center justify-center rounded-2xl bg-blue-600 shadow-xs h-44 p-6">
                 <span className="flex items-center gap-2 text-white text-xl">
                   <svg
                     width={30}
@@ -313,7 +313,7 @@ export default function BrandPage() {
 
           <div className="grid md:grid-cols-2 gap-4">
             {/* CalSans */}
-            <FadeDiv className="rounded-2xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 shadow-sm p-8 flex flex-col gap-5">
+            <FadeDiv className="rounded-2xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 shadow-xs p-8 flex flex-col gap-5">
               <div>
                 <p className="font-cal text-7xl tracking-tight text-gray-900 dark:text-gray-100 leading-none">Aa</p>
               </div>
@@ -333,7 +333,7 @@ export default function BrandPage() {
             </FadeDiv>
 
             {/* Inter */}
-            <FadeDiv className="rounded-2xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 shadow-sm p-8 flex flex-col gap-5">
+            <FadeDiv className="rounded-2xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 shadow-xs p-8 flex flex-col gap-5">
               <div>
                 <p className="font-sans text-7xl font-light text-gray-900 dark:text-gray-100 leading-none">Aa</p>
               </div>
@@ -373,7 +373,7 @@ export default function BrandPage() {
 
           <div className="grid md:grid-cols-3 gap-4">
             {voice.map((v) => (
-              <FadeDiv key={v.trait} className="rounded-2xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 shadow-sm p-7">
+              <FadeDiv key={v.trait} className="rounded-2xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 shadow-xs p-7">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-950/40 mb-5">
                   <Icon name={v.icon} className="text-blue-600 text-base" />
                 </div>
@@ -403,7 +403,7 @@ export default function BrandPage() {
 
           <div className="grid md:grid-cols-2 gap-4">
             {/* Do */}
-            <FadeDiv className="rounded-2xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 shadow-sm p-7">
+            <FadeDiv className="rounded-2xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 shadow-xs p-7">
               <div className="flex items-center gap-2 mb-5">
                 <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-950/40">
                   <Icon name="check-lg" className="text-blue-600 text-sm" />
@@ -421,7 +421,7 @@ export default function BrandPage() {
             </FadeDiv>
 
             {/* Don't */}
-            <FadeDiv className="rounded-2xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 shadow-sm p-7">
+            <FadeDiv className="rounded-2xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 shadow-xs p-7">
               <div className="flex items-center gap-2 mb-5">
                 <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-red-50 dark:bg-red-950/40">
                   <Icon name="x-lg" className="text-red-500 text-sm" />

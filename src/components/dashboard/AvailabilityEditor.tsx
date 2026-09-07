@@ -170,7 +170,7 @@ export default function AvailabilityEditor({ staffList, dayNames }: Props) {
         <select
           value={selectedStaffId}
           onChange={(e) => setSelectedStaffId(e.target.value)}
-          className="mt-1 border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          className="mt-1 border rounded-md px-3 py-2 text-sm focus:outline-hidden focus:ring-2 focus:ring-primary"
         >
           {staffList.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
         </select>
@@ -210,10 +210,10 @@ export default function AvailabilityEditor({ staffList, dayNames }: Props) {
                       {dayRows.map((row) => (
                         <div key={row.index} className="flex items-center gap-2">
                           <input type="time" value={row.startTime} onChange={(e) => updateRow(row.index, "startTime", e.target.value)}
-                            className="border rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
+                            className="border rounded-md px-2 py-1 text-sm focus:outline-hidden focus:ring-2 focus:ring-primary" />
                           <span className="text-muted-foreground text-sm">to</span>
                           <input type="time" value={row.endTime} onChange={(e) => updateRow(row.index, "endTime", e.target.value)}
-                            className="border rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
+                            className="border rounded-md px-2 py-1 text-sm focus:outline-hidden focus:ring-2 focus:ring-primary" />
                           {dayRows.length > 1 && (
                             <button
                               type="button"
@@ -263,7 +263,7 @@ export default function AvailabilityEditor({ staffList, dayNames }: Props) {
                 value={newOverride.date}
                 min={today()}
                 onChange={(e) => setNewOverride((f) => ({ ...f, date: e.target.value }))}
-                className="mt-1 w-full border rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                className="mt-1 w-full border rounded-md px-2 py-1.5 text-sm focus:outline-hidden focus:ring-2 focus:ring-primary"
               />
             </div>
             <div>
@@ -271,7 +271,7 @@ export default function AvailabilityEditor({ staffList, dayNames }: Props) {
               <select
                 value={newOverride.isBlocked ? "blocked" : "custom"}
                 onChange={(e) => setNewOverride((f) => ({ ...f, isBlocked: e.target.value === "blocked" }))}
-                className="mt-1 w-full border rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                className="mt-1 w-full border rounded-md px-2 py-1.5 text-sm focus:outline-hidden focus:ring-2 focus:ring-primary"
               >
                 <option value="blocked">Full day off</option>
                 <option value="custom">Custom hours</option>
@@ -285,13 +285,13 @@ export default function AvailabilityEditor({ staffList, dayNames }: Props) {
                 <label className="text-xs text-muted-foreground">From</label>
                 <input type="time" value={newOverride.startTime}
                   onChange={(e) => setNewOverride((f) => ({ ...f, startTime: e.target.value }))}
-                  className="mt-1 w-full border rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
+                  className="mt-1 w-full border rounded-md px-2 py-1.5 text-sm focus:outline-hidden focus:ring-2 focus:ring-primary" />
               </div>
               <div className="flex-1">
                 <label className="text-xs text-muted-foreground">To</label>
                 <input type="time" value={newOverride.endTime}
                   onChange={(e) => setNewOverride((f) => ({ ...f, endTime: e.target.value }))}
-                  className="mt-1 w-full border rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
+                  className="mt-1 w-full border rounded-md px-2 py-1.5 text-sm focus:outline-hidden focus:ring-2 focus:ring-primary" />
               </div>
             </div>
           )}
@@ -303,7 +303,7 @@ export default function AvailabilityEditor({ staffList, dayNames }: Props) {
               value={newOverride.reason}
               onChange={(e) => setNewOverride((f) => ({ ...f, reason: e.target.value }))}
               placeholder="e.g. Public holiday"
-              className="mt-1 w-full border rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className="mt-1 w-full border rounded-md px-2 py-1.5 text-sm focus:outline-hidden focus:ring-2 focus:ring-primary"
             />
           </div>
 

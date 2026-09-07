@@ -133,7 +133,7 @@ export function DocsAiActions({
         onClick={() => setOpen((prev) => !prev)}
         aria-haspopup="menu"
         aria-expanded={open}
-        className="inline-flex items-center gap-2 rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 shadow-sm shadow-gray-900/5 dark:shadow-black/20 transition hover:border-primary/40 hover:text-primary"
+        className="inline-flex items-center gap-2 rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 shadow-xs shadow-gray-900/5 dark:shadow-black/20 transition hover:border-primary/40 hover:text-primary"
       >
         <Icon name="stars" className="text-[13px]" />
         Ask with AI
@@ -143,7 +143,7 @@ export function DocsAiActions({
       {open ? (
         <div
           role="menu"
-          className="absolute right-0 z-40 mt-2 w-[18.5rem] rounded-2xl border border-gray-200 dark:border-neutral-800 bg-white dark:border-neutral-800 dark:bg-neutral-900/95 p-2 shadow-xl shadow-gray-900/15 backdrop-blur"
+          className="absolute right-0 z-40 mt-2 w-74 rounded-2xl border border-gray-200 dark:border-neutral-800 bg-white dark:border-neutral-800 dark:bg-neutral-900/95 p-2 shadow-xl shadow-gray-900/15 backdrop-blur-sm"
         >
           <p className="px-2 py-1 text-[11px] font-semibold uppercase tracking-widest text-gray-500 dark:text-gray-400">
             Utilities

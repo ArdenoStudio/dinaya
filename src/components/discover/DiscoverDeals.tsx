@@ -50,7 +50,7 @@ function DealCard({ deal, sourcePage }: { deal: DealListItem; sourcePage: string
   }, [deal]);
 
   return (
-    <div ref={ref} className="rounded-2xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5 shadow-sm">
+    <div ref={ref} className="rounded-2xl border bg-white dark:border-neutral-800 dark:bg-neutral-900 p-5 shadow-xs">
       <div className="flex items-start gap-3">
         {deal.logoUrl ? (
           <Image

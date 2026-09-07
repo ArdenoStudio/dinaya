@@ -24,11 +24,11 @@ export function DocsBookingMockup({ variant, highlightTarget }: Props) {
   return (
     <div
       data-booking-theme=""
-      className="relative flex h-full flex-col overflow-hidden bg-[var(--booking-page-bg,#fff)] text-[11px] text-foreground dark:bg-background"
+      className="relative flex h-full flex-col overflow-hidden bg-(--booking-page-bg,#fff) text-[11px] text-foreground dark:bg-background"
     >
       <div className="border-b border-border px-3 py-2.5">
         <div className="flex items-center gap-2.5">
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[var(--booking-accent-muted)] text-sm font-bold text-[var(--booking-accent)]">
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg booking-bg-accent-muted text-sm font-bold booking-text-accent">
             D
           </div>
           <div className="min-w-0">
@@ -43,7 +43,7 @@ export function DocsBookingMockup({ variant, highlightTarget }: Props) {
       <div className="flex-1 space-y-1.5 overflow-hidden px-2.5 py-2">
         {step === "service" && (
           <div className="space-y-1">
-            <p className="px-0.5 text-[9px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+            <p className="px-0.5 text-[9px] font-semibold uppercase tracking-widest text-muted-foreground">
               Choose service
             </p>
             {services.map((s) => (
@@ -56,11 +56,11 @@ export function DocsBookingMockup({ variant, highlightTarget }: Props) {
                   className={cn(
                     "flex items-start gap-2 rounded-[1.25rem] border p-2 text-left",
                     s.selected
-                      ? "border-[var(--booking-accent)] bg-[var(--booking-accent-muted)]/50 ring-2 ring-[var(--booking-accent-soft)]"
+                      ? "booking-border-accent bg-(--booking-accent-muted)/50 ring-2 ring-(--booking-accent-soft)"
                       : "border-border/50 bg-card",
                   )}
                 >
-                  <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[var(--booking-accent-muted)] text-[10px] font-bold text-[var(--booking-accent)]">
+                  <div className="flex size-8 shrink-0 items-center justify-center rounded-lg booking-bg-accent-muted text-[10px] font-bold booking-text-accent">
                     {s.name.charAt(0)}
                   </div>
                   <div className="min-w-0 flex-1">
@@ -69,13 +69,13 @@ export function DocsBookingMockup({ variant, highlightTarget }: Props) {
                         className={cn(
                           "font-medium",
                           s.selected
-                            ? "text-[var(--booking-accent)]"
+                            ? "booking-text-accent"
                             : "text-foreground",
                         )}
                       >
                         {s.name}
                       </p>
-                      <p className="shrink-0 font-semibold text-[var(--booking-accent)]">
+                      <p className="shrink-0 font-semibold booking-text-accent">
                         {s.price}
                       </p>
                     </div>
@@ -89,7 +89,7 @@ export function DocsBookingMockup({ variant, highlightTarget }: Props) {
 
         {step === "time" && (
           <div className={panelClass}>
-            <p className="mb-1.5 text-[9px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+            <p className="mb-1.5 text-[9px] font-semibold uppercase tracking-widest text-muted-foreground">
               Pick a time
             </p>
             <div className="grid grid-cols-3 gap-1">
@@ -104,7 +104,7 @@ export function DocsBookingMockup({ variant, highlightTarget }: Props) {
                     className={cn(
                       "block rounded-lg py-1.5 text-center text-[10px] font-semibold tabular-nums",
                       i === 2
-                        ? "bg-[var(--booking-accent)] text-white ring-2 ring-[var(--booking-accent-soft)]"
+                        ? "booking-bg-accent text-white ring-2 ring-(--booking-accent-soft)"
                         : "border border-border bg-secondary/40 text-foreground",
                     )}
                   >
@@ -121,12 +121,12 @@ export function DocsBookingMockup({ variant, highlightTarget }: Props) {
             <div className={panelClass}>
               <p className="font-semibold text-foreground">Haircut & Style</p>
               <p className="text-muted-foreground">Thu May 15 · 11:00</p>
-              <p className="mt-0.5 font-medium text-[var(--booking-accent)]">Rs. 2,500</p>
+              <p className="mt-0.5 font-medium booking-text-accent">Rs. 2,500</p>
             </div>
             <DocsTargetHighlight active={target("booking-confirm-pay")} label="Confirm & Pay">
               <button
                 type="button"
-                className="w-full rounded-xl bg-[var(--booking-accent)] py-2.5 text-[11px] font-semibold text-white"
+                className="w-full rounded-xl booking-bg-accent py-2.5 text-[11px] font-semibold text-white"
               >
                 Confirm & Pay
               </button>
@@ -177,7 +177,7 @@ export function DocsBookingMockup({ variant, highlightTarget }: Props) {
                 ))}
               </div>
             </DocsTargetHighlight>
-            <div className="min-h-[4.5rem] rounded-lg border border-border bg-muted/30 px-2 py-1.5 text-[9px] leading-relaxed text-muted-foreground dark:border-white/10 dark:bg-neutral-900/60">
+            <div className="min-h-18 rounded-lg border border-border bg-muted/30 px-2 py-1.5 text-[9px] leading-relaxed text-muted-foreground dark:border-white/10 dark:bg-neutral-900/60">
               Share a few words…
             </div>
           </div>

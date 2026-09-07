@@ -32,7 +32,7 @@ function PlanCell({ value, highlight }: { value: string; highlight?: boolean }) 
     <td
       className={cn(
         "px-4 py-3.5 text-center text-sm text-foreground/80",
-        highlight && "bg-primary/[0.04]",
+        highlight && "bg-primary/4",
       )}
     >
       {value === "Yes" ? (
@@ -135,7 +135,7 @@ export default async function PricingPage() {
       />
 
       <section className="px-6 pb-16 pt-4">
-        <div className="mx-auto flex max-w-6xl flex-col gap-4 rounded-2xl border border-primary/15 bg-primary/[0.04] px-6 py-5 dark:bg-primary/10 md:flex-row md:items-center md:justify-between">
+        <div className="mx-auto flex max-w-6xl flex-col gap-4 rounded-2xl border border-primary/15 bg-primary/4 px-6 py-5 dark:bg-primary/10 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="font-cal text-lg tracking-tight text-foreground">
               Trial includes Starter + Pro features
@@ -174,7 +174,7 @@ export default async function PricingPage() {
             Swipe to compare plans →
           </p>
 
-          <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+          <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-xs">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[860px] text-sm">
                 <thead>
@@ -230,7 +230,7 @@ export default async function PricingPage() {
                 <p className="mb-2 px-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   {group.label}
                 </p>
-                <ul className="divide-y divide-border rounded-2xl border border-border bg-card shadow-sm">
+                <ul className="divide-y divide-border rounded-2xl border border-border bg-card shadow-xs">
                   {group.items.map(([name, price]) => (
                     <li
                       key={name}
@@ -292,12 +292,12 @@ export default async function PricingPage() {
       </section>
 
       <section className="relative overflow-hidden px-6 pb-20">
-        <div className="relative mx-auto max-w-4xl overflow-hidden rounded-[2rem] px-8 py-16 text-center">
+        <div className="relative mx-auto max-w-4xl overflow-hidden rounded-4xl px-8 py-16 text-center">
           <div
             className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(80%_70%_at_50%_0%,hsl(220_82%_53%/0.16),transparent_65%)]"
             aria-hidden
           />
-          <div className="pointer-events-none absolute inset-0 -z-10 rounded-[2rem] border border-border bg-muted/30" aria-hidden />
+          <div className="pointer-events-none absolute inset-0 -z-10 rounded-4xl border border-border bg-muted/30" aria-hidden />
           <h2 className="font-cal text-3xl tracking-tight text-balance md:text-4xl">
             Try Dinaya free for 14 days.
           </h2>

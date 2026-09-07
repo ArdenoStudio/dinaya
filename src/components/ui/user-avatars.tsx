@@ -91,8 +91,8 @@ export function UserAvatars({
             role={decorative ? undefined : "img"}
             aria-label={decorative ? undefined : user.name || "User avatar"}
             className={cn(
-              "relative rounded-full outline-none",
-              !decorative && "cursor-pointer focus:ring-2 focus:ring-[var(--booking-accent-soft)] focus:ring-offset-2 focus:ring-offset-background",
+              "relative rounded-full outline-hidden",
+              !decorative && "cursor-pointer focus:ring-2 focus:ring-(--booking-accent-soft) focus:ring-offset-2 focus:ring-offset-background",
             )}
             style={{
               width: size,
@@ -120,7 +120,7 @@ export function UserAvatars({
                 : { type: "spring", stiffness: 200, damping: 20 }
             }
           >
-            <div className="h-full w-full overflow-hidden rounded-full border-2 border-background shadow-sm ring-1 ring-border/50">
+            <div className="h-full w-full overflow-hidden rounded-full border-2 border-background shadow-xs ring-1 ring-border/50">
               {isLengthBubble ? (
                 <div className="flex h-full w-full items-center justify-center bg-muted text-[10px] font-semibold text-muted-foreground">
                   +{users.length - maxVisible}
@@ -133,7 +133,7 @@ export function UserAvatars({
                   className="h-full w-full object-cover image-depth"
                 />
               ) : (
-                <div className="flex h-full w-full items-center justify-center bg-[var(--booking-accent-muted)] text-xs font-semibold text-[var(--booking-accent)]">
+                <div className="flex h-full w-full items-center justify-center booking-bg-accent-muted text-xs font-semibold booking-text-accent">
                   {initial}
                 </div>
               )}

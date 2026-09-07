@@ -201,7 +201,7 @@ export function VoiceReceptionistClient() {
               <input
                 value={form.businessPhone}
                 onChange={(e) => setForm((current) => ({ ...current, businessPhone: e.target.value }))}
-                className="mt-1 h-10 w-full rounded-md border px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
+                className="mt-1 h-10 w-full rounded-md border px-3 text-sm outline-hidden focus:ring-2 focus:ring-primary/30"
                 placeholder="+94..."
                 required
               />
@@ -211,7 +211,7 @@ export function VoiceReceptionistClient() {
               <input
                 value={form.handoffPhone}
                 onChange={(e) => setForm((current) => ({ ...current, handoffPhone: e.target.value }))}
-                className="mt-1 h-10 w-full rounded-md border px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
+                className="mt-1 h-10 w-full rounded-md border px-3 text-sm outline-hidden focus:ring-2 focus:ring-primary/30"
                 placeholder="+94..."
                 required
               />
@@ -255,7 +255,7 @@ export function VoiceReceptionistClient() {
                 <textarea
                   value={form[key as keyof FormState] as string}
                   onChange={(e) => setForm((current) => ({ ...current, [key]: e.target.value }))}
-                  className="mt-1 min-h-24 w-full rounded-md border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/30"
+                  className="mt-1 min-h-24 w-full rounded-md border px-3 py-2 text-sm outline-hidden focus:ring-2 focus:ring-primary/30"
                 />
               </label>
             ))}

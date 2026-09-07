@@ -47,7 +47,7 @@ export default function PayPalReturnHandler({ slug, copy }: Props) {
 
   if (error) {
     return (
-      <div className="rounded-2xl border border-red-100 bg-white p-8 text-center shadow-sm">
+      <div className="rounded-2xl border border-red-100 bg-white p-8 text-center shadow-xs">
         <Icon name="exclamation-circle" className="mb-3 text-2xl text-red-400" />
         <p className="text-sm text-gray-600">{error}</p>
       </div>
@@ -55,7 +55,7 @@ export default function PayPalReturnHandler({ slug, copy }: Props) {
   }
 
   return (
-    <div className="rounded-2xl border border-gray-100 bg-white p-10 text-center shadow-sm">
+    <div className="rounded-2xl border border-gray-100 bg-white p-10 text-center shadow-xs">
       <div className="mx-auto mb-4 size-10 animate-spin rounded-full border-2 border-gray-200 border-t-primary" />
       <p className="text-sm text-gray-500">{copy.redirectingToPayment}</p>
     </div>

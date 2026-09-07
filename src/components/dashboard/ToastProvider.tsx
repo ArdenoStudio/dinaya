@@ -63,7 +63,7 @@ export function DashboardToastProvider({ children }: { children: React.ReactNode
           </Toast.Root>
         );
       })}
-      <Toast.Viewport className="fixed bottom-[calc(3.5rem+env(safe-area-inset-bottom)+0.5rem)] right-4 z-[70] flex w-[min(24rem,calc(100vw-2rem))] flex-col gap-2 md:bottom-4" />
+      <Toast.Viewport className="fixed bottom-[calc(3.5rem+env(safe-area-inset-bottom)+0.5rem)] right-4 z-70 flex w-[min(24rem,calc(100vw-2rem))] flex-col gap-2 md:bottom-4" />
     </Toast.Provider>
   );
 }
