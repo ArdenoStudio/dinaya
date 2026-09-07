@@ -11,7 +11,7 @@ export const starterFeatures = [
 export const proFeatures = [
   "Everything in Starter",
   "1 branch, 5 staff, unlimited services",
-  "SMS/WhatsApp reminder credits",
+  "500 WhatsApp reminders/mo",
   "Google Calendar sync",
   "Reviews and advanced reports",
   "Basic automations",
@@ -21,6 +21,7 @@ export const proFeatures = [
 export const growthFeatures = [
   "Everything in Pro",
   "3 branches and 15 staff",
+  "2,000 WhatsApp reminders/mo",
   "Custom domain",
   "Remove Dinaya branding",
   "Full automations",
@@ -37,14 +38,27 @@ export const managedFeatures = [
   "Done-for-you optimization",
 ];
 
-export const addOns = [
-  ["Extra branch", "LKR 1,500/mo each"],
-  ["Extra staff pack, 5 users", "LKR 1,000/mo"],
-  ["SMS/WhatsApp top-up", "Usage-based"],
-  ["Custom domain setup help", "LKR 5,000 one-time"],
-  ["Data migration", "From LKR 10,000"],
-  ["AI Voice Receptionist", "Coming soon"],
-  ["Managed onboarding", "From LKR 15,000 one-time"],
+export const addOnGroups = [
+  {
+    label: "Scale as you grow",
+    items: [
+      ["Extra branch", "LKR 1,500/mo each"],
+      ["Extra staff pack, 5 users", "LKR 1,000/mo"],
+      ["SMS/WhatsApp top-up", "Usage-based"],
+    ],
+  },
+  {
+    label: "Setup & migration help",
+    items: [
+      ["Custom domain setup help", "LKR 5,000 one-time"],
+      ["Data migration", "From LKR 10,000"],
+      ["Managed onboarding", "From LKR 15,000 one-time"],
+    ],
+  },
+  {
+    label: "Coming soon",
+    items: [["AI Voice Receptionist", "Coming soon"]],
+  },
 ] as const;
 
 export const comparisonRows = [
@@ -56,7 +70,7 @@ export const comparisonRows = [
   ["Staff", "2", "5", "15", "Custom"],
   ["Services", "10", "Unlimited", "Unlimited", "Unlimited"],
   ["Email confirmations", "Yes", "Yes", "Yes", "Yes"],
-  ["SMS/WhatsApp reminders", "No", "Credits", "Higher credits", "Custom"],
+  ["SMS/WhatsApp reminders", "No", "500/mo", "2,000/mo", "Custom"],
   ["Deposits / full payments", "Basic", "Yes", "Yes", "Yes"],
   ["Client database", "Basic", "Yes", "Yes", "Yes"],
   ["Reviews", "No", "Yes", "Yes", "Yes"],
@@ -108,4 +122,7 @@ export type PricingShowcasePlan = {
   ctaHref: string;
   ctaLabel: string;
   featureHeading: string;
+  trialNote?: string;
+  /** Matches `PaidPlan` from @/lib/plan; omitted for sales-assisted tiers like Managed Max. */
+  planKey?: "starter" | "pro" | "max";
 };

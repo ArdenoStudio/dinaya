@@ -6,9 +6,10 @@ import { LandingFooter } from "@/components/LandingFooter";
 import { PricingPlansShowcase } from "@/components/pricing/PricingPlansShowcase";
 import { Icon } from "@/components/ui/Icon";
 import { auth } from "@/auth";
+import { getBusinessContext } from "@/lib/auth";
 import { MARKETING_CTA_PRIMARY } from "@/lib/marketing-copy";
 import {
-  addOns,
+  addOnGroups,
   comparisonRows,
   faqs,
   growthFeatures,
@@ -17,7 +18,8 @@ import {
   starterFeatures,
   type PricingShowcasePlan,
 } from "@/lib/pricing-page-content";
-import { annualSavingsPercent, getPlanConfigAsync } from "@/lib/plan";
+import { annualSavingsPercent, getPlanConfigAsync, resolveEffectivePlan } from "@/lib/plan";
+import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Pricing - 14-Day Free Trial | Dinaya",
@@ -25,9 +27,14 @@ export const metadata: Metadata = {
     "Try Dinaya free for 14 days. Starter, Pro, Growth, and Managed Max pricing built for Sri Lankan small businesses.",
 };
 
-function PlanCell({ value }: { value: string }) {
+function PlanCell({ value, highlight }: { value: string; highlight?: boolean }) {
   return (
-    <td className="px-4 py-3.5 text-center text-sm text-foreground/80">
+    <td
+      className={cn(
+        "px-4 py-3.5 text-center text-sm text-foreground/80",
+        highlight && "bg-primary/[0.04]",
+      )}
+    >
       {value === "Yes" ? (
         <Icon name="check" className="mx-auto text-sm text-primary" />
       ) : value === "No" ? (
@@ -45,6 +52,18 @@ export default async function PricingPage() {
   const ctaLabel = session?.user ? "Manage in dashboard" : MARKETING_CTA_PRIMARY;
   const config = await getPlanConfigAsync();
 
+  const businessContext = await getBusinessContext();
+  const effectivePlan = businessContext
+    ? resolveEffectivePlan({
+        storedPlan: businessContext.business.plan,
+        planExpiresAt: businessContext.business.planExpiresAt,
+      })
+    : null;
+  const currentPlanKey =
+    effectivePlan === "starter" || effectivePlan === "pro" || effectivePlan === "max"
+      ? effectivePlan
+      : null;
+
   const plans: PricingShowcasePlan[] = [
     {
       name: "Starter",
@@ -60,6 +79,7 @@ export default async function PricingPage() {
       ctaHref,
       ctaLabel,
       featureHeading: "Includes:",
+      planKey: "starter",
     },
     {
       name: "Pro",
@@ -73,6 +93,7 @@ export default async function PricingPage() {
       ctaHref,
       ctaLabel,
       featureHeading: "Everything in Starter, plus:",
+      planKey: "pro",
     },
     {
       name: "Growth",
@@ -85,6 +106,8 @@ export default async function PricingPage() {
       ctaHref,
       ctaLabel,
       featureHeading: "Everything in Pro, plus:",
+      trialNote: "Limited preview during your 14-day trial",
+      planKey: "max",
     },
     {
       name: "Managed Max",
@@ -108,6 +131,7 @@ export default async function PricingPage() {
         plans={plans}
         defaultCtaHref={ctaHref}
         defaultCtaLabel={ctaLabel}
+        currentPlanKey={currentPlanKey}
       />
 
       <section className="px-6 pb-16 pt-4">
@@ -146,12 +170,16 @@ export default async function PricingPage() {
             </p>
           </div>
 
+          <p className="mb-2 text-xs font-medium text-muted-foreground sm:hidden">
+            Swipe to compare plans →
+          </p>
+
           <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[860px] text-sm">
                 <thead>
                   <tr className="border-b border-border bg-muted/40">
-                    <th className="w-[28%] px-4 py-3.5 text-left font-medium text-muted-foreground">
+                    <th className="sticky left-0 z-10 w-[28%] bg-muted/40 px-4 py-3.5 text-left font-medium text-muted-foreground">
                       Feature
                     </th>
                     <th className="px-4 py-3.5 text-center font-medium text-muted-foreground">Starter</th>
@@ -164,10 +192,12 @@ export default async function PricingPage() {
                 </thead>
                 <tbody className="divide-y divide-border">
                   {comparisonRows.map(([feature, starter, pro, growth, managed]) => (
-                    <tr key={feature} className="transition-colors hover:bg-muted/30">
-                      <td className="px-4 py-3.5 font-medium text-foreground">{feature}</td>
+                    <tr key={feature} className="group transition-colors hover:bg-muted/30">
+                      <td className="sticky left-0 z-10 bg-card px-4 py-3.5 font-medium text-foreground group-hover:bg-muted/30">
+                        {feature}
+                      </td>
                       <PlanCell value={starter} />
-                      <PlanCell value={pro} />
+                      <PlanCell value={pro} highlight />
                       <PlanCell value={growth} />
                       <PlanCell value={managed} />
                     </tr>
@@ -194,17 +224,26 @@ export default async function PricingPage() {
             </p>
           </div>
 
-          <ul className="divide-y divide-border rounded-2xl border border-border bg-card shadow-sm">
-            {addOns.map(([name, price]) => (
-              <li
-                key={name}
-                className="flex flex-wrap items-baseline justify-between gap-2 px-5 py-4 sm:px-6"
-              >
-                <span className="font-medium text-foreground">{name}</span>
-                <span className="text-sm tabular-nums text-muted-foreground">{price}</span>
-              </li>
+          <div className="space-y-6">
+            {addOnGroups.map((group) => (
+              <div key={group.label}>
+                <p className="mb-2 px-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  {group.label}
+                </p>
+                <ul className="divide-y divide-border rounded-2xl border border-border bg-card shadow-sm">
+                  {group.items.map(([name, price]) => (
+                    <li
+                      key={name}
+                      className="flex flex-wrap items-baseline justify-between gap-2 px-5 py-4 sm:px-6"
+                    >
+                      <span className="font-medium text-foreground">{name}</span>
+                      <span className="text-sm tabular-nums text-muted-foreground">{price}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             ))}
-          </ul>
+          </div>
         </div>
       </section>
 

@@ -13,21 +13,30 @@ function formatLkr(amount: number) {
   return amount.toLocaleString("en-LK");
 }
 
+type PlanKey = "starter" | "pro" | "max";
+const PLAN_ORDER: PlanKey[] = ["starter", "pro", "max"];
+
 type PricingPlansShowcaseProps = {
   plans: PricingShowcasePlan[];
   defaultCtaHref: string;
   defaultCtaLabel: string;
+  /** The signed-in business's active paid plan, if any — drives "Current plan" / "Upgrade" CTAs. */
+  currentPlanKey?: PlanKey | null;
 };
 
 function PricingSwitch({
   isYearly,
   onChange,
+  savingsPercent,
+  reduceMotion,
 }: {
   isYearly: boolean;
   onChange: (yearly: boolean) => void;
+  savingsPercent: number;
+  reduceMotion: boolean;
 }) {
   return (
-    <div className="inline-flex items-center gap-3">
+    <div className="flex flex-col items-center gap-2">
       <div
         className="relative inline-flex rounded-xl border border-border bg-muted/50 p-1 shadow-sm"
         role="group"
@@ -59,14 +68,19 @@ function PricingSwitch({
           );
         })}
       </div>
-      <span
-        className={cn(
-          "text-sm font-medium transition-opacity duration-200",
-          isYearly ? "text-emerald-700 opacity-100 dark:text-emerald-400" : "opacity-0",
-        )}
-      >
-        Save ~17%
-      </span>
+      <AnimatePresence initial={false}>
+        {isYearly && savingsPercent > 0 ? (
+          <motion.span
+            initial={reduceMotion ? false : { opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={reduceMotion ? undefined : { opacity: 0, height: 0 }}
+            transition={{ duration: 0.18, ease: [0.2, 0, 0, 1] }}
+            className="overflow-hidden text-sm font-medium text-emerald-700 dark:text-emerald-400"
+          >
+            Save {savingsPercent}%
+          </motion.span>
+        ) : null}
+      </AnimatePresence>
     </div>
   );
 }
@@ -75,9 +89,11 @@ export function PricingPlansShowcase({
   plans,
   defaultCtaHref,
   defaultCtaLabel,
+  currentPlanKey,
 }: PricingPlansShowcaseProps) {
   const [isYearly, setIsYearly] = useState(false);
   const reduceMotion = useReducedMotion();
+  const yearlySavingsPercent = plans.find((p) => p.annualSavingsPercent > 0)?.annualSavingsPercent ?? 0;
 
   return (
     <section
@@ -118,8 +134,26 @@ export function PricingPlansShowcase({
           PayHere-ready checkout, no commission on bookings. Start free — upgrade when appointments stick.
         </p>
 
-        <div className="mt-8 flex justify-center">
-          <PricingSwitch isYearly={isYearly} onChange={setIsYearly} />
+        <div className="mt-5 flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5 text-xs text-muted-foreground">
+          {[
+            { icon: "geo-alt-fill", text: "Built for Sri Lanka" },
+            { icon: "currency-dollar", text: "No USD subscriptions" },
+            { icon: "percent", text: "Zero commission on bookings" },
+          ].map((item) => (
+            <div key={item.text} className="flex items-center gap-1.5">
+              <Icon name={item.icon} className="text-primary text-xs" />
+              <span>{item.text}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-6 flex justify-center">
+          <PricingSwitch
+            isYearly={isYearly}
+            onChange={setIsYearly}
+            savingsPercent={yearlySavingsPercent}
+            reduceMotion={reduceMotion}
+          />
         </div>
       </div>
 
@@ -131,9 +165,25 @@ export function PricingPlansShowcase({
               : isYearly
                 ? plan.annualPriceLkr
                 : plan.monthlyPriceLkr;
-          const ctaHref = plan.ctaHref || defaultCtaHref;
-          const ctaLabel = plan.ctaLabel || defaultCtaLabel;
+          // Always show a /mo figure so Monthly and Yearly stay directly comparable;
+          // the true annual charge is called out separately below.
+          const displayPriceLkr =
+            priceLkr != null && isYearly ? Math.round(priceLkr / 12) : priceLkr;
           const badgeLabel = plan.popular ? "Most popular" : plan.badge;
+
+          const isCurrentPlan = !!currentPlanKey && plan.planKey === currentPlanKey;
+          const isUpgradeTarget =
+            !!currentPlanKey &&
+            !!plan.planKey &&
+            PLAN_ORDER.indexOf(plan.planKey) > PLAN_ORDER.indexOf(currentPlanKey);
+          const ctaHref = isCurrentPlan || isUpgradeTarget
+            ? "/dashboard/billing"
+            : plan.ctaHref || defaultCtaHref;
+          const ctaLabel = isCurrentPlan
+            ? "Current plan"
+            : isUpgradeTarget
+              ? `Upgrade to ${plan.name}`
+              : plan.ctaLabel || defaultCtaLabel;
 
           return (
             <motion.article
@@ -179,30 +229,39 @@ export function PricingPlansShowcase({
                 <span className="pb-1 text-sm font-medium text-muted-foreground">LKR</span>
                 <AnimatePresence mode="wait" initial={false}>
                   <motion.span
-                    key={`${plan.name}-${priceLkr ?? "custom"}-${isYearly ? "y" : "m"}`}
+                    key={`${plan.name}-${displayPriceLkr ?? "custom"}-${isYearly ? "y" : "m"}`}
                     initial={reduceMotion ? false : { opacity: 0, y: 6 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={reduceMotion ? undefined : { opacity: 0, y: -4 }}
                     transition={{ duration: 0.18, ease: [0.2, 0, 0, 1] }}
                     className="text-4xl font-semibold leading-none tracking-tighter tabular-nums text-foreground"
                   >
-                    {priceLkr != null ? formatLkr(priceLkr) : "12,900"}
+                    {displayPriceLkr != null ? formatLkr(displayPriceLkr) : "Custom"}
                   </motion.span>
                 </AnimatePresence>
                 {priceLkr != null ? (
-                  <span className="pb-1 text-sm font-medium text-muted-foreground">
-                    /{isYearly ? "year" : "mo"}
-                  </span>
+                  <span className="pb-1 text-sm font-medium text-muted-foreground">/mo</span>
                 ) : null}
               </div>
 
               <div className="mt-1.5 h-5">
-                {priceLkr != null && plan.annualSavingsPercent > 0 && isYearly ? (
-                  <p className="text-xs font-medium text-emerald-700 dark:text-emerald-400">
-                    Save {plan.annualSavingsPercent}% vs monthly
+                {priceLkr != null && isYearly ? (
+                  <p
+                    className={cn(
+                      "text-xs font-medium",
+                      plan.annualSavingsPercent > 0
+                        ? "text-emerald-700 dark:text-emerald-400"
+                        : "text-muted-foreground",
+                    )}
+                  >
+                    Billed LKR {formatLkr(priceLkr)}/year
+                    {plan.annualSavingsPercent > 0 ? ` · Save ${plan.annualSavingsPercent}%` : ""}
                   </p>
                 ) : priceLkr == null ? (
-                  <p className="text-xs text-muted-foreground">From · custom setup quote</p>
+                  <p className="text-xs text-muted-foreground">
+                    From <span className="font-semibold text-foreground">LKR 13,000</span> · custom setup
+                    quote
+                  </p>
                 ) : null}
               </div>
 
@@ -210,14 +269,22 @@ export function PricingPlansShowcase({
                 href={ctaHref}
                 className={cn(
                   "mt-5 inline-flex h-12 w-full shrink-0 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold transition-[transform,background-color,box-shadow] duration-150 ease-out active:scale-[0.96] motion-reduce:active:scale-100",
-                  plan.popular
-                    ? "bg-primary text-primary-foreground shadow-[0_2px_12px_rgba(37,99,235,0.28)] hover:bg-primary/95"
-                    : "border border-border bg-background text-foreground hover:bg-muted/60",
+                  isCurrentPlan
+                    ? "border border-dashed border-border bg-muted/40 text-muted-foreground"
+                    : plan.popular
+                      ? "bg-primary text-primary-foreground shadow-[0_2px_12px_rgba(37,99,235,0.28)] hover:bg-primary/95"
+                      : "border border-border bg-background text-foreground hover:bg-muted/60",
                 )}
               >
                 {ctaLabel}
-                <Icon name="arrow-right" className="text-sm" />
+                <Icon name={isCurrentPlan ? "check-circle" : "arrow-right"} className="text-sm" />
               </Link>
+
+              <div className="mt-2 h-4">
+                {plan.trialNote ? (
+                  <p className="text-center text-xs text-muted-foreground">{plan.trialNote}</p>
+                ) : null}
+              </div>
 
               <div className="mt-6 flex min-h-0 flex-1 flex-col border-t border-border pt-5">
                 <p className="mb-3 min-h-[2.5rem] text-xs font-semibold uppercase tracking-wide text-muted-foreground">

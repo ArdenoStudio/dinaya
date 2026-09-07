@@ -264,12 +264,12 @@ const DEFAULT_MAX_ENTITLEMENTS: Entitlements = {
 };
 
 export const DEFAULT_PLAN_CONFIG: PlanConfig = {
-  starterMonthlyPriceLkr: 1990,
-  starterAnnualPriceLkr: 19900,
-  proMonthlyPriceLkr: 3990,
-  proAnnualPriceLkr: 39900,
-  maxMonthlyPriceLkr: 6900,
-  maxAnnualPriceLkr: 69000,
+  starterMonthlyPriceLkr: 2000,
+  starterAnnualPriceLkr: 22000,
+  proMonthlyPriceLkr: 4000,
+  proAnnualPriceLkr: 44000,
+  maxMonthlyPriceLkr: 7000,
+  maxAnnualPriceLkr: 77000,
   starterLaunched: true,
   proLaunched: true,
   maxLaunched: true,
