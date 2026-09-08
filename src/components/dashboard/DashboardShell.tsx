@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { signOut } from "next-auth/react";
-import { BookOpen, LogOut, Search, ShieldCheck, UserCircle } from "lucide-react";
+import { ArrowUpRight, BookOpen, LogOut, Search, ShieldCheck, UserCircle } from "lucide-react";
 import { ToastProvider } from "@heroui/react";
 import { Logo } from "@/components/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -191,7 +191,7 @@ export function DashboardShell({
           {planLabel} {copy.layout.planSuffix}
         </p>
         {usageLines.length > 0 ? (
-          <div className="mt-2 space-y-1.5">
+          <div className="mt-3 space-y-2.5">
             {usageLines.map((line) => {
               const usageItem =
                 line.label === "Services"
@@ -203,26 +203,39 @@ export function DashboardShell({
                 usageItem.limit != null && usageItem.limit > 0
                   ? Math.min(100, Math.round((usageItem.used / usageItem.limit) * 100))
                   : 0;
+              const atLimit = isNearPlanLimit(usageItem);
               return (
                 <div key={line.label} className="space-y-1">
-                  <p
-                    className={cn(
-                      "text-[0.68rem] text-muted-foreground",
-                      isNearPlanLimit(usageItem) && "font-medium text-amber-700 dark:text-amber-400",
-                    )}
-                  >
-                    {line.label}: {line.value}
-                  </p>
+                  <div className="flex items-baseline justify-between gap-2">
+                    <p className="text-[0.68rem] text-muted-foreground">{line.label}</p>
+                    <p
+                      className={cn(
+                        "text-[0.68rem] tabular-nums text-muted-foreground/80",
+                        atLimit && "font-medium text-amber-700 dark:text-amber-400",
+                      )}
+                    >
+                      {line.value}
+                    </p>
+                  </div>
                   {usageItem.limit != null && usageItem.limit > 0 ? (
                     <div className="h-1 overflow-hidden rounded-full bg-muted">
                       <div
                         className={cn(
                           "h-full rounded-full transition-all",
-                          isNearPlanLimit(usageItem) ? "bg-amber-500" : "bg-primary",
+                          atLimit ? "bg-amber-500" : "bg-primary",
                         )}
                         style={{ width: `${pct}%` }}
                       />
                     </div>
+                  ) : null}
+                  {atLimit ? (
+                    <Link
+                      href="/dashboard/billing"
+                      className="inline-flex items-center gap-0.5 text-[0.68rem] font-medium text-amber-700 transition-colors hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-300"
+                    >
+                      Upgrade for more
+                      <ArrowUpRight className="size-3" aria-hidden="true" />
+                    </Link>
                   ) : null}
                 </div>
               );
