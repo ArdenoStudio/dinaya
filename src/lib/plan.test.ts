@@ -163,12 +163,12 @@ describe("plan entitlements", () => {
 describe("subscription pricing", () => {
   it("returns monthly and annual prices from config", async () => {
     const { getSubscriptionPrice, DEFAULT_PLAN_CONFIG } = await import("./plan");
-    expect(getSubscriptionPrice("starter", "monthly", DEFAULT_PLAN_CONFIG)).toBe(1990);
-    expect(getSubscriptionPrice("starter", "annual", DEFAULT_PLAN_CONFIG)).toBe(19900);
-    expect(getSubscriptionPrice("pro", "monthly", DEFAULT_PLAN_CONFIG)).toBe(3990);
-    expect(getSubscriptionPrice("pro", "annual", DEFAULT_PLAN_CONFIG)).toBe(39900);
-    expect(getSubscriptionPrice("max", "monthly", DEFAULT_PLAN_CONFIG)).toBe(6900);
-    expect(getSubscriptionPrice("max", "annual", DEFAULT_PLAN_CONFIG)).toBe(69000);
+    expect(getSubscriptionPrice("starter", "monthly", DEFAULT_PLAN_CONFIG)).toBe(2000);
+    expect(getSubscriptionPrice("starter", "annual", DEFAULT_PLAN_CONFIG)).toBe(22000);
+    expect(getSubscriptionPrice("pro", "monthly", DEFAULT_PLAN_CONFIG)).toBe(4000);
+    expect(getSubscriptionPrice("pro", "annual", DEFAULT_PLAN_CONFIG)).toBe(44000);
+    expect(getSubscriptionPrice("max", "monthly", DEFAULT_PLAN_CONFIG)).toBe(7000);
+    expect(getSubscriptionPrice("max", "annual", DEFAULT_PLAN_CONFIG)).toBe(77000);
   });
 
   it("ignores legacy saved pricing configs that predate Starter", async () => {
@@ -188,9 +188,9 @@ describe("subscription pricing", () => {
       } as Partial<PlanConfig["plans"]> as PlanConfig["plans"],
     });
 
-    expect(config.starterMonthlyPriceLkr).toBe(1990);
-    expect(config.proMonthlyPriceLkr).toBe(3990);
-    expect(config.maxMonthlyPriceLkr).toBe(6900);
+    expect(config.starterMonthlyPriceLkr).toBe(2000);
+    expect(config.proMonthlyPriceLkr).toBe(4000);
+    expect(config.maxMonthlyPriceLkr).toBe(7000);
     expect(config.plans.starter).toEqual(STARTER_ENTITLEMENTS);
   });
 
