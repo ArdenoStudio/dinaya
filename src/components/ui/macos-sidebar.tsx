@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { SidebarToggleIcon } from "@/components/unlumen-ui/sidebar-toggle-icon";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { cn } from "@/lib/utils";
@@ -105,6 +105,16 @@ export function MacOSSidebar({
 }: MacOSSidebarProps) {
   const [hoveredKey, setHoveredKey] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(defaultOpen);
+
+  // Tablet widths default to collapsed. This must run post-mount (not as a
+  // useState lazy initializer) — matchMedia isn't available during SSR, and
+  // branching the initial render on it there-vs-here caused a hydration
+  // mismatch on the very first paint.
+  useEffect(() => {
+    const isTabletWidth = window.matchMedia("(min-width: 768px) and (max-width: 1023px)").matches;
+    if (isTabletWidth) setIsOpen(false);
+  }, []);
+
   const reducedMotion = useReducedMotion();
   const sidebarTransition = reducedMotion
     ? { duration: 0 }
