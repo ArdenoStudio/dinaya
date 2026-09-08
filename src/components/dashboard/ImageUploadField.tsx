@@ -2,7 +2,7 @@
 
 import { useId, useState } from "react";
 import Image from "next/image";
-import { Icon } from "@/components/ui/Icon";
+import { Upload, X } from "lucide-react";
 import { dashboardInputClass } from "@/lib/dashboard-ui";
 import { readFileAsDataUrl } from "@/lib/image-crop";
 import { isOptimizableRemoteImage } from "@/lib/utils";
@@ -152,7 +152,7 @@ const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
             className="absolute right-2 top-2 flex size-8 items-center justify-center rounded-full bg-black/60 text-white transition-opacity hover:bg-black/75"
             aria-label={`Remove ${label.toLowerCase()}`}
           >
-            <Icon name="x-lg" className="text-xs" />
+            <X className="size-3.5" />
           </button>
         </div>
       ) : null}
@@ -172,7 +172,7 @@ const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
             }}
           />
           <span className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors hover:bg-muted">
-            <Icon name="upload" className="text-xs" />
+            <Upload className="size-3.5" />
             {uploading ? "Uploading…" : value.trim() ? "Replace image" : "Upload image"}
           </span>
         </label>

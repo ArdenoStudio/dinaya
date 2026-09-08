@@ -47,12 +47,12 @@ const GlassButton = React.forwardRef<HTMLButtonElement, GlassButtonProps>(
             appearance: none;
             border: none;
             background: transparent;
-            color: oklch(from hsl(var(--foreground)) l c h / 95%);
+            color: oklch(from hsl(var(--fg)) l c h / 95%);
             --glass-reflex-light: 1;
             --glass-reflex-dark: 1;
           }
           .btn-liquid-lens {
-            background-color: ${glassColor || "oklch(from hsl(var(--foreground)) l c h / 5%)"};
+            background-color: ${glassColor || "oklch(from hsl(var(--fg)) l c h / 5%)"};
             backdrop-filter: blur(8px) url(#liquid-glass-${filterId}) saturate(150%);
             -webkit-backdrop-filter: blur(8px) saturate(150%);
             box-shadow:
@@ -69,7 +69,7 @@ const GlassButton = React.forwardRef<HTMLButtonElement, GlassButtonProps>(
             transition: background-color 400ms cubic-bezier(1, 0.0, 0.4, 1), box-shadow 400ms cubic-bezier(1, 0.0, 0.4, 1);
           }
           .btn-liquid-text {
-            text-shadow: 0 1px 2px oklch(from hsl(var(--background)) l c h / 30%);
+            text-shadow: 0 1px 2px oklch(from hsl(var(--bg)) l c h / 30%);
             transition: color 400ms cubic-bezier(1, 0.0, 0.4, 1);
           }
           @media (hover: hover) {

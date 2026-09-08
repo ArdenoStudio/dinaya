@@ -5,9 +5,9 @@ import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { signOut } from "next-auth/react";
 import { BookOpen, LogOut, Search, ShieldCheck, UserCircle } from "lucide-react";
+import { ToastProvider } from "@heroui/react";
 import { Logo } from "@/components/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { DashboardToastProvider } from "@/components/dashboard/ToastProvider";
 import { useDashboardNavigationOptional } from "@/components/dashboard/DashboardNavigation";
 import { useDashboardCopy, useDashboardRole } from "@/components/dashboard/DashboardLocaleProvider";
 import { DashboardBottomNav } from "@/components/dashboard/DashboardBottomNav";
@@ -68,12 +68,6 @@ export function DashboardShell({
   const isOwner = role === "owner";
   const isSetupFlow = minimalChrome || activeHref.startsWith("/dashboard/setup");
   const [commandOpen, setCommandOpen] = useState(false);
-  const [tabletCollapsedDefault] = useState(() => {
-    if (typeof window === "undefined") return true;
-    return window.matchMedia("(min-width: 768px) and (max-width: 1023px)").matches
-      ? false
-      : true;
-  });
 
   const openCommand = useCallback(() => setCommandOpen(true), []);
 
@@ -90,9 +84,10 @@ export function DashboardShell({
 
   if (isSetupFlow) {
     return (
-      <DashboardToastProvider>
+      <>
         {children}
-      </DashboardToastProvider>
+        <ToastProvider />
+      </>
     );
   }
 
@@ -257,6 +252,7 @@ export function DashboardShell({
   );
 
   return (
+    <>
     <div className={cn("flex h-dvh flex-col overflow-hidden", dashboardShellCanvasClass)}>
       {readOnlyImpersonation ? (
         <div className="shrink-0 border-b border-amber-500/30 bg-amber-50 px-4 py-2 text-center text-sm text-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
@@ -301,7 +297,6 @@ export function DashboardShell({
           }
           footer={accountFooter}
           collapsedFooter={collapsedAccountFooter}
-          defaultOpen={tabletCollapsedDefault}
           onItemSelect={
             navigation?.navigate
               ? (href) => {
@@ -358,16 +353,14 @@ export function DashboardShell({
 
           {banner}
 
-          <DashboardToastProvider>
-            <main
-              className={cn(
-                "min-h-0 flex-1 overflow-auto pb-[calc(3.75rem+env(safe-area-inset-bottom)+0.75rem)] md:pb-0",
-                dashboardMainCanvasClass,
-              )}
-            >
-              <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8">{children}</div>
-            </main>
-          </DashboardToastProvider>
+          <main
+            className={cn(
+              "min-h-0 flex-1 overflow-auto pb-[calc(3.75rem+env(safe-area-inset-bottom)+0.75rem)] md:pb-0",
+              dashboardMainCanvasClass,
+            )}
+          >
+            <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8">{children}</div>
+          </main>
         </MacOSSidebar>
       </div>
 
@@ -393,6 +386,9 @@ export function DashboardShell({
         onSignOut={handleSignOut}
         onNavigate={(href) => navigation?.navigate?.(href)}
       />
+
+      <ToastProvider />
     </div>
+    </>
   );
 }

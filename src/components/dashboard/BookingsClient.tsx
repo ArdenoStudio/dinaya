@@ -4,17 +4,16 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { CalendarPlus, Download } from "lucide-react";
+import { toast } from "@heroui/react";
 import { DataTable } from "@/components/dashboard/DataTable";
-import { DashboardConfirmDialog } from "@/components/dashboard/DashboardConfirmDialog";
+import { ConfirmDialog as DashboardConfirmDialog } from "@/components/dashboard/ConfirmDialog";
 import { DashboardLoadingPanel, DashboardTableSkeleton } from "@/components/dashboard/DashboardLoadingPanel";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
 import { EmptyState } from "@/components/dashboard/EmptyState";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
-import { useDashboardToast } from "@/components/dashboard/ToastProvider";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   dashboardFilterPillClass,
-  dashboardCardClass,
   dashboardOutlineActionClass,
   dashboardPrimaryActionClass,
 } from "@/lib/dashboard-ui";
@@ -155,7 +154,6 @@ function BookingActions({
 }
 
 export function BookingsClient({ api }: { api: BookingsApi }) {
-  const { showToast } = useDashboardToast();
   const [tab, setTab] = useState<BookingsTab>("today");
   const [rows, setRows] = useState<BookingRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -183,13 +181,11 @@ export function BookingsClient({ api }: { api: BookingsApi }) {
         setHasMore(false);
         setCursor(null);
         setLoading(false);
-        showToast({
-          title: "Could not load bookings",
+        toast.danger("Could not load bookings", {
           description: "Check your connection and try again.",
-          variant: "error",
         });
       });
-  }, [api, tab, showToast]);
+  }, [api, tab]);
 
   async function loadMore() {
     if (!cursor || loadingMore) return;
@@ -200,10 +196,8 @@ export function BookingsClient({ api }: { api: BookingsApi }) {
       setHasMore(page.hasMore);
       setCursor(page.nextCursor);
     } catch {
-      showToast({
-        title: "Could not load more bookings",
+      toast.danger("Could not load more bookings", {
         description: "Check your connection and try again.",
-        variant: "error",
       });
     } finally {
       setLoadingMore(false);
@@ -216,19 +210,15 @@ export function BookingsClient({ api }: { api: BookingsApi }) {
       const updated = await api.updateStatus(bookingId, status);
       if (updated) {
         setRows((prev) => prev.map((b) => (b.id === bookingId ? { ...b, status: updated.status } : b)));
-        showToast({ title: "Booking updated" });
+        toast.success("Booking updated");
       } else {
-        showToast({
-          title: "Could not update booking",
+        toast.danger("Could not update booking", {
           description: "Try again or refresh the page.",
-          variant: "error",
         });
       }
     } catch {
-      showToast({
-        title: "Could not update booking",
+      toast.danger("Could not update booking", {
         description: "Check your connection and try again.",
-        variant: "error",
       });
     } finally {
       setUpdating(null);
@@ -292,60 +282,6 @@ export function BookingsClient({ api }: { api: BookingsApi }) {
         <DataTable
           rows={rows}
           getRowId={(row) => row.id}
-          mobileCard={(row) => (
-            <article
-              key={row.id}
-              className={cn(dashboardCardClass, "p-4")}
-            >
-              <Link
-                href={`/dashboard/bookings/${row.id}`}
-                className="block -m-1 rounded-lg p-1 active:bg-muted/30"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="font-medium">{row.clientName}</p>
-                    <p className="text-sm text-muted-foreground">{row.clientPhone}</p>
-                  </div>
-                  <StatusBadge status={row.status} />
-                </div>
-                <dl className="mt-3 grid grid-cols-1 gap-y-2 text-sm sm:grid-cols-2 sm:gap-x-4">
-                  <div>
-                    <dt className="text-xs text-muted-foreground">Service</dt>
-                    <dd>{row.serviceName}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-xs text-muted-foreground">Staff</dt>
-                    <dd>{row.staffName}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-xs text-muted-foreground">When</dt>
-                    <dd className="tabular-nums">
-                      {format(new Date(row.startsAt), "d MMM yyyy, h:mm a")}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-xs text-muted-foreground">Payment</dt>
-                    <dd>
-                      {row.amountLkr ? `LKR ${row.amountLkr.toLocaleString()}` : "—"}
-                      {row.paymentStatus ? (
-                        <span className="block text-xs capitalize text-muted-foreground">
-                          {row.paymentStatus}
-                        </span>
-                      ) : null}
-                    </dd>
-                  </div>
-                </dl>
-              </Link>
-              <div className="mt-4 border-t pt-4">
-                <BookingActions
-                  row={row}
-                  updating={updating}
-                  onAction={handleAction}
-                  compact
-                />
-              </div>
-            </article>
-          )}
           empty={
             <EmptyState
               icon={CalendarPlus}

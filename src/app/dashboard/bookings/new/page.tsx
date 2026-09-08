@@ -4,11 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { format, addDays } from "date-fns";
-import {
-  DashboardField,
-  DashboardInput,
-} from "@/components/dashboard/DashboardField";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
+import { DashboardTextField } from "@/components/dashboard/DashboardFormField";
+import { submitResource } from "@/lib/dashboard/use-resource";
 import {
   dashboardErrorAlertClass,
   dashboardInputClass,
@@ -96,10 +94,9 @@ export default function NewBookingPage() {
     const session = await sessionRes.json();
     const businessId = session?.user?.businessId;
 
-    const res = await fetch("/api/bookings", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
+    const result = await submitResource(
+      "/api/bookings",
+      {
         businessId,
         serviceId,
         priceVariantId: priceVariantId || null,
@@ -111,15 +108,16 @@ export default function NewBookingPage() {
         clientEmail: clientEmail || null,
         notes: notes || null,
         source: "manual",
-      }),
-    });
+      },
+      "POST",
+    );
 
-    const data = await res.json();
-    if (!res.ok) {
-      setError(data.error ?? "Something went wrong.");
-      setSaving(false);
+    setSaving(false);
+    if (!result.ok) {
+      setError(result.error);
       return;
     }
+    const data = result.data as { bookingId: string };
     router.push(`/dashboard/bookings/${data.bookingId}`);
   }
 
@@ -269,39 +267,10 @@ export default function NewBookingPage() {
           <div className={cn(dashboardSectionClass, "space-y-4")}>
             <h2 className="text-sm font-medium">4. Client details</h2>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <DashboardField htmlFor="client-name" label="Name" required>
-                <DashboardInput
-                  id="client-name"
-                  required
-                  value={clientName}
-                  onChange={(e) => setClientName(e.target.value)}
-                />
-              </DashboardField>
-              <DashboardField htmlFor="client-phone" label="Phone" required>
-                <DashboardInput
-                  id="client-phone"
-                  required
-                  type="tel"
-                  inputMode="tel"
-                  value={clientPhone}
-                  onChange={(e) => setClientPhone(e.target.value)}
-                />
-              </DashboardField>
-              <DashboardField htmlFor="client-email" label="Email" optional>
-                <DashboardInput
-                  id="client-email"
-                  type="email"
-                  value={clientEmail}
-                  onChange={(e) => setClientEmail(e.target.value)}
-                />
-              </DashboardField>
-              <DashboardField htmlFor="client-notes" label="Notes" optional>
-                <DashboardInput
-                  id="client-notes"
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                />
-              </DashboardField>
+              <DashboardTextField label="Name" isRequired value={clientName} onChange={setClientName} />
+              <DashboardTextField label="Phone" isRequired type="tel" value={clientPhone} onChange={setClientPhone} />
+              <DashboardTextField label="Email" type="email" value={clientEmail} onChange={setClientEmail} />
+              <DashboardTextField label="Notes" value={notes} onChange={setNotes} />
             </div>
           </div>
         ) : null}

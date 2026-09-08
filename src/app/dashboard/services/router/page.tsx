@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Icon } from "@/components/ui/Icon";
+import { CheckCircle } from "lucide-react";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MAX_ROUTER_OPTIONS, type BookingRouter, type BookingRouterOption } from "@/lib/booking-router";
@@ -156,7 +156,7 @@ export default function BookingRouterPage() {
             </button>
             {saved && (
               <span className="flex items-center gap-1.5 text-green-600 text-sm">
-                <Icon name="check-circle" className="text-sm" /> Saved
+                <CheckCircle className="size-4" /> Saved
               </span>
             )}
           </div>

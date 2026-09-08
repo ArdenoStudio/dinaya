@@ -2,17 +2,22 @@
 
 import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
-import * as Dialog from "@radix-ui/react-dialog";
 import { ConfirmDialog } from "@/components/dashboard/ConfirmDialog";
 import { IntakeQuestionsEditor } from "@/components/dashboard/IntakeQuestionsEditor";
 import { PriceVariantsEditor } from "@/components/dashboard/PriceVariantsEditor";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
-import { DashboardSection } from "@/components/dashboard/DashboardSection";
+import {
+  DashboardCheckbox,
+  DashboardSelect,
+  DashboardSwitch,
+  DashboardTextAreaField,
+  DashboardTextField,
+} from "@/components/dashboard/DashboardFormField";
+import { submitResource } from "@/lib/dashboard/use-resource";
 import type { IntakeQuestion } from "@/lib/intake";
 import { minPriceVariantLkr, type ServicePriceVariant } from "@/lib/service-variants";
 import {
   dashboardErrorAlertClass,
-  dashboardInputClass,
   dashboardLabelClass,
   dashboardOutlineActionClass,
   dashboardPageClass,
@@ -45,6 +50,27 @@ interface StaffMember {
   name: string;
 }
 
+const BUFFER_OPTIONS = [0, 5, 10, 15, 20, 30, 45, 60].map((m) => ({
+  value: String(m),
+  label: m === 0 ? "No buffer" : `${m} min`,
+}));
+
+const NOTICE_OPTIONS = [0, 1, 2, 4, 6, 12, 24, 48, 72].map((h) => ({
+  value: String(h),
+  label: h === 0 ? "No minimum" : h < 24 ? `${h} hour${h > 1 ? "s" : ""}` : `${h / 24} day${h / 24 > 1 ? "s" : ""}`,
+}));
+
+const ADVANCE_OPTIONS: [number, string][] = [
+  [0, "No limit"],
+  [7, "1 week"],
+  [14, "2 weeks"],
+  [30, "1 month"],
+  [60, "2 months"],
+  [90, "3 months"],
+  [180, "6 months"],
+  [365, "1 year"],
+];
+
 export default function EditServicePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
@@ -52,12 +78,11 @@ export default function EditServicePage({ params }: { params: Promise<{ id: stri
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [error, setError] = useState("");
   const [allStaff, setAllStaff] = useState<StaffMember[]>([]);
   const [assignedStaffIds, setAssignedStaffIds] = useState<string[]>([]);
-  const [savingStaff, setSavingStaff] = useState(false);
   const [forceDeactivateError, setForceDeactivateError] = useState<string | null>(null);
-  const [forcingDeactivate, setForcingDeactivate] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -91,55 +116,60 @@ export default function EditServicePage({ params }: { params: Promise<{ id: stri
     });
   }, [id]);
 
+  function serviceBody(form: ServiceForm, forceDeactivate?: boolean) {
+    return {
+      ...form,
+      dailyCapacity: form.dailyCapacity === "" ? null : Number(form.dailyCapacity),
+      maximumAdvanceDays: form.maximumAdvanceDays || null,
+      ...(forceDeactivate ? { forceDeactivate: true } : {}),
+    };
+  }
+
+  async function saveStaffAssignments() {
+    return submitResource(`/api/dashboard/services/${id}/staff`, { staffIds: assignedStaffIds }, "POST");
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form) return;
     setSaving(true);
     setError("");
-    const res = await fetch(`/api/dashboard/services/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...form,
-        dailyCapacity: form.dailyCapacity === "" ? null : Number(form.dailyCapacity),
-        maximumAdvanceDays: form.maximumAdvanceDays || null,
-      }),
-    });
-    if (!res.ok) {
-      const d = await res.json();
-      if (res.status === 409 && form.isActive === false) {
-        setForceDeactivateError(d.error ?? "This service has upcoming bookings.");
-        setSaving(false);
+
+    const serviceResult = await submitResource(`/api/dashboard/services/${id}`, serviceBody(form));
+    if (!serviceResult.ok) {
+      setSaving(false);
+      if (serviceResult.status === 409 && form.isActive === false) {
+        setForceDeactivateError(serviceResult.error);
         return;
       }
-      setError(d.error ?? "Error saving");
-      setSaving(false);
+      setError(serviceResult.error);
       return;
     }
+
+    const staffResult = await saveStaffAssignments();
+    setSaving(false);
+    if (!staffResult.ok) {
+      setError(staffResult.error);
+      return;
+    }
+
     router.push("/dashboard/services");
   }
 
   async function handleForceDeactivate() {
     if (!form) return;
-    setForcingDeactivate(true);
-    const forced = await fetch(`/api/dashboard/services/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...form,
-        dailyCapacity: form.dailyCapacity === "" ? null : Number(form.dailyCapacity),
-        maximumAdvanceDays: form.maximumAdvanceDays || null,
-        forceDeactivate: true,
-      }),
-    });
-    setForcingDeactivate(false);
+    const result = await submitResource(`/api/dashboard/services/${id}`, serviceBody(form, true));
     setForceDeactivateError(null);
-    if (forced.ok) {
-      router.push("/dashboard/services");
-    } else {
-      const d = await forced.json();
-      setError(d.error ?? "Error saving");
+    if (!result.ok) {
+      setError(result.error);
+      return;
     }
+    const staffResult = await saveStaffAssignments();
+    if (!staffResult.ok) {
+      setError(staffResult.error);
+      return;
+    }
+    router.push("/dashboard/services");
   }
 
   async function handleDelete() {
@@ -154,16 +184,6 @@ export default function EditServicePage({ params }: { params: Promise<{ id: stri
     );
   }
 
-  async function handleSaveStaff() {
-    setSavingStaff(true);
-    await fetch(`/api/dashboard/services/${id}/staff`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ staffIds: assignedStaffIds }),
-    });
-    setSavingStaff(false);
-  }
-
   if (loading) return <div className={cn(dashboardPageClass, "text-sm text-muted-foreground")}>Loading…</div>;
   if (!form) return <div className={cn(dashboardPageClass, "text-sm text-muted-foreground")}>Service not found.</div>;
 
@@ -174,61 +194,68 @@ export default function EditServicePage({ params }: { params: Promise<{ id: stri
         backHref="/dashboard/services"
         backLabel="Services"
         actions={
-          <ConfirmDialog
-            title="Delete service"
-            description="Delete this service? This cannot be undone."
-            confirmLabel="Delete"
-            onConfirm={handleDelete}
-            trigger={
-              <button
-                type="button"
-                disabled={deleting}
-                className="text-sm text-destructive hover:underline disabled:opacity-50"
-              >
-                {deleting ? "Deleting…" : "Delete service"}
-              </button>
-            }
-          />
+          <button
+            type="button"
+            disabled={deleting}
+            onClick={() => setConfirmDeleteOpen(true)}
+            className="text-sm text-destructive hover:underline disabled:opacity-50"
+          >
+            {deleting ? "Deleting…" : "Delete service"}
+          </button>
         }
       />
 
+      <ConfirmDialog
+        title="Delete service"
+        description="Delete this service? This cannot be undone."
+        confirmLabel="Delete"
+        variant="destructive"
+        onConfirm={handleDelete}
+        open={confirmDeleteOpen}
+        onOpenChange={setConfirmDeleteOpen}
+      />
+
       <form onSubmit={handleSubmit} className={cn(dashboardSectionClass, "max-w-lg space-y-4")}>
-        <div>
-          <label className={dashboardLabelClass}>Service name *</label>
-          <input required value={form.name}
-            onChange={(e) => setForm((f) => f && ({ ...f, name: e.target.value }))}
-            className={dashboardInputClass} placeholder="e.g. Haircut" />
-        </div>
+        <DashboardTextField
+          label="Service name"
+          isRequired
+          value={form.name}
+          onChange={(value) => setForm((f) => f && { ...f, name: value })}
+          placeholder="e.g. Haircut"
+        />
 
-        <div>
-          <label className={dashboardLabelClass}>Description</label>
-          <textarea value={form.description}
-            onChange={(e) => setForm((f) => f && ({ ...f, description: e.target.value }))}
-            className={cn(dashboardInputClass, "resize-none")} rows={2} />
-        </div>
+        <DashboardTextAreaField
+          label="Description"
+          value={form.description}
+          onChange={(value) => setForm((f) => f && { ...f, description: value })}
+          rows={2}
+        />
 
-        <div>
-          <label className={dashboardLabelClass}>Cover image URL</label>
-          <input
-            value={form.imageUrl}
-            onChange={(e) => setForm((f) => f && ({ ...f, imageUrl: e.target.value }))}
-            className={dashboardInputClass}
-            placeholder="https://..."
-          />
-        </div>
+        <DashboardTextField
+          label="Cover image URL"
+          value={form.imageUrl}
+          onChange={(value) => setForm((f) => f && { ...f, imageUrl: value })}
+          placeholder="https://..."
+        />
 
         <div className="grid grid-cols-2 gap-4">
+          <DashboardTextField
+            label="Duration (minutes)"
+            isRequired
+            type="number"
+            min={5}
+            max={480}
+            value={String(form.durationMinutes)}
+            onChange={(value) => setForm((f) => f && { ...f, durationMinutes: parseInt(value) || 0 })}
+          />
           <div>
-            <label className={dashboardLabelClass}>Duration (minutes) *</label>
-            <input type="number" min={5} max={480} required value={form.durationMinutes}
-              onChange={(e) => setForm((f) => f && ({ ...f, durationMinutes: parseInt(e.target.value) }))}
-              className={dashboardInputClass} />
-          </div>
-          <div>
-            <label className={dashboardLabelClass}>Price (LKR)</label>
-            <input type="number" min={0} value={form.priceLkr}
-              onChange={(e) => setForm((f) => f && ({ ...f, priceLkr: parseInt(e.target.value) || 0 }))}
-              className={dashboardInputClass} />
+            <DashboardTextField
+              label="Price (LKR)"
+              type="number"
+              min={0}
+              value={String(form.priceLkr)}
+              onChange={(value) => setForm((f) => f && { ...f, priceLkr: parseInt(value) || 0 })}
+            />
             {form.priceVariants.length > 0 && (
               <p className="mt-1 text-xs text-muted-foreground">
                 Only shown as a fallback — clients pick from your price options below.
@@ -252,111 +279,106 @@ export default function EditServicePage({ params }: { params: Promise<{ id: stri
           <label className={dashboardLabelClass}>Buffer time</label>
           <p className="text-xs text-muted-foreground mb-2">Block time before/after each appointment.</p>
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-xs text-muted-foreground">Before (minutes)</label>
-              <select value={form.beforeBuffer}
-                onChange={(e) => setForm((f) => f && ({ ...f, beforeBuffer: parseInt(e.target.value) }))}
-                className={dashboardInputClass}>
-                {[0, 5, 10, 15, 20, 30, 45, 60].map((m) => (
-                  <option key={m} value={m}>{m === 0 ? "No buffer" : `${m} min`}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="text-xs text-muted-foreground">After (minutes)</label>
-              <select value={form.afterBuffer}
-                onChange={(e) => setForm((f) => f && ({ ...f, afterBuffer: parseInt(e.target.value) }))}
-                className={dashboardInputClass}>
-                {[0, 5, 10, 15, 20, 30, 45, 60].map((m) => (
-                  <option key={m} value={m}>{m === 0 ? "No buffer" : `${m} min`}</option>
-                ))}
-              </select>
-            </div>
+            <DashboardSelect
+              label="Before"
+              value={String(form.beforeBuffer)}
+              onChange={(value) => setForm((f) => f && { ...f, beforeBuffer: parseInt(value) })}
+              options={BUFFER_OPTIONS}
+            />
+            <DashboardSelect
+              label="After"
+              value={String(form.afterBuffer)}
+              onChange={(value) => setForm((f) => f && { ...f, afterBuffer: parseInt(value) })}
+              options={BUFFER_OPTIONS}
+            />
           </div>
         </div>
 
-        <div>
-          <label className={dashboardLabelClass}>Minimum notice</label>
-          <p className="text-xs text-muted-foreground mb-2">How far in advance must clients book?</p>
-          <select value={form.minimumNoticeHours}
-            onChange={(e) => setForm((f) => f && ({ ...f, minimumNoticeHours: parseInt(e.target.value) }))}
-            className={dashboardInputClass}>
-            {[0, 1, 2, 4, 6, 12, 24, 48, 72].map((h) => (
-              <option key={h} value={h}>{h === 0 ? "No minimum" : h < 24 ? `${h} hour${h > 1 ? "s" : ""}` : `${h / 24} day${h / 24 > 1 ? "s" : ""}`}</option>
-            ))}
-          </select>
-        </div>
+        <DashboardSelect
+          label="Minimum notice"
+          hint="How far in advance must clients book?"
+          value={String(form.minimumNoticeHours)}
+          onChange={(value) => setForm((f) => f && { ...f, minimumNoticeHours: parseInt(value) })}
+          options={NOTICE_OPTIONS}
+        />
 
-        <div>
-          <label className={dashboardLabelClass}>Daily capacity</label>
-          <p className="text-xs text-muted-foreground mb-2">Max bookings per staff per day. Leave blank for unlimited.</p>
-          <input type="number" min={1} max={100} value={form.dailyCapacity}
-            onChange={(e) => setForm((f) => f && ({ ...f, dailyCapacity: e.target.value }))}
-            placeholder="Unlimited" className={dashboardInputClass} />
-        </div>
+        <DashboardTextField
+          label="Daily capacity"
+          hint="Max bookings per staff per day. Leave blank for unlimited."
+          type="number"
+          min={1}
+          max={100}
+          value={String(form.dailyCapacity)}
+          onChange={(value) => setForm((f) => f && { ...f, dailyCapacity: value })}
+          placeholder="Unlimited"
+        />
 
-        <div>
-          <label className={dashboardLabelClass}>Booking window</label>
-          <p className="text-xs text-muted-foreground mb-2">How far ahead can clients book this service?</p>
-          <select value={form.maximumAdvanceDays}
-            onChange={(e) => setForm((f) => f && ({ ...f, maximumAdvanceDays: parseInt(e.target.value) }))}
-            className={dashboardInputClass}>
-            {([[0, "No limit"], [7, "1 week"], [14, "2 weeks"], [30, "1 month"], [60, "2 months"], [90, "3 months"], [180, "6 months"], [365, "1 year"]] as [number, string][]).map(([d, labelText]) => (
-              <option key={d} value={d}>{labelText}</option>
-            ))}
-          </select>
-        </div>
+        <DashboardSelect
+          label="Booking window"
+          hint="How far ahead can clients book this service?"
+          value={String(form.maximumAdvanceDays)}
+          onChange={(value) => setForm((f) => f && { ...f, maximumAdvanceDays: parseInt(value) })}
+          options={ADVANCE_OPTIONS.map(([d, labelText]) => ({ value: String(d), label: labelText }))}
+        />
 
         <IntakeQuestionsEditor
           value={form.intakeQuestions}
           onChange={(intakeQuestions) => setForm((f) => f && ({ ...f, intakeQuestions }))}
         />
 
-        <div>
-          <label className={dashboardLabelClass}>Success redirect URL</label>
-          <p className="text-xs text-muted-foreground mb-2">
-            Optional. Send clients here after booking (https:// URL or path like /thank-you).
-          </p>
-          <input
-            value={form.successRedirectUrl}
-            onChange={(e) => setForm((f) => f && ({ ...f, successRedirectUrl: e.target.value }))}
-            placeholder="https://example.com/thank-you or /thank-you"
-            className={dashboardInputClass}
+        <DashboardTextField
+          label="Success redirect URL"
+          hint="Optional. Send clients here after booking (https:// URL or path like /thank-you)."
+          value={form.successRedirectUrl}
+          onChange={(value) => setForm((f) => f && { ...f, successRedirectUrl: value })}
+          placeholder="https://example.com/thank-you or /thank-you"
+        />
+
+        <div className="flex flex-wrap gap-6">
+          <DashboardSwitch
+            label="Require payment"
+            isSelected={form.requiresPayment}
+            onChange={(isSelected) => setForm((f) => f && { ...f, requiresPayment: isSelected })}
+          />
+          <DashboardSwitch
+            label="Active"
+            isSelected={form.isActive}
+            onChange={(isSelected) => setForm((f) => f && { ...f, isActive: isSelected })}
           />
         </div>
 
-        <div className="flex gap-4">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" checked={form.requiresPayment}
-              onChange={(e) => setForm((f) => f && ({ ...f, requiresPayment: e.target.checked }))}
-              className="rounded" />
-            <span className="text-sm">Require payment</span>
-          </label>
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" checked={form.isActive}
-              onChange={(e) => setForm((f) => f && ({ ...f, isActive: e.target.checked }))}
-              className="rounded" />
-            <span className="text-sm">Active</span>
-          </label>
-        </div>
-
         {form.requiresPayment && (
-          <div>
-            <label className={dashboardLabelClass}>Deposit percentage</label>
-            <p className="text-xs text-muted-foreground mb-2">
-              Use 0 for full payment, or collect a smaller deposit to reduce no-shows.
-            </p>
-            <input
-              type="number"
-              min={0}
-              max={100}
-              value={form.depositPercent}
-              onChange={(e) => setForm((f) => f && ({ ...f, depositPercent: Math.min(100, Math.max(0, parseInt(e.target.value) || 0)) }))}
-              className={dashboardInputClass}
-            />
-          </div>
+          <DashboardTextField
+            label="Deposit percentage"
+            hint="Use 0 for full payment, or collect a smaller deposit to reduce no-shows."
+            type="number"
+            min={0}
+            max={100}
+            value={String(form.depositPercent)}
+            onChange={(value) =>
+              setForm((f) => f && { ...f, depositPercent: Math.min(100, Math.max(0, parseInt(value) || 0)) })
+            }
+          />
         )}
 
+        <div>
+          <p className={dashboardLabelClass}>Team members</p>
+          <p className="mb-2 text-xs text-muted-foreground">Choose which staff members offer this service.</p>
+          {allStaff.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No staff members yet. Add staff first.</p>
+          ) : (
+            <div className="space-y-2">
+              {allStaff.map((member) => (
+                <DashboardCheckbox
+                  key={member.id}
+                  isSelected={assignedStaffIds.includes(member.id)}
+                  onChange={() => toggleStaff(member.id)}
+                  label={member.name}
+                />
+              ))}
+            </div>
+          )}
+        </div>
 
         {error && <p className={dashboardErrorAlertClass}>{error}</p>}
 
@@ -370,67 +392,15 @@ export default function EditServicePage({ params }: { params: Promise<{ id: stri
         </div>
       </form>
 
-      <DashboardSection
-        title="Team members"
-        description="Choose which staff members offer this service."
-        className="max-w-lg"
-      >
-        {allStaff.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No staff members yet. Add staff first.</p>
-        ) : (
-          <div className="space-y-2 mb-4">
-            {allStaff.map((member) => (
-              <label key={member.id} className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={assignedStaffIds.includes(member.id)}
-                  onChange={() => toggleStaff(member.id)}
-                  className="rounded"
-                />
-                <span className="text-sm">{member.name}</span>
-              </label>
-            ))}
-          </div>
-        )}
-        {allStaff.length > 0 && (
-          <button
-            type="button"
-            onClick={handleSaveStaff}
-            disabled={savingStaff}
-            className={dashboardPrimaryActionClass}
-          >
-            {savingStaff ? "Saving…" : "Save team"}
-          </button>
-        )}
-      </DashboardSection>
-
-      <Dialog.Root
+      <ConfirmDialog
+        title="Deactivate service"
+        description={forceDeactivateError ?? ""}
+        confirmLabel="Deactivate anyway"
+        variant="destructive"
+        onConfirm={handleForceDeactivate}
         open={forceDeactivateError !== null}
         onOpenChange={(open) => !open && setForceDeactivateError(null)}
-      >
-        <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 z-40 bg-black/25" />
-          <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-[min(28rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 rounded-lg border bg-card border-border/60 p-5 shadow-xl">
-            <Dialog.Title className="text-base font-semibold">Deactivate service</Dialog.Title>
-            <Dialog.Description className="mt-2 text-sm leading-6 text-muted-foreground">
-              {forceDeactivateError}
-            </Dialog.Description>
-            <div className="mt-5 flex justify-end gap-2">
-              <Dialog.Close className="rounded-md border px-3 py-2 text-sm font-medium transition-colors hover:bg-muted">
-                Cancel
-              </Dialog.Close>
-              <button
-                type="button"
-                disabled={forcingDeactivate}
-                onClick={() => void handleForceDeactivate()}
-                className="rounded-md bg-red-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
-              >
-                {forcingDeactivate ? "Deactivating…" : "Deactivate anyway"}
-              </button>
-            </div>
-          </Dialog.Content>
-        </Dialog.Portal>
-      </Dialog.Root>
+      />
     </div>
   );
 }

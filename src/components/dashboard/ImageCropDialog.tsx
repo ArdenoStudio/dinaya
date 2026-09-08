@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
-import { Icon } from "@/components/ui/Icon";
+import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   cropImageWithTransform,
@@ -145,7 +145,7 @@ export function ImageCropDialog({
               className="flex size-10 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
               aria-label="Close"
             >
-              <Icon name="x-lg" />
+              <X className="size-4" />
             </Dialog.Close>
           </div>
 

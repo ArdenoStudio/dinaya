@@ -3,8 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
+import { toast } from "@heroui/react";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
-import { useDashboardToast } from "@/components/dashboard/ToastProvider";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { statusBorderStyles } from "@/lib/dashboard-status";
 import { cn } from "@/lib/utils";
@@ -29,7 +29,6 @@ export function DashboardTodayRow({
   startsAt,
   status: initialStatus,
 }: DashboardTodayRowProps) {
-  const { showToast } = useDashboardToast();
   const [status, setStatus] = useState(initialStatus);
   const [updating, setUpdating] = useState(false);
 
@@ -59,19 +58,13 @@ export function DashboardTodayRow({
         } catch {
           /* keep default */
         }
-        showToast({
-          title: "Could not confirm booking",
-          description,
-          variant: "error",
-        });
+        toast.danger("Could not confirm booking", { description });
         return;
       }
       setStatus("confirmed");
     } catch {
-      showToast({
-        title: "Could not confirm booking",
+      toast.danger("Could not confirm booking", {
         description: "Check your connection and try again.",
-        variant: "error",
       });
     } finally {
       setUpdating(false);

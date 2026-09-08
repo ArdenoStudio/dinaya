@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
 import { AuthThemeToggle } from "@/components/AuthThemeToggle";
-import { DashboardField, DashboardInput, DashboardTextarea } from "@/components/dashboard/DashboardField";
+import { DashboardCheckbox, DashboardTextAreaField, DashboardTextField } from "@/components/dashboard/DashboardFormField";
 import { SetupWizardSkeleton } from "@/components/dashboard/SetupWizardSkeleton";
-import { Icon } from "@/components/ui/Icon";
+import { CalendarCheck, CheckCircle2, Clipboard, ExternalLink, MessageCircle, RefreshCw } from "lucide-react";
 import { buildPublicBookingUrlLabel } from "@/lib/booking-url";
 import {
   dashboardErrorAlertClass,
@@ -98,7 +98,7 @@ function BookingPreviewFrame({ bookingUrl }: { bookingUrl: string }) {
   if (failed) {
     return (
       <div className="flex h-64 flex-col items-center justify-center gap-3 rounded-xl border bg-muted/30 p-6 text-center">
-        <Icon name="box-arrow-up-right" className="text-2xl text-muted-foreground" />
+        <ExternalLink className="size-6 text-muted-foreground" />
         <p className="text-sm text-muted-foreground">Preview could not load in this panel.</p>
         <a
           href={bookingUrl}
@@ -116,7 +116,7 @@ function BookingPreviewFrame({ bookingUrl }: { bookingUrl: string }) {
     <div className="relative overflow-hidden rounded-xl border">
       {!loaded ? (
         <div className="absolute inset-0 z-10 flex items-center justify-center bg-muted/40">
-          <Icon name="arrow-repeat" className="animate-spin motion-reduce:animate-none text-xl text-primary" />
+          <RefreshCw className="size-5 animate-spin motion-reduce:animate-none text-primary" />
         </div>
       ) : null}
       <iframe
@@ -423,54 +423,35 @@ export function SetupWizard() {
                 <span className="font-medium text-foreground">{bookingDisplayUrl || "yourname.dinaya.lk"}</span>.
                 Add WhatsApp so clients can reach you — address and intro can wait.
               </p>
-              <DashboardField htmlFor="biz-name" label="Business name" required>
-                <DashboardInput
-                  id="biz-name"
-                  required
-                  value={details.name}
-                  onChange={(e) => setDetails((d) => ({ ...d, name: e.target.value }))}
-                />
-              </DashboardField>
-              <DashboardField
-                htmlFor="phone"
+              <DashboardTextField
+                label="Business name"
+                isRequired
+                value={details.name}
+                onChange={(value) => setDetails((d) => ({ ...d, name: value }))}
+              />
+              <DashboardTextField
                 label="WhatsApp number (shown on your page)"
-                required
+                isRequired
+                type="tel"
                 hint="Clients use this to confirm bookings or ask a quick question. We don't spam or share it."
-              >
-                <DashboardInput
-                  id="phone"
-                  required
-                  type="tel"
-                  inputMode="tel"
-                  autoComplete="tel"
-                  placeholder="+94771234567"
-                  value={details.phone}
-                  onChange={(e) => setDetails((d) => ({ ...d, phone: e.target.value }))}
-                />
-              </DashboardField>
-              <DashboardField
-                htmlFor="address"
+                placeholder="+94771234567"
+                value={details.phone}
+                onChange={(value) => setDetails((d) => ({ ...d, phone: value }))}
+              />
+              <DashboardTextField
                 label="Shop address"
-                optional
                 hint="Helps clients find you. You can add this later in Settings."
-              >
-                <DashboardInput
-                  id="address"
-                  autoComplete="street-address"
-                  placeholder="123 Galle Road, Colombo"
-                  value={details.address}
-                  onChange={(e) => setDetails((d) => ({ ...d, address: e.target.value }))}
-                />
-              </DashboardField>
-              <DashboardField htmlFor="description" label="What you offer (one line)" optional>
-                <DashboardTextarea
-                  id="description"
-                  rows={3}
-                  placeholder="e.g. Haircuts, colour, and bridal styling in Colombo 7"
-                  value={details.description}
-                  onChange={(e) => setDetails((d) => ({ ...d, description: e.target.value }))}
-                />
-              </DashboardField>
+                placeholder="123 Galle Road, Colombo"
+                value={details.address}
+                onChange={(value) => setDetails((d) => ({ ...d, address: value }))}
+              />
+              <DashboardTextAreaField
+                label="What you offer (one line)"
+                rows={3}
+                placeholder="e.g. Haircuts, colour, and bridal styling in Colombo 7"
+                value={details.description}
+                onChange={(value) => setDetails((d) => ({ ...d, description: value }))}
+              />
               {error ? (
                 <p role="alert" className={dashboardErrorAlertClass}>
                   {error}
@@ -494,44 +475,36 @@ export function SetupWizard() {
                 We added a starter service for you. Change the name, LKR price, and duration to match what you
                 actually offer.
               </p>
-              <DashboardField htmlFor="svc-name" label="Service name" required>
-                <DashboardInput
-                  id="svc-name"
-                  required
-                  value={service.name}
-                  onChange={(e) => setService((s) => ({ ...s, name: e.target.value }))}
-                />
-              </DashboardField>
+              <DashboardTextField
+                label="Service name"
+                isRequired
+                value={service.name}
+                onChange={(value) => setService((s) => ({ ...s, name: value }))}
+              />
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <DashboardField htmlFor="duration" label="Duration (min)" required>
-                  <DashboardInput
-                    id="duration"
-                    type="number"
-                    min={5}
-                    required
-                    value={service.durationMinutes}
-                    onChange={(e) => setService((s) => ({ ...s, durationMinutes: Number(e.target.value) }))}
-                  />
-                </DashboardField>
-                <DashboardField htmlFor="price" label="Price (LKR)" required>
-                  <DashboardInput
-                    id="price"
-                    type="number"
-                    min={0}
-                    required
-                    value={service.priceLkr}
-                    onChange={(e) => setService((s) => ({ ...s, priceLkr: Number(e.target.value) }))}
-                  />
-                </DashboardField>
-              </div>
-              <DashboardField htmlFor="svc-desc" label="Description" optional>
-                <DashboardTextarea
-                  id="svc-desc"
-                  rows={2}
-                  value={service.description}
-                  onChange={(e) => setService((s) => ({ ...s, description: e.target.value }))}
+                <DashboardTextField
+                  label="Duration (min)"
+                  type="number"
+                  min={5}
+                  isRequired
+                  value={String(service.durationMinutes)}
+                  onChange={(value) => setService((s) => ({ ...s, durationMinutes: Number(value) }))}
                 />
-              </DashboardField>
+                <DashboardTextField
+                  label="Price (LKR)"
+                  type="number"
+                  min={0}
+                  isRequired
+                  value={String(service.priceLkr)}
+                  onChange={(value) => setService((s) => ({ ...s, priceLkr: Number(value) }))}
+                />
+              </div>
+              <DashboardTextAreaField
+                label="Description"
+                rows={2}
+                value={service.description}
+                onChange={(value) => setService((s) => ({ ...s, description: value }))}
+              />
               {error ? (
                 <p role="alert" className={dashboardErrorAlertClass}>
                   {error}
@@ -557,17 +530,13 @@ export function SetupWizard() {
               <p className="text-[17px] leading-snug text-muted-foreground sm:text-sm">
                 We pre-filled Mon–Sat 9:00–17:00. Confirm to continue, or edit hours below.
               </p>
-              <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-lg border border-border bg-muted/30 px-4 py-3 text-sm dark:border-neutral-700">
-                <span className="flex size-11 shrink-0 items-center justify-center">
-                  <input
-                    type="checkbox"
-                    checked={confirmDefaultHours}
-                    onChange={(e) => setConfirmDefaultHours(e.target.checked)}
-                    className="size-5 rounded border-input"
-                  />
-                </span>
-                <span>Use default hours (Mon–Sat 9:00–17:00)</span>
-              </label>
+              <div className="rounded-lg border border-border bg-muted/30 px-4 py-3 dark:border-neutral-700">
+                <DashboardCheckbox
+                  isSelected={confirmDefaultHours}
+                  onChange={setConfirmDefaultHours}
+                  label="Use default hours (Mon–Sat 9:00–17:00)"
+                />
+              </div>
               {!confirmDefaultHours ? (
                 <>
                   <div className="flex flex-wrap gap-2">
@@ -636,7 +605,7 @@ export function SetupWizard() {
           {step === 4 && (
             <div className="space-y-6" aria-busy={saving}>
               <div className="rounded-xl border bg-emerald-50 p-5 text-center dark:bg-emerald-950/40">
-                <Icon name="check-circle-fill" className="text-3xl text-emerald-600" />
+                <CheckCircle2 className="mx-auto size-8 text-emerald-600" />
                 <h2 className="mt-3 font-cal text-xl">Your booking link is live</h2>
                 <p className="mt-2 text-base text-muted-foreground sm:text-sm">
                   Clients can book here:{" "}
@@ -666,7 +635,7 @@ export function SetupWizard() {
                     }
                   }}
                 >
-                  <Icon name="clipboard" className="text-xs" />
+                  <Clipboard className="size-3.5" />
                   Copy link
                 </button>
                 <a
@@ -676,7 +645,7 @@ export function SetupWizard() {
                   className={cn(dashboardOutlineActionClass, "min-h-11")}
                   onClick={() => trackOnboardingTestBookClick({ businessSlug })}
                 >
-                  <Icon name="calendar-check" className="text-xs" />
+                  <CalendarCheck className="size-3.5" />
                   Book yourself (test)
                 </a>
                 <a
@@ -686,7 +655,7 @@ export function SetupWizard() {
                   className={cn(dashboardOutlineActionClass, "min-h-11")}
                   onClick={() => trackOnboardingWhatsappShare({ source: "setup_wizard" })}
                 >
-                  <Icon name="whatsapp" className="text-emerald-600" />
+                  <MessageCircle className="size-4 text-emerald-600" />
                   Share on WhatsApp
                 </a>
               </div>

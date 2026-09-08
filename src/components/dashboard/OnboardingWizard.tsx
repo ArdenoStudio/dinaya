@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Icon } from "@/components/ui/Icon";
+import { ArrowRight, CheckCircle2, Circle, MessageCircle } from "lucide-react";
 import { dashboardOutlineActionClass, dashboardPrimaryActionClass } from "@/lib/dashboard-ui";
 import { cn } from "@/lib/utils";
 
@@ -80,7 +80,7 @@ export function OnboardingWizard({ steps, bookingUrl, whatsappShare }: Props) {
             className={dashboardPrimaryActionClass}
           >
             {ctaForStep(nextStep.label)}
-            <Icon name="arrow-right" className="text-xs" />
+            <ArrowRight className="size-3.5" />
           </Link>
           {nextStep.label === "Share your booking link" ? (
             <a
@@ -89,7 +89,7 @@ export function OnboardingWizard({ steps, bookingUrl, whatsappShare }: Props) {
               rel="noopener noreferrer"
               className={dashboardOutlineActionClass}
             >
-              <Icon name="whatsapp" className="text-emerald-600" />
+              <MessageCircle className="size-4 text-emerald-600" />
               Share on WhatsApp
             </a>
           ) : null}
@@ -110,10 +110,11 @@ export function OnboardingWizard({ steps, bookingUrl, whatsappShare }: Props) {
             )}
           >
             <span>{step.label}</span>
-            <Icon
-              name={step.done ? "check-circle-fill" : "circle"}
-              className={step.done ? "text-emerald-600" : "text-muted-foreground"}
-            />
+            {step.done ? (
+              <CheckCircle2 className="size-4 text-emerald-600" />
+            ) : (
+              <Circle className="size-4 text-muted-foreground" />
+            )}
           </Link>
         ))}
       </div>

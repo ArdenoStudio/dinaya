@@ -2,11 +2,14 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Slider } from "@heroui/react";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
 import { DashboardSection } from "@/components/dashboard/DashboardSection";
+import { DashboardCheckbox, DashboardSelect, DashboardTextField } from "@/components/dashboard/DashboardFormField";
+import { submitResource } from "@/lib/dashboard/use-resource";
 import { computeDiscountedPrice } from "@/lib/deals/pricing";
 import {
-  dashboardInputClass,
+  dashboardErrorAlertClass,
   dashboardOutlineActionClass,
   dashboardPageClass,
   dashboardPrimaryActionClass,
@@ -89,32 +92,32 @@ export function NewDealForm() {
     setLoading(true);
     setError("");
 
-    const res = await fetch("/api/dashboard/deals", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
+    const result = await submitResource(
+      "/api/dashboard/deals",
+      {
         ...form,
         staffId: form.staffId || null,
         dealWindowStart: new Date(form.dealWindowStart).toISOString(),
         dealWindowEnd: new Date(form.dealWindowEnd).toISOString(),
         apptWindowStart: new Date(form.apptWindowStart).toISOString(),
         apptWindowEnd: new Date(form.apptWindowEnd).toISOString(),
-      }),
-    });
+      },
+      "POST",
+    );
 
-    const data = await res.json();
-    if (!res.ok) {
-      setError(data.error ?? "Could not create deal.");
+    if (!result.ok) {
+      setError(result.error);
       setLoading(false);
       return;
     }
+    const data = result.data as { notified?: number };
 
     const suggestionId = searchParams.get("suggestionId");
     if (suggestionId) {
       await fetch(`/api/dashboard/deals/suggestions/${suggestionId}`, { method: "PATCH" }).catch(() => undefined);
     }
 
-    if (data.notified > 0) {
+    if (data.notified && data.notified > 0) {
       setNotifyResult(data.notified);
       setLoading(false);
       return;
@@ -132,120 +135,97 @@ export function NewDealForm() {
       />
       <DashboardSection>
       <form onSubmit={handleSubmit} className="max-w-xl space-y-4">
-        <div>
-          <label className="text-sm font-medium">Service *</label>
-          <select
-            required
-            value={form.serviceId}
-            onChange={(e) => setForm((prev) => ({ ...prev, serviceId: e.target.value }))}
-            className={dashboardInputClass}
-          >
-            <option value="">Select service</option>
-            {services.map((service) => (
-              <option key={service.id} value={service.id}>{service.name} ({formatLkr(service.priceLkr)})</option>
-            ))}
-          </select>
-        </div>
+        <DashboardSelect
+          label="Service"
+          isRequired
+          value={form.serviceId}
+          onChange={(value) => setForm((prev) => ({ ...prev, serviceId: value }))}
+          options={[
+            { value: "", label: "Select service" },
+            ...services.map((service) => ({ value: service.id, label: `${service.name} (${formatLkr(service.priceLkr)})` })),
+          ]}
+        />
 
-        <div>
-          <label className="text-sm font-medium">Location *</label>
-          <select
-            required
-            value={form.locationId}
-            onChange={(e) => setForm((prev) => ({ ...prev, locationId: e.target.value }))}
-            className={dashboardInputClass}
-          >
-            <option value="">Select location</option>
-            {locations.map((location) => (
-              <option key={location.id} value={location.id}>{location.name}</option>
-            ))}
-          </select>
-        </div>
+        <DashboardSelect
+          label="Location"
+          isRequired
+          value={form.locationId}
+          onChange={(value) => setForm((prev) => ({ ...prev, locationId: value }))}
+          options={[
+            { value: "", label: "Select location" },
+            ...locations.map((location) => ({ value: location.id, label: location.name })),
+          ]}
+        />
 
-        <div>
-          <label className="text-sm font-medium">Staff (optional)</label>
-          <select
-            value={form.staffId}
-            onChange={(e) => setForm((prev) => ({ ...prev, staffId: e.target.value }))}
-            className={dashboardInputClass}
-          >
-            <option value="">Any available staff</option>
-            {staff.map((member) => (
-              <option key={member.id} value={member.id}>{member.name}</option>
-            ))}
-          </select>
-        </div>
+        <DashboardSelect
+          label="Staff (optional)"
+          value={form.staffId}
+          onChange={(value) => setForm((prev) => ({ ...prev, staffId: value }))}
+          options={[
+            { value: "", label: "Any available staff" },
+            ...staff.map((member) => ({ value: member.id, label: member.name })),
+          ]}
+        />
 
-        <div>
-          <label className="text-sm font-medium">Discount: {form.discountPercent}%</label>
-          <input
-            type="range"
-            min={10}
-            max={50}
-            step={5}
-            value={form.discountPercent}
-            onChange={(e) => setForm((prev) => ({ ...prev, discountPercent: Number(e.target.value) }))}
-            className="mt-2 w-full"
+        <Slider.Root
+          value={form.discountPercent}
+          onChange={(value) => setForm((prev) => ({ ...prev, discountPercent: value as number }))}
+          minValue={10}
+          maxValue={50}
+          step={5}
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium">Discount</span>
+            <Slider.Output />
+          </div>
+          <Slider.Track className="mt-2">
+            <Slider.Fill />
+            <Slider.Thumb />
+          </Slider.Track>
+        </Slider.Root>
+
+        <DashboardTextField
+          label="Slots available"
+          isRequired
+          type="number"
+          min={1}
+          max={20}
+          value={String(form.slotsTotal)}
+          onChange={(value) => setForm((prev) => ({ ...prev, slotsTotal: Number(value) || 0 }))}
+        />
+
+        <div className="grid grid-cols-2 gap-4">
+          <DashboardTextField
+            label="Deal starts"
+            isRequired
+            type="datetime-local"
+            value={form.dealWindowStart}
+            onChange={(value) => setForm((prev) => ({ ...prev, dealWindowStart: value }))}
           />
-        </div>
-
-        <div>
-          <label className="text-sm font-medium">Slots available *</label>
-          <input
-            type="number"
-            min={1}
-            max={20}
-            required
-            value={form.slotsTotal}
-            onChange={(e) => setForm((prev) => ({ ...prev, slotsTotal: Number(e.target.value) }))}
-            className={dashboardInputClass}
+          <DashboardTextField
+            label="Deal ends"
+            isRequired
+            type="datetime-local"
+            value={form.dealWindowEnd}
+            onChange={(value) => setForm((prev) => ({ ...prev, dealWindowEnd: value }))}
           />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="text-sm font-medium">Deal starts *</label>
-            <input
-              type="datetime-local"
-              required
-              value={form.dealWindowStart}
-              onChange={(e) => setForm((prev) => ({ ...prev, dealWindowStart: e.target.value }))}
-              className={dashboardInputClass}
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium">Deal ends *</label>
-            <input
-              type="datetime-local"
-              required
-              value={form.dealWindowEnd}
-              onChange={(e) => setForm((prev) => ({ ...prev, dealWindowEnd: e.target.value }))}
-              className={dashboardInputClass}
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="text-sm font-medium">Appointment from *</label>
-            <input
-              type="datetime-local"
-              required
-              value={form.apptWindowStart}
-              onChange={(e) => setForm((prev) => ({ ...prev, apptWindowStart: e.target.value }))}
-              className={dashboardInputClass}
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium">Appointment until *</label>
-            <input
-              type="datetime-local"
-              required
-              value={form.apptWindowEnd}
-              onChange={(e) => setForm((prev) => ({ ...prev, apptWindowEnd: e.target.value }))}
-              className={dashboardInputClass}
-            />
-          </div>
+          <DashboardTextField
+            label="Appointment from"
+            isRequired
+            type="datetime-local"
+            value={form.apptWindowStart}
+            onChange={(value) => setForm((prev) => ({ ...prev, apptWindowStart: value }))}
+          />
+          <DashboardTextField
+            label="Appointment until"
+            isRequired
+            type="datetime-local"
+            value={form.apptWindowEnd}
+            onChange={(value) => setForm((prev) => ({ ...prev, apptWindowEnd: value }))}
+          />
         </div>
 
         {selectedService && previewPrice !== null && (
@@ -254,20 +234,20 @@ export function NewDealForm() {
           </div>
         )}
 
-        <label className="flex items-start gap-3 rounded-lg border px-4 py-3 text-sm">
-          <input
-            type="checkbox"
-            checked={form.notifyClients}
-            onChange={(e) => setForm((prev) => ({ ...prev, notifyClients: e.target.checked }))}
-            className="mt-0.5"
+        <div className="rounded-lg border px-4 py-3">
+          <DashboardCheckbox
+            isSelected={form.notifyClients}
+            onChange={(isSelected) => setForm((prev) => ({ ...prev, notifyClients: isSelected }))}
+            label={
+              <span>
+                <span className="font-medium">Notify past clients (WhatsApp/SMS/email)</span>
+                <span className="mt-1 block text-xs text-muted-foreground">
+                  Sends a one-time message to active clients who opted in. Requires Pro messaging.
+                </span>
+              </span>
+            }
           />
-          <span>
-            <span className="font-medium">Notify past clients (WhatsApp/SMS/email)</span>
-            <span className="mt-1 block text-xs text-muted-foreground">
-              Sends a one-time message to active clients who opted in. Requires Pro messaging.
-            </span>
-          </span>
-        </label>
+        </div>
 
         {notifyResult !== null && (
           <div className="rounded-lg border border-emerald-200 dark:border-emerald-800/50 bg-emerald-50 dark:bg-emerald-950/40 px-4 py-3 text-sm text-emerald-900 dark:text-emerald-200">
@@ -282,7 +262,7 @@ export function NewDealForm() {
           </div>
         )}
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className={dashboardErrorAlertClass}>{error}</p>}
 
         <div className="flex gap-3 pt-2">
           <button

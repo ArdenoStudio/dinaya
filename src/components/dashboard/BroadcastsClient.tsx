@@ -250,21 +250,6 @@ export function BroadcastsClient() {
           columns={broadcastColumns}
           rows={rows}
           getRowId={(row) => row.id}
-          mobileCard={(row) => (
-            <div key={row.id} className="rounded-2xl border border-border/80 bg-card p-4 shadow-xs">
-              <div className="flex items-center justify-between gap-3">
-                <p className="font-medium">{row.name}</p>
-                <span className="shrink-0 text-xs capitalize text-muted-foreground">{row.channel}</span>
-              </div>
-              <p className="mt-1 text-sm text-muted-foreground">{audienceLabel(row)}</p>
-              <p className="mt-2 text-sm">
-                {row.sentCount} sent · {row.skippedCount} skipped · {row.failedCount} failed
-              </p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                {row.sentAt ? new Date(row.sentAt).toLocaleString() : "Not sent"}
-              </p>
-            </div>
-          )}
         />
       )}
     </div>

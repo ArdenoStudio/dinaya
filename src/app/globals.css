@@ -1,10 +1,21 @@
 @import 'tailwindcss';
+@import '@heroui/styles';
 
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --color-background: hsl(var(--background));
-  --color-foreground: hsl(var(--foreground));
+  /*
+    Raw token names --bg/--fg/--line/--muted-bg/--accent-bg (rather than
+    --background/--foreground/--border/--muted/--accent) deliberately avoid
+    colliding with @heroui/styles, which defines those exact 5 names itself
+    as complete OKLCH values on :root/.dark. Same layer, same selector — the
+    one loaded later would silently win the property for every consumer.
+    The utility class names below (bg-background, text-foreground, etc.)
+    are unaffected since they come from the --color-x mapping, not the raw
+    variable name.
+  */
+  --color-background: hsl(var(--bg));
+  --color-foreground: hsl(var(--fg));
 
   --color-card: hsl(var(--card));
   --color-card-foreground: hsl(var(--card-foreground));
@@ -18,18 +29,23 @@
   --color-secondary: hsl(var(--secondary));
   --color-secondary-foreground: hsl(var(--secondary-foreground));
 
-  --color-muted: hsl(var(--muted));
+  --color-muted: hsl(var(--muted-bg));
   --color-muted-foreground: hsl(var(--muted-foreground));
 
-  --color-accent: hsl(var(--accent));
+  --color-accent: hsl(var(--accent-bg));
   --color-accent-foreground: hsl(var(--accent-foreground));
 
   --color-destructive: hsl(var(--destructive));
   --color-destructive-foreground: hsl(var(--destructive-foreground));
 
-  --color-border: hsl(var(--border));
+  --color-border: hsl(var(--line));
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
+
+  --color-dashboard-canvas: hsl(var(--dashboard-canvas));
+  --color-dashboard-main: hsl(var(--dashboard-main));
+  --color-dashboard-chrome: hsl(var(--dashboard-chrome));
+  --color-dashboard-sidebar: hsl(var(--dashboard-sidebar));
 
   --font-sans: var(--font-inter), sans-serif;
   --font-cal: var(--font-cal), sans-serif;
@@ -160,19 +176,19 @@
     );
 
     /* Apple-style grouped surfaces: true black canvas, neutral elevated cards */
-    --background: 0 0% 0%;
-    --foreground: 0 0% 98%;
+    --bg: 0 0% 0%;
+    --fg: 0 0% 98%;
     --card: 240 5% 11%;
     --card-foreground: 0 0% 98%;
     --popover: 240 5% 11%;
     --popover-foreground: 0 0% 98%;
     --secondary: 240 4% 16%;
     --secondary-foreground: 0 0% 98%;
-    --muted: 240 4% 16%;
+    --muted-bg: 240 4% 16%;
     --muted-foreground: 240 4% 64%;
-    --accent: 240 4% 16%;
+    --accent-bg: 240 4% 16%;
     --accent-foreground: 0 0% 98%;
-    --border: 240 4% 22%;
+    --line: 240 4% 22%;
     --input: 240 4% 18%;
   }
 }
@@ -232,7 +248,7 @@
 
   /* Solid pink panel: readable text + solid white sub-surfaces (slots, inputs) */
   [data-booking-theme][data-booking-panel='accent'] & {
-    --foreground: 330 28% 16%;
+    --fg: 330 28% 16%;
     --muted-foreground: 330 14% 32%;
     --card: 0 0% 100%;
     --card-foreground: 330 28% 16%;
@@ -240,12 +256,12 @@
     --popover-foreground: 330 28% 16%;
     --secondary: 0 0% 100%;
     --secondary-foreground: 330 28% 16%;
-    --muted: 330 45% 94%;
-    --accent: 330 45% 94%;
+    --muted-bg: 330 45% 94%;
+    --accent-bg: 330 45% 94%;
     --accent-foreground: 330 28% 16%;
-    --border: 330 30% 76%;
+    --line: 330 30% 76%;
     --input: 330 30% 76%;
-    color: hsl(var(--foreground));
+    color: hsl(var(--fg));
   }
 }
 
@@ -320,8 +336,8 @@
     --font-inter: Inter, "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
     --gradient-color: #2563eb;
     --sparkles-color: #2563eb;
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --bg: 0 0% 100%;
+    --fg: 222.2 84% 4.9%;
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
@@ -330,13 +346,13 @@
     --primary-foreground: 210 40% 98%;
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
+    --muted-bg: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
+    --accent-bg: 210 40% 96.1%;
     --accent-foreground: 222.2 47.4% 11.2%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
+    --line: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 220 84% 67%;
     --radius: 0.5rem;
@@ -367,8 +383,8 @@
     /* True neutral dark palette (Apple systemGray-style — near-zero
        saturation, elevation via lightness only), replacing the previous
        saturated navy (222° 84%) that read as "blue" instead of black. */
-    --background: 240 6% 7%;
-    --foreground: 0 0% 95%;
+    --bg: 240 6% 7%;
+    --fg: 0 0% 95%;
     --card: 240 5% 11%;
     --card-foreground: 0 0% 95%;
     --popover: 240 5% 14%;
@@ -377,13 +393,13 @@
     --primary-foreground: 0 0% 100%;
     --secondary: 240 4% 16%;
     --secondary-foreground: 0 0% 95%;
-    --muted: 240 4% 16%;
+    --muted-bg: 240 4% 16%;
     --muted-foreground: 240 5% 65%;
-    --accent: 240 4% 16%;
+    --accent-bg: 240 4% 16%;
     --accent-foreground: 0 0% 95%;
     --destructive: 4 90% 58%;
     --destructive-foreground: 0 0% 100%;
-    --border: 240 4% 20%;
+    --line: 240 4% 20%;
     --input: 240 4% 16%;
     --ring: 220 84% 67%;
     --dashboard-canvas: 240 6% 7%;
@@ -398,6 +414,82 @@
   body {
     @apply bg-background text-foreground antialiased;
   }
+}
+
+/*
+  HeroUI's remaining tokens (--surface, --danger; --success/--warning have
+  no existing project equivalent so HeroUI's own defaults are kept) point at
+  this project's renamed tokens for a unified palette.
+*/
+:root {
+  --surface: hsl(var(--card));
+  --danger: hsl(var(--destructive));
+}
+.dark {
+  --surface: hsl(var(--card));
+  --danger: hsl(var(--destructive));
+}
+
+/*
+  HeroUI's own component CSS (node_modules/@heroui/styles/dist/components/*.css) uses bare
+  text-muted/bg-accent utilities for its OWN secondary text and checked/selected states,
+  expecting --color-muted/--color-accent to resolve to HeroUI's tokens. But those are mapped
+  above to this project's --muted-bg/--accent-bg — subtle BACKGROUND-tint tokens, not
+  text/brand tones — so HeroUI's internal states render nearly invisible.
+
+  This can't be fixed with one global value: --color-muted/--color-accent also feed this
+  project's own ~220 bg-muted background-tint usages, which need the light tint, not a
+  text-contrast gray or a vivid brand blue. bg-muted and text-muted share one token, so the
+  fix has to be scoped per-component instead. Re-pointed here to this project's own
+  muted-foreground/primary/primary-foreground (brand-aligned, not HeroUI's generic defaults)
+  only inside the HeroUI component roots that actually use the bare utilities — everywhere
+  else keeps the background-tint value from the @theme block above.
+
+  HeroUI's derived tokens (--accent-hover, --accent-soft, etc.) do NOT pick up this override
+  automatically, despite being color-mix()'d from --accent/--accent-foreground in
+  @heroui/styles: those color-mix() declarations live only on :root/.dark in
+  themes/default/variables.css, and a custom property's var() references are resolved once,
+  at the element that owns the winning declaration — :root — using :root's own --accent, then
+  the already-resolved result is what inherits down. A more specific --accent override scoped
+  to e.g. .switch is invisible to :root's --accent-hover computation; it never re-resolves for
+  descendants. Confirmed via getComputedStyle: .switch__control's --accent-hover carried
+  HeroUI's stock blue (#0485f7) instead of this project's primary, even though --accent read
+  correctly on the same element (which works only because --accent itself is redeclared right
+  here, not inherited from a :root-only definition). So every derived token an included
+  component actually consumes (grep the component CSS under node_modules/@heroui/styles for
+  bare bg-accent-hover, bg-accent-soft, bg-accent-soft-hover, text-accent-soft-foreground, or a
+  raw var(--accent-hover) like switch.css's --switch-control-bg-checked-hover) must be
+  re-derived here too, both the raw name and its --color-* @theme alias (components apply
+  either form depending on whether they use @apply or a raw var()).
+
+  !important guards against the compiled @theme block's :root rule, which a plain selector
+  can't reliably out-specify by source order alone.
+*/
+:is(
+  .typography, .typography-prose, .toast, .separator, .pagination, .modal__body,
+  .menu-item, .kbd, .header, .empty-state, .drawer__body, .description,
+  .date-input-group, .close-button, .card, .breadcrumbs, .alert, .autocomplete,
+  .alert-dialog__body, .accordion,
+  .table-root, .switch, .tabs, .range-calendar, .radio, .checkbox, .calendar
+) {
+  --muted: hsl(var(--muted-foreground)) !important;
+  --color-muted: var(--muted) !important;
+}
+
+:is(.table-root, .switch, .tabs, .range-calendar, .radio, .checkbox, .calendar, .slider) {
+  --accent: hsl(var(--primary)) !important;
+  --color-accent: var(--accent) !important;
+  --accent-foreground: hsl(var(--primary-foreground)) !important;
+  --color-accent-foreground: var(--accent-foreground) !important;
+
+  --accent-hover: color-mix(in oklab, var(--accent) 90%, var(--accent-foreground) 10%) !important;
+  --color-accent-hover: var(--accent-hover) !important;
+  --accent-soft: color-mix(in oklab, var(--accent) 15%, transparent) !important;
+  --color-accent-soft: var(--accent-soft) !important;
+  --accent-soft-hover: color-mix(in oklab, var(--accent) 20%, transparent) !important;
+  --color-accent-soft-hover: var(--accent-soft-hover) !important;
+  --accent-soft-foreground: color-mix(in oklab, var(--accent) 70%, var(--foreground) 30%) !important;
+  --color-accent-soft-foreground: var(--accent-soft-foreground) !important;
 }
 
 @layer utilities {

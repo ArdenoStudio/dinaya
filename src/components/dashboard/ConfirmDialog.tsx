@@ -1,47 +1,88 @@
 "use client";
 
-import * as Dialog from "@radix-ui/react-dialog";
+import { useState } from "react";
+import {
+  AlertDialogRoot,
+  AlertDialogBackdrop,
+  AlertDialogContainer,
+  AlertDialogDialog,
+  AlertDialogHeader,
+  AlertDialogHeading,
+  AlertDialogBody,
+  AlertDialogFooter,
+  AlertDialogIcon,
+} from "@heroui/react";
+import { AlertTriangle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export function ConfirmDialog({
   cancelLabel = "Cancel",
   confirmLabel = "Confirm",
   description,
   onConfirm,
+  open,
+  onOpenChange,
   title,
-  trigger,
+  variant = "default",
 }: {
   cancelLabel?: string;
   confirmLabel?: string;
   description: string;
   onConfirm: () => void | Promise<void>;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   title: string;
-  trigger: React.ReactNode;
+  variant?: "destructive" | "default";
 }) {
+  const [pending, setPending] = useState(false);
+
+  async function handleConfirm() {
+    setPending(true);
+    try {
+      await onConfirm();
+      onOpenChange(false);
+    } finally {
+      setPending(false);
+    }
+  }
+
   return (
-    <Dialog.Root>
-      <Dialog.Trigger asChild>{trigger}</Dialog.Trigger>
-      <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-40 bg-black/25" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-[min(28rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 rounded-lg border bg-card border-border/60 p-5 shadow-xl">
-          <Dialog.Title className="text-base font-semibold">{title}</Dialog.Title>
-          <Dialog.Description className="mt-2 text-sm leading-6 text-muted-foreground">
-            {description}
-          </Dialog.Description>
-          <div className="mt-5 flex justify-end gap-2">
-            <Dialog.Close className="rounded-md border px-3 py-2 text-sm font-medium transition-colors hover:bg-muted">
-              {cancelLabel}
-            </Dialog.Close>
-            <Dialog.Close
-              className="rounded-md bg-red-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700"
-              onClick={() => {
-                void onConfirm();
-              }}
-            >
-              {confirmLabel}
-            </Dialog.Close>
-          </div>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+    <AlertDialogRoot isOpen={open} onOpenChange={onOpenChange}>
+      <AlertDialogBackdrop>
+        <AlertDialogContainer size="sm">
+          <AlertDialogDialog>
+            {variant === "destructive" ? (
+              <AlertDialogIcon status="danger">
+                <AlertTriangle className="size-5" />
+              </AlertDialogIcon>
+            ) : null}
+            <AlertDialogHeader>
+              <AlertDialogHeading>{title}</AlertDialogHeading>
+            </AlertDialogHeader>
+            <AlertDialogBody>{description}</AlertDialogBody>
+            <AlertDialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                className="min-h-11 w-full sm:w-auto"
+                onClick={() => onOpenChange(false)}
+                disabled={pending}
+              >
+                {cancelLabel}
+              </Button>
+              <Button
+                type="button"
+                className="min-h-11 w-full sm:w-auto"
+                variant={variant === "destructive" ? "destructive" : "default"}
+                onClick={handleConfirm}
+                disabled={pending}
+              >
+                {pending ? "…" : confirmLabel}
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogDialog>
+        </AlertDialogContainer>
+      </AlertDialogBackdrop>
+    </AlertDialogRoot>
   );
 }

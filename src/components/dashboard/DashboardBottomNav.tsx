@@ -13,7 +13,7 @@ import {
   X,
   type LucideIcon,
 } from "lucide-react";
-import { DashboardConfirmDialog } from "@/components/dashboard/DashboardConfirmDialog";
+import { ConfirmDialog as DashboardConfirmDialog } from "@/components/dashboard/ConfirmDialog";
 import { trackDashboardNavClick } from "@/lib/analytics/gtag";
 import { cn } from "@/lib/utils";
 
@@ -166,7 +166,7 @@ export function DashboardBottomNav({
             id={sheetId}
             role="dialog"
             aria-modal="true"
-            aria-labelledby={titleId}
+            aria-label="More dashboard pages"
             className="absolute inset-x-0 bottom-0 z-61 flex max-h-[min(85dvh,40rem)] flex-col rounded-t-[1.25rem] border border-neutral-200 bg-white pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_40px_rgba(0,0,0,0.12)] dark:border-neutral-700 dark:bg-neutral-950"
           >
             <div className="flex shrink-0 flex-col items-center pt-2">

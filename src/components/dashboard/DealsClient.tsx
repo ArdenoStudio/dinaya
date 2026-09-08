@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "@heroui/react";
 import { ConfirmDialog } from "@/components/dashboard/ConfirmDialog";
+import { DashboardTextField } from "@/components/dashboard/DashboardFormField";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { computeDiscountedPrice } from "@/lib/deals/pricing";
+import { submitResource } from "@/lib/dashboard/use-resource";
 import {
   dashboardCardClass,
-  dashboardInputClass,
   dashboardOutlineActionClass,
   dashboardPrimaryActionClass,
 } from "@/lib/dashboard-ui";
@@ -59,6 +61,7 @@ export function DealsClient({ initialDeals }: { initialDeals: DealRow[] }) {
   const router = useRouter();
   const [deals, setDeals] = useState(initialDeals);
   const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const [confirmCancelId, setConfirmCancelId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ dealWindowEnd: "", apptWindowEnd: "", slotsTotal: 0 });
   const [editError, setEditError] = useState("");
@@ -66,18 +69,17 @@ export function DealsClient({ initialDeals }: { initialDeals: DealRow[] }) {
 
   async function cancelDeal(id: string) {
     setCancellingId(id);
-    const res = await fetch(`/api/dashboard/deals/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: "cancelled" }),
-    });
-    if (res.ok) {
-      setDeals((prev) => prev.map((deal) => (
-        deal.id === id ? { ...deal, status: "cancelled", displayStatus: "cancelled" } : deal
-      )));
-      router.refresh();
-    }
+    const result = await submitResource(`/api/dashboard/deals/${id}`, { status: "cancelled" });
     setCancellingId(null);
+    if (!result.ok) {
+      toast.danger("Could not cancel deal", { description: result.error });
+      return;
+    }
+    setDeals((prev) => prev.map((deal) => (
+      deal.id === id ? { ...deal, status: "cancelled", displayStatus: "cancelled" } : deal
+    )));
+    toast.success("Deal cancelled");
+    router.refresh();
   }
 
   function startEdit(deal: DealRow) {
@@ -94,23 +96,19 @@ export function DealsClient({ initialDeals }: { initialDeals: DealRow[] }) {
     setSavingId(id);
     setEditError("");
 
-    const res = await fetch(`/api/dashboard/deals/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        dealWindowEnd: new Date(editForm.dealWindowEnd).toISOString(),
-        apptWindowEnd: new Date(editForm.apptWindowEnd).toISOString(),
-        slotsTotal: editForm.slotsTotal,
-      }),
+    const result = await submitResource(`/api/dashboard/deals/${id}`, {
+      dealWindowEnd: new Date(editForm.dealWindowEnd).toISOString(),
+      apptWindowEnd: new Date(editForm.apptWindowEnd).toISOString(),
+      slotsTotal: editForm.slotsTotal,
     });
+    setSavingId(null);
 
-    const data = await res.json();
-    if (!res.ok) {
-      setEditError(data.error ?? "Could not update deal.");
-      setSavingId(null);
+    if (!result.ok) {
+      setEditError(result.error);
       return;
     }
 
+    const data = result.data as { dealWindowEnd: string; apptWindowEnd: string; slotsTotal: number; status: string };
     setDeals((prev) => prev.map((deal) => (
       deal.id === id
         ? {
@@ -124,7 +122,7 @@ export function DealsClient({ initialDeals }: { initialDeals: DealRow[] }) {
         : deal
     )));
     setEditingId(null);
-    setSavingId(null);
+    toast.success("Deal updated");
     router.refresh();
   }
 
@@ -173,21 +171,25 @@ export function DealsClient({ initialDeals }: { initialDeals: DealRow[] }) {
                   </button>
                 )}
                 {canCancel && (
-                  <ConfirmDialog
-                    title="Cancel deal"
-                    description={`Cancel "${deal.serviceName}" (${deal.discountPercent}% off)? Clients will no longer be able to claim it.`}
-                    confirmLabel="Cancel deal"
-                    onConfirm={() => cancelDeal(deal.id)}
-                    trigger={
-                      <button
-                        type="button"
-                        disabled={cancellingId === deal.id}
-                        className={cn(dashboardOutlineActionClass, "text-xs disabled:opacity-50")}
-                      >
-                        {cancellingId === deal.id ? "Cancelling…" : "Cancel"}
-                      </button>
-                    }
-                  />
+                  <>
+                    <button
+                      type="button"
+                      disabled={cancellingId === deal.id}
+                      onClick={() => setConfirmCancelId(deal.id)}
+                      className={cn(dashboardOutlineActionClass, "text-xs disabled:opacity-50")}
+                    >
+                      {cancellingId === deal.id ? "Cancelling…" : "Cancel"}
+                    </button>
+                    <ConfirmDialog
+                      title="Cancel deal"
+                      description={`Cancel "${deal.serviceName}" (${deal.discountPercent}% off)? Clients will no longer be able to claim it.`}
+                      confirmLabel="Cancel deal"
+                      variant="destructive"
+                      onConfirm={() => cancelDeal(deal.id)}
+                      open={confirmCancelId === deal.id}
+                      onOpenChange={(open) => setConfirmCancelId(open ? deal.id : null)}
+                    />
+                  </>
                 )}
               </div>
             </div>
@@ -195,35 +197,26 @@ export function DealsClient({ initialDeals }: { initialDeals: DealRow[] }) {
             {isEditing && (
               <div className="mt-4 rounded-lg border bg-muted/20 p-4 space-y-3">
                 <div className="grid gap-3 sm:grid-cols-3">
-                  <label className="block text-xs">
-                    <span className="font-medium">Deal ends</span>
-                    <input
-                      type="datetime-local"
-                      value={editForm.dealWindowEnd}
-                      onChange={(e) => setEditForm((prev) => ({ ...prev, dealWindowEnd: e.target.value }))}
-                      className={dashboardInputClass}
-                    />
-                  </label>
-                  <label className="block text-xs">
-                    <span className="font-medium">Appointment until</span>
-                    <input
-                      type="datetime-local"
-                      value={editForm.apptWindowEnd}
-                      onChange={(e) => setEditForm((prev) => ({ ...prev, apptWindowEnd: e.target.value }))}
-                      className={dashboardInputClass}
-                    />
-                  </label>
-                  <label className="block text-xs">
-                    <span className="font-medium">Total slots</span>
-                    <input
-                      type="number"
-                      min={deal.slotsRedeemed}
-                      max={20}
-                      value={editForm.slotsTotal}
-                      onChange={(e) => setEditForm((prev) => ({ ...prev, slotsTotal: Number(e.target.value) }))}
-                      className={dashboardInputClass}
-                    />
-                  </label>
+                  <DashboardTextField
+                    label="Deal ends"
+                    type="datetime-local"
+                    value={editForm.dealWindowEnd}
+                    onChange={(value) => setEditForm((prev) => ({ ...prev, dealWindowEnd: value }))}
+                  />
+                  <DashboardTextField
+                    label="Appointment until"
+                    type="datetime-local"
+                    value={editForm.apptWindowEnd}
+                    onChange={(value) => setEditForm((prev) => ({ ...prev, apptWindowEnd: value }))}
+                  />
+                  <DashboardTextField
+                    label="Total slots"
+                    type="number"
+                    min={deal.slotsRedeemed}
+                    max={20}
+                    value={String(editForm.slotsTotal)}
+                    onChange={(value) => setEditForm((prev) => ({ ...prev, slotsTotal: Number(value) }))}
+                  />
                 </div>
                 {editError && <p className="text-xs text-destructive">{editError}</p>}
                 <div className="flex gap-2">

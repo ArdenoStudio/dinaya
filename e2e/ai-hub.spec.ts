@@ -19,7 +19,7 @@ test.describe("AI Hub — Free plan", () => {
     const account = makeAccount("ai-free-toggles");
     await registerLoginAsStarter(page, request, account);
     await page.goto("/dashboard/ai");
-    await expect(page.getByRole("checkbox")).toHaveCount(0);
+    await expect(page.getByRole("switch")).toHaveCount(0);
   });
 });
 
@@ -33,7 +33,7 @@ test.describe("AI Hub — Pro plan", () => {
     await expect(page.getByText(/Upgrade to Growth/i)).toBeVisible();
     await expect(page.getByText(/available on Dinaya Growth/i)).toBeVisible();
     await expect(page.getByRole("link", { name: /View plan options/i })).toBeVisible();
-    await expect(page.getByRole("checkbox")).toHaveCount(0);
+    await expect(page.getByRole("switch")).toHaveCount(0);
   });
 });
 
@@ -72,15 +72,16 @@ test.describe("AI Hub — Max plan", () => {
   });
 
   test("can toggle an AI feature on", async ({ page }) => {
-    const toggle = page.getByText("AI Booking Autopilot").locator("..").locator("..").getByRole("checkbox").first();
-    await toggle.check();
+    const toggle = page.getByText("AI Booking Autopilot").locator("..").locator("..").getByRole("switch").first();
+    await toggle.click();
     await expect(toggle).toBeChecked();
   });
 
   test("can toggle an AI feature off", async ({ page }) => {
-    const toggle = page.getByText("Review Engine").locator("..").locator("..").getByRole("checkbox").first();
-    await toggle.check();
-    await toggle.uncheck();
+    const toggle = page.getByText("Review Engine").locator("..").locator("..").getByRole("switch").first();
+    await toggle.click();
+    await expect(toggle).toBeChecked();
+    await toggle.click();
     await expect(toggle).not.toBeChecked();
   });
 

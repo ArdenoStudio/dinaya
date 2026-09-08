@@ -17,7 +17,8 @@ import {
   DashboardLoadingPanel,
   DashboardTableSkeleton,
 } from "@/components/dashboard/DashboardLoadingPanel";
-import { useDashboardToast } from "@/components/dashboard/ToastProvider";
+import { toast } from "@heroui/react";
+import { DashboardSelect } from "@/components/dashboard/DashboardFormField";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { statusSurfaceStyles } from "@/lib/dashboard-status";
 import {
@@ -77,7 +78,6 @@ const navButtonClass = cn(
 );
 
 export default function CalendarPage() {
-  const { showToast } = useDashboardToast();
   const [view, setView] = useState<CalendarView>("agenda");
   const [weekStart, setWeekStart] = useState(() =>
     startOfWeek(new Date(), { weekStartsOn: 1 }),
@@ -192,11 +192,7 @@ export default function CalendarPage() {
         } catch {
           /* keep default */
         }
-        showToast({
-          title: "Could not confirm booking",
-          description,
-          variant: "error",
-        });
+        toast.danger("Could not confirm booking", { description });
         return;
       }
       setBookings((prev) =>
@@ -205,10 +201,8 @@ export default function CalendarPage() {
         ),
       );
     } catch {
-      showToast({
-        title: "Could not confirm booking",
+      toast.danger("Could not confirm booking", {
         description: "Check your connection and try again.",
-        variant: "error",
       });
     } finally {
       setUpdatingId(null);
@@ -229,22 +223,15 @@ export default function CalendarPage() {
           actions={
             <div className="flex flex-wrap items-center gap-2">
               {staffMembers.length > 1 ? (
-                <label className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <span className="sr-only">Filter by staff</span>
-                  <select
-                    value={selectedStaffId}
-                    onChange={(e) => setSelectedStaffId(e.target.value)}
-                    aria-label="Filter by staff member"
-                    className="min-h-11 rounded-md border bg-background px-3 py-2 text-base sm:text-sm"
-                  >
-                    <option value="">All staff</option>
-                    {staffMembers.map((member) => (
-                      <option key={member.id} value={member.id}>
-                        {member.name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+                <DashboardSelect
+                  label="Staff"
+                  value={selectedStaffId}
+                  onChange={setSelectedStaffId}
+                  options={[
+                    { value: "", label: "All staff" },
+                    ...staffMembers.map((member) => ({ value: member.id, label: member.name })),
+                  ]}
+                />
               ) : null}
               <Link
                 href="/dashboard/bookings"
