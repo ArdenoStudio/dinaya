@@ -13,6 +13,7 @@ import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { submitResource } from "@/lib/dashboard/use-resource";
 import { CalendarPlus, NotebookText } from "lucide-react";
 import {
+  CLIENT_STAGE_BADGE_CLASS,
   dashboardOutlineActionClass,
   dashboardPageClass,
   dashboardPrimaryActionClass,
@@ -49,12 +50,7 @@ type Client = {
 
 const STAGES = ["lead", "prospect", "active", "churned"] as const;
 
-const STAGE_STYLES: Record<string, string> = {
-  lead: "bg-blue-100 text-blue-700",
-  prospect: "bg-purple-100 text-purple-700",
-  active: "bg-green-100 text-green-700",
-  churned: "bg-gray-100 dark:bg-neutral-800 text-gray-500 dark:text-gray-400",
-};
+const STAGE_STYLES = CLIENT_STAGE_BADGE_CLASS;
 
 const bookingColumns: DataTableColumn<Booking>[] = [
   {

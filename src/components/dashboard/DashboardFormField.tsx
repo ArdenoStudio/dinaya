@@ -9,6 +9,8 @@ type BaseFieldProps = {
   error?: string;
   isRequired?: boolean;
   className?: string;
+  /** Keep the label for screen readers only — for compact, self-explanatory rows (e.g. a repeated list item). */
+  hideLabel?: boolean;
 };
 
 export function DashboardTextField({
@@ -17,6 +19,7 @@ export function DashboardTextField({
   error,
   isRequired,
   className,
+  hideLabel,
   value,
   onChange,
   placeholder,
@@ -39,8 +42,8 @@ export function DashboardTextField({
       isInvalid={Boolean(error)}
       className={className}
     >
-      <Label>{label}</Label>
-      <Input placeholder={placeholder} type={type} min={min} max={max} />
+      <Label className={hideLabel ? "sr-only" : undefined}>{label}</Label>
+      <Input placeholder={placeholder ?? (hideLabel ? label : undefined)} type={type} min={min} max={max} />
       {hint ? <Description>{hint}</Description> : null}
       {error ? <FieldError>{error}</FieldError> : null}
     </TextField>
@@ -108,6 +111,7 @@ export function DashboardSelect<T extends string>({
   error,
   isRequired,
   className,
+  hideLabel,
   value,
   onChange,
   options,
@@ -124,7 +128,7 @@ export function DashboardSelect<T extends string>({
       isInvalid={Boolean(error)}
       className={className}
     >
-      <Label>{label}</Label>
+      <Label className={hideLabel ? "sr-only" : undefined}>{label}</Label>
       <Select.Trigger>
         <Select.Value />
         <Select.Indicator />

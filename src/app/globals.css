@@ -468,15 +468,27 @@
 :is(
   .typography, .typography-prose, .toast, .separator, .pagination, .modal__body,
   .menu-item, .kbd, .header, .empty-state, .drawer__body, .description,
-  .date-input-group, .close-button, .card, .breadcrumbs, .alert, .autocomplete,
+  .date-input-group, .close-button, .card__description, .breadcrumbs, .alert, .autocomplete,
   .alert-dialog__body, .accordion,
-  .table-root, .switch, .tabs, .range-calendar, .radio, .checkbox, .calendar
+  .table__column, .switch, .tabs__tab, .tabs__separator, .range-calendar, .radio, .checkbox, .calendar
 ) {
   --muted: hsl(var(--muted-foreground)) !important;
   --color-muted: var(--muted) !important;
 }
 
-:is(.table-root, .switch, .tabs, .range-calendar, .radio, .checkbox, .calendar, .slider) {
+/*
+  NOTE: .tabs and .table-root themselves were removed from both lists below (2026-09-08) —
+  they were scoping the override to the *entire* tab panel / table body, not just the small
+  HeroUI-internal element that actually reads the bare token, so any plain bg-muted/text-muted
+  usage in this project's own content nested inside a Tabs.Root or Table.Root (e.g. a status
+  pill on a Tabs-wrapped detail page) silently lost its tint and rendered as invisible
+  text-on-itself. Confirmed live: a `bg-muted text-muted-foreground` badge inside a Tabs.Root
+  page wrapper computed to the *same* color for both background and text. Scope any new
+  addition here to the actual leaf class from the component's own CSS (grep
+  node_modules/@heroui/styles), never to a root/panel/body wrapper class that arbitrary content
+  can end up nested inside.
+*/
+:is(.table__column-resizer, .switch, .range-calendar, .radio, .checkbox, .calendar, .slider) {
   --accent: hsl(var(--primary)) !important;
   --color-accent: var(--accent) !important;
   --accent-foreground: hsl(var(--primary-foreground)) !important;

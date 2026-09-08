@@ -356,8 +356,8 @@ export function SetupWizard() {
 
   if (loadFailed) {
     return (
-      <div className="flex min-h-screen flex-col bg-stone-100 dark:bg-neutral-950">
-        <header className="border-b bg-white px-6 py-4 dark:border-border/60 dark:bg-card">
+      <div className="flex min-h-screen flex-col bg-background">
+        <header className="border-b border-border bg-card px-6 py-4">
           <div className="mx-auto flex max-w-2xl items-center justify-between gap-4">
             <Logo size="sm" />
             <AuthThemeToggle />
@@ -380,8 +380,8 @@ export function SetupWizard() {
   }
 
   return (
-    <div className="min-h-dvh bg-stone-100 dark:bg-neutral-950">
-      <header className="border-b bg-white px-4 py-4 dark:border-border/60 dark:bg-card sm:px-6">
+    <div className="min-h-dvh bg-background">
+      <header className="border-b border-border bg-card px-4 py-4 sm:px-6">
         <div className="mx-auto flex max-w-2xl flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <Logo size="sm" />
           <div className="flex items-center justify-between gap-3 sm:justify-end">
@@ -401,7 +401,7 @@ export function SetupWizard() {
           <h1 className="mt-2 font-cal text-3xl tracking-tight">{currentStep.label}</h1>
           <p className="mt-2 text-[17px] leading-snug text-muted-foreground sm:text-sm">{currentStep.description}</p>
           <div
-            className="mt-4 h-2 overflow-hidden rounded-full bg-white ring-1 ring-border dark:bg-neutral-800"
+            className="mt-4 h-2 overflow-hidden rounded-full bg-card ring-1 ring-border"
             role="progressbar"
             aria-valuenow={progress}
             aria-valuemin={0}
@@ -530,7 +530,7 @@ export function SetupWizard() {
               <p className="text-[17px] leading-snug text-muted-foreground sm:text-sm">
                 We pre-filled Mon–Sat 9:00–17:00. Confirm to continue, or edit hours below.
               </p>
-              <div className="rounded-lg border border-border bg-muted/30 px-4 py-3 dark:border-neutral-700">
+              <div className="rounded-lg border border-border bg-muted/30 px-4 py-3">
                 <DashboardCheckbox
                   isSelected={confirmDefaultHours}
                   onChange={setConfirmDefaultHours}

@@ -90,7 +90,7 @@ export function AnalyticsCharts({
               This week
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="inline-block size-2 rounded-full bg-slate-300 dark:bg-neutral-600" />
+              <span className="inline-block size-2 rounded-full" style={{ backgroundColor: lastWeekStroke }} />
               Last week
             </span>
           </div>

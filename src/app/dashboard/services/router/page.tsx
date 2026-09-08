@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, X } from "lucide-react";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
+import { DashboardSelect, DashboardSwitch, DashboardTextField } from "@/components/dashboard/DashboardFormField";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MAX_ROUTER_OPTIONS, type BookingRouter, type BookingRouterOption } from "@/lib/booking-router";
 import {
   dashboardErrorAlertClass,
-  dashboardInputClass,
   dashboardLabelClass,
   dashboardPageClass,
   dashboardPrimaryActionClass,
@@ -112,34 +112,44 @@ export default function BookingRouterPage() {
         </div>
       ) : (
         <div className={cn(dashboardSectionClass, "max-w-lg space-y-4")}>
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" checked={router.enabled}
-              onChange={(e) => setRouter((r) => ({ ...r, enabled: e.target.checked }))} className="rounded" />
-            <span className="text-sm font-medium">Show the router on my booking page</span>
-          </label>
+          <DashboardSwitch
+            label="Show the router on my booking page"
+            isSelected={router.enabled}
+            onChange={(enabled) => setRouter((r) => ({ ...r, enabled }))}
+          />
 
-          <div>
-            <label className={dashboardLabelClass}>Question</label>
-            <input value={router.question}
-              onChange={(e) => setRouter((r) => ({ ...r, question: e.target.value }))}
-              placeholder="What brings you in today?" className={dashboardInputClass} />
-          </div>
+          <DashboardTextField
+            label="Question"
+            value={router.question}
+            onChange={(question) => setRouter((r) => ({ ...r, question }))}
+            placeholder="What brings you in today?"
+          />
 
           <div className="space-y-2">
             <p className={dashboardLabelClass}>Answers</p>
             {router.options.map((o, index) => (
               <div key={o.id} className="flex items-center gap-2">
-                <input value={o.label} onChange={(e) => setOption(index, { label: e.target.value })}
-                  placeholder="Answer (e.g. Routine cleaning)" className={dashboardInputClass} />
+                <DashboardTextField
+                  label="Answer"
+                  hideLabel
+                  className="flex-1"
+                  value={o.label}
+                  onChange={(label) => setOption(index, { label })}
+                  placeholder="Answer (e.g. Routine cleaning)"
+                />
                 <span className="text-muted-foreground text-xs shrink-0">→</span>
-                <select value={o.serviceId} onChange={(e) => setOption(index, { serviceId: e.target.value })}
-                  className={cn(dashboardInputClass, "max-w-[40%]")}>
-                  {services.map((s) => (
-                    <option key={s.id} value={s.id}>{s.name}{s.isActive ? "" : " (hidden)"}</option>
-                  ))}
-                </select>
+                <DashboardSelect
+                  label="Service"
+                  hideLabel
+                  className="max-w-[40%] shrink-0"
+                  value={o.serviceId}
+                  onChange={(serviceId) => setOption(index, { serviceId })}
+                  options={services.map((s) => ({ value: s.id, label: s.isActive ? s.name : `${s.name} (hidden)` }))}
+                />
                 <button type="button" aria-label="Remove answer" onClick={() => removeOption(index)}
-                  className="shrink-0 px-2 text-xs text-muted-foreground hover:text-destructive">✕</button>
+                  className="shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive">
+                  <X className="size-3.5" />
+                </button>
               </div>
             ))}
             {router.options.length < MAX_ROUTER_OPTIONS && (
@@ -155,7 +165,7 @@ export default function BookingRouterPage() {
               {saving ? "Saving…" : "Save router"}
             </button>
             {saved && (
-              <span className="flex items-center gap-1.5 text-green-600 text-sm">
+              <span className="flex items-center gap-1.5 text-sm text-green-700 dark:text-green-400">
                 <CheckCircle className="size-4" /> Saved
               </span>
             )}

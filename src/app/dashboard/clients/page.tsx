@@ -10,16 +10,19 @@ import { DashboardStatGrid } from "@/components/dashboard/DashboardStatGrid";
 import { EmptyState } from "@/components/dashboard/EmptyState";
 import { StatCard } from "@/components/dashboard/StatCard";
 import {
+  CLIENT_STAGE_BADGE_CLASS,
+  CLIENT_STAGE_DOT_CLASS,
   dashboardFilterPillClass,
   dashboardInputClass,
   dashboardOutlineActionClass,
   dashboardPageClass,
   dashboardPrimaryActionClass,
   dashboardSurfaceClass,
+  type ClientStage,
 } from "@/lib/dashboard-ui";
 import { cn } from "@/lib/utils";
 
-type Stage = "lead" | "prospect" | "active" | "churned";
+type Stage = ClientStage;
 
 type Client = {
   id: string;
@@ -39,19 +42,8 @@ const STAGES: { key: "" | Stage; label: string }[] = [
   { key: "churned", label: "Churned" },
 ];
 
-const STAGE_STYLES: Record<Stage, string> = {
-  lead: "bg-blue-50 dark:bg-blue-950/40 text-blue-700 ring-1 ring-inset ring-blue-700/20",
-  prospect: "bg-violet-50 text-violet-700 ring-1 ring-inset ring-violet-700/20",
-  active: "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 ring-1 ring-inset ring-emerald-700/20",
-  churned: "bg-gray-100 dark:bg-neutral-800 text-gray-500 dark:text-gray-400 ring-1 ring-inset ring-gray-400/20",
-};
-
-const STAGE_DOT: Record<Stage, string> = {
-  lead: "bg-blue-500",
-  prospect: "bg-violet-500",
-  active: "bg-emerald-500",
-  churned: "bg-gray-400",
-};
+const STAGE_STYLES = CLIENT_STAGE_BADGE_CLASS;
+const STAGE_DOT = CLIENT_STAGE_DOT_CLASS;
 
 const AVATAR_COLORS = [
   "bg-blue-100 text-blue-700",

@@ -77,3 +77,20 @@ export const dashboardChromeClass = cn(
   "border-border/70 bg-dashboard-chrome/90 backdrop-blur-md",
   "dark:border-border/50",
 );
+
+/** Client pipeline stage — one hue per stage so the four are distinguishable at a glance. */
+export type ClientStage = "lead" | "prospect" | "active" | "churned";
+
+export const CLIENT_STAGE_BADGE_CLASS: Record<ClientStage, string> = {
+  lead: "bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-700/20 dark:bg-blue-950/40 dark:text-blue-400 dark:ring-blue-400/20",
+  prospect: "bg-violet-50 text-violet-700 ring-1 ring-inset ring-violet-700/20 dark:bg-violet-950/40 dark:text-violet-400 dark:ring-violet-400/20",
+  active: "bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-700/20 dark:bg-emerald-950/40 dark:text-emerald-400 dark:ring-emerald-400/20",
+  churned: "bg-muted text-muted-foreground ring-1 ring-inset ring-border",
+};
+
+export const CLIENT_STAGE_DOT_CLASS: Record<ClientStage, string> = {
+  lead: "bg-blue-500",
+  prospect: "bg-violet-500",
+  active: "bg-emerald-500",
+  churned: "bg-muted-foreground/50",
+};

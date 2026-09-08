@@ -57,7 +57,7 @@ export function OnboardingWizard({ steps, bookingUrl, whatsappShare }: Props) {
         </div>
       </div>
 
-      <div className="mb-6 h-2 overflow-hidden rounded-full bg-background ring-1 ring-border dark:bg-neutral-800">
+      <div className="mb-6 h-2 overflow-hidden rounded-full bg-background ring-1 ring-border">
         <div
           className="h-full rounded-full bg-primary transition-[width] motion-reduce:transition-none"
           style={{ width: `${progress}%` }}
@@ -69,7 +69,7 @@ export function OnboardingWizard({ steps, bookingUrl, whatsappShare }: Props) {
         />
       </div>
 
-      <div className="rounded-xl border border-border bg-muted/30 p-5 dark:border-neutral-800">
+      <div className="rounded-xl border border-border bg-muted/30 p-5">
         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Do this next</p>
         <h3 className="mt-1 font-semibold">{nextStep.label}</h3>
         <p className="mt-2 text-sm text-muted-foreground">{nextStep.description}</p>
