@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Tabs, toast } from "@heroui/react";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
 import { DashboardSelect, DashboardSwitch, DashboardTextAreaField, DashboardTextField } from "@/components/dashboard/DashboardFormField";
+import { DashboardCopyField } from "@/components/dashboard/DashboardCopyField";
 import { submitResource } from "@/lib/dashboard/use-resource";
 import { useDashboardCopy } from "@/components/dashboard/DashboardLocaleProvider";
 import { buildPublicBookingUrl } from "@/lib/booking-url";
@@ -14,17 +15,38 @@ import {
   Banknote,
   CreditCard,
   Download,
+  ExternalLink,
   Globe,
   Images,
+  Link2,
+  MapPin,
   Palette,
   Share2,
   ShieldCheck,
   X,
 } from "lucide-react";
-import { dashboardErrorAlertClass, dashboardPageClass } from "@/lib/dashboard-ui";
+import {
+  dashboardErrorAlertClass,
+  dashboardOutlineActionClass,
+  dashboardPageClass,
+  dashboardPrimaryActionClass,
+} from "@/lib/dashboard-ui";
 import { ImageUploadField } from "@/components/dashboard/ImageUploadField";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+
+function StatusPill({ enabled }: { enabled: boolean }) {
+  return (
+    <span
+      className={cn(
+        "shrink-0 rounded-full px-2 py-0.5 text-xs font-medium",
+        enabled ? "bg-green-100 text-green-700" : "bg-muted text-muted-foreground",
+      )}
+    >
+      {enabled ? "Enabled" : "Not enabled"}
+    </span>
+  );
+}
 
 type SettingsBusiness = {
   address: string | null;
@@ -168,8 +190,9 @@ export default function SettingsForm({ business }: Props) {
 
       <form onSubmit={handleSave} className="space-y-5">
         <Tabs.Panel id="general">
-          <div className={cn(cardClass, "max-w-xl")}>
-            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Business info</p>
+          <div className="grid gap-5 xl:grid-cols-[minmax(0,28rem)_1fr]">
+            <div className={cardClass}>
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Business info</p>
               <DashboardTextField
                 label="Business name"
                 isRequired
@@ -195,31 +218,55 @@ export default function SettingsForm({ business }: Props) {
                 onChange={(value) => setForm((f) => ({ ...f, address: value }))}
                 placeholder="123 Main St, Colombo 03"
               />
-              <DashboardSelect
-                label="Timezone"
-                value={form.timezone}
-                onChange={(value) => setForm((f) => ({ ...f, timezone: value }))}
-                options={TIMEZONE_OPTIONS}
-              />
-              <DashboardSelect
-                label={settingsCopy.languageLabel}
-                hint={settingsCopy.languageHint}
-                value={form.language}
-                onChange={(value) => setForm((f) => ({ ...f, language: value }))}
-                options={LANGUAGE_OPTIONS}
-              />
-              <DashboardSelect
-                label="Business type"
-                value={form.businessType}
-                onChange={(value) => setForm((f) => ({ ...f, businessType: value }))}
-                options={BUSINESS_TYPE_OPTIONS}
-              />
-              <div className="pt-1">
-                <p className="text-xs text-muted-foreground mb-1">Your booking URL</p>
-                <code className="text-sm text-primary bg-primary/5 px-2.5 py-1 rounded-md break-all">
-                  {bookingUrl.replace(/^https?:\/\//, "")}
-                </code>
+            </div>
+
+            <div className="space-y-5">
+              <div className={cardClass}>
+                <div className="flex items-center gap-2">
+                  <Link2 className="size-4 text-muted-foreground" />
+                  <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Your public page</p>
+                </div>
+                <p className="text-sm text-muted-foreground -mt-2">
+                  What clients see when they book with {form.name || "you"}.
+                </p>
+                <DashboardCopyField label="Booking link" value={bookingUrl} rows={1} mono />
+                <a
+                  href={bookingUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={cn(dashboardOutlineActionClass, "w-full justify-center")}
+                >
+                  <ExternalLink className="size-4" />
+                  View live page
+                </a>
               </div>
+
+              <div className={cardClass}>
+                <div className="flex items-center gap-2">
+                  <MapPin className="size-4 text-muted-foreground" />
+                  <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Locale</p>
+                </div>
+                <DashboardSelect
+                  label="Timezone"
+                  value={form.timezone}
+                  onChange={(value) => setForm((f) => ({ ...f, timezone: value }))}
+                  options={TIMEZONE_OPTIONS}
+                />
+                <DashboardSelect
+                  label={settingsCopy.languageLabel}
+                  hint={settingsCopy.languageHint}
+                  value={form.language}
+                  onChange={(value) => setForm((f) => ({ ...f, language: value }))}
+                  options={LANGUAGE_OPTIONS}
+                />
+                <DashboardSelect
+                  label="Business type"
+                  value={form.businessType}
+                  onChange={(value) => setForm((f) => ({ ...f, businessType: value }))}
+                  options={BUSINESS_TYPE_OPTIONS}
+                />
+              </div>
+            </div>
           </div>
         </Tabs.Panel>
 
@@ -339,20 +386,32 @@ export default function SettingsForm({ business }: Props) {
               />
             </div>
 
-            <div className={cn(cardClass, "xl:col-span-2 space-y-3")}>
+            <div className={cn(cardClass, "xl:col-span-2")}>
               <div className="flex items-center gap-2">
                 <Palette className="size-4 text-muted-foreground" />
                 <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Booking page look</p>
               </div>
-              <p className="text-sm text-muted-foreground">
-                Customize your logo, hero banner, accent color, and page background on the dedicated booking page editor.
-              </p>
-              <Link
-                href="/dashboard/booking-page"
-                className="inline-flex rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-              >
-                Open booking page editor
-              </Link>
+              <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-3">
+                  <div
+                    className="size-11 shrink-0 overflow-hidden rounded-full border border-border/60 bg-cover bg-center"
+                    style={{
+                      backgroundColor: business.accentColor || "var(--primary)",
+                      backgroundImage: logoUrl ? `url(${logoUrl})` : undefined,
+                    }}
+                    aria-hidden="true"
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    Logo, hero banner, accent color, and page background — edited on the dedicated booking page editor.
+                  </p>
+                </div>
+                <Link
+                  href="/dashboard/booking-page"
+                  className={cn(dashboardPrimaryActionClass, "shrink-0")}
+                >
+                  Open booking page editor
+                </Link>
+              </div>
             </div>
           </div>
         </Tabs.Panel>
@@ -389,9 +448,12 @@ export default function SettingsForm({ business }: Props) {
 
             <div className="space-y-5">
               <div className={cardClass}>
-                <div className="flex items-center gap-2">
-                  <CreditCard className="size-4 text-muted-foreground" />
-                  <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">PayHere</p>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <CreditCard className="size-4 text-muted-foreground" />
+                    <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">PayHere</p>
+                  </div>
+                  <StatusPill enabled={form.payhereEnabled} />
                 </div>
                 <p className="text-xs text-muted-foreground">
                   Accept online payments via{" "}
@@ -426,9 +488,12 @@ export default function SettingsForm({ business }: Props) {
               </div>
 
               <div className={cardClass}>
-                <div className="flex items-center gap-2">
-                  <Globe className="size-4 text-muted-foreground" />
-                  <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">PayPal</p>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <Globe className="size-4 text-muted-foreground" />
+                    <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">PayPal</p>
+                  </div>
+                  <StatusPill enabled={form.paypalEnabled} />
                 </div>
                 <p className="text-xs text-muted-foreground">
                   Accept international card and PayPal wallet payments in USD. Best for overseas customers booking your
@@ -474,10 +539,8 @@ export default function SettingsForm({ business }: Props) {
             <p className="text-xs text-muted-foreground">
               Export business, client, booking, review, and payment records as JSON. Payment card details are never stored in Dinaya.
             </p>
-            <a
-              href="/api/dashboard/export"
-              className="inline-flex rounded-lg border px-3 py-2 text-sm font-medium text-primary hover:border-primary/40 hover:bg-primary/5"
-            >
+            <a href="/api/dashboard/export" className={dashboardOutlineActionClass}>
+              <Download className="size-4" />
               Export all data
             </a>
           </div>
@@ -485,7 +548,7 @@ export default function SettingsForm({ business }: Props) {
 
         {error && <p className={dashboardErrorAlertClass}>{error}</p>}
 
-        <div className="sticky bottom-0 -mx-1 flex items-center gap-3 border-t border-neutral-200 bg-neutral-50 px-1 py-4 dark:border-neutral-800 dark:bg-neutral-950">
+        <div className="sticky bottom-0 -mx-1 flex items-center gap-3 border-t border-border bg-card px-1 py-4">
           <Button type="submit" disabled={saving} className="min-h-11">
             {saving ? "Saving…" : "Save changes"}
           </Button>

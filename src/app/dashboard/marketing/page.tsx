@@ -89,41 +89,46 @@ export default async function MarketingPage() {
 
       {/* Share hero — above the fold on mobile */}
       <section className={cn(dashboardSurfaceClass, "p-5")}>
-        <h2 className="font-cal text-lg tracking-tight">Share</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          One link for Instagram, WhatsApp, and your site.
-        </p>
-        <code className="mt-4 block truncate rounded-xl bg-muted/60 px-3 py-3 font-mono text-sm">
-          {bookingUrl}
-        </code>
-        <div className="mt-4 flex flex-wrap gap-2">
-          <a
-            href={`https://wa.me/?text=${encodeURIComponent(whatsappSnippet)}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={dashboardPrimaryActionClass}
-          >
-            WhatsApp share
-          </a>
-          <a href={bookingUrl} target="_blank" rel="noopener noreferrer" className={dashboardOutlineActionClass}>
-            Open page
-          </a>
-          <a href={qrPng} target="_blank" rel="noopener noreferrer" className={dashboardOutlineActionClass}>
-            QR PNG
-          </a>
-          <a href={qrSvg} target="_blank" rel="noopener noreferrer" className={dashboardOutlineActionClass}>
-            QR SVG
-          </a>
-        </div>
-        <div className="mt-5 flex justify-center sm:justify-start">
-          <Image
-            src={qrPng}
-            alt="Booking page QR code"
-            width={160}
-            height={160}
-            unoptimized
-            className="size-40 rounded-2xl border border-border/60 bg-background p-3"
-          />
+        <div className="grid gap-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
+          <div className="min-w-0">
+            <h2 className="font-cal text-lg tracking-tight">Share</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              One link for Instagram, WhatsApp, and your site.
+            </p>
+            <code className="mt-4 block truncate rounded-xl bg-muted/60 px-3 py-3 font-mono text-sm">
+              {bookingUrl}
+            </code>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <a
+                href={`https://wa.me/?text=${encodeURIComponent(whatsappSnippet)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={dashboardPrimaryActionClass}
+              >
+                WhatsApp share
+              </a>
+              <a href={bookingUrl} target="_blank" rel="noopener noreferrer" className={dashboardOutlineActionClass}>
+                Open page
+              </a>
+              <a href={qrPng} target="_blank" rel="noopener noreferrer" className={dashboardOutlineActionClass}>
+                QR PNG
+              </a>
+              <a href={qrSvg} target="_blank" rel="noopener noreferrer" className={dashboardOutlineActionClass}>
+                QR SVG
+              </a>
+            </div>
+          </div>
+          <div className="flex flex-col items-center gap-2 justify-self-center sm:justify-self-end">
+            <Image
+              src={qrPng}
+              alt="Booking page QR code"
+              width={160}
+              height={160}
+              unoptimized
+              className="size-40 rounded-2xl border border-border/60 bg-background p-3"
+            />
+            <p className="text-xs text-muted-foreground">Scan to book</p>
+          </div>
         </div>
       </section>
 
@@ -160,7 +165,7 @@ export default async function MarketingPage() {
         </div>
 
         <DashboardSection
-          title="Live preview"
+          title="Preview"
           className="hidden lg:block"
           action={
             <a

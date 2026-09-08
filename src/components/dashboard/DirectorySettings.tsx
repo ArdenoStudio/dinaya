@@ -2,7 +2,18 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { toast } from "@heroui/react";
 import { DIRECTORY_CATEGORIES, DIRECTORY_CITIES } from "@/lib/directory";
+import { DashboardSelect, DashboardSwitch, DashboardTextField } from "@/components/dashboard/DashboardFormField";
+import {
+  dashboardErrorAlertClass,
+  dashboardPrimaryActionClass,
+  dashboardSurfaceClass,
+} from "@/lib/dashboard-ui";
+import { cn } from "@/lib/utils";
+
+const CITY_OPTIONS = DIRECTORY_CITIES.map((city) => ({ value: city, label: city }));
+const CATEGORY_OPTIONS = DIRECTORY_CATEGORIES.map(({ value, label }) => ({ value, label }));
 
 type DirectoryState = {
   directoryListed: boolean;
@@ -22,7 +33,6 @@ export function DirectorySettings() {
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -51,90 +61,74 @@ export function DirectorySettings() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),
     });
-    const data = await response.json().catch(() => ({})) as { error?: string };
+    const data = (await response.json().catch(() => ({}))) as { error?: string };
 
     if (!response.ok) {
       setError(data.error ?? "Could not save directory settings.");
     } else {
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2000);
+      toast.success("Directory settings saved");
     }
-
     setSaving(false);
   }
 
   if (loading) {
-    return <div className="rounded-xl border bg-card border-border/60 p-5 text-sm text-muted-foreground">Loading directory settings…</div>;
+    return <div className={cn(dashboardSurfaceClass, "p-5 text-sm text-muted-foreground")}>Loading directory settings…</div>;
   }
 
   return (
-    <form onSubmit={handleSave} className="rounded-xl border bg-card border-border/60 p-5">
-      <div className="mb-4 flex items-start justify-between gap-4">
+    <form onSubmit={handleSave} className={cn(dashboardSurfaceClass, "p-5 space-y-4")}>
+      <div className="flex items-start justify-between gap-4">
         <div>
           <h2 className="font-cal text-base tracking-tight">Dinaya Directory</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Opt in to be discovered on <Link href="/discover" className="text-primary hover:underline">dinaya.lk/discover</Link>. Free, no commission.
           </p>
         </div>
-        <label className="inline-flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            checked={form.directoryListed}
-            onChange={(event) => setForm((current) => ({ ...current, directoryListed: event.target.checked }))}
-          />
-          Listed
-        </label>
+        <span
+          className={cn(
+            "shrink-0 rounded-full px-2 py-0.5 text-xs font-medium",
+            form.directoryListed ? "bg-green-100 text-green-700" : "bg-muted text-muted-foreground",
+          )}
+        >
+          {form.directoryListed ? "Listed" : "Not listed"}
+        </span>
       </div>
+
+      <DashboardSwitch
+        label="List this business on the directory"
+        isSelected={form.directoryListed}
+        onChange={(isSelected) => setForm((current) => ({ ...current, directoryListed: isSelected }))}
+      />
 
       <div className="grid gap-4 md:grid-cols-2">
-        <label className="text-sm">
-          City
-          <select
-            value={form.directoryCity}
-            onChange={(event) => setForm((current) => ({ ...current, directoryCity: event.target.value }))}
-            className="mt-1 w-full rounded-lg border px-3 py-2.5 text-sm"
-          >
-            {DIRECTORY_CITIES.map((city) => (
-              <option key={city} value={city}>{city}</option>
-            ))}
-          </select>
-        </label>
-
-        <label className="text-sm">
-          Category
-          <select
-            value={form.directoryCategory}
-            onChange={(event) => setForm((current) => ({ ...current, directoryCategory: event.target.value }))}
-            className="mt-1 w-full rounded-lg border px-3 py-2.5 text-sm"
-          >
-            {DIRECTORY_CATEGORIES.map((category) => (
-              <option key={category.value} value={category.value}>{category.label}</option>
-            ))}
-          </select>
-        </label>
-
-        <label className="text-sm md:col-span-2">
-          District (optional)
-          <input
-            value={form.directoryDistrict}
-            onChange={(event) => setForm((current) => ({ ...current, directoryDistrict: event.target.value }))}
-            className="mt-1 w-full rounded-lg border px-3 py-2.5 text-sm"
-            placeholder="e.g. Colombo District"
-          />
-        </label>
+        <DashboardSelect
+          label="City"
+          value={form.directoryCity}
+          onChange={(value) => setForm((current) => ({ ...current, directoryCity: value }))}
+          options={CITY_OPTIONS}
+        />
+        <DashboardSelect
+          label="Category"
+          value={form.directoryCategory}
+          onChange={(value) => setForm((current) => ({ ...current, directoryCategory: value }))}
+          options={CATEGORY_OPTIONS}
+        />
+        <DashboardTextField
+          label="District"
+          hint="Optional — helps clients narrow down your area."
+          className="md:col-span-2"
+          value={form.directoryDistrict}
+          onChange={(value) => setForm((current) => ({ ...current, directoryDistrict: value }))}
+          placeholder="e.g. Colombo District"
+        />
       </div>
 
-      {error ? <p className="mt-4 text-sm text-red-600">{error}</p> : null}
+      {error ? <p className={dashboardErrorAlertClass}>{error}</p> : null}
 
-      <div className="mt-4 flex items-center gap-3">
-        <button
-          type="submit"
-          disabled={saving}
-          className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-60"
-        >
+      <div className="flex items-center gap-3 pt-1">
+        <button type="submit" disabled={saving} className={cn(dashboardPrimaryActionClass, "disabled:opacity-60")}>
           {saving ? "Saving…" : "Save directory settings"}
         </button>
-        {saved ? <span className="text-sm text-emerald-600">Saved</span> : null}
       </div>
     </form>
   );
