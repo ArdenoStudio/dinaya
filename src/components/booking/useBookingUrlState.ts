@@ -7,6 +7,7 @@ export type BookingUrlState = {
   date?: string;
   slot?: string;
   staffId?: string;
+  variantId?: string;
   dealId?: string;
   name?: string;
   email?: string;
@@ -27,6 +28,7 @@ export function useBookingUrlState() {
       date: searchParams.get("date") ?? undefined,
       slot: searchParams.get("slot") ?? undefined,
       staffId: searchParams.get("staff") ?? undefined,
+      variantId: searchParams.get("variantId") ?? undefined,
       dealId: searchParams.get("dealId") ?? undefined,
       name: searchParams.get("name") ?? undefined,
       email: searchParams.get("email") ?? undefined,
@@ -49,6 +51,7 @@ export function useBookingUrlState() {
       apply("date", updates.date);
       apply("slot", updates.slot);
       apply("staffId", updates.staffId, "staff");
+      apply("variantId", updates.variantId);
       apply("dealId", updates.dealId);
       // Contact fields are intentionally not synced to the URL (PII / referrer leakage).
 
@@ -76,6 +79,7 @@ export function useBookingUrlSync(input: {
   date: string;
   slotStartUtc: string;
   staffId: string | null;
+  variantId: string | null;
   dealId: string | null;
   enabled?: boolean;
   setParams: (updates: Partial<BookingUrlState>, options?: { replace?: boolean }) => void;
@@ -89,11 +93,12 @@ export function useBookingUrlSync(input: {
         date: input.date || "",
         slot: input.slotStartUtc || "",
         staffId: input.staffId || "",
+        variantId: input.variantId || "",
         dealId: input.dealId || "",
       },
       { replace: true },
     );
-  }, [input.date, input.slotStartUtc, input.staffId, input.dealId, input.enabled, setParams]);
+  }, [input.date, input.slotStartUtc, input.staffId, input.variantId, input.dealId, input.enabled, setParams]);
 }
 
 /** Remove contact PII from the URL after embed prefill; sessionStorage handles recovery. */

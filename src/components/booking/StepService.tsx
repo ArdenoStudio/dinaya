@@ -16,6 +16,7 @@ import {
 import type { BookingService } from "./BookingWizard";
 import type { BookingCopy } from "@/lib/i18n";
 import type { BookingRouter } from "@/lib/booking-router";
+import { minPriceVariantLkr } from "@/lib/service-variants";
 
 interface Props {
   services: BookingService[];
@@ -38,10 +39,12 @@ function ServiceRow({
   onSelect: () => void;
   showCategory?: boolean;
 }) {
+  const minVariantPrice = minPriceVariantLkr(service.priceVariants);
+  const displayPriceLkr = minVariantPrice ?? service.priceLkr;
   const depositAmount =
     service.depositPercent > 0
-      ? Math.ceil((service.priceLkr * service.depositPercent) / 100)
-      : service.priceLkr;
+      ? Math.ceil((displayPriceLkr * service.depositPercent) / 100)
+      : displayPriceLkr;
 
   return (
     <button
@@ -51,8 +54,8 @@ function ServiceRow({
         "group flex w-full items-start gap-3 rounded-[1.375rem] border p-3.5 text-left transition-[transform,background-color,box-shadow,border-color] duration-200",
         "motion-reduce:transition-none active:scale-[0.96] motion-reduce:active:scale-100",
         selected
-          ? "border-[var(--booking-accent)] bg-[var(--booking-accent-muted)]/50 shadow-sm ring-2 ring-[var(--booking-accent-soft)]"
-          : "border-border/50 hover:border-[var(--booking-accent)]/25 hover:bg-[var(--booking-accent-muted)] hover:shadow-sm",
+          ? "booking-border-accent bg-(--booking-accent-muted)/50 shadow-xs ring-2 ring-(--booking-accent-soft)"
+          : "border-border/50 hover:border-(--booking-accent)/25 hover:booking-bg-accent-muted hover:shadow-xs",
       )}
     >
       <BookingServiceThumb
@@ -62,7 +65,7 @@ function ServiceRow({
         size="sm"
       />
       <div className="min-w-0 flex-1">
-        <p className={cn("font-medium transition-colors duration-200", selected ? "text-[var(--booking-accent)]" : "text-foreground group-hover:text-[var(--booking-accent)]")}>
+        <p className={cn("font-medium transition-colors duration-200", selected ? "booking-text-accent" : "text-foreground group-hover:booking-text-accent")}>
           {service.name}
         </p>
         {showCategory && service.categoryName ? (
@@ -76,14 +79,15 @@ function ServiceRow({
             <Icon name="clock" />
             {service.durationMinutes}m
           </Badge>
-          {service.priceLkr > 0 ? (
+          {displayPriceLkr > 0 ? (
             <Badge variant="outline" className="font-medium tabular-nums">
-              <BookingServicePrice priceLkr={service.priceLkr} />
+              {minVariantPrice != null ? `${copy.fromPrice} ` : ""}
+              <BookingServicePrice priceLkr={displayPriceLkr} />
             </Badge>
           ) : (
             <Badge variant="outline">Free</Badge>
           )}
-          {service.requiresPayment && service.priceLkr > 0 && service.depositPercent > 0 ? (
+          {service.requiresPayment && displayPriceLkr > 0 && service.depositPercent > 0 ? (
             <Badge variant="outline">
               {copy.depositDue}: {formatLkr(depositAmount)}
             </Badge>
@@ -148,11 +152,11 @@ export default function StepService({ services, selected, copy, bookingRouter, o
                     "group flex w-full items-center justify-between gap-3 rounded-[1.375rem] border px-3.5 py-3 text-left transition-[transform,background-color,box-shadow,border-color] duration-200",
                     "motion-reduce:transition-none active:scale-[0.96] motion-reduce:active:scale-100",
                     isSelected
-                      ? "border-[var(--booking-accent)] bg-[var(--booking-accent-muted)]/50 shadow-sm ring-2 ring-[var(--booking-accent-soft)]"
-                      : "border-border/50 hover:border-[var(--booking-accent)]/25 hover:bg-[var(--booking-accent-muted)] hover:shadow-sm",
+                      ? "booking-border-accent bg-(--booking-accent-muted)/50 shadow-xs ring-2 ring-(--booking-accent-soft)"
+                      : "border-border/50 hover:border-(--booking-accent)/25 hover:booking-bg-accent-muted hover:shadow-xs",
                   )}
                 >
-                  <span className={cn("text-sm font-medium transition-colors duration-200", isSelected ? "text-[var(--booking-accent)]" : "text-foreground group-hover:text-[var(--booking-accent)]")}>
+                  <span className={cn("text-sm font-medium transition-colors duration-200", isSelected ? "booking-text-accent" : "text-foreground group-hover:booking-text-accent")}>
                     {o.label}
                   </span>
                   <BookingServiceArrow selected={isSelected} />

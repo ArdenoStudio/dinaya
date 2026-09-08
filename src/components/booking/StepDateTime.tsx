@@ -311,7 +311,7 @@ export default function StepDateTime({
         </p>
       ) : null}
 
-      <div className="flex min-w-0 w-full max-w-full flex-col lg:grid lg:min-h-[24rem] lg:grid-cols-[minmax(0,1fr)_minmax(15rem,0.95fr)] lg:divide-x lg:divide-border/80 xl:grid-cols-[minmax(0,1fr)_minmax(16rem,0.95fr)]">
+      <div className="flex min-w-0 w-full max-w-full flex-col lg:grid lg:min-h-96 lg:grid-cols-[minmax(0,1fr)_minmax(15rem,0.95fr)] lg:divide-x lg:divide-border/80 xl:grid-cols-[minmax(0,1fr)_minmax(16rem,0.95fr)]">
         <section className="min-w-0 flex-1 py-0 lg:pr-6">
           <div className="mb-3 flex items-center justify-between gap-2 md:mb-4">
             {!hideHeading ? (
@@ -437,7 +437,7 @@ export default function StepDateTime({
           {showContinue && selectedSlot && onContinue && (
             <Button
               type="button"
-              className="ml-auto min-h-11 bg-[var(--booking-accent)] px-5 text-base text-white hover:bg-[var(--booking-accent)]/90 md:text-sm"
+              className="ml-auto min-h-11 booking-bg-accent px-5 text-base text-white hover:bg-(--booking-accent)/90 md:text-sm"
               onClick={onContinue}
             >
               {copy.continue}

@@ -186,7 +186,7 @@ export function ClientBookingManage({
               value={cancelNote}
               onChange={(e) => setCancelNote(e.target.value)}
               rows={2}
-              className="mt-1 w-full resize-none rounded-lg border border-red-200 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-300 dark:border-red-900/50 dark:bg-neutral-900 dark:text-gray-100"
+              className="mt-1 w-full resize-none rounded-lg border border-red-200 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-hidden focus:ring-2 focus:ring-red-300 dark:border-red-900/50 dark:bg-neutral-900 dark:text-gray-100"
             />
           </label>
           <button

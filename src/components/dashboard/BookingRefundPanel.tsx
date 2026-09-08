@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { DashboardConfirmDialog } from "@/components/dashboard/DashboardConfirmDialog";
+import { ConfirmDialog as DashboardConfirmDialog } from "@/components/dashboard/ConfirmDialog";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { dashboardInputClass, dashboardSectionClass } from "@/lib/dashboard-ui";
 import { formatLkr, cn } from "@/lib/utils";

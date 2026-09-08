@@ -21,13 +21,13 @@ export function LegalArticle({ title, current, children }: LegalArticleProps) {
     <article
       className={[
         "max-w-none text-base leading-relaxed text-gray-700 dark:text-gray-300",
-        "[&_h1]:font-cal [&_h1]:text-3xl [&_h1]:tracking-tight [&_h1]:text-gray-900 [&_h1]:dark:text-gray-100 [&_h1]:mb-2",
-        "[&_h2]:font-cal [&_h2]:text-lg [&_h2]:tracking-tight [&_h2]:text-gray-900 [&_h2]:dark:text-gray-100 [&_h2]:mt-10 [&_h2]:mb-3",
+        "[&_h1]:font-cal [&_h1]:text-3xl [&_h1]:tracking-tight [&_h1]:text-gray-900 dark:[&_h1]:text-gray-100 [&_h1]:mb-2",
+        "[&_h2]:font-cal [&_h2]:text-lg [&_h2]:tracking-tight [&_h2]:text-gray-900 dark:[&_h2]:text-gray-100 [&_h2]:mt-10 [&_h2]:mb-3",
         "[&_p]:mb-4 [&_p:last-child]:mb-0",
         "[&_ul]:mb-4 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1.5",
-        "[&_li]:text-gray-700 [&_li]:dark:text-gray-300",
-        "[&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2 hover:[&_a]:text-primary/80",
-        "[&_strong]:font-semibold [&_strong]:text-gray-900 [&_strong]:dark:text-gray-100",
+        "[&_li]:text-gray-700 dark:[&_li]:text-gray-300",
+        "[&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2 [&_a]:hover:text-primary/80",
+        "[&_strong]:font-semibold [&_strong]:text-gray-900 dark:[&_strong]:text-gray-100",
       ].join(" ")}
     >
       <h1>{title}</h1>

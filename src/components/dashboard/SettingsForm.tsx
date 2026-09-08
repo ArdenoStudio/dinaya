@@ -3,13 +3,50 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { Tabs, toast } from "@heroui/react";
+import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
+import { DashboardSelect, DashboardSwitch, DashboardTextAreaField, DashboardTextField } from "@/components/dashboard/DashboardFormField";
+import { DashboardCopyField } from "@/components/dashboard/DashboardCopyField";
+import { submitResource } from "@/lib/dashboard/use-resource";
 import { useDashboardCopy } from "@/components/dashboard/DashboardLocaleProvider";
 import { buildPublicBookingUrl } from "@/lib/booking-url";
 import { isOptimizableRemoteImage } from "@/lib/utils";
-import { Icon } from "@/components/ui/Icon";
-import { dashboardInputClass } from "@/lib/dashboard-ui";
+import {
+  Banknote,
+  CreditCard,
+  Download,
+  ExternalLink,
+  Globe,
+  Images,
+  Link2,
+  MapPin,
+  Palette,
+  Share2,
+  ShieldCheck,
+  X,
+} from "lucide-react";
+import {
+  dashboardErrorAlertClass,
+  dashboardOutlineActionClass,
+  dashboardPageClass,
+  dashboardPrimaryActionClass,
+} from "@/lib/dashboard-ui";
 import { ImageUploadField } from "@/components/dashboard/ImageUploadField";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+function StatusPill({ enabled }: { enabled: boolean }) {
+  return (
+    <span
+      className={cn(
+        "shrink-0 rounded-full px-2 py-0.5 text-xs font-medium",
+        enabled ? "bg-green-100 text-green-700" : "bg-muted text-muted-foreground",
+      )}
+    >
+      {enabled ? "Enabled" : "Not enabled"}
+    </span>
+  );
+}
 
 type SettingsBusiness = {
   address: string | null;
@@ -44,6 +81,32 @@ type SettingsBusiness = {
 
 interface Props { business: SettingsBusiness; }
 
+const TIMEZONE_OPTIONS = [
+  { value: "Asia/Colombo", label: "Asia/Colombo" },
+  { value: "Asia/Kolkata", label: "Asia/Kolkata" },
+  { value: "Asia/Dubai", label: "Asia/Dubai" },
+  { value: "UTC", label: "UTC" },
+];
+
+const LANGUAGE_OPTIONS = [
+  { value: "en", label: "English" },
+  { value: "si", label: "Sinhala" },
+  { value: "ta", label: "Tamil" },
+];
+
+const BUSINESS_TYPE_OPTIONS = [
+  { value: "salon_barber", label: "Salon / barber" },
+  { value: "clinic", label: "Clinic" },
+  { value: "tuition", label: "Tuition / classes" },
+  { value: "vehicle_service", label: "Vehicle service" },
+  { value: "photography", label: "Photography" },
+  { value: "spa_wellness", label: "Spa / wellness" },
+  { value: "consulting", label: "Consulting" },
+  { value: "other", label: "Other" },
+];
+
+const cardClass = "rounded-2xl border border-border/60 bg-card p-6 space-y-4";
+
 export default function SettingsForm({ business }: Props) {
   const settingsCopy = useDashboardCopy().settings;
   const bookingUrl = buildPublicBookingUrl({
@@ -51,6 +114,7 @@ export default function SettingsForm({ business }: Props) {
     customDomain: business.customDomain,
     customDomainVerified: business.customDomainVerified,
   });
+  const [activeTab, setActiveTab] = useState("general");
   const [form, setForm] = useState({
     name: business.name,
     description: business.description ?? "",
@@ -80,7 +144,6 @@ export default function SettingsForm({ business }: Props) {
   const [logoUrl, setLogoUrl] = useState(business.logoUrl ?? "");
 
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
 
   async function handleSave(e: React.FormEvent) {
@@ -97,440 +160,400 @@ export default function SettingsForm({ business }: Props) {
       paypalClientSecret: form.paypalClientSecret.trim() || undefined,
     };
 
-    const res = await fetch("/api/dashboard/settings", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-
-    if (!res.ok) {
-      const d = await res.json();
-      setError(d.error ?? "Error saving.");
-    } else {
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2000);
-    }
+    const result = await submitResource("/api/dashboard/settings", payload);
     setSaving(false);
+    if (!result.ok) {
+      setError(result.error);
+      return;
+    }
+    toast.success("Settings saved");
   }
 
   function removeGalleryImage(url: string) {
     setGalleryImages((prev) => prev.filter((u) => u !== url));
   }
 
-  const inputCls = `${dashboardInputClass} mt-0`;
-
   return (
-    <div className="space-y-5">
-      <form onSubmit={handleSave} className="grid gap-5 xl:grid-cols-2">
-        {/* Business info */}
-        <div className="rounded-2xl border border-border/60 bg-card dark:border-border/60 dark:bg-card p-6 space-y-4">
-          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Business info</p>
-          <div>
-            <label className="text-sm font-medium">Business name *</label>
-            <input
-              required
-              value={form.name}
-              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-              className={inputCls}
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium">Description</label>
-            <textarea
-              value={form.description}
-              onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-              className={`${inputCls} resize-none`}
-              rows={3}
-              placeholder="Tell clients about your business…"
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium">Phone</label>
-            <input
-              value={form.phone}
-              onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
-              className={inputCls}
-              placeholder="+94 77 000 0000"
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium">Address</label>
-            <input
-              value={form.address}
-              onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
-              className={inputCls}
-              placeholder="123 Main St, Colombo 03"
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium">Timezone</label>
-            <select
-              value={form.timezone}
-              onChange={(e) => setForm((f) => ({ ...f, timezone: e.target.value }))}
-              className={inputCls}
-            >
-              <option value="Asia/Colombo">Asia/Colombo</option>
-              <option value="Asia/Kolkata">Asia/Kolkata</option>
-              <option value="Asia/Dubai">Asia/Dubai</option>
-              <option value="UTC">UTC</option>
-            </select>
-          </div>
-          <div>
-            <label className="text-sm font-medium">{settingsCopy.languageLabel}</label>
-            <p className="mt-0.5 text-xs text-muted-foreground">{settingsCopy.languageHint}</p>
-            <select
-              value={form.language}
-              onChange={(e) => setForm((f) => ({ ...f, language: e.target.value }))}
-              className={inputCls}
-            >
-              <option value="en">English</option>
-              <option value="si">Sinhala</option>
-              <option value="ta">Tamil</option>
-            </select>
-          </div>
-          <div>
-            <label className="text-sm font-medium">Business type</label>
-            <select
-              value={form.businessType}
-              onChange={(e) => setForm((f) => ({ ...f, businessType: e.target.value }))}
-              className={inputCls}
-            >
-              <option value="salon_barber">Salon / barber</option>
-              <option value="clinic">Clinic</option>
-              <option value="tuition">Tuition / classes</option>
-              <option value="vehicle_service">Vehicle service</option>
-              <option value="photography">Photography</option>
-              <option value="spa_wellness">Spa / wellness</option>
-              <option value="consulting">Consulting</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
-          <div className="pt-1">
-            <p className="text-xs text-muted-foreground mb-1">Your booking URL</p>
-            <code className="text-sm text-primary bg-primary/5 px-2.5 py-1 rounded-md break-all">
-              {bookingUrl.replace(/^https?:\/\//, "")}
-            </code>
-          </div>
-        </div>
+    <Tabs.Root selectedKey={activeTab} onSelectionChange={(key) => setActiveTab(String(key))} className={dashboardPageClass}>
+      <DashboardPageHeader
+        title="Settings"
+        description="Business profile, booking policies, payments, and public page branding."
+        tabs={
+          <Tabs.List>
+            <Tabs.Tab id="general">General</Tabs.Tab>
+            <Tabs.Tab id="booking-page">Booking page</Tabs.Tab>
+            <Tabs.Tab id="payments">Payments</Tabs.Tab>
+            <Tabs.Tab id="data">Data</Tabs.Tab>
+          </Tabs.List>
+        }
+      />
 
-        {/* Booking policies */}
-        <div className="rounded-2xl border border-border/60 bg-card dark:border-border/60 dark:bg-card p-6 space-y-4">
-          <div className="flex items-center gap-2">
-            <Icon name="shield-check" className="text-sm text-muted-foreground" />
-            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Booking trust</p>
-          </div>
-          <p className="text-xs text-muted-foreground -mt-2">
-            These policies appear on the public booking page before a client confirms.
-          </p>
-          <div>
-            <label className="text-sm font-medium">Cancellation policy</label>
-            <textarea
-              value={form.cancellationPolicy}
-              onChange={(e) => setForm((f) => ({ ...f, cancellationPolicy: e.target.value }))}
-              className={`${inputCls} resize-none`}
-              rows={3}
-              placeholder="Example: Please reschedule at least 12 hours before the appointment."
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium">Deposit policy</label>
-            <textarea
-              value={form.depositPolicy}
-              onChange={(e) => setForm((f) => ({ ...f, depositPolicy: e.target.value }))}
-              className={`${inputCls} resize-none`}
-              rows={3}
-              placeholder="Example: Deposits are deducted from the final bill and may be non-refundable for no-shows."
-            />
-          </div>
-        </div>
+      <form onSubmit={handleSave} className="space-y-5">
+        <Tabs.Panel id="general">
+          <div className="grid gap-5 xl:grid-cols-[minmax(0,28rem)_1fr]">
+            <div className={cardClass}>
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Business info</p>
+              <DashboardTextField
+                label="Business name"
+                isRequired
+                value={form.name}
+                onChange={(value) => setForm((f) => ({ ...f, name: value }))}
+              />
+              <DashboardTextAreaField
+                label="Description"
+                value={form.description}
+                onChange={(value) => setForm((f) => ({ ...f, description: value }))}
+                rows={3}
+                placeholder="Tell clients about your business…"
+              />
+              <DashboardTextField
+                label="Phone"
+                value={form.phone}
+                onChange={(value) => setForm((f) => ({ ...f, phone: value }))}
+                placeholder="+94 77 000 0000"
+              />
+              <DashboardTextField
+                label="Address"
+                value={form.address}
+                onChange={(value) => setForm((f) => ({ ...f, address: value }))}
+                placeholder="123 Main St, Colombo 03"
+              />
+            </div>
 
-        {/* Local payment fallback */}
-        <div className="rounded-2xl border border-border/60 bg-card dark:border-border/60 dark:bg-card p-6 space-y-4">
-          <div className="flex items-center gap-2">
-            <Icon name="bank" className="text-sm text-muted-foreground" />
-            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Local payment fallback</p>
-          </div>
-          <p className="text-xs text-muted-foreground -mt-2">
-            Use this when PayHere is not enabled or when a client prefers bank transfer or LankaQR proof.
-          </p>
-          <div>
-            <label className="text-sm font-medium">Bank transfer / payment proof instructions</label>
-            <textarea
-              value={form.bankTransferInstructions}
-              onChange={(e) => setForm((f) => ({ ...f, bankTransferInstructions: e.target.value }))}
-              className={`${inputCls} resize-none`}
-              rows={4}
-              placeholder="Bank, account number, account name, branch, and what reference clients should send on WhatsApp."
-            />
-          </div>
-          <ImageUploadField
-            label="LankaQR image"
-            hint="Upload your LankaQR so clients can scan it at checkout. You can still paste a URL."
-            value={form.lankaqrImageUrl}
-            onChange={(url) => setForm((f) => ({ ...f, lankaqrImageUrl: url }))}
-            kind="lankaqr"
-            aspectRatio={1}
-            outputWidth={800}
-            previewShape="square"
-            allowUrl
-          />
-        </div>
-
-        {/* Social links */}
-        <div className="rounded-2xl border border-border/60 bg-card dark:border-border/60 dark:bg-card p-6 space-y-4">
-          <div className="flex items-center gap-2">
-            <Icon name="share" className="text-sm text-muted-foreground" />
-            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Social links</p>
-          </div>
-          <p className="text-xs text-muted-foreground -mt-2">
-            These appear on your public booking page so clients can find you elsewhere.
-          </p>
-          <div>
-            <label className="text-sm font-medium flex items-center gap-1.5">
-              <Icon name="instagram" className="text-pink-500" /> Instagram
-            </label>
-            <input
-              value={form.instagramUrl}
-              onChange={(e) => setForm((f) => ({ ...f, instagramUrl: e.target.value }))}
-              className={inputCls}
-              placeholder="https://instagram.com/yourbusiness"
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium flex items-center gap-1.5">
-              <Icon name="facebook" className="text-blue-600" /> Facebook
-            </label>
-            <input
-              value={form.facebookUrl}
-              onChange={(e) => setForm((f) => ({ ...f, facebookUrl: e.target.value }))}
-              className={inputCls}
-              placeholder="https://facebook.com/yourbusiness"
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium flex items-center gap-1.5">
-              <Icon name="globe" className="text-gray-500 dark:text-gray-400" /> Website
-            </label>
-            <input
-              value={form.websiteUrl}
-              onChange={(e) => setForm((f) => ({ ...f, websiteUrl: e.target.value }))}
-              className={inputCls}
-              placeholder="https://yourbusiness.lk"
-            />
-          </div>
-        </div>
-
-        <div className="rounded-2xl border border-border/60 bg-card dark:border-border/60 dark:bg-card p-6 space-y-4 xl:col-span-2">
-          <ImageUploadField
-            label="Business logo"
-            hint="Shown on your booking page next to your business name. Square logos work best."
-            value={logoUrl}
-            onChange={setLogoUrl}
-            kind="logo"
-            aspectRatio={1}
-            outputWidth={512}
-            previewShape="circle"
-          />
-        </div>
-
-        {/* Portfolio gallery */}
-        <div className="rounded-2xl border border-border/60 bg-card dark:border-border/60 dark:bg-card p-6 space-y-4">
-          <div className="flex items-center gap-2">
-            <Icon name="images" className="text-sm text-muted-foreground" />
-            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Portfolio gallery</p>
-          </div>
-          <p className="text-xs text-muted-foreground -mt-2">
-            Showcase your work on your booking page. Upload photos directly — no third-party host needed.
-          </p>
-
-          {/* Existing images */}
-          {galleryImages.length > 0 && (
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-              {galleryImages.map((url) => (
-                <div key={url} className="relative group aspect-square rounded-lg overflow-hidden border bg-muted/20">
-                  <Image
-                    src={url}
-                    alt=""
-                    fill
-                    sizes="120px"
-                    className="object-cover"
-                    unoptimized={!isOptimizableRemoteImage(url)}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeGalleryImage(url)}
-                    className="absolute top-1 right-1 size-6 rounded-full bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs"
-                  >
-                    <Icon name="x-lg" />
-                  </button>
+            <div className="space-y-5">
+              <div className={cardClass}>
+                <div className="flex items-center gap-2">
+                  <Link2 className="size-4 text-muted-foreground" />
+                  <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Your public page</p>
                 </div>
-              ))}
+                <p className="text-sm text-muted-foreground -mt-2">
+                  What clients see when they book with {form.name || "you"}.
+                </p>
+                <DashboardCopyField label="Booking link" value={bookingUrl} rows={1} mono />
+                <a
+                  href={bookingUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={cn(dashboardOutlineActionClass, "w-full justify-center")}
+                >
+                  <ExternalLink className="size-4" />
+                  View live page
+                </a>
+              </div>
+
+              <div className={cardClass}>
+                <div className="flex items-center gap-2">
+                  <MapPin className="size-4 text-muted-foreground" />
+                  <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Locale</p>
+                </div>
+                <DashboardSelect
+                  label="Timezone"
+                  value={form.timezone}
+                  onChange={(value) => setForm((f) => ({ ...f, timezone: value }))}
+                  options={TIMEZONE_OPTIONS}
+                />
+                <DashboardSelect
+                  label={settingsCopy.languageLabel}
+                  hint={settingsCopy.languageHint}
+                  value={form.language}
+                  onChange={(value) => setForm((f) => ({ ...f, language: value }))}
+                  options={LANGUAGE_OPTIONS}
+                />
+                <DashboardSelect
+                  label="Business type"
+                  value={form.businessType}
+                  onChange={(value) => setForm((f) => ({ ...f, businessType: value }))}
+                  options={BUSINESS_TYPE_OPTIONS}
+                />
+              </div>
             </div>
-          )}
-
-          <ImageUploadField
-            label="Add portfolio photo"
-            hint={`${galleryImages.length}/12 photos`}
-            value=""
-            onChange={(url) => {
-              if (!url || galleryImages.includes(url) || galleryImages.length >= 12) return;
-              setGalleryImages((prev) => [...prev, url]);
-            }}
-            kind="gallery"
-            aspectRatio={4 / 3}
-            outputWidth={1200}
-            previewShape="wide"
-            allowUrl
-          />
-        </div>
-
-        {/* Booking page appearance */}
-        <div className="rounded-2xl border border-border/60 bg-card dark:border-border/60 dark:bg-card p-6 space-y-3 xl:col-span-2">
-          <div className="flex items-center gap-2">
-            <Icon name="palette" className="text-sm text-muted-foreground" />
-            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Booking page look</p>
           </div>
-          <p className="text-sm text-muted-foreground">
-            Customize your logo, hero banner, accent color, and page background on the dedicated booking page editor.
-          </p>
-          <Link
-            href="/dashboard/booking-page"
-            className="inline-flex rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Open booking page editor
-          </Link>
-        </div>
+        </Tabs.Panel>
 
-        {/* PayHere */}
-        <div className="rounded-2xl border border-border/60 bg-card dark:border-border/60 dark:bg-card p-6 space-y-4">
-          <div className="flex items-center gap-2">
-            <Icon name="credit-card" className="text-sm text-muted-foreground" />
-            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">PayHere</p>
+        <Tabs.Panel id="booking-page">
+          <div className="grid gap-5 xl:grid-cols-2">
+            <div className={cardClass}>
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="size-4 text-muted-foreground" />
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Booking trust</p>
+              </div>
+              <p className="text-xs text-muted-foreground -mt-2">
+                These policies appear on the public booking page before a client confirms.
+              </p>
+              <DashboardTextAreaField
+                label="Cancellation policy"
+                value={form.cancellationPolicy}
+                onChange={(value) => setForm((f) => ({ ...f, cancellationPolicy: value }))}
+                rows={3}
+                placeholder="Example: Please reschedule at least 12 hours before the appointment."
+              />
+              <DashboardTextAreaField
+                label="Deposit policy"
+                value={form.depositPolicy}
+                onChange={(value) => setForm((f) => ({ ...f, depositPolicy: value }))}
+                rows={3}
+                placeholder="Example: Deposits are deducted from the final bill and may be non-refundable for no-shows."
+              />
+            </div>
+
+            <div className={cardClass}>
+              <div className="flex items-center gap-2">
+                <Share2 className="size-4 text-muted-foreground" />
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Social links</p>
+              </div>
+              <p className="text-xs text-muted-foreground -mt-2">
+                These appear on your public booking page so clients can find you elsewhere.
+              </p>
+              <DashboardTextField
+                label="Instagram"
+                value={form.instagramUrl}
+                onChange={(value) => setForm((f) => ({ ...f, instagramUrl: value }))}
+                placeholder="https://instagram.com/yourbusiness"
+              />
+              <DashboardTextField
+                label="Facebook"
+                value={form.facebookUrl}
+                onChange={(value) => setForm((f) => ({ ...f, facebookUrl: value }))}
+                placeholder="https://facebook.com/yourbusiness"
+              />
+              <DashboardTextField
+                label="Website"
+                value={form.websiteUrl}
+                onChange={(value) => setForm((f) => ({ ...f, websiteUrl: value }))}
+                placeholder="https://yourbusiness.lk"
+              />
+            </div>
+
+            <div className={cn(cardClass, "xl:col-span-2")}>
+              <ImageUploadField
+                label="Business logo"
+                hint="Shown on your booking page next to your business name. Square logos work best."
+                value={logoUrl}
+                onChange={setLogoUrl}
+                kind="logo"
+                aspectRatio={1}
+                outputWidth={512}
+                previewShape="circle"
+              />
+            </div>
+
+            <div className={cardClass}>
+              <div className="flex items-center gap-2">
+                <Images className="size-4 text-muted-foreground" />
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Portfolio gallery</p>
+              </div>
+              <p className="text-xs text-muted-foreground -mt-2">
+                Showcase your work on your booking page. Upload photos directly — no third-party host needed.
+              </p>
+
+              {galleryImages.length > 0 && (
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {galleryImages.map((url) => (
+                    <div key={url} className="relative group aspect-square rounded-lg overflow-hidden border bg-muted/20">
+                      <Image
+                        src={url}
+                        alt=""
+                        fill
+                        sizes="120px"
+                        className="object-cover"
+                        unoptimized={!isOptimizableRemoteImage(url)}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeGalleryImage(url)}
+                        className="absolute top-1 right-1 size-6 rounded-full bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs"
+                      >
+                        <X className="size-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <ImageUploadField
+                label="Add portfolio photo"
+                hint={`${galleryImages.length}/12 photos`}
+                value=""
+                onChange={(url) => {
+                  if (!url || galleryImages.includes(url) || galleryImages.length >= 12) return;
+                  setGalleryImages((prev) => [...prev, url]);
+                }}
+                kind="gallery"
+                aspectRatio={4 / 3}
+                outputWidth={1200}
+                previewShape="wide"
+                allowUrl
+              />
+            </div>
+
+            <div className={cn(cardClass, "xl:col-span-2")}>
+              <div className="flex items-center gap-2">
+                <Palette className="size-4 text-muted-foreground" />
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Booking page look</p>
+              </div>
+              <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-3">
+                  <div
+                    className="size-11 shrink-0 overflow-hidden rounded-full border border-border/60 bg-cover bg-center"
+                    style={{
+                      backgroundColor: business.accentColor || "var(--primary)",
+                      backgroundImage: logoUrl ? `url(${logoUrl})` : undefined,
+                    }}
+                    aria-hidden="true"
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    Logo, hero banner, accent color, and page background — edited on the dedicated booking page editor.
+                  </p>
+                </div>
+                <Link
+                  href="/dashboard/booking-page"
+                  className={cn(dashboardPrimaryActionClass, "shrink-0")}
+                >
+                  Open booking page editor
+                </Link>
+              </div>
+            </div>
           </div>
-          <p className="text-xs text-muted-foreground">
-            Accept online payments via{" "}
-            <a href="https://www.payhere.lk" target="_blank" rel="noopener noreferrer" className="underline">
-              PayHere
+        </Tabs.Panel>
+
+        <Tabs.Panel id="payments">
+          <div className="grid gap-5 xl:grid-cols-2">
+            <div className={cardClass}>
+              <div className="flex items-center gap-2">
+                <Banknote className="size-4 text-muted-foreground" />
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Local payment fallback</p>
+              </div>
+              <p className="text-xs text-muted-foreground -mt-2">
+                Use this when PayHere is not enabled or when a client prefers bank transfer or LankaQR proof.
+              </p>
+              <DashboardTextAreaField
+                label="Bank transfer / payment proof instructions"
+                value={form.bankTransferInstructions}
+                onChange={(value) => setForm((f) => ({ ...f, bankTransferInstructions: value }))}
+                rows={4}
+                placeholder="Bank, account number, account name, branch, and what reference clients should send on WhatsApp."
+              />
+              <ImageUploadField
+                label="LankaQR image"
+                hint="Upload your LankaQR so clients can scan it at checkout. You can still paste a URL."
+                value={form.lankaqrImageUrl}
+                onChange={(url) => setForm((f) => ({ ...f, lankaqrImageUrl: url }))}
+                kind="lankaqr"
+                aspectRatio={1}
+                outputWidth={800}
+                previewShape="square"
+                allowUrl
+              />
+            </div>
+
+            <div className="space-y-5">
+              <div className={cardClass}>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <CreditCard className="size-4 text-muted-foreground" />
+                    <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">PayHere</p>
+                  </div>
+                  <StatusPill enabled={form.payhereEnabled} />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Accept online payments via{" "}
+                  <a href="https://www.payhere.lk" target="_blank" rel="noopener noreferrer" className="underline">
+                    PayHere
+                  </a>
+                  . Enter your Merchant ID and Secret from the PayHere dashboard.
+                </p>
+                <DashboardSwitch
+                  label="Enable PayHere for this business"
+                  isSelected={form.payhereEnabled}
+                  onChange={(isSelected) => setForm((f) => ({ ...f, payhereEnabled: isSelected }))}
+                />
+                {form.payhereEnabled && (
+                  <div className="space-y-3 pl-5 border-l-2 border-primary/20">
+                    <DashboardTextField
+                      label="Merchant ID"
+                      value={form.payhereMerchantId}
+                      onChange={(value) => setForm((f) => ({ ...f, payhereMerchantId: value }))}
+                      placeholder="123456"
+                    />
+                    <DashboardTextField
+                      label="Merchant Secret"
+                      type="password"
+                      value={form.payhereMerchantSecret}
+                      onChange={(value) => setForm((f) => ({ ...f, payhereMerchantSecret: value }))}
+                      placeholder={business.hasPayhereMerchantSecret ? "Saved - leave blank to keep existing" : "Paste merchant secret"}
+                      hint={business.hasPayhereMerchantSecret ? "A secret is saved. Enter a new value only when rotating it." : undefined}
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className={cardClass}>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <Globe className="size-4 text-muted-foreground" />
+                    <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">PayPal</p>
+                  </div>
+                  <StatusPill enabled={form.paypalEnabled} />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Accept international card and PayPal wallet payments in USD. Best for overseas customers booking your
+                  Sri Lankan business. Create a REST app in the{" "}
+                  <a href="https://developer.paypal.com/dashboard/applications/live" target="_blank" rel="noopener noreferrer" className="underline">
+                    PayPal Developer Dashboard
+                  </a>
+                  .
+                </p>
+                <DashboardSwitch
+                  label="Enable PayPal for international payments"
+                  isSelected={form.paypalEnabled}
+                  onChange={(isSelected) => setForm((f) => ({ ...f, paypalEnabled: isSelected }))}
+                />
+                {form.paypalEnabled && (
+                  <div className="space-y-3 pl-5 border-l-2 border-primary/20">
+                    <DashboardTextField
+                      label="Client ID"
+                      value={form.paypalClientId}
+                      onChange={(value) => setForm((f) => ({ ...f, paypalClientId: value }))}
+                      placeholder="Abc123..."
+                    />
+                    <DashboardTextField
+                      label="Client Secret"
+                      type="password"
+                      value={form.paypalClientSecret}
+                      onChange={(value) => setForm((f) => ({ ...f, paypalClientSecret: value }))}
+                      placeholder={business.hasPaypalClientSecret ? "Saved - leave blank to keep existing" : "Paste client secret"}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </Tabs.Panel>
+
+        <Tabs.Panel id="data">
+          <div className={cn(cardClass, "max-w-xl")}>
+            <div className="flex items-center gap-2">
+              <Download className="size-4 text-muted-foreground" />
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Data controls</p>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Export business, client, booking, review, and payment records as JSON. Payment card details are never stored in Dinaya.
+            </p>
+            <a href="/api/dashboard/export" className={dashboardOutlineActionClass}>
+              <Download className="size-4" />
+              Export all data
             </a>
-            . Enter your Merchant ID and Secret from the PayHere dashboard.
-          </p>
-          <label className="flex items-center gap-2.5 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={form.payhereEnabled}
-              onChange={(e) => setForm((f) => ({ ...f, payhereEnabled: e.target.checked }))}
-              className="rounded"
-            />
-            <span className="text-sm font-medium">Enable PayHere for this business</span>
-          </label>
-          {form.payhereEnabled && (
-            <div className="space-y-3 pl-5 border-l-2 border-primary/20">
-              <div>
-                <label className="text-xs font-medium text-muted-foreground">Merchant ID</label>
-                <input
-                  value={form.payhereMerchantId}
-                  onChange={(e) => setForm((f) => ({ ...f, payhereMerchantId: e.target.value }))}
-                  placeholder="123456"
-                  className={inputCls}
-                />
-              </div>
-              <div>
-	                <label className="text-xs font-medium text-muted-foreground">Merchant Secret</label>
-	                <input
-	                  type="password"
-	                  value={form.payhereMerchantSecret}
-	                  onChange={(e) => setForm((f) => ({ ...f, payhereMerchantSecret: e.target.value }))}
-	                  placeholder={business.hasPayhereMerchantSecret ? "Saved - leave blank to keep existing" : "Paste merchant secret"}
-	                  className={inputCls}
-	                />
-	                {business.hasPayhereMerchantSecret && (
-	                  <p className="mt-1 text-xs text-muted-foreground">
-	                    A secret is saved. Enter a new value only when rotating it.
-	                  </p>
-	                )}
-	              </div>
-            </div>
-          )}
-        </div>
-
-        {/* PayPal */}
-        <div className="rounded-2xl border border-border/60 bg-card p-6 space-y-4">
-          <div className="flex items-center gap-2">
-            <Icon name="globe" className="text-sm text-muted-foreground" />
-            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">PayPal</p>
           </div>
-          <p className="text-xs text-muted-foreground">
-            Accept international card and PayPal wallet payments in USD. Best for overseas customers booking your
-            Sri Lankan business. Create a REST app in the{" "}
-            <a href="https://developer.paypal.com/dashboard/applications/live" target="_blank" rel="noopener noreferrer" className="underline">
-              PayPal Developer Dashboard
-            </a>
-            .
-          </p>
-          <label className="flex items-center gap-2.5 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={form.paypalEnabled}
-              onChange={(e) => setForm((f) => ({ ...f, paypalEnabled: e.target.checked }))}
-              className="rounded"
-            />
-            <span className="text-sm font-medium">Enable PayPal for international payments</span>
-          </label>
-          {form.paypalEnabled && (
-            <div className="space-y-3 pl-5 border-l-2 border-primary/20">
-              <div>
-                <label className="text-xs font-medium text-muted-foreground">Client ID</label>
-                <input
-                  value={form.paypalClientId}
-                  onChange={(e) => setForm((f) => ({ ...f, paypalClientId: e.target.value }))}
-                  placeholder="Abc123..."
-                  className={inputCls}
-                />
-              </div>
-              <div>
-                <label className="text-xs font-medium text-muted-foreground">Client Secret</label>
-                <input
-                  type="password"
-                  value={form.paypalClientSecret}
-                  onChange={(e) => setForm((f) => ({ ...f, paypalClientSecret: e.target.value }))}
-                  placeholder={business.hasPaypalClientSecret ? "Saved - leave blank to keep existing" : "Paste client secret"}
-                  className={inputCls}
-                />
-              </div>
-            </div>
-          )}
-        </div>
+        </Tabs.Panel>
 
-        {/* Data controls */}
-        <div className="rounded-2xl border border-border/60 bg-card dark:border-border/60 dark:bg-card p-6 space-y-3">
-          <div className="flex items-center gap-2">
-            <Icon name="download" className="text-sm text-muted-foreground" />
-            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Data controls</p>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Export business, client, booking, review, and payment records as JSON. Payment card details are never stored in Dinaya.
-          </p>
-          <a
-            href="/api/dashboard/export"
-            className="inline-flex rounded-lg border px-3 py-2 text-sm font-medium text-primary hover:border-primary/40 hover:bg-primary/5"
-          >
-            Export all data
-          </a>
-        </div>
+        {error && <p className={dashboardErrorAlertClass}>{error}</p>}
 
-        {error && <p className="text-destructive text-sm xl:col-span-2">{error}</p>}
-
-        <div className="sticky bottom-0 -mx-1 flex items-center gap-3 border-t border-neutral-200 bg-neutral-50 px-1 py-4 xl:col-span-2 dark:border-neutral-800 dark:bg-neutral-950">
+        <div className="sticky bottom-0 -mx-1 flex items-center gap-3 border-t border-border bg-card px-1 py-4">
           <Button type="submit" disabled={saving} className="min-h-11">
             {saving ? "Saving…" : "Save changes"}
           </Button>
-          {saved && (
-            <span className="flex items-center gap-1.5 text-green-600 text-sm">
-              <Icon name="check-circle" className="text-sm" /> Saved
-            </span>
-          )}
         </div>
       </form>
-    </div>
+    </Tabs.Root>
   );
 }

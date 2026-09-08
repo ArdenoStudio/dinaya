@@ -170,7 +170,7 @@ export default function FeaturesPage() {
       <section className="max-w-4xl mx-auto px-6 public-page-offset pb-14 text-center">
         <FadeContainer className="flex flex-col items-center">
           <FadeDiv className="mb-6">
-            <span className="inline-flex items-center gap-2 rounded-full border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 shadow-sm">
+            <span className="inline-flex items-center gap-2 rounded-full border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 shadow-xs">
               <Icon name="stars" className="text-xs text-primary" />
               Built for Sri Lankan businesses
             </span>
@@ -232,16 +232,16 @@ export default function FeaturesPage() {
 
         <div className="grid md:grid-cols-3 gap-px bg-gray-200 dark:bg-neutral-700/70 rounded-2xl overflow-hidden border border-gray-200 dark:border-neutral-800/70">
           {bookingFeatures.map((f, i) => (
-            <div key={f.title} className={`group relative p-7 bg-white dark:bg-neutral-900 hover:bg-gradient-to-br hover:from-amber-500/[0.03] hover:to-white dark:hover:to-neutral-900 transition-colors ${trailingSpanClass(i, bookingFeatures.length)}`}>
+            <div key={f.title} className={`group relative p-7 bg-white dark:bg-neutral-900 hover:bg-linear-to-br hover:from-amber-500/3 hover:to-white dark:hover:to-neutral-900 transition-colors ${trailingSpanClass(i, bookingFeatures.length)}`}>
               <div className="relative mb-5 inline-flex">
                 <div className="absolute inset-0 rounded-xl bg-amber-50 dark:bg-amber-950/30 blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-amber-500/15 to-amber-500/5">
+                <div className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-linear-to-br from-amber-500/15 to-amber-500/5">
                   <Icon name={f.icon} className="text-[1.15rem] text-amber-600" />
                 </div>
               </div>
               <h3 className="font-cal text-lg mb-2 tracking-tight">{f.title}</h3>
               <p className="text-muted-foreground text-sm leading-relaxed">{f.desc}</p>
-              <span className="absolute bottom-0 left-7 right-7 h-px bg-gradient-to-r from-transparent via-amber-500/40 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
+              <span className="absolute bottom-0 left-7 right-7 h-px bg-linear-to-r from-transparent via-amber-500/40 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
             </div>
           ))}
         </div>
@@ -267,16 +267,16 @@ export default function FeaturesPage() {
 
           <div className="grid md:grid-cols-3 gap-px bg-gray-200 dark:bg-neutral-700/70 rounded-2xl overflow-hidden border border-gray-200 dark:border-neutral-800/70">
             {paymentFeatures.map((f) => (
-              <div key={f.title} className="group relative p-7 bg-white dark:bg-neutral-900 hover:bg-gradient-to-br hover:from-blue-600/[0.03] hover:to-white dark:hover:to-neutral-900 transition-colors">
+              <div key={f.title} className="group relative p-7 bg-white dark:bg-neutral-900 hover:bg-linear-to-br hover:from-blue-600/3 hover:to-white dark:hover:to-neutral-900 transition-colors">
                 <div className="relative mb-5 inline-flex">
                   <div className="absolute inset-0 rounded-xl bg-blue-600/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <div className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-blue-600/15 to-blue-600/5">
+                  <div className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-linear-to-br from-blue-600/15 to-blue-600/5">
                     <Icon name={f.icon} className="text-[1.15rem] text-blue-600" />
                   </div>
                 </div>
                 <h3 className="font-cal text-lg mb-2 tracking-tight">{f.title}</h3>
                 <p className="text-muted-foreground text-sm leading-relaxed">{f.desc}</p>
-                <span className="absolute bottom-0 left-7 right-7 h-px bg-gradient-to-r from-transparent via-blue-600/40 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
+                <span className="absolute bottom-0 left-7 right-7 h-px bg-linear-to-r from-transparent via-blue-600/40 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
               </div>
             ))}
           </div>
@@ -302,23 +302,23 @@ export default function FeaturesPage() {
 
         <div className="grid md:grid-cols-3 gap-px bg-gray-200 dark:bg-neutral-700/70 rounded-2xl overflow-hidden border border-gray-200 dark:border-neutral-800/70">
           {engagementFeatures.map((f) => (
-            <div key={f.title} className="group relative p-7 bg-white dark:bg-neutral-900 hover:bg-gradient-to-br hover:from-violet-500/[0.03] hover:to-white dark:hover:to-neutral-900 transition-colors">
+            <div key={f.title} className="group relative p-7 bg-white dark:bg-neutral-900 hover:bg-linear-to-br hover:from-violet-500/3 hover:to-white dark:hover:to-neutral-900 transition-colors">
               <div className="relative mb-5 inline-flex">
                 <div className="absolute inset-0 rounded-xl bg-violet-500/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-violet-500/15 to-violet-500/5">
+                <div className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-linear-to-br from-violet-500/15 to-violet-500/5">
                   <Icon name={f.icon} className="text-[1.15rem] text-violet-600" />
                 </div>
               </div>
               <h3 className="font-cal text-lg mb-2 tracking-tight">{f.title}</h3>
               <p className="text-muted-foreground text-sm leading-relaxed">{f.desc}</p>
-              <span className="absolute bottom-0 left-7 right-7 h-px bg-gradient-to-r from-transparent via-violet-500/40 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
+              <span className="absolute bottom-0 left-7 right-7 h-px bg-linear-to-r from-transparent via-violet-500/40 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
             </div>
           ))}
         </div>
       </section>
 
       {/* Max AI growth */}
-      <div className="bg-gradient-to-b from-emerald-50/50 to-transparent dark:from-emerald-950/10 dark:to-transparent">
+      <div className="bg-linear-to-b from-emerald-50/50 to-transparent dark:from-emerald-950/10 dark:to-transparent">
         <section className="max-w-6xl mx-auto px-6 py-20" id="max-ai">
           <div className="mb-10">
             <div className="inline-flex items-center gap-2 rounded-xl ring-1 ring-emerald-100 dark:ring-emerald-900/50 bg-emerald-50 dark:bg-emerald-950/40 px-3.5 py-2 mb-4">
@@ -340,16 +340,16 @@ export default function FeaturesPage() {
 
           <div className="grid md:grid-cols-3 gap-px bg-gray-200 dark:bg-neutral-700/70 rounded-2xl overflow-hidden border border-gray-200 dark:border-neutral-800/70">
             {proAiFeatures.map((f, i) => (
-              <div key={f.title} className={`group relative p-7 bg-white dark:bg-neutral-900 hover:bg-gradient-to-br hover:from-emerald-500/[0.03] hover:to-white dark:hover:to-neutral-900 transition-colors ${trailingSpanClass(i, proAiFeatures.length)}`}>
+              <div key={f.title} className={`group relative p-7 bg-white dark:bg-neutral-900 hover:bg-linear-to-br hover:from-emerald-500/3 hover:to-white dark:hover:to-neutral-900 transition-colors ${trailingSpanClass(i, proAiFeatures.length)}`}>
                 <div className="relative mb-5 inline-flex">
                   <div className="absolute inset-0 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <div className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-500/15 to-emerald-500/5">
+                  <div className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-linear-to-br from-emerald-500/15 to-emerald-500/5">
                     <Icon name={f.icon} className="text-[1.15rem] text-emerald-600" />
                   </div>
                 </div>
                 <h3 className="font-cal text-lg mb-2 tracking-tight">{f.title}</h3>
                 <p className="text-muted-foreground text-sm leading-relaxed">{f.desc}</p>
-                <span className="absolute bottom-0 left-7 right-7 h-px bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
+                <span className="absolute bottom-0 left-7 right-7 h-px bg-linear-to-r from-transparent via-emerald-500/40 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
               </div>
             ))}
           </div>
@@ -468,7 +468,7 @@ export default function FeaturesPage() {
       {/* CTA */}
       <section className="px-6 pb-20">
         <div className="max-w-6xl mx-auto">
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 px-8 py-16 text-center shadow-2xl shadow-blue-500/20">
+          <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-blue-600 via-blue-700 to-indigo-800 px-8 py-16 text-center shadow-2xl shadow-blue-500/20">
             <div className="pointer-events-none absolute -top-24 -right-24 size-64 rounded-full bg-white/10 blur-3xl" />
             <div className="pointer-events-none absolute -bottom-16 -left-16 size-48 rounded-full bg-primary/30 blur-3xl" />
             <div className="relative z-10">

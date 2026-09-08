@@ -3,14 +3,16 @@
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
+import { toast } from "@heroui/react";
 import { BookingRefundPanel, type BookingPaymentSummary } from "@/components/dashboard/BookingRefundPanel";
 import { BookingReschedulePanel } from "@/components/dashboard/BookingReschedulePanel";
-import { DashboardConfirmDialog } from "@/components/dashboard/DashboardConfirmDialog";
+import { ConfirmDialog as DashboardConfirmDialog } from "@/components/dashboard/ConfirmDialog";
 import { DashboardLoadingPanel } from "@/components/dashboard/DashboardLoadingPanel";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
+import { submitResource } from "@/lib/dashboard/use-resource";
 import { Button } from "@/components/ui/button";
-import { Icon } from "@/components/ui/Icon";
+import { Calendar, Clock, Mail, MessageSquare, Phone, Scissors, User } from "lucide-react";
 import {
   dashboardInputClass,
   dashboardOutlineActionClass,
@@ -20,6 +22,7 @@ import {
 import { cn } from "@/lib/utils";
 import { bookingReminderText, whatsappUrl } from "@/lib/whatsapp";
 import type { IntakeAnswer } from "@/lib/intake";
+import type { ServicePriceVariant } from "@/lib/service-variants";
 
 type Booking = {
   id: string;
@@ -33,6 +36,7 @@ type Booking = {
   notes: string | null;
   staffNotes: string | null;
   intakeAnswers: IntakeAnswer[] | null;
+  priceVariant: ServicePriceVariant | null;
   serviceName: string;
   serviceDuration: number;
   staffName: string;
@@ -87,7 +91,6 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
   const [loading, setLoading] = useState(true);
   const [staffNotes, setStaffNotes] = useState("");
   const [savingNotes, setSavingNotes] = useState(false);
-  const [savedNotes, setSavedNotes] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [confirmStatus, setConfirmStatus] = useState<BookingStatus | null>(null);
 
@@ -103,16 +106,14 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
 
   async function updateStatus(status: BookingStatus) {
     setUpdatingStatus(true);
-    const res = await fetch(`/api/dashboard/bookings/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status }),
-    });
-    if (res.ok) {
-      const updated = await res.json();
-      setBooking((b) => (b ? { ...b, status: updated.status } : b));
-    }
+    const result = await submitResource(`/api/dashboard/bookings/${id}`, { status });
     setUpdatingStatus(false);
+    if (!result.ok) {
+      toast.danger("Could not update booking", { description: result.error });
+      return;
+    }
+    const updated = result.data as Booking;
+    setBooking((b) => (b ? { ...b, status: updated.status } : b));
   }
 
   function handleStatusAction(status: BookingStatus) {
@@ -125,14 +126,13 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
 
   async function saveNotes() {
     setSavingNotes(true);
-    await fetch(`/api/dashboard/bookings/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ staffNotes }),
-    });
+    const result = await submitResource(`/api/dashboard/bookings/${id}`, { staffNotes });
     setSavingNotes(false);
-    setSavedNotes(true);
-    setTimeout(() => setSavedNotes(false), 2000);
+    if (!result.ok) {
+      toast.danger("Could not save notes", { description: result.error });
+      return;
+    }
+    toast.success("Notes saved");
   }
 
   if (loading) {
@@ -169,7 +169,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
               Appointment
             </p>
             <div className="flex items-start gap-2.5">
-              <Icon name="calendar" className="mt-0.5 shrink-0 text-sm text-muted-foreground" />
+              <Calendar className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
               <div>
                 <p className="text-sm font-medium">
                   {format(new Date(booking.startsAt), "EEEE, d MMM yyyy")}
@@ -181,16 +181,19 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
               </div>
             </div>
             <div className="flex items-start gap-2.5">
-              <Icon name="scissors" className="mt-0.5 shrink-0 text-sm text-muted-foreground" />
+              <Scissors className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
               <div>
                 <p className="text-sm font-medium">{booking.serviceName}</p>
+                {booking.priceVariant ? (
+                  <p className="text-xs text-muted-foreground">{booking.priceVariant.label}</p>
+                ) : null}
                 <p className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <Icon name="clock" /> {booking.serviceDuration} min
+                  <Clock className="size-3.5" /> {booking.serviceDuration} min
                 </p>
               </div>
             </div>
             <div className="flex items-start gap-2.5">
-              <Icon name="person" className="mt-0.5 shrink-0 text-sm text-muted-foreground" />
+              <User className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
               <p className="text-sm font-medium">{booking.staffName}</p>
             </div>
           </div>
@@ -200,12 +203,12 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
               Client
             </p>
             <div className="flex items-center gap-2 text-sm">
-              <Icon name="telephone" className="shrink-0 text-xs text-muted-foreground" />
+              <Phone className="size-3.5 shrink-0 text-muted-foreground" />
               <span className="font-medium">{booking.clientPhone}</span>
             </div>
             {booking.clientEmail ? (
               <div className="flex items-center gap-2 text-sm">
-                <Icon name="envelope" className="shrink-0 text-xs text-muted-foreground" />
+                <Mail className="size-3.5 shrink-0 text-muted-foreground" />
                 <span className="font-medium">{booking.clientEmail}</span>
               </div>
             ) : null}
@@ -227,7 +230,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
                   "hidden border-green-200 text-green-700 hover:bg-green-50 md:inline-flex dark:border-green-800 dark:text-green-400 dark:hover:bg-green-950/40",
                 )}
               >
-                <Icon name="chat-square" className="text-xs" /> WhatsApp
+                <MessageSquare className="size-3.5" /> WhatsApp
               </a>
             </div>
           </div>
@@ -312,22 +315,17 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
               placeholder="Add internal notes about this appointment…"
               className={cn(dashboardInputClass, "mt-0 resize-none")}
             />
-            <div className="mt-2 flex items-center gap-3">
+            <div className="mt-2">
               <Button type="button" onClick={saveNotes} disabled={savingNotes} className="min-h-11">
                 {savingNotes ? "Saving…" : "Save notes"}
               </Button>
-              {savedNotes ? (
-                <span className="flex items-center gap-1.5 text-sm text-green-600">
-                  <Icon name="check-circle" className="text-sm" /> Saved
-                </span>
-              ) : null}
             </div>
           </div>
         </div>
       </div>
 
       {booking.status === "pending" || booking.clientPhone ? (
-        <div className="sticky bottom-[calc(3.5rem+env(safe-area-inset-bottom))] z-10 -mx-4 mt-4 flex gap-2 border-t border-border/60 bg-background/95 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 md:hidden">
+        <div className="sticky bottom-[calc(3.5rem+env(safe-area-inset-bottom))] z-10 -mx-4 mt-4 flex gap-2 border-t border-border/60 bg-background/95 px-4 py-3 backdrop-blur-sm supports-backdrop-filter:bg-background/80 md:hidden">
           <a
             href={whatsappUrl(booking.clientPhone, waText)}
             target="_blank"

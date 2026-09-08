@@ -257,7 +257,7 @@ export default async function BookingPageContent({
     return (
       <>
         {!centeredLayout && !hideSidebarSections && gallery.length > 0 && (
-          <Card className="overflow-hidden rounded-none border-x-0 border-t-0 shadow-none md:mb-6 md:rounded-xl md:border-x md:shadow-sm">
+          <Card className="overflow-hidden rounded-none border-x-0 border-t-0 shadow-none md:mb-6 md:rounded-xl md:border-x md:shadow-xs">
             <div
               className={`grid gap-0.5 overflow-hidden md:gap-2 ${
                 gallery.length === 1

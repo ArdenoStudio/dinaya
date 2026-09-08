@@ -9,9 +9,8 @@ import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader"
 import { DealsClient } from "@/components/dashboard/DealsClient";
 import { DealSuggestionsCard } from "@/components/dashboard/DealSuggestionsCard";
 import { EmptyState } from "@/components/dashboard/EmptyState";
-import { Icon } from "@/components/ui/Icon";
 import { dashboardPageClass, dashboardPrimaryActionClass } from "@/lib/dashboard-ui";
-import { Tag } from "lucide-react";
+import { Plus, Tag } from "lucide-react";
 
 export default async function DealsPage() {
   const { businessId } = await requireOwner();
@@ -35,7 +34,7 @@ export default async function DealsPage() {
           description="Post flash discounts on slow slots. Clients discover deals on Dinaya and book at the discounted price."
           actions={
             <Link href="/dashboard/deals/new" className={dashboardPrimaryActionClass}>
-              <Icon name="plus" className="text-xs" /> New deal
+              <Plus className="size-3.5" /> New deal
             </Link>
           }
         />

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Icon } from "@/components/ui/Icon";
+import { CheckCircle2, ExternalLink, X } from "lucide-react";
 import { dashboardOutlineActionClass, dashboardPrimaryActionClass } from "@/lib/dashboard-ui";
 import { cn } from "@/lib/utils";
 
@@ -36,7 +36,7 @@ export function OnboardingCelebration({ bookingUrl, bookingDisplayUrl }: Props) 
     >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex gap-3">
-          <Icon name="check-circle-fill" className="mt-0.5 shrink-0 text-2xl text-emerald-600" />
+          <CheckCircle2 className="mt-0.5 size-6 shrink-0 text-emerald-600" />
           <div>
             <h2 className="font-cal text-xl tracking-tight">Your booking link is live</h2>
             <p className="mt-1 text-[17px] leading-snug text-muted-foreground sm:text-sm">
@@ -52,12 +52,12 @@ export function OnboardingCelebration({ bookingUrl, bookingDisplayUrl }: Props) 
           className="self-start text-sm text-muted-foreground hover:text-foreground"
           aria-label="Dismiss"
         >
-          <Icon name="x-lg" />
+          <X className="size-4" />
         </button>
       </div>
       <div className="mt-4 flex flex-wrap gap-3">
         <a href={bookingUrl} target="_blank" rel="noopener noreferrer" className={dashboardPrimaryActionClass}>
-          <Icon name="box-arrow-up-right" className="text-xs" />
+          <ExternalLink className="size-3.5" />
           Preview booking page
         </a>
         <a

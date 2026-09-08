@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { Icon } from "@/components/ui/Icon";
+import { AlertTriangle } from "lucide-react";
 
 export default function AvailabilityError({
   error,
@@ -19,7 +19,7 @@ export default function AvailabilityError({
       <div className="text-center">
         <div className="mb-4 flex justify-center">
           <div className="flex size-16 items-center justify-center rounded-full bg-red-100">
-            <Icon name="exclamation-triangle" className="text-2xl text-red-600" aria-hidden="true" />
+            <AlertTriangle className="size-6 text-red-600" aria-hidden="true" />
           </div>
         </div>
         <h2 className="mb-2 text-xl font-semibold text-foreground">

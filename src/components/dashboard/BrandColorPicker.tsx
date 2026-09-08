@@ -1,7 +1,7 @@
 "use client";
 
 import { useId } from "react";
-import { Icon } from "@/components/ui/Icon";
+import { Check, RefreshCw } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { DashboardInput } from "@/components/dashboard/DashboardField";
 import { dashboardInputClass } from "@/lib/dashboard-ui";
@@ -36,7 +36,7 @@ export function BrandColorPicker({ options, value, onChange, loading, contrastHi
       >
         {loading ? (
           <div className="flex min-h-11 items-center gap-2 text-xs text-muted-foreground">
-            <Icon name="arrow-repeat" className="animate-spin text-sm" aria-hidden="true" />
+            <RefreshCw className="size-4 animate-spin" aria-hidden="true" />
             Picking colors from your logo…
           </div>
         ) : options.length > 0 ? (
@@ -60,9 +60,8 @@ export function BrandColorPicker({ options, value, onChange, loading, contrastHi
                 style={{ backgroundColor: option.hex }}
               >
                 {isSelected ? (
-                  <Icon
-                    name="check-lg"
-                    className={`absolute inset-0 m-auto text-sm drop-shadow-sm ${
+                  <Check
+                    className={`absolute inset-0 m-auto size-4 drop-shadow-xs ${
                       light ? "text-foreground" : "text-white"
                     }`}
                     aria-hidden="true"
@@ -110,7 +109,7 @@ export function BrandColorPicker({ options, value, onChange, loading, contrastHi
               <DashboardInput
                 value={selected}
                 onChange={(e) => onChange(e.target.value)}
-                className={`${dashboardInputClass} max-w-[8rem] font-mono`}
+                className={`${dashboardInputClass} max-w-32 font-mono`}
                 pattern="^#[0-9a-fA-F]{6}$"
                 aria-label="Accent color hex value"
               />

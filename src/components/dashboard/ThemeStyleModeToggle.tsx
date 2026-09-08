@@ -11,7 +11,7 @@ type Props = {
 
 export function ThemeStyleModeToggle({ solid, disabled, onChange }: Props) {
   return (
-    <div className="rounded-lg border border-border bg-muted/30 p-4 dark:border-neutral-800">
+    <div className="rounded-lg border border-border bg-muted/30 p-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
           <Label className="text-sm font-medium">Page style</Label>

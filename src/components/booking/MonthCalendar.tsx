@@ -147,9 +147,9 @@ export default function MonthCalendar({
                   : disabled
                   ? "cursor-not-allowed text-muted-foreground/45"
                   : showToday
-                  ? "font-semibold booking-text-accent ring-2 ring-[var(--booking-accent-soft)]"
+                  ? "font-semibold booking-text-accent ring-2 ring-(--booking-accent-soft)"
                   : isNextAvailable
-                  ? "font-semibold booking-text-accent ring-2 ring-[var(--booking-accent)] ring-offset-1 ring-offset-background"
+                  ? "font-semibold booking-text-accent ring-2 ring-(--booking-accent) ring-offset-1 ring-offset-background"
                   : "text-foreground hover:booking-bg-accent-muted"
               }`}
             >

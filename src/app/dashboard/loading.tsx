@@ -14,7 +14,7 @@ export default function DashboardLoading() {
       <DashboardStatSkeleton count={4} />
 
       <div className="grid gap-6 lg:grid-cols-[1.4fr_0.9fr]">
-        <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
+        <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-xs">
           <div className="mb-4 flex items-center justify-between">
             <Skeleton className="h-5 w-32" />
             <Skeleton className="h-4 w-16" />
@@ -31,7 +31,7 @@ export default function DashboardLoading() {
         </div>
 
         <div className="space-y-6">
-          <div className="rounded-2xl border border-primary/15 bg-primary/[0.04] p-5">
+          <div className="rounded-2xl border border-primary/15 bg-primary/4 p-5">
             <div className="mb-3 flex items-center gap-2.5">
               <Skeleton className="size-8 rounded-xl" />
               <Skeleton className="h-4 w-32" />
@@ -44,7 +44,7 @@ export default function DashboardLoading() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
+          <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-xs">
             <Skeleton className="mb-4 h-5 w-32" />
             <div className="space-y-3">
               {[1, 2, 3, 4].map((i) => (

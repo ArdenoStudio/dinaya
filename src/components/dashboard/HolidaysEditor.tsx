@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { toast } from "@heroui/react";
 import { ConfirmDialog } from "@/components/dashboard/ConfirmDialog";
-import { Icon } from "@/components/ui/Icon";
+import { DashboardCheckbox, DashboardTextField } from "@/components/dashboard/DashboardFormField";
+import { Trash2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { dashboardInputClass, dashboardPrimaryActionClass } from "@/lib/dashboard-ui";
-import { cn } from "@/lib/utils";
+import { submitResource } from "@/lib/dashboard/use-resource";
+import { dashboardErrorAlertClass, dashboardPrimaryActionClass } from "@/lib/dashboard-ui";
 
 type Holiday = {
   id: string;
@@ -22,6 +24,7 @@ export default function HolidaysEditor() {
   const [date, setDate] = useState("");
   const [name, setName] = useState("");
   const [isClosed, setIsClosed] = useState(true);
+  const [confirmRemoveId, setConfirmRemoveId] = useState<string | null>(null);
   const [error, setError] = useState("");
 
   async function load() {
@@ -39,24 +42,25 @@ export default function HolidaysEditor() {
   async function addHoliday(e: React.FormEvent) {
     e.preventDefault();
     setError("");
-    const res = await fetch("/api/dashboard/holidays", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ date, name, isClosed }),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      setError(data.error ?? "Could not add holiday.");
+    const result = await submitResource("/api/dashboard/holidays", { date, name, isClosed }, "POST");
+    if (!result.ok) {
+      setError(result.error);
       return;
     }
     setDate("");
     setName("");
     setIsClosed(true);
+    toast.success("Holiday added");
     await load();
   }
 
   async function removeHoliday(id: string) {
-    await fetch(`/api/dashboard/holidays?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+    const res = await fetch(`/api/dashboard/holidays?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+    if (!res.ok) {
+      toast.danger("Could not remove holiday");
+      return;
+    }
+    toast.success("Holiday removed");
     await load();
   }
 
@@ -67,37 +71,19 @@ export default function HolidaysEditor() {
         Block public holidays or set special hours for the whole business.
       </p>
 
-      <form onSubmit={addHoliday} className="mb-4 grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
-        <input
-          type="date"
-          required
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          className={cn(dashboardInputClass, "mt-0")}
-        />
-        <input
-          type="text"
-          required
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="e.g. Public holiday"
-          className={cn(dashboardInputClass, "mt-0")}
-        />
+      <form onSubmit={addHoliday} className="mb-4 grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+        <DashboardTextField label="Date" isRequired type="date" value={date} onChange={setDate} />
+        <DashboardTextField label="Name" isRequired value={name} onChange={setName} placeholder="e.g. Public holiday" />
         <button type="submit" className={dashboardPrimaryActionClass}>
           Add holiday
         </button>
       </form>
 
-      <label className="mb-4 flex items-center gap-2 text-sm">
-        <input
-          type="checkbox"
-          checked={isClosed}
-          onChange={(e) => setIsClosed(e.target.checked)}
-        />
-        Closed all day
-      </label>
+      <div className="mb-4">
+        <DashboardCheckbox isSelected={isClosed} onChange={setIsClosed} label="Closed all day" />
+      </div>
 
-      {error ? <p className="mb-3 text-sm text-red-600">{error}</p> : null}
+      {error ? <p className={dashboardErrorAlertClass}>{error}</p> : null}
 
       {loading ? (
         <div className="space-y-2" aria-busy="true" aria-live="polite" role="status">
@@ -124,21 +110,25 @@ export default function HolidaysEditor() {
                   </span>
                 ) : null}
               </div>
-              <ConfirmDialog
-                title="Remove holiday"
-                description={`Remove "${holiday.name}" (${holiday.date}) from your business holidays?`}
-                confirmLabel="Remove"
-                onConfirm={() => removeHoliday(holiday.id)}
-                trigger={
-                  <button
-                    type="button"
-                    className="text-muted-foreground hover:text-red-600"
-                    aria-label="Remove holiday"
-                  >
-                    <Icon name="trash" className="text-sm" />
-                  </button>
-                }
-              />
+              <>
+                <button
+                  type="button"
+                  className="text-muted-foreground hover:text-red-600"
+                  aria-label="Remove holiday"
+                  onClick={() => setConfirmRemoveId(holiday.id)}
+                >
+                  <Trash2 className="size-4" />
+                </button>
+                <ConfirmDialog
+                  title="Remove holiday"
+                  description={`Remove "${holiday.name}" (${holiday.date}) from your business holidays?`}
+                  confirmLabel="Remove"
+                  variant="destructive"
+                  onConfirm={() => removeHoliday(holiday.id)}
+                  open={confirmRemoveId === holiday.id}
+                  onOpenChange={(open) => setConfirmRemoveId(open ? holiday.id : null)}
+                />
+              </>
             </li>
           ))}
         </ul>

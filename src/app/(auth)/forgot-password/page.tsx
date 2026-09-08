@@ -8,7 +8,7 @@ import { Icon } from "@/components/ui/Icon";
 import { authFieldTransitionClassName, authSubmitButtonClassName } from "@/components/auth/auth-form-styles";
 
 const inputCls =
-  `mt-1.5 w-full border border-gray-200 dark:border-neutral-800 rounded-lg px-3 py-2.5 text-sm bg-white dark:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 placeholder:text-gray-300 dark:placeholder:text-neutral-600 ${authFieldTransitionClassName}`;
+  `mt-1.5 w-full border border-gray-200 dark:border-neutral-800 rounded-lg px-3 py-2.5 text-sm bg-white dark:bg-neutral-900 focus:outline-hidden focus:ring-2 focus:ring-primary/40 focus:border-primary/40 placeholder:text-gray-300 dark:placeholder:text-neutral-600 ${authFieldTransitionClassName}`;
 
 function ForgotPasswordForm() {
   const emailRef = useRef<HTMLInputElement>(null);

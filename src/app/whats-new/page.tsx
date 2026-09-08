@@ -244,7 +244,7 @@ export default function WhatsNewPage() {
       <PublicNav />
 
       {/* ── Hero ─────────────────────────────────────────────── */}
-      <div className="relative overflow-hidden border-b border-gray-100 dark:border-neutral-800 bg-gradient-to-b from-blue-50/40 to-white">
+      <div className="relative overflow-hidden border-b border-gray-100 dark:border-neutral-800 bg-linear-to-b from-blue-50/40 to-white">
         {/* Subtle dot grid */}
         <div
           className="absolute inset-0 opacity-[0.45]"
@@ -259,7 +259,7 @@ export default function WhatsNewPage() {
         <div className="relative max-w-4xl mx-auto px-6 public-page-offset pb-16">
           <FadeContainer>
             <FadeDiv>
-              <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-white dark:bg-neutral-900 px-3.5 py-1.5 text-xs font-medium text-primary shadow-sm mb-6">
+              <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-white dark:bg-neutral-900 px-3.5 py-1.5 text-xs font-medium text-primary shadow-xs mb-6">
                 <span className="relative flex h-1.5 w-1.5">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-60" />
                   <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-primary" />
@@ -286,7 +286,7 @@ export default function WhatsNewPage() {
               <div className="flex items-center gap-3 mt-8 flex-wrap">
                 <Link
                   href="/register"
-                  className="inline-flex items-center gap-2 bg-primary text-white text-sm font-semibold px-5 py-2.5 rounded-lg hover:bg-primary/90 transition-colors shadow-sm shadow-primary/20"
+                  className="inline-flex items-center gap-2 bg-primary text-white text-sm font-semibold px-5 py-2.5 rounded-lg hover:bg-primary/90 transition-colors shadow-xs shadow-primary/20"
                 >
                   {MARKETING_CTA_PRIMARY}
                   <Icon name="arrow-right" className="text-xs" />
@@ -317,7 +317,7 @@ export default function WhatsNewPage() {
                   onClick={() => setActiveFilter(f.id)}
                   className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-[transform,background-color,color,box-shadow] duration-200 ease-out active:scale-[0.96] motion-reduce:active:scale-100 ${
                     activeFilter === f.id
-                      ? "bg-gray-900 text-white shadow-sm"
+                      ? "bg-gray-900 text-white shadow-xs"
                       : "bg-gray-100 dark:bg-neutral-800/80 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-neutral-700 hover:text-gray-900 dark:hover:text-gray-100"
                   }`}
                 >
@@ -348,7 +348,7 @@ export default function WhatsNewPage() {
         {/* Timeline */}
         <div className="relative">
           {/* Vertical connector line */}
-          <div className="absolute left-[7.75rem] top-4 bottom-8 w-px bg-gradient-to-b from-gray-200 via-gray-100 to-transparent hidden md:block" />
+          <div className="absolute left-31 top-4 bottom-8 w-px bg-linear-to-b from-gray-200 via-gray-100 to-transparent hidden md:block" />
 
           <AnimatePresence mode="popLayout">
             {visibleReleases.map((release, i) => (
@@ -389,7 +389,7 @@ export default function WhatsNewPage() {
                 {/* ── Content (right col) ── */}
                 <div className="relative">
                   {/* Timeline dot */}
-                  <div className="absolute -left-[2.6rem] top-1.5 hidden md:block">
+                  <div className="absolute left-[-2.6rem] top-1.5 hidden md:block">
                     <div
                       className={`w-3 h-3 rounded-full border-2 border-white shadow ${
                         release.isLatest ? "bg-primary" : "bg-gray-300"
@@ -409,16 +409,16 @@ export default function WhatsNewPage() {
                       return (
                         <div
                           key={j}
-                          className="flex gap-3.5 p-4 rounded-xl border border-gray-100 dark:border-neutral-800 bg-white dark:bg-neutral-900 hover:border-gray-200 dark:hover:border-neutral-700 hover:shadow-sm transition-[box-shadow,border-color] duration-150"
+                          className="flex gap-3.5 p-4 rounded-xl border border-gray-100 dark:border-neutral-800 bg-white dark:bg-neutral-900 hover:border-gray-200 dark:hover:border-neutral-700 hover:shadow-xs transition-[box-shadow,border-color] duration-150"
                         >
                           {/* Type indicator stripe */}
                           <div
-                            className={`flex-shrink-0 mt-0.5 w-1 self-stretch rounded-full ${cfg.dotClass} opacity-70`}
+                            className={`shrink-0 mt-0.5 w-1 self-stretch rounded-full ${cfg.dotClass} opacity-70`}
                           />
 
                           {/* Icon */}
                           <div
-                            className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center ${cfg.iconBgClass}`}
+                            className={`shrink-0 w-8 h-8 rounded-lg flex items-center justify-center ${cfg.iconBgClass}`}
                           >
                             <Icon name={change.icon} className="text-sm" />
                           </div>
@@ -481,17 +481,17 @@ export default function WhatsNewPage() {
                 what&apos;s missing.
               </p>
             </div>
-            <div className="flex items-center gap-3 flex-shrink-0">
+            <div className="flex items-center gap-3 shrink-0">
               <Link
                 href="/help"
-                className="inline-flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-4 py-2.5 rounded-lg hover:border-gray-300 dark:hover:border-neutral-700 hover:shadow-sm transition-[transform,box-shadow,border-color] duration-150 ease-out active:scale-[0.96] motion-reduce:active:scale-100"
+                className="inline-flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-4 py-2.5 rounded-lg hover:border-gray-300 dark:hover:border-neutral-700 hover:shadow-xs transition-[transform,box-shadow,border-color] duration-150 ease-out active:scale-[0.96] motion-reduce:active:scale-100"
               >
                 <Icon name="chat-dots" className="text-xs" />
                 Contact us
               </Link>
               <Link
                 href="/register"
-                className="inline-flex items-center gap-2 bg-primary text-white text-sm font-semibold px-4 py-2.5 rounded-lg hover:bg-primary/90 transition-[transform,background-color] duration-150 ease-out active:scale-[0.96] motion-reduce:active:scale-100 shadow-sm shadow-primary/20"
+                className="inline-flex items-center gap-2 bg-primary text-white text-sm font-semibold px-4 py-2.5 rounded-lg hover:bg-primary/90 transition-[transform,background-color] duration-150 ease-out active:scale-[0.96] motion-reduce:active:scale-100 shadow-xs shadow-primary/20"
               >
                 {MARKETING_CTA_PRIMARY}
                 <Icon name="arrow-right" className="text-xs" />

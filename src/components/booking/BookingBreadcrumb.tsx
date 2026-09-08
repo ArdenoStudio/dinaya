@@ -26,7 +26,7 @@ export function BookingBreadcrumb({ items, className }: Props) {
           const isCurrent = item.current ?? isLast;
 
           const labelClass = cn(
-            "truncate max-w-[14rem] sm:max-w-[18rem]",
+            "truncate max-w-56 sm:max-w-[18rem]",
             isCurrent
               ? "font-medium text-foreground"
               : "text-muted-foreground transition-colors hover:text-foreground",

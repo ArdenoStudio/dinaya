@@ -15,7 +15,7 @@ export default function HelpPage() {
       <HelpFaqSections />
       <section className="px-6 pb-20">
         <div className="max-w-4xl mx-auto">
-          <div className="relative overflow-hidden rounded-3xl border border-neutral-800 bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-900 px-8 py-14 shadow-xl">
+          <div className="relative overflow-hidden rounded-3xl border border-neutral-800 bg-linear-to-br from-neutral-950 via-neutral-900 to-neutral-900 px-8 py-14 shadow-xl">
             <div className="pointer-events-none absolute -top-16 -right-16 size-56 rounded-full bg-primary/20 blur-3xl" />
             <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-8">
               <div>
@@ -41,7 +41,7 @@ export default function HelpPage() {
                     href={supportWhatsApp.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-black/25 border border-white/35 text-white px-5 py-3 text-sm font-medium hover:bg-black/40 backdrop-blur-sm transition-colors"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-black/25 border border-white/35 text-white px-5 py-3 text-sm font-medium hover:bg-black/40 backdrop-blur-xs transition-colors"
                   >
                     <Icon name="whatsapp" className="text-sm" />
                     WhatsApp us

@@ -4,10 +4,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { signOut } from "next-auth/react";
-import { BookOpen, LogOut, Search, ShieldCheck, UserCircle } from "lucide-react";
+import { ArrowUpRight, BookOpen, LogOut, Search, ShieldCheck, UserCircle } from "lucide-react";
+import { ToastProvider } from "@heroui/react";
 import { Logo } from "@/components/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { DashboardToastProvider } from "@/components/dashboard/ToastProvider";
 import { useDashboardNavigationOptional } from "@/components/dashboard/DashboardNavigation";
 import { useDashboardCopy, useDashboardRole } from "@/components/dashboard/DashboardLocaleProvider";
 import { DashboardBottomNav } from "@/components/dashboard/DashboardBottomNav";
@@ -68,12 +68,6 @@ export function DashboardShell({
   const isOwner = role === "owner";
   const isSetupFlow = minimalChrome || activeHref.startsWith("/dashboard/setup");
   const [commandOpen, setCommandOpen] = useState(false);
-  const [tabletCollapsedDefault] = useState(() => {
-    if (typeof window === "undefined") return true;
-    return window.matchMedia("(min-width: 768px) and (max-width: 1023px)").matches
-      ? false
-      : true;
-  });
 
   const openCommand = useCallback(() => setCommandOpen(true), []);
 
@@ -90,9 +84,10 @@ export function DashboardShell({
 
   if (isSetupFlow) {
     return (
-      <DashboardToastProvider>
+      <>
         {children}
-      </DashboardToastProvider>
+        <ToastProvider />
+      </>
     );
   }
 
@@ -184,7 +179,7 @@ export function DashboardShell({
       {showAdminLink ? (
         <Link
           href="/admin"
-          className="flex min-h-11 items-center gap-2 rounded-xl border border-primary/20 bg-primary/[0.06] px-2 py-2 text-xs font-medium text-primary transition-colors hover:bg-primary/10"
+          className="flex min-h-11 items-center gap-2 rounded-xl border border-primary/20 bg-primary/6 px-2 py-2 text-xs font-medium text-primary transition-colors hover:bg-primary/10"
         >
           <ShieldCheck className="size-3.5" aria-hidden="true" />
           {copy.layout.platformAdmin}
@@ -196,7 +191,7 @@ export function DashboardShell({
           {planLabel} {copy.layout.planSuffix}
         </p>
         {usageLines.length > 0 ? (
-          <div className="mt-2 space-y-1.5">
+          <div className="mt-3 space-y-2.5">
             {usageLines.map((line) => {
               const usageItem =
                 line.label === "Services"
@@ -208,26 +203,39 @@ export function DashboardShell({
                 usageItem.limit != null && usageItem.limit > 0
                   ? Math.min(100, Math.round((usageItem.used / usageItem.limit) * 100))
                   : 0;
+              const atLimit = isNearPlanLimit(usageItem);
               return (
                 <div key={line.label} className="space-y-1">
-                  <p
-                    className={cn(
-                      "text-[0.68rem] text-muted-foreground",
-                      isNearPlanLimit(usageItem) && "font-medium text-amber-700 dark:text-amber-400",
-                    )}
-                  >
-                    {line.label}: {line.value}
-                  </p>
+                  <div className="flex items-baseline justify-between gap-2">
+                    <p className="text-[0.68rem] text-muted-foreground">{line.label}</p>
+                    <p
+                      className={cn(
+                        "text-[0.68rem] tabular-nums text-muted-foreground/80",
+                        atLimit && "font-medium text-amber-700 dark:text-amber-400",
+                      )}
+                    >
+                      {line.value}
+                    </p>
+                  </div>
                   {usageItem.limit != null && usageItem.limit > 0 ? (
                     <div className="h-1 overflow-hidden rounded-full bg-muted">
                       <div
                         className={cn(
                           "h-full rounded-full transition-all",
-                          isNearPlanLimit(usageItem) ? "bg-amber-500" : "bg-primary",
+                          atLimit ? "bg-amber-500" : "bg-primary",
                         )}
                         style={{ width: `${pct}%` }}
                       />
                     </div>
+                  ) : null}
+                  {atLimit ? (
+                    <Link
+                      href="/dashboard/billing"
+                      className="inline-flex items-center gap-0.5 text-[0.68rem] font-medium text-amber-700 transition-colors hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-300"
+                    >
+                      Upgrade for more
+                      <ArrowUpRight className="size-3" aria-hidden="true" />
+                    </Link>
                   ) : null}
                 </div>
               );
@@ -257,6 +265,7 @@ export function DashboardShell({
   );
 
   return (
+    <>
     <div className={cn("flex h-dvh flex-col overflow-hidden", dashboardShellCanvasClass)}>
       {readOnlyImpersonation ? (
         <div className="shrink-0 border-b border-amber-500/30 bg-amber-50 px-4 py-2 text-center text-sm text-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
@@ -301,7 +310,6 @@ export function DashboardShell({
           }
           footer={accountFooter}
           collapsedFooter={collapsedAccountFooter}
-          defaultOpen={tabletCollapsedDefault}
           onItemSelect={
             navigation?.navigate
               ? (href) => {
@@ -317,7 +325,7 @@ export function DashboardShell({
                 <button
                   type="button"
                   onClick={openCommand}
-                  className="flex h-11 w-full items-center gap-2 rounded-xl border border-black/[0.06] bg-[hsl(var(--dashboard-main))] px-3 text-left text-sm text-muted-foreground transition-colors hover:border-primary/30 hover:text-foreground dark:border-white/10"
+                  className="flex h-11 w-full items-center gap-2 rounded-xl border border-black/6 dashboard-main px-3 text-left text-sm text-muted-foreground transition-colors hover:border-primary/30 hover:text-foreground dark:border-white/10"
                 >
                   <Search className="size-4 shrink-0" aria-hidden="true" />
                   <span className="min-w-0 flex-1 truncate">{copy.layout.searchPlaceholder}</span>
@@ -358,16 +366,14 @@ export function DashboardShell({
 
           {banner}
 
-          <DashboardToastProvider>
-            <main
-              className={cn(
-                "min-h-0 flex-1 overflow-auto pb-[calc(3.75rem+env(safe-area-inset-bottom)+0.75rem)] md:pb-0",
-                dashboardMainCanvasClass,
-              )}
-            >
-              <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8">{children}</div>
-            </main>
-          </DashboardToastProvider>
+          <main
+            className={cn(
+              "min-h-0 flex-1 overflow-auto pb-[calc(3.75rem+env(safe-area-inset-bottom)+0.75rem)] md:pb-0",
+              dashboardMainCanvasClass,
+            )}
+          >
+            <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8">{children}</div>
+          </main>
         </MacOSSidebar>
       </div>
 
@@ -393,6 +399,9 @@ export function DashboardShell({
         onSignOut={handleSignOut}
         onNavigate={(href) => navigation?.navigate?.(href)}
       />
+
+      <ToastProvider />
     </div>
+    </>
   );
 }

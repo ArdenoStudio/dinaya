@@ -179,9 +179,9 @@ export function DashboardCommandMenu({
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-[80] bg-black/45 backdrop-blur-[2px]" />
+        <Dialog.Overlay className="fixed inset-0 z-80 bg-black/45 backdrop-blur-[2px]" />
         <Dialog.Content
-          className="fixed left-1/2 top-[12vh] z-[81] w-[min(36rem,calc(100vw-1.5rem))] -translate-x-1/2 overflow-hidden rounded-2xl border border-border bg-card shadow-2xl outline-none"
+          className="fixed left-1/2 top-[12vh] z-81 w-[min(36rem,calc(100vw-1.5rem))] -translate-x-1/2 overflow-hidden rounded-2xl border border-border bg-card shadow-2xl outline-hidden"
           aria-describedby={undefined}
         >
           <Dialog.Title className="sr-only">Command menu</Dialog.Title>
@@ -193,7 +193,7 @@ export function DashboardCommandMenu({
               onChange={(event) => setQuery(event.target.value)}
               onKeyDown={onInputKeyDown}
               placeholder="Jump to a page or action…"
-              className="h-12 w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+              className="h-12 w-full bg-transparent text-sm outline-hidden placeholder:text-muted-foreground"
               aria-label="Filter commands"
               role="combobox"
               aria-expanded="true"
@@ -236,7 +236,7 @@ export function DashboardCommandMenu({
                               className={cn(
                                 "flex min-h-11 w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm transition-colors",
                                 active ? "bg-primary/5 text-foreground" : "hover:bg-primary/5 hover:text-foreground",
-                                "focus-visible:bg-primary/5 focus-visible:outline-none",
+                                "focus-visible:bg-primary/5 focus-visible:outline-hidden",
                               )}
                             >
                               <span

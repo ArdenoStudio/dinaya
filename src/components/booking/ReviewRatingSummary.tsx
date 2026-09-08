@@ -46,7 +46,7 @@ export function ReviewRatingSummary({
                 onClick={() => onFilterChange(isActive ? "all" : stars)}
                 className={cn(
                   "flex w-full items-center gap-2 rounded-md px-1 py-0.5 transition-colors",
-                  isActive && "bg-[var(--booking-accent-muted)]/60",
+                  isActive && "bg-(--booking-accent-muted)/60",
                 )}
               >
                 <span className="w-3 shrink-0 text-xs font-medium tabular-nums text-foreground">
@@ -88,7 +88,7 @@ export function ReviewRatingSummary({
           <button
             type="button"
             onClick={() => onFilterChange("all")}
-            className="font-medium text-[var(--booking-accent)] hover:underline"
+            className="font-medium booking-text-accent hover:underline"
           >
             {copy.clearReviewFilter}
           </button>

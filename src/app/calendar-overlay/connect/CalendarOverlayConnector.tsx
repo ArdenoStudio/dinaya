@@ -135,7 +135,7 @@ export default function CalendarOverlayConnector({
 
         <CardContent className="px-6 py-6">
           <div className="mb-5 flex items-start gap-3 rounded-2xl bg-gray-50 px-4 py-3.5 dark:bg-neutral-950/60">
-            <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-white text-gray-500 shadow-sm dark:bg-neutral-900 dark:text-gray-300">
+            <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-white text-gray-500 shadow-xs dark:bg-neutral-900 dark:text-gray-300">
               <Icon name="shield-check" aria-hidden="true" />
             </span>
             <div>

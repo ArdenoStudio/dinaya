@@ -22,9 +22,9 @@ const industries = [
       light: "bg-amber-50 dark:bg-amber-950/40",
       ring: "ring-amber-100 dark:ring-amber-900/50",
       text: "text-amber-600",
-      iconBg: "bg-gradient-to-br from-amber-500/15 to-amber-500/5",
+      iconBg: "bg-linear-to-br from-amber-500/15 to-amber-500/5",
       glow: "bg-amber-50 dark:bg-amber-950/30",
-      hover: "hover:from-amber-500/[0.03]",
+      hover: "hover:from-amber-500/3",
       line: "via-amber-500/40",
     },
     label: "Salons & spas",
@@ -66,9 +66,9 @@ const industries = [
       light: "bg-violet-50/50 dark:bg-violet-950/40",
       ring: "ring-violet-100 dark:ring-violet-900/50",
       text: "text-violet-600",
-      iconBg: "bg-gradient-to-br from-violet-500/15 to-violet-500/5",
+      iconBg: "bg-linear-to-br from-violet-500/15 to-violet-500/5",
       glow: "bg-violet-500/20",
-      hover: "hover:from-violet-500/[0.03]",
+      hover: "hover:from-violet-500/3",
       line: "via-violet-500/40",
     },
     label: "Clinics",
@@ -110,9 +110,9 @@ const industries = [
       light: "bg-indigo-50/50 dark:bg-indigo-950/40",
       ring: "ring-indigo-100 dark:ring-indigo-900/50",
       text: "text-indigo-600",
-      iconBg: "bg-gradient-to-br from-indigo-500/15 to-indigo-500/5",
+      iconBg: "bg-linear-to-br from-indigo-500/15 to-indigo-500/5",
       glow: "bg-indigo-500/20",
-      hover: "hover:from-indigo-500/[0.03]",
+      hover: "hover:from-indigo-500/3",
       line: "via-indigo-500/40",
     },
     label: "Tuition classes",
@@ -154,9 +154,9 @@ const industries = [
       light: "bg-sky-50/50 dark:bg-sky-950/40",
       ring: "ring-sky-100 dark:ring-sky-900/50",
       text: "text-sky-600",
-      iconBg: "bg-gradient-to-br from-sky-500/15 to-sky-500/5",
+      iconBg: "bg-linear-to-br from-sky-500/15 to-sky-500/5",
       glow: "bg-sky-500/20",
-      hover: "hover:from-sky-500/[0.03]",
+      hover: "hover:from-sky-500/3",
       line: "via-sky-500/40",
     },
     label: "Freelancers",
@@ -201,7 +201,7 @@ export default function SolutionsPage() {
       <section className="max-w-4xl mx-auto px-6 public-page-offset pb-16 text-center">
         <FadeContainer className="flex flex-col items-center">
           <FadeDiv className="mb-6">
-            <span className="inline-flex items-center gap-2 rounded-full border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 shadow-sm">
+            <span className="inline-flex items-center gap-2 rounded-full border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-3 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 shadow-xs">
               <span className="size-1.5 rounded-full bg-primary animate-pulse" />
               Built for Sri Lankan businesses
             </span>
@@ -225,7 +225,7 @@ export default function SolutionsPage() {
                 <a
                   key={ind.id}
                   href={`#${ind.id}`}
-                  className="inline-flex items-center gap-2 rounded-full border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm hover:shadow-md hover:border-gray-300 dark:hover:border-neutral-700 transition-[transform,box-shadow,border-color] duration-150 ease-out active:scale-[0.96] motion-reduce:active:scale-100"
+                  className="inline-flex items-center gap-2 rounded-full border bg-white dark:border-neutral-800 dark:bg-neutral-900 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-xs hover:shadow-md hover:border-gray-300 dark:hover:border-neutral-700 transition-[transform,box-shadow,border-color] duration-150 ease-out active:scale-[0.96] motion-reduce:active:scale-100"
                 >
                   <span className={`flex h-5 w-5 items-center justify-center rounded-md ${ind.color.bg} text-white`}>
                     <Icon name={ind.icon} className="text-[10px]" />
@@ -272,7 +272,7 @@ export default function SolutionsPage() {
               {ind.features.map((f) => (
                 <div
                   key={f.title}
-                  className={`group relative p-7 bg-white dark:bg-neutral-900 hover:bg-gradient-to-br ${ind.color.hover} hover:to-white dark:hover:to-neutral-900 transition-colors`}
+                  className={`group relative p-7 bg-white dark:bg-neutral-900 hover:bg-linear-to-br ${ind.color.hover} hover:to-white dark:hover:to-neutral-900 transition-colors`}
                 >
                   <div className="relative mb-5 inline-flex">
                     <div className={`absolute inset-0 rounded-xl ${ind.color.glow} blur-md opacity-0 group-hover:opacity-100 transition-opacity`} />
@@ -282,7 +282,7 @@ export default function SolutionsPage() {
                   </div>
                   <h3 className="font-semibold text-sm mb-2">{f.title}</h3>
                   <p className="text-muted-foreground text-sm leading-relaxed">{f.desc}</p>
-                  <span className={`absolute bottom-0 left-7 right-7 h-px bg-gradient-to-r from-transparent ${ind.color.line} to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500`} />
+                  <span className={`absolute bottom-0 left-7 right-7 h-px bg-linear-to-r from-transparent ${ind.color.line} to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500`} />
                 </div>
               ))}
             </div>
@@ -332,7 +332,7 @@ export default function SolutionsPage() {
       {/* CTA */}
       <section className="px-6 py-20">
         <div className="max-w-6xl mx-auto">
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 px-8 py-16 text-center shadow-2xl shadow-blue-500/20">
+          <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-blue-600 via-blue-700 to-indigo-800 px-8 py-16 text-center shadow-2xl shadow-blue-500/20">
             {/* Pattern */}
             <div className="absolute inset-0 opacity-10">
               <svg className="h-full w-full" xmlns="http://www.w3.org/2000/svg">

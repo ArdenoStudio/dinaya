@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Icon } from "@/components/ui/Icon";
+import { ArrowRight, CheckCircle2, Circle, MessageCircle } from "lucide-react";
 import { dashboardOutlineActionClass, dashboardPrimaryActionClass } from "@/lib/dashboard-ui";
 import { cn } from "@/lib/utils";
 
@@ -41,7 +41,7 @@ export function OnboardingWizard({ steps, bookingUrl, whatsappShare }: Props) {
   const progress = Math.round((completed / steps.length) * 100);
 
   return (
-    <div className="overflow-hidden rounded-xl border bg-card p-6 shadow-sm dark:border-border/60 dark:bg-card">
+    <div className="overflow-hidden rounded-xl border bg-card p-6 shadow-xs dark:border-border/60 dark:bg-card">
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-widest text-primary">
@@ -57,7 +57,7 @@ export function OnboardingWizard({ steps, bookingUrl, whatsappShare }: Props) {
         </div>
       </div>
 
-      <div className="mb-6 h-2 overflow-hidden rounded-full bg-background ring-1 ring-border dark:bg-neutral-800">
+      <div className="mb-6 h-2 overflow-hidden rounded-full bg-background ring-1 ring-border">
         <div
           className="h-full rounded-full bg-primary transition-[width] motion-reduce:transition-none"
           style={{ width: `${progress}%` }}
@@ -69,7 +69,7 @@ export function OnboardingWizard({ steps, bookingUrl, whatsappShare }: Props) {
         />
       </div>
 
-      <div className="rounded-xl border border-border bg-muted/30 p-5 dark:border-neutral-800">
+      <div className="rounded-xl border border-border bg-muted/30 p-5">
         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Do this next</p>
         <h3 className="mt-1 font-semibold">{nextStep.label}</h3>
         <p className="mt-2 text-sm text-muted-foreground">{nextStep.description}</p>
@@ -80,7 +80,7 @@ export function OnboardingWizard({ steps, bookingUrl, whatsappShare }: Props) {
             className={dashboardPrimaryActionClass}
           >
             {ctaForStep(nextStep.label)}
-            <Icon name="arrow-right" className="text-xs" />
+            <ArrowRight className="size-3.5" />
           </Link>
           {nextStep.label === "Share your booking link" ? (
             <a
@@ -89,7 +89,7 @@ export function OnboardingWizard({ steps, bookingUrl, whatsappShare }: Props) {
               rel="noopener noreferrer"
               className={dashboardOutlineActionClass}
             >
-              <Icon name="whatsapp" className="text-emerald-600" />
+              <MessageCircle className="size-4 text-emerald-600" />
               Share on WhatsApp
             </a>
           ) : null}
@@ -103,17 +103,18 @@ export function OnboardingWizard({ steps, bookingUrl, whatsappShare }: Props) {
             href={step.href}
             target={step.href.startsWith("http") ? "_blank" : undefined}
             className={cn(
-              "flex min-h-11 items-center justify-between rounded-lg border px-4 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
+              "flex min-h-11 items-center justify-between rounded-lg border px-4 py-2 text-sm focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary/40",
               step.done
                 ? "border-emerald-200 bg-emerald-50 dark:border-emerald-800/50 dark:bg-emerald-950/40"
                 : "bg-background hover:border-primary/30",
             )}
           >
             <span>{step.label}</span>
-            <Icon
-              name={step.done ? "check-circle-fill" : "circle"}
-              className={step.done ? "text-emerald-600" : "text-muted-foreground"}
-            />
+            {step.done ? (
+              <CheckCircle2 className="size-4 text-emerald-600" />
+            ) : (
+              <Circle className="size-4 text-muted-foreground" />
+            )}
           </Link>
         ))}
       </div>

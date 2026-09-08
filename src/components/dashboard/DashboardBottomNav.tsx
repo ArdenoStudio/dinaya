@@ -13,7 +13,7 @@ import {
   X,
   type LucideIcon,
 } from "lucide-react";
-import { DashboardConfirmDialog } from "@/components/dashboard/DashboardConfirmDialog";
+import { ConfirmDialog as DashboardConfirmDialog } from "@/components/dashboard/ConfirmDialog";
 import { trackDashboardNavClick } from "@/lib/analytics/gtag";
 import { cn } from "@/lib/utils";
 
@@ -38,7 +38,7 @@ const PRIMARY: BottomNavItem[] = [
 ];
 
 const focusRingClass =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-950";
+  "focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background";
 
 function isActive(item: { exact?: boolean; href: string }, pathname: string): boolean {
   if (item.exact) return pathname === item.href;
@@ -154,7 +154,7 @@ export function DashboardBottomNav({
   return (
     <>
       {moreOpen ? (
-        <div className="fixed inset-0 z-[60] md:hidden" role="presentation">
+        <div className="fixed inset-0 z-60 md:hidden" role="presentation">
           <button
             type="button"
             aria-label="Close more menu"
@@ -166,11 +166,11 @@ export function DashboardBottomNav({
             id={sheetId}
             role="dialog"
             aria-modal="true"
-            aria-labelledby={titleId}
-            className="absolute inset-x-0 bottom-0 z-[61] flex max-h-[min(85dvh,40rem)] flex-col rounded-t-[1.25rem] border border-neutral-200 bg-white pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_40px_rgba(0,0,0,0.12)] dark:border-neutral-700 dark:bg-neutral-950"
+            aria-label="More dashboard pages"
+            className="absolute inset-x-0 bottom-0 z-61 flex max-h-[min(85dvh,40rem)] flex-col rounded-t-[1.25rem] border border-border bg-card pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_40px_rgba(0,0,0,0.12)]"
           >
             <div className="flex shrink-0 flex-col items-center pt-2">
-              <div className="h-1 w-10 rounded-full bg-neutral-300 dark:bg-neutral-600" aria-hidden="true" />
+              <div className="h-1 w-10 rounded-full bg-muted-foreground/30" aria-hidden="true" />
               <div className="flex w-full items-center justify-between px-4 pb-2 pt-3">
                 <p id={titleId} className="text-base font-semibold tracking-tight">
                   More
@@ -180,7 +180,7 @@ export function DashboardBottomNav({
                   type="button"
                   aria-label="Close"
                   className={cn(
-                    "flex size-11 items-center justify-center rounded-full bg-neutral-100 text-neutral-600 transition-transform active:scale-95 dark:bg-neutral-800 dark:text-neutral-300",
+                    "flex size-11 items-center justify-center rounded-full bg-muted text-muted-foreground transition-transform active:scale-95",
                     focusRingClass,
                   )}
                   onClick={() => setMoreOpen(false)}
@@ -190,13 +190,13 @@ export function DashboardBottomNav({
               </div>
             </div>
 
-            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 pb-[5.5rem]">
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 pb-22">
               {moreSections.map((section) => (
                 <div key={section.label} className="mb-4">
-                  <p className="mb-1.5 px-3 text-[0.7rem] font-semibold uppercase tracking-wider text-neutral-500">
+                  <p className="mb-1.5 px-3 text-[0.7rem] font-semibold uppercase tracking-wider text-muted-foreground">
                     {section.label}
                   </p>
-                  <ul className="overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-50 dark:border-border/60 dark:bg-card">
+                  <ul className="overflow-hidden rounded-2xl border border-border bg-muted/30">
                     {section.items.map((item, index) => {
                       const Icon = item.icon;
                       const active = isActive(item, activeHref);
@@ -207,12 +207,12 @@ export function DashboardBottomNav({
                             onClick={() => handleNav(item.href, "more_sheet", item.routeId)}
                             aria-current={active ? "page" : undefined}
                             className={cn(
-                              "flex min-h-12 items-center gap-3 px-3.5 py-3 text-[15px] transition-colors active:bg-neutral-200/80 dark:active:bg-neutral-800",
+                              "flex min-h-12 items-center gap-3 px-3.5 py-3 text-[15px] transition-colors active:bg-muted",
                               focusRingClass,
-                              index > 0 && "border-t border-neutral-200/80 dark:border-neutral-800",
+                              index > 0 && "border-t border-border/70",
                               active
-                                ? "bg-primary/[0.06] font-semibold text-primary"
-                                : "font-medium text-neutral-900 dark:text-neutral-100",
+                                ? "bg-primary/6 font-semibold text-primary"
+                                : "font-medium text-foreground",
                             )}
                           >
                             <span
@@ -220,7 +220,7 @@ export function DashboardBottomNav({
                                 "flex size-9 shrink-0 items-center justify-center rounded-xl",
                                 active
                                   ? "bg-primary/15 text-primary"
-                                  : "bg-white text-neutral-600 shadow-sm dark:bg-neutral-800 dark:text-neutral-300",
+                                  : "bg-card text-muted-foreground shadow-xs",
                               )}
                             >
                               <Icon className="size-4" aria-hidden="true" />
@@ -238,39 +238,39 @@ export function DashboardBottomNav({
               ))}
 
               <div className="mb-2">
-                <p className="mb-1.5 px-3 text-[0.7rem] font-semibold uppercase tracking-wider text-neutral-500">
+                <p className="mb-1.5 px-3 text-[0.7rem] font-semibold uppercase tracking-wider text-muted-foreground">
                   Account
                 </p>
-                <ul className="overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-50 dark:border-border/60 dark:bg-card">
+                <ul className="overflow-hidden rounded-2xl border border-border bg-muted/30">
                   <li className="px-3.5 py-3">
-                    <p className="truncate text-[15px] font-medium text-neutral-900 dark:text-neutral-100">
+                    <p className="truncate text-[15px] font-medium text-foreground">
                       {userEmail}
                     </p>
-                    <p className="mt-0.5 text-xs text-neutral-500">{planLabel}</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">{planLabel}</p>
                   </li>
-                  <li className="border-t border-neutral-200/80 dark:border-neutral-800">
+                  <li className="border-t border-border/70">
                     <Link
                       href="/docs"
                       target="_blank"
                       rel="noopener noreferrer"
                       className={cn(
-                        "flex min-h-12 items-center gap-3 px-3.5 py-3 text-[15px] font-medium text-neutral-900 active:bg-neutral-200/80 dark:text-neutral-100 dark:active:bg-neutral-800",
+                        "flex min-h-12 items-center gap-3 px-3.5 py-3 text-[15px] font-medium text-foreground active:bg-muted",
                         focusRingClass,
                       )}
                       onClick={() => setMoreOpen(false)}
                     >
-                      <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-white text-neutral-600 shadow-sm dark:bg-neutral-800 dark:text-neutral-300">
+                      <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-card text-muted-foreground shadow-xs">
                         <BookOpen className="size-4" aria-hidden="true" />
                       </span>
                       Help &amp; docs
                     </Link>
                   </li>
                   {showAdminLink ? (
-                    <li className="border-t border-neutral-200/80 dark:border-neutral-800">
+                    <li className="border-t border-border/70">
                       <Link
                         href="/admin"
                         className={cn(
-                          "flex min-h-12 items-center gap-3 px-3.5 py-3 text-[15px] font-medium text-primary active:bg-neutral-200/80 dark:active:bg-neutral-800",
+                          "flex min-h-12 items-center gap-3 px-3.5 py-3 text-[15px] font-medium text-primary active:bg-muted",
                           focusRingClass,
                         )}
                         onClick={() => {
@@ -289,7 +289,7 @@ export function DashboardBottomNav({
                       </Link>
                     </li>
                   ) : null}
-                  <li className="border-t border-neutral-200/80 dark:border-neutral-800">
+                  <li className="border-t border-border/70">
                     <button
                       type="button"
                       onClick={() => {
@@ -297,11 +297,11 @@ export function DashboardBottomNav({
                         setSignOutOpen(true);
                       }}
                       className={cn(
-                        "flex min-h-12 w-full items-center gap-3 px-3.5 py-3 text-left text-[15px] font-medium text-red-600 active:bg-neutral-200/80 dark:text-red-400 dark:active:bg-neutral-800",
+                        "flex min-h-12 w-full items-center gap-3 px-3.5 py-3 text-left text-[15px] font-medium text-destructive active:bg-muted",
                         focusRingClass,
                       )}
                     >
-                      <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-red-50 text-red-600 dark:bg-red-950/50 dark:text-red-400">
+                      <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-destructive/10 text-destructive">
                         <LogOut className="size-4" aria-hidden="true" />
                       </span>
                       Sign out
@@ -327,10 +327,10 @@ export function DashboardBottomNav({
 
       <nav
         data-dashboard-bottom-nav
-        className="fixed inset-x-0 bottom-0 z-[55] border-t border-border/80 bg-[hsl(var(--dashboard-chrome))]/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden"
+        className="fixed inset-x-0 bottom-0 z-55 border-t border-border/80 bg-[hsl(var(--dashboard-chrome))]/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden"
         aria-label="Primary"
       >
-        <div className="grid h-[3.75rem] grid-cols-5">
+        <div className="grid h-15 grid-cols-5">
           {PRIMARY.map((item) => {
             const Icon = item.icon;
             const active = isActive(item, activeHref);

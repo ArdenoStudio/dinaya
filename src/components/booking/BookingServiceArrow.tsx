@@ -15,8 +15,8 @@ export function BookingServiceArrow({ selected = false, className }: Props) {
         "flex size-8 shrink-0 items-center justify-center self-center rounded-full border transition-[background-color,border-color,color,box-shadow] duration-200 ease-out",
         "motion-reduce:transition-none",
         selected
-          ? "border-[var(--booking-accent)]/40 bg-[var(--booking-accent-muted)] text-[var(--booking-accent)] shadow-sm"
-          : "border-border/60 bg-muted/25 text-muted-foreground/70 group-hover:border-[var(--booking-accent)]/35 group-hover:bg-[var(--booking-accent-muted)] group-hover:text-[var(--booking-accent)] group-hover:shadow-sm group-focus-visible:border-[var(--booking-accent)]/35 group-focus-visible:bg-[var(--booking-accent-muted)] group-focus-visible:text-[var(--booking-accent)]",
+          ? "border-(--booking-accent)/40 booking-bg-accent-muted booking-text-accent shadow-xs"
+          : "border-border/60 bg-muted/25 text-muted-foreground/70 group-hover:border-(--booking-accent)/35 group-hover:booking-bg-accent-muted group-hover:booking-text-accent group-hover:shadow-xs group-focus-visible:border-(--booking-accent)/35 group-focus-visible:booking-bg-accent-muted group-focus-visible:booking-text-accent",
         className,
       )}
     >

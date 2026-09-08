@@ -6,7 +6,7 @@ import {
   bookingTransition,
 } from "@/lib/booking/booking-motion";
 
-export type WizardStep = "service" | "staff" | "dateTime" | "confirm" | "hub" | "booker";
+export type WizardStep = "service" | "variant" | "staff" | "dateTime" | "confirm" | "hub" | "booker";
 
 interface Props {
   step: WizardStep;

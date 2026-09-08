@@ -46,7 +46,7 @@ function MemberAvatar({
       title={member.name}
     >
       {member.avatarUrl ? <AvatarImage src={member.avatarUrl} alt={member.name} /> : null}
-      <AvatarFallback className="bg-[var(--booking-accent-muted)] font-semibold text-[var(--booking-accent)]">
+      <AvatarFallback className="booking-bg-accent-muted font-semibold booking-text-accent">
         {member.name.charAt(0).toUpperCase()}
       </AvatarFallback>
     </Avatar>
@@ -73,7 +73,7 @@ export function BookingTeamSection({ members, copy, variant, className, id }: Pr
           <button
           type="button"
           onClick={openDialog}
-          className="group flex min-h-11 items-center gap-3 rounded-full border border-border/70 bg-card/80 px-4 py-2.5 text-sm text-muted-foreground shadow-sm transition-[background-color,border-color,transform] duration-200 ease-out hover:border-border hover:bg-card hover:text-foreground active:scale-[0.96] motion-reduce:active:scale-100"
+          className="group flex min-h-11 items-center gap-3 rounded-full border border-border/70 bg-card/80 px-4 py-2.5 text-sm text-muted-foreground shadow-xs transition-[background-color,border-color,transform] duration-200 ease-out hover:border-border hover:bg-card hover:text-foreground active:scale-[0.96] motion-reduce:active:scale-100"
         >
           <UserAvatars
             users={staffToAvatarUsers(members)}
@@ -130,7 +130,7 @@ export function BookingTeamSection({ members, copy, variant, className, id }: Pr
   return (
     <BlurFade inView className={className}>
       <section id={id}>
-        <Card className="mt-0 overflow-hidden rounded-none border-x-0 py-0 shadow-none md:mt-6 md:rounded-xl md:border-x md:shadow-sm">
+        <Card className="mt-0 overflow-hidden rounded-none border-x-0 py-0 shadow-none md:mt-6 md:rounded-xl md:border-x md:shadow-xs">
           <CardHeader className="pb-3">
             <CardTitle className="text-base">{copy.meetTeam}</CardTitle>
           </CardHeader>

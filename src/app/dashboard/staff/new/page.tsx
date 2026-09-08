@@ -3,9 +3,10 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
+import { DashboardCheckbox, DashboardTextAreaField, DashboardTextField } from "@/components/dashboard/DashboardFormField";
+import { submitResource } from "@/lib/dashboard/use-resource";
 import {
   dashboardErrorAlertClass,
-  dashboardInputClass,
   dashboardLabelClass,
   dashboardOutlineActionClass,
   dashboardPageClass,
@@ -48,14 +49,16 @@ export default function NewStaffPage() {
     setLoading(true);
     setError("");
 
-    const res = await fetch("/api/dashboard/staff", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...form, serviceIds: selectedServices, locationIds: selectedLocations }),
-    });
-
-    const data = await res.json();
-    if (!res.ok) { setError(data.error ?? "Error"); setLoading(false); return; }
+    const result = await submitResource(
+      "/api/dashboard/staff",
+      { ...form, serviceIds: selectedServices, locationIds: selectedLocations },
+      "POST",
+    );
+    setLoading(false);
+    if (!result.ok) {
+      setError(result.error);
+      return;
+    }
     router.push("/dashboard/staff");
   }
 
@@ -68,44 +71,51 @@ export default function NewStaffPage() {
       />
 
       <form onSubmit={handleSubmit} className={cn(dashboardSectionClass, "max-w-lg space-y-4")}>
-        <div>
-          <label className={dashboardLabelClass}>Name *</label>
-          <input required value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-            className={dashboardInputClass}
-            placeholder="Kamala Silva" />
-        </div>
-        <div>
-          <label className={dashboardLabelClass}>Short bio</label>
-          <textarea value={form.bio} onChange={(e) => setForm((f) => ({ ...f, bio: e.target.value }))}
-            className={cn(dashboardInputClass, "resize-none")} rows={2}
-            placeholder="5 years experience in…" />
-        </div>
+        <DashboardTextField
+          label="Name"
+          isRequired
+          value={form.name}
+          onChange={(value) => setForm((f) => ({ ...f, name: value }))}
+          placeholder="Kamala Silva"
+        />
+        <DashboardTextAreaField
+          label="Short bio"
+          value={form.bio}
+          onChange={(value) => setForm((f) => ({ ...f, bio: value }))}
+          rows={2}
+          placeholder="5 years experience in…"
+        />
         {services.length > 0 && (
           <div>
             <label className={dashboardLabelClass}>Can perform</label>
             <div className="mt-2 space-y-1">
               {services.map((s) => (
-                <label key={s.id} className="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" checked={selectedServices.includes(s.id)}
-                    onChange={() => toggleService(s.id)} className="rounded" />
-                  <span className="text-sm">{s.name}</span>
-                </label>
+                <DashboardCheckbox
+                  key={s.id}
+                  isSelected={selectedServices.includes(s.id)}
+                  onChange={() => toggleService(s.id)}
+                  label={s.name}
+                />
               ))}
             </div>
           </div>
         )}
-        
+
         {locations.length > 1 && (
           <div>
             <label className={dashboardLabelClass}>Works at</label>
             <div className="mt-2 space-y-1">
               {locations.map((loc) => (
-                <label key={loc.id} className="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" checked={selectedLocations.includes(loc.id)}
-                    onChange={() => setSelectedLocations((prev) => prev.includes(loc.id) ? prev.filter((id) => id !== loc.id) : [...prev, loc.id])}
-                    className="rounded" />
-                  <span className="text-sm">{loc.name}</span>
-                </label>
+                <DashboardCheckbox
+                  key={loc.id}
+                  isSelected={selectedLocations.includes(loc.id)}
+                  onChange={() =>
+                    setSelectedLocations((prev) =>
+                      prev.includes(loc.id) ? prev.filter((id) => id !== loc.id) : [...prev, loc.id],
+                    )
+                  }
+                  label={loc.name}
+                />
               ))}
             </div>
           </div>

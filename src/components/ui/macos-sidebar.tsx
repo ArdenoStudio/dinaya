@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { SidebarToggleIcon } from "@/components/unlumen-ui/sidebar-toggle-icon";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { cn } from "@/lib/utils";
@@ -105,6 +105,16 @@ export function MacOSSidebar({
 }: MacOSSidebarProps) {
   const [hoveredKey, setHoveredKey] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(defaultOpen);
+
+  // Tablet widths default to collapsed. This must run post-mount (not as a
+  // useState lazy initializer) — matchMedia isn't available during SSR, and
+  // branching the initial render on it there-vs-here caused a hydration
+  // mismatch on the very first paint.
+  useEffect(() => {
+    const isTabletWidth = window.matchMedia("(min-width: 768px) and (max-width: 1023px)").matches;
+    if (isTabletWidth) setIsOpen(false);
+  }, []);
+
   const reducedMotion = useReducedMotion();
   const sidebarTransition = reducedMotion
     ? { duration: 0 }
@@ -121,7 +131,7 @@ export function MacOSSidebar({
         animate={{ width: isOpen ? 248 : 64 }}
         transition={sidebarTransition}
         className={cn(
-          "hidden shrink-0 flex-col items-start border-r border-black/[0.06] p-2 transition-colors duration-300 ease-out md:flex md:h-full md:max-h-full dark:border-white/[0.08]",
+          "hidden shrink-0 flex-col items-start border-r border-black/6 p-2 transition-colors duration-300 ease-out md:flex md:h-full md:max-h-full dark:border-white/8",
           isOpen ? "dashboard-sidebar" : "bg-transparent",
         )}
         aria-label="Sidebar"

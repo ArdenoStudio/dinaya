@@ -30,8 +30,8 @@ export function BookingStepIndicator({ steps, current, className, onStepClick }:
               <span
                 className={cn(
                   "flex size-7 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold transition-colors",
-                  active && "bg-[var(--booking-accent)] text-white",
-                  done && !active && "bg-[var(--booking-accent-muted)] text-[var(--booking-accent)]",
+                  active && "booking-bg-accent text-white",
+                  done && !active && "booking-bg-accent-muted booking-text-accent",
                   !active && !done && "bg-muted text-muted-foreground",
                 )}
               >
@@ -41,7 +41,7 @@ export function BookingStepIndicator({ steps, current, className, onStepClick }:
                 className={cn(
                   "text-xs font-medium",
                   active && "text-foreground",
-                  done && !active && "text-[var(--booking-accent)]",
+                  done && !active && "booking-text-accent",
                   !active && !done && "text-muted-foreground",
                 )}
               >
@@ -67,7 +67,7 @@ export function BookingStepIndicator({ steps, current, className, onStepClick }:
                 <div
                   className={cn(
                     "mx-2 h-px min-w-4 flex-1",
-                    done ? "bg-[var(--booking-accent)]/40" : "bg-border",
+                    done ? "bg-(--booking-accent)/40" : "bg-border",
                   )}
                 />
               )}

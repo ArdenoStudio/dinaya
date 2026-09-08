@@ -4,11 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { format, addDays } from "date-fns";
-import {
-  DashboardField,
-  DashboardInput,
-} from "@/components/dashboard/DashboardField";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
+import { DashboardTextField } from "@/components/dashboard/DashboardFormField";
+import { submitResource } from "@/lib/dashboard/use-resource";
 import {
   dashboardErrorAlertClass,
   dashboardInputClass,
@@ -16,9 +14,16 @@ import {
   dashboardPrimaryActionClass,
   dashboardSectionClass,
 } from "@/lib/dashboard-ui";
-import { cn } from "@/lib/utils";
+import { cn, formatLkr } from "@/lib/utils";
+import type { ServicePriceVariant } from "@/lib/service-variants";
 
-type Service = { id: string; name: string; durationMinutes: number; priceLkr: number };
+type Service = {
+  id: string;
+  name: string;
+  durationMinutes: number;
+  priceLkr: number;
+  priceVariants?: ServicePriceVariant[] | null;
+};
 type Staff = { id: string; name: string };
 type Slot = { startUtc: string; endUtc: string; label: string };
 
@@ -30,6 +35,7 @@ export default function NewBookingPage() {
   const [slots, setSlots] = useState<Slot[]>([]);
 
   const [serviceId, setServiceId] = useState("");
+  const [priceVariantId, setPriceVariantId] = useState("");
   const [staffId, setStaffId] = useState("");
   const [date, setDate] = useState(format(new Date(), "yyyy-MM-dd"));
   const [slot, setSlot] = useState<Slot | null>(null);
@@ -47,6 +53,7 @@ export default function NewBookingPage() {
   }, []);
 
   useEffect(() => {
+    setPriceVariantId("");
     if (!serviceId) {
       setStaffList([]);
       setStaffId("");
@@ -87,12 +94,12 @@ export default function NewBookingPage() {
     const session = await sessionRes.json();
     const businessId = session?.user?.businessId;
 
-    const res = await fetch("/api/bookings", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
+    const result = await submitResource(
+      "/api/bookings",
+      {
         businessId,
         serviceId,
+        priceVariantId: priceVariantId || null,
         staffId,
         startsAt: slot.startUtc,
         endsAt: slot.endUtc,
@@ -101,20 +108,26 @@ export default function NewBookingPage() {
         clientEmail: clientEmail || null,
         notes: notes || null,
         source: "manual",
-      }),
-    });
+      },
+      "POST",
+    );
 
-    const data = await res.json();
-    if (!res.ok) {
-      setError(data.error ?? "Something went wrong.");
-      setSaving(false);
+    setSaving(false);
+    if (!result.ok) {
+      setError(result.error);
       return;
     }
+    const data = result.data as { bookingId: string };
     router.push(`/dashboard/bookings/${data.bookingId}`);
   }
 
   const selectedService = services.find((s) => s.id === serviceId);
-  const canConfirm = Boolean(slot && clientName && clientPhone);
+  const priceVariants = selectedService?.priceVariants ?? [];
+  const needsPriceVariant = priceVariants.length > 0;
+  const selectedPriceVariant = priceVariants.find((v) => v.id === priceVariantId) ?? null;
+  const canConfirm = Boolean(
+    slot && clientName && clientPhone && (!needsPriceVariant || priceVariantId),
+  );
 
   return (
     <div className={cn(dashboardPageClass, "max-w-2xl pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0")}>
@@ -160,6 +173,30 @@ export default function NewBookingPage() {
             ) : null}
           </div>
         </div>
+
+        {needsPriceVariant ? (
+          <div className={cn(dashboardSectionClass, "space-y-4")}>
+            <h2 className="text-sm font-medium">Price option</h2>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {priceVariants.map((v) => (
+                <button
+                  key={v.id}
+                  type="button"
+                  onClick={() => setPriceVariantId(v.id)}
+                  className={cn(
+                    "min-h-11 rounded-lg border p-3 text-left text-sm transition-colors",
+                    priceVariantId === v.id
+                      ? "border-primary bg-primary/5"
+                      : "hover:border-primary/40",
+                  )}
+                >
+                  <p className="font-medium">{v.label}</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">{formatLkr(v.priceLkr)}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
 
         {serviceId ? (
           <div className={cn(dashboardSectionClass, "space-y-4")}>
@@ -230,39 +267,10 @@ export default function NewBookingPage() {
           <div className={cn(dashboardSectionClass, "space-y-4")}>
             <h2 className="text-sm font-medium">4. Client details</h2>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <DashboardField htmlFor="client-name" label="Name" required>
-                <DashboardInput
-                  id="client-name"
-                  required
-                  value={clientName}
-                  onChange={(e) => setClientName(e.target.value)}
-                />
-              </DashboardField>
-              <DashboardField htmlFor="client-phone" label="Phone" required>
-                <DashboardInput
-                  id="client-phone"
-                  required
-                  type="tel"
-                  inputMode="tel"
-                  value={clientPhone}
-                  onChange={(e) => setClientPhone(e.target.value)}
-                />
-              </DashboardField>
-              <DashboardField htmlFor="client-email" label="Email" optional>
-                <DashboardInput
-                  id="client-email"
-                  type="email"
-                  value={clientEmail}
-                  onChange={(e) => setClientEmail(e.target.value)}
-                />
-              </DashboardField>
-              <DashboardField htmlFor="client-notes" label="Notes" optional>
-                <DashboardInput
-                  id="client-notes"
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                />
-              </DashboardField>
+              <DashboardTextField label="Name" isRequired value={clientName} onChange={setClientName} />
+              <DashboardTextField label="Phone" isRequired type="tel" value={clientPhone} onChange={setClientPhone} />
+              <DashboardTextField label="Email" type="email" value={clientEmail} onChange={setClientEmail} />
+              <DashboardTextField label="Notes" value={notes} onChange={setNotes} />
             </div>
           </div>
         ) : null}
@@ -271,13 +279,15 @@ export default function NewBookingPage() {
           <>
             <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm">
               <p className="font-medium">
-                {selectedService?.name} with {staffList.find((s) => s.id === staffId)?.name}
+                {selectedService?.name}
+                {selectedPriceVariant ? ` (${selectedPriceVariant.label})` : ""} with{" "}
+                {staffList.find((s) => s.id === staffId)?.name}
               </p>
               <p className="text-muted-foreground">
                 {format(new Date(slot!.startUtc), "d MMM yyyy")} at {slot!.label}
               </p>
             </div>
-            <div className="sticky bottom-[calc(3.5rem+env(safe-area-inset-bottom))] z-10 -mx-4 border-t bg-background/95 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 md:static md:mx-0 md:border-0 md:bg-transparent md:px-0 md:py-0 md:backdrop-blur-none">
+            <div className="sticky bottom-[calc(3.5rem+env(safe-area-inset-bottom))] z-10 -mx-4 border-t bg-background/95 px-4 py-3 backdrop-blur-sm supports-backdrop-filter:bg-background/80 md:static md:mx-0 md:border-0 md:bg-transparent md:px-0 md:py-0 md:backdrop-blur-none">
               <button
                 type="submit"
                 disabled={saving}

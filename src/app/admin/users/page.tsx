@@ -82,7 +82,7 @@ export default async function AdminUsersPage({
             name="q"
             defaultValue={q}
             placeholder="Search by name or email"
-            className="h-10 w-full rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 pl-9 pr-3 text-sm outline-none transition-shadow placeholder:text-muted-foreground/60 focus:ring-2 focus:ring-primary/30"
+            className="h-10 w-full rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 pl-9 pr-3 text-sm outline-hidden transition-shadow placeholder:text-muted-foreground/60 focus:ring-2 focus:ring-primary/30"
           />
         </div>
         <div className="flex items-center gap-1 rounded-md border bg-muted/30 p-1">
@@ -96,7 +96,7 @@ export default async function AdminUsersPage({
                 value={chip.value}
                 className={
                   active
-                    ? "rounded px-3 py-1.5 text-xs font-semibold bg-white text-primary shadow-sm"
+                    ? "rounded px-3 py-1.5 text-xs font-semibold bg-white text-primary shadow-xs"
                     : "rounded px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground"
                 }
               >

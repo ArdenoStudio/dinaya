@@ -1,43 +1,334 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+@import '@heroui/styles';
 
-/* Prevent horizontal scroll from full-bleed sections and scaled mockups */
-html,
-body {
-  overflow-x: clip;
-  max-width: 100%;
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  /*
+    Raw token names --bg/--fg/--line/--muted-bg/--accent-bg (rather than
+    --background/--foreground/--border/--muted/--accent) deliberately avoid
+    colliding with @heroui/styles, which defines those exact 5 names itself
+    as complete OKLCH values on :root/.dark. Same layer, same selector — the
+    one loaded later would silently win the property for every consumer.
+    The utility class names below (bg-background, text-foreground, etc.)
+    are unaffected since they come from the --color-x mapping, not the raw
+    variable name.
+  */
+  --color-background: hsl(var(--bg));
+  --color-foreground: hsl(var(--fg));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+
+  --color-muted: hsl(var(--muted-bg));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-accent: hsl(var(--accent-bg));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  --color-border: hsl(var(--line));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --color-dashboard-canvas: hsl(var(--dashboard-canvas));
+  --color-dashboard-main: hsl(var(--dashboard-main));
+  --color-dashboard-chrome: hsl(var(--dashboard-chrome));
+  --color-dashboard-sidebar: hsl(var(--dashboard-sidebar));
+
+  --font-sans: var(--font-inter), sans-serif;
+  --font-cal: var(--font-cal), sans-serif;
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  --width-xs: 20rem;
+  --width-sm: 24rem;
+
+  --animate-scroll: scroll var(--animation-duration, 40s) linear infinite;
+  --animate-gradient: gradient 8s linear infinite;
+
+  @keyframes scroll {
+    to {
+      transform: translate(calc(-50% - 0.5rem));
+    }
+  }
+  @keyframes gradient {
+    0%,
+    100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
 }
 
-/* Scroll lock applied by UnderlayNav when the drawer is open */
-html.nav-open {
-  overflow-y: hidden;
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
 }
 
-@keyframes promo-gradient {
-  0%   { background-position: 0% 50%; }
-  50%  { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+@utility image-depth {
+  @apply outline-solid outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10;
 }
 
-.promo-card {
-  background-image: linear-gradient(135deg, #030712, #111827, #1e1b4b, #030712, #111827, #1e1b4b);
-  background-size: 100% 100%;
-  transition: background-size 0.3s ease;
+@utility surface-page {
+  @apply bg-white dark:bg-neutral-950;
 }
 
-.group:hover .promo-card {
-  background-size: 300% 300%;
-  animation: promo-gradient 4s ease infinite;
+@utility surface-card {
+  @apply bg-white dark:bg-neutral-900;
 }
 
-@keyframes grid-drift {
-  0%   { background-position: 0 0; }
-  100% { background-position: 0 -4rem; }
+@utility surface-muted {
+  @apply bg-gray-50 dark:bg-neutral-900/60;
 }
 
-.animate-grid-drift {
-  animation: grid-drift 4s linear infinite;
+@utility dashboard-canvas {
+  background-color: hsl(var(--dashboard-canvas));
+}
+
+@utility dashboard-main {
+  background-color: hsl(var(--dashboard-main));
+}
+
+@utility dashboard-chrome {
+  background-color: hsl(var(--dashboard-chrome));
+}
+
+@utility dashboard-sidebar {
+  background-color: hsl(var(--dashboard-sidebar));
+}
+
+@utility booking-panel-bg {
+  @apply bg-card;
+}
+
+@utility booking-sticky-bar {
+  @apply bg-background/95 backdrop-blur-md;
+}
+
+@utility public-page-offset {
+  padding-top: calc(
+    var(--public-nav-top) + var(--public-nav-height) + var(--public-nav-gap)
+  );
+}
+
+@utility public-page-offset-lg {
+  padding-top: calc(var(--public-nav-top) + var(--public-nav-height) + 2.75rem);
+}
+
+@utility dark {
+  & [data-booking-theme] {
+    --booking-accent-hover: color-mix(
+      in srgb,
+      var(--booking-accent) 78%,
+      white
+    );
+    /* Mix toward an elevated gray, not pure black — a dark/low-luminance
+       accent (e.g. near-black brand colors) would otherwise mix down to a
+       tint indistinguishable from the black page canvas. */
+    --booking-accent-muted: color-mix(
+      in srgb,
+      var(--booking-accent) 22%,
+      #2c2c30
+    );
+    --booking-accent-soft: color-mix(
+      in srgb,
+      var(--booking-accent) 34%,
+      #2c2c30
+    );
+    --booking-accent-shadow: color-mix(
+      in srgb,
+      var(--booking-accent) 45%,
+      transparent
+    );
+    --booking-accent-on-dark: color-mix(
+      in srgb,
+      var(--booking-accent) 65%,
+      white
+    );
+
+    /* Apple-style grouped surfaces: true black canvas, neutral elevated cards */
+    --bg: 0 0% 0%;
+    --fg: 0 0% 98%;
+    --card: 240 5% 11%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 5% 11%;
+    --popover-foreground: 0 0% 98%;
+    --secondary: 240 4% 16%;
+    --secondary-foreground: 0 0% 98%;
+    --muted-bg: 240 4% 16%;
+    --muted-foreground: 240 4% 64%;
+    --accent-bg: 240 4% 16%;
+    --accent-foreground: 0 0% 98%;
+    --line: 240 4% 22%;
+    --input: 240 4% 18%;
+  }
+}
+
+@utility booking-bg-accent {
+  background-color: var(--booking-accent);
+}
+
+@utility booking-bg-accent-hover {
+  &:hover {
+    background-color: var(--booking-accent-hover);
+  }
+}
+
+@utility booking-text-accent {
+  color: var(--booking-accent);
+}
+
+@utility booking-text-accent-on-dark {
+  color: var(--booking-accent-on-dark);
+}
+
+@utility booking-border-accent {
+  border-color: var(--booking-accent);
+}
+
+@utility booking-ring-accent {
+  --tw-ring-color: var(--booking-accent-ring);
+}
+
+@utility booking-shadow-accent {
+  box-shadow: 0 10px 25px -5px var(--booking-accent-shadow);
+}
+
+@utility booking-bg-accent-muted {
+  background-color: var(--booking-accent-muted);
+}
+
+@utility booking-bg-accent-soft {
+  background-color: var(--booking-accent-soft);
+}
+
+@utility booking-gradient-accent {
+  background-image: linear-gradient(
+    to right,
+    var(--booking-accent),
+    var(--booking-accent-hover)
+  );
+}
+
+@utility booking-page-bg {
+  background-color: var(--booking-page-bg);
+}
+
+@utility booking-panel-surface {
+  background-color: var(--booking-panel-bg);
+
+  /* Solid pink panel: readable text + solid white sub-surfaces (slots, inputs) */
+  [data-booking-theme][data-booking-panel='accent'] & {
+    --fg: 330 28% 16%;
+    --muted-foreground: 330 14% 32%;
+    --card: 0 0% 100%;
+    --card-foreground: 330 28% 16%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 330 28% 16%;
+    --secondary: 0 0% 100%;
+    --secondary-foreground: 330 28% 16%;
+    --muted-bg: 330 45% 94%;
+    --accent-bg: 330 45% 94%;
+    --accent-foreground: 330 28% 16%;
+    --line: 330 30% 76%;
+    --input: 330 30% 76%;
+    color: hsl(var(--fg));
+  }
+}
+
+@utility booking-hero-overlay {
+  background-color: color-mix(
+    in srgb,
+    var(--booking-hero-overlay) calc(var(--booking-hero-overlay-opacity) * 100%),
+    transparent
+  );
+}
+
+@layer utilities {
+  /* Prevent horizontal scroll from full-bleed sections and scaled mockups */
+  html,
+  body {
+    overflow-x: clip;
+    max-width: 100%;
+  }
+
+  /* Scroll lock applied by UnderlayNav when the drawer is open */
+  html.nav-open {
+    overflow-y: hidden;
+  }
+
+  @keyframes promo-gradient {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
+  .promo-card {
+    background-image: linear-gradient(
+      135deg,
+      #030712,
+      #111827,
+      #1e1b4b,
+      #030712,
+      #111827,
+      #1e1b4b
+    );
+    background-size: 100% 100%;
+    transition: background-size 0.3s ease;
+  }
+
+  .group:hover .promo-card {
+    background-size: 300% 300%;
+    animation: promo-gradient 4s ease infinite;
+  }
+
+  @keyframes grid-drift {
+    0% {
+      background-position: 0 0;
+    }
+    100% {
+      background-position: 0 -4rem;
+    }
+  }
+
+  .animate-grid-drift {
+    animation: grid-drift 4s linear infinite;
+  }
 }
 
 @layer base {
@@ -45,8 +336,8 @@ html.nav-open {
     --font-inter: Inter, "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
     --gradient-color: #2563eb;
     --sparkles-color: #2563eb;
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --bg: 0 0% 100%;
+    --fg: 222.2 84% 4.9%;
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
@@ -55,13 +346,13 @@ html.nav-open {
     --primary-foreground: 210 40% 98%;
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
+    --muted-bg: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
+    --accent-bg: 210 40% 96.1%;
     --accent-foreground: 222.2 47.4% 11.2%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
+    --line: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 220 84% 67%;
     --radius: 0.5rem;
@@ -92,8 +383,8 @@ html.nav-open {
     /* True neutral dark palette (Apple systemGray-style — near-zero
        saturation, elevation via lightness only), replacing the previous
        saturated navy (222° 84%) that read as "blue" instead of black. */
-    --background: 240 6% 7%;
-    --foreground: 0 0% 95%;
+    --bg: 240 6% 7%;
+    --fg: 0 0% 95%;
     --card: 240 5% 11%;
     --card-foreground: 0 0% 95%;
     --popover: 240 5% 14%;
@@ -102,13 +393,13 @@ html.nav-open {
     --primary-foreground: 0 0% 100%;
     --secondary: 240 4% 16%;
     --secondary-foreground: 0 0% 95%;
-    --muted: 240 4% 16%;
+    --muted-bg: 240 4% 16%;
     --muted-foreground: 240 5% 65%;
-    --accent: 240 4% 16%;
+    --accent-bg: 240 4% 16%;
     --accent-foreground: 0 0% 95%;
     --destructive: 4 90% 58%;
     --destructive-foreground: 0 0% 100%;
-    --border: 240 4% 20%;
+    --line: 240 4% 20%;
     --input: 240 4% 16%;
     --ring: 220 84% 67%;
     --dashboard-canvas: 240 6% 7%;
@@ -125,73 +416,116 @@ html.nav-open {
   }
 }
 
+/*
+  HeroUI's remaining tokens (--surface, --danger; --success/--warning have
+  no existing project equivalent so HeroUI's own defaults are kept) point at
+  this project's renamed tokens for a unified palette.
+*/
+:root {
+  --surface: hsl(var(--card));
+  --danger: hsl(var(--destructive));
+}
+.dark {
+  --surface: hsl(var(--card));
+  --danger: hsl(var(--destructive));
+}
+
+/*
+  HeroUI's own component CSS (node_modules/@heroui/styles/dist/components/*.css) uses bare
+  text-muted/bg-accent utilities for its OWN secondary text and checked/selected states,
+  expecting --color-muted/--color-accent to resolve to HeroUI's tokens. But those are mapped
+  above to this project's --muted-bg/--accent-bg — subtle BACKGROUND-tint tokens, not
+  text/brand tones — so HeroUI's internal states render nearly invisible.
+
+  This can't be fixed with one global value: --color-muted/--color-accent also feed this
+  project's own ~220 bg-muted background-tint usages, which need the light tint, not a
+  text-contrast gray or a vivid brand blue. bg-muted and text-muted share one token, so the
+  fix has to be scoped per-component instead. Re-pointed here to this project's own
+  muted-foreground/primary/primary-foreground (brand-aligned, not HeroUI's generic defaults)
+  only inside the HeroUI component roots that actually use the bare utilities — everywhere
+  else keeps the background-tint value from the @theme block above.
+
+  HeroUI's derived tokens (--accent-hover, --accent-soft, etc.) do NOT pick up this override
+  automatically, despite being color-mix()'d from --accent/--accent-foreground in
+  @heroui/styles: those color-mix() declarations live only on :root/.dark in
+  themes/default/variables.css, and a custom property's var() references are resolved once,
+  at the element that owns the winning declaration — :root — using :root's own --accent, then
+  the already-resolved result is what inherits down. A more specific --accent override scoped
+  to e.g. .switch is invisible to :root's --accent-hover computation; it never re-resolves for
+  descendants. Confirmed via getComputedStyle: .switch__control's --accent-hover carried
+  HeroUI's stock blue (#0485f7) instead of this project's primary, even though --accent read
+  correctly on the same element (which works only because --accent itself is redeclared right
+  here, not inherited from a :root-only definition). So every derived token an included
+  component actually consumes (grep the component CSS under node_modules/@heroui/styles for
+  bare bg-accent-hover, bg-accent-soft, bg-accent-soft-hover, text-accent-soft-foreground, or a
+  raw var(--accent-hover) like switch.css's --switch-control-bg-checked-hover) must be
+  re-derived here too, both the raw name and its --color-* @theme alias (components apply
+  either form depending on whether they use @apply or a raw var()).
+
+  !important guards against the compiled @theme block's :root rule, which a plain selector
+  can't reliably out-specify by source order alone.
+*/
+:is(
+  .typography, .typography-prose, .toast, .separator, .pagination, .modal__body,
+  .menu-item, .kbd, .header, .empty-state, .drawer__body, .description,
+  .date-input-group, .close-button, .card__description, .breadcrumbs, .alert, .autocomplete,
+  .alert-dialog__body, .accordion,
+  .table__column, .switch, .tabs__tab, .tabs__separator, .range-calendar, .radio, .checkbox, .calendar
+) {
+  --muted: hsl(var(--muted-foreground)) !important;
+  --color-muted: var(--muted) !important;
+}
+
+/*
+  NOTE: .tabs and .table-root themselves were removed from both lists below (2026-09-08) —
+  they were scoping the override to the *entire* tab panel / table body, not just the small
+  HeroUI-internal element that actually reads the bare token, so any plain bg-muted/text-muted
+  usage in this project's own content nested inside a Tabs.Root or Table.Root (e.g. a status
+  pill on a Tabs-wrapped detail page) silently lost its tint and rendered as invisible
+  text-on-itself. Confirmed live: a `bg-muted text-muted-foreground` badge inside a Tabs.Root
+  page wrapper computed to the *same* color for both background and text. Scope any new
+  addition here to the actual leaf class from the component's own CSS (grep
+  node_modules/@heroui/styles), never to a root/panel/body wrapper class that arbitrary content
+  can end up nested inside.
+*/
+:is(.table__column-resizer, .switch, .range-calendar, .radio, .checkbox, .calendar, .slider) {
+  --accent: hsl(var(--primary)) !important;
+  --color-accent: var(--accent) !important;
+  --accent-foreground: hsl(var(--primary-foreground)) !important;
+  --color-accent-foreground: var(--accent-foreground) !important;
+
+  --accent-hover: color-mix(in oklab, var(--accent) 90%, var(--accent-foreground) 10%) !important;
+  --color-accent-hover: var(--accent-hover) !important;
+  --accent-soft: color-mix(in oklab, var(--accent) 15%, transparent) !important;
+  --color-accent-soft: var(--accent-soft) !important;
+  --accent-soft-hover: color-mix(in oklab, var(--accent) 20%, transparent) !important;
+  --color-accent-soft-hover: var(--accent-soft-hover) !important;
+  --accent-soft-foreground: color-mix(in oklab, var(--accent) 70%, var(--foreground) 30%) !important;
+  --color-accent-soft-foreground: var(--accent-soft-foreground) !important;
+}
+
 @layer utilities {
-  .image-depth {
-    @apply outline outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10;
+  /* Hide scrollbar globally but preserve scrolling functionality */
+  html,
+  body {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
   }
-  .surface-page {
-    @apply bg-white dark:bg-neutral-950;
-  }
-
-  .surface-card {
-    @apply bg-white dark:bg-neutral-900;
-  }
-
-  .surface-muted {
-    @apply bg-gray-50 dark:bg-neutral-900/60;
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
   }
 
-  .dashboard-canvas {
-    background-color: hsl(var(--dashboard-canvas));
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
 
-  .dashboard-main {
-    background-color: hsl(var(--dashboard-main));
-  }
-
-  .dashboard-chrome {
-    background-color: hsl(var(--dashboard-chrome));
-  }
-
-  .dashboard-sidebar {
-    background-color: hsl(var(--dashboard-sidebar));
-  }
-
-  .booking-panel-bg {
-    @apply bg-card;
-  }
-
-  .booking-sticky-bar {
-    @apply bg-background/95 backdrop-blur-md;
-  }
-
-  .public-page-offset {
-    padding-top: calc(var(--public-nav-top) + var(--public-nav-height) + var(--public-nav-gap));
-  }
-
-  .public-page-offset-lg {
-    padding-top: calc(var(--public-nav-top) + var(--public-nav-height) + 2.75rem);
-  }
+  /* Tenant-branded public booking surfaces */
 }
-
-/* Hide scrollbar globally but preserve scrolling functionality */
-html, body {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
-}
-html::-webkit-scrollbar, body::-webkit-scrollbar {
-  display: none; /* Chrome, Safari and Opera */
-}
-
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-
-/* Tenant-branded public booking surfaces */
 @layer components {
   [data-booking-theme] {
     --booking-accent: #2563eb;
@@ -205,80 +539,6 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
     --booking-accent-ring: color-mix(in srgb, var(--booking-accent) 28%, transparent);
     --booking-accent-shadow: color-mix(in srgb, var(--booking-accent) 35%, transparent);
     --booking-accent-on-dark: color-mix(in srgb, var(--booking-accent) 55%, white);
-  }
-
-  .dark [data-booking-theme] {
-    --booking-accent-hover: color-mix(in srgb, var(--booking-accent) 78%, white);
-    /* Mix toward an elevated gray, not pure black — a dark/low-luminance
-       accent (e.g. near-black brand colors) would otherwise mix down to a
-       tint indistinguishable from the black page canvas. */
-    --booking-accent-muted: color-mix(in srgb, var(--booking-accent) 22%, #2c2c30);
-    --booking-accent-soft: color-mix(in srgb, var(--booking-accent) 34%, #2c2c30);
-    --booking-accent-shadow: color-mix(in srgb, var(--booking-accent) 45%, transparent);
-    --booking-accent-on-dark: color-mix(in srgb, var(--booking-accent) 65%, white);
-
-    /* Apple-style grouped surfaces: true black canvas, neutral elevated cards */
-    --background: 0 0% 0%;
-    --foreground: 0 0% 98%;
-    --card: 240 5% 11%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 5% 11%;
-    --popover-foreground: 0 0% 98%;
-    --secondary: 240 4% 16%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 4% 16%;
-    --muted-foreground: 240 4% 64%;
-    --accent: 240 4% 16%;
-    --accent-foreground: 0 0% 98%;
-    --border: 240 4% 22%;
-    --input: 240 4% 18%;
-  }
-
-  .booking-bg-accent { background-color: var(--booking-accent); }
-  .booking-bg-accent-hover:hover { background-color: var(--booking-accent-hover); }
-  .booking-text-accent { color: var(--booking-accent); }
-  .booking-text-accent-on-dark { color: var(--booking-accent-on-dark); }
-  .booking-border-accent { border-color: var(--booking-accent); }
-  .booking-ring-accent { --tw-ring-color: var(--booking-accent-ring); }
-  .booking-shadow-accent { box-shadow: 0 10px 25px -5px var(--booking-accent-shadow); }
-  .booking-bg-accent-muted { background-color: var(--booking-accent-muted); }
-  .booking-bg-accent-soft { background-color: var(--booking-accent-soft); }
-  .booking-gradient-accent {
-    background-image: linear-gradient(to right, var(--booking-accent), var(--booking-accent-hover));
-  }
-
-  .booking-page-bg {
-    background-color: var(--booking-page-bg);
-  }
-
-  .booking-panel-surface {
-    background-color: var(--booking-panel-bg);
-  }
-
-  /* Solid pink panel: readable text + solid white sub-surfaces (slots, inputs) */
-  [data-booking-theme][data-booking-panel="accent"] .booking-panel-surface {
-    --foreground: 330 28% 16%;
-    --muted-foreground: 330 14% 32%;
-    --card: 0 0% 100%;
-    --card-foreground: 330 28% 16%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 330 28% 16%;
-    --secondary: 0 0% 100%;
-    --secondary-foreground: 330 28% 16%;
-    --muted: 330 45% 94%;
-    --accent: 330 45% 94%;
-    --accent-foreground: 330 28% 16%;
-    --border: 330 30% 76%;
-    --input: 330 30% 76%;
-    color: hsl(var(--foreground));
-  }
-
-  .booking-hero-overlay {
-    background-color: color-mix(
-      in srgb,
-      var(--booking-hero-overlay) calc(var(--booking-hero-overlay-opacity) * 100%),
-      transparent
-    );
   }
 }
 

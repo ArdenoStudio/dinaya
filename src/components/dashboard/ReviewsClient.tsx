@@ -3,13 +3,16 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
+import { toast } from "@heroui/react";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
 import { useDashboardCopy } from "@/components/dashboard/DashboardLocaleProvider";
 import { ConfirmDialog } from "@/components/dashboard/ConfirmDialog";
-import { Icon } from "@/components/ui/Icon";
+import { DashboardLoadingPanel } from "@/components/dashboard/DashboardLoadingPanel";
+import { DashboardSwitch, DashboardTextAreaField } from "@/components/dashboard/DashboardFormField";
+import { EmptyState } from "@/components/dashboard/EmptyState";
+import { Star, Trash2 } from "lucide-react";
 import {
   dashboardCardClass,
-  dashboardInputClass,
   dashboardOutlineActionClass,
   dashboardPageClass,
   dashboardPrimaryActionClass,
@@ -38,7 +41,11 @@ function Stars({ rating }: { rating: number }) {
   return (
     <span className="inline-flex gap-0.5">
       {[1, 2, 3, 4, 5].map((n) => (
-        <Icon key={n} name={n <= rating ? "star-fill" : "star"} className={`${n <= rating ? "text-amber-400" : "text-gray-300"} text-xs`} />
+        <Star
+          key={n}
+          className={`size-3.5 ${n <= rating ? "text-amber-400" : "text-gray-300"}`}
+          fill={n <= rating ? "currentColor" : "none"}
+        />
       ))}
     </span>
   );
@@ -51,13 +58,13 @@ export function ReviewsClient({ canUseAiReplies }: { canUseAiReplies: boolean })
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const [cursor, setCursor] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [summary, setSummary] = useState<ReviewsSummary | null>(null);
   const [loadError, setLoadError] = useState("");
   const [activeReplyId, setActiveReplyId] = useState<string | null>(null);
   const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({});
   const [savingReplyId, setSavingReplyId] = useState<string | null>(null);
   const [generatingReplyId, setGeneratingReplyId] = useState<string | null>(null);
-  const [savedReplyId, setSavedReplyId] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/dashboard/reviews")
@@ -98,7 +105,7 @@ export function ReviewsClient({ canUseAiReplies }: { canUseAiReplies: boolean })
       setHasMore(Boolean(data.hasMore));
       setCursor(data.nextCursor ?? null);
     } catch {
-      // Non-fatal — the existing list stays usable; the button just stays clickable to retry.
+      toast.danger("Could not load more reviews");
     } finally {
       setLoadingMore(false);
     }
@@ -113,12 +120,19 @@ export function ReviewsClient({ canUseAiReplies }: { canUseAiReplies: boolean })
     if (response.ok) {
       const updated = await response.json() as Review;
       setReviewList((prev) => prev.map((review) => review.id === id ? updated : review));
+    } else {
+      toast.danger("Could not update review visibility");
     }
   }
 
   async function deleteReview(id: string) {
     const response = await fetch(`/api/dashboard/reviews/${id}`, { method: "DELETE" });
-    if (response.ok) setReviewList((prev) => prev.filter((review) => review.id !== id));
+    if (response.ok) {
+      setReviewList((prev) => prev.filter((review) => review.id !== id));
+      toast.success("Review deleted");
+    } else {
+      toast.danger("Could not delete review");
+    }
   }
 
   async function saveReply(id: string) {
@@ -131,8 +145,9 @@ export function ReviewsClient({ canUseAiReplies }: { canUseAiReplies: boolean })
     if (response.ok) {
       const updated = await response.json() as Review;
       setReviewList((prev) => prev.map((review) => review.id === id ? updated : review));
-      setSavedReplyId(id);
-      setTimeout(() => setSavedReplyId(null), 2000);
+      toast.success(copy.replySaved);
+    } else {
+      toast.danger("Could not save reply");
     }
     setSavingReplyId(null);
   }
@@ -144,6 +159,8 @@ export function ReviewsClient({ canUseAiReplies }: { canUseAiReplies: boolean })
     if (response.ok && data.reply) {
       setReplyDrafts((prev) => ({ ...prev, [id]: data.reply! }));
       setActiveReplyId(id);
+    } else {
+      toast.danger("Could not generate a reply");
     }
     setGeneratingReplyId(null);
   }
@@ -181,17 +198,13 @@ export function ReviewsClient({ canUseAiReplies }: { canUseAiReplies: boolean })
       )}
 
       {loading ? (
-        <p className="text-sm text-muted-foreground">{copy.loading}</p>
+        <DashboardLoadingPanel rows={3} />
       ) : loadError ? (
         <div className={cn(dashboardSectionMutedClass, "text-center")}>
           <p className="text-sm text-destructive">{loadError}</p>
         </div>
       ) : reviewList.length === 0 ? (
-        <div className={cn(dashboardCardClass, "p-12 text-center")}>
-          <Icon name="star" className="mb-3 block text-3xl text-muted-foreground/40" />
-          <p className="text-sm font-medium">{copy.emptyTitle}</p>
-          <p className="mt-1 text-xs text-muted-foreground">{copy.emptyBody}</p>
-        </div>
+        <EmptyState icon={Star} title={copy.emptyTitle} description={copy.emptyBody} />
       ) : (
         <div className="space-y-4">
           {reviewList.map((review) => (
@@ -208,29 +221,30 @@ export function ReviewsClient({ canUseAiReplies }: { canUseAiReplies: boolean })
                   <span className="text-xs text-muted-foreground">
                     {format(new Date(review.createdAt), "d MMM yyyy")}
                   </span>
-                  <button
-                    type="button"
-                    onClick={() => togglePublished(review.id, review.isPublished)}
-                    className={`relative inline-flex h-5 w-9 rounded-full transition-colors ${review.isPublished ? "bg-primary" : "bg-gray-200 dark:bg-neutral-700"}`}
-                    aria-label={copy.visible}
-                  >
-                    <span className={`absolute top-0.5 size-4 rounded-full bg-white shadow transition-transform ${review.isPublished ? "translate-x-4" : "translate-x-0.5"}`} />
-                  </button>
-                  <ConfirmDialog
-                    title="Delete review"
-                    description="Delete this review? This cannot be undone."
-                    confirmLabel="Delete"
-                    onConfirm={() => deleteReview(review.id)}
-                    trigger={
-                      <button
-                        type="button"
-                        className="text-sm text-muted-foreground transition-colors hover:text-destructive"
-                        aria-label="Delete review"
-                      >
-                        <Icon name="trash" />
-                      </button>
-                    }
+                  <DashboardSwitch
+                    label={copy.visible}
+                    isSelected={review.isPublished}
+                    onChange={() => togglePublished(review.id, review.isPublished)}
                   />
+                  <>
+                    <button
+                      type="button"
+                      className="text-sm text-muted-foreground transition-colors hover:text-destructive"
+                      aria-label="Delete review"
+                      onClick={() => setConfirmDeleteId(review.id)}
+                    >
+                      <Trash2 className="size-4" />
+                    </button>
+                    <ConfirmDialog
+                      title="Delete review"
+                      description="Delete this review? This cannot be undone."
+                      confirmLabel="Delete"
+                      variant="destructive"
+                      onConfirm={() => deleteReview(review.id)}
+                      open={confirmDeleteId === review.id}
+                      onOpenChange={(open) => setConfirmDeleteId(open ? review.id : null)}
+                    />
+                  </>
                 </div>
               </div>
 
@@ -252,12 +266,12 @@ export function ReviewsClient({ canUseAiReplies }: { canUseAiReplies: boolean })
 
                 {activeReplyId === review.id ? (
                   <div className="mt-3 space-y-3">
-                    <textarea
-                      rows={3}
+                    <DashboardTextAreaField
+                      label={copy.reply}
                       value={replyDrafts[review.id] ?? ""}
-                      onChange={(event) => setReplyDrafts((prev) => ({ ...prev, [review.id]: event.target.value }))}
+                      onChange={(value) => setReplyDrafts((prev) => ({ ...prev, [review.id]: value }))}
                       placeholder={copy.replyPlaceholder}
-                      className={dashboardInputClass}
+                      rows={3}
                     />
                     <div className="flex flex-wrap items-center gap-2">
                       <button
@@ -282,9 +296,6 @@ export function ReviewsClient({ canUseAiReplies }: { canUseAiReplies: boolean })
                           {copy.upgradeReply}
                         </Link>
                       )}
-                      {savedReplyId === review.id ? (
-                        <span className="text-sm text-muted-foreground">{copy.replySaved}</span>
-                      ) : null}
                     </div>
                   </div>
                 ) : null}

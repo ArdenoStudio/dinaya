@@ -47,7 +47,7 @@ export function SidebarToggleIcon({
         d={isOpen ? PANEL_OPEN : PANEL_CLOSED}
         initial={{ d: isOpen ? PANEL_OPEN : PANEL_CLOSED }}
         animate={{ d: isOpen ? PANEL_OPEN : PANEL_CLOSED }}
-        style={{ fill: "hsl(var(--background))" }}
+        style={{ fill: "hsl(var(--bg))" }}
         transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
       />
     </svg>

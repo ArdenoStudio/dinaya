@@ -9,7 +9,7 @@ import { Icon } from "@/components/ui/Icon";
 import { cn } from "@/lib/utils";
 
 const pillFocus =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--booking-accent-soft)] focus-visible:ring-offset-2";
+  "focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-(--booking-accent-soft) focus-visible:ring-offset-2";
 
 interface Props {
   allStaff: Staff[];
@@ -60,7 +60,7 @@ export default function StaffPicker({
               pillFocus,
               anyStaffSelected
                 ? "booking-border-accent booking-bg-accent-muted booking-text-accent ring-2 booking-ring-accent"
-                : "border-border bg-secondary/50 text-muted-foreground hover:border-[var(--booking-accent)]",
+                : "border-border bg-secondary/50 text-muted-foreground hover:booking-border-accent",
             )}
           >
             <span className="inline-flex items-center gap-1.5">
@@ -85,7 +85,7 @@ export default function StaffPicker({
                 pillFocus,
                 isSelected
                   ? "booking-border-accent booking-bg-accent-muted booking-text-accent ring-2 booking-ring-accent"
-                  : "border-border bg-secondary/50 text-muted-foreground hover:border-[var(--booking-accent)]",
+                  : "border-border bg-secondary/50 text-muted-foreground hover:booking-border-accent",
               )}
             >
               {s.avatarUrl ? (

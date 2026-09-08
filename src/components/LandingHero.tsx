@@ -56,7 +56,7 @@ export function LandingHero() {
           <CTAPrimaryButton>{MARKETING_CTA_HERO}</CTAPrimaryButton>
           <Link
             href={LANDING_LIVE_DEMO_PATH}
-            className="inline-flex items-center gap-2 rounded-lg border border-border bg-background/80 px-6 py-3.5 text-sm font-medium text-foreground shadow-sm backdrop-blur-sm transition-[transform,background-color,border-color] duration-150 hover:bg-muted/60 active:scale-[0.96]"
+            className="inline-flex items-center gap-2 rounded-lg border border-border bg-background/80 px-6 py-3.5 text-sm font-medium text-foreground shadow-xs backdrop-blur-xs transition-[transform,background-color,border-color] duration-150 hover:bg-muted/60 active:scale-[0.96]"
           >
             <Icon name="box-arrow-up-right" className="text-base" />
             Try a live booking page

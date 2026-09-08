@@ -34,6 +34,7 @@ import {
 } from "@/lib/booking-attribution";
 import { canUseFeature, getBusinessPlan, PlanLimitError, requirePlanLimit } from "@/lib/plan";
 import { validateIntakeAnswers, intakeAnswersInputSchema, type IntakeAnswer } from "@/lib/intake";
+import { resolvePriceVariantSelection, type ServicePriceVariant } from "@/lib/service-variants";
 import { withRateLimit } from "@/lib/rate-limit";
 import { hasApiKeyAuth, requireApiKey } from "@/lib/api-key-auth";
 import {
@@ -64,6 +65,7 @@ const bookingSchema = z.object({
   clientEmail: z.email().optional().nullable().or(z.literal("")),
   notes: z.string().trim().max(2000).optional().nullable(),
   intakeAnswers: intakeAnswersInputSchema.optional().nullable(),
+  priceVariantId: z.string().trim().min(1).max(40).optional().nullable(),
   dealId: z.uuid().optional().nullable(),
   sessionToken: z.string().min(16).max(64).optional().nullable(),
   paymentMethod: z.enum(["payhere", "paypal", "manual"]).optional().nullable(),
@@ -143,6 +145,7 @@ export async function POST(req: NextRequest) {
     clientEmail,
     notes,
     intakeAnswers,
+    priceVariantId,
     dealId: requestedDealId,
     source: requestedSource = "public",
     attribution: requestedAttribution,
@@ -219,6 +222,7 @@ export async function POST(req: NextRequest) {
       startsAt,
       endsAt,
       clientPhone,
+      priceVariantId,
     });
     const cached = await getBookingIdempotencyResponse({
       businessId,
@@ -238,6 +242,7 @@ export async function POST(req: NextRequest) {
         startsAt,
         endsAt,
         clientPhone,
+        priceVariantId,
       })
     : null;
 
@@ -278,6 +283,7 @@ export async function POST(req: NextRequest) {
       maximumAdvanceDays: services.maximumAdvanceDays,
       dailyCapacity: services.dailyCapacity,
       intakeQuestions: services.intakeQuestions,
+      priceVariants: services.priceVariants,
       isActive: services.isActive,
     })
     .from(services)
@@ -287,6 +293,22 @@ export async function POST(req: NextRequest) {
   if (!service || !service.isActive) {
     return NextResponse.json({ error: "Service is not available." }, { status: 400 });
   }
+
+  // Never trust a client-submitted price: re-resolve the chosen option (if any)
+  // against the service's own stored options, server-side, before any money math.
+  const priceVariantResult = resolvePriceVariantSelection(service.priceVariants, priceVariantId);
+  if (!priceVariantResult.ok) {
+    if (!isOwnerBooking && !isApiBooking) {
+      return NextResponse.json({ error: priceVariantResult.error }, { status: 400 });
+    }
+  }
+  const resolvedPriceVariant: ServicePriceVariant | null = priceVariantResult.ok
+    ? priceVariantResult.variant
+    : null;
+  const effectiveBasePriceLkr = resolvedPriceVariant?.priceLkr ?? service.priceLkr;
+  const serviceDisplayName = resolvedPriceVariant
+    ? `${service.name} (${resolvedPriceVariant.label})`
+    : service.name;
 
   const [staffMember] = await db
     .select({
@@ -368,14 +390,14 @@ export async function POST(req: NextRequest) {
     }
 
     validatedDealId = deal.id;
-    discountedPriceLkr = computeDiscountedPrice(service.priceLkr, deal.discountPercent);
+    discountedPriceLkr = computeDiscountedPrice(effectiveBasePriceLkr, deal.discountPercent);
   }
 
   const amountDueLkr = discountedPriceLkr !== null
     ? computeAmountDueFromDiscountedPrice(discountedPriceLkr, service.depositPercent)
     : service.depositPercent > 0
-      ? Math.ceil((service.priceLkr * service.depositPercent) / 100)
-      : service.priceLkr;
+      ? Math.ceil((effectiveBasePriceLkr * service.depositPercent) / 100)
+      : effectiveBasePriceLkr;
 
   const hasPayhereSecret = Boolean(decryptSecret(business.payhereMerchantSecret));
   const hasPaypalSecret = Boolean(decryptSecret(business.paypalClientSecret));
@@ -553,6 +575,7 @@ export async function POST(req: NextRequest) {
         attribution: attribution && Object.values(attribution).some(Boolean) ? attribution : null,
         notes: notes || null,
         intakeAnswers: storedIntakeAnswers,
+        priceVariant: resolvedPriceVariant,
       })
       .returning({ id: bookings.id });
   } catch (error) {
@@ -646,7 +669,7 @@ export async function POST(req: NextRequest) {
           clientEmail: clientEmail || null,
           clientPhone,
           businessName: business.name,
-          serviceName: service.name,
+          serviceName: serviceDisplayName,
           staffName: staffMember.name,
           startsAt: new Date(startsAt),
           manageUrl,
@@ -659,7 +682,7 @@ export async function POST(req: NextRequest) {
               clientEmail: business.email,
               businessName: business.name,
               businessSlug: business.slug,
-              serviceName: service.name,
+              serviceName: serviceDisplayName,
               staffName: staffMember.name,
               startsAt: new Date(startsAt),
               bookingId: booking.id,
@@ -672,7 +695,7 @@ export async function POST(req: NextRequest) {
               businessPhone: business.phone,
               businessName: business.name,
               clientName,
-              serviceName: service.name,
+              serviceName: serviceDisplayName,
               staffName: staffMember.name,
               startsAt: new Date(startsAt),
               plan: business.plan as Plan,
@@ -699,7 +722,7 @@ export async function POST(req: NextRequest) {
       bookingId: booking.id,
       businessId,
       business,
-      serviceName: service.name,
+      serviceName: serviceDisplayName,
       depositPercent: service.depositPercent,
       clientName,
       clientPhone,

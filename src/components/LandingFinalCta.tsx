@@ -6,7 +6,7 @@ export function LandingFinalCta() {
   return (
     <section className="relative mx-auto max-w-4xl overflow-hidden px-6 py-20 text-center">
       <div
-        className="pointer-events-none absolute inset-0 -z-10 rounded-[2rem] bg-[radial-gradient(80%_70%_at_50%_0%,hsl(220_82%_53%/0.12),transparent_65%)] dark:bg-[radial-gradient(80%_70%_at_50%_0%,hsl(220_82%_53%/0.2),transparent_65%)]"
+        className="pointer-events-none absolute inset-0 -z-10 rounded-4xl bg-[radial-gradient(80%_70%_at_50%_0%,hsl(220_82%_53%/0.12),transparent_65%)] dark:bg-[radial-gradient(80%_70%_at_50%_0%,hsl(220_82%_53%/0.2),transparent_65%)]"
         aria-hidden="true"
       />
       <h2 className="font-cal text-3xl tracking-tight text-balance md:text-4xl">

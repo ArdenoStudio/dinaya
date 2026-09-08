@@ -57,7 +57,7 @@ export function ReferralSettings({
       </div>
 
       <div className="rounded-lg border border-border/60 bg-muted/40 p-4 text-xs text-muted-foreground">
-        <p className="font-medium text-gray-800 dark:text-gray-200">Track campaigns with UTM links</p>
+        <p className="font-medium text-foreground">Track campaigns with UTM links</p>
         <p className="mt-1">
           Append <code>?utm_source=instagram</code>, <code>?utm_source=whatsapp</code>, or{" "}
           <code>?channel=directory</code> to your booking link.

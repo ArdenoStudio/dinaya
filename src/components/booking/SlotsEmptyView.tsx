@@ -55,7 +55,7 @@ export function SlotsEmptyView({
           <button
             type="button"
             onClick={() => onNextAvailable(nextAvailable)}
-            className="mt-4 inline-flex min-h-11 w-full max-w-xs items-center justify-center rounded-lg bg-[var(--booking-accent)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[var(--booking-accent)]/90"
+            className="mt-4 inline-flex min-h-11 w-full max-w-xs items-center justify-center rounded-lg booking-bg-accent px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition-colors hover:bg-(--booking-accent)/90"
             aria-label={`${copy.nextAvailable}: ${nextLabel}`}
           >
             {nextLabel}
@@ -66,14 +66,14 @@ export function SlotsEmptyView({
   }
 
   return (
-    <div className="flex min-h-[12rem] flex-col items-center justify-center gap-3 px-4 py-8 text-center">
+    <div className="flex min-h-48 flex-col items-center justify-center gap-3 px-4 py-8 text-center">
       <Icon name={emptyIcon(emptyState)} className="text-2xl text-muted-foreground/50" />
       <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">{message}</p>
       {showNext && nextLabel && (
         <button
           type="button"
           onClick={() => onNextAvailable(nextAvailable)}
-          className="flex min-h-11 w-full items-center justify-center rounded-lg bg-[var(--booking-accent)] px-3 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[var(--booking-accent)]/90"
+          className="flex min-h-11 w-full items-center justify-center rounded-lg booking-bg-accent px-3 py-2.5 text-sm font-semibold text-white shadow-xs transition-colors hover:bg-(--booking-accent)/90"
           aria-label={`${copy.nextAvailable}: ${nextLabel}`}
         >
           {nextLabel}

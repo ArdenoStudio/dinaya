@@ -70,7 +70,7 @@ export default async function AdminLayout({
       </aside>
 
       <div className="min-w-0">
-        <header className="sticky top-0 z-20 border-b bg-white/95 backdrop-blur dark:border-neutral-800 dark:bg-neutral-950/95">
+        <header className="sticky top-0 z-20 border-b bg-white/95 backdrop-blur-sm dark:border-neutral-800 dark:bg-neutral-950/95">
           <div className="flex h-16 items-center gap-3 px-4 sm:px-6 lg:px-8">
             <AdminThemeToggle />
             <details className="group lg:hidden">
@@ -92,7 +92,7 @@ export default async function AdminLayout({
                 name="q"
                 type="search"
                 aria-label="Search platform"
-                className="h-10 w-full rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 pl-9 pr-3 text-sm outline-none transition-shadow placeholder:text-muted-foreground/60 focus:ring-2 focus:ring-primary/30"
+                className="h-10 w-full rounded-md border bg-white dark:border-neutral-800 dark:bg-neutral-900 pl-9 pr-3 text-sm outline-hidden transition-shadow placeholder:text-muted-foreground/60 focus:ring-2 focus:ring-primary/30"
                 placeholder="Search accounts, users, subscriptions"
               />
             </form>

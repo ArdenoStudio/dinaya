@@ -28,7 +28,7 @@ export default async function BookingPayPage({ params }: Props) {
       <div className="w-full max-w-md">
         <Suspense
           fallback={
-            <div className="rounded-2xl border border-gray-100 bg-white p-10 text-center shadow-sm">
+            <div className="rounded-2xl border border-gray-100 bg-white p-10 text-center shadow-xs">
               <div className="mx-auto mb-4 size-10 animate-spin rounded-full border-2 border-gray-200 border-t-primary" />
               <p className="text-sm text-gray-500">{copy.redirectingToPayment}</p>
             </div>

@@ -1,9 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { toast } from "@heroui/react";
 import { CheckCircle2, KeyRound, PhoneCall, Save, ShieldCheck } from "lucide-react";
+import { DashboardCheckbox, DashboardTextAreaField, DashboardTextField } from "@/components/dashboard/DashboardFormField";
+import { submitResource } from "@/lib/dashboard/use-resource";
 import {
   dashboardCardClass,
+  dashboardErrorAlertClass,
 } from "@/lib/dashboard-ui";
 import { cn } from "@/lib/utils";
 import {
@@ -64,6 +68,17 @@ const DEFAULT_FORM: FormState = {
   welcomeMessage: "Hi, thanks for calling. I can help you book an appointment.",
 };
 
+type ConversationRuleKey = "welcomeMessage" | "fallbackMessage" | "openingRules" | "serviceRules" | "bookingRules" | "faqNotes";
+
+const CONVERSATION_RULE_FIELDS: { key: ConversationRuleKey; label: string }[] = [
+  { key: "welcomeMessage", label: "Welcome message" },
+  { key: "fallbackMessage", label: "Fallback message" },
+  { key: "openingRules", label: "Opening rules" },
+  { key: "serviceRules", label: "Service rules" },
+  { key: "bookingRules", label: "Booking rules" },
+  { key: "faqNotes", label: "FAQ notes" },
+];
+
 function toForm(data: ApiResponse | null): FormState {
   const integration = data?.integration;
   return {
@@ -91,7 +106,6 @@ export function VoiceReceptionistClient() {
   const [saving, setSaving] = useState(false);
   const [keyLoading, setKeyLoading] = useState(false);
   const [rawKey, setRawKey] = useState<string | null>(null);
-  const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
   const status = data?.integration?.status ?? "not_requested";
@@ -132,43 +146,35 @@ export function VoiceReceptionistClient() {
     e.preventDefault();
     setSaving(true);
     setError("");
-    setMessage("");
-    const res = await fetch("/api/dashboard/voice-receptionist", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
-    const next = await res.json();
+    const result = await submitResource("/api/dashboard/voice-receptionist", form, "POST");
     setSaving(false);
-    if (!res.ok) {
-      setError(next.error ?? "Could not save voice setup.");
+    if (!result.ok) {
+      setError(result.error);
       return;
     }
+    const next = result.data as { integration: VoiceIntegrationPayload };
     setData((current) => ({
       ...(current ?? { available: true, businessPhone: form.businessPhone, requiredPlan: "max" as const }),
       integration: next.integration,
     }));
-    setMessage("Voice setup request saved.");
+    toast.success("Voice setup request saved");
   }
 
   async function generateVoiceKey() {
     setKeyLoading(true);
     setError("");
     setRawKey(null);
-    const res = await fetch("/api/dashboard/api-keys", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: "AI Voice Receptionist",
-        scopes: VOICE_API_SCOPES,
-      }),
-    });
-    const next = await res.json();
+    const result = await submitResource(
+      "/api/dashboard/api-keys",
+      { name: "AI Voice Receptionist", scopes: VOICE_API_SCOPES },
+      "POST",
+    );
     setKeyLoading(false);
-    if (!res.ok) {
-      setError(next.error ?? "Could not generate voice API key.");
+    if (!result.ok) {
+      setError(result.error);
       return;
     }
+    const next = result.data as { rawKey: string };
     setRawKey(next.rawKey);
   }
 
@@ -196,44 +202,33 @@ export function VoiceReceptionistClient() {
           </div>
 
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
-            <label className="block">
-              <span className="text-sm font-medium">Business phone</span>
-              <input
-                value={form.businessPhone}
-                onChange={(e) => setForm((current) => ({ ...current, businessPhone: e.target.value }))}
-                className="mt-1 h-10 w-full rounded-md border px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
-                placeholder="+94..."
-                required
-              />
-            </label>
-            <label className="block">
-              <span className="text-sm font-medium">Human handoff phone</span>
-              <input
-                value={form.handoffPhone}
-                onChange={(e) => setForm((current) => ({ ...current, handoffPhone: e.target.value }))}
-                className="mt-1 h-10 w-full rounded-md border px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
-                placeholder="+94..."
-                required
-              />
-            </label>
+            <DashboardTextField
+              label="Business phone"
+              isRequired
+              value={form.businessPhone}
+              onChange={(value) => setForm((current) => ({ ...current, businessPhone: value }))}
+              placeholder="+94..."
+            />
+            <DashboardTextField
+              label="Human handoff phone"
+              isRequired
+              value={form.handoffPhone}
+              onChange={(value) => setForm((current) => ({ ...current, handoffPhone: value }))}
+              placeholder="+94..."
+            />
           </div>
 
           <div className="mt-5">
             <span className="text-sm font-medium">Languages</span>
             <div className="mt-2 flex flex-wrap gap-2">
               {VOICE_LANGUAGES.map((language) => (
-                <label
-                  key={language.value}
-                  className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm"
-                >
-                  <input
-                    type="checkbox"
-                    checked={form.languages.includes(language.value)}
+                <div key={language.value} className="rounded-md border px-3 py-2">
+                  <DashboardCheckbox
+                    isSelected={form.languages.includes(language.value)}
                     onChange={() => toggleLanguage(language.value)}
-                    className="size-4 rounded border-muted-foreground/30 text-primary focus:ring-primary"
+                    label={language.label}
                   />
-                  {language.label}
-                </label>
+                </div>
               ))}
             </div>
           </div>
@@ -242,28 +237,18 @@ export function VoiceReceptionistClient() {
         <div className={cn(dashboardCardClass, "p-5")}>
           <h2 className="font-cal text-base tracking-tight">Conversation rules</h2>
           <div className="mt-4 grid gap-4">
-            {[
-              ["welcomeMessage", "Welcome message"],
-              ["fallbackMessage", "Fallback message"],
-              ["openingRules", "Opening rules"],
-              ["serviceRules", "Service rules"],
-              ["bookingRules", "Booking rules"],
-              ["faqNotes", "FAQ notes"],
-            ].map(([key, label]) => (
-              <label key={key} className="block">
-                <span className="text-sm font-medium">{label}</span>
-                <textarea
-                  value={form[key as keyof FormState] as string}
-                  onChange={(e) => setForm((current) => ({ ...current, [key]: e.target.value }))}
-                  className="mt-1 min-h-24 w-full rounded-md border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/30"
-                />
-              </label>
+            {CONVERSATION_RULE_FIELDS.map(({ key, label }) => (
+              <DashboardTextAreaField
+                key={key}
+                label={label}
+                value={form[key]}
+                onChange={(value) => setForm((current) => ({ ...current, [key]: value }))}
+              />
             ))}
           </div>
         </div>
 
-        {error ? <p className="text-sm text-red-600">{error}</p> : null}
-        {message ? <p className="text-sm text-emerald-700">{message}</p> : null}
+        {error ? <p className={dashboardErrorAlertClass}>{error}</p> : null}
 
         <button
           type="submit"

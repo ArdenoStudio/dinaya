@@ -46,13 +46,13 @@ export function BookingServiceSearch({
           onChange={(e) => onQueryChange(e.target.value)}
           placeholder={placeholder}
           aria-label={placeholder}
-          className="min-h-11 w-full rounded-xl border border-border bg-card py-2.5 pl-10 pr-10 text-base text-foreground placeholder:text-muted-foreground focus-visible:border-[var(--booking-accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--booking-accent-soft)] md:text-sm"
+          className="min-h-11 w-full rounded-xl border border-border bg-card py-2.5 pl-10 pr-10 text-base text-foreground placeholder:text-muted-foreground focus-visible:booking-border-accent focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-(--booking-accent-soft) md:text-sm"
         />
         {query ? (
           <button
             type="button"
             onClick={() => onQueryChange("")}
-            className="absolute right-1 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--booking-accent-soft)]"
+            className="absolute right-1 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-(--booking-accent-soft)"
             aria-label="Clear search"
           >
             <Icon name="x-lg" className="size-4" />
@@ -99,9 +99,9 @@ function CategoryChip({
       type="button"
       onClick={onClick}
       className={cn(
-        "inline-flex min-h-11 shrink-0 items-center rounded-full border px-4 py-2.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--booking-accent-soft)]",
+        "inline-flex min-h-11 shrink-0 items-center rounded-full border px-4 py-2.5 text-xs font-medium transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-(--booking-accent-soft)",
         active
-          ? "border-[var(--booking-accent)] bg-[var(--booking-accent-muted)] text-[var(--booking-accent)]"
+          ? "booking-border-accent booking-bg-accent-muted booking-text-accent"
           : "border-border bg-card text-muted-foreground hover:border-border hover:bg-muted/50 hover:text-foreground",
       )}
     >

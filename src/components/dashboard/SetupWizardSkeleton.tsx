@@ -3,8 +3,8 @@ import { cn } from "@/lib/utils";
 
 export function SetupWizardSkeleton() {
   return (
-    <div className="min-h-screen bg-stone-100 dark:bg-neutral-950">
-      <header className="border-b bg-white px-6 py-4 dark:border-border/60 dark:bg-card">
+    <div className="min-h-screen bg-background">
+      <header className="border-b border-border bg-card px-6 py-4">
         <div className="mx-auto flex max-w-2xl items-center justify-between gap-4">
               <div className="h-8 w-24 animate-pulse motion-reduce:animate-none rounded-md bg-muted" />
           <div className="h-4 w-16 animate-pulse motion-reduce:animate-none rounded-md bg-muted" />

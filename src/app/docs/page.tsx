@@ -42,7 +42,7 @@ export default function DocsHubPage() {
       <div className="relative mb-14 overflow-hidden rounded-[1.85rem] bg-[hsl(240_6%_97%)] px-6 py-10 shadow-[0_0_0_1px_rgba(0,0,0,0.05)] dark:bg-[hsl(240_6%_7%)] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.07)]">
         <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
           <div>
-            <p className="mb-3 text-[0.7rem] font-medium uppercase tracking-[0.1em] text-muted-foreground">
+            <p className="mb-3 text-[0.7rem] font-medium uppercase tracking-widest text-muted-foreground">
               Documentation
             </p>
             <h1 className="font-cal text-3xl tracking-tight text-balance text-foreground md:text-[2.5rem] md:leading-tight">
@@ -67,7 +67,7 @@ export default function DocsHubPage() {
         <div className="grid gap-6 md:grid-cols-3 md:gap-8">
           {walkthroughCues.map((cue, index) => (
             <div key={cue.label} className="min-w-0">
-              <p className="text-[0.65rem] font-medium uppercase tracking-[0.1em] text-muted-foreground">
+              <p className="text-[0.65rem] font-medium uppercase tracking-widest text-muted-foreground">
                 {String(index + 1).padStart(2, "0")}
               </p>
               <p className="mt-2 font-cal text-base tracking-tight text-gray-950 dark:text-white">
@@ -90,7 +90,7 @@ export default function DocsHubPage() {
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search guides…"
           aria-label="Search documentation guides"
-          className="w-full rounded-2xl border border-gray-200 dark:border-neutral-800 bg-white dark:border-neutral-800 dark:bg-neutral-900 pl-10 pr-4 py-3 text-sm shadow-sm shadow-gray-900/5 dark:shadow-black/20 focus:outline-none focus:ring-2 focus:ring-primary/40"
+          className="w-full rounded-2xl border border-gray-200 dark:border-neutral-800 bg-white dark:border-neutral-800 dark:bg-neutral-900 pl-10 pr-4 py-3 text-sm shadow-xs shadow-gray-900/5 dark:shadow-black/20 focus:outline-hidden focus:ring-2 focus:ring-primary/40"
         />
       </div>
 
@@ -105,7 +105,7 @@ export default function DocsHubPage() {
                 <li key={g.slug}>
                   <Link
                     href={`/docs/guides/${g.slug}`}
-                    className="flex items-center justify-between gap-4 rounded-xl border p-4 hover:border-primary/30 hover:shadow-sm"
+                    className="flex items-center justify-between gap-4 rounded-xl border p-4 hover:border-primary/30 hover:shadow-xs"
                   >
                     <DocsGuideThumbnail
                       mockupId={getGuidePreviewMockupId(g)}
@@ -182,7 +182,7 @@ export default function DocsHubPage() {
                 <a
                   key={cat.id}
                   href={`#${cat.id}`}
-                  className="rounded-2xl border border-gray-200 dark:border-neutral-800 bg-white dark:border-neutral-800 dark:bg-neutral-900 p-4 shadow-sm shadow-gray-900/5 dark:shadow-black/20 transition-[transform,box-shadow,border-color] duration-150 ease-out hover:border-primary/30 hover:shadow-md active:scale-[0.99] motion-reduce:active:scale-100"
+                  className="rounded-2xl border border-gray-200 dark:border-neutral-800 bg-white dark:border-neutral-800 dark:bg-neutral-900 p-4 shadow-xs shadow-gray-900/5 dark:shadow-black/20 transition-[transform,box-shadow,border-color] duration-150 ease-out hover:border-primary/30 hover:shadow-md active:scale-[0.99] motion-reduce:active:scale-100"
                 >
                   <div className="flex items-center gap-2 mb-1">
                     <Icon name={cat.icon} className="text-primary" />
@@ -205,7 +205,7 @@ export default function DocsHubPage() {
                     <li key={g.slug}>
                       <Link
                         href={`/docs/guides/${g.slug}`}
-                        className="flex items-center gap-3 rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-4 py-3 shadow-sm shadow-gray-900/5 dark:shadow-black/20 transition-[box-shadow,border-color,background-color] duration-150 ease-out hover:border-primary/30 hover:bg-gray-50 dark:hover:bg-neutral-900/60"
+                        className="flex items-center gap-3 rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-4 py-3 shadow-xs shadow-gray-900/5 dark:shadow-black/20 transition-[box-shadow,border-color,background-color] duration-150 ease-out hover:border-primary/30 hover:bg-gray-50 dark:hover:bg-neutral-900/60"
                       >
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
@@ -226,7 +226,7 @@ export default function DocsHubPage() {
             );
           })}
 
-          <section className="rounded-3xl border border-gray-200 dark:border-neutral-800 bg-gradient-to-br from-gray-50 to-white dark:from-neutral-900 dark:to-neutral-900 p-6">
+          <section className="rounded-3xl border border-gray-200 dark:border-neutral-800 bg-linear-to-br from-gray-50 to-white dark:from-neutral-900 dark:to-neutral-900 p-6">
             <h2 className="font-cal text-lg mb-2 text-gray-900 dark:text-gray-100">Quick answers</h2>
             <p className="text-sm text-muted-foreground mb-4">
               Prefer short FAQ-style answers? Visit the help center.

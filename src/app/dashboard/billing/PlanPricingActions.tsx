@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { DashboardFilterPill } from "@/components/dashboard/DashboardFilterBar";
 import type { BillingInterval, PaidPlan } from "@/lib/plan";
-import { dashboardFilterPillClass } from "@/lib/dashboard-ui";
 import { UpgradeButton } from "./UpgradeButton";
 
 export function PlanPricingActions({
@@ -32,25 +32,13 @@ export function PlanPricingActions({
 
   return (
     <div className="mt-5 space-y-4">
-      <div className="flex flex-wrap gap-2" role="tablist" aria-label="Billing interval">
-        <button
-          type="button"
-          role="tab"
-          aria-selected={interval === "monthly"}
-          onClick={() => setInterval("monthly")}
-          className={dashboardFilterPillClass(interval === "monthly")}
-        >
+      <div className="flex flex-wrap gap-2" role="group" aria-label="Billing interval">
+        <DashboardFilterPill isSelected={interval === "monthly"} onChange={() => setInterval("monthly")}>
           Monthly
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={interval === "annual"}
-          onClick={() => setInterval("annual")}
-          className={dashboardFilterPillClass(interval === "annual")}
-        >
+        </DashboardFilterPill>
+        <DashboardFilterPill isSelected={interval === "annual"} onChange={() => setInterval("annual")}>
           Annual{savings > 0 ? ` · save ${savings}%` : ""}
-        </button>
+        </DashboardFilterPill>
       </div>
       <UpgradeButton
         targetPlan={targetPlan}

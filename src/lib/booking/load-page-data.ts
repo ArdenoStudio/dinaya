@@ -152,6 +152,7 @@ async function loadBookingPageDataInner(slug: string, serviceSlug?: string) {
           dailyCapacity: services.dailyCapacity,
           maximumAdvanceDays: services.maximumAdvanceDays,
           intakeQuestions: services.intakeQuestions,
+          priceVariants: services.priceVariants,
           createdAt: services.createdAt,
           categoryId: services.categoryId,
           categoryName: serviceCategories.name,
@@ -191,6 +192,7 @@ async function loadBookingPageDataInner(slug: string, serviceSlug?: string) {
     }),
     imageUrl: includeServiceImage ? (s as { imageUrl?: string | null }).imageUrl ?? null : null,
     intakeQuestions: intakeEnabled ? s.intakeQuestions ?? [] : [],
+    priceVariants: s.priceVariants ?? [],
   }));
 
   const initialService = serviceSlug

@@ -19,7 +19,7 @@ export function DashboardLoadingPanel({
       {Array.from({ length: rows }).map((_, index) => (
         <div
           key={index}
-          className="flex min-h-14 items-center gap-3 rounded-2xl border border-border/80 bg-card px-4 py-3 shadow-sm"
+          className="flex min-h-14 items-center gap-3 rounded-2xl border border-border/80 bg-card px-4 py-3 shadow-xs"
         >
           <Skeleton className="size-10 shrink-0 rounded-full" />
           <div className="min-w-0 flex-1 space-y-2">
@@ -38,7 +38,7 @@ export function DashboardTableSkeleton({ rows = 6 }: { rows?: number }) {
     <div
       aria-busy="true"
       aria-live="polite"
-      className="overflow-hidden rounded-2xl border border-border/80 bg-card shadow-sm"
+      className="overflow-hidden rounded-2xl border border-border/80 bg-card shadow-xs"
       role="status"
     >
       <span className="sr-only">Loading</span>
@@ -65,7 +65,7 @@ export function DashboardStatSkeleton({ count = 4 }: { count?: number }) {
       {Array.from({ length: count }).map((_, index) => (
         <div
           key={index}
-          className="overflow-hidden rounded-2xl border border-border/80 bg-card shadow-sm"
+          className="overflow-hidden rounded-2xl border border-border/80 bg-card shadow-xs"
         >
           <Skeleton className="h-1 w-full" />
           <div className="space-y-3 p-5">

@@ -116,8 +116,8 @@ export function DocsDashboardMockup({ variant, highlightNav, highlightTarget }: 
 
   return (
     <div className={cn("flex min-h-[320px] text-[10px]", dashboardShellCanvasClass)}>
-      <aside className="dashboard-sidebar relative flex w-[34%] shrink-0 flex-col border-r border-black/[0.06] dark:border-white/[0.08]">
-        <div className="border-b border-black/[0.06] px-2.5 py-2.5 dark:border-white/[0.08]">
+      <aside className="dashboard-sidebar relative flex w-[34%] shrink-0 flex-col border-r border-black/6 dark:border-white/8">
+        <div className="border-b border-black/6 px-2.5 py-2.5 dark:border-white/8">
           <div className="flex items-center gap-1.5 text-gray-900 dark:text-gray-100">
             <LogoIcon className="size-3.5 shrink-0" />
             <div className="min-w-0">
@@ -131,7 +131,7 @@ export function DocsDashboardMockup({ variant, highlightNav, highlightTarget }: 
         <nav className="flex-1 overflow-visible px-1.5 py-2">
           {DASHBOARD_NAV_GROUPS.map((group) => (
             <div key={group.label} className="mb-2">
-              <p className="mb-0.5 px-1.5 text-[8px] font-semibold uppercase tracking-[0.1em] text-gray-500 dark:text-gray-400">
+              <p className="mb-0.5 px-1.5 text-[8px] font-semibold uppercase tracking-widest text-gray-500 dark:text-gray-400">
                 {group.label}
               </p>
               <ul className="space-y-px">
@@ -161,7 +161,7 @@ export function DocsDashboardMockup({ variant, highlightNav, highlightTarget }: 
             </div>
           ))}
         </nav>
-        <div className="border-t border-black/[0.06] px-2.5 py-2 dark:border-white/[0.08]">
+        <div className="border-t border-black/6 px-2.5 py-2 dark:border-white/8">
           <p className="text-[8px] text-gray-500 dark:text-gray-400">Help & docs</p>
         </div>
       </aside>
@@ -173,7 +173,7 @@ export function DocsDashboardMockup({ variant, highlightNav, highlightTarget }: 
             dashboardChromeClass,
           )}
         >
-          <div className="flex min-w-0 flex-1 items-center gap-1.5 rounded-xl border border-black/[0.06] bg-[hsl(var(--dashboard-main))] px-2 py-1 dark:border-white/10">
+          <div className="flex min-w-0 flex-1 items-center gap-1.5 rounded-xl border border-black/6 dashboard-main px-2 py-1 dark:border-white/10">
             <Icon name="search" className="text-[9px] text-muted-foreground" />
             <span className="truncate text-[9px] text-muted-foreground">Search · ⌘K</span>
           </div>
@@ -248,7 +248,7 @@ export function DocsDashboardMockup({ variant, highlightNav, highlightTarget }: 
                 </span>
               </div>
               <Surface className="overflow-hidden">
-                <div className="flex items-center justify-between border-b border-black/[0.06] px-2.5 py-2 dark:border-white/[0.08]">
+                <div className="flex items-center justify-between border-b border-black/6 px-2.5 py-2 dark:border-white/8">
                   <div>
                     <p className="font-cal text-[11px] font-semibold tracking-tight">Today</p>
                     <p className="text-[8px] text-gray-400">Tap an appointment to manage it</p>
@@ -292,7 +292,7 @@ export function DocsDashboardMockup({ variant, highlightNav, highlightTarget }: 
                       "flex items-center justify-between rounded-xl border px-2.5 py-1.5",
                       i < 2
                         ? "border-emerald-200 bg-emerald-50 dark:border-emerald-800/50 dark:bg-emerald-950/40"
-                        : "border-black/[0.06] bg-white dark:border-white/[0.08] dark:bg-neutral-900",
+                        : "border-black/6 bg-white dark:border-white/8 dark:bg-neutral-900",
                     )}
                   >
                     <span className="text-gray-800 dark:text-gray-200">{s}</span>
@@ -392,7 +392,7 @@ export function DocsDashboardMockup({ variant, highlightNav, highlightTarget }: 
                       label="Reschedule"
                       variant="inline"
                     >
-                      <span className="rounded-lg border border-black/[0.08] px-1.5 py-0.5 text-[9px] dark:border-white/10">
+                      <span className="rounded-lg border border-black/8 px-1.5 py-0.5 text-[9px] dark:border-white/10">
                         Reschedule
                       </span>
                     </DocsTargetHighlight>
@@ -410,7 +410,7 @@ export function DocsDashboardMockup({ variant, highlightNav, highlightTarget }: 
                       label="Refund"
                       variant="inline"
                     >
-                      <span className="rounded-lg border border-black/[0.08] px-1.5 py-0.5 text-[9px] dark:border-white/10">
+                      <span className="rounded-lg border border-black/8 px-1.5 py-0.5 text-[9px] dark:border-white/10">
                         Refund
                       </span>
                     </DocsTargetHighlight>
@@ -439,7 +439,7 @@ export function DocsDashboardMockup({ variant, highlightNav, highlightTarget }: 
               <Surface className="px-2.5 py-2 font-medium text-gray-900 dark:text-gray-100">
                 Owner (you)
               </Surface>
-              <div className="rounded-2xl border border-dashed border-black/[0.1] bg-white/70 px-2.5 py-2 text-gray-500 dark:border-white/15 dark:bg-neutral-900/60 dark:text-gray-400">
+              <div className="rounded-2xl border border-dashed border-black/10 bg-white/70 px-2.5 py-2 text-gray-500 dark:border-white/15 dark:bg-neutral-900/60 dark:text-gray-400">
                 + Add staff member
               </div>
             </div>
@@ -503,7 +503,7 @@ export function DocsDashboardMockup({ variant, highlightNav, highlightTarget }: 
               </DocsTargetHighlight>
               <div className="flex flex-wrap gap-1.5 pb-0.5">
                 <DocsTargetHighlight active={target("marketing-copy-link")} variant="inline">
-                  <span className="rounded-lg border border-black/[0.08] bg-white px-1.5 py-0.5 dark:border-white/10 dark:bg-neutral-900">
+                  <span className="rounded-lg border border-black/8 bg-white px-1.5 py-0.5 dark:border-white/10 dark:bg-neutral-900">
                     Copy link
                   </span>
                 </DocsTargetHighlight>
@@ -512,7 +512,7 @@ export function DocsDashboardMockup({ variant, highlightNav, highlightTarget }: 
                   label="QR code"
                   variant="inline"
                 >
-                  <span className="rounded-lg border border-black/[0.08] bg-white px-1.5 py-0.5 dark:border-white/10 dark:bg-neutral-900">
+                  <span className="rounded-lg border border-black/8 bg-white px-1.5 py-0.5 dark:border-white/10 dark:bg-neutral-900">
                     QR code
                   </span>
                 </DocsTargetHighlight>
@@ -521,18 +521,18 @@ export function DocsDashboardMockup({ variant, highlightNav, highlightTarget }: 
                   label="WhatsApp share"
                   variant="inline"
                 >
-                  <span className="rounded-lg border border-black/[0.08] bg-white px-1.5 py-0.5 dark:border-white/10 dark:bg-neutral-900">
+                  <span className="rounded-lg border border-black/8 bg-white px-1.5 py-0.5 dark:border-white/10 dark:bg-neutral-900">
                     WhatsApp
                   </span>
                 </DocsTargetHighlight>
               </div>
               <DocsTargetHighlight active={target("marketing-directory")} label="Directory">
-                <div className="rounded-2xl border border-dashed border-black/[0.1] bg-white/70 p-2.5 text-[9px] text-gray-500 dark:border-white/15 dark:bg-neutral-900/60 dark:text-gray-400">
+                <div className="rounded-2xl border border-dashed border-black/10 bg-white/70 p-2.5 text-[9px] text-gray-500 dark:border-white/15 dark:bg-neutral-900/60 dark:text-gray-400">
                   Directory listing
                 </div>
               </DocsTargetHighlight>
               <DocsTargetHighlight active={target("marketing-embed")} label="Embed code">
-                <div className="rounded-2xl border border-dashed border-black/[0.1] bg-white/70 p-2.5 text-[9px] text-gray-500 dark:border-white/15 dark:bg-neutral-900/60 dark:text-gray-400">
+                <div className="rounded-2xl border border-dashed border-black/10 bg-white/70 p-2.5 text-[9px] text-gray-500 dark:border-white/15 dark:bg-neutral-900/60 dark:text-gray-400">
                   Embed widget · Book now button
                 </div>
               </DocsTargetHighlight>
@@ -587,7 +587,7 @@ export function DocsDashboardMockup({ variant, highlightNav, highlightTarget }: 
 
           {variant.includes("reports") ? (
             <Surface className="space-y-1.5 p-2.5">
-              <div className="h-14 rounded-xl bg-gradient-to-t from-primary/20 via-primary/5 to-transparent" />
+              <div className="h-14 rounded-xl bg-linear-to-t from-primary/20 via-primary/5 to-transparent" />
               <p className="text-[9px] text-gray-500 dark:text-gray-400">
                 Revenue & bookings · Last 30 days
               </p>

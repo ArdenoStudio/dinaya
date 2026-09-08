@@ -3,24 +3,26 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Users, UserCheck, UserPlus, Sparkles } from "lucide-react";
+import { ArrowRight, Download, Mail, Phone, Plus, Search, Users, UserCheck, UserPlus, Sparkles, X } from "lucide-react";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
 import { DashboardLoadingPanel } from "@/components/dashboard/DashboardLoadingPanel";
 import { DashboardStatGrid } from "@/components/dashboard/DashboardStatGrid";
 import { EmptyState } from "@/components/dashboard/EmptyState";
 import { StatCard } from "@/components/dashboard/StatCard";
-import { Icon } from "@/components/ui/Icon";
 import {
+  CLIENT_STAGE_BADGE_CLASS,
+  CLIENT_STAGE_DOT_CLASS,
   dashboardFilterPillClass,
   dashboardInputClass,
   dashboardOutlineActionClass,
   dashboardPageClass,
   dashboardPrimaryActionClass,
   dashboardSurfaceClass,
+  type ClientStage,
 } from "@/lib/dashboard-ui";
 import { cn } from "@/lib/utils";
 
-type Stage = "lead" | "prospect" | "active" | "churned";
+type Stage = ClientStage;
 
 type Client = {
   id: string;
@@ -40,19 +42,8 @@ const STAGES: { key: "" | Stage; label: string }[] = [
   { key: "churned", label: "Churned" },
 ];
 
-const STAGE_STYLES: Record<Stage, string> = {
-  lead: "bg-blue-50 dark:bg-blue-950/40 text-blue-700 ring-1 ring-inset ring-blue-700/20",
-  prospect: "bg-violet-50 text-violet-700 ring-1 ring-inset ring-violet-700/20",
-  active: "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 ring-1 ring-inset ring-emerald-700/20",
-  churned: "bg-gray-100 dark:bg-neutral-800 text-gray-500 dark:text-gray-400 ring-1 ring-inset ring-gray-400/20",
-};
-
-const STAGE_DOT: Record<Stage, string> = {
-  lead: "bg-blue-500",
-  prospect: "bg-violet-500",
-  active: "bg-emerald-500",
-  churned: "bg-gray-400",
-};
+const STAGE_STYLES = CLIENT_STAGE_BADGE_CLASS;
+const STAGE_DOT = CLIENT_STAGE_DOT_CLASS;
 
 const AVATAR_COLORS = [
   "bg-blue-100 text-blue-700",
@@ -84,23 +75,38 @@ export default function ClientsPage() {
   const [stage, setStage] = useState<"" | Stage>("");
   const [q, setQ] = useState(initialQuery);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
 
   useEffect(() => {
     setQ(searchParams.get("q") ?? "");
   }, [searchParams]);
 
   useEffect(() => {
+    let cancelled = false;
     setLoading(true);
+    setLoadError("");
     const params = new URLSearchParams();
     if (stage) params.set("stage", stage);
     if (q) params.set("q", q);
     fetch(`/api/dashboard/clients?${params}`)
-      .then((r) => r.json())
-      .then((data: Client[]) => {
+      .then((r) => {
+        if (!r.ok) throw new Error("load failed");
+        return r.json() as Promise<Client[]>;
+      })
+      .then((data) => {
+        if (cancelled) return;
         setClients(data);
         if (!stage && !q) setAllClients(data);
         setLoading(false);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setLoadError("Could not load customers. Check your connection and try again.");
+        setLoading(false);
       });
+    return () => {
+      cancelled = true;
+    };
   }, [stage, q]);
 
   const stats = useMemo(() => {
@@ -156,10 +162,10 @@ export default function ClientsPage() {
               disabled={clients.length === 0}
               className={cn(dashboardOutlineActionClass, "disabled:cursor-not-allowed disabled:opacity-40")}
             >
-              <Icon name="download" className="text-xs" /> Export CSV
+              <Download className="size-3.5" /> Export CSV
             </button>
             <Link href="/dashboard/clients/new" className={dashboardPrimaryActionClass}>
-              <Icon name="plus" className="text-xs" /> Add customer
+              <Plus className="size-3.5" /> Add customer
             </Link>
           </>
         }
@@ -175,7 +181,7 @@ export default function ClientsPage() {
       {/* Filters */}
       <div className="flex flex-wrap gap-2.5 items-center mb-4">
         <div className="relative flex-1 min-w-[220px]">
-          <Icon name="search" className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none" />
+          <Search className="absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground pointer-events-none" />
           <input
             type="text"
             placeholder="Search by name, phone, or email…"
@@ -191,7 +197,7 @@ export default function ClientsPage() {
               aria-label="Clear search"
               className="absolute right-1 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
             >
-              <Icon name="x-lg" className="text-xs" />
+              <X className="size-3.5" />
             </button>
           ) : null}
         </div>
@@ -213,6 +219,8 @@ export default function ClientsPage() {
       {/* List */}
       {loading ? (
         <DashboardLoadingPanel rows={5} />
+      ) : loadError ? (
+        <div className={cn(dashboardSurfaceClass, "p-8 text-center text-sm text-destructive")}>{loadError}</div>
       ) : showEmptyAll ? (
         <EmptyState
           icon={Users}
@@ -220,7 +228,7 @@ export default function ClientsPage() {
           description="Start by adding your first customer, or share your booking page to collect them automatically."
           action={
             <Link href="/dashboard/clients/new" className={dashboardPrimaryActionClass}>
-              <Icon name="plus" className="text-xs" /> Add your first customer
+              <Plus className="size-3.5" /> Add your first customer
             </Link>
           }
         />
@@ -230,7 +238,7 @@ export default function ClientsPage() {
           description="Try adjusting your search or stage filter."
           action={
             <button type="button" onClick={clearFilters} className={dashboardOutlineActionClass}>
-              <Icon name="x-lg" className="text-xs" /> Clear filters
+              <X className="size-3.5" /> Clear filters
             </button>
           }
         />
@@ -282,12 +290,12 @@ export default function ClientsPage() {
                 {/* Contact (desktop) */}
                 <div className="hidden md:flex flex-col justify-center min-w-0 gap-0.5">
                   <span className="text-sm text-foreground/80 flex items-center gap-1.5 truncate">
-                    <Icon name="telephone" className="shrink-0 text-muted-foreground/50" />
+                    <Phone className="size-3.5 shrink-0 text-muted-foreground/50" />
                     <span className="truncate tabular-nums">{c.phone}</span>
                   </span>
                   {c.email && (
                     <span className="text-xs text-muted-foreground flex items-center gap-1.5 truncate">
-                      <Icon name="envelope" className="shrink-0 text-muted-foreground/50" />
+                      <Mail className="size-3.5 shrink-0 text-muted-foreground/50" />
                       <span className="truncate">{c.email}</span>
                     </span>
                   )}
@@ -318,7 +326,7 @@ export default function ClientsPage() {
                 <div className="hidden md:flex justify-end">
                   <span className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground/50 group-hover:text-primary transition-colors">
                     View
-                    <Icon name="arrow-right" className="group-hover:translate-x-0.5 transition-transform" />
+                    <ArrowRight className="size-3.5 group-hover:translate-x-0.5 transition-transform" />
                   </span>
                 </div>
               </Link>
@@ -339,7 +347,7 @@ export default function ClientsPage() {
                 onClick={clearFilters}
                 className="text-primary hover:underline font-medium flex items-center gap-1"
               >
-                <Icon name="x-lg" /> Clear filters
+                <X className="size-3.5" /> Clear filters
               </button>
             )}
           </div>

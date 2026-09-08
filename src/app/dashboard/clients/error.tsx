@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { Icon } from "@/components/ui/Icon";
+import { Users } from "lucide-react";
 
 export default function ClientsError({
   error,
@@ -19,7 +19,7 @@ export default function ClientsError({
       <div className="text-center">
         <div className="mb-4 flex justify-center">
           <div className="flex size-14 items-center justify-center rounded-full bg-red-100">
-            <Icon name="people" className="text-xl text-red-600" aria-hidden="true" />
+            <Users className="size-5 text-red-600" aria-hidden="true" />
           </div>
         </div>
         <h2 className="mb-2 text-lg font-semibold">

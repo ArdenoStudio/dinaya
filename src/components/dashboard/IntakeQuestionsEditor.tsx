@@ -1,7 +1,11 @@
 "use client";
 
+import { ChevronDown, ChevronUp, Plus, X } from "lucide-react";
 import type { IntakeQuestion, IntakeQuestionType } from "@/lib/intake";
 import { MAX_INTAKE_QUESTIONS } from "@/lib/intake";
+import { DashboardSelect, DashboardSwitch, DashboardTextField } from "@/components/dashboard/DashboardFormField";
+import { dashboardOutlineActionClass } from "@/lib/dashboard-ui";
+import { cn } from "@/lib/utils";
 
 interface Props {
   value: IntakeQuestion[];
@@ -21,9 +25,6 @@ function newId(): string {
     ? crypto.randomUUID()
     : `q_${Math.round(performance.now() * 1000)}`;
 }
-
-const inputCls =
-  "w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary";
 
 export function IntakeQuestionsEditor({ value, onChange }: Props) {
   const questions = value ?? [];
@@ -55,7 +56,7 @@ export function IntakeQuestionsEditor({ value, onChange }: Props) {
   return (
     <div className="space-y-3">
       <div>
-        <label className="text-sm font-medium">Booking questions</label>
+        <p className="text-sm font-medium text-foreground">Booking questions</p>
         <p className="text-xs text-muted-foreground">
           Ask clients for details when they book (e.g. reason for visit, new or returning).
           Shown on your booking page — <span className="font-medium">Pro plan</span>.
@@ -65,50 +66,67 @@ export function IntakeQuestionsEditor({ value, onChange }: Props) {
       {questions.length > 0 && (
         <ul className="space-y-3">
           {questions.map((q, index) => (
-            <li key={q.id} className="rounded-lg border bg-muted/30 p-3 space-y-2">
+            <li key={q.id} className="rounded-lg border border-border bg-muted/30 p-3 space-y-3">
               <div className="flex items-start gap-2">
-                <input
+                <DashboardTextField
+                  label="Question"
+                  hideLabel
+                  className="flex-1"
                   value={q.label}
-                  onChange={(e) => update(index, { label: e.target.value })}
+                  onChange={(label) => update(index, { label })}
                   placeholder="Question (e.g. Reason for your visit?)"
-                  className={inputCls}
                 />
                 <div className="flex shrink-0 flex-col">
-                  <button type="button" aria-label="Move up" onClick={() => move(index, -1)}
+                  <button
+                    type="button"
+                    aria-label="Move up"
+                    onClick={() => move(index, -1)}
                     disabled={index === 0}
-                    className="px-1.5 text-xs text-muted-foreground hover:text-foreground disabled:opacity-30">▲</button>
-                  <button type="button" aria-label="Move down" onClick={() => move(index, 1)}
+                    className="rounded-md px-1.5 py-0.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-30"
+                  >
+                    <ChevronUp className="size-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="Move down"
+                    onClick={() => move(index, 1)}
                     disabled={index === questions.length - 1}
-                    className="px-1.5 text-xs text-muted-foreground hover:text-foreground disabled:opacity-30">▼</button>
+                    className="rounded-md px-1.5 py-0.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-30"
+                  >
+                    <ChevronDown className="size-3.5" />
+                  </button>
                 </div>
-                <button type="button" aria-label="Remove question" onClick={() => remove(index)}
-                  className="shrink-0 px-2 py-1 text-xs text-destructive hover:underline">Remove</button>
+                <button
+                  type="button"
+                  aria-label="Remove question"
+                  onClick={() => remove(index)}
+                  className="shrink-0 rounded-md px-2 py-1.5 text-xs font-medium text-destructive transition-colors hover:bg-destructive/10"
+                >
+                  Remove
+                </button>
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
-                <select
+              <div className="grid gap-2 sm:grid-cols-2">
+                <DashboardSelect
+                  label="Answer type"
+                  hideLabel
                   value={q.type}
-                  onChange={(e) => {
-                    const type = e.target.value as IntakeQuestionType;
-                    update(index, { type, options: type === "select" ? q.options ?? [""] : undefined });
-                  }}
-                  className={inputCls}
-                >
-                  {TYPE_OPTIONS.map((t) => (
-                    <option key={t.value} value={t.value}>{t.label}</option>
-                  ))}
-                </select>
-                <div className="flex items-center gap-4">
-                  <label className="flex items-center gap-1.5 text-xs cursor-pointer">
-                    <input type="checkbox" checked={q.required}
-                      onChange={(e) => update(index, { required: e.target.checked })} className="rounded" />
-                    Required
-                  </label>
-                  <label className="flex items-center gap-1.5 text-xs cursor-pointer">
-                    <input type="checkbox" checked={!!q.sensitive}
-                      onChange={(e) => update(index, { sensitive: e.target.checked })} className="rounded" />
-                    Sensitive
-                  </label>
+                  onChange={(type) =>
+                    update(index, { type, options: type === "select" ? (q.options ?? [""]) : undefined })
+                  }
+                  options={TYPE_OPTIONS}
+                />
+                <div className="flex items-center gap-5 sm:justify-end">
+                  <DashboardSwitch
+                    label="Required"
+                    isSelected={q.required}
+                    onChange={(required) => update(index, { required })}
+                  />
+                  <DashboardSwitch
+                    label="Sensitive"
+                    isSelected={!!q.sensitive}
+                    onChange={(sensitive) => update(index, { sensitive })}
+                  />
                 </div>
               </div>
 
@@ -117,24 +135,36 @@ export function IntakeQuestionsEditor({ value, onChange }: Props) {
                   <p className="text-xs text-muted-foreground">Options</p>
                   {(q.options ?? []).map((opt, optIndex) => (
                     <div key={optIndex} className="flex items-center gap-2">
-                      <input
+                      <DashboardTextField
+                        label={`Option ${optIndex + 1}`}
+                        hideLabel
+                        className="flex-1"
                         value={opt}
-                        onChange={(e) => {
+                        onChange={(next) => {
                           const options = [...(q.options ?? [])];
-                          options[optIndex] = e.target.value;
+                          options[optIndex] = next;
                           update(index, { options });
                         }}
                         placeholder={`Option ${optIndex + 1}`}
-                        className={inputCls}
                       />
-                      <button type="button" aria-label="Remove option"
+                      <button
+                        type="button"
+                        aria-label="Remove option"
                         onClick={() => update(index, { options: (q.options ?? []).filter((_, i) => i !== optIndex) })}
-                        className="shrink-0 px-2 text-xs text-muted-foreground hover:text-destructive">✕</button>
+                        className="shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                      >
+                        <X className="size-3.5" />
+                      </button>
                     </div>
                   ))}
-                  <button type="button"
+                  <button
+                    type="button"
                     onClick={() => update(index, { options: [...(q.options ?? []), ""] })}
-                    className="text-xs text-primary hover:underline">+ Add option</button>
+                    className={cn(dashboardOutlineActionClass, "h-8 px-3 text-xs")}
+                  >
+                    <Plus className="size-3.5" />
+                    Add option
+                  </button>
                 </div>
               )}
             </li>
@@ -143,8 +173,10 @@ export function IntakeQuestionsEditor({ value, onChange }: Props) {
       )}
 
       {questions.length < MAX_INTAKE_QUESTIONS && (
-        <button type="button" onClick={add}
-          className="text-sm text-primary hover:underline">+ Add a question</button>
+        <button type="button" onClick={add} className={cn(dashboardOutlineActionClass, "h-9 px-3.5 text-sm")}>
+          <Plus className="size-4" />
+          Add a question
+        </button>
       )}
     </div>
   );

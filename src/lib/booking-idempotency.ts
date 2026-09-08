@@ -13,6 +13,7 @@ export type BookingIdempotencyPayload = {
   startsAt: string;
   endsAt: string;
   clientPhone: string;
+  priceVariantId?: string | null;
 };
 
 export function hashBookingIdempotencyPayload(payload: BookingIdempotencyPayload): string {
@@ -25,6 +26,7 @@ export function hashBookingIdempotencyPayload(payload: BookingIdempotencyPayload
         payload.startsAt,
         payload.endsAt,
         payload.clientPhone,
+        payload.priceVariantId ?? "",
       ].join("|"),
     )
     .digest("hex");

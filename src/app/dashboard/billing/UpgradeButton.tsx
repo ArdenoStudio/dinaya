@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { BillingInterval, PaidPlan } from "@/lib/plan";
 import { trackPlanUpgradeStart } from "@/lib/analytics/gtag";
-import { DashboardConfirmDialog } from "@/components/dashboard/DashboardConfirmDialog";
+import { ConfirmDialog as DashboardConfirmDialog } from "@/components/dashboard/ConfirmDialog";
 import { Button } from "@/components/ui/button";
 import { planDisplayName } from "@/lib/plan-display";
 

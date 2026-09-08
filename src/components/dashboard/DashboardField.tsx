@@ -46,7 +46,7 @@ export function DashboardTextarea({
 }: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
   return (
     <textarea
-      className={cn(dashboardInputClass, "mt-0 min-h-[6rem] resize-y", className)}
+      className={cn(dashboardInputClass, "mt-0 min-h-24 resize-y", className)}
       {...props}
     />
   );

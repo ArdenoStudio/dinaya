@@ -11,7 +11,7 @@ interface Props {
 
 export function BookingBackPill({ label, href, onClick }: Props) {
   const className =
-    "inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-card/95 px-3.5 py-1.5 text-sm font-medium text-muted-foreground shadow-sm backdrop-blur-sm transition-colors hover:border-border hover:bg-card hover:text-foreground";
+    "inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-card/95 px-3.5 py-1.5 text-sm font-medium text-muted-foreground shadow-xs backdrop-blur-xs transition-colors hover:border-border hover:bg-card hover:text-foreground";
 
   if (href) {
     return (

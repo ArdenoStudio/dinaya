@@ -5,9 +5,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ConfirmDialog } from "@/components/dashboard/ConfirmDialog";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
+import { DashboardCheckbox, DashboardSwitch, DashboardTextAreaField, DashboardTextField } from "@/components/dashboard/DashboardFormField";
+import { submitResource } from "@/lib/dashboard/use-resource";
 import {
   dashboardCardClass,
-  dashboardInputClass,
+  dashboardErrorAlertClass,
   dashboardLabelClass,
   dashboardOutlineActionClass,
   dashboardPageClass,
@@ -37,6 +39,7 @@ export default function EditStaffPage({ params }: { params: Promise<{ id: string
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -93,20 +96,15 @@ export default function EditStaffPage({ params }: { params: Promise<{ id: string
     setSaving(true);
     setError("");
 
-    const res = await fetch(`/api/dashboard/staff/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...form,
-        avatarUrl: form.avatarUrl || null,
-        bio: form.bio || null,
-      }),
+    const result = await submitResource(`/api/dashboard/staff/${id}`, {
+      ...form,
+      avatarUrl: form.avatarUrl || null,
+      bio: form.bio || null,
     });
+    setSaving(false);
 
-    if (!res.ok) {
-      const data = await res.json();
-      setError(data.error ?? "Could not save staff member.");
-      setSaving(false);
+    if (!result.ok) {
+      setError(result.error);
       return;
     }
 
@@ -147,64 +145,54 @@ export default function EditStaffPage({ params }: { params: Promise<{ id: string
         backHref="/dashboard/staff"
         backLabel="Staff"
         actions={
-          <ConfirmDialog
-            title="Delete team member"
-            description={`Delete ${form?.name || "this team member"}? Their past bookings stay on record, but this cannot be undone and they'll no longer be selectable for new appointments.`}
-            confirmLabel="Delete"
-            onConfirm={handleDelete}
-            trigger={
-              <button
-                type="button"
-                disabled={deleting}
-                className={cn(dashboardOutlineActionClass, "border-destructive/30 text-destructive hover:bg-destructive/5")}
-              >
-                {deleting ? "Deleting..." : "Delete"}
-              </button>
-            }
-          />
+          <button
+            type="button"
+            disabled={deleting}
+            onClick={() => setConfirmDeleteOpen(true)}
+            className={cn(dashboardOutlineActionClass, "border-destructive/30 text-destructive hover:bg-destructive/5")}
+          >
+            {deleting ? "Deleting..." : "Delete"}
+          </button>
         }
       />
 
+      <ConfirmDialog
+        title="Delete team member"
+        description={`Delete ${form.name || "this team member"}? Their past bookings stay on record, but this cannot be undone and they'll no longer be selectable for new appointments.`}
+        confirmLabel="Delete"
+        variant="destructive"
+        onConfirm={handleDelete}
+        open={confirmDeleteOpen}
+        onOpenChange={setConfirmDeleteOpen}
+      />
+
       <form onSubmit={handleSave} className={cn(dashboardSectionClass, "max-w-xl space-y-5")}>
-        <div>
-          <label className={dashboardLabelClass}>Name *</label>
-          <input
-            required
-            value={form.name}
-            onChange={(e) => setForm((current) => current && { ...current, name: e.target.value })}
-            className={dashboardInputClass}
-          />
-        </div>
+        <DashboardTextField
+          label="Name"
+          isRequired
+          value={form.name}
+          onChange={(value) => setForm((current) => current && { ...current, name: value })}
+        />
 
-        <div>
-          <label className={dashboardLabelClass}>Short bio</label>
-          <textarea
-            value={form.bio}
-            onChange={(e) => setForm((current) => current && { ...current, bio: e.target.value })}
-            className={cn(dashboardInputClass, "resize-none")}
-            rows={3}
-          />
-        </div>
+        <DashboardTextAreaField
+          label="Short bio"
+          value={form.bio}
+          onChange={(value) => setForm((current) => current && { ...current, bio: value })}
+          rows={3}
+        />
 
-        <div>
-          <label className={dashboardLabelClass}>Avatar URL</label>
-          <input
-            value={form.avatarUrl}
-            onChange={(e) => setForm((current) => current && { ...current, avatarUrl: e.target.value })}
-            className={dashboardInputClass}
-            placeholder="https://..."
-          />
-        </div>
+        <DashboardTextField
+          label="Avatar URL"
+          value={form.avatarUrl}
+          onChange={(value) => setForm((current) => current && { ...current, avatarUrl: value })}
+          placeholder="https://..."
+        />
 
-        <label className="flex cursor-pointer items-center gap-2 text-sm font-medium">
-          <input
-            type="checkbox"
-            checked={form.isActive}
-            onChange={(e) => setForm((current) => current && { ...current, isActive: e.target.checked })}
-            className="rounded"
-          />
-          Active on public booking page
-        </label>
+        <DashboardSwitch
+          label="Active on public booking page"
+          isSelected={form.isActive}
+          onChange={(isSelected) => setForm((current) => current && { ...current, isActive: isSelected })}
+        />
 
         <div>
           <p className={dashboardLabelClass}>Can perform</p>
@@ -213,45 +201,34 @@ export default function EditStaffPage({ params }: { params: Promise<{ id: string
               <p className="text-sm text-muted-foreground">No services yet.</p>
             ) : (
               services.map((service) => (
-                <label key={service.id} className="flex cursor-pointer items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={form.serviceIds.includes(service.id)}
-                    onChange={() => toggleService(service.id)}
-                    className="rounded"
-                  />
-                  {service.name}
-                </label>
+                <DashboardCheckbox
+                  key={service.id}
+                  isSelected={form.serviceIds.includes(service.id)}
+                  onChange={() => toggleService(service.id)}
+                  label={service.name}
+                />
               ))
             )}
           </div>
         </div>
 
-        
         {locations.length > 1 && (
           <div>
             <p className={dashboardLabelClass}>Works at</p>
             <div className="mt-2 space-y-2">
               {locations.map((loc) => (
-                <label key={loc.id} className="flex cursor-pointer items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={form.locationIds.includes(loc.id)}
-                    onChange={() => toggleLocation(loc.id)}
-                    className="rounded"
-                  />
-                  {loc.name}
-                </label>
+                <DashboardCheckbox
+                  key={loc.id}
+                  isSelected={form.locationIds.includes(loc.id)}
+                  onChange={() => toggleLocation(loc.id)}
+                  label={loc.name}
+                />
               ))}
             </div>
           </div>
         )}
 
-        {error && (
-          <p className="rounded-md border border-destructive/20 bg-destructive/5 px-3 py-2 text-sm text-destructive">
-            {error}
-          </p>
-        )}
+        {error && <p className={dashboardErrorAlertClass}>{error}</p>}
 
         <div className="flex flex-wrap items-center gap-3 pt-2">
           <button type="button" onClick={() => router.back()} className={dashboardOutlineActionClass}>

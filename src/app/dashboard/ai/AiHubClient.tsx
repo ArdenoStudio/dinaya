@@ -2,9 +2,12 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { toast } from "@heroui/react";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
 import { DashboardSection } from "@/components/dashboard/DashboardSection";
+import { DashboardSwitch } from "@/components/dashboard/DashboardFormField";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
+import { submitResource } from "@/lib/dashboard/use-resource";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   dashboardOutlineActionClass,
@@ -97,24 +100,18 @@ export default function AiHubClient() {
 
   async function toggleFeature(locationId: string, feature: AiFeatureKey, enabled: boolean) {
     setSavingId(locationId);
-    const res = await fetch(`/api/dashboard/locations/${locationId}/ai`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ [feature]: enabled }),
-    });
-    if (!res.ok) {
-      const data = await res.json();
-      setError(data.error ?? "Could not save AI settings.");
-      setSavingId(null);
+    const result = await submitResource(`/api/dashboard/locations/${locationId}/ai`, { [feature]: enabled });
+    setSavingId(null);
+    if (!result.ok) {
+      toast.danger("Could not save AI settings", { description: result.error });
       return;
     }
-    const data = await res.json();
+    const data = result.data as { aiConfig?: Record<string, boolean> };
     setLocations((prev) =>
       prev.map((loc) =>
         loc.id === locationId ? { ...loc, aiConfig: data.aiConfig ?? loc.aiConfig } : loc
       )
     );
-    setSavingId(null);
   }
 
   async function generateContent(locationId?: string) {
@@ -295,16 +292,14 @@ export default function AiHubClient() {
                         <p className="text-sm font-medium">{meta.label}</p>
                         <p className="mt-0.5 text-xs text-muted-foreground">{meta.description}</p>
                       </div>
-                      <label className="flex shrink-0 items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={on}
-                          disabled={savingId === loc.id}
-                          onChange={(e) => void toggleFeature(loc.id, feature, e.target.checked)}
-                          className="size-4 rounded border-muted-foreground/30"
+                      <div className="shrink-0">
+                        <DashboardSwitch
+                          isSelected={on}
+                          isDisabled={savingId === loc.id}
+                          onChange={(isSelected) => void toggleFeature(loc.id, feature, isSelected)}
+                          label={<span className="text-xs text-muted-foreground">{on ? "On" : "Off"}</span>}
                         />
-                        <span className="text-xs text-muted-foreground">{on ? "On" : "Off"}</span>
-                      </label>
+                      </div>
                     </li>
                   );
                 })}

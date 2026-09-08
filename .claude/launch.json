@@ -6,6 +6,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
       "port": 3002
+    },
+    {
+      "name": "dinaya-dev-redesign",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["next", "dev", "-p", "3055"],
+      "port": 3055
     }
   ]
 }

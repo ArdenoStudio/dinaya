@@ -29,7 +29,7 @@ export function BookingServiceThumb({
       return (
         <div
           className={cn(
-            "flex shrink-0 items-center justify-center bg-[var(--booking-accent-muted)] text-sm font-bold text-[var(--booking-accent)]",
+            "flex shrink-0 items-center justify-center booking-bg-accent-muted text-sm font-bold booking-text-accent",
             box,
           )}
         >
@@ -40,11 +40,11 @@ export function BookingServiceThumb({
     return (
       <div
         className={cn(
-          "flex shrink-0 items-center justify-center bg-[var(--booking-accent-muted)] ring-1 ring-border/40",
+          "flex shrink-0 items-center justify-center booking-bg-accent-muted ring-1 ring-border/40",
           box,
         )}
       >
-        <Icon name={iconName} className="text-lg text-[var(--booking-accent)]" />
+        <Icon name={iconName} className="text-lg booking-text-accent" />
       </div>
     );
   }

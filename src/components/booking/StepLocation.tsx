@@ -30,7 +30,7 @@ export default function StepLocation({ locations, selected, copy, onSelect, comp
               className={`flex w-full items-start gap-3 rounded-xl border px-4 py-3 text-left transition-colors ${
                 active
                   ? "booking-border-accent booking-bg-accent-muted/80 ring-1 booking-ring-accent"
-                  : "border-border bg-card hover:border-[var(--booking-accent)] hover:booking-bg-accent-muted/30"
+                  : "border-border bg-card hover:booking-border-accent hover:booking-bg-accent-muted/30"
               }`}
             >
               <span

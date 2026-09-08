@@ -1,22 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
-import { MapPin } from "lucide-react";
+import { MapPin, Plus } from "lucide-react";
+import { toast, Modal } from "@heroui/react";
 import { DashboardLoadingPanel } from "@/components/dashboard/DashboardLoadingPanel";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
 import { EmptyState } from "@/components/dashboard/EmptyState";
-import { Icon } from "@/components/ui/Icon";
-import {
-  dashboardErrorAlertClass,
-  dashboardInputClass,
-  dashboardLabelClass,
-  dashboardOutlineActionClass,
-  dashboardPageClass,
-  dashboardPrimaryActionClass,
-  dashboardSectionClass,
-  dashboardSurfaceClass,
-} from "@/lib/dashboard-ui";
+import { DataTable, type DataTableColumn } from "@/components/dashboard/DataTable";
+import { DashboardTextField } from "@/components/dashboard/DashboardFormField";
+import { Button } from "@/components/ui/button";
+import { useResource, submitResource } from "@/lib/dashboard/use-resource";
+import { dashboardOutlineActionClass, dashboardPrimaryActionClass, dashboardErrorAlertClass, dashboardPageClass } from "@/lib/dashboard-ui";
 import { cn } from "@/lib/utils";
 
 type LocationRow = {
@@ -37,75 +32,139 @@ type Props = {
   locationLimit: number | null;
 };
 
+const emptyForm = { name: "", address: "", phone: "" };
+
 export default function LocationsClient({ plan, locationLimit }: Props) {
-  const [locations, setLocations] = useState<LocationRow[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [showForm, setShowForm] = useState(false);
+  const { data, setData, loading } = useResource<LocationRow[]>("/api/dashboard/locations");
+  const locations = data ?? [];
+  const [modalOpen, setModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ name: "", address: "", phone: "" });
+  const [formError, setFormError] = useState("");
+  const [form, setForm] = useState(emptyForm);
+  const [pendingId, setPendingId] = useState<string | null>(null);
+  // DataTable caches a row's rendered cells by row identity, so this button's
+  // `disabled` attribute (driven by pendingId, not row data) never visually
+  // updates — guard re-entrancy here instead of relying on the DOM state.
+  const pendingIdsRef = useRef<Set<string>>(new Set());
 
-  async function load() {
-    setLoading(true);
+  async function reload() {
     const res = await fetch("/api/dashboard/locations");
-    const data = await res.json();
-    if (!res.ok) {
-      setError(data.error ?? "Could not load locations.");
-      setLoading(false);
-      return;
-    }
-    setLocations(Array.isArray(data) ? data : []);
-    setLoading(false);
+    const json = await res.json();
+    if (res.ok) setData(Array.isArray(json) ? json : []);
   }
-
-  useEffect(() => {
-    void load();
-  }, []);
 
   const atLimit = locationLimit !== null && locations.length >= locationLimit;
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
-    setError("");
-    const res = await fetch("/api/dashboard/locations", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: form.name,
-        address: form.address || null,
-        phone: form.phone || null,
-      }),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      setError(data.error ?? "Could not create location.");
-      setSaving(false);
+    setFormError("");
+    const result = await submitResource(
+      "/api/dashboard/locations",
+      { name: form.name, address: form.address || null, phone: form.phone || null },
+      "POST",
+    );
+    setSaving(false);
+    if (!result.ok) {
+      setFormError(result.error);
       return;
     }
-    setForm({ name: "", address: "", phone: "" });
-    setShowForm(false);
-    setSaving(false);
-    await load();
+    setForm(emptyForm);
+    setModalOpen(false);
+    toast.success("Location added");
+    await reload();
   }
 
   async function setDefault(id: string) {
-    await fetch(`/api/dashboard/locations/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ isDefault: true }),
-    });
-    await load();
+    if (pendingIdsRef.current.has(id)) return;
+    pendingIdsRef.current.add(id);
+    setPendingId(id);
+    const result = await submitResource(`/api/dashboard/locations/${id}`, { isDefault: true });
+    pendingIdsRef.current.delete(id);
+    setPendingId(null);
+    if (!result.ok) {
+      toast.danger("Could not set default location", { description: result.error });
+      return;
+    }
+    await reload();
   }
 
   async function toggleActive(id: string, isActive: boolean) {
-    await fetch(`/api/dashboard/locations/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ isActive: !isActive }),
-    });
-    await load();
+    if (pendingIdsRef.current.has(id)) return;
+    pendingIdsRef.current.add(id);
+    setPendingId(id);
+    const result = await submitResource(`/api/dashboard/locations/${id}`, { isActive: !isActive });
+    pendingIdsRef.current.delete(id);
+    setPendingId(null);
+    if (!result.ok) {
+      toast.danger("Could not update location", { description: result.error });
+      return;
+    }
+    await reload();
   }
+
+  const columns: DataTableColumn<LocationRow>[] = [
+    {
+      key: "name",
+      header: "Location",
+      render: (loc) => (
+        <div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="font-medium">{loc.name}</span>
+            {loc.isDefault ? (
+              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase text-primary">
+                Default
+              </span>
+            ) : null}
+            {!loc.isActive ? (
+              <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold uppercase text-muted-foreground">
+                Inactive
+              </span>
+            ) : null}
+          </div>
+          {loc.address ? <p className="mt-0.5 text-xs text-muted-foreground">{loc.address}</p> : null}
+        </div>
+      ),
+    },
+    {
+      key: "staff",
+      header: "Staff",
+      render: (loc) => <span className="text-muted-foreground">{loc.staffCount} staff</span>,
+    },
+    {
+      key: "timezone",
+      header: "Timezone",
+      className: "text-muted-foreground",
+      render: (loc) => loc.timezone,
+    },
+    {
+      key: "actions",
+      header: "",
+      align: "right",
+      render: (loc) => (
+        <div className="flex flex-wrap justify-end gap-2">
+          {!loc.isDefault ? (
+            <button
+              type="button"
+              disabled={pendingId === loc.id}
+              onClick={() => void setDefault(loc.id)}
+              className={cn(dashboardOutlineActionClass, "px-2.5 py-1 text-xs disabled:opacity-50")}
+            >
+              Set default
+            </button>
+          ) : null}
+          <button
+            type="button"
+            disabled={pendingId === loc.id}
+            onClick={() => void toggleActive(loc.id, loc.isActive)}
+            className={cn(dashboardOutlineActionClass, "px-2.5 py-1 text-xs disabled:opacity-50")}
+          >
+            {loc.isActive ? "Deactivate" : "Activate"}
+          </button>
+        </div>
+      ),
+    },
+  ];
 
   return (
     <div className={dashboardPageClass}>
@@ -123,12 +182,8 @@ export default function LocationsClient({ plan, locationLimit }: Props) {
         }
         actions={
           !atLimit ? (
-            <button
-              type="button"
-              onClick={() => setShowForm((v) => !v)}
-              className={dashboardPrimaryActionClass}
-            >
-              <Icon name="plus" className="text-xs" /> Add location
+            <button type="button" onClick={() => setModalOpen(true)} className={dashboardPrimaryActionClass}>
+              <Plus className="size-3.5" /> Add location
             </button>
           ) : undefined
         }
@@ -144,51 +199,6 @@ export default function LocationsClient({ plan, locationLimit }: Props) {
         </div>
       )}
 
-      {showForm && (
-        <form onSubmit={handleCreate} className={cn(dashboardSectionClass, "max-w-lg space-y-4")}>
-          <h2 className="font-cal text-lg tracking-tight">New branch</h2>
-          <div>
-            <label className={dashboardLabelClass}>Name *</label>
-            <input
-              required
-              value={form.name}
-              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-              className={dashboardInputClass}
-              placeholder="Colombo 7 branch"
-            />
-          </div>
-          <div>
-            <label className={dashboardLabelClass}>Address</label>
-            <input
-              value={form.address}
-              onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
-              className={dashboardInputClass}
-            />
-          </div>
-          <div>
-            <label className={dashboardLabelClass}>Phone</label>
-            <input
-              value={form.phone}
-              onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
-              className={dashboardInputClass}
-            />
-          </div>
-          {error && <p className={dashboardErrorAlertClass}>{error}</p>}
-          <div className="flex flex-wrap gap-3">
-            <button type="button" onClick={() => setShowForm(false)} className={dashboardOutlineActionClass}>
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={saving}
-              className={cn(dashboardPrimaryActionClass, "ml-auto")}
-            >
-              {saving ? "Saving…" : "Create"}
-            </button>
-          </div>
-        </form>
-      )}
-
       {loading ? (
         <DashboardLoadingPanel rows={2} />
       ) : locations.length === 0 ? (
@@ -197,62 +207,70 @@ export default function LocationsClient({ plan, locationLimit }: Props) {
           title="No locations yet"
           description="Add your first branch so clients can pick where to book."
           action={
-            <button
-              type="button"
-              onClick={() => setShowForm(true)}
-              className={dashboardPrimaryActionClass}
-            >
-              <Icon name="plus" className="text-xs" /> Add location
+            <button type="button" onClick={() => setModalOpen(true)} className={dashboardPrimaryActionClass}>
+              <Plus className="size-3.5" /> Add location
             </button>
           }
         />
       ) : (
-        <div className={cn(dashboardSurfaceClass, "divide-y overflow-hidden")}>
-          {locations.map((loc) => (
-            <div key={loc.id} className="flex flex-wrap items-center gap-4 px-5 py-4 hover:bg-muted/20">
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <p className="font-medium">{loc.name}</p>
-                  {loc.isDefault && (
-                    <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase text-primary">
-                      Default
-                    </span>
-                  )}
-                  {!loc.isActive && (
-                    <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold uppercase text-muted-foreground">
-                      Inactive
-                    </span>
-                  )}
-                </div>
-                {loc.address && <p className="mt-0.5 truncate text-xs text-muted-foreground">{loc.address}</p>}
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {loc.staffCount} staff · {loc.timezone}
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {!loc.isDefault && (
-                  <button
-                    type="button"
-                    onClick={() => void setDefault(loc.id)}
-                    className={cn(dashboardOutlineActionClass, "px-2.5 py-1 text-xs")}
-                  >
-                    Set default
-                  </button>
-                )}
-                <button
-                  type="button"
-                  onClick={() => void toggleActive(loc.id, loc.isActive)}
-                  className={cn(dashboardOutlineActionClass, "px-2.5 py-1 text-xs")}
-                >
-                  {loc.isActive ? "Deactivate" : "Activate"}
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+        <DataTable columns={columns} rows={locations} getRowId={(loc) => loc.id} />
       )}
 
-      {!loading && error && !showForm && <p className="text-sm text-destructive">{error}</p>}
+      <Modal.Root
+        isOpen={modalOpen}
+        onOpenChange={(open) => {
+          setModalOpen(open);
+          if (!open) {
+            setForm(emptyForm);
+            setFormError("");
+          }
+        }}
+      >
+        <Modal.Backdrop>
+          <Modal.Container size="sm">
+            <Modal.Dialog>
+              <Modal.Header>
+                <Modal.Heading>New branch</Modal.Heading>
+              </Modal.Header>
+              <form onSubmit={handleCreate}>
+                <Modal.Body className="space-y-4">
+                  <DashboardTextField
+                    label="Name"
+                    isRequired
+                    value={form.name}
+                    onChange={(value) => setForm((f) => ({ ...f, name: value }))}
+                    placeholder="Colombo 7 branch"
+                  />
+                  <DashboardTextField
+                    label="Address"
+                    value={form.address}
+                    onChange={(value) => setForm((f) => ({ ...f, address: value }))}
+                  />
+                  <DashboardTextField
+                    label="Phone"
+                    value={form.phone}
+                    onChange={(value) => setForm((f) => ({ ...f, phone: value }))}
+                  />
+                  {formError ? <p className={dashboardErrorAlertClass}>{formError}</p> : null}
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="min-h-11 w-full sm:w-auto"
+                    onClick={() => setModalOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={saving} className="min-h-11 w-full sm:w-auto">
+                    {saving ? "Saving…" : "Create"}
+                  </Button>
+                </Modal.Footer>
+              </form>
+            </Modal.Dialog>
+          </Modal.Container>
+        </Modal.Backdrop>
+      </Modal.Root>
     </div>
   );
 }

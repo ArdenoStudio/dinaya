@@ -11,15 +11,22 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { BrandColorPicker } from "@/components/dashboard/BrandColorPicker";
 import { DashboardField } from "@/components/dashboard/DashboardField";
+import { DashboardSwitch } from "@/components/dashboard/DashboardFormField";
 import { ImageUploadField } from "@/components/dashboard/ImageUploadField";
 import { ThemeEditorLockedSection } from "@/components/dashboard/ThemeEditorProGate";
 import { ThemePresetCards } from "@/components/dashboard/ThemePresetCards";
 import { ThemeStyleModeToggle } from "@/components/dashboard/ThemeStyleModeToggle";
-import { Icon } from "@/components/ui/Icon";
+import {
+  AlertTriangle,
+  IdCard,
+  Image as ImageIcon,
+  Images,
+  Palette,
+  X,
+} from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
-import { Switch } from "@/components/ui/switch";
 import { BlurFade } from "@/components/ui/blur-fade";
 import { Button } from "@/components/ui/button";
 import { buildThemeEditorPreviewUrl, type ThemeEditorPreviewState } from "@/lib/booking/theme-editor-preview";
@@ -124,7 +131,6 @@ function contrastBackground(form: ThemeEditorPreviewState): string {
 }
 
 export function BookingPageThemeEditor({ business, onPreviewChange }: Props) {
-  const footerSwitchId = useId();
   const contrastHintId = useId();
 
   const [form, setForm] = useState({
@@ -336,7 +342,7 @@ export function BookingPageThemeEditor({ business, onPreviewChange }: Props) {
               type="text"
               value={form.bookingPageBackgroundColor}
               onChange={(e) => updateForm("bookingPageBackgroundColor", e.target.value)}
-              className={`${dashboardInputClass} max-w-[8rem] font-mono`}
+              className={`${dashboardInputClass} max-w-32 font-mono`}
               aria-label="Custom page background hex"
             />
           </div>
@@ -423,7 +429,7 @@ export function BookingPageThemeEditor({ business, onPreviewChange }: Props) {
       <BlurFade delay={0.02}>
         <section className={dashboardSectionClass} aria-labelledby="identity-heading">
           <div className="flex items-center gap-2">
-            <Icon name="image" className="text-sm text-muted-foreground" aria-hidden="true" />
+            <ImageIcon className="size-4 text-muted-foreground" aria-hidden="true" />
             <h3 id="identity-heading" className="text-sm font-semibold text-foreground">
               Identity
             </h3>
@@ -463,7 +469,7 @@ export function BookingPageThemeEditor({ business, onPreviewChange }: Props) {
       <BlurFade delay={0.05}>
         <section className={dashboardSectionClass} aria-labelledby="brand-heading">
           <div className="flex items-center gap-2">
-            <Icon name="palette" className="text-sm text-muted-foreground" aria-hidden="true" />
+            <Palette className="size-4 text-muted-foreground" aria-hidden="true" />
             <h3 id="brand-heading" className="text-sm font-semibold text-foreground">
               Brand & theme
             </h3>
@@ -486,7 +492,7 @@ export function BookingPageThemeEditor({ business, onPreviewChange }: Props) {
                   id={contrastHintId}
                   className="mt-3 border-amber-200/80 bg-amber-50/90 text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-100"
                 >
-                  <Icon name="exclamation-triangle" aria-hidden="true" />
+                  <AlertTriangle className="size-4" aria-hidden="true" />
                   <AlertDescription className="text-xs">
                     <strong>Warning:</strong> {contrastWarning}
                     {contrastValue ? ` (${contrastValue.toFixed(1)}:1)` : null}
@@ -529,7 +535,7 @@ export function BookingPageThemeEditor({ business, onPreviewChange }: Props) {
       <BlurFade delay={0.08}>
         <section className={dashboardSectionClass} aria-labelledby="gallery-heading">
           <div className="flex items-center gap-2">
-            <Icon name="images" className="text-sm text-muted-foreground" aria-hidden="true" />
+            <Images className="size-4 text-muted-foreground" aria-hidden="true" />
             <h3 id="gallery-heading" className="text-sm font-semibold text-foreground">
               Gallery
             </h3>
@@ -540,7 +546,7 @@ export function BookingPageThemeEditor({ business, onPreviewChange }: Props) {
           {galleryRest.length > 0 ? (
             <div className="mt-3 grid grid-cols-2 gap-2">
               {galleryRest.map((url) => (
-                <div key={url} className="group relative aspect-[4/3] overflow-hidden rounded-lg border bg-muted/20">
+                <div key={url} className="group relative aspect-4/3 overflow-hidden rounded-lg border bg-muted/20">
                   <GalleryThumb url={url} />
                   <button
                     type="button"
@@ -548,7 +554,7 @@ export function BookingPageThemeEditor({ business, onPreviewChange }: Props) {
                     className="absolute right-2 top-2 flex size-10 items-center justify-center rounded-full bg-black/60 text-white sm:opacity-0 sm:transition-opacity sm:group-hover:opacity-100"
                     aria-label="Remove image"
                   >
-                    <Icon name="x-lg" />
+                    <X className="size-4" />
                   </button>
                 </div>
               ))}
@@ -576,7 +582,7 @@ export function BookingPageThemeEditor({ business, onPreviewChange }: Props) {
       <BlurFade delay={0.1}>
         <section className={dashboardSectionClass} aria-labelledby="footer-heading">
           <div className="flex items-center gap-2">
-            <Icon name="person-badge" className="text-sm text-muted-foreground" aria-hidden="true" />
+            <IdCard className="size-4 text-muted-foreground" aria-hidden="true" />
             <h3 id="footer-heading" className="text-sm font-semibold text-foreground">
               Footer
             </h3>
@@ -584,31 +590,29 @@ export function BookingPageThemeEditor({ business, onPreviewChange }: Props) {
           {business.canCustomizeBookingPage ? (
             <div className="mt-4 flex items-center justify-between gap-4 rounded-lg border bg-muted/30 px-4 py-3">
               <div>
-                <Label htmlFor={footerSwitchId} className="text-sm font-medium">
-                  Remove Dinaya branding
-                </Label>
+                <p className="text-sm font-medium">Remove Dinaya branding</p>
                 <p className="mt-0.5 text-xs text-muted-foreground">
                   Hides the small &quot;Powered by Dinaya&quot; link in your booking footer.
                 </p>
               </div>
-              <Switch
-                id={footerSwitchId}
-                checked={form.hideDinayaBranding}
-                onCheckedChange={(checked) => updateForm("hideDinayaBranding", checked)}
+              <DashboardSwitch
+                label=""
+                isSelected={form.hideDinayaBranding}
+                onChange={(isSelected) => updateForm("hideDinayaBranding", isSelected)}
               />
             </div>
           ) : (
             <ThemeEditorLockedSection enabled={false} feature="publicBookingPageCustomization">
               <div className="mt-3 flex items-center justify-between gap-4 rounded-lg border px-4 py-3 opacity-60">
-                <Label className="text-sm font-medium">Remove Dinaya branding</Label>
-                <Switch checked={false} disabled />
+                <p className="text-sm font-medium">Remove Dinaya branding</p>
+                <DashboardSwitch label="" isSelected={false} onChange={() => {}} isDisabled />
               </div>
             </ThemeEditorLockedSection>
           )}
         </section>
       </BlurFade>
 
-      <div className="sticky bottom-0 z-20 -mx-1 border-t bg-background/95 px-1 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+      <div className="sticky bottom-0 z-20 -mx-1 border-t bg-background/95 px-1 py-3 backdrop-blur-sm supports-backdrop-filter:bg-background/80">
         <div className="flex flex-wrap items-center gap-3">
           <Button type="submit" disabled={saving} className={dashboardPrimaryActionClass}>
             {saving ? "Saving…" : "Save changes"}

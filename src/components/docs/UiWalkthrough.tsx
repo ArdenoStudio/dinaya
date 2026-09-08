@@ -56,7 +56,7 @@ function StepVisual({ step }: { step: GuideStep }) {
   const mockupId = resolveStepMockupId(step);
   if (!mockupId) {
     return (
-      <div className="flex aspect-[16/10] items-center justify-center rounded-2xl bg-[hsl(240_6%_96%)] text-sm text-muted-foreground shadow-[0_0_0_1px_rgba(0,0,0,0.06)] dark:bg-[hsl(240_5%_10%)]">
+      <div className="flex aspect-16/10 items-center justify-center rounded-2xl bg-[hsl(240_6%_96%)] text-sm text-muted-foreground shadow-[0_0_0_1px_rgba(0,0,0,0.06)] dark:bg-[hsl(240_5%_10%)]">
         Follow the steps on the left
       </div>
     );
@@ -127,10 +127,10 @@ export function UiWalkthrough({ steps }: Props) {
       {/* Copy column */}
       <div className="order-2 space-y-5 lg:order-1">
         <div className="flex items-center gap-3">
-          <p className="shrink-0 text-[0.7rem] font-medium uppercase tracking-[0.1em] text-muted-foreground tabular-nums">
+          <p className="shrink-0 text-[0.7rem] font-medium uppercase tracking-widest text-muted-foreground tabular-nums">
             Step {activeStep + 1} of {steps.length}
           </p>
-          <div className="h-px w-16 overflow-hidden bg-black/[0.08] dark:bg-white/[0.1]">
+          <div className="h-px w-16 overflow-hidden bg-black/8 dark:bg-white/10">
             <motion.div
               className="h-full bg-foreground/50"
               animate={{ width: `${progress}%` }}
@@ -175,8 +175,8 @@ export function UiWalkthrough({ steps }: Props) {
                   onClick={() => goTo(i)}
                   className={`flex w-full min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-[background-color,color,transform] duration-150 ease-[cubic-bezier(0.2,0,0,1)] active:scale-[0.98] motion-reduce:active:scale-100 ${
                     current
-                      ? "bg-foreground/[0.06] text-foreground dark:bg-white/[0.08]"
-                      : "text-foreground/55 hover:bg-foreground/[0.03] hover:text-foreground"
+                      ? "bg-foreground/6 text-foreground dark:bg-white/8"
+                      : "text-foreground/55 hover:bg-foreground/3 hover:text-foreground"
                   }`}
                 >
                   <span
@@ -185,7 +185,7 @@ export function UiWalkthrough({ steps }: Props) {
                         ? "bg-foreground text-background"
                         : done
                           ? "bg-foreground/15 text-foreground/70"
-                          : "bg-foreground/[0.06] text-foreground/45"
+                          : "bg-foreground/6 text-foreground/45"
                     }`}
                   >
                     {done && !current ? <Icon name="check" className="text-[10px]" /> : i + 1}
@@ -207,15 +207,15 @@ export function UiWalkthrough({ steps }: Props) {
                 type="button"
                 aria-current={i === activeStep ? "step" : undefined}
                 onClick={() => goTo(i)}
-                className={`flex h-12 min-w-[2.75rem] shrink-0 items-center justify-center gap-2 rounded-full px-3.5 text-xs font-medium transition-[background-color,color,transform] duration-150 ease-[cubic-bezier(0.2,0,0,1)] active:scale-[0.96] ${
+                className={`flex h-12 min-w-11 shrink-0 items-center justify-center gap-2 rounded-full px-3.5 text-xs font-medium transition-[background-color,color,transform] duration-150 ease-[cubic-bezier(0.2,0,0,1)] active:scale-[0.96] ${
                   i === activeStep
                     ? "bg-foreground text-background"
-                    : "bg-foreground/[0.06] text-foreground/60"
+                    : "bg-foreground/6 text-foreground/60"
                 }`}
               >
                 <span className="tabular-nums">{i + 1}</span>
                 {i === activeStep ? (
-                  <span className="max-w-[8rem] truncate">{item.title}</span>
+                  <span className="max-w-32 truncate">{item.title}</span>
                 ) : null}
               </button>
             ))}
@@ -227,7 +227,7 @@ export function UiWalkthrough({ steps }: Props) {
             type="button"
             disabled={activeStep === 0}
             onClick={() => goTo(activeStep - 1)}
-            className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-white px-3.5 py-2 text-sm font-medium shadow-[0_0_0_1px_rgba(0,0,0,0.08)] transition-[transform,background-color] duration-150 ease-[cubic-bezier(0.2,0,0,1)] active:scale-[0.96] motion-reduce:active:scale-100 disabled:opacity-35 hover:bg-foreground/[0.03] dark:bg-neutral-900 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.1)]"
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-white px-3.5 py-2 text-sm font-medium shadow-[0_0_0_1px_rgba(0,0,0,0.08)] transition-[transform,background-color] duration-150 ease-[cubic-bezier(0.2,0,0,1)] active:scale-[0.96] motion-reduce:active:scale-100 disabled:opacity-35 hover:bg-foreground/3 dark:bg-neutral-900 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.1)]"
           >
             <Icon name="arrow-left" className="text-xs" />
             Previous

@@ -31,7 +31,7 @@ export function BusinessAvatar({ name, logoUrl, icon, size, onDark }: BusinessAv
     <div
       className={`${dim} flex shrink-0 items-center justify-center shadow-lg ${
         onDark
-          ? "bg-white/20 ring-2 ring-white/30 backdrop-blur-sm"
+          ? "bg-white/20 ring-2 ring-white/30 backdrop-blur-xs"
           : "booking-gradient-accent booking-shadow-accent"
       }`}
     >

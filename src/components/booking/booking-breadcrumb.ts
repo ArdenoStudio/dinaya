@@ -8,11 +8,14 @@ type BuildBookingBreadcrumbInput = {
   showContactForm: boolean;
   showStaffStep: boolean;
   needsStaffPicker: boolean;
+  showVariantStep?: boolean;
+  needsVariantPicker?: boolean;
   hubHref?: string | null;
   onBackToHub?: () => void;
   lockServiceSelection: boolean;
   multiService: boolean;
   onBackToServices: () => void;
+  onBackToVariant?: () => void;
   onBackToStaff: () => void;
   onBackToDateTime: () => void;
 };
@@ -23,11 +26,14 @@ export function buildBookingBreadcrumbItems({
   showContactForm,
   showStaffStep,
   needsStaffPicker,
+  showVariantStep = false,
+  needsVariantPicker = false,
   hubHref,
   onBackToHub,
   lockServiceSelection,
   multiService,
   onBackToServices,
+  onBackToVariant = () => {},
   onBackToStaff,
   onBackToDateTime,
 }: BuildBookingBreadcrumbInput): BookingBreadcrumbItem[] {
@@ -41,9 +47,16 @@ export function buildBookingBreadcrumbItems({
     items.push({ label: copy.chooseService, onClick: onBackToServices });
   }
 
+  if (showVariantStep) {
+    items.push({ label: service.name, onClick: onBackToServices });
+    items.push({ label: copy.chooseOption, current: true });
+    return items;
+  }
+
   if (showContactForm) {
     if (needsStaffPicker) {
       items.push({ label: service.name, onClick: onBackToServices });
+      if (needsVariantPicker) items.push({ label: copy.chooseOption, onClick: onBackToVariant });
       items.push({ label: copy.chooseTeam, onClick: onBackToStaff });
       items.push({ label: copy.dateTime, onClick: onBackToDateTime });
       items.push({ label: copy.details, current: true });
@@ -56,12 +69,14 @@ export function buildBookingBreadcrumbItems({
 
   if (showStaffStep) {
     items.push({ label: service.name, onClick: onBackToServices });
+    if (needsVariantPicker) items.push({ label: copy.chooseOption, onClick: onBackToVariant });
     items.push({ label: copy.chooseTeam, current: true });
     return items;
   }
 
   if (needsStaffPicker) {
     items.push({ label: service.name, onClick: onBackToServices });
+    if (needsVariantPicker) items.push({ label: copy.chooseOption, onClick: onBackToVariant });
     items.push({ label: copy.chooseTeam, onClick: onBackToStaff });
     items.push({ label: copy.dateTime, current: true });
     return items;
@@ -72,6 +87,7 @@ export function buildBookingBreadcrumbItems({
     label: service.name,
     onClick: lockServiceSelection ? undefined : onBackToServices,
   });
+  if (needsVariantPicker) items.push({ label: copy.chooseOption, onClick: onBackToVariant });
   items.push({ label: copy.dateTime, current: true });
   return items;
 }

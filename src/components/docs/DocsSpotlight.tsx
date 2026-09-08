@@ -22,7 +22,7 @@ export function DocsSpotlight({ active, children, className }: Props) {
       </div>
       {active ? (
         <div
-          className="pointer-events-none absolute inset-0 z-[15] rounded-b-[1.25rem] bg-[radial-gradient(ellipse_at_center,transparent_42%,rgba(0,0,0,0.08)_100%)]"
+          className="pointer-events-none absolute inset-0 z-15 rounded-b-[1.25rem] bg-[radial-gradient(ellipse_at_center,transparent_42%,rgba(0,0,0,0.08)_100%)]"
           aria-hidden
         />
       ) : null}

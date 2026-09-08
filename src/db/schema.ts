@@ -326,6 +326,8 @@ export const services = pgTable("services", {
   intakeQuestions: jsonb("intake_questions").$type<import("@/lib/intake").IntakeQuestion[]>(),
   // Optional post-booking redirect (https URL or same-site path).
   successRedirectUrl: text("success_redirect_url"),
+  // Price options (e.g. wax type) — same service, different prices (null/[] = single fixed price).
+  priceVariants: jsonb("price_variants").$type<import("@/lib/service-variants").ServicePriceVariant[]>(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 }, (table) => ({
   businessSlugUnique: uniqueIndex("services_business_slug_unique")
@@ -569,6 +571,8 @@ export const bookings = pgTable("bookings", {
   staffNotes: text("staff_notes"),
   // Answers to the service's intake questions, snapshotted at booking time.
   intakeAnswers: jsonb("intake_answers").$type<import("@/lib/intake").IntakeAnswer[]>(),
+  // The service's price option chosen (if any), snapshotted at booking time.
+  priceVariant: jsonb("price_variant").$type<import("@/lib/service-variants").ServicePriceVariant>(),
   reminderSentAt: timestamp("reminder_sent_at"),
   cancelledAt: timestamp("cancelled_at"),
   cancellationReason: text("cancellation_reason"),

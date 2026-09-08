@@ -46,7 +46,7 @@ export default function AddToCalendar({
           href={googleUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-[var(--booking-accent)] px-4 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+          className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl booking-bg-accent px-4 text-sm font-semibold text-white transition-opacity hover:opacity-90"
         >
           <Icon name="calendar-event-fill" className="text-sm" />
           {labels.googleCalendar}
